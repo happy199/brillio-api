@@ -1,0 +1,372 @@
+@extends('layouts.public')
+
+@section('title', 'À propos - Brillio | Notre mission pour les jeunes africains')
+@section('meta_description', 'Découvrez l\'histoire de Brillio, notre mission d\'accompagnement des jeunes africains dans leur orientation professionnelle, nos valeurs et notre équipe.')
+
+@section('content')
+    <!-- Hero Section -->
+    <section class="gradient-hero pt-32 pb-20 relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 -left-40 w-96 h-96 bg-secondary-500/20 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-3xl mx-auto text-center text-white">
+                <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6" data-aos="fade-up">
+                    Notre histoire
+                </span>
+                <h1 class="text-4xl sm:text-5xl font-bold mb-6" data-aos="fade-up" data-aos-delay="100">
+                    Construire l'avenir de la jeunesse africaine
+                </h1>
+                <p class="text-xl text-white/90" data-aos="fade-up" data-aos-delay="200">
+                    Brillio est né d'un constat simple : trop de jeunes africains sont perdus face à leur avenir.
+                    Notre mission est de changer cela.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div data-aos="fade-right">
+                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Notre mission</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4 mb-6">
+                        Démocratiser l'accès à l'orientation professionnelle en Afrique
+                    </h2>
+                    <p class="text-lg text-gray-600 mb-6">
+                        <!-- TODO: Personnaliser le texte de mission -->
+                        En Afrique, moins de 5% des jeunes ont accès à un conseiller d'orientation. Brillio veut
+                        combler ce fossé en offrant à chaque jeune africain, où qu'il soit, les outils et
+                        l'accompagnement nécessaires pour construire son avenir professionnel.
+                    </p>
+                    <p class="text-lg text-gray-600 mb-8">
+                        Nous croyons que chaque jeune mérite de connaître ses talents, d'explorer les possibilités
+                        qui s'offrent à lui et d'être inspiré par des modèles qui lui ressemblent.
+                    </p>
+
+                    <!-- Mission pillars -->
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Accessibilité</h4>
+                                <p class="text-gray-600">Gratuit et disponible pour tous, même sans connexion permanente.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Pertinence locale</h4>
+                                <p class="text-gray-600">Des contenus et conseils adaptés au contexte africain.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-accent-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Innovation</h4>
+                                <p class="text-gray-600">L'IA au service de l'orientation personnalisée.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-aos="fade-left">
+                    <!-- TODO: Ajouter image/illustration de la mission -->
+                    <div class="bg-gradient-to-br from-primary-100 to-secondary-100 rounded-3xl p-8 aspect-square flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-3xl flex items-center justify-center">
+                                <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-600">Image de la mission</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto text-center mb-16" data-aos="fade-up">
+                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Nos valeurs</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4 mb-6">
+                    Ce qui nous guide au quotidien
+                </h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Value 1 -->
+                <div class="bg-white rounded-2xl p-8 text-center shadow-sm" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Bienveillance</h3>
+                    <p class="text-gray-600">
+                        <!-- TODO: Personnaliser la description -->
+                        Nous accompagnons chaque jeune avec empathie et encouragement, sans jugement.
+                    </p>
+                </div>
+
+                <!-- Value 2 -->
+                <div class="bg-white rounded-2xl p-8 text-center shadow-sm" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Intégrité</h3>
+                    <p class="text-gray-600">
+                        <!-- TODO: Personnaliser la description -->
+                        Nous donnons des conseils honnêtes et transparents, même quand c'est difficile.
+                    </p>
+                </div>
+
+                <!-- Value 3 -->
+                <div class="bg-white rounded-2xl p-8 text-center shadow-sm" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-accent-500 to-accent-600 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Inclusion</h3>
+                    <p class="text-gray-600">
+                        <!-- TODO: Personnaliser la description -->
+                        Nous servons tous les jeunes, peu importe leur origine, leur genre ou leur situation.
+                    </p>
+                </div>
+
+                <!-- Value 4 -->
+                <div class="bg-white rounded-2xl p-8 text-center shadow-sm" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Impact</h3>
+                    <p class="text-gray-600">
+                        <!-- TODO: Personnaliser la description -->
+                        Nous mesurons notre succès par le nombre de jeunes que nous aidons à trouver leur voie.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision / Objectives Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto text-center mb-16" data-aos="fade-up">
+                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Notre vision</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4 mb-6">
+                    Nos objectifs pour l'avenir
+                </h2>
+                <p class="text-xl text-gray-600">
+                    <!-- TODO: Personnaliser la vision -->
+                    Nous voulons devenir la référence de l'orientation professionnelle en Afrique francophone
+                    d'ici 2030.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Objective 1 -->
+                <div class="relative" data-aos="fade-up" data-aos-delay="100">
+                    <div class="absolute -top-4 -left-4 w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                        <span class="text-2xl font-bold text-primary-600">1M</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-8 pt-16">
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">1 million de jeunes</h3>
+                        <p class="text-gray-600">
+                            <!-- TODO: Personnaliser l'objectif -->
+                            Accompagner 1 million de jeunes africains dans leur orientation d'ici 2027.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Objective 2 -->
+                <div class="relative" data-aos="fade-up" data-aos-delay="200">
+                    <div class="absolute -top-4 -left-4 w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center">
+                        <span class="text-2xl font-bold text-secondary-600">25</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-8 pt-16">
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">25 pays africains</h3>
+                        <p class="text-gray-600">
+                            <!-- TODO: Personnaliser l'objectif -->
+                            Être présent dans 25 pays africains avec des contenus localisés.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Objective 3 -->
+                <div class="relative" data-aos="fade-up" data-aos-delay="300">
+                    <div class="absolute -top-4 -left-4 w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center">
+                        <span class="text-2xl font-bold text-accent-600">5K</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-2xl p-8 pt-16">
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">5 000 mentors</h3>
+                        <p class="text-gray-600">
+                            <!-- TODO: Personnaliser l'objectif -->
+                            Constituer un réseau de 5 000 mentors africains dans tous les secteurs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto text-center mb-16" data-aos="fade-up">
+                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">L'équipe</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4 mb-6">
+                    Les personnes derrière Brillio
+                </h2>
+                <p class="text-xl text-gray-600">
+                    <!-- TODO: Personnaliser la description de l'équipe -->
+                    Une équipe passionnée par l'éducation et l'avenir de la jeunesse africaine.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Team Member 1 -->
+                <div class="bg-white rounded-2xl p-6 text-center shadow-sm" data-aos="fade-up" data-aos-delay="100">
+                    <!-- TODO: Ajouter photo -->
+                    <div class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-2xl font-bold">
+                        HT
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Happy Tidjani</h3>
+                    <p class="text-primary-600 text-sm mb-3">Fondateur & CEO</p>
+                    <p class="text-gray-600 text-sm">
+                        <!-- TODO: Ajouter bio -->
+                        Passionné par l'éducation et la tech.
+                    </p>
+                    <div class="flex justify-center space-x-3 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-primary-600">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-primary-600">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 2 - Placeholder -->
+                <div class="bg-white rounded-2xl p-6 text-center shadow-sm" data-aos="fade-up" data-aos-delay="200">
+                    <!-- TODO: Ajouter membre de l'équipe -->
+                    <div class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-2xl font-bold">
+                        ?
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Nom Prénom</h3>
+                    <p class="text-primary-600 text-sm mb-3">Rôle</p>
+                    <p class="text-gray-600 text-sm">
+                        Description du membre de l'équipe.
+                    </p>
+                </div>
+
+                <!-- Team Member 3 - Placeholder -->
+                <div class="bg-white rounded-2xl p-6 text-center shadow-sm" data-aos="fade-up" data-aos-delay="300">
+                    <!-- TODO: Ajouter membre de l'équipe -->
+                    <div class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-2xl font-bold">
+                        ?
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Nom Prénom</h3>
+                    <p class="text-primary-600 text-sm mb-3">Rôle</p>
+                    <p class="text-gray-600 text-sm">
+                        Description du membre de l'équipe.
+                    </p>
+                </div>
+
+                <!-- Team Member 4 - Placeholder -->
+                <div class="bg-white rounded-2xl p-6 text-center shadow-sm" data-aos="fade-up" data-aos-delay="400">
+                    <!-- TODO: Ajouter membre de l'équipe -->
+                    <div class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-2xl font-bold">
+                        ?
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Nom Prénom</h3>
+                    <p class="text-primary-600 text-sm mb-3">Rôle</p>
+                    <p class="text-gray-600 text-sm">
+                        Description du membre de l'équipe.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto text-center mb-16" data-aos="fade-up">
+                <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Nos partenaires</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4 mb-6">
+                    Ils soutiennent notre mission
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
+                <!-- TODO: Ajouter logos des partenaires -->
+                @for ($i = 1; $i <= 6; $i++)
+                    <div class="bg-gray-100 rounded-xl p-6 flex items-center justify-center aspect-video" data-aos="fade-up" data-aos-delay="{{ $i * 50 }}">
+                        <span class="text-gray-400 text-sm">Partenaire {{ $i }}</span>
+                    </div>
+                @endfor
+            </div>
+
+            <div class="text-center mt-12" data-aos="fade-up">
+                <p class="text-gray-600 mb-4">Vous souhaitez devenir partenaire ?</p>
+                <a href="{{ route('contact') }}" class="inline-flex items-center text-primary-600 font-semibold hover:underline">
+                    Contactez-nous
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 gradient-hero relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 -left-40 w-96 h-96 bg-secondary-500/20 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-3xl mx-auto text-center text-white">
+                <h2 class="text-3xl sm:text-4xl font-bold mb-6" data-aos="fade-up">
+                    Rejoins le mouvement
+                </h2>
+                <p class="text-xl text-white/90 mb-8" data-aos="fade-up" data-aos-delay="100">
+                    Télécharge Brillio et fais partie des milliers de jeunes africains qui construisent leur avenir.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
+                    <a href="{{ route('home') }}#telecharger" class="px-8 py-4 bg-white text-primary-600 font-bold rounded-full hover:bg-gray-100 hover:shadow-xl transition-all duration-300">
+                        Télécharger l'app
+                    </a>
+                    <a href="{{ route('contact') }}" class="px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/10 transition-all duration-300">
+                        Nous contacter
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+@endsection

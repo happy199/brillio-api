@@ -1,0 +1,26 @@
+# Dependencies
+/node_modules
+/vendor
+
+# Environment
+/.env
+/.env.*.local
+/.env.local
+/.env.backup
+
+# Storage
+/storage/*.key
+/public/storage
+/public/hot
+
+# Bootstrap cache
+/bootstrap/cache/*
+
+# Composer
+composer.phar
+
+# IDE
+/.idea
+/.vscode
+.DS_Store
+
