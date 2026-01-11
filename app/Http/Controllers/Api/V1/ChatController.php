@@ -39,6 +39,8 @@ class ChatController extends Controller
                     'created_at' => $conv->created_at->toISOString(),
                     'updated_at' => $conv->updated_at->toISOString(),
                     'messages_count' => $conv->messages()->count(),
+                    'needs_human_support' => (bool) $conv->needs_human_support,
+                    'human_support_active' => (bool) $conv->human_support_active,
                 ];
             }),
         ]);
@@ -90,11 +92,15 @@ class ChatController extends Controller
         return $this->success([
             'conversation_id' => $conversation->id,
             'conversation_title' => $conversation->title,
+            'needs_human_support' => (bool) $conversation->needs_human_support,
+            'human_support_active' => (bool) $conversation->human_support_active,
             'messages' => $messages->map(function ($msg) {
                 return [
                     'id' => $msg->id,
                     'role' => $msg->role,
                     'content' => $msg->content,
+                    'is_from_human' => (bool) $msg->is_from_human,
+                    'is_system_message' => (bool) $msg->is_system_message,
                     'created_at' => $msg->created_at->toISOString(),
                 ];
             }),
@@ -128,7 +134,29 @@ class ChatController extends Controller
             $conversation = $this->deepSeekService->createConversation($user);
         }
 
-        // Envoyer le message et obtenir la réponse
+        // Si le support humain est actif, on enregistre juste le message utilisateur sans appeler l'IA
+        if ($conversation->human_support_active) {
+            $userMessage = $conversation->messages()->create([
+                'role' => 'user',
+                'content' => $validated['message'],
+            ]);
+            $conversation->touch();
+
+            return $this->success([
+                'conversation_id' => $conversation->id,
+                'conversation_title' => $conversation->title,
+                'human_support_active' => true,
+                'message' => [
+                    'id' => $userMessage->id,
+                    'role' => $userMessage->role,
+                    'content' => $userMessage->content,
+                    'created_at' => $userMessage->created_at->toISOString(),
+                ],
+                'info' => 'Un conseiller humain est en train de gérer votre conversation. Votre message lui a été transmis.',
+            ]);
+        }
+
+        // Envoyer le message et obtenir la réponse de l'IA
         $assistantMessage = $this->deepSeekService->sendMessage(
             $conversation,
             $validated['message']
@@ -140,10 +168,12 @@ class ChatController extends Controller
         return $this->success([
             'conversation_id' => $conversation->id,
             'conversation_title' => $conversation->title,
+            'human_support_active' => false,
             'message' => [
                 'id' => $assistantMessage->id,
                 'role' => $assistantMessage->role,
                 'content' => $assistantMessage->content,
+                'is_from_human' => false,
                 'created_at' => $assistantMessage->created_at->toISOString(),
             ],
         ]);
@@ -170,5 +200,92 @@ class ChatController extends Controller
         $this->deepSeekService->deleteConversation($conversation);
 
         return $this->success(null, 'Conversation supprimée');
+    }
+
+    /**
+     * Demande un support humain pour une conversation
+     *
+     * @param Request $request
+     * @param int $conversationId
+     * @return JsonResponse
+     */
+    public function requestHumanSupport(Request $request, int $conversationId): JsonResponse
+    {
+        $user = $request->user();
+        $conversation = ChatConversation::where('id', $conversationId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$conversation) {
+            return $this->notFound('Conversation non trouvée');
+        }
+
+        // Vérifier si déjà en support humain
+        if ($conversation->human_support_active) {
+            return $this->success([
+                'conversation_id' => $conversation->id,
+                'needs_human_support' => true,
+                'human_support_active' => true,
+            ], 'Un conseiller est déjà en train de vous aider.');
+        }
+
+        // Demander le support humain
+        $conversation->requestHumanSupport();
+
+        // Ajouter un message système pour informer l'utilisateur
+        $systemMessage = $conversation->messages()->create([
+            'role' => 'assistant',
+            'content' => "Votre demande de parler à un conseiller a bien été enregistrée. Un conseiller va prendre en charge votre conversation dans les meilleurs délais. En attendant, n'hésitez pas à décrire votre situation.",
+            'is_from_human' => false,
+            'is_system_message' => true,
+        ]);
+
+        return $this->success([
+            'conversation_id' => $conversation->id,
+            'needs_human_support' => true,
+            'human_support_active' => false,
+            'message' => [
+                'id' => $systemMessage->id,
+                'role' => $systemMessage->role,
+                'content' => $systemMessage->content,
+                'is_system_message' => true,
+                'created_at' => $systemMessage->created_at->toISOString(),
+            ],
+        ], 'Demande de support humain enregistrée.');
+    }
+
+    /**
+     * Annule une demande de support humain
+     *
+     * @param Request $request
+     * @param int $conversationId
+     * @return JsonResponse
+     */
+    public function cancelHumanSupport(Request $request, int $conversationId): JsonResponse
+    {
+        $user = $request->user();
+        $conversation = ChatConversation::where('id', $conversationId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$conversation) {
+            return $this->notFound('Conversation non trouvée');
+        }
+
+        // Si le support est actif, l'utilisateur ne peut pas annuler
+        if ($conversation->human_support_active) {
+            return $this->error('Un conseiller est déjà en charge. Vous ne pouvez pas annuler.', 400);
+        }
+
+        // Annuler la demande
+        $conversation->update([
+            'needs_human_support' => false,
+        ]);
+
+        return $this->success([
+            'conversation_id' => $conversation->id,
+            'needs_human_support' => false,
+            'human_support_active' => false,
+        ], 'Demande de support annulée. Vous pouvez continuer avec le chatbot IA.');
     }
 }

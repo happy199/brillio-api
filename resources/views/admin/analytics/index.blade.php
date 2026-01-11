@@ -4,20 +4,79 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Analytics</h1>
-            <p class="text-gray-600">Statistiques et métriques de la plateforme</p>
+    <!-- Header avec filtres -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Analytics</h1>
+                <p class="text-gray-600">Statistiques et métriques de la plateforme</p>
+            </div>
+
+            <!-- Filtres de date -->
+            <form action="{{ route('admin.analytics.index') }}" method="GET" class="flex flex-wrap items-end gap-3">
+                <!-- Préréglages -->
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Période</label>
+                    <select name="preset" onchange="toggleCustomDates(this.value)"
+                            class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="today" {{ ($dateRange['preset'] ?? '') == 'today' ? 'selected' : '' }}>Aujourd'hui</option>
+                        <option value="week" {{ ($dateRange['preset'] ?? '') == 'week' ? 'selected' : '' }}>7 derniers jours</option>
+                        <option value="month" {{ ($dateRange['preset'] ?? 'month') == 'month' ? 'selected' : '' }}>30 derniers jours</option>
+                        <option value="quarter" {{ ($dateRange['preset'] ?? '') == 'quarter' ? 'selected' : '' }}>3 derniers mois</option>
+                        <option value="year" {{ ($dateRange['preset'] ?? '') == 'year' ? 'selected' : '' }}>Cette année</option>
+                        <option value="all" {{ ($dateRange['preset'] ?? '') == 'all' ? 'selected' : '' }}>Tout</option>
+                        <option value="custom" {{ ($dateRange['preset'] ?? '') == 'custom' ? 'selected' : '' }}>Personnalisé</option>
+                    </select>
+                </div>
+
+                <!-- Dates personnalisées -->
+                <div id="custom-dates" class="{{ ($dateRange['preset'] ?? '') == 'custom' ? 'flex' : 'hidden' }} items-end gap-2">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Du</label>
+                        <input type="date" name="start_date"
+                               value="{{ $dateRange['start']->format('Y-m-d') }}"
+                               class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Au</label>
+                        <input type="date" name="end_date"
+                               value="{{ $dateRange['end']->format('Y-m-d') }}"
+                               class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
+                    Filtrer
+                </button>
+            </form>
         </div>
-        <div class="flex gap-3">
-            <select id="period-filter" class="rounded-lg border-gray-300 text-sm">
-                <option value="7">7 derniers jours</option>
-                <option value="30" selected>30 derniers jours</option>
-                <option value="90">3 derniers mois</option>
-                <option value="365">Cette année</option>
-            </select>
+
+        <!-- Boutons d'export -->
+        <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+            <span class="text-sm text-gray-500 mr-2">Exporter en PDF :</span>
+            <a href="{{ route('admin.analytics.export-pdf', array_merge(request()->query(), ['type' => 'general'])) }}"
+               class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium">
+                Rapport général
+            </a>
+            <a href="{{ route('admin.analytics.export-pdf', array_merge(request()->query(), ['type' => 'users'])) }}"
+               class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm font-medium">
+                Utilisateurs
+            </a>
+            <a href="{{ route('admin.analytics.export-pdf', array_merge(request()->query(), ['type' => 'personality'])) }}"
+               class="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 text-sm font-medium">
+                Personnalités
+            </a>
+            <a href="{{ route('admin.analytics.export-pdf', array_merge(request()->query(), ['type' => 'chat'])) }}"
+               class="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm font-medium">
+                Chat
+            </a>
         </div>
+
+        <!-- Période actuelle -->
+        <p class="text-sm text-gray-500 mt-3">
+            Données du <strong>{{ $dateRange['start']->format('d/m/Y') }}</strong>
+            au <strong>{{ $dateRange['end']->format('d/m/Y') }}</strong>
+        </p>
     </div>
 
     <!-- Stats principales -->
@@ -35,8 +94,8 @@
                 </div>
             </div>
             <div class="mt-4 flex items-center text-sm">
-                <span class="text-green-600 font-medium">+{{ $stats['new_users_week'] }}</span>
-                <span class="text-gray-500 ml-1">cette semaine</span>
+                <span class="text-green-600 font-medium">+{{ $stats['new_users_period'] }}</span>
+                <span class="text-gray-500 ml-1">sur la période</span>
             </div>
         </div>
 
@@ -53,8 +112,8 @@
                 </div>
             </div>
             <div class="mt-4 flex items-center text-sm">
-                <span class="text-gray-500">Taux complétion:</span>
-                <span class="text-purple-600 font-medium ml-1">{{ $stats['test_completion_rate'] }}%</span>
+                <span class="text-purple-600 font-medium">+{{ $stats['tests_period'] }}</span>
+                <span class="text-gray-500 ml-1">sur la période ({{ $stats['test_completion_rate'] }}% taux)</span>
             </div>
         </div>
 
@@ -71,8 +130,8 @@
                 </div>
             </div>
             <div class="mt-4 flex items-center text-sm">
-                <span class="text-gray-500">Conversations:</span>
-                <span class="text-green-600 font-medium ml-1">{{ number_format($stats['total_conversations']) }}</span>
+                <span class="text-green-600 font-medium">+{{ $stats['messages_period'] }}</span>
+                <span class="text-gray-500 ml-1">sur la période ({{ $stats['conversations_period'] }} conv.)</span>
             </div>
         </div>
 
@@ -95,41 +154,49 @@
         </div>
     </div>
 
+    <!-- Graphique d'évolution -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Évolution sur la période</h3>
+        <div class="h-64">
+            <canvas id="evolutionChart"></canvas>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Distribution des types de personnalité -->
         <div class="bg-white rounded-xl shadow-sm p-6">
-            <h3 class="font-semibold text-gray-900 mb-4">Distribution des personnalités</h3>
+            <h3 class="font-semibold text-gray-900 mb-4">Distribution des personnalités (période)</h3>
             <div class="space-y-3">
                 @forelse($stats['personality_distribution'] as $type => $count)
                 <div class="flex items-center gap-3">
                     <div class="w-16 text-sm font-medium text-gray-700">{{ $type }}</div>
                     <div class="flex-1 bg-gray-100 rounded-full h-4">
                         <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full"
-                             style="width: {{ $stats['total_tests'] > 0 ? ($count / $stats['total_tests'] * 100) : 0 }}%"></div>
+                             style="width: {{ $stats['tests_period'] > 0 ? ($count / $stats['tests_period'] * 100) : 0 }}%"></div>
                     </div>
                     <div class="w-12 text-sm text-gray-500 text-right">{{ $count }}</div>
                 </div>
                 @empty
-                <p class="text-gray-500 text-center py-4">Aucune donnée disponible</p>
+                <p class="text-gray-500 text-center py-4">Aucune donnée sur cette période</p>
                 @endforelse
             </div>
         </div>
 
         <!-- Distribution par pays -->
         <div class="bg-white rounded-xl shadow-sm p-6">
-            <h3 class="font-semibold text-gray-900 mb-4">Utilisateurs par pays</h3>
+            <h3 class="font-semibold text-gray-900 mb-4">Utilisateurs par pays (période)</h3>
             <div class="space-y-3">
                 @forelse($stats['users_by_country'] as $country)
                 <div class="flex items-center gap-3">
                     <div class="w-24 text-sm text-gray-700 truncate">{{ $country->country ?? 'Non renseigné' }}</div>
                     <div class="flex-1 bg-gray-100 rounded-full h-4">
                         <div class="bg-gradient-to-r from-green-500 to-teal-500 h-4 rounded-full"
-                             style="width: {{ $stats['total_users'] > 0 ? ($country->total / $stats['total_users'] * 100) : 0 }}%"></div>
+                             style="width: {{ $stats['new_users_period'] > 0 ? ($country->total / $stats['new_users_period'] * 100) : 0 }}%"></div>
                     </div>
                     <div class="w-12 text-sm text-gray-500 text-right">{{ $country->total }}</div>
                 </div>
                 @empty
-                <p class="text-gray-500 text-center py-4">Aucune donnée disponible</p>
+                <p class="text-gray-500 text-center py-4">Aucune donnée sur cette période</p>
                 @endforelse
             </div>
         </div>
@@ -157,8 +224,8 @@
 
         <!-- Activité récente -->
         <div class="bg-white rounded-xl shadow-sm p-6">
-            <h3 class="font-semibold text-gray-900 mb-4">Inscriptions récentes</h3>
-            <div class="space-y-4">
+            <h3 class="font-semibold text-gray-900 mb-4">Inscriptions récentes (période)</h3>
+            <div class="space-y-4 max-h-80 overflow-y-auto">
                 @forelse($stats['recent_signups'] as $user)
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full flex items-center justify-center {{ $user->user_type === 'mentor' ? 'bg-orange-100' : 'bg-blue-100' }}">
@@ -178,7 +245,7 @@
                     </div>
                 </div>
                 @empty
-                <p class="text-gray-500 text-center py-4">Aucune inscription récente</p>
+                <p class="text-gray-500 text-center py-4">Aucune inscription sur cette période</p>
                 @endforelse
             </div>
         </div>
@@ -186,11 +253,15 @@
 
     <!-- Documents -->
     <div class="bg-white rounded-xl shadow-sm p-6">
-        <h3 class="font-semibold text-gray-900 mb-4">Documents académiques</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <h3 class="font-semibold text-gray-900 mb-4">Documents académiques (période)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                <p class="text-3xl font-bold text-gray-600">{{ $stats['documents']['total'] ?? 0 }}</p>
+                <p class="text-sm text-gray-600 mt-1">Total (tous)</p>
+            </div>
             <div class="text-center p-4 bg-blue-50 rounded-lg">
-                <p class="text-3xl font-bold text-blue-600">{{ $stats['documents']['total'] ?? 0 }}</p>
-                <p class="text-sm text-gray-600 mt-1">Total documents</p>
+                <p class="text-3xl font-bold text-blue-600">{{ $stats['documents']['period'] ?? 0 }}</p>
+                <p class="text-sm text-gray-600 mt-1">Sur la période</p>
             </div>
             <div class="text-center p-4 bg-green-50 rounded-lg">
                 <p class="text-3xl font-bold text-green-600">{{ $stats['documents']['bulletin'] ?? 0 }}</p>
@@ -198,7 +269,7 @@
             </div>
             <div class="text-center p-4 bg-purple-50 rounded-lg">
                 <p class="text-3xl font-bold text-purple-600">{{ $stats['documents']['releve_notes'] ?? 0 }}</p>
-                <p class="text-sm text-gray-600 mt-1">Relevés de notes</p>
+                <p class="text-sm text-gray-600 mt-1">Relevés</p>
             </div>
             <div class="text-center p-4 bg-orange-50 rounded-lg">
                 <p class="text-3xl font-bold text-orange-600">{{ $stats['documents']['diplome'] ?? 0 }}</p>
@@ -207,4 +278,86 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function toggleCustomDates(value) {
+    const customDates = document.getElementById('custom-dates');
+    if (value === 'custom') {
+        customDates.classList.remove('hidden');
+        customDates.classList.add('flex');
+    } else {
+        customDates.classList.add('hidden');
+        customDates.classList.remove('flex');
+    }
+}
+
+// Graphique d'évolution
+const ctx = document.getElementById('evolutionChart').getContext('2d');
+const dailySignups = @json($stats['daily_signups']);
+const dailyTests = @json($stats['daily_tests']);
+const dailyMessages = @json($stats['daily_messages']);
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: Object.keys(dailySignups),
+        datasets: [
+            {
+                label: 'Inscriptions',
+                data: Object.values(dailySignups),
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'Tests MBTI',
+                data: Object.values(dailyTests),
+                borderColor: '#8B5CF6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'Messages',
+                data: Object.values(dailyMessages),
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                fill: true
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        },
+        scales: {
+            x: {
+                display: true,
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    maxTicksLimit: 10
+                }
+            },
+            y: {
+                display: true,
+                beginAtZero: true,
+                grid: {
+                    color: '#f3f4f6'
+                }
+            }
+        }
+    }
+});
+</script>
+@endpush
 @endsection

@@ -72,6 +72,10 @@ Route::prefix('v1')->group(function () {
             Route::get('conversations/{conversationId}/messages', [ChatController::class, 'messages']);
             Route::delete('conversations/{conversationId}', [ChatController::class, 'deleteConversation']);
             Route::post('send', [ChatController::class, 'send']);
+
+            // Support humain (conseiller)
+            Route::post('conversations/{conversationId}/request-human-support', [ChatController::class, 'requestHumanSupport']);
+            Route::post('conversations/{conversationId}/cancel-human-support', [ChatController::class, 'cancelHumanSupport']);
         })->middleware('throttle:chat'); // Rate limiting spécifique pour le chat
 
         // === PROFIL MENTOR (pour les mentors) ===

@@ -71,13 +71,25 @@
                     </span>
                 </a>
 
+                @php
+                    $pendingSupportCount = \App\Models\ChatConversation::where('needs_human_support', true)
+                        ->where('human_support_active', false)
+                        ->count();
+                @endphp
                 <a href="{{ route('admin.chat.index') }}"
                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.chat.*') ? 'bg-indigo-800' : '' }}">
-                    <span class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                        </svg>
-                        Chat
+                    <span class="flex items-center justify-between">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            Chat
+                        </span>
+                        @if($pendingSupportCount > 0)
+                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                            {{ $pendingSupportCount }}
+                        </span>
+                        @endif
                     </span>
                 </a>
 

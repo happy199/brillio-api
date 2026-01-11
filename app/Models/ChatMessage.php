@@ -23,6 +23,14 @@ class ChatMessage extends Model
         'conversation_id',
         'role',
         'content',
+        'is_from_human',
+        'is_system_message',
+        'admin_id',
+    ];
+
+    protected $casts = [
+        'is_from_human' => 'boolean',
+        'is_system_message' => 'boolean',
     ];
 
     /**
@@ -31,6 +39,14 @@ class ChatMessage extends Model
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(ChatConversation::class, 'conversation_id');
+    }
+
+    /**
+     * Relation vers l'admin qui a envoyé le message (si conseiller humain)
+     */
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
     /**
@@ -47,5 +63,21 @@ class ChatMessage extends Model
     public function isFromAssistant(): bool
     {
         return $this->role === self::ROLE_ASSISTANT;
+    }
+
+    /**
+     * Vérifie si le message vient d'un conseiller humain
+     */
+    public function isFromHumanAdvisor(): bool
+    {
+        return $this->is_from_human && $this->role === self::ROLE_ASSISTANT;
+    }
+
+    /**
+     * Vérifie si c'est un message système
+     */
+    public function isSystemMessage(): bool
+    {
+        return $this->is_system_message ?? false;
     }
 }

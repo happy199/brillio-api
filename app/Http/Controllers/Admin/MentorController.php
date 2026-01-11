@@ -99,14 +99,16 @@ class MentorController extends Controller
     }
 
     /**
-     * Valide (publie) un profil mentor
+     * Approuve et publie un profil mentor
      */
-    public function validate(MentorProfile $mentor)
+    public function approve(MentorProfile $mentor)
     {
         $mentor->is_published = true;
+        $mentor->is_validated = true;
+        $mentor->validated_at = now();
         $mentor->save();
 
-        return back()->with('success', "Le profil de {$mentor->user->name} a été publié");
+        return back()->with('success', "Le profil de {$mentor->user->name} a été validé et publié");
     }
 
     /**

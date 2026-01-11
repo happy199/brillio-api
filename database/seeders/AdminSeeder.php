@@ -16,7 +16,7 @@ class AdminSeeder extends Seeder
         User::create([
             'name' => 'Admin Brillio',
             'email' => config('app.admin_email', 'admin@brillio.com'),
-            'password' => Hash::make(config('app.admin_password', 'BrillioAdmin2024!')),
+            'password' => Hash::make(config('app.admin_password', 'BrillioAdmin2026!')),
             'user_type' => 'jeune', // L'admin peut être de n'importe quel type
             'is_admin' => true,
             'country' => 'Sénégal',

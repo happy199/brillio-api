@@ -15,10 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Alias pour les middlewares personnalisés
         $middleware->alias([
             'is_admin' => \App\Http\Middleware\IsAdmin::class,
+            'user_type' => \App\Http\Middleware\CheckUserType::class,
         ]);
 
-        // Redirection pour les non-authentifiés vers l'URL admin secrète
-        $middleware->redirectGuestsTo('/brillioSecretTeamAdmin');
+        // Redirection pour les non-authentifiés
+        $middleware->redirectGuestsTo('/rejoindre');
 
         // Rate limiting pour l'API
         $middleware->throttleApi('60,1');

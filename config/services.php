@@ -59,11 +59,11 @@ return [
         'locale' => env('OPENMBTI_LOCALE', 'fr'), // Résultats en français
     ],
 
-    // LinkedIn OAuth
-    'linkedin' => [
-        'client_id' => env('LINKEDIN_CLIENT_ID'),
-        'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
-        'redirect_uri' => env('LINKEDIN_REDIRECT_URI'),
+    // Supabase Authentication
+    'supabase' => [
+        'url' => env('SUPABASE_URL'),
+        'anon_key' => env('SUPABASE_ANON_KEY'),
+        'service_role_key' => env('SUPABASE_SERVICE_ROLE_KEY'),
     ],
 
 ];

@@ -39,8 +39,14 @@ class User extends Authenticatable
         'country',
         'city',
         'profile_photo_path',
+        'profile_photo_url',
         'linkedin_url',
         'is_admin',
+        'auth_provider',
+        'provider_id',
+        'onboarding_completed',
+        'onboarding_data',
+        'last_login_at',
     ];
 
     /**
@@ -65,6 +71,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'date_of_birth' => 'date',
             'is_admin' => 'boolean',
+            'onboarding_completed' => 'boolean',
+            'onboarding_data' => 'array',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -127,12 +136,25 @@ class User extends Authenticatable
     /**
      * Retourne l'URL complète de la photo de profil
      */
-    public function getProfilePhotoUrlAttribute(): ?string
+    public function getAvatarUrlAttribute(): ?string
     {
-        if (!$this->profile_photo_path) {
-            return null;
+        // Priorite: photo OAuth > photo uploadee
+        if ($this->attributes['profile_photo_url'] ?? null) {
+            return $this->attributes['profile_photo_url'];
         }
 
-        return asset('storage/' . $this->profile_photo_path);
+        if ($this->profile_photo_path) {
+            return asset('storage/' . $this->profile_photo_path);
+        }
+
+        return null;
+    }
+
+    /**
+     * Verifie si l'onboarding est complete
+     */
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->onboarding_completed === true;
     }
 }

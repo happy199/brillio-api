@@ -31,11 +31,14 @@
 
                     <!-- CTA Buttons -->
                     <div class="flex flex-col sm:flex-row gap-4 mb-12">
-                        <a href="#telecharger" class="px-8 py-4 bg-white text-primary-600 font-bold rounded-full hover:bg-gray-100 hover:shadow-xl transition-all duration-300 text-center">
-                            Télécharger gratuitement
+                        <a href="{{ route('auth.choice') }}" class="px-8 py-4 bg-white text-primary-600 font-bold rounded-full hover:bg-gray-100 hover:shadow-xl transition-all duration-300 text-center flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            Explorer ta carrière
                         </a>
-                        <a href="#fonctionnalites" class="px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/10 transition-all duration-300 text-center">
-                            Découvrir les fonctionnalités
+                        <a href="#telecharger" class="px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/10 transition-all duration-300 text-center">
+                            Télécharger l'app mobile
                         </a>
                     </div>
 
@@ -567,6 +570,79 @@
         </div>
     </section>
 
+    <!-- Web Platform CTA Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-5xl mx-auto">
+                <div class="bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 rounded-3xl p-8 md:p-12 relative overflow-hidden">
+                    <!-- Decorative elements -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-primary-200 rounded-full opacity-20 blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 bg-secondary-200 rounded-full opacity-20 blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+
+                    <div class="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+                        <div data-aos="fade-right">
+                            <span class="inline-block px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-4">
+                                Nouveau : Plateforme Web
+                            </span>
+                            <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                                Accède à Brillio depuis ton navigateur
+                            </h2>
+                            <p class="text-lg text-gray-600 mb-6">
+                                Pas envie de télécharger ? Utilise notre plateforme web pour passer le test MBTI, discuter avec notre IA et explorer les parcours de mentors africains.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="{{ route('auth.choice') }}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-bold rounded-full hover:shadow-xl transition-all duration-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                    Commencer gratuitement
+                                </a>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4" data-aos="fade-left">
+                            <div class="bg-white rounded-2xl p-6 shadow-sm">
+                                <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                    </svg>
+                                </div>
+                                <h4 class="font-bold text-gray-900">Test MBTI</h4>
+                                <p class="text-sm text-gray-500">Decouvre ton profil</p>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 shadow-sm">
+                                <div class="w-12 h-12 bg-secondary-100 rounded-xl flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                    </svg>
+                                </div>
+                                <h4 class="font-bold text-gray-900">Chat IA</h4>
+                                <p class="text-sm text-gray-500">Conseils 24/7</p>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 shadow-sm">
+                                <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                </div>
+                                <h4 class="font-bold text-gray-900">Mentors</h4>
+                                <p class="text-sm text-gray-500">Parcours inspirants</p>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 shadow-sm">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <h4 class="font-bold text-gray-900">100% Gratuit</h4>
+                                <p class="text-sm text-gray-500">Sans engagement</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA / Download Section -->
     <section id="telecharger" class="py-20 gradient-hero relative overflow-hidden">
         <!-- Background decoration -->
@@ -578,10 +654,10 @@
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="max-w-4xl mx-auto text-center text-white">
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6" data-aos="fade-up">
-                    Prêt à construire ton avenir ?
+                    Pret a construire ton avenir ?
                 </h2>
                 <p class="text-xl text-white/90 mb-10" data-aos="fade-up" data-aos-delay="100">
-                    Télécharge Brillio gratuitement et commence ton voyage vers le métier de tes rêves.
+                    Telecharge Brillio ou utilise la plateforme web pour commencer ton voyage vers le metier de tes reves.
                 </p>
 
                 <!-- Download Buttons -->
@@ -608,15 +684,129 @@
                     </a>
                 </div>
 
-                <!-- QR Code placeholder -->
-                <div class="inline-block" data-aos="fade-up" data-aos-delay="300">
-                    <div class="bg-white p-4 rounded-2xl inline-block">
-                        <!-- TODO: Ajouter vrai QR code -->
-                        <div class="w-32 h-32 bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
-                            QR Code
+                <!-- Web platform CTA -->
+                <div class="mt-8 pt-8 border-t border-white/20" data-aos="fade-up" data-aos-delay="300">
+                    <p class="text-white/80 mb-4">Ou accede directement depuis ton navigateur</p>
+                    <a href="{{ route('auth.choice') }}" class="inline-flex items-center gap-2 px-8 py-4 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-full hover:bg-white/30 transition-all duration-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                        </svg>
+                        Utiliser la version web
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Become a Mentor Section -->
+    <section class="py-20 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-5xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div data-aos="fade-right">
+                        <span class="inline-block px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
+                            Pour les professionnels
+                        </span>
+                        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                            Devenez mentor et inspirez la prochaine generation
+                        </h2>
+                        <p class="text-lg text-gray-600 mb-6">
+                            Vous etes un professionnel africain qui a reussi ? Partagez votre parcours, vos conseils et inspirez des milliers de jeunes a suivre leurs reves.
+                        </p>
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900">Partagez votre roadmap</p>
+                                    <p class="text-sm text-gray-500">Decrivez les etapes cles de votre parcours professionnel</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900">Gagnez en visibilite</p>
+                                    <p class="text-sm text-gray-500">Renforcez votre personal branding aupres de la jeunesse africaine</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-900">Contribuez a l'Afrique</p>
+                                    <p class="text-sm text-gray-500">Aidez a former les leaders de demain sur le continent</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <a href="{{ route('mentor.login') }}" class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:shadow-xl transition-all duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Devenir mentor via LinkedIn
+                        </a>
+                        <p class="text-sm text-gray-500 mt-3">Inscription rapide avec votre profil LinkedIn</p>
+                    </div>
+                    <div class="relative" data-aos="fade-left">
+                        <!-- Mentor cards illustration -->
+                        <div class="relative">
+                            <div class="bg-white rounded-2xl shadow-xl p-6 transform rotate-3 absolute top-0 right-0 w-64 opacity-60">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold">
+                                        SK
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900">Sophie K.</p>
+                                        <p class="text-xs text-gray-500">Directrice Marketing</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Marketing</span>
+                                    <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">12 ans exp.</span>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-2xl shadow-xl p-6 transform -rotate-2 relative z-10 w-72 ml-8 mt-16">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                                        AM
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 text-lg">Adama M.</p>
+                                        <p class="text-sm text-gray-500">CEO, Tech Startup</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4">"Partager mon parcours avec les jeunes est une facon de redonner a ma communaute..."</p>
+                                <div class="flex gap-2 flex-wrap">
+                                    <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">Entrepreneuriat</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Senegal</span>
+                                    <span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Verifie</span>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-2xl shadow-xl p-6 transform rotate-1 absolute bottom-0 left-0 w-56 opacity-70">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                                        FN
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 text-sm">Fatou N.</p>
+                                        <p class="text-xs text-gray-500">Ingenieure Data</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Tech</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-white/70 text-sm mt-3">Scanne pour télécharger</p>
                 </div>
             </div>
         </div>
