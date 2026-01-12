@@ -23,7 +23,7 @@ class SupabaseAuthService
     }
 
     /**
-     * Génère l'URL d'authentification OAuth
+     * Génère l'URL d'authentification OAuth avec PKCE
      */
     public function getOAuthUrl(string $provider, string $redirectTo, array $scopes = []): string
     {
@@ -40,7 +40,7 @@ class SupabaseAuthService
     }
 
     /**
-     * Échange le code OAuth contre un token
+     * Échange le code OAuth contre un token (PKCE flow)
      */
     public function exchangeCodeForSession(string $code): ?array
     {
@@ -64,6 +64,62 @@ class SupabaseAuthService
             return null;
         } catch (\Exception $e) {
             Log::error('Supabase OAuth exception', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Récupère un utilisateur par son ID Supabase (admin API)
+     */
+    public function getUserById(string $userId): ?array
+    {
+        try {
+            $response = Http::withHeaders([
+                'apikey' => $this->serviceRoleKey,
+                'Authorization' => "Bearer {$this->serviceRoleKey}",
+            ])->get("{$this->supabaseUrl}/auth/v1/admin/users/{$userId}");
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            Log::error('Supabase getUserById failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Supabase getUserById exception', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Liste tous les utilisateurs (pour recherche par email)
+     */
+    public function getUserByEmail(string $email): ?array
+    {
+        try {
+            $response = Http::withHeaders([
+                'apikey' => $this->serviceRoleKey,
+                'Authorization' => "Bearer {$this->serviceRoleKey}",
+            ])->get("{$this->supabaseUrl}/auth/v1/admin/users");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $users = $data['users'] ?? $data;
+
+                foreach ($users as $user) {
+                    if (($user['email'] ?? '') === $email) {
+                        return $user;
+                    }
+                }
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Supabase getUserByEmail exception', ['error' => $e->getMessage()]);
             return null;
         }
     }
@@ -138,6 +194,11 @@ class SupabaseAuthService
             if ($response->successful()) {
                 return $response->json();
             }
+
+            Log::error('Supabase getUser failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
 
             return null;
         } catch (\Exception $e) {
@@ -217,10 +278,10 @@ class SupabaseAuthService
         $identities = $userData['identities'] ?? [];
         $linkedinIdentity = collect($identities)->firstWhere('provider', 'linkedin_oidc');
 
-        $metadata = $userData['user_metadata'] ?? [];
+        $metadata = $userData['user_metadata'] ?? $userData['raw_user_meta_data'] ?? [];
 
         return [
-            'linkedin_id' => $linkedinIdentity['id'] ?? null,
+            'linkedin_id' => $linkedinIdentity['id'] ?? $userData['id'] ?? null,
             'name' => $metadata['full_name'] ?? $metadata['name'] ?? null,
             'email' => $userData['email'] ?? null,
             'avatar_url' => $metadata['avatar_url'] ?? $metadata['picture'] ?? null,
@@ -233,14 +294,17 @@ class SupabaseAuthService
      */
     public function extractSocialData(array $userData): array
     {
-        $metadata = $userData['user_metadata'] ?? [];
+        $appMetadata = $userData['app_metadata'] ?? $userData['raw_app_meta_data'] ?? [];
+        $metadata = $userData['user_metadata'] ?? $userData['raw_user_meta_data'] ?? [];
 
         return [
-            'provider' => $userData['app_metadata']['provider'] ?? 'email',
+            'provider' => $appMetadata['provider'] ?? 'email',
+            'provider_id' => $metadata['provider_id'] ?? $metadata['sub'] ?? $userData['id'] ?? null,
             'name' => $metadata['full_name'] ?? $metadata['name'] ?? null,
             'email' => $userData['email'] ?? null,
             'avatar_url' => $metadata['avatar_url'] ?? $metadata['picture'] ?? null,
-            'email_verified' => $userData['email_confirmed_at'] !== null,
+            'email_verified' => ($userData['email_confirmed_at'] ?? $userData['confirmed_at'] ?? null) !== null
+                              || ($metadata['email_verified'] ?? false),
         ];
     }
 }

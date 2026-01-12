@@ -9,10 +9,12 @@ use App\Services\SupabaseAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
  * Controller pour l'authentification web (jeunes et mentors)
+ * Gere OAuth via Supabase (Google, Facebook, LinkedIn)
  */
 class WebAuthController extends Controller
 {
@@ -21,11 +23,19 @@ class WebAuthController extends Controller
     ) {}
 
     /**
-     * Affiche la page de choix du type de compte
+     * Affiche la page de choix du type de compte (inscription)
      */
     public function showChoice()
     {
         return view('auth.choice');
+    }
+
+    /**
+     * Affiche la page de choix du type de compte (connexion)
+     */
+    public function showLoginChoice()
+    {
+        return view('auth.login-choice');
     }
 
     /**
@@ -59,17 +69,24 @@ class WebAuthController extends Controller
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
         ]);
 
+        // Optionnellement, creer l'utilisateur dans Supabase aussi
+        $supabaseResult = $this->supabase->signUpWithEmail(
+            $validated['email'],
+            $validated['password'],
+            ['name' => $validated['name']]
+        );
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'user_type' => 'jeune',
             'auth_provider' => 'email',
+            'provider_id' => $supabaseResult['user']['id'] ?? null,
         ]);
 
         Auth::login($user);
 
-        // Rediriger vers l'onboarding si pas encore complete
         if (!$user->onboarding_completed) {
             return redirect()->route('jeune.onboarding');
         }
@@ -127,7 +144,10 @@ class WebAuthController extends Controller
         $redirectUrl = route('auth.jeune.oauth.callback', ['provider' => $provider]);
 
         // Stocker le provider en session
-        session(['oauth_provider' => $provider, 'oauth_type' => 'jeune']);
+        session([
+            'oauth_provider' => $provider,
+            'oauth_type' => 'jeune'
+        ]);
 
         $oauthUrl = $this->supabase->getOAuthUrl($provider, $redirectUrl);
 
@@ -135,49 +155,197 @@ class WebAuthController extends Controller
     }
 
     /**
-     * Callback OAuth pour les jeunes
+     * Callback OAuth pour les jeunes - Affiche la page intermediaire
+     * Supabase retourne les tokens dans le hash (#), pas en query params
      */
     public function jeuneOAuthCallback(Request $request, string $provider)
     {
+        // Verifier si on a un code (Authorization Code flow)
         $code = $request->get('code');
 
-        if (!$code) {
-            return redirect()->route('auth.jeune.login')
-                ->with('error', 'Erreur lors de l\'authentification. Veuillez reessayer.');
+        if ($code) {
+            // Traiter directement le code
+            return $this->processJeuneOAuthCode($code, $provider);
         }
 
-        // Echanger le code contre un token
+        // Sinon, afficher la page intermediaire pour capturer le hash
+        return view('auth.oauth-callback', [
+            'processUrl' => route('auth.jeune.oauth.process', ['provider' => $provider]),
+            'errorUrl' => route('auth.jeune.login'),
+        ]);
+    }
+
+    /**
+     * Traitement du code OAuth (Authorization Code flow)
+     */
+    protected function processJeuneOAuthCode(string $code, string $provider)
+    {
         $session = $this->supabase->exchangeCodeForSession($code);
 
-        if (!$session) {
+        if (!$session || !isset($session['access_token'])) {
+            Log::error('Supabase code exchange failed', ['provider' => $provider]);
             return redirect()->route('auth.jeune.login')
                 ->with('error', 'Erreur lors de la connexion. Veuillez reessayer.');
         }
 
-        // Recuperer les infos utilisateur
-        $userData = $this->supabase->getUser($session['access_token']);
+        return $this->authenticateJeuneWithToken($session['access_token'], $provider);
+    }
+
+    /**
+     * Traitement AJAX du token OAuth pour les jeunes
+     */
+    public function jeuneOAuthProcess(Request $request, string $provider)
+    {
+        try {
+            Log::info('OAuth process started', [
+                'provider' => $provider,
+                'has_access_token' => $request->has('access_token'),
+                'has_code' => $request->has('code'),
+            ]);
+
+            // Verifier si on a un access_token (Implicit/PKCE flow)
+            if ($request->has('access_token')) {
+                $accessToken = $request->input('access_token');
+
+                Log::info('Getting user from Supabase with access token');
+
+                $userData = $this->supabase->getUser($accessToken);
+
+                if (!$userData) {
+                    Log::warning('Failed to get user data from Supabase');
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Impossible de recuperer vos informations.'
+                    ], 400);
+                }
+
+                Log::info('User data retrieved', ['email' => $userData['email'] ?? 'unknown']);
+
+                $result = $this->createOrUpdateJeuneUser($userData, $provider);
+
+                if ($result['success']) {
+                    return response()->json([
+                        'success' => true,
+                        'redirect' => $result['redirect']
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'error' => $result['error']
+                ], 400);
+            }
+
+            // Verifier si on a un code (Authorization Code flow)
+            if ($request->has('code')) {
+                $code = $request->input('code');
+
+                Log::info('Exchanging code for session');
+
+                $session = $this->supabase->exchangeCodeForSession($code);
+
+                if (!$session || !isset($session['access_token'])) {
+                    Log::warning('Failed to exchange code for session');
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Erreur lors de l\'echange du code.'
+                    ], 400);
+                }
+
+                $userData = $this->supabase->getUser($session['access_token']);
+
+                if (!$userData) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Impossible de recuperer vos informations.'
+                    ], 400);
+                }
+
+                $result = $this->createOrUpdateJeuneUser($userData, $provider);
+
+                if ($result['success']) {
+                    return response()->json([
+                        'success' => true,
+                        'redirect' => $result['redirect']
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'error' => $result['error']
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Aucune information d\'authentification fournie.'
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('OAuth process error', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Une erreur inattendue est survenue: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Authentifie un jeune avec un token d'acces
+     */
+    protected function authenticateJeuneWithToken(string $accessToken, string $provider)
+    {
+        $userData = $this->supabase->getUser($accessToken);
 
         if (!$userData) {
             return redirect()->route('auth.jeune.login')
                 ->with('error', 'Impossible de recuperer vos informations.');
         }
 
+        $result = $this->createOrUpdateJeuneUser($userData, $provider);
+
+        if (!$result['success']) {
+            return redirect()->route('auth.jeune.login')
+                ->with('error', $result['error']);
+        }
+
+        return redirect($result['redirect']);
+    }
+
+    /**
+     * Cree ou met a jour un utilisateur jeune
+     */
+    protected function createOrUpdateJeuneUser(array $userData, string $provider): array
+    {
         $socialData = $this->supabase->extractSocialData($userData);
 
-        // Chercher ou creer l'utilisateur
+        if (empty($socialData['email'])) {
+            return [
+                'success' => false,
+                'error' => 'Impossible de recuperer votre adresse email.'
+            ];
+        }
+
         $user = User::where('email', $socialData['email'])->first();
 
         if ($user) {
             // Verifier que c'est bien un compte jeune
             if ($user->user_type !== 'jeune') {
-                return redirect()->route('auth.jeune.login')
-                    ->with('error', 'Cette adresse email est associee a un compte mentor.');
+                return [
+                    'success' => false,
+                    'error' => 'Cette adresse email est associee a un compte mentor.'
+                ];
             }
 
             // Mettre a jour les infos
             $user->update([
                 'auth_provider' => $provider,
-                'provider_id' => $userData['id'],
+                'provider_id' => $userData['id'] ?? $user->provider_id,
                 'profile_photo_url' => $socialData['avatar_url'] ?? $user->profile_photo_url,
                 'last_login_at' => now(),
             ]);
@@ -189,7 +357,7 @@ class WebAuthController extends Controller
                 'password' => Hash::make(Str::random(32)),
                 'user_type' => 'jeune',
                 'auth_provider' => $provider,
-                'provider_id' => $userData['id'],
+                'provider_id' => $userData['id'] ?? null,
                 'profile_photo_url' => $socialData['avatar_url'],
                 'email_verified_at' => $socialData['email_verified'] ? now() : null,
             ]);
@@ -197,11 +365,14 @@ class WebAuthController extends Controller
 
         Auth::login($user, true);
 
-        if (!$user->onboarding_completed) {
-            return redirect()->route('jeune.onboarding');
-        }
+        $redirect = !$user->onboarding_completed
+            ? route('jeune.onboarding')
+            : route('jeune.dashboard');
 
-        return redirect()->route('jeune.dashboard');
+        return [
+            'success' => true,
+            'redirect' => $redirect
+        ];
     }
 
     /**
@@ -229,41 +400,170 @@ class WebAuthController extends Controller
     }
 
     /**
-     * Callback LinkedIn pour les mentors
+     * Callback LinkedIn pour les mentors - Affiche la page intermediaire
      */
     public function mentorLinkedInCallback(Request $request)
     {
+        // Verifier si on a un code (Authorization Code flow)
         $code = $request->get('code');
 
-        if (!$code) {
-            return redirect()->route('auth.mentor.login')
-                ->with('error', 'Erreur lors de l\'authentification LinkedIn.');
+        if ($code) {
+            return $this->processMentorLinkedInCode($code);
         }
 
+        // Sinon, afficher la page intermediaire pour capturer le hash
+        return view('auth.oauth-callback', [
+            'processUrl' => route('auth.mentor.linkedin.process'),
+            'errorUrl' => route('auth.mentor.login'),
+        ]);
+    }
+
+    /**
+     * Traitement du code LinkedIn (Authorization Code flow)
+     */
+    protected function processMentorLinkedInCode(string $code)
+    {
         $session = $this->supabase->exchangeCodeForSession($code);
 
-        if (!$session) {
+        if (!$session || !isset($session['access_token'])) {
+            Log::error('Supabase LinkedIn code exchange failed');
             return redirect()->route('auth.mentor.login')
                 ->with('error', 'Erreur lors de la connexion LinkedIn.');
         }
 
-        $userData = $this->supabase->getUser($session['access_token']);
+        return $this->authenticateMentorWithToken($session['access_token']);
+    }
+
+    /**
+     * Traitement AJAX du token LinkedIn pour les mentors
+     */
+    public function mentorLinkedInProcess(Request $request)
+    {
+        try {
+            // Verifier si on a un access_token (Implicit/PKCE flow)
+            if ($request->has('access_token')) {
+                $accessToken = $request->input('access_token');
+
+                $userData = $this->supabase->getUser($accessToken);
+
+                if (!$userData) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Impossible de recuperer vos informations LinkedIn.'
+                    ], 400);
+                }
+
+                $result = $this->createOrUpdateMentorUser($userData);
+
+                if ($result['success']) {
+                    return response()->json([
+                        'success' => true,
+                        'redirect' => $result['redirect']
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'error' => $result['error']
+                ], 400);
+            }
+
+            // Verifier si on a un code (Authorization Code flow)
+            if ($request->has('code')) {
+                $code = $request->input('code');
+                $session = $this->supabase->exchangeCodeForSession($code);
+
+                if (!$session || !isset($session['access_token'])) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Erreur lors de l\'echange du code LinkedIn.'
+                    ], 400);
+                }
+
+                $userData = $this->supabase->getUser($session['access_token']);
+
+                if (!$userData) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Impossible de recuperer vos informations LinkedIn.'
+                    ], 400);
+                }
+
+                $result = $this->createOrUpdateMentorUser($userData);
+
+                if ($result['success']) {
+                    return response()->json([
+                        'success' => true,
+                        'redirect' => $result['redirect']
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'error' => $result['error']
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Aucune information d\'authentification fournie.'
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('LinkedIn process error', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Une erreur inattendue est survenue.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Authentifie un mentor avec un token d'acces
+     */
+    protected function authenticateMentorWithToken(string $accessToken)
+    {
+        $userData = $this->supabase->getUser($accessToken);
 
         if (!$userData) {
             return redirect()->route('auth.mentor.login')
                 ->with('error', 'Impossible de recuperer vos informations LinkedIn.');
         }
 
+        $result = $this->createOrUpdateMentorUser($userData);
+
+        if (!$result['success']) {
+            return redirect()->route('auth.mentor.login')
+                ->with('error', $result['error']);
+        }
+
+        return redirect($result['redirect']);
+    }
+
+    /**
+     * Cree ou met a jour un utilisateur mentor
+     */
+    protected function createOrUpdateMentorUser(array $userData): array
+    {
         $linkedinData = $this->supabase->extractLinkedInData($userData);
 
-        // Chercher ou creer l'utilisateur mentor
+        if (empty($linkedinData['email'])) {
+            return [
+                'success' => false,
+                'error' => 'Impossible de recuperer votre adresse email LinkedIn.'
+            ];
+        }
+
         $user = User::where('email', $linkedinData['email'])->first();
 
         if ($user) {
             // Verifier que c'est bien un compte mentor
             if ($user->user_type !== 'mentor') {
-                return redirect()->route('auth.mentor.login')
-                    ->with('error', 'Cette adresse email est associee a un compte jeune. Veuillez utiliser la connexion jeune.');
+                return [
+                    'success' => false,
+                    'error' => 'Cette adresse email est associee a un compte jeune. Veuillez utiliser la connexion jeune.'
+                ];
             }
 
             $user->update([
@@ -301,8 +601,10 @@ class WebAuthController extends Controller
 
         Auth::login($user, true);
 
-        // Rediriger vers l'espace mentor
-        return redirect()->route('mentor.dashboard');
+        return [
+            'success' => true,
+            'redirect' => route('mentor.dashboard')
+        ];
     }
 
     /**

@@ -48,8 +48,11 @@ Route::get('/conditions-utilisation', [PageController::class, 'terms'])->name('t
 |--------------------------------------------------------------------------
 */
 
-// Choix du type de compte
+// Choix du type de compte (inscription)
 Route::get('/rejoindre', [WebAuthController::class, 'showChoice'])->name('auth.choice');
+
+// Choix du type de compte (connexion)
+Route::get('/connexion', [WebAuthController::class, 'showLoginChoice'])->name('auth.login');
 
 // Authentification Jeunes
 Route::prefix('jeune')->name('auth.jeune.')->group(function () {
@@ -63,6 +66,9 @@ Route::prefix('jeune')->name('auth.jeune.')->group(function () {
         Route::get('/oauth/{provider}', [WebAuthController::class, 'jeuneOAuthRedirect'])->name('oauth');
         Route::get('/oauth/{provider}/callback', [WebAuthController::class, 'jeuneOAuthCallback'])->name('oauth.callback');
     });
+
+    // Route process sans middleware guest (car appelée en AJAX après callback)
+    Route::post('/oauth/{provider}/process', [WebAuthController::class, 'jeuneOAuthProcess'])->name('oauth.process');
 });
 
 // Authentification Mentors (LinkedIn uniquement)
@@ -72,7 +78,13 @@ Route::prefix('mentor')->name('auth.mentor.')->group(function () {
         Route::get('/linkedin', [WebAuthController::class, 'mentorLinkedInRedirect'])->name('linkedin');
         Route::get('/linkedin/callback', [WebAuthController::class, 'mentorLinkedInCallback'])->name('linkedin.callback');
     });
+
+    // Route process sans middleware guest (car appelée en AJAX après callback)
+    Route::post('/linkedin/process', [WebAuthController::class, 'mentorLinkedInProcess'])->name('linkedin.process');
 });
+
+// Alias pour la landing page
+Route::get('/devenir-mentor', [WebAuthController::class, 'showMentorLogin'])->name('mentor.login');
 
 // Deconnexion commune
 Route::post('/deconnexion', [WebAuthController::class, 'logout'])->name('logout')->middleware('auth');
@@ -93,8 +105,13 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
     Route::get('/test-personnalite', [JeuneDashboardController::class, 'personalityTest'])->name('personality');
     Route::get('/chat', [JeuneDashboardController::class, 'chat'])->name('chat');
     Route::get('/documents', [JeuneDashboardController::class, 'documents'])->name('documents');
+    Route::post('/documents', [JeuneDashboardController::class, 'storeDocument'])->name('documents.store');
+    Route::get('/documents/{document}/download', [JeuneDashboardController::class, 'downloadDocument'])->name('documents.download');
+    Route::delete('/documents/{document}', [JeuneDashboardController::class, 'deleteDocument'])->name('documents.destroy');
     Route::get('/mentors', [JeuneDashboardController::class, 'mentors'])->name('mentors');
+    Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [JeuneDashboardController::class, 'profile'])->name('profile');
+    Route::put('/profil', [JeuneDashboardController::class, 'updateProfile'])->name('profile.update');
 });
 
 /*
@@ -106,8 +123,12 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
 Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:mentor'])->group(function () {
     Route::get('/', [MentorDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profil', [MentorDashboardController::class, 'profile'])->name('profile');
-    Route::post('/profil', [MentorDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profil', [MentorDashboardController::class, 'updateProfile'])->name('profile.update');
     Route::get('/parcours', [MentorDashboardController::class, 'roadmap'])->name('roadmap');
+    Route::get('/parcours/{step}', [MentorDashboardController::class, 'getStep'])->name('roadmap.show');
+    Route::post('/parcours', [MentorDashboardController::class, 'storeStep'])->name('roadmap.store');
+    Route::put('/parcours/{step}', [MentorDashboardController::class, 'updateStep'])->name('roadmap.update');
+    Route::delete('/parcours/{step}', [MentorDashboardController::class, 'deleteStep'])->name('roadmap.destroy');
     Route::get('/statistiques', [MentorDashboardController::class, 'stats'])->name('stats');
 });
 

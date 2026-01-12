@@ -1,13 +1,13 @@
 @extends('layouts.auth')
 
-@section('title', 'Rejoignez Brillio')
-@section('heading', 'Rejoignez la communaute Brillio')
-@section('subheading', 'Choisissez votre profil pour commencer')
+@section('title', 'Connexion - Brillio')
+@section('heading', 'Bon retour parmi nous !')
+@section('subheading', 'Choisissez votre type de compte pour vous connecter')
 
 @section('content')
 <div class="space-y-6">
     <!-- Jeune Card -->
-    <a href="{{ route('auth.jeune.register') }}"
+    <a href="{{ route('auth.jeune.login') }}"
        class="block p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-transparent hover:border-primary-500 transition-all duration-300 group">
         <div class="flex items-center gap-4">
             <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -18,7 +18,7 @@
             <div class="flex-1">
                 <h3 class="text-xl font-bold text-gray-900">Je suis un Jeune</h3>
                 <p class="text-gray-600 text-sm mt-1">
-                    Decouvrez votre personnalite, explorez des carrieres et trouvez votre voie grace a nos mentors.
+                    Connectez-vous pour continuer votre exploration et decouvrir votre voie.
                 </p>
             </div>
             <svg class="w-6 h-6 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@
             <div class="flex-1">
                 <h3 class="text-xl font-bold text-gray-900">Je suis un Mentor</h3>
                 <p class="text-gray-600 text-sm mt-1">
-                    Partagez votre parcours professionnel et inspirez la prochaine generation de talents africains.
+                    Connectez-vous via LinkedIn pour acceder a votre espace mentor.
                 </p>
             </div>
             <svg class="w-6 h-6 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@
 
 @section('footer')
 <p class="text-white/80 text-sm">
-    Deja inscrit ?
-    <a href="{{ route('auth.login') }}" class="text-white font-semibold hover:underline">Se connecter</a>
+    Pas encore inscrit ?
+    <a href="{{ route('auth.choice') }}" class="text-white font-semibold hover:underline">Creer un compte</a>
 </p>
 @endsection

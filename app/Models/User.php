@@ -47,6 +47,7 @@ class User extends Authenticatable
         'onboarding_completed',
         'onboarding_data',
         'last_login_at',
+        'email_verified_at',
     ];
 
     /**

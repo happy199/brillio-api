@@ -155,10 +155,15 @@
                     <a href="{{ route('contact') }}" class="font-medium transition-colors" :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Contact</a>
                 </div>
 
-                <!-- CTA Button -->
-                <div class="hidden md:flex items-center space-x-4">
+                <!-- CTA Buttons -->
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="{{ route('auth.login') }}"
+                       class="px-5 py-2.5 font-semibold rounded-full transition-all duration-300"
+                       :class="scrolled ? 'text-primary-600 hover:bg-primary-50' : 'text-white hover:bg-white/10'">
+                        Explorer ta carriere
+                    </a>
                     <a href="#telecharger" class="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300">
-                        Télécharger l'app
+                        Telecharger l'app
                     </a>
                 </div>
 
@@ -183,12 +188,17 @@
                  x-transition:leave-end="opacity-0 -translate-y-4"
                  class="md:hidden bg-white rounded-2xl shadow-xl mt-2 p-4">
                 <a href="{{ route('home') }}" class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Accueil</a>
-                <a href="{{ route('home') }}#fonctionnalites" class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Fonctionnalités</a>
-                <a href="{{ route('about') }}" class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">À propos</a>
+                <a href="{{ route('home') }}#fonctionnalites" class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Fonctionnalites</a>
+                <a href="{{ route('about') }}" class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">A propos</a>
                 <a href="{{ route('contact') }}" class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Contact</a>
-                <a href="#telecharger" class="block mt-4 py-3 px-4 bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-center font-semibold rounded-lg">
-                    Télécharger l'app
-                </a>
+                <div class="mt-4 space-y-2">
+                    <a href="{{ route('auth.login') }}" class="block py-3 px-4 border border-primary-600 text-primary-600 text-center font-semibold rounded-lg hover:bg-primary-50">
+                        Explorer ta carriere
+                    </a>
+                    <a href="#telecharger" class="block py-3 px-4 bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-center font-semibold rounded-lg">
+                        Telecharger l'app
+                    </a>
+                </div>
             </div>
         </nav>
     </header>

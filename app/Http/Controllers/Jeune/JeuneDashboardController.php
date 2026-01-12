@@ -48,12 +48,11 @@ class JeuneDashboardController extends Controller
     public function personalityTest()
     {
         $user = auth()->user();
-        $test = $user->personalityTest;
+        $personalityTest = $user->personalityTest;
 
         return view('jeune.personality', [
             'user' => $user,
-            'test' => $test,
-            'hasCompleted' => $test && $test->completed_at,
+            'personalityTest' => $personalityTest,
         ]);
     }
 
@@ -141,5 +140,94 @@ class JeuneDashboardController extends Controller
         return view('jeune.profile', [
             'user' => $user,
         ]);
+    }
+
+    /**
+     * Mise a jour du profil
+     */
+    public function updateProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'birth_date' => 'nullable|date',
+            'phone' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
+        ]);
+
+        auth()->user()->update($validated);
+
+        return back()->with('success', 'Profil mis a jour avec succes.');
+    }
+
+    /**
+     * Detail d'un mentor
+     */
+    public function mentorShow(MentorProfile $mentor)
+    {
+        $mentor->load(['user', 'roadmapSteps']);
+
+        // Mentors similaires (meme specialisation)
+        $similarMentors = MentorProfile::where('is_published', true)
+            ->where('id', '!=', $mentor->id)
+            ->where('specialization', $mentor->specialization)
+            ->with('user')
+            ->limit(3)
+            ->get();
+
+        return view('jeune.mentor-show', [
+            'mentor' => $mentor,
+            'similarMentors' => $similarMentors,
+        ]);
+    }
+
+    /**
+     * Upload de document
+     */
+    public function storeDocument(Request $request)
+    {
+        $validated = $request->validate([
+            'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'document_type' => 'required|in:bulletin,diplome,attestation,autre',
+            'school_year' => 'nullable|string|max:20',
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        $file = $request->file('document');
+        $path = $file->store('documents/' . auth()->id(), 'public');
+
+        auth()->user()->academicDocuments()->create([
+            'original_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'file_type' => $file->getClientOriginalExtension(),
+            'file_size' => $file->getSize(),
+            'document_type' => $validated['document_type'],
+            'school_year' => $validated['school_year'] ?? null,
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        return back()->with('success', 'Document ajoute avec succes.');
+    }
+
+    /**
+     * Telecharger un document
+     */
+    public function downloadDocument($document)
+    {
+        $doc = auth()->user()->academicDocuments()->findOrFail($document);
+
+        return response()->download(storage_path('app/public/' . $doc->file_path), $doc->original_name);
+    }
+
+    /**
+     * Supprimer un document
+     */
+    public function deleteDocument($document)
+    {
+        $doc = auth()->user()->academicDocuments()->findOrFail($document);
+        \Storage::disk('public')->delete($doc->file_path);
+        $doc->delete();
+
+        return response()->json(['success' => true]);
     }
 }
