@@ -63,7 +63,7 @@ class PersonalityService
     /**
      * Descriptions détaillées des types de personnalité en français
      */
-    private const TYPE_DESCRIPTIONS = [
+    public const TYPE_DESCRIPTIONS = [
         'INTJ' => [
             'label' => 'L\'Architecte',
             'description' => 'Les INTJ sont des penseurs stratégiques naturels. Ils excellent dans la planification à long terme et l\'analyse complexe. Indépendants et déterminés, ils cherchent constamment à améliorer les systèmes et processus. Ils sont souvent attirés par les carrières en technologie, sciences, ingénierie, droit ou gestion stratégique.',
@@ -297,6 +297,43 @@ class PersonalityService
         Log::info('Test de personnalité complété', [
             'user_id' => $user->id,
             'type' => $result['type'],
+        ]);
+
+        return $personalityTest;
+    }
+
+    /**
+     * Enregistre un résultat de test pré-calculé (depuis l'API OpenMBTI côté frontend)
+     */
+    public function savePreCalculatedResult(
+        User $user,
+        string $personalityType,
+        string $personalityLabel,
+        string $personalityDescription,
+        array $traitsScores,
+        array $responses
+    ): PersonalityTest {
+        // Marquer tous les tests précédents comme historique
+        PersonalityTest::where('user_id', $user->id)
+            ->where('is_current', true)
+            ->update(['is_current' => false]);
+
+        // Créer un nouveau test
+        $personalityTest = PersonalityTest::create([
+            'user_id' => $user->id,
+            'test_type' => 'openmbti',
+            'raw_responses' => $responses,
+            'personality_type' => $personalityType,
+            'personality_label' => $personalityLabel,
+            'personality_description' => $personalityDescription,
+            'traits_scores' => $traitsScores,
+            'completed_at' => now(),
+            'is_current' => true,
+        ]);
+
+        Log::info('Test de personnalité complété (pré-calculé)', [
+            'user_id' => $user->id,
+            'type' => $personalityType,
         ]);
 
         return $personalityTest;

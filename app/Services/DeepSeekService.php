@@ -32,35 +32,41 @@ class DeepSeekService
      * Prompt système pour orienter l'IA vers les conseils d'orientation
      */
     private const SYSTEM_PROMPT = <<<EOT
-Tu es Brillio, un conseiller en orientation professionnelle spécialisé pour les jeunes africains.
+Tu es Brillio, un conseiller en orientation professionnelle specialise pour les jeunes africains.
 
-Ton rôle est de :
-- Aider les jeunes à découvrir leurs talents et intérêts
-- Donner des conseils d'orientation adaptés au contexte africain
-- Informer sur les métiers, les formations et les opportunités de carrière
+REGLES IMPORTANTES DE COMMUNICATION:
+- Tu DOIS TOUJOURS tutoyer l'utilisateur (jamais de "vous", uniquement "tu")
+- Tu DOIS utiliser le prenom de l'utilisateur regulierement dans tes reponses pour personnaliser l'echange
+- Sois chaleureux, amical et proche comme un grand frere ou une grande soeur bienveillant(e)
+
+Ton role est de :
+- Aider les jeunes a decouvrir leurs talents et interets
+- Donner des conseils d'orientation adaptes au contexte africain
+- Informer sur les metiers, les formations et les opportunites de carriere
 - Encourager et motiver les jeunes dans leurs parcours
-- Répondre aux questions sur les études et le monde professionnel
+- Repondre aux questions sur les etudes et le monde professionnel
 
-Tes réponses doivent être :
+Tes reponses doivent etre :
+- Personnalisees (utilise le prenom!)
 - Bienveillantes et encourageantes
-- Pratiques et concrètes
-- Adaptées au contexte africain (pays, économie, opportunités locales)
+- Pratiques et concretes
+- Adaptees au contexte africain (pays, economie, opportunites locales)
 - Claires et accessibles
 
 Tu peux poser des questions pour mieux comprendre le profil de l'utilisateur :
 - Son pays et sa ville
-- Son niveau d'études actuel
-- Ses matières préférées
+- Son niveau d'etudes actuel
+- Ses matieres preferees
 - Ses passions et loisirs
 - Ses aspirations professionnelles
 
-N'hésite pas à :
-- Suggérer des métiers adaptés à son profil
+N'hesite pas a :
+- Suggerer des metiers adaptes a son profil
 - Recommander des formations disponibles en Afrique
-- Partager des témoignages inspirants
-- Donner des conseils pratiques pour réussir
+- Partager des temoignages inspirants
+- Donner des conseils pratiques pour reussir
 
-Réponds toujours en français sauf si l'utilisateur s'adresse à toi dans une autre langue.
+Reponds toujours en francais sauf si l'utilisateur s'adresse a toi dans une autre langue.
 EOT;
 
     public function __construct()
@@ -135,9 +141,10 @@ EOT;
         if ($user) {
             $userContext = $this->buildUserContext($user);
             if ($userContext) {
+                $firstName = explode(' ', $user->name ?? '')[0] ?? 'ami(e)';
                 $messages[] = [
                     'role' => 'system',
-                    'content' => "Contexte de l'utilisateur : {$userContext}",
+                    'content' => "CONTEXTE UTILISATEUR - UTILISE CES INFORMATIONS POUR PERSONNALISER TES REPONSES:\n{$userContext}\n\nIMPORTANT: Tu parles a {$firstName}. Utilise son prenom dans tes reponses et tutoie-le/la toujours!",
                 ];
             }
         }
@@ -188,15 +195,39 @@ EOT;
     }
 
     /**
+     * Vérifie si la clé API est configurée
+     */
+    public function isApiKeyConfigured(): bool
+    {
+        return !empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
+    }
+
+    /**
      * Appelle l'API OpenRouter (DeepSeek)
      */
     private function callOpenRouterApi(array $messages): string
     {
+        Log::info('=== APPEL API OPENROUTER ===', [
+            'api_url' => $this->apiUrl,
+            'model' => $this->model,
+            'messages_count' => count($messages),
+            'api_key_configured' => $this->isApiKeyConfigured(),
+            'api_key_preview' => substr($this->apiKey ?? '', 0, 10) . '...',
+        ]);
+
         try {
-            if (empty($this->apiKey) || $this->apiKey === 'your_openrouter_api_key_here') {
-                Log::warning('OpenRouter API key not configured, using fallback response');
+            if (!$this->isApiKeyConfigured()) {
+                Log::warning('OpenRouter API key not configured', [
+                    'api_key_value' => $this->apiKey,
+                    'env_key' => env('OPENROUTER_API_KEY'),
+                ]);
                 return $this->getFallbackResponse($messages);
             }
+
+            Log::info('Envoi requete OpenRouter', [
+                'url' => $this->apiUrl,
+                'model' => $this->model,
+            ]);
 
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
@@ -204,22 +235,34 @@ EOT;
                 'X-Title' => $this->siteName,
                 'Content-Type' => 'application/json',
             ])->timeout(60)->post($this->apiUrl, [
-                'model' => $this->model,
-                'messages' => $messages,
-                'max_tokens' => $this->maxTokens,
-                'temperature' => $this->temperature,
+                        'model' => $this->model,
+                        'messages' => $messages,
+                        'max_tokens' => $this->maxTokens,
+                        'temperature' => $this->temperature,
+                    ]);
+
+            Log::info('Reponse OpenRouter recue', [
+                'status' => $response->status(),
+                'successful' => $response->successful(),
+                'body_length' => strlen($response->body()),
             ]);
 
             if ($response->successful()) {
                 $data = $response->json();
                 $content = $data['choices'][0]['message']['content'] ?? null;
 
+                Log::info('Contenu extrait de la reponse', [
+                    'has_content' => !empty($content),
+                    'content_length' => strlen($content ?? ''),
+                ]);
+
                 if ($content) {
-                    // Nettoyer le contenu (DeepSeek R1 peut inclure des balises <think>)
                     $content = $this->cleanResponse($content);
+                    Log::info('=== REPONSE OPENROUTER OK ===');
                     return $content;
                 }
 
+                Log::warning('Pas de contenu dans la reponse OpenRouter');
                 return $this->getFallbackResponse($messages);
             }
 
@@ -232,6 +275,8 @@ EOT;
         } catch (\Exception $e) {
             Log::error('OpenRouter API exception', [
                 'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
             return $this->getFallbackResponse($messages);
@@ -246,13 +291,25 @@ EOT;
         // Supprimer les balises <think>...</think> qui contiennent le raisonnement interne
         $content = preg_replace('/<think>.*?<\/think>/s', '', $content);
 
-        // Supprimer les espaces multiples et les retours à la ligne en début/fin
-        $content = trim(preg_replace('/\s+/', ' ', $content));
+        // Remplacer les ### par des doubles retours à la ligne pour séparer les sections
+        $content = preg_replace('/###\s*/', "\n\n", $content);
 
-        // Rétablir les retours à la ligne pour la lisibilité
-        $content = preg_replace('/\s*\n\s*/', "\n", $content);
+        // Remplacer les ## par des doubles retours à la ligne
+        $content = preg_replace('/##\s*/', "\n\n", $content);
 
-        return trim($content);
+        // Remplacer les listes numérotées pour ajouter un retour à la ligne avant
+        $content = preg_replace('/(\d+\.\s)/', "\n$1", $content);
+
+        // Remplacer les listes à puces pour ajouter un retour à la ligne avant
+        $content = preg_replace('/([•\-✔️👉])\s/', "\n$1 ", $content);
+
+        // Nettoyer les retours à la ligne multiples (max 2)
+        $content = preg_replace('/\n{3,}/', "\n\n", $content);
+
+        // Trim final
+        $content = trim($content);
+
+        return $content;
     }
 
     /**
@@ -312,6 +369,21 @@ EOT;
             ->orderBy('created_at', 'asc')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Traduit un texte en utilisant DeepSeek
+     */
+    public function translate(string $prompt): string
+    {
+        $messages = [
+            [
+                'role' => 'user',
+                'content' => $prompt,
+            ],
+        ];
+
+        return $this->callOpenRouterApi($messages);
     }
 
     /**

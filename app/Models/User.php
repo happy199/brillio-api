@@ -103,11 +103,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Relation vers le test de personnalité
+     * Relation vers le test de personnalité actuel
      */
     public function personalityTest(): HasOne
     {
-        return $this->hasOne(PersonalityTest::class);
+        return $this->hasOne(PersonalityTest::class)->where('is_current', true);
+    }
+
+    /**
+     * Relation vers tous les tests de personnalité
+     */
+    public function personalityTests(): HasMany
+    {
+        return $this->hasMany(PersonalityTest::class)->orderByDesc('completed_at');
     }
 
     /**

@@ -45,7 +45,9 @@ class PersonalityTest extends Model
         'personality_label',
         'personality_description',
         'traits_scores',
+        'recommended_careers',
         'completed_at',
+        'is_current',
     ];
 
     protected function casts(): array
@@ -53,7 +55,9 @@ class PersonalityTest extends Model
         return [
             'raw_responses' => 'array',
             'traits_scores' => 'array',
+            'recommended_careers' => 'array',
             'completed_at' => 'datetime',
+            'is_current' => 'boolean',
         ];
     }
 
@@ -63,6 +67,22 @@ class PersonalityTest extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Scope pour obtenir uniquement le test actuel
+     */
+    public function scopeCurrent($query)
+    {
+        return $query->where('is_current', true);
+    }
+
+    /**
+     * Scope pour obtenir l'historique (tests non actuels)
+     */
+    public function scopeHistory($query)
+    {
+        return $query->where('is_current', false)->orderBy('completed_at', 'desc');
     }
 
     /**

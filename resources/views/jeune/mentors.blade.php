@@ -70,54 +70,101 @@
         </div>
     </div>
 
-    <!-- Specialization Quick Filters -->
-    <div class="flex flex-wrap gap-2">
-        <a href="{{ route('jeune.mentors') }}"
-           class="px-4 py-2 rounded-full text-sm font-medium transition {{ !request('specialization') ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
-            Tous
-        </a>
-        @foreach($specializations ?? [] as $key => $label)
-        <a href="{{ route('jeune.mentors', ['specialization' => $key]) }}"
-           class="px-4 py-2 rounded-full text-sm font-medium transition {{ request('specialization') === $key ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
-            {{ $label }}
-        </a>
-        @endforeach
+    <!-- Recommandation MBTI -->
+    @if(isset($userMbtiType) && $userMbtiType)
+    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-100">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <span class="text-white font-bold">{{ $userMbtiType }}</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Ton profil : <span class="font-semibold text-gray-900">{{ $userMbtiLabel ?? $userMbtiType }}</span></p>
+                    <p class="text-xs text-gray-500">Decouvre les mentors dans tes secteurs recommandes</p>
+                </div>
+            </div>
+            <a href="{{ route('jeune.mentors', ['for_profile' => 'true']) }}"
+               class="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg transition flex items-center gap-2 {{ request('for_profile') === 'true' ? 'ring-2 ring-purple-300' : '' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Pour mon profil
+            </a>
+        </div>
+    </div>
+    @endif
+
+    <!-- Filtres rapides -->
+    <div class="space-y-3">
+        <!-- Secteurs MBTI -->
+        @if(isset($sectors) && count($sectors) > 0)
+        <div class="flex flex-wrap gap-2">
+            <span class="text-sm text-gray-500 py-2">Secteurs :</span>
+            <a href="{{ route('jeune.mentors') }}"
+               class="px-4 py-2 rounded-full text-sm font-medium transition {{ !request('sector') && !request('specialization') && !request('for_profile') ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border' }}">
+                Tous
+            </a>
+            @foreach($sectors as $code => $sector)
+            <a href="{{ route('jeune.mentors', ['sector' => $code]) }}"
+               class="px-4 py-2 rounded-full text-sm font-medium transition {{ request('sector') === $code ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border' }}">
+                {{ $sector['name'] ?? $code }}
+            </a>
+            @endforeach
+        </div>
+        @endif
+
+        <!-- Specialisations -->
+        <div class="flex flex-wrap gap-2">
+            <span class="text-sm text-gray-500 py-2">Specialisation :</span>
+            @foreach($specializations ?? [] as $key => $label)
+            <a href="{{ route('jeune.mentors', ['specialization' => $key]) }}"
+               class="px-3 py-1.5 rounded-full text-xs font-medium transition {{ request('specialization') === $key ? 'bg-orange-500 text-white' : 'bg-orange-50 text-orange-700 hover:bg-orange-100' }}">
+                {{ $label }}
+            </a>
+            @endforeach
+        </div>
     </div>
 
     <!-- Mentors Grid -->
     @if($mentors->count() > 0)
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($mentors as $mentor)
-        <a href="{{ route('jeune.mentors.show', $mentor) }}" class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group">
-            <!-- Header with gradient -->
-            <div class="h-24 bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 relative">
-                @if($mentor->is_validated)
-                <span class="absolute top-3 right-3 px-2 py-1 bg-white/90 text-green-600 text-xs font-medium rounded-full flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    Verifie
-                </span>
-                @endif
-            </div>
+        <a href="{{ route('jeune.mentors.show', $mentor) }}" class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group relative">
+            <!-- Barre laterale decorative -->
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-orange-400 via-red-400 to-pink-400 rounded-l-2xl"></div>
 
-            <!-- Profile -->
-            <div class="px-5 pb-5 -mt-10">
-                <div class="w-20 h-20 rounded-2xl bg-white shadow-md flex items-center justify-center overflow-hidden mb-4">
-                    @if($mentor->user && $mentor->user->avatar_url)
-                    <img src="{{ $mentor->user->avatar_url }}" alt="" class="w-full h-full object-cover">
-                    @else
-                    <span class="text-2xl font-bold text-gray-400">{{ strtoupper(substr($mentor->user->name ?? '?', 0, 2)) }}</span>
-                    @endif
+            <div class="p-5 pl-6">
+                <!-- Header avec photo/initiales et badge -->
+                <div class="flex items-start gap-4 mb-4">
+                    <!-- Photo ou initiales -->
+                    <div class="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden {{ $mentor->user && $mentor->user->avatar_url ? '' : 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-400' }} flex items-center justify-center shadow-md">
+                        @if($mentor->user && $mentor->user->avatar_url)
+                        <img src="{{ $mentor->user->avatar_url }}" alt="{{ $mentor->user->name }}" class="w-full h-full object-cover">
+                        @else
+                        <span class="text-xl font-bold text-white">{{ strtoupper(substr($mentor->user->name ?? '?', 0, 2)) }}</span>
+                        @endif
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-2">
+                            <h3 class="font-bold text-gray-900 text-lg group-hover:text-primary-600 transition truncate">{{ $mentor->user->name ?? 'Mentor' }}</h3>
+                            @if($mentor->is_validated)
+                            <span class="flex-shrink-0 w-5 h-5 bg-green-100 rounded-full flex items-center justify-center" title="Profil verifie">
+                                <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </span>
+                            @endif
+                        </div>
+                        <p class="text-gray-600 text-sm truncate">{{ $mentor->current_position }}</p>
+                        @if($mentor->current_company)
+                        <p class="text-gray-500 text-sm truncate">{{ $mentor->current_company }}</p>
+                        @endif
+                    </div>
                 </div>
 
-                <h3 class="font-bold text-gray-900 text-lg group-hover:text-primary-600 transition">{{ $mentor->user->name ?? 'Mentor' }}</h3>
-                <p class="text-gray-600 text-sm">{{ $mentor->current_position }}</p>
-                @if($mentor->current_company)
-                <p class="text-gray-500 text-sm">{{ $mentor->current_company }}</p>
-                @endif
-
-                <div class="flex flex-wrap gap-2 mt-4">
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-4">
                     @if($mentor->specialization)
                     <span class="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
                         {{ $mentor->specialization_label }}
@@ -135,11 +182,13 @@
                     @endif
                 </div>
 
+                <!-- Bio -->
                 @if($mentor->bio)
-                <p class="text-gray-500 text-sm mt-4 line-clamp-2">{{ $mentor->bio }}</p>
+                <p class="text-gray-500 text-sm line-clamp-2 mb-4">{{ $mentor->bio }}</p>
                 @endif
 
-                <div class="mt-4 pt-4 border-t flex items-center justify-between">
+                <!-- Footer -->
+                <div class="pt-4 border-t flex items-center justify-between">
                     <div class="flex items-center gap-1 text-sm text-gray-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>

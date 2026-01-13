@@ -15,7 +15,8 @@ class PersonalityController extends Controller
 {
     public function __construct(
         private PersonalityService $personalityService
-    ) {}
+    ) {
+    }
 
     /**
      * Récupère les questions du test de personnalité
@@ -35,7 +36,7 @@ class PersonalityController extends Controller
     }
 
     /**
-     * Soumet les réponses et calcule le type de personnalité
+     * Soumet les réponses et enregistre le type de personnalité pré-calculé
      *
      * @param SubmitTestRequest $request
      * @return JsonResponse
@@ -43,9 +44,16 @@ class PersonalityController extends Controller
     public function submit(SubmitTestRequest $request): JsonResponse
     {
         $user = $request->user();
-        $responses = $request->validated()['responses'];
+        $validated = $request->validated();
 
-        $personalityTest = $this->personalityService->submitTest($user, $responses);
+        $personalityTest = $this->personalityService->savePreCalculatedResult(
+            $user,
+            $validated['personality_type'],
+            $validated['personality_label'],
+            $validated['personality_description'],
+            $validated['traits_scores'],
+            $validated['responses']
+        );
 
         return $this->success([
             'personality_type' => $personalityTest->personality_type,

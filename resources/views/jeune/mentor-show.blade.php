@@ -16,11 +16,11 @@
     <div class="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl overflow-hidden">
         <div class="p-8 text-white">
             <div class="flex flex-col md:flex-row md:items-start gap-6">
-                <div class="w-28 h-28 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div class="w-28 h-28 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 {{ $mentor->user && $mentor->user->avatar_url ? 'bg-white shadow-lg' : 'bg-white/20 backdrop-blur-sm' }}">
                     @if($mentor->user && $mentor->user->avatar_url)
-                    <img src="{{ $mentor->user->avatar_url }}" alt="" class="w-full h-full object-cover">
+                    <img src="{{ $mentor->user->avatar_url }}" alt="{{ $mentor->user->name }}" class="w-full h-full object-cover">
                     @else
-                    <span class="text-4xl font-bold">{{ strtoupper(substr($mentor->user->name ?? '?', 0, 2)) }}</span>
+                    <span class="text-4xl font-bold text-white">{{ strtoupper(substr($mentor->user->name ?? '?', 0, 2)) }}</span>
                     @endif
                 </div>
                 <div class="flex-1">
@@ -151,7 +151,39 @@
                         Voir sur LinkedIn
                     </a>
                     @endif
-                    <a href="{{ route('jeune.chat') }}?topic=mentor-{{ $mentor->id }}"
+                    @php
+                        // Construire le message pre-rempli
+                        $mentorName = $mentor->user->name ?? 'ce mentor';
+                        $mentorPosition = $mentor->current_position ?? '';
+                        $mentorCompany = $mentor->current_company ?? '';
+                        $mentorSpecialization = $mentor->specialization_label ?? '';
+
+                        $user = auth()->user();
+                        $userName = explode(' ', $user->name ?? '')[0] ?? '';
+
+                        // Construire les etapes du parcours pour le contexte
+                        $roadmapSummary = '';
+                        if ($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0) {
+                            $steps = $mentor->roadmapSteps->sortBy('position')->take(3);
+                            $stepDescriptions = $steps->map(fn($s) => $s->title . ($s->organization ? ' chez ' . $s->organization : ''))->implode(', ');
+                            $roadmapSummary = "Son parcours inclut: " . $stepDescriptions . ".";
+                        }
+
+                        $prefilledMessage = "Bonjour ! Je suis inspire(e) par le profil de {$mentorName}";
+                        if ($mentorPosition) {
+                            $prefilledMessage .= " qui travaille actuellement comme {$mentorPosition}";
+                            if ($mentorCompany) {
+                                $prefilledMessage .= " chez {$mentorCompany}";
+                            }
+                        }
+                        $prefilledMessage .= ". ";
+                        if ($roadmapSummary) {
+                            $prefilledMessage .= $roadmapSummary . " ";
+                        }
+                        $prefilledMessage .= "J'aimerais avoir un parcours similaire dans le domaine " . ($mentorSpecialization ?: "de ce professionnel") . ". ";
+                        $prefilledMessage .= "Quelles sont les etapes cles que je devrais suivre pour atteindre un profil similaire ? Quelles formations ou competences dois-je acquerir ?";
+                    @endphp
+                    <a href="{{ route('jeune.chat') }}?mentor_id={{ $mentor->id }}&prefill={{ urlencode($prefilledMessage) }}"
                        class="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold rounded-xl hover:shadow-lg transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -226,11 +258,11 @@
                 <div class="space-y-3">
                     @foreach($similarMentors->take(3) as $similar)
                     <a href="{{ route('jeune.mentors.show', $similar) }}" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition">
-                        <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 {{ $similar->user && $similar->user->avatar_url ? '' : 'bg-gradient-to-br from-orange-400 to-red-500' }}">
                             @if($similar->user && $similar->user->avatar_url)
-                            <img src="{{ $similar->user->avatar_url }}" alt="" class="w-10 h-10 rounded-lg object-cover">
+                            <img src="{{ $similar->user->avatar_url }}" alt="{{ $similar->user->name }}" class="w-full h-full object-cover">
                             @else
-                            <span class="text-white font-bold text-sm">{{ strtoupper(substr($similar->user->name ?? '?', 0, 1)) }}</span>
+                            <span class="text-white font-bold text-sm">{{ strtoupper(substr($similar->user->name ?? '?', 0, 2)) }}</span>
                             @endif
                         </div>
                         <div class="flex-1 min-w-0">

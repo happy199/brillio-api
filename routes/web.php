@@ -103,16 +103,43 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
     // Dashboard et fonctionnalites
     Route::get('/', [JeuneDashboardController::class, 'index'])->name('dashboard');
     Route::get('/test-personnalite', [JeuneDashboardController::class, 'personalityTest'])->name('personality');
+    Route::get('/test-personnalite/questions', [JeuneDashboardController::class, 'getPersonalityQuestions'])->name('personality.questions');
+    Route::post('/test-personnalite/submit', [JeuneDashboardController::class, 'submitPersonalityTest'])->name('personality.submit');
+    Route::get('/test-personnalite/history/{testId}', [JeuneDashboardController::class, 'getHistoryTestDetails'])->name('personality.history');
+    Route::get('/test-personnalite/export-pdf', [\App\Http\Controllers\Jeune\PersonalityPdfController::class, 'exportCurrent'])->name('personality.export-pdf');
+    Route::get('/test-personnalite/export-history-pdf', [\App\Http\Controllers\Jeune\PersonalityPdfController::class, 'exportHistory'])->name('personality.export-history-pdf');
     Route::get('/chat', [JeuneDashboardController::class, 'chat'])->name('chat');
+    Route::post('/chat/send', [JeuneDashboardController::class, 'sendChatMessage'])->name('chat.send');
+    Route::get('/chat/{conversation}', [JeuneDashboardController::class, 'getConversation'])->name('chat.get');
+    Route::delete('/chat/{conversation}', [JeuneDashboardController::class, 'deleteConversation'])->name('chat.delete');
+    Route::post('/chat/{conversation}/request-human', [JeuneDashboardController::class, 'requestHumanSupport'])->name('chat.request-human');
     Route::get('/documents', [JeuneDashboardController::class, 'documents'])->name('documents');
     Route::post('/documents', [JeuneDashboardController::class, 'storeDocument'])->name('documents.store');
     Route::get('/documents/{document}/download', [JeuneDashboardController::class, 'downloadDocument'])->name('documents.download');
+    Route::get('/documents/{document}/view', [JeuneDashboardController::class, 'viewDocument'])->name('documents.view');
     Route::delete('/documents/{document}', [JeuneDashboardController::class, 'deleteDocument'])->name('documents.destroy');
     Route::get('/mentors', [JeuneDashboardController::class, 'mentors'])->name('mentors');
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [JeuneDashboardController::class, 'profile'])->name('profile');
     Route::put('/profil', [JeuneDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::put('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'updatePassword'])->name('password.update');
 });
+
+// Routes publiques
+Route::get('/politique-de-confidentialite', function () {
+    return view('privacy-policy');
+})->name('privacy-policy');
+
+Route::post('/accept-cookies', function (Illuminate\Http\Request $request) {
+    \App\Models\CookieConsent::create([
+        'user_id' => auth()->id(),
+        'accepted_at' => now(),
+        'ip_address' => $request->ip(),
+        'user_agent' => $request->userAgent(),
+    ]);
+    return response()->json(['success' => true]);
+})->name('accept-cookies');
 
 /*
 |--------------------------------------------------------------------------
