@@ -52,20 +52,33 @@ class MentorProfile extends Model
     protected $fillable = [
         'user_id',
         'bio',
+        'linkedin_url',
+        'website_url',
         'current_position',
         'current_company',
         'years_of_experience',
         'specialization',
+        'specialization_id',
         'linkedin_profile_data',
         'is_published',
+        'skills',
+        'linkedin_imported_at',
+        'linkedin_raw_data',
+        'linkedin_pdf_path',
+        'linkedin_pdf_original_name',
+        'linkedin_import_count',
     ];
 
     protected function casts(): array
     {
         return [
             'linkedin_profile_data' => 'array',
+            'linkedin_raw_data' => 'array',
+            'skills' => 'array',
             'is_published' => 'boolean',
             'years_of_experience' => 'integer',
+            'linkedin_import_count' => 'integer',
+            'linkedin_imported_at' => 'datetime',
         ];
     }
 
@@ -83,6 +96,14 @@ class MentorProfile extends Model
     public function roadmapSteps(): HasMany
     {
         return $this->hasMany(RoadmapStep::class)->orderBy('position');
+    }
+
+    /**
+     * Relation vers la spécialisation
+     */
+    public function specialization()
+    {
+        return $this->belongsTo(Specialization::class);
     }
 
     /**
@@ -117,7 +138,7 @@ class MentorProfile extends Model
      */
     public function getSpecializationLabelAttribute(): string
     {
-        return self::SPECIALIZATIONS[$this->specialization] ?? 'Non définie';
+        return $this->specialization?->name ?? 'Non définie';
     }
 
     /**
@@ -125,7 +146,7 @@ class MentorProfile extends Model
      */
     public function getMbtiSectorsAttribute(): array
     {
-        return self::SPECIALIZATION_TO_MBTI_SECTORS[$this->specialization] ?? [];
+        return $this->specialization?->mbtiTypes->pluck('mbti_type_code')->toArray() ?? [];
     }
 
     /**

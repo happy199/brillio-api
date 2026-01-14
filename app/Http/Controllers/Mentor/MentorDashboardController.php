@@ -39,7 +39,10 @@ class MentorDashboardController extends Controller
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
-        $specializations = MentorProfile::SPECIALIZATIONS;
+        // Charger les spécialisations actives depuis la base de données
+        $specializations = \App\Models\Specialization::active()
+            ->orderBy('name')
+            ->get();
 
         return view('mentor.profile', [
             'user' => $user,
@@ -58,7 +61,8 @@ class MentorDashboardController extends Controller
             'current_position' => 'required|string|max:255',
             'current_company' => 'nullable|string|max:255',
             'years_of_experience' => 'required|integer|min:0|max:50',
-            'specialization' => 'required|string|in:' . implode(',', array_keys(MentorProfile::SPECIALIZATIONS)),
+            'specialization_id' => 'required|string', // Peut être un ID ou 'new'
+            'new_specialization_name' => 'nullable|required_if:specialization_id,new|string|max:255',
             'linkedin_url' => 'nullable|url|max:255',
             'website_url' => 'nullable|url|max:255',
             'advice' => 'nullable|string|max:1000',
@@ -67,19 +71,66 @@ class MentorDashboardController extends Controller
 
         $validated['is_published'] = $request->has('is_published');
 
+
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
+        // Gérer la spécialisation
+        if ($validated['specialization_id'] === 'new' && !empty($validated['new_specialization_name'])) {
+            // Vérifier si une spécialisation avec ce nom existe déjà
+            $existingSpec = \App\Models\Specialization::where('name', $validated['new_specialization_name'])
+                ->orWhere('slug', \Illuminate\Support\Str::slug($validated['new_specialization_name']))
+                ->first();
+
+            if ($existingSpec) {
+                // Si elle existe déjà, utiliser celle-ci
+                $validated['specialization_id'] = $existingSpec->id;
+
+                if ($existingSpec->status === 'pending') {
+                    $message = 'Votre profil a été mis à jour. Ce domaine est déjà en attente de validation par un administrateur.';
+                } elseif ($existingSpec->status === 'active') {
+                    $message = 'Votre profil a été mis à jour. Le domaine "' . $existingSpec->name . '" a été sélectionné.';
+                } else {
+                    $message = 'Votre profil a été mis à jour.';
+                }
+            } else {
+                // Créer une nouvelle spécialisation en attente de modération
+                $newSpec = \App\Models\Specialization::create([
+                    'name' => $validated['new_specialization_name'],
+                    'status' => 'pending',
+                    'created_by_admin' => false,
+                ]);
+                $validated['specialization_id'] = $newSpec->id;
+
+                $message = 'Votre profil a été mis à jour. Votre suggestion de domaine d\'expertise sera examinée par un administrateur.';
+            }
+        } else {
+            $validated['specialization_id'] = (int) $validated['specialization_id'];
+            $message = 'Votre profil a été mis à jour.';
+        }
+
+        // Supprimer les champs non nécessaires
+        unset($validated['new_specialization_name']);
+
         if ($profile) {
             $profile->update($validated);
+
+            // Mettre à jour le compteur de mentors pour l'ancienne et nouvelle spécialisation
+            if ($profile->wasChanged('specialization_id')) {
+                if ($profile->getOriginal('specialization_id')) {
+                    \App\Models\Specialization::find($profile->getOriginal('specialization_id'))?->updateMentorCount();
+                }
+                $profile->specialization?->updateMentorCount();
+            }
         } else {
             $profile = MentorProfile::create([
                 'user_id' => $user->id,
                 ...$validated,
             ]);
+            $profile->specialization?->updateMentorCount();
         }
 
-        return back()->with('success', 'Votre profil a ete mis a jour.');
+        return back()->with('success', $message);
     }
 
     /**
@@ -120,7 +171,7 @@ class MentorDashboardController extends Controller
     /**
      * Recuperer une etape du roadmap
      */
-    public function getStep($stepId)
+    public function getStep($step)
     {
         $user = auth()->user();
         $profile = $user->mentorProfile;
@@ -129,9 +180,9 @@ class MentorDashboardController extends Controller
             return response()->json(['error' => 'Profile not found'], 404);
         }
 
-        $step = $profile->roadmapSteps()->findOrFail($stepId);
+        $roadmapStep = $profile->roadmapSteps()->findOrFail($step);
 
-        return response()->json($step);
+        return response()->json($roadmapStep);
     }
 
     /**
@@ -160,7 +211,12 @@ class MentorDashboardController extends Controller
         $maxPosition = $profile->roadmapSteps()->max('position') ?? 0;
 
         $step = $profile->roadmapSteps()->create([
-            ...$validated,
+            'step_type' => 'work',
+            'title' => $validated['title'],
+            'institution_company' => $validated['organization'] ?? null,
+            'start_date' => !empty($validated['year_start']) ? $validated['year_start'] . '-01-01' : null,
+            'end_date' => !empty($validated['year_end']) ? $validated['year_end'] . '-12-31' : null,
+            'description' => $validated['description'] ?? null,
             'position' => $maxPosition + 1,
         ]);
 
@@ -170,7 +226,7 @@ class MentorDashboardController extends Controller
     /**
      * Mettre a jour une etape
      */
-    public function updateStep(Request $request, $stepId)
+    public function updateStep(Request $request, $step)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -189,10 +245,16 @@ class MentorDashboardController extends Controller
             return response()->json(['error' => 'Profile not found'], 404);
         }
 
-        $step = $profile->roadmapSteps()->findOrFail($stepId);
-        $step->update($validated);
+        $roadmapStep = $profile->roadmapSteps()->findOrFail($step);
+        $roadmapStep->update([
+            'title' => $validated['title'],
+            'institution_company' => $validated['organization'] ?? null,
+            'start_date' => !empty($validated['year_start']) ? $validated['year_start'] . '-01-01' : null,
+            'end_date' => !empty($validated['year_end']) ? $validated['year_end'] . '-12-31' : null,
+            'description' => $validated['description'] ?? null,
+        ]);
 
-        return response()->json($step);
+        return response()->json($roadmapStep);
     }
 
     /**
@@ -211,5 +273,236 @@ class MentorDashboardController extends Controller
         $step->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Importer les données LinkedIn depuis un PDF
+     */
+    public function importLinkedInData(Request $request)
+    {
+        $request->validate([
+            'pdf' => 'required|file|mimes:pdf|max:5120', // 5MB max
+        ]);
+
+        $user = auth()->user();
+        $profile = $user->mentorProfile;
+
+        if (!$profile) {
+            $profile = MentorProfile::create(['user_id' => $user->id]);
+        }
+
+        try {
+            // Stocker temporairement le PDF
+            $pdfPath = $request->file('pdf')->store('temp-linkedin-pdfs', 'local');
+            $fullPath = storage_path('app/' . $pdfPath);
+
+            // Parser le PDF
+            $parserService = new \App\Services\LinkedInPdfParserService();
+            $profileData = $parserService->parsePdf($fullPath);
+
+            \Log::info('LinkedIn PDF parsed', ['data' => $profileData]);
+
+            // 🔒 SÉCURITÉ : Vérifier que l'email correspond
+            if (!empty($profileData['contact']['email'])) {
+                $pdfEmail = strtolower(trim($profileData['contact']['email']));
+                $userEmail = strtolower(trim($user->email));
+
+                if ($pdfEmail !== $userEmail) {
+                    // Supprimer le fichier temporaire
+                    \Storage::disk('local')->delete($pdfPath);
+
+                    \Log::warning('LinkedIn import email mismatch', [
+                        'user_id' => $user->id,
+                        'user_email' => $userEmail,
+                        'pdf_email' => $pdfEmail
+                    ]);
+
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'L\'email dans le PDF (' . $pdfEmail . ') ne correspond pas à votre compte (' . $userEmail . '). Veuillez utiliser votre propre profil LinkedIn.'
+                    ], 422);
+                }
+
+                \Log::info('✅ Email validation passed', [
+                    'email' => $userEmail
+                ]);
+            } else {
+                // Pas d'email trouvé dans le PDF - warning mais on continue
+                \Log::warning('No email found in LinkedIn PDF', [
+                    'user_id' => $user->id
+                ]);
+            }
+
+            // Stocker le PDF définitivement
+            $finalPdfPath = $request->file('pdf')->store('linkedin-pdfs', 'local');
+            $originalName = $request->file('pdf')->getClientOriginalName();
+
+            // Supprimer le fichier temporaire
+            \Storage::disk('local')->delete($pdfPath);
+
+            // Supprimer anciennes expériences si réimport
+            if ($profile->linkedin_import_count > 0) {
+                $profile->roadmapSteps()->delete();
+            }
+
+
+
+            // Calculer les années d'expérience
+            $yearsOfExperience = $this->calculateYearsOfExperience($profileData['experience']);
+
+            // Récupérer la dernière expérience (la plus récente)
+            $latestExperience = !empty($profileData['experience']) ? $profileData['experience'][0] : null;
+
+            // Sauvegarder les données
+            $profile->update([
+                'linkedin_raw_data' => $profileData,
+                'linkedin_imported_at' => now(),
+                'linkedin_pdf_path' => $finalPdfPath,
+                'linkedin_pdf_original_name' => $originalName,
+                'linkedin_import_count' => $profile->linkedin_import_count + 1,
+
+                // Poste actuel = titre de la dernière expérience
+                'current_position' => $latestExperience['title'] ?? $profile->current_position,
+
+                // Entreprise actuelle = company de la dernière expérience
+                'current_company' => $latestExperience['company'] ?? $profile->current_company,
+
+                // Bio = headline (description de l'entreprise)
+                'bio' => $profileData['headline'] ?? $profile->bio,
+
+                'skills' => $profileData['skills'] ?? $profile->skills,
+
+                // Nouveaux mappings
+                'linkedin_url' => $profileData['contact']['linkedin'] ?? $profile->linkedin_url,
+                'website_url' => $profileData['contact']['website'] ?? $profile->website_url,
+                'years_of_experience' => $yearsOfExperience > 0 ? $yearsOfExperience : $profile->years_of_experience,
+            ]);
+
+            // Importer les expériences comme étapes
+            $stepPosition = 0;
+
+            if (!empty($profileData['experience'])) {
+                foreach ($profileData['experience'] as $exp) {
+                    // Calculer les années de début et fin basées sur la durée
+                    $currentYear = date('Y');
+                    $durationYears = $exp['duration_years'] ?? 0;
+
+                    if ($durationYears > 0) {
+                        $endYear = $currentYear;
+                        $startYear = $currentYear - $durationYears;
+                    } else {
+                        // Si durée = 0, début = fin = année courante
+                        $startYear = $currentYear;
+                        $endYear = $currentYear;
+                    }
+
+                    $profile->roadmapSteps()->create([
+                        'step_type' => 'work',
+                        'title' => $exp['title'] ?? 'Sans titre',
+                        'institution_company' => $exp['company'] ?? null,
+                        'description' => trim($exp['description'] ?? ''),
+                        'start_date' => $startYear . '-01-01',
+                        'end_date' => $endYear . '-12-31',
+                        'position' => $stepPosition++,
+                    ]);
+                }
+            }
+
+            // Importer les formations comme étapes
+            if (!empty($profileData['education'])) {
+                foreach ($profileData['education'] as $edu) {
+                    $profile->roadmapSteps()->create([
+                        'step_type' => 'education',
+                        'title' => $edu['degree'] ?? 'Formation',
+                        'institution_company' => $edu['school'] ?? null,
+                        'description' => 'Formation académique',
+                        'start_date' => !empty($edu['year_start']) ? $edu['year_start'] . '-01-01' : null,
+                        'end_date' => !empty($edu['year_end']) ? $edu['year_end'] . '-12-31' : null,
+                        'position' => $stepPosition++,
+                    ]);
+                }
+            }
+
+            // Détecter les données manquantes et générer des suggestions
+            $warnings = [];
+            $missingFields = [];
+            $suggestions = [];
+
+            if (empty($profileData['summary'])) {
+                $missingFields[] = 'bio';
+                $warnings[] = 'Aucun résumé trouvé dans le PDF';
+                $suggestions[] = 'Ajoutez une bio sur la page "Mon profil"';
+            }
+
+            if (empty($profileData['skills']) || count($profileData['skills']) === 0) {
+                $missingFields[] = 'compétences';
+                $warnings[] = 'Aucune compétence trouvée dans le PDF';
+                $suggestions[] = 'Ajoutez vos compétences sur la page "Mon profil"';
+            }
+
+            if (empty($profileData['contact']['website'])) {
+                $missingFields[] = 'site web';
+                $suggestions[] = 'Ajoutez votre site web sur la page "Mon profil"';
+            }
+
+            if ($yearsOfExperience === 0) {
+                $warnings[] = 'Impossible de calculer les années d\'expérience';
+                $suggestions[] = 'Vérifiez vos années d\'expérience sur la page "Mon profil"';
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil LinkedIn importé avec succès !',
+                'data' => [
+                    'name' => $profileData['name'] ?? '',
+                    'headline' => $profileData['headline'] ?? '',
+                    'experience_count' => count($profileData['experience'] ?? []),
+                    'skills_count' => count($profileData['skills'] ?? []),
+                    'import_count' => $profile->linkedin_import_count,
+                    'years_of_experience' => $yearsOfExperience
+                ],
+                'warnings' => $warnings,
+                'missing_fields' => $missingFields,
+                'suggestions' => !empty($suggestions) ? [
+                    'message' => 'Certaines données sont manquantes. Complétez votre profil :',
+                    'actions' => $suggestions
+                ] : null
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('LinkedIn PDF import error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors du parsing du PDF : ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculer les années d'expérience totales depuis les durées
+     */
+    private function calculateYearsOfExperience($experiences)
+    {
+        if (empty($experiences)) {
+            return 0;
+        }
+
+        $totalMonths = 0;
+
+        foreach ($experiences as $exp) {
+            // Utiliser duration_years et duration_months si disponibles
+            if (isset($exp['duration_years'])) {
+                $totalMonths += ($exp['duration_years'] * 12);
+            }
+            if (isset($exp['duration_months'])) {
+                $totalMonths += $exp['duration_months'];
+            }
+        }
+
+        return round($totalMonths / 12);
     }
 }
