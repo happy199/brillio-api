@@ -1,7 +1,12 @@
 # Stage 1: Build
 FROM php:8.4-fpm-alpine AS builder
 
-# Install system dependencies
+# Install extensions using the official installer script
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions && \
+    install-php-extensions pdo pdo_mysql zip gd pcntl
+
+# Install runtime dependencies
 RUN apk add --no-cache \
     git \
     curl \
@@ -12,9 +17,6 @@ RUN apk add --no-cache \
     mysql-client \
     nginx \
     supervisor
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql zip gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -42,18 +44,18 @@ RUN php artisan config:cache && \
 # Stage 2: Production
 FROM php:8.4-fpm-alpine
 
-# Install runtime dependencies
+# Install extensions using the official installer script (much faster and reliable)
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/install-php-extensions && \
+    install-php-extensions pdo pdo_mysql zip gd pcntl @composer
+
+# Install system dependencies required for build
 RUN apk add --no-cache \
+    git \
     nginx \
     supervisor \
-    mysql-client \
-    libpng-dev \
-    libzip-dev \
-    libzip \
-    libpng
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql zip gd pcntl
+    mysql-client
 
 # Copy application from builder
 COPY --from=builder /var/www/html /var/www/html
