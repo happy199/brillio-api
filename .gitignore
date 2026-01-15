@@ -108,5 +108,4 @@ yarn-error.log*
 /reverb
 
 # Deployment
-/.github
 /.deploy
