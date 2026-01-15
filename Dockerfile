@@ -48,7 +48,8 @@ RUN apk add --no-cache \
     supervisor \
     mysql-client \
     libpng \
-    libzip
+    libzip \
+    libzip-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql zip gd
