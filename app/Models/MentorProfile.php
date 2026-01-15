@@ -142,11 +142,11 @@ class MentorProfile extends Model
     }
 
     /**
-     * Relation vers la spécialisation
+     * Relation vers la spécialisation (Objet)
      */
-    public function specialization()
+    public function specializationModel()
     {
-        return $this->belongsTo(Specialization::class);
+        return $this->belongsTo(Specialization::class, 'specialization_id');
     }
 
     /**

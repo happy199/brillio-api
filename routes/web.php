@@ -12,6 +12,10 @@ use App\Http\Controllers\Jeune\JeuneDashboardController;
 use App\Http\Controllers\Jeune\OnboardingController;
 use App\Http\Controllers\Mentor\MentorDashboardController;
 use App\Http\Controllers\Public\PageController;
+use App\Http\Controllers\Public\NewsletterController as PublicNewsletterController;
+use App\Http\Controllers\Public\ContactController as PublicContactController;
+use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\ContactMessageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,7 +40,11 @@ Route::get('/', [PageController::class, 'home'])->name('home');
 // Pages informatives
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
-Route::post('/contact', [PageController::class, 'submitContact'])->name('contact.submit');
+Route::post('/contact', [PublicContactController::class, 'submit'])->name('contact.submit');
+
+// Newsletter
+Route::post('/newsletter/subscribe', [PublicNewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/newsletter/unsubscribe/{token}', [PublicNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 // Pages légales
 Route::get('/politique-de-confidentialite', [PageController::class, 'privacy'])->name('privacy');
@@ -220,6 +228,21 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('specializations-moderate', [\App\Http\Controllers\Admin\SpecializationController::class, 'moderate'])->name('specializations.moderate');
         Route::post('specializations/{specialization}/approve', [\App\Http\Controllers\Admin\SpecializationController::class, 'approve'])->name('specializations.approve');
         Route::post('specializations/{specialization}/reject', [\App\Http\Controllers\Admin\SpecializationController::class, 'reject'])->name('specializations.reject');
+
+        // Newsletter
+        Route::get('newsletter', [NewsletterController::class, 'index'])->name('newsletter.index');
+        Route::get('newsletter/export-csv', [NewsletterController::class, 'exportCsv'])->name('newsletter.export-csv');
+        Route::get('newsletter/export-pdf', [NewsletterController::class, 'exportPdf'])->name('newsletter.export-pdf');
+        Route::post('newsletter/send-email', [NewsletterController::class, 'sendEmail'])->name('newsletter.send-email');
+        Route::put('newsletter/{subscriber}', [NewsletterController::class, 'update'])->name('newsletter.update');
+        Route::delete('newsletter/{subscriber}', [NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+
+        // Messages de contact
+        Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+        Route::get('contact-messages/{message}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
+        Route::post('contact-messages/{message}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
+        Route::delete('contact-messages/{message}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
+        Route::get('contact-messages-export-pdf', [ContactMessageController::class, 'exportPdf'])->name('contact-messages.export-pdf');
 
         // Documents
         Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');

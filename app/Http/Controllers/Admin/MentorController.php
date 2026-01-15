@@ -33,7 +33,7 @@ class MentorController extends Controller
      */
     public function index(Request $request)
     {
-        $query = MentorProfile::with(['user', 'roadmapSteps']);
+        $query = MentorProfile::with(['user', 'roadmapSteps', 'specializationModel']);
 
         // Filtre par statut de publication
         if ($request->filled('status')) {
@@ -75,7 +75,7 @@ class MentorController extends Controller
      */
     public function show(MentorProfile $mentor)
     {
-        $mentor->load(['user', 'roadmapSteps']);
+        $mentor->load(['user', 'roadmapSteps', 'specializationModel']);
 
         return view('admin.mentors.show', [
             'mentor' => $mentor,
@@ -92,7 +92,9 @@ class MentorController extends Controller
             'is_published' => !$mentor->is_published,
         ]);
 
-        return back()->with('success', $mentor->is_published
+        return back()->with(
+            'success',
+            $mentor->is_published
             ? 'Profil mentor publié.'
             : 'Profil mentor dépublié.'
         );

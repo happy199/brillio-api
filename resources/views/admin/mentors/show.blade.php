@@ -69,17 +69,23 @@
                         <span class="text-gray-500">Expérience</span>
                         <span class="text-gray-900">{{ $mentor->years_of_experience ? $mentor->years_of_experience . ' ans' : '-' }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Spécialisation</span>
-                        <span class="text-gray-900">
-                            @if($mentor->specialization)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                    {{ $specializations[$mentor->specialization] ?? $mentor->specialization }}
-                                </span>
-                            @else
-                                -
-                            @endif
-                        </span>
+                    <div class="border-t pt-4">
+                        <span class="text-gray-500 text-sm block mb-2">Domaine d'expertise</span>
+                        @if($mentor->specializationModel && $mentor->specializationModel->status === 'approved')
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                {{ $mentor->specializationModel->name }}
+                            </span>
+                        @elseif($mentor->specializationModel)
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                {{ $mentor->specializationModel->name }} (En attente)
+                            </span>
+                        @elseif($mentor->specialization)
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
+                                {{ $specializations[$mentor->specialization] ?? $mentor->specialization }}
+                            </span>
+                        @else
+                            <span class="text-gray-400">Aucun domaine renseigné</span>
+                        @endif
                     </div>
                     @if($mentor->user->linkedin_url)
                     <div class="flex justify-between items-center">

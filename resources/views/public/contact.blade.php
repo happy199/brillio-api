@@ -249,10 +249,10 @@
                         <div x-show="open === 1" x-collapse class="px-6 pb-4">
                             <p class="text-gray-600">
                                 <!-- TODO: Mettre les vrais liens de téléchargement -->
-                                Brillio est disponible gratuitement sur l'App Store pour iOS et le Google Play Store pour
-                                Android.
+                                Brillio est disponible sur l'App Store pour iOS et le Google Play Store pour Android.
                                 Recherchez simplement "Brillio" ou suivez les liens de téléchargement sur notre page
-                                d'accueil.
+                                d'accueil. L'inscription est gratuite et vous donne accès à un essai complet de la
+                                plateforme.
                             </p>
                         </div>
                     </div>
@@ -261,7 +261,7 @@
                     <div class="bg-white rounded-2xl shadow-sm overflow-hidden" data-aos="fade-up" data-aos-delay="150">
                         <button @click="open = open === 2 ? null : 2"
                             class="w-full px-6 py-4 text-left flex items-center justify-between">
-                            <span class="font-semibold text-gray-900">L'application est-elle vraiment gratuite ?</span>
+                            <span class="font-semibold text-gray-900">Quel est le modèle tarifaire de Brillio ?</span>
                             <svg class="w-5 h-5 text-gray-500 transition-transform duration-200"
                                 :class="{ 'rotate-180': open === 2 }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
@@ -270,10 +270,10 @@
                         </button>
                         <div x-show="open === 2" x-collapse class="px-6 pb-4">
                             <p class="text-gray-600">
-                                Oui, Brillio est 100% gratuite. Toutes les fonctionnalités (test de personnalité, chatbot
-                                IA,
-                                accès aux profils de mentors, gestion de documents) sont accessibles sans frais et sans
-                                abonnement.
+                                Brillio propose un modèle freemium accessible à tous. L'inscription est gratuite et vous
+                                donne accès à un essai complet incluant le test de personnalité, le chatbot IA, et la
+                                découverte des profils de mentors. Des fonctionnalités premium sont disponibles pour
+                                approfondir votre accompagnement.
                             </p>
                         </div>
                     </div>

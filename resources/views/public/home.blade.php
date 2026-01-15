@@ -977,15 +977,17 @@
     </section>
 
     <!-- Newsletter Section -->
-    <section class="py-16 bg-white">
+    <section id="newsletter" class="py-16 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-2xl mx-auto text-center" data-aos="fade-up">
                 <h3 class="text-2xl font-bold text-gray-900 mb-4">Reste informé</h3>
                 <p class="text-gray-600 mb-8">
                     Inscris-toi à notre newsletter pour recevoir des conseils d'orientation et les dernières actualités.
                 </p>
-                <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                    <input type="email" placeholder="Ton adresse email"
+                <form action="{{ route('newsletter.subscribe') }}" method="POST"
+                    class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                    @csrf
+                    <input type="email" name="email" placeholder="Ton adresse email" required
                         class="flex-1 px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                     <button type="submit"
                         class="px-8 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-full hover:shadow-lg transition-all duration-300">
