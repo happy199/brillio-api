@@ -14,7 +14,7 @@
 - ✅ `.env.production.example` - Template variables
 - ✅ `docker/mysql/my.cnf` - Config MySQL optimisée
 
-### CI/CD
+### CI/CD Configuration
 - ✅ `.github/workflows/deploy.yml` - Déploiement SSH
 
 ### Scripts
