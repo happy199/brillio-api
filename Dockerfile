@@ -42,28 +42,16 @@ RUN php artisan config:cache && \
 # Stage 2: Production
 FROM php:8.4-fpm-alpine
 
-# Install system dependencies
+# Install runtime dependencies
 RUN apk add --no-cache \
-    git \
-    curl \
-    mysql-client \
     nginx \
     supervisor \
-    php84-pdo \
-    php84-pdo_mysql \
-    php84-zip \
-    php84-gd \
-    php84-tokenizer \
-    php84-xml \
-    php84-pcntl \
-    php84-posix \
-    php84-fileinfo \
-    php84-simplexml \
-    php84-dom \
-    php84-xmlwriter
+    mysql-client \
+    libpng \
+    libzip
 
-# Link PHP binaries
-RUN ln -s /usr/bin/php84 /usr/bin/php
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql zip gd pcntl
 
 # Copy application from builder
 COPY --from=builder /var/www/html /var/www/html
