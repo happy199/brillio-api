@@ -60,6 +60,9 @@ class AnalyticsController extends Controller
             case 'today':
                 $start = Carbon::today()->startOfDay();
                 break;
+            case '3days':
+                $start = Carbon::now()->subDays(3)->startOfDay();
+                break;
             case 'week':
                 $start = Carbon::now()->subWeek()->startOfDay();
                 break;
@@ -390,6 +393,21 @@ class AnalyticsController extends Controller
                 ];
                 $view = 'admin.exports.analytics-users';
                 $filename = 'brillio-analytics-utilisateurs';
+                break;
+
+            case 'mentors':
+                $data['mentors'] = MentorProfile::with(['user', 'specialization', 'roadmapSteps'])
+                    ->whereBetween('created_at', [$start, $end])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                $data['stats'] = [
+                    'total' => $data['mentors']->count(),
+                    'published' => $data['mentors']->where('is_published', true)->count(),
+                    'pending' => $data['mentors']->where('is_published', false)->count(),
+                    'with_roadmap' => $data['mentors']->filter(fn($m) => $m->roadmapSteps->count() > 0)->count(),
+                ];
+                $view = 'admin.exports.analytics-mentors';
+                $filename = 'brillio-analytics-mentors';
                 break;
 
             default:

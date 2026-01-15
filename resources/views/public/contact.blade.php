@@ -97,7 +97,7 @@
                                 <p class="text-gray-600">Notre siège</p>
                                 <!-- TODO: Mettre la vraie adresse -->
                                 <p class="text-gray-800">
-                                    Dakar, Sénégal
+                                    Cotonou, Bénin
                                 </p>
                             </div>
                         </div>
@@ -360,7 +360,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
-                    <p>Carte interactive - Dakar, Sénégal</p>
+                    <p>Carte interactive - Cotonou, Bénin</p>
                 </div>
             </div>
         </div>

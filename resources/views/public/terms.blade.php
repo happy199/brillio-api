@@ -157,8 +157,8 @@
 
                 <h2>12. Droit applicable</h2>
                 <p>
-                    Les présentes conditions sont régies par le droit sénégalais. Tout litige sera
-                    soumis à la compétence exclusive des tribunaux de Dakar, Sénégal.
+                    Les présentes conditions sont régies par le droit béninois. Tout litige sera
+                    soumis à la compétence exclusive des tribunaux de Cotonou, Bénin.
                 </p>
 
                 <h2>13. Dispositions générales</h2>
@@ -174,7 +174,7 @@
                 </p>
                 <ul>
                     <li>Email : <a href="mailto:legal@brillio.africa">legal@brillio.africa</a></li>
-                    <li>Adresse : Dakar, Sénégal</li>
+                    <li>Adresse : Cotonou, Bénin</li>
                 </ul>
             </div>
         </div>

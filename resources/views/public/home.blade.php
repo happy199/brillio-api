@@ -19,7 +19,7 @@
                 <div class="text-white" data-aos="fade-right">
                     <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
                         <!-- TODO: Ajouter badge promotionnel -->
-                        Nouveau : Test de personnalité MBTI gratuit
+                        Nouveau : Test de personnalité
                     </span>
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                         Ton avenir,<br>
@@ -111,22 +111,57 @@
         </div>
     </section>
 
-    <!-- Trusted By / Partners Section -->
-    <section class="py-16 bg-gray-50">
+    <!-- Impact Stats Section -->
+    <section class="py-16 bg-gradient-to-r from-primary-50 to-secondary-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-gray-500 mb-8 font-medium">ILS NOUS FONT CONFIANCE</p>
-            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60">
-                <!-- TODO: Ajouter logos des partenaires -->
-                <div class="h-12 w-32 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-sm">Partenaire
-                    1</div>
-                <div class="h-12 w-32 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-sm">Partenaire
-                    2</div>
-                <div class="h-12 w-32 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-sm">Partenaire
-                    3</div>
-                <div class="h-12 w-32 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-sm">Partenaire
-                    4</div>
-                <div class="h-12 w-32 bg-gray-300 rounded flex items-center justify-center text-gray-500 text-sm">Partenaire
-                    5</div>
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-3">L'orientation professionnelle réinventée</h2>
+                    <p class="text-lg text-gray-600">Rejoins des milliers de jeunes africains qui construisent leur avenir
+                        avec Brillio</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <!-- Stat 1 -->
+                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                        data-aos="fade-up" data-aos-delay="100">
+                        <div
+                            class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent mb-2">
+                            10K+
+                        </div>
+                        <p class="text-sm text-gray-600 font-medium">Jeunes accompagnés</p>
+                    </div>
+
+                    <!-- Stat 2 -->
+                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                        data-aos="fade-up" data-aos-delay="200">
+                        <div
+                            class="text-4xl font-bold bg-gradient-to-r from-secondary-600 to-accent-600 bg-clip-text text-transparent mb-2">
+                            500+
+                        </div>
+                        <p class="text-sm text-gray-600 font-medium">Mentors actifs</p>
+                    </div>
+
+                    <!-- Stat 3 -->
+                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                        data-aos="fade-up" data-aos-delay="300">
+                        <div
+                            class="text-4xl font-bold bg-gradient-to-r from-accent-600 to-primary-600 bg-clip-text text-transparent mb-2">
+                            15+
+                        </div>
+                        <p class="text-sm text-gray-600 font-medium">Pays africains</p>
+                    </div>
+
+                    <!-- Stat 4 -->
+                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                        data-aos="fade-up" data-aos-delay="400">
+                        <div
+                            class="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                            24/7
+                        </div>
+                        <p class="text-sm text-gray-600 font-medium">Support IA</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -217,8 +252,8 @@
                             <p class="text-white/80 text-sm">Disponible</p>
                         </div>
                         <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 text-center">
-                            <p class="text-4xl font-bold">100%</p>
-                            <p class="text-white/80 text-sm">Gratuit</p>
+                            <p class="text-4xl font-bold">🌍</p>
+                            <p class="text-white/80 text-sm">Pour l'Afrique</p>
                         </div>
                         <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 text-center">
                             <p class="text-4xl font-bold">IA</p>
@@ -259,9 +294,9 @@
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Test de personnalité MBTI</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Test de personnalité</h3>
                     <p class="text-gray-600 mb-4">
-                        Découvre ton type de personnalité parmi les 16 profils MBTI et comprends tes forces,
+                        Découvre ton type de personnalité parmi 16 profils et comprends tes forces,
                         tes motivations et les métiers qui te correspondent.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-500">
@@ -452,21 +487,21 @@
                     </ul>
                 </div>
 
-                <!-- Feature 6: Gratuit -->
+                <!-- Feature 6: Accessible -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-shadow duration-300"
                     data-aos="fade-up" data-aos-delay="600">
                     <div
                         class="w-14 h-14 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">100% Gratuit</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Accessible à tous</h3>
                     <p class="text-gray-600 mb-4">
-                        Toutes les fonctionnalités sont gratuites. Notre mission est d'aider le plus
-                        grand nombre de jeunes africains.
+                        Commence sans carte bancaire. Accède aux fonctionnalités essentielles
+                        pour démarrer ton orientation professionnelle.
                     </p>
                     <ul class="space-y-2 text-sm text-gray-500">
                         <li class="flex items-center">
@@ -474,21 +509,21 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
-                            Pas d'abonnement
+                            Essai complet
                         </li>
                         <li class="flex items-center">
                             <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
-                            Pas de publicité
+                            Pas de carte requise
                         </li>
                         <li class="flex items-center">
                             <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
-                            Accès illimité
+                            Fonctionnalités premium
                         </li>
                     </ul>
                 </div>
@@ -520,7 +555,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Télécharge l'app</h3>
                     <p class="text-gray-600">
-                        Disponible gratuitement sur iOS et Android. Crée ton compte en quelques secondes.
+                        Disponible sur iOS et Android. Crée ton compte en quelques secondes.
                     </p>
                 </div>
 
@@ -537,7 +572,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Passe le test</h3>
                     <p class="text-gray-600">
-                        Réponds aux 32 questions du test MBTI pour découvrir ton type de personnalité.
+                        Réponds aux 32 questions du test de personnalité pour découvrir ton profil unique.
                     </p>
                 </div>
 
@@ -591,7 +626,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="font-semibold text-gray-900">Aminata M.</p>
-                            <p class="text-sm text-gray-500">Dakar, Sénégal</p>
+                            <p class="text-sm text-gray-500">Cotonou, Bénin</p>
                         </div>
                     </div>
                 </div>
@@ -677,7 +712,8 @@
                                 Accède à Brillio depuis ton navigateur
                             </h2>
                             <p class="text-lg text-gray-600 mb-6">
-                                Pas envie de télécharger ? Utilise notre plateforme web pour passer le test MBTI, discuter
+                                Pas envie de télécharger ? Utilise notre plateforme web pour passer le test de personnalité,
+                                discuter
                                 avec notre IA et explorer les parcours de mentors africains.
                             </p>
                             <div class="flex flex-col sm:flex-row gap-4">
@@ -687,7 +723,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
-                                    Commencer gratuitement
+                                    Commencer maintenant
                                 </a>
                             </div>
                         </div>
@@ -700,7 +736,7 @@
                                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                     </svg>
                                 </div>
-                                <h4 class="font-bold text-gray-900">Test MBTI</h4>
+                                <h4 class="font-bold text-gray-900">Test de personnalité</h4>
                                 <p class="text-sm text-gray-500">Decouvre ton profil</p>
                             </div>
                             <div class="bg-white rounded-2xl p-6 shadow-sm">
@@ -733,8 +769,8 @@
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h4 class="font-bold text-gray-900">100% Gratuit</h4>
-                                <p class="text-sm text-gray-500">Sans engagement</p>
+                                <h4 class="font-bold text-gray-900">Accessible</h4>
+                                <p class="text-sm text-gray-500">Essai inclus</p>
                             </div>
                         </div>
                     </div>

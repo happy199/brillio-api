@@ -12,51 +12,39 @@
                     <p class="text-gray-600">Statistiques et métriques de la plateforme</p>
                 </div>
 
-                <!-- Filtres de date -->
-                <form action="{{ route('admin.analytics.index') }}" method="GET" class="flex flex-wrap items-end gap-3">
-                    <!-- Préréglages -->
+            <!-- Filtres de date -->
+            <form id="filterForm" action="{{ route('admin.analytics.index') }}" method="GET" class="flex flex-wrap items-end gap-3">
+                <!-- Raccourci -->
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Raccourci</label>
+                    <select onchange="handlePresetChange(this.value)" class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Sélectionner...</option>
+                        <option value="today">Aujourd'hui</option>
+                        <option value="3days">3 derniers jours</option>
+                        <option value="week">7 derniers jours</option>
+                        <option value="month">30 derniers jours</option>
+                        <option value="quarter">3 derniers mois</option>
+                        <option value="year">Cette année</option>
+                        <option value="all">Tout</option>
+                    </select>
+                </div>
+
+                <!-- Dates -->
+                <div class="flex items-end gap-2">
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1">Période</label>
-                        <select name="preset" onchange="toggleCustomDates(this.value)"
-                            class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="today" {{ ($dateRange['preset'] ?? '') == 'today' ? 'selected' : '' }}>Aujourd'hui
-                            </option>
-                            <option value="3days" {{ ($dateRange['preset'] ?? '') == '3days' ? 'selected' : '' }}>3 derniers
-                                jours</option>
-                            <option value="week" {{ ($dateRange['preset'] ?? '') == 'week' ? 'selected' : '' }}>7 derniers
-                                jours</option>
-                            <option value="month" {{ ($dateRange['preset'] ?? 'month') == 'month' ? 'selected' : '' }}>30
-                                derniers jours</option>
-                            <option value="quarter" {{ ($dateRange['preset'] ?? '') == 'quarter' ? 'selected' : '' }}>3
-                                derniers mois</option>
-                            <option value="year" {{ ($dateRange['preset'] ?? '') == 'year' ? 'selected' : '' }}>Cette année
-                            </option>
-                            <option value="all" {{ ($dateRange['preset'] ?? '') == 'all' ? 'selected' : '' }}>Tout</option>
-                            <option value="custom" {{ ($dateRange['preset'] ?? '') == 'custom' ? 'selected' : '' }}>
-                                Personnalisé</option>
-                        </select>
+                        <label class="block text-xs text-gray-500 mb-1">Du</label>
+                        <input type="date" name="start_date" value="{{ $dateRange['start']->format('Y-m-d') }}" class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
-
-                    <!-- Dates personnalisées -->
-                    <div id="custom-dates"
-                        class="{{ ($dateRange['preset'] ?? '') == 'custom' ? 'flex' : 'hidden' }} items-end gap-2">
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1">Du</label>
-                            <input type="date" name="start_date" value="{{ $dateRange['start']->format('Y-m-d') }}"
-                                class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1">Au</label>
-                            <input type="date" name="end_date" value="{{ $dateRange['end']->format('Y-m-d') }}"
-                                class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Au</label>
+                        <input type="date" name="end_date" value="{{ $dateRange['end']->format('Y-m-d') }}" class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
+                </div>
 
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
-                        Filtrer
-                    </button>
-                </form>
-            </div>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
+                    Filtrer
+                </button>
+            </form>
 
             <!-- Boutons d'export -->
             <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t">
@@ -227,7 +215,8 @@
                     @forelse($stats['mentors_by_specialization'] as $spec)
                         <div class="flex items-center gap-3">
                             <div class="w-32 text-sm text-gray-700 truncate">
-                                {{ $specializations[$spec->specialization] ?? $spec->specialization ?? 'Non défini' }}</div>
+                                {{ $specializations[$spec->specialization] ?? $spec->specialization ?? 'Non défini' }}
+                            </div>
                             <div class="flex-1 bg-gray-100 rounded-full h-4">
                                 <div class="bg-gradient-to-r from-orange-500 to-red-500 h-4 rounded-full"
                                     style="width: {{ $stats['active_mentors'] > 0 ? ($spec->total / $stats['active_mentors'] * 100) : 0 }}%">
@@ -304,58 +293,58 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            function toggleCustomDates(value) {
+            function handlePresetChange(value) {
                 const customDates = document.getElementById('custom-dates');
                 const startDateInput = document.querySelector('input[name="start_date"]');
                 const endDateInput = document.querySelector('input[name="end_date"]');
 
-                if (value === 'custom') {
-                    customDates.classList.remove('hidden');
-                    customDates.classList.add('flex');
-                } else {
-                    customDates.classList.add('hidden');
-                    customDates.classList.remove('flex');
+                // Toujours afficher les champs de date
+                customDates.classList.remove('hidden');
+                customDates.classList.add('flex');
 
-                    // Calculer et remplir les dates pour les presets
-                    const today = new Date();
-                    const endDate = new Date(today);
-                    let startDate = new Date(today);
+                // Calculer les dates selon le preset
+                const today = new Date();
+                const endDate = new Date(today);
+                let startDate = new Date(today);
 
-                    switch (value) {
-                        case 'today':
-                            startDate = new Date(today);
-                            break;
-                        case '3days':
-                            startDate.setDate(today.getDate() - 3);
-                            break;
-                        case 'week':
-                            startDate.setDate(today.getDate() - 7);
-                            break;
-                        case 'month':
-                            startDate.setDate(today.getDate() - 30);
-                            break;
-                        case 'quarter':
-                            startDate.setMonth(today.getMonth() - 3);
-                            break;
-                        case 'year':
-                            startDate.setFullYear(today.getFullYear() - 1);
-                            break;
-                        case 'all':
-                            startDate = new Date('2020-01-01');
-                            break;
-                    }
-
-                    // Formater en YYYY-MM-DD
-                    const formatDate = (date) => {
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const day = String(date.getDate()).padStart(2, '0');
-                        return `${year}-${month}-${day}`;
-                    };
-
-                    startDateInput.value = formatDate(startDate);
-                    endDateInput.value = formatDate(endDate);
+                switch (value) {
+                    case 'today':
+                        startDate = new Date(today);
+                        break;
+                    case '3days':
+                        startDate.setDate(today.getDate() - 3);
+                        break;
+                    case 'week':
+                        startDate.setDate(today.getDate() - 7);
+                        break;
+                    case 'month':
+                        startDate.setDate(today.getDate() - 30);
+                        break;
+                    case 'quarter':
+                        startDate.setMonth(today.getMonth() - 3);
+                        break;
+                    case 'year':
+                        startDate.setFullYear(today.getFullYear() - 1);
+                        break;
+                    case 'all':
+                        startDate = new Date('2020-01-01');
+                        break;
+                    case 'custom':
+                        // Ne rien changer pour custom
+                        return;
                 }
+
+                // Formater les dates en YYYY-MM-DD
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+
+                // Remplir les champs
+                startDateInput.value = formatDate(startDate);
+                endDateInput.value = formatDate(endDate);
             }
 
             // Graphique d'évolution

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\MentorProfile;
 use Illuminate\Http\Request;
 
 /**
@@ -66,5 +67,47 @@ class PageController extends Controller
     public function terms()
     {
         return view('public.terms');
+    }
+
+    /**
+     * Profil public d'un mentor (partageable sur réseaux sociaux)
+     */
+    public function mentorProfile(MentorProfile $mentor)
+    {
+        // Vérifier que le profil est publié
+        if (!$mentor->is_published) {
+            abort(404);
+        }
+
+        $mentor->load(['user', 'specialization', 'roadmapSteps']);
+
+        // Données sécurisées pour affichage public
+        $publicData = [
+            'name' => $mentor->user->name,
+            'picture' => $mentor->linkedin_profile_data['picture'] ?? null,
+            'current_position' => $mentor->current_position,
+            'current_company' => $mentor->current_company,
+            'years_of_experience' => $mentor->years_of_experience,
+            'specialization' => $mentor->specialization?->name,
+            'bio' => $mentor->bio,
+            'advice' => $mentor->advice,
+            'linkedin_url' => $mentor->linkedin_url,
+            'website_url' => $mentor->website_url,
+            'roadmap' => $mentor->roadmapSteps->map(function ($step) {
+                return [
+                    'title' => $step->title,
+                    'institution_company' => $step->institution_company,
+                    'start_date' => $step->start_date,
+                    'end_date' => $step->end_date,
+                    'description' => $step->description,
+                    'step_type' => $step->step_type,
+                ];
+            }),
+        ];
+
+        return view('public.mentor-profile', [
+            'mentor' => $mentor,
+            'publicData' => $publicData,
+        ]);
     }
 }

@@ -160,7 +160,7 @@
                 <div class="mt-3 p-4 bg-gray-50 rounded-xl">
                     <p class="text-gray-700"><strong>Email :</strong> <a href="mailto:dpo@brillio.com"
                             class="text-primary-600 hover:underline">dpo@brillio.com</a></p>
-                    <p class="text-gray-700 mt-1"><strong>Adresse :</strong> Brillio, Dakar, Sénégal</p>
+                    <p class="text-gray-700 mt-1"><strong>Adresse :</strong> Brillio, Cotonou, Bénin</p>
                 </div>
             </section>
         </div>

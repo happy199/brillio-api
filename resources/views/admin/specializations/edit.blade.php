@@ -111,14 +111,6 @@
 
             <!-- Actions -->
             <div class="flex justify-between">
-                <form action="{{ route('admin.specializations.destroy', $specialization) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir {{ $specialization->mentor_profiles_count > 0 ? 'archiver' : 'supprimer' }} ce domaine ?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                        {{ $specialization->mentor_profiles_count > 0 ? 'Archiver' : 'Supprimer' }}
-                    </button>
-                </form>
-
                 <div class="flex gap-3">
                     <a href="{{ route('admin.specializations.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                         Annuler
@@ -128,6 +120,15 @@
                     </button>
                 </div>
             </div>
+        </form>
+
+        <!-- Delete form separate -->
+        <form action="{{ route('admin.specializations.destroy', $specialization) }}" method="POST" class="mt-4" onsubmit="return confirm('Êtes-vous sûr de vouloir {{ $specialization->mentor_profiles_count > 0 ? 'archiver' : 'supprimer' }} ce domaine ?')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                {{ $specialization->mentor_profiles_count > 0 ? 'Archiver' : 'Supprimer' }}
+            </button>
         </form>
     </div>
 </div>

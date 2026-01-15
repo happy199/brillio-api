@@ -11,7 +11,7 @@
                 <p class="text-gray-500">Gerez les informations visibles par les jeunes</p>
             </div>
             @if($profile && $profile->is_published)
-                <a href="{{ route('jeune.mentors.show', $profile->id) }}" target="_blank"
+                <a href="{{ route('public.mentor.profile', $profile->public_slug) }}" target="_blank"
                     class="px-5 py-2 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

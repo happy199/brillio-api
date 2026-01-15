@@ -38,7 +38,8 @@
                         <h1 class="text-3xl font-bold mb-2">{{ $typeInfo['name'] }}</h1>
                         <p class="text-white/90">{{ $personalityTest->personality_description }}</p>
                         <p class="text-white/70 text-sm mt-2">Test passe le
-                            {{ $personalityTest->completed_at->format('d/m/Y') }}</p>
+                            {{ $personalityTest->completed_at->format('d/m/Y') }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -83,25 +84,29 @@
             @endif
 
             @if($personalityTest->recommended_careers)
-            <div class="bg-white rounded-2xl p-6 shadow-sm">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">Métiers recommandés pour ton profil</h2>
-                <div class="grid md:grid-cols-2 gap-4">
-                    @foreach($personalityTest->recommended_careers as $career)
-                    <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-300 hover:shadow-md transition">
-                        <h3 class="font-bold text-gray-900 mb-2">{{ $career['title'] }}</h3>
-                        <p class="text-sm text-gray-600 mb-3">{{ $career['description'] }}</p>
-                        <div class="flex items-start gap-2">
-                            <svg class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <p class="text-xs text-primary-600">{{ $career['match_reason'] }}</p>
-                        </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">Métiers recommandés pour ton profil</h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        @foreach($personalityTest->recommended_careers as $career)
+                            <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-300 hover:shadow-md transition">
+                                <h3 class="font-bold text-gray-900 mb-2">{{ $career['title'] }}</h3>
+                                <p class="text-sm text-gray-600 mb-3">{{ $career['description'] }}</p>
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p class="text-xs text-primary-600">{{ $career['match_reason'] }}</p>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                    @endforeach
                 </div>
-            </div>
             @endif
 
             <div class="flex flex-col sm:flex-row gap-4">
-                <a href="{{ route('jeune.chat') }}"
+                <a href="{{ route('jeune.chat', ['prefill' => 'Je viens de passer le test de personnalité et mon profil est ' . $personalityTest->personality_type . ' (' . ($mbtiTypes[$personalityTest->personality_type]['name'] ?? $personalityTest->personality_label) . '). Peux-tu m\'aider à mieux comprendre ce profil et me donner des conseils pour mon orientation professionnelle ?']) }}"
                     class="flex-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition">Discuter
                     avec l'IA sur mes resultats</a>
                 <a href="{{ route('jeune.mentors') }}"
@@ -113,51 +118,59 @@
                 <a href="{{ route('jeune.personality.export-pdf') }}"
                     class="flex-1 bg-red-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Télécharger mon test en PDF
                 </a>
                 @if($testHistory && $testHistory->count() > 0)
-                <a href="{{ route('jeune.personality.export-history-pdf') }}"
-                    class="flex-1 bg-purple-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Télécharger l'historique complet
-                </a>
+                    <a href="{{ route('jeune.personality.export-history-pdf') }}"
+                        class="flex-1 bg-purple-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Télécharger l'historique complet
+                    </a>
                 @endif
             </div>
 
             @if($testHistory && $testHistory->count() > 0)
-            <div class="bg-white rounded-2xl p-6 shadow-sm">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">Historique de tes tests</h2>
-                <p class="text-sm text-gray-600 mb-4">Voici l'évolution de ta personnalité au fil du temps</p>
-                <div class="space-y-3">
-                    @foreach($testHistory as $test)
-                    <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-200 transition">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <div class="w-16 h-16 bg-gradient-to-r {{ $mbtiTypes[$test->personality_type]['color'] ?? 'from-gray-400 to-gray-600' }} rounded-xl flex items-center justify-center">
-                                    <span class="text-white font-bold text-lg">{{ $test->personality_type }}</span>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-900">{{ $test->personality_label }}</h3>
-                                    <p class="text-sm text-gray-500">{{ $test->completed_at->format('d/m/Y à H:i') }}</p>
+                <div class="bg-white rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">Historique de tes tests</h2>
+                    <p class="text-sm text-gray-600 mb-4">Voici l'évolution de ta personnalité au fil du temps</p>
+                    <div class="space-y-3">
+                        @foreach($testHistory as $test)
+                            <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-200 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="w-16 h-16 bg-gradient-to-r {{ $mbtiTypes[$test->personality_type]['color'] ?? 'from-gray-400 to-gray-600' }} rounded-xl flex items-center justify-center">
+                                            <span class="text-white font-bold text-lg">{{ $test->personality_type }}</span>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-gray-900">{{ $test->personality_label }}</h3>
+                                            <p class="text-sm text-gray-500">{{ $test->completed_at->format('d/m/Y à H:i') }}</p>
+                                        </div>
+                                    </div>
+                                    <button @click="viewHistoryTest({{ $test->id }})"
+                                        class="px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition">
+                                        Voir détails
+                                    </button>
                                 </div>
                             </div>
-                            <button @click="viewHistoryTest({{ $test->id }})" class="px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition">
-                                Voir détails
-                            </button>
-                        </div>
+                        @endforeach
                     </div>
-                    @endforeach
                 </div>
-            </div>
             @endif
 
             <div class="text-center">
-                <button @click="retakeTest()" class="px-8 py-3 bg-white border-2 border-primary-500 text-primary-600 font-semibold rounded-xl hover:bg-primary-50 transition">
-                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <button @click="retakeTest()"
+                    class="px-8 py-3 bg-white border-2 border-primary-500 text-primary-600 font-semibold rounded-xl hover:bg-primary-50 transition">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
                     Refaire le test
                 </button>
             </div>
@@ -226,8 +239,7 @@
 
             <div x-show="showTest" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
                 x-transition>
-                <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
-                    @click.outside="closeTest()">
+                <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                     <div class="p-6 border-b flex-shrink-0">
                         <div class="flex items-center justify-between">
                             <div>
@@ -254,19 +266,6 @@
                                 class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4">
                             </div>
                             <p class="text-gray-600">Chargement des questions...</p>
-                        </div>
-                        <div x-show="!testStarted && !loading && !submitting" class="text-center">
-                            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg
-                                    class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                </svg></div>
-                            <h4 class="text-lg font-semibold text-gray-900 mb-2">Pret a decouvrir ta personnalite ?</h4>
-                            <p class="text-gray-600 mb-6">Reponds honnetement aux 32 questions. Il n'y a pas de bonnes ou
-                                mauvaises reponses !</p>
-                            <button @click="loadQuestions()"
-                                class="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition">Commencer
-                                le test</button>
                         </div>
                         <div x-show="testStarted && !submitting" class="space-y-6">
                             <div class="text-center">
@@ -316,93 +315,6 @@
             </div>
         @endif
 
-        <!-- Modal du test - Toujours disponible -->
-        <div x-show="showTest" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-            x-transition>
-            <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
-                @click.away="closeTest()">
-                <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-                    <h3 class="text-xl font-bold text-gray-900">Test de personnalité MBTI</h3>
-                    <button @click="closeTest()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="flex-1 overflow-y-auto p-6">
-                    <div x-show="loading && !testStarted" class="text-center py-12">
-                        <div
-                            class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4">
-                        </div>
-                        <p class="text-gray-600">Chargement des questions...</p>
-                    </div>
-                    <div x-show="!testStarted && !loading && !submitting" class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg
-                                class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg></div>
-                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Pret a decouvrir ta personnalite ?</h4>
-                        <p class="text-gray-600 mb-6">Reponds honnetement aux 32 questions. Il n'y a pas de bonnes ou
-                            mauvaises reponses !</p>
-                        <button @click="loadQuestions()"
-                            class="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition">Commencer
-                            le test</button>
-                    </div>
-                    <div x-show="testStarted && !submitting" class="space-y-6">
-                        <div class="text-center">
-                            <p class="text-lg text-gray-900 font-medium" x-text="questions[currentQuestion]?.text"></p>
-                        </div>
-                        <div class="space-y-3 mt-8">
-                            <template x-for="option in answerOptions" :key="option.value">
-                                <button @click="selectAnswer(option.value)"
-                                    :class="answers[questions[currentQuestion]?.id] === option.value ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'"
-                                    class="w-full p-4 border-2 rounded-xl text-left transition">
-                                    <div class="flex items-center gap-3">
-                                        <div :class="answers[questions[currentQuestion]?.id] === option.value ? 'bg-purple-500 border-purple-500' : 'border-gray-300'"
-                                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center">
-                                            <div x-show="answers[questions[currentQuestion]?.id] === option.value"
-                                                class="w-2 h-2 bg-white rounded-full"></div>
-                                        </div>
-                                        <span class="text-gray-700" x-text="option.label"></span>
-                                    </div>
-                                </button>
-                            </template>
-                        </div>
-                    </div>
-                    <div x-show="submitting" class="text-center py-12">
-                        <div
-                            class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4">
-                        </div>
-                        <p class="text-gray-600">Calcul de ton profil en cours...</p>
-                    </div>
-                </div>
-                <div x-show="testStarted && !submitting"
-                    class="p-6 border-t border-gray-200 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <button @click="previousQuestion()" :disabled="currentQuestion === 0"
-                            :class="currentQuestion === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'"
-                            class="px-4 py-2 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl transition">Precedent</button>
-                        <span class="text-sm text-gray-500" x-text="`Question ${currentQuestion + 1}/${questions.length}`"></span>
-                    </div>
-                    <div class="flex gap-3">
-                        <button @click="nextQuestion()"
-                            x-show="currentQuestion < questions.length - 1"
-                            :disabled="!answers[questions[currentQuestion]?.id]"
-                            :class="!answers[questions[currentQuestion]?.id] ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'"
-                            class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl transition">Suivant</button>
-                        <button @click="submitTest()"
-                            x-show="currentQuestion === questions.length - 1"
-                            :disabled="!allAnswered"
-                            :class="!allAnswered ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'"
-                            class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl transition">Voir
-                            mes resultats</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Modal Historique Test -->
         <div x-show="showHistoryModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
             x-transition>
@@ -412,25 +324,30 @@
                     <h3 class="text-xl font-bold text-gray-900">Détails du test</h3>
                     <button @click="closeHistoryModal()" class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
                 <div class="flex-1 overflow-y-auto p-6">
                     <div x-show="historyLoading" class="text-center py-12">
-                        <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <div
+                            class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4">
+                        </div>
                         <p class="text-gray-600">Chargement des détails...</p>
                     </div>
                     <div x-show="!historyLoading && historyTest" class="space-y-6">
                         <!-- En-tête du type -->
                         <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
                             <div class="flex items-center gap-4">
-                                <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <div
+                                    class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                                     <span class="text-3xl font-bold" x-text="historyTest?.personality_type"></span>
                                 </div>
                                 <div>
                                     <h4 class="text-2xl font-bold" x-text="historyTest?.personality_label"></h4>
-                                    <p class="text-white/80 text-sm" x-text="'Test passé le ' + historyTest?.completed_at"></p>
+                                    <p class="text-white/80 text-sm" x-text="'Test passé le ' + historyTest?.completed_at">
+                                    </p>
                                 </div>
                             </div>
                             <p class="mt-4 text-white/90" x-text="historyTest?.personality_description"></p>
@@ -441,24 +358,29 @@
                             <h5 class="font-bold text-gray-900 mb-4">Dimensions de personnalité</h5>
                             <div class="space-y-4">
                                 <template x-for="dim in [
-                                    {left: 'E', right: 'I', leftName: 'Extraversion', rightName: 'Introversion'},
-                                    {left: 'S', right: 'N', leftName: 'Sensation', rightName: 'Intuition'},
-                                    {left: 'T', right: 'F', leftName: 'Pensée', rightName: 'Sentiment'},
-                                    {left: 'J', right: 'P', leftName: 'Jugement', rightName: 'Perception'}
-                                ]" :key="dim.left">
+                                                            {left: 'E', right: 'I', leftName: 'Extraversion', rightName: 'Introversion'},
+                                                            {left: 'S', right: 'N', leftName: 'Sensation', rightName: 'Intuition'},
+                                                            {left: 'T', right: 'F', leftName: 'Pensée', rightName: 'Sentiment'},
+                                                            {left: 'J', right: 'P', leftName: 'Jugement', rightName: 'Perception'}
+                                                        ]" :key="dim.left">
                                     <div>
                                         <div class="flex justify-between mb-1 text-sm">
-                                            <span class="text-gray-600" x-text="dim.leftName + ' (' + dim.left + ')'"></span>
-                                            <span class="text-gray-600" x-text="dim.rightName + ' (' + dim.right + ')'"></span>
+                                            <span class="text-gray-600"
+                                                x-text="dim.leftName + ' (' + dim.left + ')'"></span>
+                                            <span class="text-gray-600"
+                                                x-text="dim.rightName + ' (' + dim.right + ')'"></span>
                                         </div>
                                         <div class="relative w-full bg-gray-200 rounded-full h-3">
                                             <div class="absolute left-1/2 w-px h-full bg-gray-400"></div>
                                             <div class="absolute bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full"
-                                                :style="'left: ' + Math.min(historyTest?.traits_scores?.[dim.left] || 50, 50) + '%; width: ' + Math.abs((historyTest?.traits_scores?.[dim.left] || 50) - 50) + '%'"></div>
+                                                :style="'left: ' + Math.min(historyTest?.traits_scores?.[dim.left] || 50, 50) + '%; width: ' + Math.abs((historyTest?.traits_scores?.[dim.left] || 50) - 50) + '%'">
+                                            </div>
                                         </div>
                                         <div class="flex justify-between mt-1 text-xs text-gray-500">
-                                            <span x-text="Math.round(historyTest?.traits_scores?.[dim.left] || 50) + '%'"></span>
-                                            <span x-text="Math.round(100 - (historyTest?.traits_scores?.[dim.left] || 50)) + '%'"></span>
+                                            <span
+                                                x-text="Math.round(historyTest?.traits_scores?.[dim.left] || 50) + '%'"></span>
+                                            <span
+                                                x-text="Math.round(100 - (historyTest?.traits_scores?.[dim.left] || 50)) + '%'"></span>
                                         </div>
                                     </div>
                                 </template>
@@ -469,13 +391,15 @@
                         <div x-show="historyTest?.recommended_careers?.length > 0">
                             <h5 class="font-bold text-gray-900 mb-4">Métiers recommandés</h5>
                             <div class="grid md:grid-cols-2 gap-3">
-                                <template x-for="career in historyTest?.recommended_careers?.slice(0, 6)" :key="career.title">
+                                <template x-for="career in historyTest?.recommended_careers?.slice(0, 6)"
+                                    :key="career.title">
                                     <div class="border border-gray-200 rounded-xl p-4 hover:border-purple-300 transition">
                                         <h6 class="font-semibold text-gray-900" x-text="career.title"></h6>
                                         <p class="text-sm text-gray-600 mt-1" x-text="career.description"></p>
                                         <div x-show="career.sectors?.length > 0" class="flex flex-wrap gap-1 mt-2">
                                             <template x-for="sector in career.sectors" :key="sector">
-                                                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full" x-text="sector"></span>
+                                                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"
+                                                    x-text="sector"></span>
                                             </template>
                                         </div>
                                     </div>
@@ -495,8 +419,11 @@
                     showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
                     answerOptions: [{ value: 1, label: 'Pas du tout d\'accord' }, { value: 2, label: 'Plutot pas d\'accord' }, { value: 3, label: 'Neutre' }, { value: 4, label: 'Plutot d\'accord' }, { value: 5, label: 'Tout a fait d\'accord' }],
                     get allAnswered() { return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length; },
-                    startTest() { this.showTest = true; },
-                    closeTest() { if (this.testStarted && Object.keys(this.answers).length > 0 && !confirm('Tu es sur de vouloir quitter ?')) return; this.showTest = false; this.resetTest(); },
+                    startTest() {
+                        this.showTest = true;
+                        this.loadQuestions();
+                    },
+                    closeTest() { this.showTest = false; this.resetTest(); },
                     resetTest() { this.testStarted = false; this.questions = []; this.answers = {}; this.currentQuestion = 0; },
                     retakeTest() {
                         this.resetTest();

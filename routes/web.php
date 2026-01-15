@@ -42,6 +42,9 @@ Route::post('/contact', [PageController::class, 'submitContact'])->name('contact
 Route::get('/politique-de-confidentialite', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/conditions-utilisation', [PageController::class, 'terms'])->name('terms');
 
+// Profil public mentor (partageable)
+Route::get('/profil-mentor/{mentor}', [PageController::class, 'mentorProfile'])->name('public.mentor.profile');
+
 /*
 |--------------------------------------------------------------------------
 | Routes Authentification Jeunes & Mentors

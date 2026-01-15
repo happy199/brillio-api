@@ -52,6 +52,7 @@ class MentorProfile extends Model
     protected $fillable = [
         'user_id',
         'bio',
+        'advice',
         'linkedin_url',
         'website_url',
         'current_position',
@@ -80,6 +81,48 @@ class MentorProfile extends Model
             'linkedin_import_count' => 'integer',
             'linkedin_imported_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Boot du modèle - génère automatiquement le slug public
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($mentorProfile) {
+            if (empty($mentorProfile->public_slug)) {
+                $mentorProfile->public_slug = static::generateUniqueSlug($mentorProfile);
+            }
+        });
+    }
+
+    /**
+     * Génère un slug unique pour le profil
+     */
+    protected static function generateUniqueSlug($mentorProfile)
+    {
+        $user = $mentorProfile->user ?? \App\Models\User::find($mentorProfile->user_id);
+        $baseName = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::limit($user->name, 30, ''));
+        $hash = substr(md5(uniqid() . time()), 0, 8);
+        $slug = $baseName . '-' . $hash;
+
+        // Vérifier l'unicité
+        $count = 1;
+        while (static::where('public_slug', $slug)->exists()) {
+            $slug = $baseName . '-' . $hash . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Utiliser le slug pour le routing au lieu de l'ID
+     */
+    public function getRouteKeyName()
+    {
+        return 'public_slug';
     }
 
     /**

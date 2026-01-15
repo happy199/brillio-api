@@ -132,7 +132,7 @@
                 </p>
                 <ul>
                     <li>Email : <a href="mailto:privacy@brillio.africa">privacy@brillio.africa</a></li>
-                    <li>Adresse : Dakar, Sénégal</li>
+                    <li>Adresse : Cotonou, Bénin</li>
                 </ul>
             </div>
         </div>
