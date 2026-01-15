@@ -49,7 +49,8 @@ RUN apk add --no-cache \
     mysql-client \
     libpng \
     libzip \
-    libzip-dev
+    libzip-dev \
+    libpng-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql zip gd
