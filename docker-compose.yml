@@ -24,9 +24,7 @@ services:
 
   # Application Laravel
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: brillioafrica/api:latest
     container_name: brillio-app
     restart: unless-stopped
     environment:
