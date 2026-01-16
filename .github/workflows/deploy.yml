@@ -48,7 +48,10 @@ jobs:
       - name: Add known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts
+          echo "Scanning host: ${{ secrets.GCP_VM_IP }}"
+          ssh-keyscan -H -t rsa,ed25519 ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts || true
+          echo "Known hosts content:"
+          cat ~/.ssh/known_hosts
 
       - name: Copy docker-compose and config files
         run: |
