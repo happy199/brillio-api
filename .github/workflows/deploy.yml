@@ -59,7 +59,8 @@ jobs:
             --exclude '.git' \
             --exclude 'node_modules' \
             --exclude 'vendor' \
-            --exclude 'storage/logs/*' \
+            --exclude 'docker/certbot' \
+            --exclude 'storage' \
             --exclude '.env' \
             ./ ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }}:/opt/brillio-api/
 
