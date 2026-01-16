@@ -1,0 +1,15 @@
+@extends('errors.minimal')
+
+@section('title', 'Erreur Serveur')
+@section('code', '500')
+@section('message', 'Erreur interne')
+
+@section('icon')
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+@endsection
+
+@section('description')
+    Oups ! Quelque chose s'est mal passé de notre côté. Nos ingénieurs ont été notifiés.
+@endsection
