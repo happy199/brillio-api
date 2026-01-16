@@ -34,6 +34,12 @@ class NewsletterController extends Controller
         return view('admin.newsletter.index', compact('subscribers', 'stats'));
     }
 
+    public function campaigns()
+    {
+        $campaigns = EmailCampaign::latest()->paginate(20);
+        return view('admin.newsletter.campaigns', compact('campaigns'));
+    }
+
     public function exportCsv(Request $request)
     {
         $query = NewsletterSubscriber::query();
@@ -92,6 +98,13 @@ class NewsletterController extends Controller
 
     public function sendEmail(Request $request)
     {
+        // Fix pour le JS qui envoie du JSON stringifié au lieu d'un array
+        if ($request->has('recipients') && is_string($request->input('recipients'))) {
+            $request->merge([
+                'recipients' => json_decode($request->input('recipients'), true)
+            ]);
+        }
+
         $request->validate([
             'subject' => 'required|string|max:255',
             'body' => 'required|string',
@@ -105,37 +118,16 @@ class NewsletterController extends Controller
             'body' => $request->body,
             'type' => 'newsletter',
             'recipients_count' => count($request->recipients),
-            'status' => 'sending',
+            'status' => 'queued', // Statut initial mis en file d'attente
             'sent_by' => auth()->id(),
             'recipient_emails' => $request->recipients,
         ]);
 
-        $sent = 0;
-        $failed = 0;
-
-        foreach ($request->recipients as $email) {
-            try {
-                Mail::send([], [], function ($message) use ($email, $request) {
-                    $message->to($email)
-                        ->subject($request->subject)
-                        ->html($request->body);
-                });
-                $sent++;
-            } catch (\Exception $e) {
-                $failed++;
-                \Log::error('Newsletter email failed: ' . $e->getMessage(), ['email' => $email]);
-            }
-        }
-
-        $campaign->update([
-            'sent_count' => $sent,
-            'failed_count' => $failed,
-            'status' => $failed > 0 ? 'partial' : 'sent',
-            'sent_at' => now(),
-        ]);
+        // Dispatcher le Job dans la queue
+        \App\Jobs\SendNewsletterJob::dispatch($campaign);
 
         return redirect()->route('admin.newsletter.index')
-            ->with('success', "Email envoyé à {$sent} destinataire(s). {$failed} échec(s).");
+            ->with('success', "La campagne a été mise en file d'attente. L'envoi se fera en arrière-plan.");
     }
 
     /**

@@ -234,6 +234,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('newsletter/export-csv', [NewsletterController::class, 'exportCsv'])->name('newsletter.export-csv');
         Route::get('newsletter/export-pdf', [NewsletterController::class, 'exportPdf'])->name('newsletter.export-pdf');
         Route::post('newsletter/send-email', [NewsletterController::class, 'sendEmail'])->name('newsletter.send-email');
+        Route::get('newsletter/campaigns', [NewsletterController::class, 'campaigns'])->name('newsletter.campaigns');
         Route::put('newsletter/{subscriber}', [NewsletterController::class, 'update'])->name('newsletter.update');
         Route::delete('newsletter/{subscriber}', [NewsletterController::class, 'destroy'])->name('newsletter.destroy');
 
