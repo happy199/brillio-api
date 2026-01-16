@@ -72,7 +72,9 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Create directory for nginx
-RUN mkdir -p /run/nginx
+RUN mkdir -p /run/nginx && \
+    mkdir -p /var/lib/nginx/tmp && \
+    chown -R nginx:nginx /var/lib/nginx
 
 WORKDIR /var/www/html
 
