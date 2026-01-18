@@ -180,6 +180,7 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::post('/test-personnalite/submit', [App\Http\Controllers\Mentor\PersonalityController::class, 'submit'])->name('personality.submit');
     Route::get('/test-personnalite/export-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class, 'exportCurrent'])->name('personality.export-pdf');
     Route::get('/test-personnalite/export-history-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class, 'exportHistory'])->name('personality.export-history-pdf');
+    Route::get('/test-personnalite/history/{testId}', [App\Http\Controllers\Mentor\PersonalityController::class, 'getHistoryTestDetails'])->name('personality.history');
 });
 
 /*

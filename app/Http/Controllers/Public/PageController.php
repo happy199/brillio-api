@@ -113,4 +113,23 @@ class PageController extends Controller
             'publicData' => $publicData,
         ]);
     }
+    /**
+     * Profil public d'un jeune (partageable)
+     */
+    public function jeuneProfile($slug)
+    {
+        $profile = \App\Models\JeuneProfile::where('public_slug', $slug)
+            ->where('is_public', true)
+            ->firstOrFail();
+
+        // Incrémenter le compteur de vues
+        $profile->increment('profile_views');
+
+        $profile->load(['user', 'user.personalityTest']);
+
+        return view('public.jeune-profile', [
+            'profile' => $profile,
+            'user' => $profile->user,
+        ]);
+    }
 }

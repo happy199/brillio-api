@@ -194,7 +194,8 @@
             </a>
 
             <!-- Importer LinkedIn -->
-            <button onclick="document.getElementById('linkedinImportModal').classList.remove('hidden')"
+            <button
+                onclick="const m=document.getElementById('linkedinImportModal'); m.classList.remove('hidden'); m.style.display=''"
                 class="bg-white rounded-2xl p-6 shadow-sm card-hover group text-left">
                 <div class="flex items-start gap-4">
                     <div

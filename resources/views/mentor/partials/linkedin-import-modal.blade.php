@@ -1,12 +1,12 @@
 <!-- Modal Import LinkedIn -->
 <div id="linkedinImportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-    x-data="linkedInImporter()">
+    style="display: none;" x-data="linkedInImporter()">
     <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b sticky top-0 bg-white rounded-t-3xl">
             <div class="flex items-center justify-between">
                 <h3 class="text-2xl font-bold text-gray-900">Importer depuis LinkedIn</h3>
                 <button @click="closeModal()" class="p-2 hover:bg-gray-100 rounded-full">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -18,7 +18,7 @@
             <!-- Messages d'erreur/succès -->
             <div x-show="errorMessage" x-cloak class="bg-red-50 border border-red-200 rounded-xl p-4">
                 <div class="flex gap-3">
-                    <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                    <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -32,7 +32,7 @@
 
             <div x-show="successMessage" x-cloak class="bg-green-50 border border-green-200 rounded-xl p-4">
                 <div class="flex gap-3">
-                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -47,7 +47,7 @@
             <!-- Instructions -->
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
                 <h4 class="font-bold text-blue-900 mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -69,7 +69,7 @@
                 <input type="file" accept=".pdf" @change="handleFileUpload($event)" class="hidden" x-ref="fileInput">
                 <div @click="$refs.fileInput.click()"
                     class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
-                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor"
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" width="64" height="64" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -112,7 +112,7 @@
                 <div x-show="parsedData?.suggestions" x-cloak
                     class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                     <div class="flex gap-3">
-                        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

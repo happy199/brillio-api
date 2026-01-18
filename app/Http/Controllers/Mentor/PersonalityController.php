@@ -122,4 +122,51 @@ class PersonalityController extends Controller
             ], 500);
         }
     }
+    /**
+     * Récupère les détails d'un test historique
+     */
+    public function getHistoryTestDetails(int $testId)
+    {
+        $user = auth()->user();
+
+        $test = \App\Models\PersonalityTest::where('user_id', $user->id)
+            ->where('id', $testId)
+            ->first();
+
+        if (!$test) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Test non trouvé.',
+            ], 404);
+        }
+
+        // Récupérer les infos du type
+        $typeInfo = PersonalityService::TYPE_DESCRIPTIONS[$test->personality_type] ?? [
+            'label' => $test->personality_type,
+            'description' => 'Type de personnalité ' . $test->personality_type,
+        ];
+
+        // Récupérer les métiers (depuis les données sauvegardées ou générer)
+        $careers = $test->recommended_careers;
+        if (empty($careers)) {
+            $careers = MbtiCareersService::getCareersForType($test->personality_type);
+        }
+
+        $sectors = MbtiCareersService::getSectorsForType($test->personality_type);
+
+        return response()->json([
+            'success' => true,
+            'test' => [
+                'id' => $test->id,
+                'personality_type' => $test->personality_type,
+                'personality_label' => $test->personality_label ?? $typeInfo['label'],
+                'personality_description' => $test->personality_description ?? $typeInfo['description'],
+                'traits_scores' => $test->traits_scores,
+                'recommended_careers' => $careers,
+                'recommended_sectors' => $sectors,
+                'completed_at' => $test->completed_at->format('d/m/Y à H:i'),
+                'is_current' => $test->is_current,
+            ],
+        ]);
+    }
 }

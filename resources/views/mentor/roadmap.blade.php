@@ -54,7 +54,8 @@
                         <p class="text-sm text-blue-700">Remplissez automatiquement votre parcours professionnel</p>
                     </div>
                 </div>
-                <button onclick="document.getElementById('linkedinImportModal').classList.remove('hidden')"
+                <button
+                    onclick="const m=document.getElementById('linkedinImportModal'); m.classList.remove('hidden'); m.style.display=''"
                     class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition whitespace-nowrap">
                     📥 Importer LinkedIn
                 </button>
