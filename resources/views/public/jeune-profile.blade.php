@@ -107,31 +107,36 @@
                 }
             </script>
 
+            <!-- Personnalité (Full Width) -->
+            @if($user->personalityTest && $user->personalityTest->personality_type)
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-purple-100 mb-8 relative overflow-hidden">
+                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    
+                    <div class="relative flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+                        <div class="flex-shrink-0">
+                            <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center text-purple-600 shadow-sm">
+                                <span class="text-xl font-extrabold">{{ $user->personalityTest->personality_type }}</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xs font-bold text-purple-600 uppercase tracking-widest mb-1">Personnalité</h3>
+                            <h2 class="text-2xl font-bold text-gray-900 mb-3">
+                                {{ $user->personalityTest->personality_label ?? $user->personalityTest->personality_type }}
+                            </h2>
+                            <p class="text-gray-700 leading-relaxed">
+                                {{ $user->personalityTest->personality_description }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Colonne Gauche -->
                 <div class="md:col-span-2 space-y-8">
 
-                    <!-- Infos Onboarding & Personnalité -->
+                    <!-- Infos Onboarding -->
                     <div class="grid sm:grid-cols-2 gap-4">
-                        <!-- Personnalité -->
-                        @if($user->personalityTest && $user->personalityTest->personality_type)
-                            <div
-                                class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-                                <div
-                                    class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center text-pink-600 mb-3">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                    </svg>
-                                </div>
-                                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Personnalité</span>
-                                <span
-                                    class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
-                                    {{ $user->personalityTest->personality_type }}
-                                </span>
-                            </div>
-                        @endif
-
                         <!-- Situation Actuelle -->
                         @if(isset($user->onboarding_data['current_situation']))
                             <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -146,8 +151,7 @@
                                     {{ ucfirst($user->onboarding_data['current_situation']) }}
                                 </p>
                                 @if(isset($user->onboarding_data['education_level']))
-                                    <p class="text-sm text-gray-500 mt-1">{{ ucfirst($user->onboarding_data['education_level']) }}
-                                    </p>
+                                    <p class="text-sm text-gray-500 mt-1">{{ ucfirst($user->onboarding_data['education_level']) }}</p>
                                 @endif
                             </div>
                         @endif
