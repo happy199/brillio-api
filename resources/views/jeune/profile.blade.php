@@ -4,10 +4,10 @@
 
 @section('content')
     <div x-data="{ 
-        editPersonal: false, 
-        editProfessional: false,
-        editVisibility: false 
-    }">
+            editPersonal: false, 
+            editProfessional: false,
+            editVisibility: false 
+        }">
         <div class="space-y-8">
             <!-- Header -->
             <div
@@ -226,12 +226,14 @@
                                 <div>
                                     <p class="text-xs text-gray-500 uppercase">Situation</p>
                                     <p class="font-medium text-gray-900">
-                                        {{ ucfirst($user->onboarding_data['current_situation'] ?? 'Non défini') }}</p>
+                                        {{ ucfirst($user->onboarding_data['current_situation'] ?? 'Non défini') }}
+                                    </p>
                                 </div>
                                 <div>
                                     <p class="text-xs text-gray-500 uppercase">Niveau d'étude</p>
                                     <p class="font-medium text-gray-900">
-                                        {{ ucfirst($user->onboarding_data['education_level'] ?? 'Non défini') }}</p>
+                                        {{ ucfirst($user->onboarding_data['education_level'] ?? 'Non défini') }}
+                                    </p>
                                 </div>
                                 <div>
                                     <p class="text-xs text-gray-500 uppercase">Intérêts</p>
@@ -269,6 +271,7 @@
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-sm font-medium text-gray-900">Profil Public</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="hidden" name="is_public" value="0">
                                     <input type="checkbox" name="is_public" value="1" class="sr-only peer" {{ $profile->is_public ? 'checked' : '' }} onchange="this.form.submit()">
                                     <div
                                         class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500">
