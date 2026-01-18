@@ -105,6 +105,24 @@
         </div>
         @endif
 
+        <!-- Personality Test Results (Only if available) -->
+        @if(isset($publicData['personality']) && $publicData['personality'])
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6 border-l-4 border-purple-500">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Personnalité</h2>
+            <div class="flex items-start gap-6">
+                <div class="flex-shrink-0">
+                    <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 font-bold text-xl uppercase">
+                        {{ $publicData['personality']['type'] }}
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $publicData['personality']['label'] }}</h3>
+                    <p class="text-gray-700 leading-relaxed">{{ $publicData['personality']['description'] }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Advice -->
         @if($publicData['advice'])
         <div class="bg-gradient-to-r from-orange-50 to-pink-50 rounded-2xl shadow-lg p-8 mb-6 border-l-4 border-orange-500">

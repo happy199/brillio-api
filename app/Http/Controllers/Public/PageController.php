@@ -82,7 +82,7 @@ class PageController extends Controller
         // Incrémenter le compteur de vues
         $mentor->increment('profile_views');
 
-        $mentor->load(['user', 'specializationModel', 'roadmapSteps']);
+        $mentor->load(['user', 'user.personalityTest', 'specializationModel', 'roadmapSteps']);
 
         // Données sécurisées pour affichage public
         $publicData = [
@@ -106,6 +106,11 @@ class PageController extends Controller
                     'step_type' => $step->step_type,
                 ];
             }),
+            'personality' => $mentor->user->personalityTest ? [
+                'type' => $mentor->user->personalityTest->personality_type,
+                'label' => $mentor->user->personalityTest->personality_label ?? $mentor->user->personalityTest->personality_type,
+                'description' => $mentor->user->personalityTest->personality_description,
+            ] : null,
         ];
 
         return view('public.mentor-profile', [

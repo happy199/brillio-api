@@ -152,10 +152,7 @@
                             <h3 class="font-bold text-gray-900">{{ $pTest->personality_label ?? $pTest->personality_type }}</h3>
                             <p class="text-sm text-gray-500 line-clamp-2">{{ $pTest->personality_description }}</p>
                         </div>
-                        <a href="{{ route('mentor.personality') }}"
-                            class="px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition font-medium text-sm">
-                            Voir détails
-                        </a>
+
                     </div>
                 @else
                     <div class="flex flex-col sm:flex-row items-center gap-6">

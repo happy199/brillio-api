@@ -4,10 +4,10 @@
 
 @section('content')
     <div x-data="{ 
-            editPersonal: false, 
-            editProfessional: false,
-            editVisibility: false 
-        }">
+                editPersonal: false, 
+                editProfessional: false,
+                editVisibility: false 
+            }">
         <div class="space-y-8">
             <!-- Header -->
             <div
@@ -194,11 +194,15 @@
 
                             @if($user->personalityTest && $user->personalityTest->personality_type)
                                 <div class="text-center py-4">
-                                    <span
-                                        class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">
                                         {{ $user->personalityTest->personality_type }}
                                     </span>
-                                    <p class="text-sm text-gray-500 mt-2">Résultat du test</p>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                        {{ $user->personalityTest->personality_label ?? $user->personalityTest->personality_type }}
+                                    </h3>
+                                    <p class="text-sm text-gray-500 line-clamp-3 px-4">
+                                        {{ $user->personalityTest->personality_description }}
+                                    </p>
                                 </div>
                             @else
                                 <div class="text-center py-6">
