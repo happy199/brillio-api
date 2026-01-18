@@ -107,10 +107,10 @@ EOT;
         $content = preg_replace('/##\s*/', "\n\n", $content);
 
         // Remplacer les listes numérotées pour ajouter un retour à la ligne avant
-        $content = preg_replace('/(\d+\.\s)/', "\n$1", $content);
+        $content = preg_replace('/(\d+\.\s)/u', "\n$1", $content);
 
         // Remplacer les listes à puces pour ajouter un retour à la ligne avant
-        $content = preg_replace('/([•\-✔️👉])\s/', "\n$1 ", $content);
+        $content = preg_replace('/([•\-✔️👉])\s/u', "\n$1 ", $content);
 
         // Nettoyer les retours à la ligne multiples (max 2)
         $content = preg_replace('/\n{3,}/', "\n\n", $content);
