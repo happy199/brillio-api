@@ -100,6 +100,9 @@ Route::get('/devenir-mentor', [WebAuthController::class, 'showMentorLogin'])->na
 // Deconnexion commune
 Route::post('/deconnexion', [WebAuthController::class, 'logout'])->name('logout')->middleware('auth');
 
+// Profil public Jeune
+Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.public.show');
+
 /*
 |--------------------------------------------------------------------------
 | Espace Jeune (protege)
@@ -131,8 +134,8 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
     Route::delete('/documents/{document}', [JeuneDashboardController::class, 'deleteDocument'])->name('documents.destroy');
     Route::get('/mentors', [JeuneDashboardController::class, 'mentors'])->name('mentors');
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
-    Route::get('/profil', [JeuneDashboardController::class, 'profile'])->name('profile');
-    Route::put('/profil', [JeuneDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'index'])->name('profile');
+    Route::post('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'update'])->name('profile.update');
     Route::get('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'showChangePasswordForm'])->name('password.change');
     Route::put('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'updatePassword'])->name('password.update');
 });
@@ -169,6 +172,14 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::delete('/parcours/{step}', [MentorDashboardController::class, 'deleteStep'])->name('roadmap.destroy');
     Route::get('/statistiques', [MentorDashboardController::class, 'stats'])->name('stats');
     Route::post('/profil/linkedin-import', [MentorDashboardController::class, 'importLinkedInData'])->name('profile.linkedin-import');
+    Route::get('/explorer', [App\Http\Controllers\Mentor\ExploreController::class, 'index'])->name('explore');
+
+    // Test Personnalité Mentor
+    Route::get('/test-personnalite', [App\Http\Controllers\Mentor\PersonalityController::class, 'index'])->name('personality');
+    Route::get('/test-personnalite/questions', [App\Http\Controllers\Mentor\PersonalityController::class, 'getQuestions'])->name('personality.questions');
+    Route::post('/test-personnalite/submit', [App\Http\Controllers\Mentor\PersonalityController::class, 'submit'])->name('personality.submit');
+    Route::get('/test-personnalite/export-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class, 'exportCurrent'])->name('personality.export-pdf');
+    Route::get('/test-personnalite/export-history-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class, 'exportHistory'])->name('personality.export-history-pdf');
 });
 
 /*
@@ -203,6 +214,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('mentors', [MentorController::class, 'index'])->name('mentors.index');
         Route::get('mentors/{mentor}', [MentorController::class, 'show'])->name('mentors.show');
         Route::patch('mentors/{mentor}/toggle-publish', [MentorController::class, 'togglePublish'])->name('mentors.toggle-publish');
+        Route::patch('mentors/{mentor}/toggle-validation', [MentorController::class, 'toggleValidation'])->name('mentors.toggle-validation');
         Route::put('mentors/{mentor}/approve', [MentorController::class, 'approve'])->name('mentors.approve');
         Route::put('mentors/{mentor}/reject', [MentorController::class, 'reject'])->name('mentors.reject');
 

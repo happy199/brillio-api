@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
 
 /**
  * Controller pour l'authentification web (jeunes et mentors)
@@ -20,7 +22,8 @@ class WebAuthController extends Controller
 {
     public function __construct(
         private SupabaseAuthService $supabase
-    ) {}
+    ) {
+    }
 
     /**
      * Affiche la page de choix du type de compte (inscription)
@@ -84,6 +87,12 @@ class WebAuthController extends Controller
             'auth_provider' => 'email',
             'provider_id' => $supabaseResult['user']['id'] ?? null,
         ]);
+
+        try {
+            Mail::to($user)->send(new WelcomeEmail($user));
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi email bienvenue: ' . $e->getMessage());
+        }
 
         Auth::login($user);
 
@@ -361,6 +370,12 @@ class WebAuthController extends Controller
                 'profile_photo_url' => $socialData['avatar_url'],
                 'email_verified_at' => $socialData['email_verified'] ? now() : null,
             ]);
+
+            try {
+                Mail::to($user)->send(new WelcomeEmail($user));
+            } catch (\Exception $e) {
+                Log::error('Erreur envoi email bienvenue (OAuth Jeune): ' . $e->getMessage());
+            }
         }
 
         Auth::login($user, true);
@@ -591,6 +606,12 @@ class WebAuthController extends Controller
                 'profile_photo_url' => $linkedinData['avatar_url'],
                 'email_verified_at' => now(),
             ]);
+
+            try {
+                Mail::to($user)->send(new WelcomeEmail($user));
+            } catch (\Exception $e) {
+                Log::error('Erreur envoi email bienvenue (OAuth Mentor): ' . $e->getMessage());
+            }
 
             // Creer le profil mentor avec les donnees LinkedIn
             MentorProfile::create([

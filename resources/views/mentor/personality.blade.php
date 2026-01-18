@@ -1,4 +1,4 @@
-@extends('layouts.jeune')
+@extends('layouts.mentor')
 
 @section('title', 'Test de personnalite MBTI')
 
@@ -29,7 +29,27 @@
             @php
                 $typeInfo = $mbtiTypes[$personalityTest->personality_type] ?? ['name' => $personalityTest->personality_label ?? $personalityTest->personality_type, 'color' => 'from-purple-500 to-pink-500'];
             @endphp
-            <div class="bg-gradient-to-r {{ $typeInfo['color'] }} rounded-3xl p-8 text-white">
+            <div class="bg-gradient-to-r 
+                @switch($personalityTest->personality_type)
+                    @case('INTJ') from-purple-500 to-indigo-600 @break
+                    @case('INTP') from-purple-400 to-blue-500 @break
+                    @case('ENTJ') from-purple-600 to-pink-500 @break
+                    @case('ENTP') from-orange-500 to-pink-500 @break
+                    @case('INFJ') from-green-500 to-teal-500 @break
+                    @case('INFP') from-green-400 to-cyan-500 @break
+                    @case('ENFJ') from-green-500 to-emerald-600 @break
+                    @case('ENFP') from-yellow-500 to-orange-500 @break
+                    @case('ISTJ') from-blue-600 to-indigo-700 @break
+                    @case('ISFJ') from-blue-500 to-cyan-600 @break
+                    @case('ESTJ') from-blue-600 to-blue-800 @break
+                    @case('ESFJ') from-cyan-500 to-blue-600 @break
+                    @case('ISTP') from-amber-500 to-yellow-600 @break
+                    @case('ISFP') from-amber-400 to-orange-500 @break
+                    @case('ESTP') from-red-500 to-orange-600 @break
+                    @case('ESFP') from-pink-500 to-rose-600 @break
+                    @default from-purple-500 to-pink-500
+                @endswitch
+                rounded-3xl p-8 text-white">
                 <div class="flex flex-col md:flex-row md:items-center gap-6">
                     <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                         <span class="text-4xl font-bold">{{ $personalityTest->personality_type }}</span>
@@ -37,7 +57,7 @@
                     <div class="flex-1">
                         <h1 class="text-3xl font-bold mb-2">{{ $typeInfo['name'] }}</h1>
                         <p class="text-white/90">{{ $personalityTest->personality_description }}</p>
-                        <p class="text-white/70 text-sm mt-2">Test passe le
+                        <p class="text-white/70 text-sm mt-2">Test passé le
                             {{ $personalityTest->completed_at->format('d/m/Y') }}
                         </p>
                     </div>
@@ -46,7 +66,7 @@
 
             @if($personalityTest->traits_scores)
                 <div class="bg-white rounded-2xl p-6 shadow-sm">
-                    <h2 class="text-xl font-bold text-gray-900 mb-6">Tes dimensions de personnalite</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">Vos dimensions de personnalite</h2>
                     <div class="space-y-6">
                         @php
                             $dimensions = [
@@ -90,7 +110,7 @@
 
             @if($personalityTest->recommended_careers)
                 <div class="bg-white rounded-2xl p-6 shadow-sm">
-                    <h2 class="text-xl font-bold text-gray-900 mb-6">Métiers recommandés pour ton profil</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">Métiers recommandés pour votre profil</h2>
                     <div class="grid md:grid-cols-2 gap-4">
                         @foreach($personalityTest->recommended_careers as $career)
                             <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-300 hover:shadow-md transition">
@@ -111,16 +131,7 @@
             @endif
 
             <div class="flex flex-col sm:flex-row gap-4">
-                <a href="{{ route('jeune.chat', ['prefill' => 'Je viens de passer le test de personnalité et mon profil est ' . $personalityTest->personality_type . ' (' . ($mbtiTypes[$personalityTest->personality_type]['name'] ?? $personalityTest->personality_label) . '). Peux-tu m\'aider à mieux comprendre ce profil et me donner des conseils pour mon orientation professionnelle ?']) }}"
-                    class="flex-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition">Discuter
-                    avec l'IA sur mes resultats</a>
-                <a href="{{ route('jeune.mentors') }}"
-                    class="flex-1 bg-white border-2 border-gray-200 text-gray-700 text-center py-4 rounded-xl font-semibold hover:border-primary-500 hover:text-primary-600 transition">Voir
-                    des mentors dans mes domaines</a>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-4 mt-4">
-                <a href="{{ route('jeune.personality.export-pdf') }}"
+                <a href="{{ route('mentor.personality.export-pdf') }}"
                     class="flex-1 bg-red-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -129,7 +140,7 @@
                     Télécharger mon test en PDF
                 </a>
                 @if($testHistory && $testHistory->count() > 0)
-                    <a href="{{ route('jeune.personality.export-history-pdf') }}"
+                    <a href="{{ route('mentor.personality.export-history-pdf') }}"
                         class="flex-1 bg-purple-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -138,12 +149,20 @@
                         Télécharger l'historique complet
                     </a>
                 @endif
+                <a href="{{ route('mentor.explore') }}"
+                    class="flex-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Voir jeunes compatibles
+                </a>
             </div>
 
             @if($testHistory && $testHistory->count() > 0)
                 <div class="bg-white rounded-2xl p-6 shadow-sm">
-                    <h2 class="text-xl font-bold text-gray-900 mb-6">Historique de tes tests</h2>
-                    <p class="text-sm text-gray-600 mb-4">Voici l'évolution de ta personnalité au fil du temps</p>
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">Historique de vos tests</h2>
+                    <p class="text-sm text-gray-600 mb-4">Voici l'évolution de votre personnalité au fil du temps</p>
                     <div class="space-y-3">
                         @foreach($testHistory as $test)
                             <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-200 transition">
@@ -180,16 +199,16 @@
                 </button>
             </div>
         @else
-            <div class="bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-3xl p-8 text-white text-center">
+            <div class="bg-gradient-to-r from-purple-500 via-purple-500 to-pink-500 rounded-3xl p-8 text-white text-center">
                 <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl font-bold mb-4">Decouvre ton type de personnalite</h1>
-                <p class="text-white/90 max-w-lg mx-auto">Le test MBTI t'aidera a mieux te connaitre et a decouvrir les metiers
-                    qui correspondent a ta personnalite.</p>
+                <h1 class="text-3xl font-bold mb-4">Découvrez votre type de personnalité</h1>
+                <p class="text-white/90 max-w-lg mx-auto">Le test MBTI vous aidera à mieux vous connaître et à identifier les
+                    jeunes avec qui vous êtes le plus compatible.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-6">
@@ -200,7 +219,7 @@
                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg></div>
                     <h3 class="font-bold text-gray-900 mb-2">10-15 minutes</h3>
-                    <p class="text-sm text-gray-500">Duree moyenne du test</p>
+                    <p class="text-sm text-gray-500">Durée moyenne du test</p>
                 </div>
                 <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
                     <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg
@@ -218,12 +237,12 @@
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg></div>
                     <h3 class="font-bold text-gray-900 mb-2">16 types</h3>
-                    <p class="text-sm text-gray-500">De personnalite possibles</p>
+                    <p class="text-sm text-gray-500">De personnalité possibles</p>
                 </div>
             </div>
 
             <div class="bg-white rounded-2xl p-6 shadow-sm">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">Les 16 types de personnalite MBTI</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Les 16 types de personnalité MBTI</h2>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     @foreach($mbtiTypes as $type => $info)
                         <div
@@ -246,14 +265,13 @@
         <!-- Modal du test -->
         <div x-show="showTest" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
             x-transition>
-            <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
                 @click.outside="closeTest()">
-                <!-- Header -->
                 <div class="p-6 border-b flex-shrink-0">
                     <div class="flex items-center justify-between">
-                        <div class="flex-1">
+                        <div>
                             <h3 class="text-xl font-bold text-gray-900">Test de personnalité MBTI</h3>
-                            <p class="text-sm text-gray-500" x-show="!loading">Question <span
+                            <p class="text-sm text-gray-500" x-show="testStarted">Question <span
                                     x-text="currentQuestion + 1"></span> sur <span x-text="questions.length"></span></p>
                         </div>
                         <button @click="closeTest()" class="p-2 hover:bg-gray-100 rounded-full"><svg
@@ -262,108 +280,102 @@
                                     d="M6 18L18 6M6 6l12 12" />
                             </svg></button>
                     </div>
-                    <div x-show="!loading" class="mt-4">
+                    <div x-show="testStarted" class="mt-4">
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
                                 :style="'width: ' + ((currentQuestion + 1) / questions.length * 100) + '%'"></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Content -->
-                <div class="p-8 flex-1 overflow-y-auto">
-                    <!-- Loading -->
-                    <div x-show="loading" class="text-center py-12">
+                <div class="p-6 flex-1 overflow-y-auto">
+                    <div x-show="loading && !testStarted" class="text-center py-12">
                         <div
                             class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4">
                         </div>
                         <p class="text-gray-600">Chargement des questions...</p>
                     </div>
-
-                    <!-- Questions -->
-                    <div x-show="!loading && !submitting" class="space-y-8">
+                    <div x-show="!testStarted && !loading && !submitting" class="text-center">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg
+                                class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg></div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Prêt à découvrir votre personnalité ?</h4>
+                        <p class="text-gray-600 mb-6">Répondez honnêtement aux 32 questions. Il n'y a pas de bonnes ou
+                            mauvaises réponses !</p>
+                        <button @click="loadQuestions()"
+                            class="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition">Commencer
+                            le test</button>
+                    </div>
+                    <div x-show="testStarted && !submitting" class="space-y-8">
                         <!-- Question text -->
-                        <div class="text-center mb-8">
-                            <p class="text-2xl text-gray-900 font-semibold leading-relaxed"
-                                x-text="questions[currentQuestion]?.text"></p>
+                        <div class="text-center">
+                            <p class="text-xl text-gray-900 font-semibold" x-text="questions[currentQuestion]?.text"></p>
                         </div>
-
-                        <!-- Scale with numbered squares -->
-                        <div class="py-8">
-                            <!-- Trait labels -->
-                            <div class="flex justify-between items-center mb-8 px-4">
-                                <div class="text-left">
-                                    <p class="text-lg font-semibold text-teal-500"
-                                        x-text="questions[currentQuestion]?.left_trait || 'Trait gauche'"></p>
+                        
+                        <!-- Horizontal scale -->
+                        <div class="bg-gray-50 rounded-2xl p-8">
+                            <!-- Labels -->
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="text-left flex-1">
+                                    <p class="text-sm font-medium text-blue-600">Pas du tout d'accord</p>
                                 </div>
-                                <div class="text-center">
-                                    <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">Contre</p>
+                                <div class="text-center px-4">
+                                    <p class="text-sm font-medium text-gray-500">Neutre</p>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-lg font-semibold text-purple-500"
-                                        x-text="questions[currentQuestion]?.right_trait || 'Trait droit'"></p>
+                                <div class="text-right flex-1">
+                                    <p class="text-sm font-medium text-purple-600">Tout à fait d'accord</p>
                                 </div>
                             </div>
-
-                            <!-- Numbered square buttons -->
-                            <div class="flex justify-center items-center gap-4">
+                            
+                            <!-- Scale buttons -->
+                            <div class="flex justify-between items-center gap-3">
                                 <template x-for="option in answerOptions" :key="option.value">
-                                    <div class="flex flex-col items-center gap-3">
-                                        <button @click="selectAnswer(option.value)" :class="answers[questions[currentQuestion]?.id] === option.value 
-                                                        ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white' 
-                                                            : option.value === 3 ? 'bg-gray-500 border-gray-600 text-white'
-                                                            : 'bg-purple-500 border-purple-600 text-white')
-                                                        : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50' 
-                                                            : option.value === 3 ? 'border-gray-400 text-gray-400 hover:bg-gray-50'
-                                                            : 'border-purple-500 text-purple-500 hover:bg-purple-50')"
-                                            class="w-20 h-20 border-2 rounded-lg font-bold text-3xl transition-all duration-200 hover:scale-105 flex items-center justify-center">
-                                            <span x-text="option.value"></span>
-                                        </button>
-                                        <p class="text-xs text-gray-500 text-center max-w-[100px]" x-text="option.label">
-                                        </p>
+                                    <button @click="selectAnswer(option.value)"
+                                        :class="answers[questions[currentQuestion]?.id] === option.value 
+                                            ? (option.value <= 2 ? 'bg-blue-500 border-blue-600 text-white scale-110' 
+                                                : option.value === 3 ? 'bg-gray-500 border-gray-600 text-white scale-110'
+                                                : 'bg-purple-500 border-purple-600 text-white scale-110')
+                                            : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'"
+                                        class="flex-1 aspect-square max-w-[80px] border-2 rounded-xl font-bold text-2xl transition-all duration-200 hover:scale-105 flex items-center justify-center">
+                                        <span x-text="option.value"></span>
+                                    </button>
+                                </template>
+                            </div>
+                            
+                            <!-- Scale labels below -->
+                            <div class="flex justify-between items-center gap-3 mt-3">
+                                <template x-for="option in answerOptions" :key="option.value">
+                                    <div class="flex-1 max-w-[80px] text-center">
+                                        <p class="text-xs text-gray-500" x-text="option.label"></p>
                                     </div>
                                 </template>
                             </div>
                         </div>
-
-                        <!-- Navigation arrows -->
-                        <div class="flex justify-center gap-4 pt-4">
-                            <button @click="previousQuestion()" :disabled="currentQuestion === 0"
-                                :class="currentQuestion === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100'"
-                                class="p-3 rounded-full border-2 border-gray-300 transition">
-                                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-                            <button @click="nextQuestion()"
-                                :disabled="!answers[questions[currentQuestion]?.id] || currentQuestion === questions.length - 1"
-                                :class="(!answers[questions[currentQuestion]?.id] || currentQuestion === questions.length - 1) ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100'"
-                                class="p-3 rounded-full border-2 border-gray-300 transition">
-                                <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-                        </div>
                     </div>
-
-                    <!-- Submitting -->
+                    </div>
                     <div x-show="submitting" class="text-center py-12">
                         <div
                             class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4">
                         </div>
-                        <p class="text-gray-600">Calcul de ton profil en cours...</p>
+                        <p class="text-gray-600">Calcul de votre profil en cours...</p>
                     </div>
                 </div>
-
-                <!-- Footer with submit button -->
-                <div x-show="!loading && !submitting && currentQuestion === questions.length - 1 && allAnswered"
-                    class="p-6 border-t flex-shrink-0">
-                    <button @click="submitTest()"
-                        class="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-lg rounded-xl hover:shadow-lg transition">
-                        Voir mes résultats
-                    </button>
+                <div x-show="testStarted && !submitting" class="p-6 border-t flex-shrink-0">
+                    <div class="flex justify-between">
+                        <button @click="previousQuestion()" :disabled="currentQuestion === 0"
+                            :class="currentQuestion === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'"
+                            class="px-6 py-3 border rounded-xl font-medium text-gray-700 transition">Précédent</button>
+                        <button x-show="currentQuestion < questions.length - 1" @click="nextQuestion()"
+                            :disabled="!answers[questions[currentQuestion]?.id]"
+                            :class="!answers[questions[currentQuestion]?.id] ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'"
+                            class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl transition">Suivant</button>
+                        <button x-show="currentQuestion === questions.length - 1" @click="submitTest()"
+                            :disabled="!allAnswered"
+                            :class="!allAnswered ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'"
+                            class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl transition">Voir
+                            mes résultats</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -411,11 +423,11 @@
                             <h5 class="font-bold text-gray-900 mb-4">Dimensions de personnalité</h5>
                             <div class="space-y-4">
                                 <template x-for="dim in [
-                                                                        {left: 'E', right: 'I', leftName: 'Extraversion', rightName: 'Introversion'},
-                                                                        {left: 'S', right: 'N', leftName: 'Sensation', rightName: 'Intuition'},
-                                                                        {left: 'T', right: 'F', leftName: 'Pensée', rightName: 'Sentiment'},
-                                                                        {left: 'J', right: 'P', leftName: 'Jugement', rightName: 'Perception'}
-                                                                    ]" :key="dim.left">
+                                            {left: 'E', right: 'I', leftName: 'Extraversion', rightName: 'Introversion'},
+                                            {left: 'S', right: 'N', leftName: 'Sensation', rightName: 'Intuition'},
+                                            {left: 'T', right: 'F', leftName: 'Pensée', rightName: 'Sentiment'},
+                                            {left: 'J', right: 'P', leftName: 'Jugement', rightName: 'Perception'}
+                                        ]" :key="dim.left">
                                     <div>
                                         <div class="flex justify-between mb-1 text-sm">
                                             <span class="text-gray-600"
@@ -436,8 +448,8 @@
                                             <template x-if="(historyTest?.traits_scores?.[dim.left] || 50) != 50">
                                                 <div class="absolute bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full"
                                                     :style="(historyTest?.traits_scores?.[dim.left] || 50) > 50 
-                                                                            ? 'right: 50%; width: ' + Math.min((historyTest?.traits_scores?.[dim.left] || 50) - 50, 50) + '%; border-radius: 9999px 0 0 9999px;'
-                                                                            : 'left: 50%; width: ' + Math.min(50 - (historyTest?.traits_scores?.[dim.left] || 50), 50) + '%; border-radius: 0 9999px 9999px 0;'">
+                                                                ? 'right: 50%; width: ' + Math.min((historyTest?.traits_scores?.[dim.left] || 50) - 50, 50) + '%; border-radius: 9999px 0 0 9999px;'
+                                                                : 'left: 50%; width: ' + Math.min(50 - (historyTest?.traits_scores?.[dim.left] || 50), 50) + '%; border-radius: 0 9999px 9999px 0;'">
                                                 </div>
                                             </template>
                                         </div>
@@ -478,127 +490,7 @@
     </div>
 
     @push('scripts')
-        <script>
-            function personalityTest() {
-                return {
-                    showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
-                    answerOptions: [{ value: 1, label: 'Toujours comme ça' }, { value: 2, label: 'Souvent comme ça' }, { value: 3, label: 'Cela dépend de la situation' }, { value: 4, label: 'Souvent comme ça' }, { value: 5, label: 'Toujours comme ça' }],
-                    get allAnswered() { return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length; },
-                    startTest() {
-                        console.log('startTest() called - opening modal');
-                        this.showTest = true;
-                        this.loadQuestions(); // Auto-load questions
-                    },
-                    closeTest() { if (this.testStarted && Object.keys(this.answers).length > 0 && !confirm('Tu es sur de vouloir quitter ?')) return; this.showTest = false; this.resetTest(); },
-                    resetTest() { this.testStarted = false; this.questions = []; this.answers = {}; this.currentQuestion = 0; },
-                    retakeTest() {
-                        this.resetTest();
-                        this.showTest = true;
-                        this.loadQuestions(); // Load questions when retaking test
-                    },
-                    showHistoryModal: false,
-                    historyTest: null,
-                    historyLoading: false,
-                    async viewHistoryTest(testId) {
-                        this.historyLoading = true;
-                        this.showHistoryModal = true;
-                        try {
-                            const response = await fetch(`/espace-jeune/test-personnalite/history/${testId}`, {
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
-                            const data = await response.json();
-                            if (data.success) {
-                                this.historyTest = data.test;
-                            } else {
-                                alert(data.message || 'Erreur lors du chargement du test.');
-                                this.showHistoryModal = false;
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('Erreur de connexion.');
-                            this.showHistoryModal = false;
-                        }
-                        this.historyLoading = false;
-                    },
-                    closeHistoryModal() {
-                        this.showHistoryModal = false;
-                        this.historyTest = null;
-                    },
-                    async loadQuestions() {
-                        console.log('loadQuestions called');
-                        this.loading = true;
-                        try {
-                            const response = await fetch('/espace-jeune/test-personnalite/questions', {
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
-                            console.log('Response status:', response.status);
-                            const data = await response.json();
-                            console.log('Response data:', data);
-                            if (data.success && data.questions) {
-                                this.questions = data.questions;
-                                this.testStarted = true;
-                                console.log('Questions loaded:', this.questions.length);
-                            } else {
-                                console.error('Failed to load questions:', data);
-                                alert('Erreur lors du chargement des questions.');
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('Erreur de connexion.');
-                        }
-                        this.loading = false;
-                    },
-                    selectAnswer(value) {
-                        console.log('selectAnswer called with value:', value);
-                        const qid = this.questions[this.currentQuestion]?.id;
-                        console.log('Question ID:', qid);
-                        if (qid) {
-                            this.answers[qid] = value;
-                            console.log('Answer saved, advancing to next question');
-                            // Auto-advance to next question after a short delay
-                            if (this.currentQuestion < this.questions.length - 1) {
-                                setTimeout(() => {
-                                    this.currentQuestion++;
-                                }, 300);
-                            }
-                        }
-                    },
-                    nextQuestion() { if (this.currentQuestion < this.questions.length - 1 && this.answers[this.questions[this.currentQuestion]?.id]) this.currentQuestion++; },
-                    previousQuestion() { if (this.currentQuestion > 0) this.currentQuestion--; },
-                    async submitTest() {
-                        if (!this.allAnswered) return;
-                        this.submitting = true;
-                        try {
-                            const response = await fetch('/espace-jeune/test-personnalite/submit', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                },
-                                body: JSON.stringify({ responses: this.answers })
-                            });
-                            const data = await response.json();
-                            if (data.success) {
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Erreur lors de la soumission.');
-                                this.submitting = false;
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('Erreur de connexion.');
-                            this.submitting = false;
-                        }
-                    }
-                }
-            }
+        <script>     function personalityTest() {         return {             showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,             answerOptions: [{ value: 1, label: 'Pas du tout d\'accord' }, { value: 2, label: 'Plutôt pas d\'accord' }, { value: 3, label: 'Neutre' }, { value: 4, label: 'Plutôt d\'accord' }, { value: 5, label: 'Tout à fait d\'accord' }],             get allAnswered() { return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length; },             startTest() { this.showTest = true; },             closeTest() { if (this.testStarted && Object.keys(this.answers).length > 0 && !confirm('Êtes-vous sûr de vouloir quitter ?')) return; this.showTest = false; this.resetTest(); },             resetTest() { this.testStarted = false; this.questions = []; this.answers = {}; this.currentQuestion = 0; },             retakeTest() {                 this.resetTest();                 this.showTest = true;             },             showHistoryModal: false,             historyTest: null,             historyLoading: false,             async viewHistoryTest(testId) {                 this.historyLoading = true;                 this.showHistoryModal = true;                 try {                     const response = await fetch(`/espace-mentor/test-personnalite/history/${testId}`, {                         headers: {                             'Accept': 'application/json',                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content                         }                     });                     const data = await response.json();                     if (data.success) {                         this.historyTest = data.test;                     } else {                         alert(data.message || 'Erreur lors du chargement du test.');                         this.showHistoryModal = false;                     }                 } catch (error) {                     console.error('Error:', error);                     alert('Erreur de connexion.');                     this.showHistoryModal = false;                 }                 this.historyLoading = false;             },             closeHistoryModal() {                 this.showHistoryModal = false;                 this.historyTest = null;             },             async loadQuestions() {                 this.loading = true;                 try {                     const response = await fetch('/espace-mentor/test-personnalite/questions', {                         headers: {                             'Accept': 'application/json',                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content                         }                     });                     const data = await response.json();                     if (data.success && data.questions) {                         this.questions = data.questions;                         this.testStarted = true;                     } else {                         alert('Erreur lors du chargement des questions.');                     }                 } catch (error) {                     console.error('Error:', error);                     alert('Erreur de connexion.');                 }                 this.loading = false;             },             selectAnswer(value) { const qid = this.questions[this.currentQuestion]?.id; if (qid) this.answers[qid] = value; },             nextQuestion() { if (this.currentQuestion < this.questions.length - 1 && this.answers[this.questions[this.currentQuestion]?.id]) this.currentQuestion++; },             previousQuestion() { if (this.currentQuestion > 0) this.currentQuestion--; },             async submitTest() {                 if (!this.allAnswered) return;                 this.submitting = true;                 try {                     const response = await fetch('/espace-mentor/test-personnalite/submit', {                         method: 'POST',                         headers: {                             'Content-Type': 'application/json',                             'Accept': 'application/json',                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content                         },                         body: JSON.stringify({ responses: this.answers })                     });                     const data = await response.json();                     if (data.success) {                         window.location.reload();                     } else {                         alert(data.message || 'Erreur lors de la soumission.');                         this.submitting = false;                     }                 } catch (error) {                     console.error('Error:', error);                     alert('Erreur de connexion.');                     this.submitting = false;                 }             }         }     }
         </script>
     @endpush
 @endsection

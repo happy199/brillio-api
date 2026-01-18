@@ -135,6 +135,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Relation vers le profil jeune (si type jeune)
+     */
+    public function jeuneProfile(): HasOne
+    {
+        return $this->hasOne(JeuneProfile::class);
+    }
+
+    /**
      * Relation vers les documents académiques
      */
     public function academicDocuments(): HasMany

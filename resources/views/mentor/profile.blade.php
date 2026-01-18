@@ -127,6 +127,52 @@
                 </div>
             </div>
 
+            <!-- Personality Test Section -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <svg class="w-24 h-24 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Test de Personnalité (MBTI)</h2>
+
+                @php
+                    $pTest = auth()->user()->personalityTest;
+                @endphp
+
+                @if($pTest && $pTest->completed_at)
+                    <div class="flex items-center gap-6">
+                        <div
+                            class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center text-purple-700 font-bold text-xl border-2 border-purple-200">
+                            {{ $pTest->personality_type }}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-900">{{ $pTest->personality_label ?? $pTest->personality_type }}</h3>
+                            <p class="text-sm text-gray-500 line-clamp-2">{{ $pTest->personality_description }}</p>
+                        </div>
+                        <a href="{{ route('mentor.personality') }}"
+                            class="px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition font-medium text-sm">
+                            Voir détails
+                        </a>
+                    </div>
+                @else
+                    <div class="flex flex-col sm:flex-row items-center gap-6">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-900">Découvrez votre type de personnalité</h3>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Le test MBTI vous aide à mieux comprendre vos forces en tant que mentor.
+                                Cela enrichit votre profil pour les jeunes.
+                            </p>
+                        </div>
+                        <a href="{{ route('mentor.personality') }}"
+                            class="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition font-bold shadow-md hover:shadow-lg whitespace-nowrap">
+                            Passer le test
+                        </a>
+                    </div>
+                @endif
+            </div>
+
             <!-- Links -->
             <div class="bg-white rounded-2xl p-6 shadow-sm">
                 <h2 class="text-lg font-bold text-gray-900 mb-6">Liens</h2>

@@ -1001,4 +1001,23 @@
             </div>
         </div>
     </section>
+    <!-- Supabase OAuth Redirect Fix -->
+    <script>
+        (function () {
+            if (window.location.hash && window.location.hash.includes('access_token=')) {
+                if (window.location.pathname === '/' || window.location.pathname === '') {
+                    const pendingProvider = "{{ session('oauth_provider') }}";
+                    const pendingType = "{{ session('oauth_type') }}";
+
+                    console.log("[Auth] Hash detected on home. Provider:", pendingProvider, "Type:", pendingType);
+
+                    if (pendingProvider && pendingType === 'jeune') {
+                        window.location.href = "/jeune/oauth/" + pendingProvider + "/callback" + window.location.hash;
+                    } else if (pendingType === 'mentor') {
+                        window.location.href = "/mentor/linkedin/callback" + window.location.hash;
+                    }
+                }
+            }
+        })();
+    </script>
 @endsection

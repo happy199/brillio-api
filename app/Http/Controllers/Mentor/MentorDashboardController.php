@@ -18,7 +18,7 @@ class MentorDashboardController extends Controller
 
         // Stats
         $stats = [
-            'profile_views' => 0, // A implementer avec un systeme de tracking
+            'profile_views' => $profile ? $profile->profile_views : 0,
             'roadmap_steps' => $profile ? $profile->roadmapSteps()->count() : 0,
             'is_published' => $profile ? $profile->is_published : false,
             'profile_complete' => $profile ? $profile->isComplete() : false,
@@ -158,7 +158,7 @@ class MentorDashboardController extends Controller
         $profile = $user->mentorProfile;
 
         $stats = [
-            'profile_views' => 0, // A implementer
+            'profile_views' => $profile ? $profile->profile_views : 0,
         ];
 
         return view('mentor.stats', [
@@ -280,10 +280,6 @@ class MentorDashboardController extends Controller
      */
     public function importLinkedInData(Request $request)
     {
-        $request->validate([
-            'pdf' => 'required|file|mimes:pdf|max:5120', // 5MB max
-        ]);
-
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
@@ -292,6 +288,10 @@ class MentorDashboardController extends Controller
         }
 
         try {
+            $request->validate([
+                'pdf' => 'required|file|mimes:pdf|max:5120', // 5MB max
+            ]);
+
             // Stocker temporairement le PDF
             $pdfPath = $request->file('pdf')->store('temp-linkedin-pdfs', 'local');
             $fullPath = storage_path('app/' . $pdfPath);
@@ -469,7 +469,7 @@ class MentorDashboardController extends Controller
                 ] : null
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::error('LinkedIn PDF import error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -477,7 +477,7 @@ class MentorDashboardController extends Controller
 
             return response()->json([
                 'success' => false,
-                'error' => 'Erreur lors du parsing du PDF : ' . $e->getMessage()
+                'error' => 'Erreur critique lors du parsing : ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()
             ], 500);
         }
     }

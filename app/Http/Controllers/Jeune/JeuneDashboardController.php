@@ -34,6 +34,8 @@ class JeuneDashboardController extends Controller
             'documents_count' => $user->academicDocuments()->count(),
             'conversations_count' => $user->chatConversations()->count(),
             'messages_count' => $user->chatConversations()->withCount('messages')->get()->sum('messages_count'),
+            'profile_views' => $user->jeuneProfile?->profile_views ?? 0,
+            'mentor_views' => $user->jeuneProfile?->mentor_views ?? 0,
         ];
 
         // Mentors recommandes (basé sur le type de personnalité si disponible)
@@ -447,6 +449,9 @@ class JeuneDashboardController extends Controller
      */
     public function mentorShow(MentorProfile $mentor)
     {
+        // Incrémenter le compteur de vues
+        $mentor->increment('profile_views');
+
         $mentor->load(['user', 'roadmapSteps']);
 
         // Mentors similaires (meme specialisation)

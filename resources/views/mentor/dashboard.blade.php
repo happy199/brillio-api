@@ -57,7 +57,7 @@
                             @if(!$profile || !$profile->current_position)
                                 <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Poste manquant</span>
                             @endif
-                            @if(!$profile || !$profile->specialization)
+                            @if(!$profile || (!$profile->specialization && !$profile->specialization_id))
                                 <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Specialisation
                                     manquante</span>
                             @endif
@@ -254,4 +254,3 @@
 @endsection
 
 @include('mentor.partials.linkedin-import-modal')
-

@@ -1,0 +1,757 @@
+@php
+    $theme = $theme ?? 'jeune';
+
+    // Theme Configuration
+    $themeConfig = [
+        'jeune' => [
+            'primary_gradient' => 'from-purple-600 to-indigo-600',
+            'secondary_gradient' => 'from-purple-600 to-pink-600',
+            'primary_text' => 'text-purple-700',
+            'secondary_text' => 'text-pink-600',
+            'primary_bg' => 'bg-purple-600',
+            'secondary_bg' => 'bg-pink-600',
+            'primary_border' => 'border-purple-600',
+            'secondary_border' => 'border-pink-600',
+            'primary_light_ring' => 'ring-purple-200',
+            'secondary_light_ring' => 'ring-pink-200',
+            'primary_light_bg' => 'bg-purple-500',
+            'secondary_light_bg' => 'bg-pink-500',
+            'primary_border_light' => 'border-purple-300',
+            'secondary_border_light' => 'border-pink-300',
+            'loading_border' => 'border-purple-500',
+            'button_bg' => 'bg-white',
+            'button_text' => 'text-purple-600',
+        ],
+        'mentor' => [
+            'primary_gradient' => 'from-orange-500 to-red-600',
+            'secondary_gradient' => 'from-orange-500 to-amber-500',
+            'primary_text' => 'text-orange-700',
+            'secondary_text' => 'text-red-600',
+            'primary_bg' => 'bg-orange-600',
+            'secondary_bg' => 'bg-red-600',
+            'primary_border' => 'border-orange-600',
+            'secondary_border' => 'border-red-600',
+            'primary_light_ring' => 'ring-orange-200',
+            'secondary_light_ring' => 'ring-red-200',
+            'primary_light_bg' => 'bg-orange-500',
+            'secondary_light_bg' => 'bg-red-500',
+            'primary_border_light' => 'border-orange-300',
+            'secondary_border_light' => 'border-red-300',
+            'loading_border' => 'border-orange-500',
+            'button_bg' => 'bg-white',
+            'button_text' => 'text-orange-600',
+        ],
+    ];
+
+    $colors = $themeConfig[$theme];
+    $mbtiTypes = \App\Models\PersonalityTest::PERSONALITY_TYPES;
+
+    // Type Colors (Grid & Result)
+    if ($theme === 'mentor') {
+        // Mentor: All Orange/Red variants
+        $mbtiColors = array_fill_keys(array_keys($mbtiTypes), 'from-orange-500 to-red-600');
+    } else {
+        // Jeune: Varied Spectrum
+        $mbtiColors = [
+            'INTJ' => 'from-purple-500 to-indigo-600',
+            'INTP' => 'from-purple-400 to-blue-500',
+            'ENTJ' => 'from-purple-600 to-pink-500',
+            'ENTP' => 'from-pink-500 to-orange-500',
+            'INFJ' => 'from-green-500 to-teal-500',
+            'INFP' => 'from-green-400 to-cyan-500',
+            'ENFJ' => 'from-green-500 to-emerald-600',
+            'ENFP' => 'from-yellow-500 to-orange-500',
+            'ISTJ' => 'from-blue-600 to-indigo-700',
+            'ISFJ' => 'from-blue-500 to-cyan-600',
+            'ESTJ' => 'from-blue-600 to-blue-800',
+            'ESFJ' => 'from-cyan-500 to-blue-600',
+            'ISTP' => 'from-amber-500 to-yellow-600',
+            'ISFP' => 'from-amber-400 to-orange-500',
+            'ESTP' => 'from-red-500 to-orange-600',
+            'ESFP' => 'from-pink-500 to-rose-600',
+        ];
+    }
+@endphp
+
+<div class="space-y-8" x-data="personalityTest()" x-cloak>
+    @if($personalityTest && $personalityTest->completed_at)
+        @php
+            $typeLabel = $mbtiTypes[$personalityTest->personality_type] ?? $personalityTest->personality_type;
+            $colorClass = $mbtiColors[$personalityTest->personality_type] ?? $colors['primary_gradient'];
+        @endphp
+        <!-- Large Header Card -->
+        <div class="bg-gradient-to-r {{ $colorClass }} rounded-3xl p-8 md:p-12 text-white shadow-xl">
+            <div class="flex items-start gap-6">
+                <!-- Type Badge -->
+                <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 flex items-center justify-center shadow-lg">
+                    <span class="text-5xl font-extrabold">{{ $personalityTest->personality_type }}</span>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ $typeLabel }}</h1>
+                    <p class="text-white/95 text-lg leading-relaxed mb-4">{{ $personalityTest->personality_description }}
+                    </p>
+                    <p class="text-white/70 text-sm">Test passé le {{ $personalityTest->completed_at->format('d/m/Y') }}</p>
+                </div>
+            </div>
+        </div>
+
+        @if($personalityTest->traits_scores)
+            <!-- Dimensions Section -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-bold text-gray-900 mb-8">Tes dimensions de personnalité</h2>
+                <div class="space-y-8">
+                    @php
+                        $dimensions = [
+                            'E-I' => ['left' => 'Extraversion (E)', 'right' => 'Introversion (I)', 'color' => 'bg-blue-500'],
+                            'S-N' => ['left' => 'Sensation (S)', 'right' => 'Intuition (N)', 'color' => 'bg-green-500'],
+                            'T-F' => ['left' => 'Pensée (T)', 'right' => 'Sentiment (F)', 'color' => 'bg-pink-500'],
+                            'J-P' => ['left' => 'Jugement (J)', 'right' => 'Perception (P)', 'color' => 'bg-yellow-500'],
+                        ];
+                    @endphp
+
+                    @foreach($dimensions as $key => $dimension)
+                        @php
+                            // Get the scores for this dimension
+                            $leftLetter = substr($key, 0, 1);
+                            $rightLetter = substr($key, 2, 1);
+                            $leftScore = $personalityTest->traits_scores[$leftLetter] ?? 50;
+                            $rightScore = $personalityTest->traits_scores[$rightLetter] ?? 50;
+
+                            // Determine which side is dominant
+                            $dominantSide = $leftScore > $rightScore ? 'left' : 'right';
+                            $percentage = $dominantSide === 'left' ? $leftScore : $rightScore;
+                        @endphp
+
+                        <div>
+                            <!-- Labels -->
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-sm font-semibold text-gray-700">{{ $dimension['left'] }}</span>
+                                <span class="text-sm font-semibold text-gray-700">{{ $dimension['right'] }}</span>
+                            </div>
+
+                            <!-- Progress Bar Container -->
+                            <div class="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+                                @if($dominantSide === 'left')
+                                    <!-- Fill from left -->
+                                    <div class="{{ $dimension['color'] }} h-full rounded-full transition-all duration-500"
+                                        style="width: {{ $percentage }}%"></div>
+                                @else
+                                    <!-- Fill from right -->
+                                    <div class="{{ $dimension['color'] }} h-full rounded-full transition-all duration-500 ml-auto"
+                                        style="width: {{ $percentage }}%"></div>
+                                @endif
+                            </div>
+
+                            <!-- Percentage Labels -->
+                            <div class="flex justify-between items-center mt-2">
+                                <span
+                                    class="text-xs text-gray-500">{{ $dominantSide === 'left' ? round($percentage) : 100 - round($percentage) }}%</span>
+                                <span
+                                    class="text-xs text-gray-500">{{ $dominantSide === 'right' ? round($percentage) : 100 - round($percentage) }}%</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Retake Button -->
+                <div class="mt-8 flex justify-center">
+                    <button @click="retakeTest()"
+                        class="px-8 py-3 {{ $colors['button_bg'] }} {{ $colors['button_text'] }} rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refaire le test
+                    </button>
+                </div>
+            </div>
+        @endif
+
+        <!-- Recommended Careers Section -->
+        @if(isset($personalityTest->recommended_careers) && !empty($personalityTest->recommended_careers))
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Métiers recommandés pour ton profil</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach($personalityTest->recommended_careers as $career)
+                        <div class="border border-gray-100 rounded-xl p-4 hover:shadow-md transition">
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="font-bold text-lg text-gray-800">{{ $career['title'] ?? 'Métier' }}</h3>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">{{ $career['description'] ?? '' }}</p>
+                            <div class="flex items-start gap-2 text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
+                                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Parfait pour ton profil</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <!-- Actions Buttons -->
+        @if($theme === 'jeune')
+            <div class="flex flex-col md:flex-row gap-4">
+                <button onclick="discussWithAIJeune()"
+                    class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl py-4 px-6 font-bold text-center hover:shadow-lg transition flex items-center justify-center gap-2">
+                    <span>Discuter avec l'IA sur mes résultats</span>
+                </button>
+                @if(Route::has('jeune.mentors'))
+                    <a href="{{ route('jeune.mentors', ['for_profile' => 'true']) }}"
+                        class="flex-1 bg-white border border-gray-200 text-gray-700 rounded-xl py-4 px-6 font-bold text-center hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                        <span>Voir des mentors dans mes domaines</span>
+                    </a>
+                @endif
+            </div>
+        @endif
+
+        <div class="flex flex-col md:flex-row gap-4">
+            @if($theme === 'jeune')
+            <a href="{{ route('jeune.personality.export-pdf') }}" @else <a
+            href="{{ route('mentor.personality.export-pdf') }}" @endif
+                class="flex-1 bg-red-500 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-red-600 transition flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                    </path>
+                </svg>
+                <span>Télécharger mon test en PDF</span>
+            </a>
+            @if($theme === 'jeune')
+            <a href="{{ route('jeune.personality.export-history-pdf') }}" @else <a
+            href="{{ route('mentor.personality.export-history-pdf') }}" @endif
+                class="flex-1 bg-purple-500 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-purple-600 transition flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Télécharger l'historique complet</span>
+            </a>
+        </div>
+
+        <!-- History Section -->
+        @if(isset($testHistory) && count($testHistory) > 0)
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Historique de tes tests</h2>
+                <p class="text-sm text-gray-500 mb-4">Voici l'évolution de ta personnalité au fil du temps</p>
+                <div class="space-y-4">
+                    @foreach($testHistory as $historyTest)
+                        @php
+                            // Map personality type to solid color for badge
+                            $badgeColor = match ($historyTest->personality_type) {
+                                'INTJ', 'INTP', 'ENTJ', 'ENTP' => 'bg-purple-600',
+                                'INFJ', 'INFP', 'ENFJ', 'ENFP' => 'bg-green-600',
+                                'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ' => 'bg-blue-600',
+                                'ISTP', 'ISFP', 'ESTP', 'ESFP' => 'bg-orange-600',
+                                default => 'bg-gray-500',
+                            };
+                        @endphp
+                        <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition"
+                            x-data="{
+                                                                    historyData: {
+                                                                        personality_type: '{{ $historyTest->personality_type }}',
+                                                                        personality_label: '{{ $mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type }}',
+                                                                        personality_description: {{ json_encode($historyTest->personality_description ?? '') }},
+                                                                        completed_at: '{{ $historyTest->completed_at }}',
+                                                                        traits_scores: {{ json_encode($historyTest->traits_scores ?? []) }},
+                                                                        recommended_careers: {{ json_encode($historyTest->recommended_careers ?? []) }}
+                                                                    }
+                                                                 }">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-white text-sm {{ $badgeColor }}">
+                                    {{ $historyTest->personality_type }}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">
+                                        {{ $mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type }}
+                                    </h4>
+                                    <p class="text-xs text-gray-500">{{ $historyTest->completed_at->format('d/m/Y à H:i') }}</p>
+                                </div>
+                            </div>
+                            <button @click="$root.viewHistoryDetails(historyData)"
+                                class="text-blue-600 text-sm font-medium hover:underline">Voir détails</button>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <!-- History Details Modal -->
+        <div x-show="showHistoryModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak style="display: none;"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="closeHistoryModal()"></div>
+
+            <div class="relative min-h-screen flex items-center justify-center p-4">
+                <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
+                    <!-- Header -->
+                    <div
+                        class="bg-gradient-to-r {{ $colors['primary_gradient'] }} px-8 py-6 text-white flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold">Détails du test</h2>
+                            <p class="text-white/80 text-sm mt-1"
+                                x-text="selectedHistory?.completed_at ? new Date(selectedHistory.completed_at).toLocaleDateString('fr-FR', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : ''">
+                            </p>
+                        </div>
+                        <button @click="closeHistoryModal()"
+                            class="p-2 text-white/80 hover:text-white rounded-lg hover:bg-white/10 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-8 max-h-[70vh] overflow-y-auto">
+                        <template x-if="selectedHistory">
+                            <div class="space-y-6">
+                                <!-- Type Info -->
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-white text-3xl bg-gradient-to-br {{ $colors['primary_gradient'] }}">
+                                        <span x-text="selectedHistory.personality_type"></span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-gray-900"
+                                            x-text="selectedHistory.personality_label || selectedHistory.personality_type">
+                                        </h3>
+                                        <p class="text-gray-600 mt-1" x-text="selectedHistory.personality_description"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Traits Scores -->
+                                <template x-if="selectedHistory.traits_scores">
+                                    <div>
+                                        <h4 class="text-lg font-bold text-gray-900 mb-4">Dimensions de personnalité</h4>
+                                        <div class="space-y-4">
+                                            <template x-for="(score, trait) in selectedHistory.traits_scores" :key="trait">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                                                        <span x-text="trait"></span>
+                                                        <span x-text="Math.round(score) + '%'"></span>
+                                                    </div>
+                                                    <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+                                                        <div class="h-full bg-gradient-to-r {{ $colors['primary_gradient'] }} rounded-full transition-all"
+                                                            :style="'width: ' + score + '%'"></div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Recommended Careers -->
+                                <template
+                                    x-if="selectedHistory.recommended_careers && selectedHistory.recommended_careers.length > 0">
+                                    <div>
+                                        <h4 class="text-lg font-bold text-gray-900 mb-4">Métiers recommandés</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <template x-for="career in selectedHistory.recommended_careers"
+                                                :key="career.title">
+                                                <div class="border border-gray-200 rounded-lg p-3">
+                                                    <h5 class="font-bold text-gray-800" x-text="career.title"></h5>
+                                                    <p class="text-sm text-gray-600 mt-1" x-text="career.description"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+                        <button @click="closeHistoryModal()"
+                            class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition">
+                            Fermer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    @else
+        <!-- Intro Text if no test taken -->
+        <div class="bg-gradient-to-r {{ $colors['primary_gradient'] }} rounded-3xl p-8 text-white text-center shadow-lg">
+            <h1 class="text-3xl font-bold mb-4">Découvrez votre type
+                {{ $theme === 'mentor' ? 'de mentor' : 'de personnalité' }}
+            </h1>
+            <p class="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
+                Le test MBTI vous aidera à mieux connaître vos atouts.
+                Cela prend environ 10 minutes.
+            </p>
+            <button @click="startTest()"
+                class="px-8 py-4 {{ $colors['button_bg'] }} {{ $colors['button_text'] }} rounded-xl font-bold text-lg hover:shadow-lg hover:scale-105 transition transform shadow-md">
+                Commencer le test
+            </button>
+        </div>
+
+        <!-- 16 Types Grid Info -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Les 16 types de personnalités</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                @foreach($mbtiTypes as $type => $label)
+                    @php $gridColor = $mbtiColors[$type] ?? $colors['primary_gradient']; @endphp
+                    <div
+                        class="bg-gradient-to-br {{ $gridColor }} rounded-xl p-4 text-white hover:scale-105 transition duration-300 cursor-default shadow-md">
+                        <span class="font-extrabold text-xl block mb-1">{{ $type }}</span>
+                        <span class="text-white/90 text-sm font-medium">{{ $label }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <!-- Modal du Test -->
+    <div x-show="showTest" class="fixed inset-0 z-50 overflow-y-auto" x-cloak style="display: none;"
+        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="closeTest()"></div>
+
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div
+                class="relative bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh] {{ $theme === 'mentor' ? 'border-t-4 border-orange-500' : 'border-t-4 border-purple-500' }}">
+
+                <!-- Header Modal -->
+                <div
+                    class="bg-gray-50 px-8 py-4 border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
+                    <div>
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Test MBTI</span>
+                        <h2 class="text-xl font-bold text-gray-900">Question <span
+                                x-text="currentQuestion + 1"></span>/<span x-text="questions.length"></span></h2>
+                    </div>
+                    <button @click="closeTest()"
+                        class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="h-1 bg-gray-100 w-full">
+                    <div class="h-full {{ $colors['primary_bg'] }} transition-all duration-300 ease-out"
+                        :style="'width: ' + ((Object.keys(answers).length / questions.length) * 100) + '%'"></div>
+                </div>
+
+                <!-- Loading State -->
+                <div x-show="loading" class="flex-1 flex items-center justify-center p-12">
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="animate-spin rounded-full h-12 w-12 border-4 {{ $colors['loading_border'] }} border-t-transparent mb-4">
+                        </div>
+                        <p class="text-gray-500">Chargement des questions...</p>
+                    </div>
+                </div>
+
+                <!-- Questions -->
+                <div x-show="!loading && testStarted" class="flex-1 overflow-y-auto p-8 lg:p-12">
+                    <div class="max-w-3xl mx-auto">
+                        <template x-if="questions[currentQuestion]">
+                            <div class="space-y-12">
+                                <h3 class="text-2xl md:text-3xl font-bold text-gray-900 text-center leading-tight min-h-[120px] flex items-center justify-center p-4 bg-gray-50 rounded-2xl"
+                                    x-text="questions[currentQuestion].text || questions[currentQuestion].question_text">
+                                </h3>
+
+                                <!-- Semantic Differential Scale (5 Options) -->
+                                <div class="relative py-8">
+                                    <!-- Labels -->
+                                    <div class="flex justify-between items-center mb-8 px-2 md:px-6">
+                                        <span
+                                            class="text-lg font-bold {{ $colors['primary_text'] }} w-1/3 text-left leading-tight"
+                                            x-text="questions[currentQuestion].left_trait || questions[currentQuestion].left_trait_fr || 'Pas d\'accord'"></span>
+                                        <span class="text-sm font-semibold text-gray-400">Neutre</span>
+                                        <span
+                                            class="text-lg font-bold {{ $colors['secondary_text'] }} w-1/3 text-right leading-tight"
+                                            x-text="questions[currentQuestion].right_trait || questions[currentQuestion].right_trait_fr || 'D\'accord'"></span>
+                                    </div>
+
+                                    <!-- Track Line -->
+                                    <div
+                                        class="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 -z-10 transform -translate-y-1/2 rounded-full mx-6 md:mx-12">
+                                    </div>
+
+                                    <!-- Options -->
+                                    <div class="flex justify-between items-center max-w-2xl mx-auto px-4 gap-2">
+                                        <!-- Option 1 (Strongly Left - Primary) Big -->
+                                        <button @click="selectAnswer(1); setTimeout(() => nextQuestion(), 350)"
+                                            class="group relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none"
+                                            :class="answers[questions[currentQuestion].id] === 1 ? 'scale-110 ring-4 {{ $colors['primary_light_ring'] }}' : 'hover:scale-110'">
+                                            <div class="w-12 h-12 rounded-full border-4 transition-all duration-200"
+                                                :class="answers[questions[currentQuestion].id] === 1 ? '{{ $colors['primary_border'] }} {{ $colors['primary_bg'] }}' : '{{ $colors['primary_border_light'] }} group-hover:{{ $colors['primary_border'] }} bg-white'">
+                                            </div>
+                                        </button>
+
+                                        <!-- Option 2 (Med Left) Med -->
+                                        <button @click="selectAnswer(2); setTimeout(() => nextQuestion(), 350)"
+                                            class="group relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none"
+                                            :class="answers[questions[currentQuestion].id] === 2 ? 'scale-110 ring-4 {{ $colors['primary_light_ring'] }}' : 'hover:scale-110'">
+                                            <div class="w-9 h-9 rounded-full border-4 transition-all duration-200"
+                                                :class="answers[questions[currentQuestion].id] === 2 ? '{{ $colors['primary_border'] }} {{ $colors['primary_light_bg'] }}' : '{{ $colors['primary_border_light'] }} group-hover:{{ $colors['primary_border'] }} bg-white'">
+                                            </div>
+                                        </button>
+
+                                        <!-- Option 3 (Neutral) Smallest -->
+                                        <button @click="selectAnswer(3); setTimeout(() => nextQuestion(), 350)"
+                                            class="group relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none"
+                                            :class="answers[questions[currentQuestion].id] === 3 ? 'scale-110 ring-4 ring-gray-200 shadow-md' : 'hover:scale-110'">
+                                            <div class="w-6 h-6 rounded-full border-2 transition-all duration-200"
+                                                :class="answers[questions[currentQuestion].id] === 3 ? 'border-gray-400 bg-gray-400' : 'border-gray-300 group-hover:border-gray-400 bg-white'">
+                                            </div>
+                                        </button>
+
+                                        <!-- Option 4 (Med Right) Med -->
+                                        <button @click="selectAnswer(4); setTimeout(() => nextQuestion(), 350)"
+                                            class="group relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none"
+                                            :class="answers[questions[currentQuestion].id] === 4 ? 'scale-110 ring-4 {{ $colors['secondary_light_ring'] }}' : 'hover:scale-110'">
+                                            <div class="w-9 h-9 rounded-full border-4 transition-all duration-200"
+                                                :class="answers[questions[currentQuestion].id] === 4 ? '{{ $colors['secondary_border'] }} {{ $colors['secondary_light_bg'] }}' : '{{ $colors['secondary_border_light'] }} group-hover:{{ $colors['secondary_border'] }} bg-white'">
+                                            </div>
+                                        </button>
+
+                                        <!-- Option 5 (Strongly Right) Big -->
+                                        <button @click="selectAnswer(5); setTimeout(() => nextQuestion(), 350)"
+                                            class="group relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none"
+                                            :class="answers[questions[currentQuestion].id] === 5 ? 'scale-110 ring-4 {{ $colors['secondary_light_ring'] }}' : 'hover:scale-110'">
+                                            <div class="w-12 h-12 rounded-full border-4 transition-all duration-200"
+                                                :class="answers[questions[currentQuestion].id] === 5 ? '{{ $colors['secondary_border'] }} {{ $colors['secondary_bg'] }}' : '{{ $colors['secondary_border_light'] }} group-hover:{{ $colors['secondary_border'] }} bg-white'">
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    <div class="flex justify-between items-start max-w-2xl mx-auto px-4 gap-2 mt-2">
+                                        <span
+                                            class="w-16 text-center text-[10px] leading-tight font-medium text-gray-500">Toujours
+                                            comme ça</span>
+                                        <span
+                                            class="w-12 text-center text-[10px] leading-tight font-medium text-gray-500">Souvent
+                                            comme ça</span>
+                                        <span
+                                            class="w-10 text-center text-[10px] leading-tight font-medium text-gray-500">Ça
+                                            dépend</span>
+                                        <span
+                                            class="w-12 text-center text-[10px] leading-tight font-medium text-gray-500">Souvent
+                                            comme ça</span>
+                                        <span
+                                            class="w-16 text-center text-[10px] leading-tight font-medium text-gray-500">Toujours
+                                            comme ça</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Footer Controls -->
+                <div
+                    class="bg-gray-50 px-8 py-4 border-t border-gray-100 flex justify-between items-center sticky bottom-0 z-10">
+                    <button @click="previousQuestion()" :disabled="currentQuestion === 0"
+                        class="px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-200 text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Précédent
+                    </button>
+
+                    <div x-show="currentQuestion === questions.length - 1">
+                        <button @click="submitTest()" :disabled="!allAnswered || submitting"
+                            class="px-8 py-3 bg-gradient-to-r {{ $colors['secondary_gradient'] }} text-white rounded-xl font-bold hover:shadow-lg hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                            <span x-show="submitting"
+                                class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                            <span x-text="submitting ? 'Analyse en cours...' : 'Voir mes résultats'"></span>
+                        </button>
+                    </div>
+                    <div x-show="currentQuestion < questions.length - 1">
+                        <button @click="nextQuestion()" :disabled="!answers[questions[currentQuestion]?.id]"
+                            class="px-6 py-3 bg-gray-900 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            Suivant
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global function for AI chat (accessible from onclick) - Jeune only
+        function discussWithAIJeune() {
+            try {
+                const personalityType = {{ json_encode($personalityTest->personality_type ?? '') }};
+                const personalityLabel = {{ json_encode($mbtiTypes[$personalityTest->personality_type ?? ''] ?? '') }};
+                const description = {{ json_encode($personalityTest->personality_description ?? '') }};
+
+                if (!personalityType) {
+                    alert('Aucun test de personnalité trouvé.');
+                    return;
+                }
+
+                const message = `Bonjour ! Je viens de passer un test de personnalité MBTI et j'ai obtenu le type ${personalityType} (${personalityLabel}).\n\nVoici ma description : ${description}\n\nPeux-tu m'aider à mieux comprendre mon profil et me donner des conseils pour mon développement personnel et professionnel ?`;
+
+                const chatUrl = {{ json_encode(route('jeune.chat')) }};
+                window.location.href = chatUrl + '?message=' + encodeURIComponent(message);
+            } catch (error) {
+                console.error('Erreur discussWithAIJeune:', error);
+                window.location.href = {{ json_encode(route('jeune.chat')) }};
+            }
+        }
+    </script>
+
+    
+        <script>
+            function personalityTest() {
+                return {
+                    showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
+                    showHistoryModal: false, selectedHistory: null,
+
+                    get allAnswered() {
+                        return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length;
+                    },
+
+                    startTest() {
+                        this.showTest = true;
+                        if (this.questions.length === 0) {
+                            this.loadQuestions();
+                        } else {
+                            this.testStarted = true;
+                        }
+                    },
+
+                    closeTest() {
+                        // Confirm before closing if progress
+                        if (this.questions.length > 0 && Object.keys(this.answers).length > 0 && !this.allAnswered) {
+                            if (confirm('Voulez-vous vraiment fermer le test ? Votre progression sera perdue.')) {
+                                this.showTest = false;
+                                this.resetTest();
+                            }
+                        } else {
+                            this.showTest = false;
+                        }
+                    },
+
+                    resetTest() {
+                        this.testStarted = false;
+                        this.questions = [];
+                        this.answers = {};
+                        this.currentQuestion = 0;
+                    },
+
+                    retakeTest() {
+                        this.resetTest();
+                        this.startTest();
+                    },
+
+                    async loadQuestions() {
+                        this.loading = true;
+                        try {
+                            // Bust cache with timestamp
+                            const url = '{{ $questionsUrl ?? route("jeune.personality.questions") }}' + '?t=' + new Date().getTime();
+                            const response = await fetch(url, {
+                                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                            });
+                            const data = await response.json();
+                            if (data.success && data.questions) {
+                                this.questions = data.questions;
+                                this.testStarted = true;
+                            } else {
+                                alert('Erreur: ' + (data.message || 'Format invalide'));
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert('Erreur connexion. Vérifiez votre connexion internet.');
+                        }
+                        this.loading = false;
+                    },
+
+                    selectAnswer(value) {
+                        const qid = this.questions[this.currentQuestion]?.id;
+                        if (qid) this.answers[qid] = value;
+                    },
+
+                    nextQuestion() {
+                        if (this.currentQuestion < this.questions.length - 1 && this.answers[this.questions[this.currentQuestion]?.id]) {
+                            this.currentQuestion++;
+                        }
+                    },
+
+                    previousQuestion() {
+                        if (this.currentQuestion > 0) this.currentQuestion--;
+                    },
+
+                    async submitTest() {
+                        if (!this.allAnswered) return;
+                        this.submitting = true;
+                        try {
+                            const url = '{{ $submitUrl ?? route("jeune.personality.submit") }}';
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                                body: JSON.stringify({ responses: this.answers })
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert(data.message || 'Erreur soumission.');
+                                this.submitting = false;
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert('Erreur connexion.');
+                            this.submitting = false;
+                        }
+                    },
+
+                    discussWithAI() {
+                        try {
+                            // Préparer le message avec le contexte du test
+                            const personalityType = {{ json_encode($personalityTest->personality_type ?? '') }};
+                            const personalityLabel = {{ json_encode($mbtiTypes[$personalityTest->personality_type ?? ''] ?? '') }};
+                            const description = {{ json_encode($personalityTest->personality_description ?? '') }};
+
+                            if (!personalityType) {
+                                alert('Aucun test de personnalité trouvé.');
+                                return;
+                            }
+
+                            const message = `Bonjour ! Je viens de passer un test de personnalité MBTI et j'ai obtenu le type ${personalityType} (${personalityLabel}).\n\nVoici ma description : ${description}\n\nPeux-tu m'aider à mieux comprendre mon profil et me donner des conseils pour mon développement personnel et professionnel ?`;
+
+                            // Rediriger vers le chat avec le message pré-rempli
+                            const chatUrl = {{ json_encode(route('jeune.chat')) }};
+                            window.location.href = chatUrl + '?message=' + encodeURIComponent(message);
+                        } catch (error) {
+                            console.error('Erreur discussWithAI:', error);
+                            // Fallback: rediriger vers le chat sans message
+                            window.location.href = {{ json_encode(route('jeune.chat')) }};
+                        }
+                    },
+
+                    viewHistoryDetails(test) {
+                        this.selectedHistory = test;
+                        this.showHistoryModal = true;
+                    },
+
+                    closeHistoryModal() {
+                        this.showHistoryModal = false;
+                        this.selectedHistory = null;
+                    }
+                }
+            }
+        </script>
+    

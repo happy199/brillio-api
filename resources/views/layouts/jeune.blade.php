@@ -70,6 +70,10 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 
     @stack('styles')

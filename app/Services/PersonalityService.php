@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PersonalityQuestion;
 use App\Models\PersonalityTest;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -131,24 +132,24 @@ class PersonalityService
     ];
 
     /**
-     * Retourne les questions du test formatées
+     * Retourne les questions du test formatées depuis la base de données
      */
     public function getQuestions(string $locale = 'fr'): array
     {
-        return array_map(function ($question) use ($locale) {
-            $textKey = $locale === 'fr' ? 'text_fr' : 'text_en';
+        $questions = PersonalityQuestion::all();
+
+        return $questions->map(function ($question) use ($locale) {
+            $leftTrait = $locale === 'fr' ? $question->left_trait_fr : $question->left_trait_en;
+            $rightTrait = $locale === 'fr' ? $question->right_trait_fr : $question->right_trait_en;
+
             return [
-                'id' => $question['id'],
-                'text' => $question[$textKey],
-                'options' => [
-                    ['value' => 1, 'label' => $locale === 'fr' ? 'Pas du tout d\'accord' : 'Strongly disagree'],
-                    ['value' => 2, 'label' => $locale === 'fr' ? 'Plutôt pas d\'accord' : 'Disagree'],
-                    ['value' => 3, 'label' => $locale === 'fr' ? 'Neutre' : 'Neutral'],
-                    ['value' => 4, 'label' => $locale === 'fr' ? 'Plutôt d\'accord' : 'Agree'],
-                    ['value' => 5, 'label' => $locale === 'fr' ? 'Tout à fait d\'accord' : 'Strongly agree'],
-                ],
+                'id' => $question->id,
+                'text' => "$leftTrait ou $rightTrait ?",
+                'left_trait_fr' => $question->left_trait_fr,
+                'right_trait_fr' => $question->right_trait_fr,
+                'dimension' => $question->dimension,
             ];
-        }, self::QUESTIONS);
+        })->toArray();
     }
 
     /**

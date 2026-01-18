@@ -18,6 +18,14 @@
             </div>
         </div>
         <div class="flex gap-3">
+             <form action="{{ route('admin.mentors.toggle-validation', $mentor) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="px-4 py-2 rounded-lg border {{ $mentor->is_validated ? 'border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50' }}">
+                    {{ $mentor->is_validated ? 'Vérifié' : 'Marquer comme vérifié' }}
+                </button>
+            </form>
+
             <form action="{{ route('admin.mentors.toggle-publish', $mentor) }}" method="POST">
                 @csrf
                 @method('PATCH')
@@ -45,7 +53,14 @@
                             </span>
                         </div>
                     @endif
-                    <h3 class="mt-4 text-lg font-semibold text-gray-900">{{ $mentor->user->name }}</h3>
+                    <h3 class="mt-4 text-lg font-semibold text-gray-900 flex items-center justify-center gap-2">
+                        {{ $mentor->user->name }}
+                        @if($mentor->is_validated)
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        @endif
+                    </h3>
                     <p class="text-gray-500">{{ $mentor->current_position ?? 'Position non renseignée' }}</p>
                     @if($mentor->current_company)
                         <p class="text-sm text-gray-400">{{ $mentor->current_company }}</p>
@@ -53,6 +68,10 @@
                 </div>
 
                 <div class="mt-6 border-t pt-6 space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Vues du profil</span>
+                        <span class="font-bold text-gray-900">{{ $mentor->profile_views }}</span>
+                    </div>
                     <div class="flex justify-between">
                         <span class="text-gray-500">Email</span>
                         <span class="text-gray-900">{{ $mentor->user->email }}</span>
@@ -71,13 +90,9 @@
                     </div>
                     <div class="border-t pt-4">
                         <span class="text-gray-500 text-sm block mb-2">Domaine d'expertise</span>
-                        @if($mentor->specializationModel && $mentor->specializationModel->status === 'approved')
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
-                                {{ $mentor->specializationModel->name }}
-                            </span>
-                        @elseif($mentor->specializationModel)
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                {{ $mentor->specializationModel->name }} (En attente)
+                        @if($mentor->specializationModel)
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $mentor->specializationModel->status === 'active' ? 'bg-orange-100 text-orange-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                {{ $mentor->specializationModel->name }} {{ $mentor->specializationModel->status !== 'active' ? '(En attente de validation)' : '' }}
                             </span>
                         @elseif($mentor->specialization)
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">

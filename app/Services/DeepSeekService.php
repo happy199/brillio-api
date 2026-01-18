@@ -27,6 +27,7 @@ class DeepSeekService
     private float $temperature;
     private string $siteUrl;
     private string $siteName;
+    private string $systemPrompt;
 
     /**
      * Prompt système pour orienter l'IA vers les conseils d'orientation
@@ -78,11 +79,47 @@ EOT;
         $this->temperature = (float) config('services.openrouter.temperature', 0.7);
         $this->siteUrl = config('services.openrouter.site_url', 'https://www.brillio.africa');
         $this->siteName = config('services.openrouter.site_name', 'Brillio');
+
+        // Initialisation du prompt système avec l'instruction de formatage pour séparer pensée et réponse
+        $this->systemPrompt = self::SYSTEM_PROMPT . "\n\nIMPORTANT: Pour chaque reponse, tu dois D'ABORD reflechir (tu peux afficher ta reflexion), puis IMPERATIVEMENT ecrire ta reponse finale au destinataire entre les balises <answer> et </answer>. Exemple: <answer>Bonjour Tidjani...</answer>";
     }
 
+    // ... (createConversation unchange)
+
     /**
-     * Crée une nouvelle conversation
+     * Nettoie la réponse de l'IA (supprime les balises <think> de DeepSeek R1 et extrait <answer>)
      */
+    private function cleanResponse(string $content): string
+    {
+        // 1. Essayer d'extraire le contenu entre <answer>...</answer>
+        if (preg_match('/<answer>(.*?)<\/answer>/s', $content, $matches)) {
+            $content = $matches[1];
+        }
+        // 2. Si pas de balises <answer>, essayer de nettoyer les balises <think> (comportement standard R1)
+        else {
+            $content = preg_replace('/<think>.*?<\/think>/s', '', $content);
+        }
+
+        // Remplacer les ### par des doubles retours à la ligne pour séparer les sections
+        $content = preg_replace('/###\s*/', "\n\n", $content);
+
+        // Remplacer les ## par des doubles retours à la ligne
+        $content = preg_replace('/##\s*/', "\n\n", $content);
+
+        // Remplacer les listes numérotées pour ajouter un retour à la ligne avant
+        $content = preg_replace('/(\d+\.\s)/', "\n$1", $content);
+
+        // Remplacer les listes à puces pour ajouter un retour à la ligne avant
+        $content = preg_replace('/([•\-✔️👉])\s/', "\n$1 ", $content);
+
+        // Nettoyer les retours à la ligne multiples (max 2)
+        $content = preg_replace('/\n{3,}/', "\n\n", $content);
+
+        // Trim final
+        $content = trim($content);
+
+        return $content;
+    }
     public function createConversation(User $user, ?string $title = null): ChatConversation
     {
         return ChatConversation::create([
@@ -132,7 +169,7 @@ EOT;
         $messages = [
             [
                 'role' => 'system',
-                'content' => self::SYSTEM_PROMPT,
+                'content' => $this->systemPrompt,
             ],
         ];
 
@@ -234,7 +271,7 @@ EOT;
                 'HTTP-Referer' => $this->siteUrl,
                 'X-Title' => $this->siteName,
                 'Content-Type' => 'application/json',
-            ])->timeout(60)->post($this->apiUrl, [
+            ])->timeout(300)->post($this->apiUrl, [
                         'model' => $this->model,
                         'messages' => $messages,
                         'max_tokens' => $this->maxTokens,
@@ -249,6 +286,10 @@ EOT;
 
             if ($response->successful()) {
                 $data = $response->json();
+
+                // DEBUG: Loguer la réponse brute pour comprendre la structure
+                Log::info('DEBUG OPENROUTER RESPONSE', ['data' => $data]);
+
                 $content = $data['choices'][0]['message']['content'] ?? null;
 
                 Log::info('Contenu extrait de la reponse', [
@@ -286,31 +327,6 @@ EOT;
     /**
      * Nettoie la réponse de l'IA (supprime les balises <think> de DeepSeek R1)
      */
-    private function cleanResponse(string $content): string
-    {
-        // Supprimer les balises <think>...</think> qui contiennent le raisonnement interne
-        $content = preg_replace('/<think>.*?<\/think>/s', '', $content);
-
-        // Remplacer les ### par des doubles retours à la ligne pour séparer les sections
-        $content = preg_replace('/###\s*/', "\n\n", $content);
-
-        // Remplacer les ## par des doubles retours à la ligne
-        $content = preg_replace('/##\s*/', "\n\n", $content);
-
-        // Remplacer les listes numérotées pour ajouter un retour à la ligne avant
-        $content = preg_replace('/(\d+\.\s)/', "\n$1", $content);
-
-        // Remplacer les listes à puces pour ajouter un retour à la ligne avant
-        $content = preg_replace('/([•\-✔️👉])\s/', "\n$1 ", $content);
-
-        // Nettoyer les retours à la ligne multiples (max 2)
-        $content = preg_replace('/\n{3,}/', "\n\n", $content);
-
-        // Trim final
-        $content = trim($content);
-
-        return $content;
-    }
 
     /**
      * Retourne une réponse de secours si l'API est indisponible

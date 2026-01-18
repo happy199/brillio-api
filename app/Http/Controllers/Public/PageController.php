@@ -79,7 +79,10 @@ class PageController extends Controller
             abort(404);
         }
 
-        $mentor->load(['user', 'specialization', 'roadmapSteps']);
+        // Incrémenter le compteur de vues
+        $mentor->increment('profile_views');
+
+        $mentor->load(['user', 'specializationModel', 'roadmapSteps']);
 
         // Données sécurisées pour affichage public
         $publicData = [
@@ -88,7 +91,7 @@ class PageController extends Controller
             'current_position' => $mentor->current_position,
             'current_company' => $mentor->current_company,
             'years_of_experience' => $mentor->years_of_experience,
-            'specialization' => $mentor->specialization?->name,
+            'specialization' => $mentor->specializationModel?->name ?? $mentor->specialization,
             'bio' => $mentor->bio,
             'advice' => $mentor->advice,
             'linkedin_url' => $mentor->linkedin_url,

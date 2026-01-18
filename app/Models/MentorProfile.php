@@ -68,6 +68,9 @@ class MentorProfile extends Model
         'linkedin_pdf_path',
         'linkedin_pdf_original_name',
         'linkedin_import_count',
+        'is_validated',
+        'validated_at',
+        'profile_views',
     ];
 
     protected function casts(): array
@@ -77,9 +80,11 @@ class MentorProfile extends Model
             'linkedin_raw_data' => 'array',
             'skills' => 'array',
             'is_published' => 'boolean',
+            'is_validated' => 'boolean',
             'years_of_experience' => 'integer',
             'linkedin_import_count' => 'integer',
             'linkedin_imported_at' => 'datetime',
+            'validated_at' => 'datetime',
         ];
     }
 
@@ -172,7 +177,7 @@ class MentorProfile extends Model
     {
         return !empty($this->bio)
             && !empty($this->current_position)
-            && !empty($this->specialization)
+            && (!empty($this->specialization) || !empty($this->specialization_id))
             && $this->roadmapSteps()->count() >= 1;
     }
 
