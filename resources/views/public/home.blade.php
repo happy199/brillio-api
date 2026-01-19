@@ -111,60 +111,77 @@
         </div>
     </section>
 
-    <!-- Impact Stats Section -->
-    <section class="py-16 bg-gradient-to-r from-primary-50 to-secondary-50">
+
+    <!-- Value Proposition Section -->
+    <section class="py-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-4xl mx-auto">
-                <div class="text-center mb-12" data-aos="fade-up">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-3">L'orientation professionnelle réinventée</h2>
-                    <p class="text-lg text-gray-600">Rejoins des milliers de jeunes africains qui construisent leur avenir
-                        avec Brillio</p>
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                        Pourquoi choisir Brillio ?
+                    </h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Une plateforme complète pensée pour les jeunes africains, avec des outils adaptés à ton contexte et
+                        tes ambitions.
+                    </p>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <!-- Stat 1 -->
-                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Value 1 -->
+                    <div class="group bg-gradient-to-br from-primary-50 to-secondary-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300"
                         data-aos="fade-up" data-aos-delay="100">
                         <div
-                            class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent mb-2">
-                            10K+
+                            class="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
                         </div>
-                        <p class="text-sm text-gray-600 font-medium">Jeunes accompagnés</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Connais-toi mieux</h3>
+                        <p class="text-gray-600">
+                            Découvre ta personnalité unique avec notre test MBTI scientifique et reçois des recommandations
+                            de métiers adaptés à qui tu es vraiment.
+                        </p>
                     </div>
 
-                    <!-- Stat 2 -->
-                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                    <!-- Value 2 -->
+                    <div class="group bg-gradient-to-br from-secondary-50 to-accent-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300"
                         data-aos="fade-up" data-aos-delay="200">
                         <div
-                            class="text-4xl font-bold bg-gradient-to-r from-secondary-600 to-accent-600 bg-clip-text text-transparent mb-2">
-                            500+
+                            class="w-16 h-16 bg-gradient-to-br from-secondary-500 to-accent-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
                         </div>
-                        <p class="text-sm text-gray-600 font-medium">Mentors actifs</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Inspire-toi de modèles</h3>
+                        <p class="text-gray-600">
+                            Explore les parcours de professionnels africains qui ont réussi dans ton domaine d'intérêt et
+                            apprends de leur expérience.
+                        </p>
                     </div>
 
-                    <!-- Stat 3 -->
-                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                    <!-- Value 3 -->
+                    <div class="group bg-gradient-to-br from-accent-50 to-primary-50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300"
                         data-aos="fade-up" data-aos-delay="300">
                         <div
-                            class="text-4xl font-bold bg-gradient-to-r from-accent-600 to-primary-600 bg-clip-text text-transparent mb-2">
-                            15+
+                            class="w-16 h-16 bg-gradient-to-br from-accent-500 to-primary-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
                         </div>
-                        <p class="text-sm text-gray-600 font-medium">Pays africains</p>
-                    </div>
-
-                    <!-- Stat 4 -->
-                    <div class="text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow"
-                        data-aos="fade-up" data-aos-delay="400">
-                        <div
-                            class="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
-                            24/7
-                        </div>
-                        <p class="text-sm text-gray-600 font-medium">Support IA</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Passe à l'action</h3>
+                        <p class="text-gray-600">
+                            Reçois des conseils personnalisés 24/7 de notre IA et construis ton plan d'action concret pour
+                            atteindre tes objectifs professionnels.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- Problem / Solution Section -->
     <section class="py-20 bg-white">
