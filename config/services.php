@@ -43,7 +43,7 @@ return [
 
     // OpenRouter API - Pour accéder à DeepSeek R1 et autres modèles IA
     'openrouter' => [
-        'api_key' => env('OPENROUTER_API_KEY', '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'),
+        'api_key' => env('OPENROUTER_API_KEY'),
         'api_url' => env('OPENROUTER_API_URL', 'https://openrouter.ai/api/v1/chat/completions'),
         'model' => env('OPENROUTER_MODEL', 'tngtech/deepseek-r1t-chimera:free'),
         'max_tokens' => env('OPENROUTER_MAX_TOKENS', 2000),

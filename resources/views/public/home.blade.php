@@ -83,7 +83,7 @@
                                             </svg>
                                         </div>
                                         <h3 class="text-xl font-bold text-gray-800">Brillio</h3>
-                                        <p class="text-gray-600 text-sm mt-2">Capture d'écran de l'application</p>
+                                        <p class="text-gray-600 text-sm mt-2">L'application mobile bientôt disponible</p>
                                     </div>
                                 </div>
                             </div>
