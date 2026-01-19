@@ -15,7 +15,7 @@ class AdminSeeder extends Seeder
     {
         User::create([
             'name' => 'Admin Brillio',
-            'email' => config('app.admin_email', 'admin@brillio.com'),
+            'email' => config('app.admin_email', 'contact@brillio.africa'),
             'password' => Hash::make(config('app.admin_password', 'BrillioAdmin2026!')),
             'user_type' => 'jeune', // L'admin peut être de n'importe quel type
             'is_admin' => true,
@@ -24,6 +24,6 @@ class AdminSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
-        $this->command->info('Compte admin créé : admin@brillio.com');
+        $this->command->info('Compte admin créé : contact@brillio.africa');
     }
 }

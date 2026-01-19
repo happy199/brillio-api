@@ -108,8 +108,8 @@
                     <li><strong>Droit de limitation :</strong> Limiter le traitement de vos données</li>
                 </ul>
                 <p class="text-gray-700 mt-3">
-                    Pour exercer ces droits, contactez-nous à : <a href="mailto:privacy@brillio.com"
-                        class="text-primary-600 hover:underline">privacy@brillio.com</a>
+                    Pour exercer ces droits, contactez-nous à : <a href="mailto:contact@brillio.africa"
+                        class="text-primary-600 hover:underline">contact@brillio.africa</a>
                 </p>
             </section>
 
@@ -158,8 +158,8 @@
                     Protection des Données :
                 </p>
                 <div class="mt-3 p-4 bg-gray-50 rounded-xl">
-                    <p class="text-gray-700"><strong>Email :</strong> <a href="mailto:dpo@brillio.com"
-                            class="text-primary-600 hover:underline">dpo@brillio.com</a></p>
+                    <p class="text-gray-700"><strong>Email :</strong> <a href="mailto:contact@brillio.africa"
+                            class="text-primary-600 hover:underline">contact@brillio.africa</a></p>
                     <p class="text-gray-700 mt-1"><strong>Adresse :</strong> Brillio, Cotonou, Bénin</p>
                 </div>
             </section>

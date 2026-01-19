@@ -83,7 +83,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'admin_email' => env('ADMIN_EMAIL', 'admin@brillio.com'),
+    'admin_email' => env('ADMIN_EMAIL', 'contact@brillio.africa'),
     'admin_password' => env('ADMIN_PASSWORD', 'BrillioAdmin2024!'),
 
 ];
