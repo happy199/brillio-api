@@ -130,6 +130,11 @@ class PageController extends Controller
         // Incrémenter le compteur de vues
         $profile->increment('profile_views');
 
+        // Si c'est un mentor connecté qui visite, incrémenter les vues par mentor
+        if (auth()->check() && auth()->user()->isMentor()) {
+            $profile->increment('mentor_views');
+        }
+
         $profile->load(['user', 'user.personalityTest']);
 
         return view('public.jeune-profile', [

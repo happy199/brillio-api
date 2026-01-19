@@ -30,6 +30,20 @@ class WebAuthController extends Controller
      */
     public function showChoice()
     {
+        // Si l'utilisateur est déjà connecté, le rediriger vers son espace
+        if (Auth::check()) {
+            $user = Auth::user();
+
+            if ($user->isJeune()) {
+                // Rediriger vers l'onboarding si pas complété, sinon vers le dashboard
+                return redirect()->route($user->onboarding_completed ? 'jeune.dashboard' : 'jeune.onboarding');
+            }
+
+            if ($user->isMentor()) {
+                return redirect()->route('mentor.dashboard');
+            }
+        }
+
         return view('auth.choice');
     }
 
@@ -38,6 +52,19 @@ class WebAuthController extends Controller
      */
     public function showLoginChoice()
     {
+        // Si l'utilisateur est déjà connecté, le rediriger vers son espace
+        if (Auth::check()) {
+            $user = Auth::user();
+
+            if ($user->isJeune()) {
+                return redirect()->route($user->onboarding_completed ? 'jeune.dashboard' : 'jeune.onboarding');
+            }
+
+            if ($user->isMentor()) {
+                return redirect()->route('mentor.dashboard');
+            }
+        }
+
         return view('auth.login-choice');
     }
 
