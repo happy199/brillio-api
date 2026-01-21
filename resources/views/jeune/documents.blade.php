@@ -11,7 +11,7 @@
                 <p class="text-gray-500">Centralise et organise tes documents academiques</p>
             </div>
             <button @click="showUploadModal = true"
-                class="px-5 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold rounded-xl hover:shadow-lg transition flex items-center gap-2">
+                class="px-5 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -60,7 +60,8 @@
                     </svg>
                 </div>
                 <p class="text-2xl font-bold text-gray-900">
-                    {{ number_format($documents->sum('file_size') / 1024 / 1024, 1) }} Mo</p>
+                    {{ number_format($documents->sum('file_size') / 1024 / 1024, 1) }} Mo
+                </p>
                 <p class="text-sm text-gray-500">Stockage utilise</p>
             </div>
         </div>
@@ -102,10 +103,10 @@
                         x-show="filter === 'all' || filter === '{{ $document->document_type }}'">
                         <div class="flex items-start gap-4">
                             <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
-                                {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
-                                {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
-                                {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
-                                {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
+                                            {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
+                                            {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
+                                            {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
+                                            {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
                                 @if($document->mime_type === 'application/pdf')
                                     <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                                         <path
@@ -167,7 +168,7 @@
                 <h3 class="text-xl font-bold text-gray-900 mb-2">Aucun document</h3>
                 <p class="text-gray-500 mb-6">Commence par ajouter tes bulletins, diplomes et autres documents academiques.</p>
                 <button @click="showUploadModal = true"
-                    class="px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold rounded-xl hover:shadow-lg transition">
+                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
                     Ajouter mon premier document
                 </button>
             </div>
@@ -240,96 +241,97 @@
                             Annuler
                         </button>
                         <button type="submit"
-                            class="flex-1 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold rounded-xl hover:shadow-lg transition">
+                            class="flex-1 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
                             Ajouter
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-    <!-- Preview Modal -->
-    <div x-show="showPreviewModal" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
-         x-transition>
-        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="flex items-center justify-between p-6 border-b">
-                <h3 class="text-xl font-bold text-gray-900" x-text="previewFileName"></h3>
-                <button @click="showPreviewModal = false" class="p-2 hover:bg-gray-100 rounded-full">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="flex-1 overflow-auto p-6 bg-gray-50">
-                <!-- Image Preview -->
-                <template x-if="previewType && previewType.startsWith('image/')">
-                    <img :src="previewUrl" :alt="previewFileName" class="max-w-full h-auto mx-auto rounded-lg shadow-lg">
-                </template>
-                
-                <!-- PDF Preview -->
-                <template x-if="previewType === 'application/pdf'">
-                    <iframe :src="previewUrl" class="w-full h-[70vh] rounded-lg shadow-lg"></iframe>
-                </template>
+        <!-- Preview Modal -->
+        <div x-show="showPreviewModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+            x-transition>
+            <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                <div class="flex items-center justify-between p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-900" x-text="previewFileName"></h3>
+                    <button @click="showPreviewModal = false" class="p-2 hover:bg-gray-100 rounded-full">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-auto p-6 bg-gray-50">
+                    <!-- Image Preview -->
+                    <template x-if="previewType && previewType.startsWith('image/')">
+                        <img :src="previewUrl" :alt="previewFileName"
+                            class="max-w-full h-auto mx-auto rounded-lg shadow-lg">
+                    </template>
+
+                    <!-- PDF Preview -->
+                    <template x-if="previewType === 'application/pdf'">
+                        <iframe :src="previewUrl" class="w-full h-[70vh] rounded-lg shadow-lg"></iframe>
+                    </template>
+                </div>
             </div>
         </div>
     </div>
-</div>
     @push('scripts')
         <script>
             function documentsApp() {
-    return {
-        filter: 'all',
-        showUploadModal: false,
-        showPreviewModal: false,
-        fileName: '',
-        dragover: false,
-        previewUrl: '',
-        previewType: '',
-        previewFileName: '',
+                return {
+                    filter: 'all',
+                    showUploadModal: false,
+                    showPreviewModal: false,
+                    fileName: '',
+                    dragover: false,
+                    previewUrl: '',
+                    previewType: '',
+                    previewFileName: '',
 
-        handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                this.fileName = file.name;
-            }
-        },
+                    handleFileSelect(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            this.fileName = file.name;
+                        }
+                    },
 
-        handleDrop(event) {
-            this.dragover = false;
-            const file = event.dataTransfer.files[0];
-            if (file) {
-                this.fileName = file.name;
-                this.$refs.fileInput.files = event.dataTransfer.files;
-            }
-        },
+                    handleDrop(event) {
+                        this.dragover = false;
+                        const file = event.dataTransfer.files[0];
+                        if (file) {
+                            this.fileName = file.name;
+                            this.$refs.fileInput.files = event.dataTransfer.files;
+                        }
+                    },
 
-        previewDocument(id, mimeType, fileName) {
-            this.previewUrl = `/espace-jeune/documents/${id}/view`;
-            this.previewType = mimeType;
-            this.previewFileName = fileName;
-            this.showPreviewModal = true;
-        },
+                    previewDocument(id, mimeType, fileName) {
+                        this.previewUrl = `/espace-jeune/documents/${id}/view`;
+                        this.previewType = mimeType;
+                        this.previewFileName = fileName;
+                        this.showPreviewModal = true;
+                    },
 
-        async deleteDocument(id) {
-            if (!confirm('Es-tu sur de vouloir supprimer ce document ?')) return;
+                    async deleteDocument(id) {
+                        if (!confirm('Es-tu sur de vouloir supprimer ce document ?')) return;
 
-            try {
-                const response = await fetch(`/espace-jeune/documents/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        try {
+                            const response = await fetch(`/espace-jeune/documents/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+
+                            if (response.ok) {
+                                window.location.reload();
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
                     }
-                });
-
-                if (response.ok) {
-                    window.location.reload();
                 }
-            } catch (error) {
-                console.error('Error:', error);
             }
-        }
-    }
-}
         </script>
     @endpush
 @endsection
