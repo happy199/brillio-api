@@ -34,7 +34,7 @@ class OnboardingController extends Controller
             'birth_date' => 'required|date|before:today',
             'country' => 'required|string|max:100',
             'city' => 'nullable|string|max:100',
-            'education_level' => 'required|string|in:college,lycee,bac,licence,master,doctorat,autre',
+            'education_level' => 'required|string|in:college,lycee,bac,licence,master,doctorat',
             'current_situation' => 'required|string|in:etudiant,recherche_emploi,emploi,entrepreneur,autre',
             'interests' => 'required|array|min:1|max:5',
             'interests.*' => 'string',
