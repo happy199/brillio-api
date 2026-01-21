@@ -104,10 +104,10 @@
                         <div class="flex items-start gap-4">
                             <div
                                 class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
-                                                                    {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
-                                                                    {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
-                                                                    {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
-                                                                    {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
+                                                                                {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
+                                                                                {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
+                                                                                {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
+                                                                                {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
                                 @if($document->mime_type === 'application/pdf')
                                     <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                                         <path
@@ -324,8 +324,8 @@
                     showPreviewModal: false,
                     showDeleteModal: false,
                     documentToDelete: null,
-                    fileName: '', ',
-                            dragover: false,
+                    fileName: '',
+                    dragover: false,
                     previewUrl: '',
                     previewType: '',
                     previewFileName: '',
