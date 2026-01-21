@@ -3,7 +3,7 @@
 @section('title', 'Mes statistiques')
 
 @section('content')
-    <div class="space-y-8">
+    <div class="space-y-8" x-data="mentorStatsData()">
         <!-- Header -->
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Mes statistiques</h1>
@@ -112,7 +112,8 @@
                     </div>
                     <div>
                         <p class="text-3xl font-bold text-gray-900">
-                            {{ $profile && $profile->is_published ? 'Publie' : 'Brouillon' }}</p>
+                            {{ $profile && $profile->is_published ? 'Publie' : 'Brouillon' }}
+                        </p>
                         <p class="text-sm text-gray-500">Statut du profil</p>
                     </div>
                 </div>
@@ -228,5 +229,145 @@
                 </div>
             </div>
         </div>
+
+        <!-- Zone de Danger -->
+        <div class="bg-white rounded-2xl shadow-sm p-8 border border-red-200">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Zone de danger</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        La suppression de votre compte archivera toutes vos données. Vous pourrez réactiver votre compte à
+                        tout moment en vous reconnectant.
+                    </p>
+                    <button @click="showDeleteConfirm = true"
+                        class="px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Supprimer mon compte
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 1: Confirmation initiale de suppression -->
+        <div x-show="showDeleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" x-cloak
+            x-transition>
+            <div class="bg-white rounded-3xl max-w-md w-full p-6" @click.away="showDeleteConfirm = false">
+                <div class="flex items-center justify-center w-14 h-14 bg-red-100 rounded-full mx-auto mb-4">
+                    <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Êtes-vous sûr ?</h3>
+                <p class="text-gray-600 text-center mb-6">
+                    Votre compte sera archivé et vous serez déconnecté. Vous pourrez le réactiver à tout moment en vous
+                    reconnectant avec vos identifiants.
+                </p>
+
+                <div class="flex gap-3">
+                    <button @click="showDeleteConfirm = false"
+                        class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                        Annuler
+                    </button>
+                    <button @click="showDeleteConfirm = false; showDeleteCode = true; generateCode()"
+                        class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition">
+                        Continuer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: Validation par code -->
+        <div x-show="showDeleteCode" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" x-cloak
+            x-transition>
+            <div class="bg-white rounded-3xl max-w-md w-full p-6" @click.away="showDeleteCode = false">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Confirmer la suppression</h3>
+                <p class="text-gray-600 mb-4">
+                    Pour confirmer, veuillez taper le code suivant :
+                </p>
+
+                <div class="bg-gray-100 rounded-xl p-4 mb-4 text-center">
+                    <p class="text-2xl font-bold text-gray-900 tracking-wider" x-text="confirmationCode"></p>
+                </div>
+
+                <form @submit.prevent="submitArchive">
+                    <div class="mb-4">
+                        <input type="text" x-model="codeInput" placeholder="Tapez le code ici"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition text-center text-lg font-semibold tracking-wider uppercase">
+                        <p x-show="codeError" class="text-red-600 text-sm mt-2" x-text="codeError"></p>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="button" @click="showDeleteCode = false; codeInput = ''; codeError = ''"
+                            class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                            Annuler
+                        </button>
+                        <button type="submit" :disabled="codeInput !== confirmationCode"
+                            :class="codeInput === confirmationCode ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-300 cursor-not-allowed'"
+                            class="flex-1 py-3 text-white font-semibold rounded-xl transition">
+                            Archiver mon compte
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function mentorStatsData() {
+            return {
+                showDeleteConfirm: false,
+                showDeleteCode: false,
+                confirmationCode: '',
+                codeInput: '',
+                codeError: '',
+
+                async generateCode() {
+                    try {
+                        const response = await fetch('{{ route("mentor.account.confirmation-code") }}');
+                        const data = await response.json();
+                        this.confirmationCode = data.code;
+                    } catch (error) {
+                        console.error('Error generating code:', error);
+                        this.confirmationCode = 'ERROR-0000';
+                    }
+                },
+
+                async submitArchive() {
+                    if (this.codeInput !== this.confirmationCode) {
+                        this.codeError = 'Le code ne correspond pas';
+                        return;
+                    }
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route("mentor.account.archive") }}';
+
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfToken);
+
+                    const codeField = document.createElement('input');
+                    codeField.type = 'hidden';
+                    codeField.name = 'confirmation_code';
+                    codeField.value = this.codeInput;
+                    form.appendChild(codeField);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        }
+    </script>
 @endsection
