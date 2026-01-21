@@ -104,10 +104,10 @@
                         <div class="flex items-start gap-4">
                             <div
                                 class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
-                                                                                {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
-                                                                                {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
-                                                                                {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
-                                                                                {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
+                                                                                            {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
+                                                                                            {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
+                                                                                            {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
+                                                                                            {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
                                 @if($document->mime_type === 'application/pdf')
                                     <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                                         <path
@@ -315,79 +315,78 @@
             </div>
         </div>
     </div>
-    @push('scripts')
-        <script>
-            function documentsApp() {
-                return {
-                    filter: 'all',
-                    showUploadModal: false,
-                    showPreviewModal: false,
-                    showDeleteModal: false,
-                    documentToDelete: null,
-                    fileName: '',
-                    dragover: false,
-                    previewUrl: '',
-                    previewType: '',
-                    previewFileName: '',
-                    startYear: '',
-                    endYear: '',
 
-                    calculateEndYear() {
-                        if (this.startYear && this.startYear.length === 4) {
-                            this.endYear = parseInt(this.startYear) + 1;
-                        } else {
-                            this.endYear = '';
-                        }
-                    },
+    <script>
+        function documentsApp() {
+            return {
+                filter: 'all',
+                showUploadModal: false,
+                showPreviewModal: false,
+                showDeleteModal: false,
+                documentToDelete: null,
+                fileName: '',
+                dragover: false,
+                previewUrl: '',
+                previewType: '',
+                previewFileName: '',
+                startYear: '',
+                endYear: '',
 
-                    handleFileSelect(event) {
-                        const file = event.target.files[0];
-                        if (file) {
-                            this.fileName = file.name;
-                        }
-                    },
+                calculateEndYear() {
+                    if (this.startYear && this.startYear.length === 4) {
+                        this.endYear = parseInt(this.startYear) + 1;
+                    } else {
+                        this.endYear = '';
+                    }
+                },
 
-                    handleDrop(event) {
-                        this.dragover = false;
-                        const file = event.dataTransfer.files[0];
-                        if (file) {
-                            this.fileName = file.name;
-                            this.$refs.fileInput.files = event.dataTransfer.files;
-                        }
-                    },
+                handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.fileName = file.name;
+                    }
+                },
 
-                    previewDocument(id, mimeType, fileName) {
-                        this.previewUrl = `/espace-jeune/documents/${id}/view`;
-                        this.previewType = mimeType;
-                        this.previewFileName = fileName;
-                        this.showPreviewModal = true;
-                    },
+                handleDrop(event) {
+                    this.dragover = false;
+                    const file = event.dataTransfer.files[0];
+                    if (file) {
+                        this.fileName = file.name;
+                        this.$refs.fileInput.files = event.dataTransfer.files;
+                    }
+                },
 
-                    deleteDocument(id) {
-                        this.documentToDelete = id;
-                        this.showDeleteModal = true;
-                    },
+                previewDocument(id, mimeType, fileName) {
+                    this.previewUrl = `/espace-jeune/documents/${id}/view`;
+                    this.previewType = mimeType;
+                    this.previewFileName = fileName;
+                    this.showPreviewModal = true;
+                },
 
-                    async confirmDelete() {
-                        if (!this.documentToDelete) return;
+                deleteDocument(id) {
+                    this.documentToDelete = id;
+                    this.showDeleteModal = true;
+                },
 
-                        try {
-                            const response = await fetch(`/espace-jeune/documents/${this.documentToDelete}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
+                async confirmDelete() {
+                    if (!this.documentToDelete) return;
 
-                            if (response.ok) {
-                                window.location.reload();
+                    try {
+                        const response = await fetch(`/espace-jeune/documents/${this.documentToDelete}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             }
-                        } catch (error) {
-                            console.error('Error:', error);
+                        });
+
+                        if (response.ok) {
+                            window.location.reload();
                         }
+                    } catch (error) {
+                        console.error('Error:', error);
                     }
                 }
             }
-        </script>
-    @endpush
+        }
+    </script>
 @endsection
