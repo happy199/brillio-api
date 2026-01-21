@@ -9,7 +9,7 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div>
                     <h1 class="text-3xl font-bold">Bonjour, {{ explode(' ', $user->name)[0] }} !</h1>
-                    <p class="text-white/80 mt-2">Pret a explorer de nouvelles opportunites aujourd'hui ?</p>
+                    <p class="text-white/80 mt-2">Prêt à explorer de nouvelles opportunités aujourd'hui ?</p>
                 </div>
                 <div class="flex gap-3">
                     @if(!$stats['personality_completed'])
