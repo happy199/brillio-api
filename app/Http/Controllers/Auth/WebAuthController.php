@@ -156,6 +156,16 @@ class WebAuthController extends Controller
 
             $user->update(['last_login_at' => now()]);
 
+            // Reactivate archived account automatically
+            if ($user->is_archived) {
+                $user->is_archived = false;
+                $user->archived_at = null;
+                $user->archived_reason = null;
+                $user->save();
+
+                session()->flash('success', 'Bon retour ! Votre compte a été réactivé automatiquement.');
+            }
+
             if (!$user->onboarding_completed) {
                 return redirect()->route('jeune.onboarding');
             }

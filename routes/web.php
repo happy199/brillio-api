@@ -148,6 +148,10 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'index'])->name('profile');
     Route::post('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'update'])->name('profile.update');
+
+    // Account archiving
+    Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
+    Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');
     Route::get('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'showChangePasswordForm'])->name('password.change');
     Route::put('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'updatePassword'])->name('password.update');
 });
@@ -193,6 +197,10 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::get('/test-personnalite/export-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class, 'exportCurrent'])->name('personality.export-pdf');
     Route::get('/test-personnalite/export-history-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class, 'exportHistory'])->name('personality.export-history-pdf');
     Route::get('/test-personnalite/history/{testId}', [App\Http\Controllers\Mentor\PersonalityController::class, 'getHistoryTestDetails'])->name('personality.history');
+
+    // Account archiving
+    Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
+    Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');
 });
 
 /*
