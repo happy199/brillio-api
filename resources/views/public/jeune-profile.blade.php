@@ -19,8 +19,10 @@
                     </div>
                 </div>
                 <div class="px-8 pb-8">
-                    <div class="relative flex justify-between items-end -mt-16 mb-6">
-                        <div class="flex items-end gap-6">
+                    <!-- Profile Info Container - Responsive -->
+                    <div class="relative -mt-16 mb-6">
+                        <!-- Avatar and Name - Always together -->
+                        <div class="flex items-end gap-6 mb-4">
                             <div class="w-24 h-24 rounded-2xl bg-white p-1 shadow-lg">
                                 @if($user->avatar_url)
                                     <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}"
@@ -33,14 +35,15 @@
                                 @endif
                             </div>
                             <div class="mb-1">
-                                <h1 class="text-3xl font-bold text-gray-900">{{ $user->name }}</h1>
-                                <p class="text-gray-500 font-medium">
+                                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $user->name }}</h1>
+                                <p class="text-gray-500 font-medium text-sm sm:text-base">
                                     {{ $user->city ? $user->city . ', ' : '' }}{{ $user->country }}
                                 </p>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3">
+                        <!-- Action Buttons - Stack on mobile, inline on desktop -->
+                        <div class="flex flex-wrap items-center gap-3">
                             <!-- Website / Portfolio -->
                             @if($profile->portfolio_url)
                                 <a href="{{ $profile->portfolio_url }}" target="_blank"
@@ -64,7 +67,8 @@
                                 </a>
                             @endif
 
-                            <div class="h-8 w-px bg-gray-200 mx-2"></div>
+                            <!-- Divider - Hidden on mobile -->
+                            <div class="hidden sm:block h-8 w-px bg-gray-200 mx-2"></div>
 
                             <!-- Share Button -->
                             <button onclick="shareProfile()"
@@ -77,6 +81,7 @@
                             </button>
                         </div>
                     </div>
+
 
                     @if($profile->bio)
                         <div class="prose max-w-none text-gray-600">
