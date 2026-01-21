@@ -122,11 +122,29 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
-                    <input type="date" name="birth_date" x-model="formData.birth_date" required
-                        class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                    <input type="date" name="birth_date" x-model="formData.birth_date" @change="validateAge()"
+                        :max="maxDate" :min="minDate" required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
                     @error('birth_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
+
+                    <!-- Alerte pour utilisateurs trop jeunes -->
+                    <div x-show="ageError" x-transition class="mt-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor"
+                                viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-red-800">Tu es trop jeune pour utiliser Brillio</p>
+                                <p class="text-sm text-red-700 mt-1">Cette application est réservée aux personnes de 10
+                                    ans et plus. Merci de te rapprocher d'un adulte pour obtenir de l'aide.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -161,8 +179,9 @@
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button type="button" @click="nextStep()"
-                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                <button type="button" @click="nextStep()" :disabled="ageError"
+                    :class="ageError ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-700'"
+                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl transition">
                     Continuer
                 </button>
             </div>
@@ -358,6 +377,9 @@
 
                 showCitySuggestions: false,
                 filteredCities: [],
+                ageError: false,
+                maxDate: new Date().toISOString().split('T')[0], // Aujourd'hui
+                minDate: new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0], // 100 ans en arrière
 
                 // Base de données des principales villes par pays
                 citiesByCountry: {
@@ -445,7 +467,7 @@
 
                 filterCities() {
                     const input = this.formData.city.toLowerCase();
-                    
+
                     // Afficher les suggestions seulement après 2 caractères
                     if (input.length < 2) {
                         this.filteredCities = [];
@@ -454,9 +476,9 @@
 
                     // Obtenir les villes du pays sélectionné
                     const countryCities = this.citiesByCountry[this.formData.country] || [];
-                    
+
                     // Filtrer les villes qui correspondent à la saisie
-                    this.filteredCities = countryCities.filter(city => 
+                    this.filteredCities = countryCities.filter(city =>
                         city.toLowerCase().includes(input)
                     ).slice(0, 10); // Limiter à 10 résultats
                 },
@@ -465,6 +487,26 @@
                     this.formData.city = city;
                     this.showCitySuggestions = false;
                     this.filteredCities = [];
+                },
+
+                validateAge() {
+                    if (!this.formData.birth_date) {
+                        this.ageError = false;
+                        return;
+                    }
+
+                    const birthDate = new Date(this.formData.birth_date);
+                    const today = new Date();
+                    const age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                    // Calculer l'âge exact
+                    const exactAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())
+                        ? age - 1
+                        : age;
+
+                    // Vérifier si l'utilisateur a moins de 10 ans
+                    this.ageError = exactAge < 10;
                 },
 
                 toggleInterest(interest) {
