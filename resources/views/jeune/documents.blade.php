@@ -102,11 +102,12 @@
                     <div class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition group"
                         x-show="filter === 'all' || filter === '{{ $document->document_type }}'">
                         <div class="flex items-start gap-4">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
-                                                        {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
-                                                        {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
-                                                        {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
-                                                        {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
+                            <div
+                                class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
+                                                                    {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
+                                                                    {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
+                                                                    {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
+                                                                    {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
                                 @if($document->mime_type === 'application/pdf')
                                     <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                                         <path
@@ -286,6 +287,33 @@
                 </div>
             </div>
         </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+            x-transition>
+            <div class="bg-white rounded-3xl max-w-md w-full p-6" @click.outside="showDeleteModal = false">
+                <div class="flex items-center justify-center w-14 h-14 bg-red-100 rounded-full mx-auto mb-4">
+                    <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Supprimer ce document ?</h3>
+                <p class="text-gray-500 text-center mb-6">Cette action est irréversible. Le document sera définitivement
+                    supprimé.</p>
+
+                <div class="flex gap-3">
+                    <button @click="showDeleteModal = false"
+                        class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                        Annuler
+                    </button>
+                    <button @click="confirmDelete()"
+                        class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
     @push('scripts')
         <script>
@@ -294,8 +322,10 @@
                     filter: 'all',
                     showUploadModal: false,
                     showPreviewModal: false,
-                    fileName: '',
-                    dragover: false,
+                    showDeleteModal: false,
+                    documentToDelete: null,
+                    fileName: '', ',
+                            dragover: false,
                     previewUrl: '',
                     previewType: '',
                     previewFileName: '',
@@ -333,11 +363,16 @@
                         this.showPreviewModal = true;
                     },
 
-                    async deleteDocument(id) {
-                        if (!confirm('Es-tu sur de vouloir supprimer ce document ?')) return;
+                    deleteDocument(id) {
+                        this.documentToDelete = id;
+                        this.showDeleteModal = true;
+                    },
+
+                    async confirmDelete() {
+                        if (!this.documentToDelete) return;
 
                         try {
-                            const response = await fetch(`/espace-jeune/documents/${id}`, {
+                            const response = await fetch(`/espace-jeune/documents/${this.documentToDelete}`, {
                                 method: 'DELETE',
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
