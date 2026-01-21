@@ -4,10 +4,10 @@
 
 @section('content')
     <div x-data="{ 
-                    editPersonal: false, 
-                    editProfessional: false,
-                    editVisibility: false 
-                }">
+                        editPersonal: false, 
+                        editProfessional: false,
+                        editVisibility: false 
+                    }">
         <div class="space-y-8">
             <!-- Header -->
             <div
@@ -312,17 +312,17 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
                             <input type="text" name="name" value="{{ $user->name }}"
-                                class="w-full rounded-xl border-gray-200">
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
                             <input type="date" name="date_of_birth" value="{{ $user->date_of_birth?->format('Y-m-d') }}"
-                                class="w-full rounded-xl border-gray-200">
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
                             <input type="text" name="city" value="{{ $user->city }}"
-                                class="w-full rounded-xl border-gray-200">
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition">
                         </div>
 
                         <!-- Hidden fields to preserve other data -->
