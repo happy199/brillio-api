@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,8 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -36,15 +38,19 @@
         .step-indicator.active {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         }
+
         .step-indicator.completed {
             background: #10b981;
         }
+
         .gradient-bg {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
         }
+
         .chip {
             transition: all 0.2s ease;
         }
+
         .chip.selected {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
@@ -52,6 +58,7 @@
         }
     </style>
 </head>
+
 <body class="font-sans antialiased bg-gray-50 min-h-screen" x-data="onboarding()">
     <!-- Header -->
     <div class="gradient-bg py-8 text-white text-center">
@@ -66,31 +73,34 @@
 
     <!-- Progress Steps -->
     <div class="max-w-2xl mx-auto px-4 -mt-4">
-        <div class="bg-white rounded-2xl shadow-lg p-4">
-            <div class="flex items-center justify-between">
+        <div class="bg-white rounded-2xl shadow-lg p-3 sm:p-4 overflow-x-auto">
+            <div class="flex items-center justify-between min-w-max sm:min-w-0">
                 <template x-for="(step, index) in steps" :key="index">
                     <div class="flex items-center">
                         <div class="flex flex-col items-center">
                             <div :class="[
-                                'w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all',
+                                'w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-all',
                                 currentStep > index ? 'step-indicator completed text-white' : '',
                                 currentStep === index ? 'step-indicator active text-white' : '',
                                 currentStep < index ? 'bg-gray-200 text-gray-500' : ''
                             ]">
                                 <template x-if="currentStep > index">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
                                     </svg>
                                 </template>
                                 <template x-if="currentStep <= index">
                                     <span x-text="index + 1"></span>
                                 </template>
                             </div>
-                            <span class="text-xs text-gray-500 mt-1 hidden sm:block" x-text="step"></span>
+                            <span class="text-[10px] sm:text-xs text-gray-500 mt-1 hidden sm:block whitespace-nowrap"
+                                x-text="step"></span>
                         </div>
                         <template x-if="index < steps.length - 1">
                             <div :class="[
-                                'w-12 sm:w-20 h-1 mx-2',
+                                'w-6 sm:w-12 md:w-20 h-1 mx-1 sm:mx-2',
                                 currentStep > index ? 'bg-green-500' : 'bg-gray-200'
                             ]"></div>
                         </template>
@@ -99,6 +109,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Form -->
     <form action="{{ route('jeune.onboarding.complete') }}" method="POST" class="max-w-2xl mx-auto px-4 py-8">
@@ -111,11 +122,8 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
-                    <input type="date"
-                           name="birth_date"
-                           x-model="formData.birth_date"
-                           required
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                    <input type="date" name="birth_date" x-model="formData.birth_date" required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
                     @error('birth_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -123,10 +131,8 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pays</label>
-                    <select name="country"
-                            x-model="formData.country"
-                            required
-                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                    <select name="country" x-model="formData.country" required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
                         <option value="">Selectionnez votre pays</option>
                         @foreach($countries as $code => $name)
                             <option value="{{ $name }}">{{ $name }}</option>
@@ -136,16 +142,14 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-                    <input type="text"
-                           name="city"
-                           x-model="formData.city"
-                           placeholder="Votre ville"
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                    <input type="text" name="city" x-model="formData.city" placeholder="Votre ville"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
                 </div>
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button type="button" @click="nextStep()" class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                <button type="button" @click="nextStep()"
+                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
                     Continuer
                 </button>
             </div>
@@ -160,9 +164,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Niveau d'etudes</label>
                     <div class="grid grid-cols-2 gap-3">
                         <template x-for="level in educationLevels" :key="level.value">
-                            <button type="button"
-                                    @click="formData.education_level = level.value"
-                                    :class="[
+                            <button type="button" @click="formData.education_level = level.value" :class="[
                                         'chip p-3 text-sm rounded-xl border-2 text-left',
                                         formData.education_level === level.value ? 'selected' : 'border-gray-200 hover:border-primary-300'
                                     ]">
@@ -177,9 +179,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Situation actuelle</label>
                     <div class="grid grid-cols-2 gap-3">
                         <template x-for="situation in situations" :key="situation.value">
-                            <button type="button"
-                                    @click="formData.current_situation = situation.value"
-                                    :class="[
+                            <button type="button" @click="formData.current_situation = situation.value" :class="[
                                         'chip p-3 text-sm rounded-xl border-2 text-left',
                                         formData.current_situation === situation.value ? 'selected' : 'border-gray-200 hover:border-primary-300'
                                     ]">
@@ -192,10 +192,12 @@
             </div>
 
             <div class="mt-6 flex justify-between">
-                <button type="button" @click="prevStep()" class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
+                <button type="button" @click="prevStep()"
+                    class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
                     Retour
                 </button>
-                <button type="button" @click="nextStep()" class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                <button type="button" @click="nextStep()"
+                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
                     Continuer
                 </button>
             </div>
@@ -208,9 +210,7 @@
 
             <div class="flex flex-wrap gap-2">
                 <template x-for="interest in interestOptions" :key="interest">
-                    <button type="button"
-                            @click="toggleInterest(interest)"
-                            :class="[
+                    <button type="button" @click="toggleInterest(interest)" :class="[
                                 'chip px-4 py-2 text-sm rounded-full border-2',
                                 formData.interests.includes(interest) ? 'selected' : 'border-gray-200 hover:border-primary-300'
                             ]">
@@ -223,10 +223,12 @@
             </template>
 
             <div class="mt-6 flex justify-between">
-                <button type="button" @click="prevStep()" class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
+                <button type="button" @click="prevStep()"
+                    class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
                     Retour
                 </button>
-                <button type="button" @click="nextStep()" class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                <button type="button" @click="nextStep()"
+                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
                     Continuer
                 </button>
             </div>
@@ -239,9 +241,7 @@
 
             <div class="space-y-3">
                 <template x-for="goal in goalOptions" :key="goal.value">
-                    <button type="button"
-                            @click="toggleGoal(goal.value)"
-                            :class="[
+                    <button type="button" @click="toggleGoal(goal.value)" :class="[
                                 'chip w-full p-4 text-left rounded-xl border-2 flex items-start gap-3',
                                 formData.goals.includes(goal.value) ? 'selected' : 'border-gray-200 hover:border-primary-300'
                             ]">
@@ -253,7 +253,9 @@
                         </div>
                         <div>
                             <span class="font-medium" x-text="goal.label"></span>
-                            <p class="text-sm mt-0.5" :class="formData.goals.includes(goal.value) ? 'text-white/70' : 'text-gray-500'" x-text="goal.desc"></p>
+                            <p class="text-sm mt-0.5"
+                                :class="formData.goals.includes(goal.value) ? 'text-white/70' : 'text-gray-500'"
+                                x-text="goal.desc"></p>
                         </div>
                     </button>
                 </template>
@@ -263,10 +265,12 @@
             </template>
 
             <div class="mt-6 flex justify-between">
-                <button type="button" @click="prevStep()" class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
+                <button type="button" @click="prevStep()"
+                    class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
                     Retour
                 </button>
-                <button type="button" @click="nextStep()" class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                <button type="button" @click="nextStep()"
+                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
                     Continuer
                 </button>
             </div>
@@ -279,9 +283,7 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <template x-for="source in sources" :key="source.value">
-                    <button type="button"
-                            @click="formData.how_found_us = source.value"
-                            :class="[
+                    <button type="button" @click="formData.how_found_us = source.value" :class="[
                                 'chip p-4 text-center rounded-xl border-2',
                                 formData.how_found_us === source.value ? 'selected' : 'border-gray-200 hover:border-primary-300'
                             ]">
@@ -293,10 +295,12 @@
             <input type="hidden" name="how_found_us" x-model="formData.how_found_us">
 
             <div class="mt-6 flex justify-between">
-                <button type="button" @click="prevStep()" class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
+                <button type="button" @click="prevStep()"
+                    class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
                     Retour
                 </button>
-                <button type="submit" class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 transition shadow-lg">
+                <button type="submit"
+                    class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 transition shadow-lg">
                     Commencer l'aventure !
                 </button>
             </div>
@@ -394,4 +398,5 @@
         }
     </script>
 </body>
+
 </html>
