@@ -36,28 +36,42 @@ class OnboardingController extends Controller
             'city' => 'nullable|string|max:100',
             'education_level' => 'required|string|in:college,lycee,bac,licence,master,doctorat',
             'current_situation' => 'required|string|in:etudiant,recherche_emploi,emploi,entrepreneur,autre',
+            'current_situation_other' => 'nullable|string|max:255',
             'interests' => 'required|array|min:1|max:5',
             'interests.*' => 'string',
             'goals' => 'required|array|min:1|max:3',
             'goals.*' => 'string',
             'how_found_us' => 'required|string',
+            'how_found_us_other' => 'nullable|string|max:255',
         ]);
 
         $user = auth()->user();
+
+        // Préparer les données d'onboarding
+        $onboardingData = [
+            'education_level' => $validated['education_level'],
+            'current_situation' => $validated['current_situation'],
+            'interests' => $validated['interests'],
+            'goals' => $validated['goals'],
+            'how_found_us' => $validated['how_found_us'],
+            'completed_at' => now()->toISOString(),
+        ];
+
+        // Ajouter les champs personnalisés si présents
+        if ($validated['current_situation'] === 'autre' && !empty($validated['current_situation_other'])) {
+            $onboardingData['current_situation_other'] = $validated['current_situation_other'];
+        }
+
+        if ($validated['how_found_us'] === 'other' && !empty($validated['how_found_us_other'])) {
+            $onboardingData['how_found_us_other'] = $validated['how_found_us_other'];
+        }
 
         $user->update([
             'date_of_birth' => $validated['birth_date'],
             'country' => $validated['country'],
             'city' => $validated['city'] ?? null,
             'onboarding_completed' => true,
-            'onboarding_data' => [
-                'education_level' => $validated['education_level'],
-                'current_situation' => $validated['current_situation'],
-                'interests' => $validated['interests'],
-                'goals' => $validated['goals'],
-                'how_found_us' => $validated['how_found_us'],
-                'completed_at' => now()->toISOString(),
-            ],
+            'onboarding_data' => $onboardingData,
         ]);
 
         return redirect()->route('jeune.dashboard')

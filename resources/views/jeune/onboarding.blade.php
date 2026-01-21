@@ -188,6 +188,16 @@
                         </template>
                     </div>
                     <input type="hidden" name="current_situation" x-model="formData.current_situation">
+                    
+                    <!-- Champ personnalisé si 'Autre' est sélectionné -->
+                    <div x-show="formData.current_situation === 'autre'" x-transition class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Précisez votre situation</label>
+                        <input type="text" 
+                               name="current_situation_other" 
+                               x-model="formData.current_situation_other"
+                               placeholder="Décrivez votre situation actuelle"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                    </div>
                 </div>
             </div>
 
@@ -293,6 +303,16 @@
                 </template>
             </div>
             <input type="hidden" name="how_found_us" x-model="formData.how_found_us">
+            
+            <!-- Champ personnalisé si 'Autre' est sélectionné -->
+            <div x-show="formData.how_found_us === 'other'" x-transition class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Comment nous avez-vous découvert ?</label>
+                <input type="text" 
+                       name="how_found_us_other" 
+                       x-model="formData.how_found_us_other"
+                       placeholder="Précisez comment vous avez découvert Brillio"
+                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+            </div>
 
             <div class="mt-6 flex justify-between">
                 <button type="button" @click="prevStep()"
@@ -320,9 +340,11 @@
                     city: '',
                     education_level: '',
                     current_situation: '',
+                    current_situation_other: '',
                     interests: [],
                     goals: [],
                     how_found_us: '',
+                    how_found_us_other: '',
                 },
 
                 educationLevels: [
