@@ -75,6 +75,7 @@ class User extends Authenticatable
             'onboarding_completed' => 'boolean',
             'onboarding_data' => 'array',
             'last_login_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 
