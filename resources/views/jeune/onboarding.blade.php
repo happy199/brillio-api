@@ -123,7 +123,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
                     <input type="date" name="birth_date" x-model="formData.birth_date" required
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                        class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
                     @error('birth_date')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -131,7 +131,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pays</label>
-                    <select name="country" x-model="formData.country" required
+                    <select name="country" x-model="formData.country" @change="onCountryChange()" required
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
                         <option value="">Selectionnez votre pays</option>
                         @foreach($countries as $code => $name)
@@ -140,10 +140,23 @@
                     </select>
                 </div>
 
-                <div>
+                <div class="relative">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-                    <input type="text" name="city" x-model="formData.city" placeholder="Votre ville"
+                    <input type="text" name="city" x-model="formData.city" @input="filterCities()"
+                        @focus="showCitySuggestions = true" placeholder="Commencez à taper votre ville"
+                        autocomplete="off"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+
+                    <!-- City suggestions dropdown -->
+                    <div x-show="showCitySuggestions && filteredCities.length > 0"
+                        @click.away="showCitySuggestions = false"
+                        class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                        <template x-for="city in filteredCities" :key="city">
+                            <button type="button" @click="selectCity(city)"
+                                class="w-full px-4 py-2 text-left hover:bg-gray-50 transition text-sm" x-text="city">
+                            </button>
+                        </template>
+                    </div>
                 </div>
             </div>
 
@@ -188,15 +201,13 @@
                         </template>
                     </div>
                     <input type="hidden" name="current_situation" x-model="formData.current_situation">
-                    
+
                     <!-- Champ personnalisé si 'Autre' est sélectionné -->
                     <div x-show="formData.current_situation === 'autre'" x-transition class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Précisez votre situation</label>
-                        <input type="text" 
-                               name="current_situation_other" 
-                               x-model="formData.current_situation_other"
-                               placeholder="Décrivez votre situation actuelle"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                        <input type="text" name="current_situation_other" x-model="formData.current_situation_other"
+                            placeholder="Décrivez votre situation actuelle"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
                     </div>
                 </div>
             </div>
@@ -303,15 +314,13 @@
                 </template>
             </div>
             <input type="hidden" name="how_found_us" x-model="formData.how_found_us">
-            
+
             <!-- Champ personnalisé si 'Autre' est sélectionné -->
             <div x-show="formData.how_found_us === 'other'" x-transition class="mt-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Comment nous avez-vous découvert ?</label>
-                <input type="text" 
-                       name="how_found_us_other" 
-                       x-model="formData.how_found_us_other"
-                       placeholder="Précisez comment vous avez découvert Brillio"
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                <input type="text" name="how_found_us_other" x-model="formData.how_found_us_other"
+                    placeholder="Précisez comment vous avez découvert Brillio"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
             </div>
 
             <div class="mt-6 flex justify-between">
@@ -345,6 +354,35 @@
                     goals: [],
                     how_found_us: '',
                     how_found_us_other: '',
+                },
+
+                showCitySuggestions: false,
+                filteredCities: [],
+
+                // Base de données des principales villes par pays
+                citiesByCountry: {
+                    'Benin': ['Cotonou', 'Porto-Novo', 'Parakou', 'Abomey-Calavi', 'Djougou', 'Bohicon', 'Kandi', 'Lokossa', 'Ouidah', 'Abomey'],
+                    'Senegal': ['Dakar', 'Thies', 'Kaolack', 'Saint-Louis', 'Ziguinchor', 'Diourbel', 'Louga', 'Tambacounda', 'Mbour', 'Rufisque'],
+                    'Cote d\'Ivoire': ['Abidjan', 'Bouake', 'Daloa', 'Yamoussoukro', 'San-Pedro', 'Korhogo', 'Man', 'Divo', 'Gagnoa', 'Abengourou'],
+                    'Togo': ['Lome', 'Sokode', 'Kara', 'Kpalime', 'Atakpame', 'Bassar', 'Tsevie', 'Aneho', 'Sansanne-Mango', 'Dapaong'],
+                    'Burkina Faso': ['Ouagadougou', 'Bobo-Dioulasso', 'Koudougou', 'Ouahigouya', 'Banfora', 'Dedougou', 'Kaya', 'Tenkodogo', 'Fada N\'Gourma', 'Houndé'],
+                    'Mali': ['Bamako', 'Sikasso', 'Mopti', 'Koutiala', 'Kayes', 'Segou', 'Gao', 'Kati', 'Tombouctou', 'Markala'],
+                    'Niger': ['Niamey', 'Zinder', 'Maradi', 'Agadez', 'Tahoua', 'Dosso', 'Tillaberi', 'Diffa', 'Arlit', 'Birni N\'Konni'],
+                    'Ghana': ['Accra', 'Kumasi', 'Tamale', 'Sekondi-Takoradi', 'Ashaiman', 'Sunyani', 'Cape Coast', 'Obuasi', 'Teshie', 'Tema'],
+                    'Nigeria': ['Lagos', 'Kano', 'Ibadan', 'Abuja', 'Port Harcourt', 'Benin City', 'Kaduna', 'Enugu', 'Zaria', 'Warri'],
+                    'Cameroun': ['Douala', 'Yaounde', 'Garoua', 'Bamenda', 'Bafoussam', 'Maroua', 'Nkongsamba', 'Ngaoundere', 'Bertoua', 'Loum'],
+                    'Gabon': ['Libreville', 'Port-Gentil', 'Franceville', 'Oyem', 'Moanda', 'Mouila', 'Lambarene', 'Tchibanga', 'Koulamoutou', 'Makokou'],
+                    'Congo': ['Brazzaville', 'Pointe-Noire', 'Dolisie', 'Nkayi', 'Impfondo', 'Ouesso', 'Madingou', 'Owando', 'Sibiti', 'Mossendjo'],
+                    'RD Congo': ['Kinshasa', 'Lubumbashi', 'Mbuji-Mayi', 'Kananga', 'Kisangani', 'Bukavu', 'Tshikapa', 'Kolwezi', 'Likasi', 'Goma'],
+                    'Maroc': ['Casablanca', 'Rabat', 'Fes', 'Marrakech', 'Agadir', 'Tanger', 'Meknes', 'Oujda', 'Kenitra', 'Tetouan'],
+                    'Algerie': ['Alger', 'Oran', 'Constantine', 'Annaba', 'Blida', 'Batna', 'Djelfa', 'Setif', 'Sidi Bel Abbes', 'Biskra'],
+                    'Tunisie': ['Tunis', 'Sfax', 'Sousse', 'Kairouan', 'Bizerte', 'Gabes', 'Ariana', 'Gafsa', 'Monastir', 'Ben Arous'],
+                    'Kenya': ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Ruiru', 'Kikuyu', 'Kangundo-Tala', 'Malindi', 'Naivasha'],
+                    'Tanzanie': ['Dar es Salaam', 'Mwanza', 'Arusha', 'Dodoma', 'Mbeya', 'Morogoro', 'Tanga', 'Kahama', 'Tabora', 'Zanzibar'],
+                    'Ouganda': ['Kampala', 'Gulu', 'Lira', 'Mbarara', 'Jinja', 'Bwizibwera', 'Mbale', 'Mukono', 'Kasese', 'Masaka'],
+                    'Rwanda': ['Kigali', 'Butare', 'Gitarama', 'Ruhengeri', 'Gisenyi', 'Byumba', 'Cyangugu', 'Kibungo', 'Kibuye', 'Rwamagana'],
+                    'Ethiopie': ['Addis-Abeba', 'Dire Dawa', 'Mekele', 'Gondar', 'Awasa', 'Bahir Dar', 'Dessie', 'Jimma', 'Jijiga', 'Shashamane'],
+                    'Afrique du Sud': ['Johannesburg', 'Le Cap', 'Durban', 'Pretoria', 'Port Elizabeth', 'Bloemfontein', 'East London', 'Polokwane', 'Nelspruit', 'Kimberley'],
                 },
 
                 educationLevels: [
@@ -397,6 +435,36 @@
                     if (this.currentStep > 0) {
                         this.currentStep--;
                     }
+                },
+
+                onCountryChange() {
+                    // Réinitialiser la ville quand le pays change
+                    this.formData.city = '';
+                    this.filteredCities = [];
+                },
+
+                filterCities() {
+                    const input = this.formData.city.toLowerCase();
+                    
+                    // Afficher les suggestions seulement après 2 caractères
+                    if (input.length < 2) {
+                        this.filteredCities = [];
+                        return;
+                    }
+
+                    // Obtenir les villes du pays sélectionné
+                    const countryCities = this.citiesByCountry[this.formData.country] || [];
+                    
+                    // Filtrer les villes qui correspondent à la saisie
+                    this.filteredCities = countryCities.filter(city => 
+                        city.toLowerCase().includes(input)
+                    ).slice(0, 10); // Limiter à 10 résultats
+                },
+
+                selectCity(city) {
+                    this.formData.city = city;
+                    this.showCitySuggestions = false;
+                    this.filteredCities = [];
                 },
 
                 toggleInterest(interest) {
