@@ -41,12 +41,39 @@ class DashboardController extends Controller
             ->get();
 
         // Distribution des types de personnalité
-        $personalityDistribution = PersonalityTest::whereNotNull('personality_type')
+        $personalityTypes = PersonalityTest::whereNotNull('personality_type')
             ->selectRaw('personality_type, COUNT(*) as count')
             ->groupBy('personality_type')
             ->orderBy('count', 'desc')
             ->pluck('count', 'personality_type')
             ->toArray();
+
+        // Mapping des codes MBTI vers leurs noms
+        $personalityNames = [
+            'INTJ' => 'Architecte',
+            'INTP' => 'Logicien',
+            'ENTJ' => 'Commandant',
+            'ENTP' => 'Innovateur',
+            'INFJ' => 'Avocat',
+            'INFP' => 'Médiateur',
+            'ENFJ' => 'Protagoniste',
+            'ENFP' => 'Inspirateur',
+            'ISTJ' => 'Logisticien',
+            'ISFJ' => 'Défenseur',
+            'ESTJ' => 'Directeur',
+            'ESFJ' => 'Consul',
+            'ISTP' => 'Virtuose',
+            'ISFP' => 'Aventurier',
+            'ESTP' => 'Entrepreneur',
+            'ESFP' => 'Amuseur',
+        ];
+
+        // Transformer pour inclure les noms complets
+        $personalityDistribution = [];
+        foreach ($personalityTypes as $type => $count) {
+            $name = $personalityNames[$type] ?? $type;
+            $personalityDistribution["$type - $name"] = $count;
+        }
 
         // Mentors en attente de validation
         $pendingMentors = MentorProfile::with('user')
