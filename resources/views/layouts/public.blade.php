@@ -162,7 +162,7 @@
     @stack('styles')
 </head>
 
-<body class="bg-gray-50 text-gray-900 antialiased" x-data="{ mobileMenu: false }">
+<body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden" x-data="{ mobileMenu: false }">
     <!-- Header / Navigation -->
     <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" x-data="{ scrolled: false }"
         x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 50 })"
