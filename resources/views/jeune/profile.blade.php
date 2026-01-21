@@ -4,10 +4,10 @@
 
 @section('content')
     <div x-data="{ 
-                editPersonal: false, 
-                editProfessional: false,
-                editVisibility: false 
-            }">
+                    editPersonal: false, 
+                    editProfessional: false,
+                    editVisibility: false 
+                }">
         <div class="space-y-8">
             <!-- Header -->
             <div
@@ -352,17 +352,17 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Bio / À propos</label>
                             <textarea name="bio" rows="4"
-                                class="w-full rounded-xl border-gray-200">{{ $profile->bio }}</textarea>
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition">{{ $profile->bio }}</textarea>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Profil LinkedIn (URL)</label>
                             <input type="url" name="linkedin_url" value="{{ $user->linkedin_url }}"
-                                class="w-full rounded-xl border-gray-200">
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Portfolio (URL)</label>
                             <input type="url" name="portfolio_url" value="{{ $profile->portfolio_url }}"
-                                class="w-full rounded-xl border-gray-200">
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Upload CV (PDF)</label>
