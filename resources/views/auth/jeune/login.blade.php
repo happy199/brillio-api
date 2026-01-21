@@ -53,7 +53,8 @@
             <div>
                 <div class="flex items-center justify-between mb-1">
                     <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-                    <a href="#" class="text-sm text-primary-600 hover:underline">Mot de passe oublie ?</a>
+                    <a href="{{ route('auth.jeune.password.request') }}"
+                        class="text-sm text-primary-600 hover:underline">Mot de passe oublie ?</a>
                 </div>
                 <input type="password" id="password" name="password" required
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-colors @error('password') border-red-500 @enderror"

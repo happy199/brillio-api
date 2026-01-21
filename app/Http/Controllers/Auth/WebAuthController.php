@@ -670,4 +670,115 @@ class WebAuthController extends Controller
         return redirect()->route('home')
             ->with('success', 'Vous avez ete deconnecte avec succes.');
     }
+
+    /**
+     * Afficher le formulaire de mot de passe oublié
+     */
+    public function showForgotPasswordForm()
+    {
+        return view('auth.jeune.forgot-password');
+    }
+
+    /**
+     * Envoyer le lien de réinitialisation
+     */
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)
+            ->where('user_type', 'jeune')
+            ->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Aucun compte jeune trouve avec cette adresse email.']);
+        }
+
+        // Générer un token unique
+        $token = Str::random(64);
+
+        // Stocker le token (expire après 10 minutes)
+        \DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => Hash::make($token),
+                'created_at' => now()
+            ]
+        );
+
+        // Envoyer l'email
+        try {
+            Mail::to($user)->send(new \App\Mail\ResetPasswordMail($user, $token));
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi email reset password: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'Erreur lors de l\'envoi de l\'email. Veuillez reessayer.']);
+        }
+
+        return back()->with('status', 'Un lien de reinitialisation a ete envoye a votre adresse email.');
+    }
+
+    /**
+     * Afficher le formulaire de réinitialisation
+     */
+    public function showResetForm($token, Request $request)
+    {
+        return view('auth.jeune.reset-password', [
+            'token' => $token,
+            'email' => $request->email
+        ]);
+    }
+
+    /**
+     * Réinitialiser le mot de passe
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caracteres.',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+        ]);
+
+        // Vérifier le token
+        $resetRecord = \DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$resetRecord) {
+            return back()->withErrors(['email' => 'Lien de reinitialisation invalide.']);
+        }
+
+        // Vérifier que le token n'a pas expiré (10 minutes)
+        $createdAt = \Carbon\Carbon::parse($resetRecord->created_at);
+        if ($createdAt->addMinutes(10)->isPast()) {
+            \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return back()->withErrors(['email' => 'Le lien de reinitialisation a expire. Veuillez en demander un nouveau.']);
+        }
+
+        // Vérifier le token
+        if (!Hash::check($request->token, $resetRecord->token)) {
+            return back()->withErrors(['email' => 'Lien de reinitialisation invalide.']);
+        }
+
+        // Mettre à jour le mot de passe
+        $user = User::where('email', $request->email)
+            ->where('user_type', 'jeune')
+            ->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Utilisateur introuvable.']);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Supprimer le token utilisé
+        \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return redirect()->route('auth.jeune.login')
+            ->with('status', 'Votre mot de passe a ete reinitialise avec succes. Vous pouvez maintenant vous connecter.');
+    }
 }

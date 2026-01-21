@@ -76,6 +76,12 @@ Route::prefix('jeune')->name('auth.jeune.')->group(function () {
         // OAuth (Google, Facebook)
         Route::get('/oauth/{provider}', [WebAuthController::class, 'jeuneOAuthRedirect'])->name('oauth');
         Route::get('/oauth/{provider}/callback', [WebAuthController::class, 'jeuneOAuthCallback'])->name('oauth.callback');
+
+        // Password Reset
+        Route::get('/mot-de-passe-oublie', [WebAuthController::class, 'showForgotPasswordForm'])->name('password.request');
+        Route::post('/mot-de-passe-oublie', [WebAuthController::class, 'sendResetLink'])->name('password.email');
+        Route::get('/reinitialiser-mot-de-passe/{token}', [WebAuthController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/reinitialiser-mot-de-passe', [WebAuthController::class, 'resetPassword'])->name('password.update');
     });
 
     // Route process sans middleware guest (car appelée en AJAX après callback)
