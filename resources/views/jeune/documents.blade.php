@@ -103,10 +103,10 @@
                         x-show="filter === 'all' || filter === '{{ $document->document_type }}'">
                         <div class="flex items-start gap-4">
                             <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
-                                            {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
-                                            {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
-                                            {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
-                                            {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
+                                                        {{ $document->document_type === 'bulletin' ? 'bg-purple-100' : '' }}
+                                                        {{ $document->document_type === 'diplome' ? 'bg-yellow-100' : '' }}
+                                                        {{ $document->document_type === 'attestation' ? 'bg-blue-100' : '' }}
+                                                        {{ $document->document_type === 'autre' ? 'bg-gray-100' : '' }}">
                                 @if($document->mime_type === 'application/pdf')
                                     <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                                         <path
@@ -221,11 +221,22 @@
                         </div>
 
                         <!-- School Year (optional) -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Annee scolaire (optionnel)</label>
-                            <input type="text" name="school_year" placeholder="Ex: 2023-2024"
-                                class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Année de début</label>
+                                <input type="number" name="start_year" x-model="startYear" @input="calculateEndYear()"
+                                    placeholder="Ex: 2023" min="1900" :max="new Date().getFullYear()"
+                                    class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Année de fin</label>
+                                <input type="number" name="end_year" x-model="endYear" readonly placeholder="Auto"
+                                    class="w-full px-4 py-3 border rounded-xl bg-gray-50 cursor-not-allowed focus:outline-none">
+                            </div>
                         </div>
+                        <!-- Hidden field for combined school_year -->
+                        <input type="hidden" name="school_year"
+                            :value="startYear && endYear ? startYear + '-' + endYear : ''">
 
                         <!-- Description (optional) -->
                         <div>
@@ -288,6 +299,16 @@
                     previewUrl: '',
                     previewType: '',
                     previewFileName: '',
+                    startYear: '',
+                    endYear: '',
+
+                    calculateEndYear() {
+                        if (this.startYear && this.startYear.length === 4) {
+                            this.endYear = parseInt(this.startYear) + 1;
+                        } else {
+                            this.endYear = '';
+                        }
+                    },
 
                     handleFileSelect(event) {
                         const file = event.target.files[0];
