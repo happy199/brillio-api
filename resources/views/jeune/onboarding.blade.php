@@ -159,10 +159,11 @@
                 </div>
 
                 <div class="relative">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ville <span
+                            class="text-red-500">*</span></label>
                     <input type="text" name="city" x-model="formData.city" @input="filterCities()"
                         @focus="showCitySuggestions = true" placeholder="Commencez à taper votre ville"
-                        autocomplete="off"
+                        autocomplete="off" required
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
 
                     <!-- City suggestions dropdown -->
@@ -178,10 +179,22 @@
                 </div>
             </div>
 
+            <!-- Error message for step 0 -->
+            <div x-show="errors.step0" x-transition class="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p class="text-sm text-red-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span x-text="errors.step0"></span>
+                </p>
+            </div>
+
             <div class="mt-6 flex justify-end">
-                <button type="button" @click="nextStep()" :disabled="ageError"
-                    :class="ageError ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-700'"
-                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl transition">
+                <button type="button" @click="nextStep()" :disabled="!canProceedStep0"
+                    :class="!canProceedStep0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'"
+                    class="px-6 py-3 text-white font-semibold rounded-xl transition">
                     Continuer
                 </button>
             </div>
@@ -231,13 +244,26 @@
                 </div>
             </div>
 
+            <!-- Error message for step 1 -->
+            <div x-show="errors.step1" x-transition class="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p class="text-sm text-red-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span x-text="errors.step1"></span>
+                </p>
+            </div>
+
             <div class="mt-6 flex justify-between">
                 <button type="button" @click="prevStep()"
                     class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
                     Retour
                 </button>
-                <button type="button" @click="nextStep()"
-                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                <button type="button" @click="nextStep()" :disabled="!canProceedStep1"
+                    :class="!canProceedStep1 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'"
+                    class="px-6 py-3 text-white font-semibold rounded-xl transition">
                     Continuer
                 </button>
             </div>
@@ -246,7 +272,14 @@
         <!-- Step 3: Interets -->
         <div x-show="currentStep === 2" x-transition class="bg-white rounded-2xl shadow-lg p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-2">Vos centres d'interet</h2>
-            <p class="text-gray-500 text-sm mb-6">Selectionnez 1 a 5 domaines qui vous interessent</p>
+            <p class="text-gray-500 text-sm mb-4">Selectionnez <strong>exactement 5 domaines</strong> qui vous
+                interessent</p>
+            <div class="mb-4 p-2 bg-primary-50 border border-primary-200 rounded-xl">
+                <p class="text-sm text-primary-700 text-center">
+                    <span class="font-bold" x-text="formData.interests.length"></span> / 5 sélectionné(s)
+                    <span x-show="formData.interests.length === 5" class="ml-2">✓</span>
+                </p>
+            </div>
 
             <div class="flex flex-wrap gap-2">
                 <template x-for="interest in interestOptions" :key="interest">
@@ -262,13 +295,26 @@
                 <input type="hidden" name="interests[]" :value="interest">
             </template>
 
+            <!-- Error message for step 2 -->
+            <div x-show="errors.step2" x-transition class="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p class="text-sm text-red-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span x-text="errors.step2"></span>
+                </p>
+            </div>
+
             <div class="mt-6 flex justify-between">
                 <button type="button" @click="prevStep()"
                     class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
                     Retour
                 </button>
-                <button type="button" @click="nextStep()"
-                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                <button type="button" @click="nextStep()" :disabled="!canProceedStep2"
+                    :class="!canProceedStep2 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'"
+                    class="px-6 py-3 text-white font-semibold rounded-xl transition">
                     Continuer
                 </button>
             </div>
@@ -277,7 +323,12 @@
         <!-- Step 4: Objectifs -->
         <div x-show="currentStep === 3" x-transition class="bg-white rounded-2xl shadow-lg p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-2">Vos objectifs sur Brillio</h2>
-            <p class="text-gray-500 text-sm mb-6">Qu'esperez-vous trouver ici ? (max 3)</p>
+            <p class="text-gray-500 text-sm mb-4">Qu'esperez-vous trouver ici ? (max 3)</p>
+            <div class="mb-4 p-2 bg-primary-50 border border-primary-200 rounded-xl">
+                <p class="text-sm text-primary-700 text-center">
+                    <span class="font-bold" x-text="formData.goals.length"></span> / 3 sélectionné(s)
+                </p>
+            </div>
 
             <div class="space-y-3">
                 <template x-for="goal in goalOptions" :key="goal.value">
@@ -304,13 +355,26 @@
                 <input type="hidden" name="goals[]" :value="goal">
             </template>
 
+            <!-- Error message for step 3 -->
+            <div x-show="errors.step3" x-transition class="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p class="text-sm text-red-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span x-text="errors.step3"></span>
+                </p>
+            </div>
+
             <div class="mt-6 flex justify-between">
                 <button type="button" @click="prevStep()"
                     class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
                     Retour
                 </button>
-                <button type="button" @click="nextStep()"
-                    class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                <button type="button" @click="nextStep()" :disabled="!canProceedStep3"
+                    :class="!canProceedStep3 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'"
+                    class="px-6 py-3 text-white font-semibold rounded-xl transition">
                     Continuer
                 </button>
             </div>
@@ -342,13 +406,26 @@
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
             </div>
 
+            <!-- Error message for step 4 -->
+            <div x-show="errors.step4" x-transition class="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p class="text-sm text-red-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span x-text="errors.step4"></span>
+                </p>
+            </div>
+
             <div class="mt-6 flex justify-between">
                 <button type="button" @click="prevStep()"
                     class="px-6 py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">
                     Retour
                 </button>
-                <button type="submit"
-                    class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 transition shadow-lg">
+                <button type="submit" :disabled="!canProceedStep4"
+                    :class="!canProceedStep4 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'"
+                    class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl transition shadow-lg">
                     Commencer l'aventure !
                 </button>
             </div>
@@ -361,6 +438,13 @@
             return {
                 currentStep: 0,
                 steps: ['Profil', 'Situation', 'Interets', 'Objectifs', 'Source'],
+                errors: {
+                    step0: '',
+                    step1: '',
+                    step2: '',
+                    step3: '',
+                    step4: '',
+                },
 
                 formData: {
                     birth_date: '',
@@ -447,7 +531,122 @@
                     { value: 'other', label: 'Autre', icon: '✨' },
                 ],
 
+                // Validation pour chaque étape
+                get canProceedStep0() {
+                    return this.formData.birth_date !== '' &&
+                           this.formData.country !== '' &&
+                           this.formData.city !== '' &&
+                           !this.ageError;
+                },
+
+                get canProceedStep1() {
+                    if (!this.formData.education_level || !this.formData.current_situation) {
+                        return false;
+                    }
+                    // Si "autre" est sélectionné, le champ personnalisé doit être rempli
+                    if (this.formData.current_situation === 'autre' && !this.formData.current_situation_other?.trim()) {
+                        return false;
+                    }
+                    return true;
+                },
+
+                get canProceedStep2() {
+                    return this.formData.interests.length === 5;
+                },
+
+                get canProceedStep3() {
+                    return this.formData.goals.length >= 1 && this.formData.goals.length <= 3;
+                },
+
+                get canProceedStep4() {
+                    if (!this.formData.how_found_us) {
+                        return false;
+                    }
+                    // Si "autre" est sélectionné, le champ personnalisé doit être rempli
+                    if (this.formData.how_found_us === 'other' && !this.formData.how_found_us_other?.trim()) {
+                        return false;
+                    }
+                    return true;
+                },
+
+                validateStep() {
+                    this.errors['step' + this.currentStep] = '';
+
+                    switch (this.currentStep) {
+                        case 0:
+                            if (!this.formData.birth_date) {
+                                this.errors.step0 = 'Veuillez sélectionner votre date de naissance';
+                                return false;
+                            }
+                            if (!this.formData.country) {
+                                this.errors.step0 = 'Veuillez sélectionner votre pays';
+                                return false;
+                            }
+                            if (!this.formData.city) {
+                                this.errors.step0 = 'Veuillez saisir votre ville';
+                                return false;
+                            }
+                            if (this.ageError) {
+                                this.errors.step0 = 'Vous devez avoir au moins 10 ans pour utiliser Brillio';
+                                return false;
+                            }
+                            return true;
+
+                        case 1:
+                            if (!this.formData.education_level) {
+                                this.errors.step1 = 'Veuillez sélectionner votre niveau d\'études';
+                                return false;
+                            }
+                            if (!this.formData.current_situation) {
+                                this.errors.step1 = 'Veuillez sélectionner votre situation actuelle';
+                                return false;
+                            }
+                            if (this.formData.current_situation === 'autre' && !this.formData.current_situation_other?.trim()) {
+                                this.errors.step1 = 'Veuillez préciser votre situation actuelle';
+                                return false;
+                            }
+                            return true;
+
+                        case 2:
+                            if (this.formData.interests.length !== 5) {
+                                this.errors.step2 = 'Vous devez sélectionner exactement 5 centres d\'intérêt';
+                                return false;
+                            }
+                            return true;
+
+                        case 3:
+                            if (this.formData.goals.length < 1) {
+                                this.errors.step3 = 'Veuillez sélectionner au moins 1 objectif';
+                                return false;
+                            }
+                            if (this.formData.goals.length > 3) {
+                                this.errors.step3 = 'Vous ne pouvez sélectionner que 3 objectifs maximum';
+                                return false;
+                            }
+                            return true;
+
+                        case 4:
+                            if (!this.formData.how_found_us) {
+                                this.errors.step4 = 'Veuillez indiquer comment vous avez découvert Brillio';
+                                return false;
+                            }
+                            if (this.formData.how_found_us === 'other' && !this.formData.how_found_us_other?.trim()) {
+                                this.errors.step4 = 'Veuillez préciser comment vous avez découvert Brillio';
+                                return false;
+                            }
+                            return true;
+
+                        default:
+                            return true;
+                    }
+                },
+
                 nextStep() {
+                    if (!this.validateStep()) {
+                        // L'erreur est déjà définie dans validateStep
+                        return;
+                    }
+
                     if (this.currentStep < this.steps.length - 1) {
                         this.currentStep++;
                     }
@@ -455,6 +654,7 @@
 
                 prevStep() {
                     if (this.currentStep > 0) {
+                        this.errors['step' + this.currentStep] = '';
                         this.currentStep--;
                     }
                 },

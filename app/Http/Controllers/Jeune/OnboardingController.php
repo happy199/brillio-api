@@ -33,11 +33,11 @@ class OnboardingController extends Controller
         $validated = $request->validate([
             'birth_date' => 'required|date|before:today',
             'country' => 'required|string|max:100',
-            'city' => 'nullable|string|max:100',
+            'city' => 'required|string|max:100',
             'education_level' => 'required|string|in:college,lycee,bac,licence,master,doctorat',
             'current_situation' => 'required|string|in:etudiant,recherche_emploi,emploi,entrepreneur,autre',
             'current_situation_other' => 'nullable|string|max:255',
-            'interests' => 'required|array|min:1|max:5',
+            'interests' => 'required|array|size:5',
             'interests.*' => 'string',
             'goals' => 'required|array|min:1|max:3',
             'goals.*' => 'string',
