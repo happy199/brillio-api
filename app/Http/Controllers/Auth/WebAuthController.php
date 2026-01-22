@@ -797,7 +797,19 @@ class WebAuthController extends Controller
      */
     protected function handleCrossTypeReactivation(User $user, string $newType, array $oauthData, string $provider): array
     {
-        // Créer un token de migration temporaire
+        // Si le compte est ACTIF (pas archivé), refuser la migration
+        if (!$user->is_archived) {
+            $errorMessage = $user->user_type === 'jeune'
+                ? "Un compte jeune actif existe déjà avec cet email. Pour devenir mentor, vous devez d'abord archiver votre compte jeune depuis la page Profil > Zone de danger. <br><br><strong>⚠️ Important :</strong> Les comptes mentors sont soumis à une vérification stricte pour garantir la qualité. Si nous détectons que votre profil ne correspond pas aux critères de mentor, vous serez rétrogradé en compte jeune."
+                : "Un compte mentor actif existe déjà avec cet email. Pour devenir jeune, vous devez d'abord archiver votre compte mentor depuis la page Statistiques > Zone de danger.";
+
+            return [
+                'success' => false,
+                'error' => $errorMessage
+            ];
+        }
+
+        // Compte archivé → Créer un token de migration temporaire
         $migration = \App\Models\AccountTypeMigration::create([
             'user_id' => $user->id,
             'old_type' => $user->user_type,
