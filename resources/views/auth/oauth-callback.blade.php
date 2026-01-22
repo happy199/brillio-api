@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,22 +18,33 @@
             box-sizing: border-box;
             animation: rotation 1s linear infinite;
         }
+
         @keyframes rotation {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center">
+
+<body
+    class="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center">
     <div class="text-center text-white max-w-md px-4">
         <div class="loader mx-auto mb-6"></div>
         <h1 class="text-2xl font-bold mb-2">Connexion en cours...</h1>
         <p class="text-white/80" id="status-message">Verification de vos informations</p>
-        <p class="text-red-200 text-sm mt-4 break-words" id="error-message" style="display: none;"></p>
+        <div class="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 text-white text-sm"
+            id="error-container" style="display: none;">
+            <p id="error-message" class="break-words"></p>
+        </div>
     </div>
 
     <script>
-        (function() {
+        (function () {
             const processUrl = "{{ $processUrl }}";
             const errorUrl = "{{ $errorUrl }}";
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -103,9 +115,12 @@
                             console.error('Server error response:', text);
                             try {
                                 const data = JSON.parse(text);
-                                throw new Error(data.error || data.message || 'Erreur serveur ' + response.status);
+                                throw new Error(data.error || data.message || 'Erreur serveur');
                             } catch (e) {
-                                throw new Error('Erreur serveur ' + response.status + ': ' + text.substring(0, 200));
+                                if (e.message && e.message !== 'Unexpected token' && !e.message.startsWith('Erreur serveur')) {
+                                    throw e;
+                                }
+                                throw new Error('Une erreur est survenue lors de l\'authentification');
                             }
                         }
 
@@ -139,9 +154,12 @@
                             console.error('Server error response:', text);
                             try {
                                 const data = JSON.parse(text);
-                                throw new Error(data.error || data.message || 'Erreur serveur ' + response.status);
+                                throw new Error(data.error || data.message || 'Erreur serveur');
                             } catch (e) {
-                                throw new Error('Erreur serveur ' + response.status + ': ' + text.substring(0, 200));
+                                if (e.message && e.message !== 'Unexpected token' && !e.message.startsWith('Erreur serveur')) {
+                                    throw e;
+                                }
+                                throw new Error('Une erreur est survenue lors de l\'authentification');
                             }
                         }
 
@@ -180,13 +198,17 @@
 
             function showError(message) {
                 document.getElementById('status-message').textContent = 'Une erreur est survenue';
-                document.getElementById('error-message').textContent = message;
-                document.getElementById('error-message').style.display = 'block';
+                // Utiliser innerHTML pour afficher le HTML (br, strong, etc.)
+                document.getElementById('error-message').innerHTML = message;
+                document.getElementById('error-container').style.display = 'block';
 
-                // Rediriger vers la page d'erreur apres 5 secondes
+                // Masquer le loader
+                document.querySelector('.loader').style.display = 'none';
+
+                // Rediriger vers la page d'erreur apres 8 secondes (plus de temps pour lire)
                 setTimeout(() => {
-                    window.location.href = errorUrl + '?error=' + encodeURIComponent(message);
-                }, 5000);
+                    window.location.href = errorUrl + '?error=' + encodeURIComponent(message.replace(/<[^>]*>/g, ''));
+                }, 8000);
             }
 
             // Lancer le traitement au chargement
@@ -198,4 +220,5 @@
         })();
     </script>
 </body>
+
 </html>
