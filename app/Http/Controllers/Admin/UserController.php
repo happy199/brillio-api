@@ -36,6 +36,18 @@ class UserController extends Controller
             });
         }
 
+        // Filtre par statut d'archivage
+        if ($request->has('archived')) {
+            $query->where('is_archived', true);
+        } else {
+            // Par défaut, on ne montre pas les archivés sauf si demandé explicitement
+            // OU on peut décider de tout montrer et utiliser un badget.
+            // Pour l'instant, faisons un filtre explicite : ?archived=1 pour voir les archives
+            // $query->where('is_archived', false); 
+            // ^ Si on décommente ça, ils sont masqués par défaut. 
+            // Mais l'utilisateur veut un onglet séparé, donc le filtre est logique.
+        }
+
         // Tri
         $sortBy = $request->get('sort', 'created_at');
         $sortOrder = $request->get('order', 'desc');
@@ -68,7 +80,7 @@ class UserController extends Controller
     }
 
     /**
-     * Supprime un utilisateur
+     * Supprime un utilisateur définitivement
      */
     public function destroy(User $user)
     {
@@ -80,7 +92,24 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.index')
-            ->with('success', "L'utilisateur {$user->name} a été supprimé");
+            ->with('success', "L'utilisateur {$user->name} a été supprimé définitivement");
+    }
+
+    /**
+     * Réactive un compte archivé
+     */
+    public function reactivate(User $user)
+    {
+        if (!$user->is_archived) {
+            return back()->with('error', 'Ce compte n\'est pas archivé');
+        }
+
+        $user->is_archived = false;
+        $user->archived_at = null;
+        $user->archived_reason = null;
+        $user->save();
+
+        return back()->with('success', "Le compte de {$user->name} a été réactivé avec succès");
     }
 
     /**

@@ -309,7 +309,15 @@ class WebAuthController extends Controller
 
                 $result = $this->createOrUpdateJeuneUser($userData, $provider);
 
-                if ($result['success']) {
+                // Gestion spécifique pour la redirection de confirmation de type
+                if (isset($result['success']) && $result['success'] === 'redirect_confirm') {
+                    return response()->json([
+                        'success' => false,
+                        'redirect' => $result['redirect']
+                    ]);
+                }
+
+                if (isset($result['success']) && $result['success'] === true) {
                     return response()->json([
                         'success' => true,
                         'redirect' => $result['redirect']
@@ -318,7 +326,7 @@ class WebAuthController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'error' => $result['error']
+                    'error' => $result['error'] ?? 'Une erreur est survenue.'
                 ], 400);
             }
 
@@ -505,7 +513,15 @@ class WebAuthController extends Controller
 
                 $result = $this->createOrUpdateMentorUser($userData);
 
-                if ($result['success']) {
+                // Gestion spécifique pour la redirection de confirmation de type
+                if (isset($result['success']) && $result['success'] === 'redirect_confirm') {
+                    return response()->json([
+                        'success' => false,
+                        'redirect' => $result['redirect']
+                    ]);
+                }
+
+                if (isset($result['success']) && $result['success'] === true) {
                     return response()->json([
                         'success' => true,
                         'redirect' => $result['redirect']
@@ -514,7 +530,7 @@ class WebAuthController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'error' => $result['error']
+                    'error' => $result['error'] ?? 'Une erreur est survenue.'
                 ], 400);
             }
 
@@ -541,7 +557,15 @@ class WebAuthController extends Controller
 
                 $result = $this->createOrUpdateMentorUser($userData);
 
-                if ($result['success']) {
+                // Gestion spécifique pour la redirection de confirmation de type
+                if (isset($result['success']) && $result['success'] === 'redirect_confirm') {
+                    return response()->json([
+                        'success' => false,
+                        'redirect' => $result['redirect']
+                    ]);
+                }
+
+                if (isset($result['success']) && $result['success'] === true) {
                     return response()->json([
                         'success' => true,
                         'redirect' => $result['redirect']
@@ -550,7 +574,7 @@ class WebAuthController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'error' => $result['error']
+                    'error' => $result['error'] ?? 'Une erreur est survenue.'
                 ], 400);
             }
 
