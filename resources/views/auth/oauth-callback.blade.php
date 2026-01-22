@@ -44,7 +44,7 @@
     </div>
 
     <script>
-        (function () {
+        (function  () {
             const processUrl = "{{ $processUrl }}";
             const errorUrl = "{{ $errorUrl }}";
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -205,10 +205,10 @@
                 // Masquer le loader
                 document.querySelector('.loader').style.display = 'none';
 
-                // Rediriger vers la page d'erreur apres 8 secondes (plus de temps pour lire)
+                // Rediriger vers la page d'erreur apres 15 secondes (plus de temps pour lire)
                 setTimeout(() => {
                     window.location.href = errorUrl + '?error=' + encodeURIComponent(message.replace(/<[^>]*>/g, ''));
-                }, 8000);
+                }, 15000);
             }
 
             // Lancer le traitement au chargement
