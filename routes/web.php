@@ -88,6 +88,10 @@ Route::prefix('jeune')->name('auth.jeune.')->group(function () {
     Route::post('/oauth/{provider}/process', [WebAuthController::class, 'jeuneOAuthProcess'])->name('oauth.process');
 });
 
+// Routes de confirmation de changement de type (accessible sans authentification)
+Route::get('/auth/confirm-type-change', [WebAuthController::class, 'showConfirmTypeChange'])->name('auth.confirm-type-change');
+Route::post('/auth/confirm-type-change', [WebAuthController::class, 'confirmTypeChange'])->name('auth.confirm-type-change.post');
+
 // Authentification Mentors (LinkedIn uniquement)
 Route::prefix('mentor')->name('auth.mentor.')->group(function () {
     Route::middleware('guest')->group(function () {
@@ -230,6 +234,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Gestion des utilisateurs
         Route::resource('users', UserController::class)->only(['index', 'show', 'destroy']);
         Route::put('users/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('users.toggle-admin');
+        Route::put('users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
 
         // Gestion des mentors
         Route::get('mentors', [MentorController::class, 'index'])->name('mentors.index');

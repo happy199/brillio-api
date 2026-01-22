@@ -382,10 +382,8 @@ class WebAuthController extends Controller
         if ($user) {
             // Verifier que c'est bien un compte jeune
             if ($user->user_type !== 'jeune') {
-                return [
-                    'success' => false,
-                    'error' => 'Cette adresse email est associee a un compte mentor.'
-                ];
+                // Compte mentor trouvé, proposer la migration
+                return $this->handleCrossTypeReactivation($user, 'jeune', $userData, $provider);
             }
 
             // Mettre a jour les infos
@@ -612,10 +610,8 @@ class WebAuthController extends Controller
         if ($user) {
             // Verifier que c'est bien un compte mentor
             if ($user->user_type !== 'mentor') {
-                return [
-                    'success' => false,
-                    'error' => 'Cette adresse email est associee a un compte jeune. Veuillez utiliser la connexion jeune.'
-                ];
+                // Compte jeune trouvé, proposer la migration
+                return $this->handleCrossTypeReactivation($user, 'mentor', $userData, 'linkedin');
             }
 
             $user->update([
@@ -791,4 +787,139 @@ class WebAuthController extends Controller
         return redirect()->route('auth.jeune.login')
             ->with('status', 'Votre mot de passe a ete reinitialise avec succes. Vous pouvez maintenant vous connecter.');
     }
+
+    // ==========================================
+    // ACCOUNT TYPE MIGRATION METHODS
+    // ==========================================
+
+    /**
+     * Gère la réactivation cross-type (jeune → mentor ou mentor → jeune)
+     */
+    protected function handleCrossTypeReactivation(User $user, string $newType, array $oauthData, string $provider): array
+    {
+        // Créer un token de migration temporaire
+        $migration = \App\Models\AccountTypeMigration::create([
+            'user_id' => $user->id,
+            'old_type' => $user->user_type,
+            'new_type' => $newType,
+            'token' => \Str::random(64),
+            'oauth_data' => [
+                'provider' => $provider,
+                'provider_id' => $oauthData['id'] ?? null,
+                'email' => $oauthData['email'] ?? $user->email,
+                'name' => $oauthData['user_metadata']['name'] ?? $oauthData['name'] ?? null,
+                'avatar_url' => $oauthData['user_metadata']['avatar_url'] ?? $oauthData['avatar_url'] ?? null,
+            ],
+            'expires_at' => now()->addHours(24),
+        ]);
+
+        // Rediriger vers la page de confirmation
+        return [
+            'success' => 'redirect_confirm',
+            'redirect' => route('auth.confirm-type-change', ['token' => $migration->token])
+        ];
+    }
+
+    /**
+     * Affiche la page de confirmation de changement de type
+     */
+    public function showConfirmTypeChange(Request $request)
+    {
+        $migration = \App\Models\AccountTypeMigration::where('token', $request->token)
+            ->where('expires_at', '>', now())
+            ->firstOrFail();
+
+        return view('auth.confirm-type-change', [
+            'user' => $migration->user,
+            'oldType' => $migration->old_type,
+            'newType' => $migration->new_type,
+            'token' => $migration->token,
+            'isArchived' => $migration->user->is_archived,
+        ]);
+    }
+
+    /**
+     * Traite la confirmation de changement de type
+     */
+    public function confirmTypeChange(Request $request)
+    {
+        $migration = \App\Models\AccountTypeMigration::where('token', $request->token)
+            ->where('expires_at', '>', now())
+            ->firstOrFail();
+
+        $user = $migration->user;
+        $action = $request->action;
+
+        switch ($action) {
+            case 'migrate':
+                return $this->migrateAccountType($user, $migration);
+
+            case 'keep':
+                return $this->keepCurrentType($user, $migration);
+
+            default:
+                abort(400, 'Action invalide');
+        }
+    }
+
+    /**
+     * Migre le compte vers le nouveau type
+     */
+    protected function migrateAccountType(User $user, \App\Models\AccountTypeMigration $migration)
+    {
+        // Réactiver si archivé
+        if ($user->is_archived) {
+            $user->is_archived = false;
+            $user->archived_at = null;
+            $user->archived_reason = null;
+        }
+
+        // Changer le type
+        $user->user_type = $migration->new_type;
+
+        // Mettre à jour OAuth data si fournies
+        if ($migration->oauth_data) {
+            $user->auth_provider = $migration->oauth_data['provider'] ?? $user->auth_provider;
+            $user->provider_id = $migration->oauth_data['provider_id'] ?? $user->provider_id;
+
+            if (!empty($migration->oauth_data['avatar_url'])) {
+                $user->profile_photo_url = $migration->oauth_data['avatar_url'];
+            }
+        }
+
+        $user->last_login_at = now();
+        $user->save();
+
+        // Créer profil si nécessaire
+        if ($migration->new_type === 'mentor' && !$user->mentorProfile) {
+            $user->mentorProfile()->create([]);
+        } elseif ($migration->new_type === 'jeune' && !$user->jeuneProfile) {
+            $user->jeuneProfile()->create([]);
+        }
+
+        // Supprimer le token de migration
+        $migration->delete();
+
+        // Connecter l'utilisateur
+        Auth::login($user, true);
+
+        return redirect()->route($migration->new_type . '.dashboard')
+            ->with('success', "Votre compte a été réactivé en tant que {$migration->new_type} !");
+    }
+
+    /**
+     * Garde le type actuel et redirige vers la bonne page de connexion
+     */
+    protected function keepCurrentType(User $user, \App\Models\AccountTypeMigration $migration)
+    {
+        // Supprimer le token de migration
+        $migration->delete();
+
+        // Rediriger vers la page de connexion appropriée
+        $route = $user->user_type === 'jeune' ? 'auth.jeune.login' : 'auth.mentor.login';
+
+        return redirect()->route($route)
+            ->with('info', "Veuillez vous connecter avec votre compte {$user->user_type}.");
+    }
 }
+
