@@ -205,9 +205,9 @@
                 // Masquer le loader
                 document.querySelector('.loader').style.display = 'none';
 
-                // Rediriger vers la page d'erreur apres 15 secondes (plus de temps pour lire)
+                // Rediriger vers la connexion jeune apres 15 secondes
                 setTimeout(() => {
-                    window.location.href = errorUrl + '?error=' + encodeURIComponent(message.replace(/<[^>]*>/g, ''));
+                    window.location.href = '/jeune/connexion';
                 }, 15000);
             }
 
