@@ -247,6 +247,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::patch('mentors/{mentor}/toggle-validation', [MentorController::class, 'toggleValidation'])->name('mentors.toggle-validation');
         Route::put('mentors/{mentor}/approve', [MentorController::class, 'approve'])->name('mentors.approve');
         Route::put('mentors/{mentor}/reject', [MentorController::class, 'reject'])->name('mentors.reject');
+        Route::get('mentors/{mentor}/download-linkedin', [MentorController::class, 'downloadLinkeInProfile'])->name('mentors.download-linkedin');
 
         // Analytiques
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');

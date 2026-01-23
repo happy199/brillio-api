@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MentorProfile;
 use App\Models\RoadmapStep;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Controller pour la gestion des mentors dans le dashboard admin
@@ -122,5 +123,25 @@ class MentorController extends Controller
         $mentor->save();
 
         return back()->with('warning', "Le profil de {$mentor->user->name} a été retiré");
+    }
+
+    /**
+     * Télécharge le fichier profil LinkedIn du mentor
+     */
+    public function downloadLinkeInProfile(MentorProfile $mentor)
+    {
+        if (!$mentor->linkedin_pdf_path) {
+            return back()->with('error', 'Aucun fichier profil associé.');
+        }
+
+        // Le fichier est stocké sur le disque 'local' (storage/app/linkedin-pdfs)
+        if (!Storage::disk('local')->exists($mentor->linkedin_pdf_path)) {
+            return back()->with('error', 'Fichier introuvable sur le serveur.');
+        }
+
+        return Storage::disk('local')->download(
+            $mentor->linkedin_pdf_path,
+            $mentor->linkedin_pdf_original_name ?? 'profil-linkedin.pdf'
+        );
     }
 }

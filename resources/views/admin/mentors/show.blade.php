@@ -125,6 +125,29 @@
                 <p class="text-gray-600 text-sm leading-relaxed">{{ $mentor->bio }}</p>
             </div>
             @endif
+
+            <!-- Fichier Profil Importé -->
+            @if($mentor->linkedin_pdf_path)
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="font-semibold text-gray-900 mb-3">Fichier Profil Importé</h3>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate" title="{{ $mentor->linkedin_pdf_original_name }}">
+                            {{ $mentor->linkedin_pdf_original_name ?? 'profil-linkedin.pdf' }}
+                        </p>
+                        <p class="text-xs text-gray-500">PDF Importé</p>
+                    </div>
+                    <a href="{{ route('admin.mentors.download-linkedin', $mentor) }}" target="_blank" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg" title="Télécharger">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Parcours -->
