@@ -160,7 +160,9 @@
                             console.error('Server error response:', text);
                             try {
                                 const data = JSON.parse(text);
-                                throw new Error(data.error || data.message || 'Erreur serveur');
+                                const error = new Error(data.error || data.message || 'Erreur serveur');
+                                error.redirect_url = data.redirect_url; // Stocker redirect_url si présent
+                                throw error;
                             } catch (e) {
                                 if (e.message && e.message !== 'Unexpected token' && !e.message.startsWith('Erreur serveur')) {
                                     throw e;
