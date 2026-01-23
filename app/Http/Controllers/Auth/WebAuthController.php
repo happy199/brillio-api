@@ -827,9 +827,15 @@ class WebAuthController extends Controller
                 ? "Un compte jeune actif existe déjà avec cet email. Pour devenir mentor, vous devez d'abord archiver votre compte jeune depuis la page Profil > Zone de danger. <br><br><strong>⚠️ Important :</strong> Les comptes mentors sont soumis à une vérification stricte pour garantir la qualité. Si nous détectons que votre profil ne correspond pas aux critères de mentor, vous serez rétrogradé en compte jeune."
                 : "Un compte mentor actif existe déjà avec cet email. Pour devenir jeune, vous devez d'abord archiver votre compte mentor depuis la page Statistiques > Zone de danger.";
 
+            // Déterminer l'URL de redirection correcte selon le type de compte existant
+            $redirectUrl = $user->user_type === 'jeune'
+                ? route('auth.jeune.login')
+                : route('auth.mentor.login');
+
             return [
                 'success' => false,
-                'error' => $errorMessage
+                'error' => $errorMessage,
+                'redirect_url' => $redirectUrl // URL de la page de login du compte existant
             ];
         }
 

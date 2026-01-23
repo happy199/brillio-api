@@ -44,7 +44,7 @@
     </div>
 
     <script>
-        (function  () {
+        (function () {
             const processUrl = "{{ $processUrl }}";
             const errorUrl = "{{ $errorUrl }}";
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -115,7 +115,9 @@
                             console.error('Server error response:', text);
                             try {
                                 const data = JSON.parse(text);
-                                throw new Error(data.error || data.message || 'Erreur serveur');
+                                const error = new Error(data.error || data.message || 'Erreur serveur');
+                                error.redirect_url = data.redirect_url; // Stocker redirect_url si présent
+                                throw error;
                             } catch (e) {
                                 if (e.message && e.message !== 'Unexpected token' && !e.message.startsWith('Erreur serveur')) {
                                     throw e;
@@ -126,9 +128,13 @@
 
                         const data = await response.json();
 
-                        if (data.success && data.redirect) {
+                        // Si on a une redirection (succès ou confirmation), rediriger
+                        if (data.redirect) {
                             document.getElementById('status-message').textContent = 'Redirection...';
                             window.location.href = data.redirect;
+                        } else if (data.success) {
+                            // Succès mais pas de redirection spécifique
+                            window.location.href = '/mentor/dashboard';
                         } else {
                             throw new Error(data.error || 'Erreur lors de l\'authentification');
                         }
@@ -165,9 +171,13 @@
 
                         const data = await response.json();
 
-                        if (data.success && data.redirect) {
+                        // Si on a une redirection (succès ou confirmation), rediriger
+                        if (data.redirect) {
                             document.getElementById('status-message').textContent = 'Redirection...';
                             window.location.href = data.redirect;
+                        } else if (data.success) {
+                            // Succès mais pas de redirection spécifique
+                            window.location.href = '/mentor/dashboard';
                         } else {
                             throw new Error(data.error || 'Erreur lors de l\'authentification');
                         }
@@ -192,11 +202,11 @@
                     }
                 } catch (error) {
                     console.error('Auth error:', error);
-                    showError(error.message);
+                    showError(error.message, error.redirect_url);
                 }
             }
 
-            function showError(message) {
+            function showError(message, redirectUrl) {
                 document.getElementById('status-message').textContent = 'Une erreur est survenue';
                 // Utiliser innerHTML pour afficher le HTML (br, strong, etc.)
                 document.getElementById('error-message').innerHTML = message;
@@ -205,9 +215,11 @@
                 // Masquer le loader
                 document.querySelector('.loader').style.display = 'none';
 
-                // Rediriger vers la connexion jeune apres 15 secondes
+                // Rediriger vers la page de login appropriée après 15 secondes
+                // Utiliser redirectUrl de la réponse si disponible, sinon errorUrl par défaut
+                const finalRedirectUrl = redirectUrl || errorUrl;
                 setTimeout(() => {
-                    window.location.href = '/jeune/connexion';
+                    window.location.href = finalRedirectUrl;
                 }, 15000);
             }
 
