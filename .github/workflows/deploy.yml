@@ -79,7 +79,8 @@ jobs:
             docker-compose up -d --remove-orphans
             
             # Wait for MySQL (just in case it restarted)
-            sleep 10
+            echo "Waiting 30s for MySQL to initialize..."
+            sleep 30
             
             # Run migrations (using the pre-built image)
             docker-compose exec -T app php artisan migrate --force
