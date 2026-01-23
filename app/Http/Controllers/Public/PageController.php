@@ -16,7 +16,12 @@ class PageController extends Controller
      */
     public function home()
     {
-        return view('public.home');
+        // Statistiques dynamiques
+        $jeunesCount = \App\Models\User::where('user_type', 'jeune')->count();
+        $mentorsCount = \App\Models\User::where('user_type', 'mentor')->count();
+        $countriesCount = \App\Models\User::distinct('country')->whereNotNull('country')->count('country');
+
+        return view('public.home', compact('jeunesCount', 'mentorsCount', 'countriesCount'));
     }
 
     /**

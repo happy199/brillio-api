@@ -49,15 +49,15 @@
                     <!-- Stats -->
                     <div class="grid grid-cols-3 gap-6">
                         <div>
-                            <p class="text-3xl font-bold">10K+</p>
+                            <p class="text-3xl font-bold">{{ $jeunesCount }}+</p>
                             <p class="text-white/70 text-sm">Jeunes accompagnés</p>
                         </div>
                         <div>
-                            <p class="text-3xl font-bold">500+</p>
+                            <p class="text-3xl font-bold">{{ $mentorsCount }}+</p>
                             <p class="text-white/70 text-sm">Mentors actifs</p>
                         </div>
                         <div>
-                            <p class="text-3xl font-bold">15+</p>
+                            <p class="text-3xl font-bold">{{ $countriesCount }}+</p>
                             <p class="text-white/70 text-sm">Pays africains</p>
                         </div>
                     </div>
