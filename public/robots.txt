@@ -1,2 +1,37 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Pages à ne pas indexer
+Disallow: /admin/
+Disallow: /jeune/dashboard
+Disallow: /jeune/chat
+Disallow: /jeune/onboarding
+Disallow: /jeune/profile
+Disallow: /jeune/mentors
+Disallow: /jeune/documents
+Disallow: /jeune/personality
+Disallow: /mentor/dashboard
+Disallow: /mentor/profile
+Disallow: /mentor/chat
+Disallow: /mentor/roadmap
+Disallow: /mentor/stats
+Disallow: /mentor/personality
+Disallow: /mentor/explore
+Disallow: /api/
+
+# Autoriser les profils publics
+Allow: /mentors/*
+Allow: /jeunes/*
+
+# Autoriser les pages publiques
+Allow: /
+Allow: /jeune/connexion
+Allow: /jeune/inscription
+Allow: /mentor/connexion
+Allow: /a-propos
+Allow: /contact
+Allow: /politique-de-confidentialite
+Allow: /conditions-utilisation
+
+# Sitemap
+Sitemap: https://brillio.africa/sitemap.xml

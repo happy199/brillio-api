@@ -26,10 +26,20 @@
     <meta property="twitter:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
 
-    <title>@yield('title', 'Brillio - Ton avenir, ton choix')</title>
+    <title>@yield('title', 'Brillio - Plateforme de Mentorat en Afrique')</title>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('android-chrome-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('android-chrome-512x512.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#6366f1">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ url()->current() }}">
+
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -159,8 +169,45 @@
         }
     </style>
 
+    <!-- JSON-LD Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Brillio",
+        "description": "Plateforme de mentorat connectant jeunes talents et mentors expérimentés en Afrique pour l'orientation professionnelle et le développement de carrière",
+        "url": "https://brillio.africa",
+        "logo": "{{ asset('android-chrome-512x512.png') }}",
+       "sameAs": [
+            "https://www.facebook.com/brillioafrica",
+            "https://www.linkedin.com/company/brillioafrica",
+            "https://twitter.com/brillioafrica"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Service",
+            "email": "contact@brillio.africa"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Brillio",
+        "url": "https://brillio.africa",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://brillio.africa/mentors?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
     @stack('styles')
 </head>
+
 
 <body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden" x-data="{ mobileMenu: false }">
     <!-- Header / Navigation -->

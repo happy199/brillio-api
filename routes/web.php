@@ -48,6 +48,10 @@ Route::get('/newsletter/unsubscribe/{token}', [PublicNewsletterController::class
 
 // Pages légales
 Route::get('/politique-de-confidentialite', [PageController::class, 'privacy'])->name('privacy');
+
+// SEO
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+
 Route::get('/conditions-utilisation', [PageController::class, 'terms'])->name('terms');
 
 // Profil public mentor (partageable)
