@@ -29,12 +29,13 @@ class SitemapController extends Controller
         }
 
         // Profils publics des mentors vérifiés
-        $verifiedMentors = MentorProfile::whereHas('user', function ($query) {
-            $query->where('is_verified', true)
-                ->where('is_archived', false);
-        })
+        $verifiedMentors = MentorProfile::where('is_validated', true)
             ->whereNotNull('public_slug')
-            ->get();
+            ->with('user')
+            ->get()
+            ->filter(function ($mentor) {
+                return $mentor->user && !$mentor->user->is_archived;
+            });
 
         foreach ($verifiedMentors as $mentor) {
             $sitemap .= $this->addUrl(
