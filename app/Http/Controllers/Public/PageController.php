@@ -16,10 +16,18 @@ class PageController extends Controller
      */
     public function home()
     {
-        // Statistiques dynamiques
-        $jeunesCount = \App\Models\User::where('user_type', 'jeune')->count();
-        $mentorsCount = \App\Models\User::where('user_type', 'mentor')->count();
-        $countriesCount = \App\Models\User::distinct('country')->whereNotNull('country')->count('country');
+        // Statistiques dynamiques avec résilience
+        try {
+            $jeunesCount = \App\Models\User::where('user_type', 'jeune')->count();
+            $mentorsCount = \App\Models\User::where('user_type', 'mentor')->count();
+            $countriesCount = \App\Models\User::distinct('country')->whereNotNull('country')->count('country');
+        } catch (\Exception $e) {
+            // Fallback en cas d'erreur DB pour ne pas casser la home
+            \Illuminate\Support\Facades\Log::error('Erreur récupération stats home: ' . $e->getMessage());
+            $jeunesCount = 10000;
+            $mentorsCount = 500;
+            $countriesCount = 15;
+        }
 
         return view('public.home', compact('jeunesCount', 'mentorsCount', 'countriesCount'));
     }
