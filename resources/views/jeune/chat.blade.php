@@ -164,7 +164,7 @@
                             class="px-4 py-2 bg-white border rounded-full text-sm hover:border-primary-500 hover:text-primary-600 transition">
                             Etudes developpeur
                         </button>
-                        <button @click="sendSuggestion('Comment trouver un stage au Senegal ?')"
+                        <button @click="sendSuggestion('Comment trouver un stage {{ $location }} ?')"
                             class="px-4 py-2 bg-white border rounded-full text-sm hover:border-primary-500 hover:text-primary-600 transition">
                             Trouver un stage
                         </button>
@@ -263,8 +263,8 @@
                             this.messages = @json($currentConversation->messages->map(fn($m) => ['role' => $m->role, 'content' => $m->content]));
                         @endif
 
-                                            // Check for prefilled message from URL params
-                                            const urlParams = new URLSearchParams(window.location.search);
+                                                    // Check for prefilled message from URL params
+                                                    const urlParams = new URLSearchParams(window.location.search);
                         const prefillMessage = urlParams.get('prefill');
                         if (prefillMessage) {
                             this.newMessage = decodeURIComponent(prefillMessage);

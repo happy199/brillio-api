@@ -325,11 +325,32 @@ class JeuneDashboardController extends Controller
         // Charger la dernière conversation par défaut
         $currentConversation = $conversations->first();
 
+        // Déterminer la localisation pour les suggestions
+        $location = $this->getUserLocation($user);
+
         return view('jeune.chat', [
             'user' => $user,
             'conversations' => $conversations,
             'currentConversation' => $currentConversation,
+            'location' => $location,
         ]);
+    }
+
+    /**
+     * Déterminer la localisation de l'utilisateur pour les suggestions
+     */
+    private function getUserLocation($user): string
+    {
+        // Priorité: ville > pays > défaut (Sénégal)
+        if ($user->city) {
+            return "à {$user->city}";
+        }
+
+        if ($user->country) {
+            return "au {$user->country}";
+        }
+
+        return "au Sénégal";
     }
 
     /**
