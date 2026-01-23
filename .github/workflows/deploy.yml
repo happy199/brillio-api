@@ -55,7 +55,7 @@ jobs:
 
       - name: Copy docker-compose and config files
         run: |
-          rsync -avz --delete --no-owner --no-group --no-perms \
+          rsync -avz --delete --no-owner --no-group --no-perms --no-times \
             --exclude '.git' \
             --exclude 'node_modules' \
             --exclude 'vendor' \
