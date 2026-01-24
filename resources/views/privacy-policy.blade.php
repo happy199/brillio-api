@@ -1,4 +1,4 @@
-@extends('layouts.jeune')
+@extends('layouts.public')
 
 @section('title', 'Politique de Confidentialité')
 
