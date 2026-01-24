@@ -46,7 +46,8 @@
                     <option value="video" {{ request('type') === 'video' ? 'selected' : '' }}>Vidéos</option>
                     <option value="tool" {{ request('type') === 'tool' ? 'selected' : '' }}>Outils</option>
                     <option value="exercise" {{ request('type') === 'exercise' ? 'selected' : '' }}>Exercices</option>
-                    <option value="advertisement" {{ request('type') === 'advertisement' ? 'selected' : '' }}>Publicité</option>
+                    <option value="advertisement" {{ request('type') === 'advertisement' ? 'selected' : '' }}>Publicité
+                    </option>
                 </select>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher..."
                     class="rounded-lg border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500 w-full md:w-64">
@@ -95,7 +96,8 @@
                                     @endif
                                     <div class="max-w-xs">
                                         <div class="text-sm font-medium text-gray-900 truncate" title="{{ $resource->title }}">
-                                            {{ $resource->title }}</div>
+                                            {{ $resource->title }}
+                                        </div>
                                         <div class="text-sm text-gray-500 truncate">{{ Str::limit($resource->description, 50) }}
                                         </div>
                                     </div>
@@ -103,21 +105,19 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase
-                                    @if($resource->type === 'article') bg-blue-100 text-blue-800
-                                    @elseif($resource->type === 'video') bg-red-100 text-red-800
-                                    @elseif($resource->type === 'advertisement') bg-purple-100 text-purple-800
-                                    @else bg-gray-100 text-gray-800 @endif">
+                                            @if($resource->type === 'article') bg-blue-100 text-blue-800
+                                            @elseif($resource->type === 'video') bg-red-100 text-red-800
+                                            @elseif($resource->type === 'advertisement') bg-purple-100 text-purple-800
+                                            @else bg-gray-100 text-gray-800 @endif">
                                     {{ $resource->type === 'advertisement' ? 'Publicité' : $resource->type }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                @if($resource->price > 0)
+                                @if(!$resource->is_premium)
+                                    <span class="text-green-600 font-medium">Gratuit</span>
+                                @else
                                     <span class="font-bold text-gray-900">{{ number_format($resource->price, 0, ',', ' ') }}
                                         F</span>
-                                @else
-                                    <span class="text-green-600 font-medium">Gratuit</span>
-                                @endif
-                                @if($resource->is_premium)
                                     <span class="ml-1 text-xs text-yellow-600 bg-yellow-100 px-1 rounded">Premium</span>
                                 @endif
                             </td>

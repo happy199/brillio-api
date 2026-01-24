@@ -118,6 +118,10 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Assistant IA
                     </a>
+                    <a href="{{ route('jeune.resources.index') }}"
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Ressources
+                    </a>
                     <a href="{{ route('jeune.documents') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Documents
@@ -184,6 +188,10 @@
             <a href="{{ route('jeune.chat') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Assistant
+            </a>
+            <a href="{{ route('jeune.resources.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Ressources
             </a>
             <a href="{{ route('jeune.documents') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 bg-gray-100' }}">

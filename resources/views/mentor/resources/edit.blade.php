@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.mentor')
 
 @section('title', 'Éditer Ressource')
 
@@ -29,7 +29,7 @@
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex items-center gap-4">
-        <a href="{{ route('admin.resources.index') }}" class="text-gray-500 hover:text-gray-700">
+        <a href="{{ route('mentor.resources.index') }}" class="text-gray-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.resources.update', $resource) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+    <form action="{{ route('mentor.resources.update', $resource) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
         @csrf
         @method('PUT')
 
@@ -219,7 +219,7 @@
                                         <label class="cursor-pointer">
                                             <input type="checkbox" name="targeting[situations][]" value="{{ $key }}" 
                                                 {{ in_array($key, $selectedSit) ? 'checked' : '' }} class="peer sr-only">
-                                            <span class="inline-block px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-full hover:bg-purple-100 hover:text-purple-800 peer-checked:bg-purple-100 peer-checked:border-purple-400 peer-checked:text-purple-800 transition select-none">
+                                            <span class="inline-block px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-full hover:bg-gray-50 peer-checked:bg-purple-100 peer-checked:border-purple-400 peer-checked:text-purple-800 transition select-none">
                                                 {{ $label }}
                                             </span>
                                         </label>
@@ -350,7 +350,7 @@
 
                             <div x-show="isPremium === '1'" x-transition>
                                     <div class="relative mt-2">
-                                        <input id="editPriceInput" type="number" name="price" value="{{ old('price', $resource->price) }}"
+                                        <input id="editPriceInput" type="number" name="price" value="{{ old('price', $resource->price) }}" 
                                             :required="isPremium === '1'"
                                             min="0" step="100"
                                             class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5 pr-12" placeholder="Prix">
@@ -365,146 +365,40 @@
                     </div>
 
                     <!-- Fichiers -->
-                    <div class="space-y-5 pt-5 border-t border-gray-100" x-data="{
-                            coverPreview: null,
-                            fileName: null,
-                            isUploading: false,
-                            uploadSuccess: false,
-                            uploadError: null,
-                            handleCoverChange(event) {
-                                const file = event.target.files[0];
-                                if (file) {
-                                    this.coverPreview = URL.createObjectURL(file);
-                                }
-                            },
-                            handleFileChange(event) {
-                                const file = event.target.files[0];
-                                if (file) {
-                                     // Validation Type (Pas de vidéo)
-                                    if (file.type.startsWith('video/')) {
-                                        this.uploadError = 'Les vidéos ne sont pas autorisées ici.';
-                                        this.fileName = null;
-                                        this.uploadSuccess = false;
-                                        event.target.value = ''; // Reset input
-                                        return;
-                                    }
-                                    
-                                     // Validation Taille (ex: 20MB)
-                                    if (file.size > 20 * 1024 * 1024) {
-                                        this.uploadError = 'Le fichier est trop volumineux (Max 20MB).';
-                                        this.fileName = null;
-                                        this.uploadSuccess = false;
-                                        event.target.value = ''; // Reset input
-                                        return;
-                                    }
-
-                                    this.uploadError = null;
-                                    this.isUploading = true;
-                                    this.uploadSuccess = false;
-                                    
-                                    // Simulation d'upload
-                                    setTimeout(() => {
-                                        this.isUploading = false;
-                                        this.uploadSuccess = true;
-                                        this.fileName = file.name;
-                                    }, 1500);
-                                }
-                            },
-                            removeFile() {
-                                this.fileName = null;
-                                this.uploadSuccess = false;
-                                this.uploadError = null;
-                                document.getElementById('file_input').value = '';
-                            }
-                        }">
+                    <div class="space-y-5 pt-5 border-t border-gray-100">
                          <!-- Image -->
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Couverture</label>
-                            <label for="preview_image_input" class="relative flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition relative overflow-hidden group">
-                                <template x-if="!coverPreview">
-                                   <!-- Affichage par défaut ou image existante -->
-                                   <div class="w-full h-full flex flex-col items-center justify-center">
-                                        @if($resource->preview_image_path)
-                                            <img src="{{ Storage::url($resource->preview_image_path) }}" alt="Preview" class="absolute inset-0 w-full h-full object-cover">
-                                            <div class="absolute bottom-0 inset-x-0 bg-black/50 p-1 text-white text-center text-[10px] opacity-0 group-hover:opacity-100 transition">
-                                                Changer
-                                            </div>
-                                        @else
-                                            <div class="flex flex-col items-center justify-center pt-2 pb-3">
-                                                <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                                <p class="text-[10px] text-gray-500">JPG, PNG</p>
-                                            </div>
-                                        @endif
-                                   </div>
-                                </template>
-
-                                <template x-if="coverPreview">
-                                    <img :src="coverPreview" class="w-full h-full object-cover">
-                                </template>
-
-                                <input id="preview_image_input" type="file" name="preview_image" accept="image/*" class="hidden" @change="handleCoverChange" />
+                            <label for="preview_image_input" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition relative overflow-hidden group">
+                                @if($resource->preview_image_path)
+                                    <img src="{{ Storage::url($resource->preview_image_path) }}" alt="Preview" class="absolute inset-0 w-full h-full object-cover">
+                                    <div class="absolute bottom-0 inset-x-0 bg-black/50 p-1 text-white text-center text-[10px] opacity-0 group-hover:opacity-100 transition">
+                                        Changer
+                                    </div>
+                                @else
+                                    <div class="flex flex-col items-center justify-center pt-2 pb-3">
+                                        <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <p class="text-[10px] text-gray-500">JPG, PNG</p>
+                                    </div>
+                                @endif
+                                <input id="preview_image_input" type="file" name="preview_image" accept="image/*" class="hidden" />
                             </label>
-                             <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG. Taille max : 5 Mo.</p>
-                             @error('preview_image') <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                         </div>
 
                          <!-- PJ -->
                          <div>
                             <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Fichier (Optionnel)</label>
-                            
-                            <div class="relative">
-                                <label for="file_input" x-show="!uploadSuccess"
-                                    class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition relative overflow-hidden"
-                                    :class="uploadError ? 'border-red-300 bg-red-50' : ''">
-                                    
-                                     <!-- État Initial / Existant -->
-                                    <div x-show="!isUploading && !uploadSuccess" class="flex flex-col items-center w-full">
-                                        @if($resource->file_path)
-                                            <div class="flex items-center gap-2 text-green-600 mb-1" x-show="!uploadError">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                                <span class="text-xs font-bold">Fichier actuel (conservé)</span>
-                                            </div>
-                                            <span class="text-[10px] text-gray-500" x-show="!uploadError">Cliquez pour remplacer</span>
-                                        @else
-                                            <span class="text-xs text-gray-600 font-medium" x-text="uploadError ? 'Réessayer' : 'Choisir un fichier...'"></span>
-                                            <span x-show="!uploadError" class="text-[9px] text-gray-400 mt-1">Docs, Images, Zip</span>
-                                        @endif
-                                        <span x-show="uploadError" class="text-[9px] text-red-500 mt-1" x-text="uploadError"></span>
+                            <label for="file_input" class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition">
+                                @if($resource->file_path)
+                                    <div class="flex items-center gap-2 text-green-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span class="text-xs font-bold">Fich. ok</span>
                                     </div>
-
-                                     <!-- État "Upload" (Loader) -->
-                                    <div x-show="isUploading" class="flex flex-col items-center text-indigo-600">
-                                        <svg class="animate-spin h-6 w-6 mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span class="text-[10px] font-semibold animate-pulse">Traitement...</span>
-                                    </div>
-                                </label>
-
-                                <input id="file_input" type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z,.jpg,.jpeg,.png,.webp" class="hidden" @change="handleFileChange" />
-
-                                <div x-show="uploadSuccess" class="flex items-center justify-between w-full h-20 border border-green-200 bg-green-50 rounded-lg px-4 transition">
-                                    <div class="flex items-center gap-3 overflow-hidden">
-                                        <div class="bg-white p-2 rounded-lg border border-green-100 flex-shrink-0">
-                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                            </svg>
-                                        </div>
-                                        <div class="flex flex-col min-w-0">
-                                            <span class="text-xs font-bold text-gray-900 truncate" x-text="fileName"></span>
-                                            <span class="text-[10px] text-green-600 font-medium">Prêt à être publié</span>
-                                        </div>
-                                    </div>
-                                    <button type="button" @click="removeFile" class="p-2 text-gray-400 hover:text-red-500 transition rounded-full hover:bg-white">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <p class="text-[10px] text-gray-400 mt-1">Formats acceptés : PDF, Word, Excel, PowerPoint, ZIP, Images. Taille max : 20 Mo.</p>
-                            @error('file') <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
+                                @else
+                                    <span class="text-xs text-gray-600 font-medium">Choisir un fichier...</span>
+                                @endif
+                                <input id="file_input" type="file" name="file" class="hidden" />
+                            </label>
                         </div>
                     </div>
 
@@ -524,7 +418,7 @@
         </div>
     </form>
 
-    <form id="delete-form" action="{{ route('admin.resources.destroy', $resource) }}" method="POST" class="hidden">
+    <form id="delete-form" action="{{ route('mentor.resources.destroy', $resource) }}" method="POST" class="hidden">
         @csrf
         @method('DELETE')
     </form>

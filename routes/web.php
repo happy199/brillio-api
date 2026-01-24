@@ -16,6 +16,8 @@ use App\Http\Controllers\Public\NewsletterController as PublicNewsletterControll
 use App\Http\Controllers\Public\ContactController as PublicContactController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\ContactMessageController;
+use App\Http\Controllers\Admin\MonetizationController;
+use App\Http\Controllers\Mentor\WalletController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -163,6 +165,9 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
     Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');
     Route::get('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'showChangePasswordForm'])->name('password.change');
     Route::put('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'updatePassword'])->name('password.update');
+
+    // Ressources pédagogiques
+    Route::resource('ressources', \App\Http\Controllers\Jeune\ResourceController::class)->only(['index', 'show'])->names('resources');
 });
 
 // Routes publiques
@@ -200,6 +205,11 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::post('/profil/linkedin-import', [MentorDashboardController::class, 'importLinkedInData'])->name('profile.linkedin-import');
     Route::get('/explorer', [App\Http\Controllers\Mentor\ExploreController::class, 'index'])->name('explore');
 
+    // Portefeuille & Crédits
+    Route::get('/portefeuille', [WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/portefeuille/achat', [WalletController::class, 'purchase'])->name('wallet.purchase');
+    Route::post('/portefeuille/coupon', [WalletController::class, 'redeemCoupon'])->name('wallet.redeem');
+
     // Test Personnalité Mentor
     Route::get('/test-personnalite', [App\Http\Controllers\Mentor\PersonalityController::class, 'index'])->name('personality');
     Route::get('/test-personnalite/questions', [App\Http\Controllers\Mentor\PersonalityController::class, 'getQuestions'])->name('personality.questions');
@@ -211,6 +221,9 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     // Account archiving
     Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
     Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');
+
+    // Gestion des ressources mentor
+    Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
 });
 
 /*
@@ -261,6 +274,13 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::resource('resources', \App\Http\Controllers\Admin\ResourceController::class);
         Route::put('resources/{resource}/approve', [\App\Http\Controllers\Admin\ResourceController::class, 'approve'])->name('resources.approve');
         Route::put('resources/{resource}/reject', [\App\Http\Controllers\Admin\ResourceController::class, 'reject'])->name('resources.reject');
+
+        // Monétisation
+        Route::get('monetisation', [MonetizationController::class, 'index'])->name('monetization.index');
+        Route::post('monetisation/settings', [MonetizationController::class, 'updateSettings'])->name('monetization.settings.update');
+        Route::get('monetisation/coupons', [MonetizationController::class, 'coupons'])->name('monetization.coupons');
+        Route::post('monetisation/coupons', [MonetizationController::class, 'storeCoupon'])->name('monetization.coupons.store');
+        Route::delete('monetisation/coupons/{coupon}', [MonetizationController::class, 'destroyCoupon'])->name('monetization.coupons.destroy');
 
         // Analytiques
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
