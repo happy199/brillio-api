@@ -257,6 +257,11 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::put('mentors/{mentor}/reject', [MentorController::class, 'reject'])->name('mentors.reject');
         Route::get('mentors/{mentor}/download-linkedin', [MentorController::class, 'downloadLinkeInProfile'])->name('mentors.download-linkedin');
 
+        // Gestion des ressources
+        Route::resource('resources', \App\Http\Controllers\Admin\ResourceController::class);
+        Route::put('resources/{resource}/approve', [\App\Http\Controllers\Admin\ResourceController::class, 'approve'])->name('resources.approve');
+        Route::put('resources/{resource}/reject', [\App\Http\Controllers\Admin\ResourceController::class, 'reject'])->name('resources.reject');
+
         // Analytiques
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
         Route::prefix('analytics')->name('analytics.')->group(function () {
