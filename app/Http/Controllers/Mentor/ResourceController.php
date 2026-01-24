@@ -1,50 +1,32 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Resource;
 use App\Models\User;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ResourceController extends Controller
 {
-    /**
-     * Liste des ressources
-     */
-    public function index(Request $request)
+    protected $walletService;
+
+    public function __construct(WalletService $walletService)
     {
-        $query = Resource::with('user');
+        $this->walletService = $walletService;
+    }
 
-        // Filtre par statut
-        if ($request->filled('status')) {
-            if ($request->status === 'pending') {
-                $query->where('is_validated', false);
-            } elseif ($request->status === 'published') {
-                $query->where('is_published', true)->where('is_validated', true);
-            } elseif ($request->status === 'draft') {
-                $query->where('is_published', false);
-            }
-        }
-
-        // Filtre par type
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
-        }
-
-        // Recherche
-        if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        $resources = $query->orderBy('created_at', 'desc')->paginate(15);
-
-        return view('admin.resources.index', compact('resources'));
+    /**
+     * Liste des ressources du mentor
+     */
+    public function index()
+    {
+        $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
+        return view('mentor.resources.index', compact('resources'));
     }
 
     /**
@@ -53,7 +35,8 @@ class ResourceController extends Controller
     public function create()
     {
         $targetingOptions = $this->getDynamicTargetingOptions();
-        return view('admin.resources.create', compact('targetingOptions'));
+        $targetingCost = $this->walletService->getFeatureCost('advanced_targeting', 10);
+        return view('mentor.resources.create', compact('targetingOptions', 'targetingCost'));
     }
 
     /**
@@ -82,15 +65,24 @@ class ResourceController extends Controller
             'description' => 'required|string|max:1000',
             'content' => 'nullable|string',
             'type' => 'required|in:article,video,tool,exercise,template,script,advertisement',
+
             'price' => 'nullable|integer',
             'is_premium' => 'required|in:0,1',
             'file' => 'nullable|file|max:20480', // 20MB
             'preview_image' => 'nullable|image|max:5120', // 5MB
             'metadata' => 'nullable|array',
             'mbti_types' => 'nullable|array',
-            'tags' => 'nullable|string', // Reçu comme string séparée par virgules
+            'tags' => 'nullable|string',
             'targeting' => 'nullable|array',
         ], $messages);
+
+        // Vérification des crédits pour le ciblage
+        $hasTargeting = !empty($validated['targeting']) && (
+            !empty($validated['targeting']['education_levels']) ||
+            !empty($validated['targeting']['situations']) ||
+            !empty($validated['targeting']['countries']) ||
+            !empty($validated['targeting']['interests'])
+        );
 
         // Validation conditionnelle pour le prix
         if ($request->is_premium == '1') {
@@ -100,6 +92,20 @@ class ResourceController extends Controller
                 'price.required' => 'Le prix est obligatoire pour une ressource payante.',
                 'price.min' => 'Le prix minimum pour une ressource payante est de 200 FCFA.',
             ]);
+        }
+
+        if ($hasTargeting) {
+            $cost = $this->walletService->getFeatureCost('advanced_targeting', 10);
+            try {
+                // Tentaive de débit (lance une exception si solde insuffisant)
+                // Note: On ne sauvegarde pas encore la transaction car si le create échoue plus bas, on a débité pour rien.
+                // On utilisera une transaction DB globale ou on checke juste le solde ici.
+                if (auth()->user()->credits_balance < $cost) {
+                    return back()->withInput()->withErrors(['targeting' => "Crédits insuffisants. Le ciblage avancé coûte {$cost} crédits. Votre solde: " . auth()->user()->credits_balance]);
+                }
+            } catch (\Exception $e) {
+                return back()->withInput()->withErrors(['targeting' => $e->getMessage()]);
+            }
         }
 
         // Gestion des fichiers
@@ -116,51 +122,70 @@ class ResourceController extends Controller
         // Traitement des tags (string vers array)
         $tags = !empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
-        $resource = Resource::create([
-            'user_id' => auth()->id(),
-            'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']) . '-' . uniqid(),
-            'description' => $validated['description'],
-            'content' => $validated['content'],
-            'type' => $validated['type'],
-            'price' => $request->is_premium == '1' ? $request->price : 0,
-            'is_premium' => $request->is_premium == '1', // Correction ici
-            'file_path' => $filePath,
-            'preview_image_path' => $previewPath,
-            'metadata' => $validated['metadata'] ?? [],
-            'mbti_types' => $validated['mbti_types'] ?? [],
-            'tags' => $tags,
-            'targeting' => $validated['targeting'] ?? [],
-            'is_published' => true, // Admin publie directement
-            'is_validated' => true, // Admin valide directement
-            'validated_at' => now(),
-        ]);
+        // Création Transactionnelle
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('admin.resources.index')->with('success', 'Ressource créée avec succès.');
-    }
+            $resource = Resource::create([
+                'user_id' => auth()->id(),
+                'title' => $validated['title'],
+                'slug' => Str::slug($validated['title']) . '-' . uniqid(),
+                'description' => $validated['description'],
+                'content' => $validated['content'],
 
-    /**
-     * Affichage détail
-     */
-    public function show(Resource $resource)
-    {
-        return view('admin.resources.show', compact('resource'));
+                'type' => $validated['type'],
+                'price' => $request->is_premium == '1' ? $request->price : 0,
+                'is_premium' => $request->is_premium == '1', // Correction ici
+                'file_path' => $filePath,
+                'preview_image_path' => $previewPath,
+                'metadata' => $validated['metadata'] ?? [],
+                'mbti_types' => $validated['mbti_types'] ?? [],
+                'tags' => $tags,
+                'targeting' => $validated['targeting'] ?? [],
+                'is_published' => true,
+                'is_validated' => false,
+                'validated_at' => null,
+            ]);
+
+            // Débit réel si ciblage
+            if ($hasTargeting && isset($cost)) {
+                $this->walletService->deductCredits(
+                    auth()->user(),
+                    $cost,
+                    'service_fee',
+                    "Ciblage avancé pour: {$validated['title']}",
+                    $resource
+                );
+            }
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Nettoyage fichiers si erreur (optionnel mais propre)
+            return back()->withInput()->with('error', "Erreur lors de la création : " . $e->getMessage());
+        }
+
+        return redirect()->route('mentor.resources.index')->with('success', 'Ressource créée ! Elle sera visible après validation par un administrateur.');
     }
 
     /**
      * Formulaire d'édition
      */
-    public function edit(Resource $resource)
+    public function edit($id)
     {
+        $resource = auth()->user()->resources()->findOrFail($id);
         $targetingOptions = $this->getDynamicTargetingOptions();
-        return view('admin.resources.edit', compact('resource', 'targetingOptions'));
+        return view('mentor.resources.edit', compact('resource', 'targetingOptions'));
     }
 
     /**
      * Mise à jour
      */
-    public function update(Request $request, Resource $resource)
+    public function update(Request $request, $id)
     {
+        $resource = auth()->user()->resources()->findOrFail($id);
+
         $messages = [
             'required' => 'Ce champ est obligatoire.',
             'string' => 'Ce champ doit être une chaîne de caractères.',
@@ -182,6 +207,7 @@ class ResourceController extends Controller
             'description' => 'required|string|max:1000',
             'content' => 'nullable|string',
             'type' => 'required|in:article,video,tool,exercise,template,script,advertisement',
+
             'price' => 'nullable|integer',
             'is_premium' => 'required|in:0,1',
             'file' => 'nullable|file|max:20480', // 20MB
@@ -200,13 +226,6 @@ class ResourceController extends Controller
                 'price.required' => 'Le prix est obligatoire pour une ressource payante.',
                 'price.min' => 'Le prix minimum pour une ressource payante est de 200 FCFA.',
             ]);
-        }
-
-        if ($request->hasFile('file')) {
-            if ($resource->file_path) {
-                Storage::disk('public')->delete($resource->file_path);
-            }
-            $resource->file_path = $request->file('file')->store('resources/files', 'public');
         }
 
         if ($request->hasFile('preview_image')) {
@@ -231,14 +250,16 @@ class ResourceController extends Controller
             'targeting' => $validated['targeting'] ?? [],
         ]);
 
-        return redirect()->route('admin.resources.index')->with('success', 'Ressource mise à jour.');
+        return redirect()->route('mentor.resources.index')->with('success', 'Ressource mise à jour.');
     }
 
     /**
      * Suppression
      */
-    public function destroy(Resource $resource)
+    public function destroy($id)
     {
+        $resource = auth()->user()->resources()->findOrFail($id);
+
         if ($resource->file_path) {
             Storage::disk('public')->delete($resource->file_path);
         }
@@ -248,34 +269,7 @@ class ResourceController extends Controller
 
         $resource->delete();
 
-        return redirect()->route('admin.resources.index')->with('success', 'Ressource supprimée.');
-    }
-
-    /**
-     * Valider une ressource
-     */
-    public function approve(Resource $resource)
-    {
-        $resource->update([
-            'is_validated' => true,
-            'is_published' => true,
-            'validated_at' => now(),
-        ]);
-
-        return back()->with('success', 'Ressource validée et publiée.');
-    }
-
-    /**
-     * Rejeter une ressource
-     */
-    public function reject(Resource $resource)
-    {
-        $resource->update([
-            'is_published' => false,
-            // On garde is_validated a false ou on pourrait ajouter un champ 'rejected_at'
-        ]);
-
-        return back()->with('warning', 'Ressource retirée de la publication.');
+        return redirect()->route('mentor.resources.index')->with('success', 'Ressource supprimée.');
     }
 
     /**
@@ -283,7 +277,7 @@ class ResourceController extends Controller
      */
     private function getDynamicTargetingOptions()
     {
-        // Labels (Mappage statique pour l'affichage propre)
+        // Labels
         $educationLabels = [
             'college' => 'Collège',
             'lycee' => 'Lycée',
@@ -351,7 +345,6 @@ class ResourceController extends Controller
 
         // Tri
         ksort($countries);
-
         $orderedEducation = [];
         foreach ($educationLabels as $key => $label) {
             if (isset($educationLevels[$key])) {
@@ -363,11 +356,10 @@ class ResourceController extends Controller
                 $orderedEducation[$key] = $label;
             }
         }
-
         sort($interests);
 
         return [
-            'countries' => $countries,
+            'countries' => $countries, // [Label => Value]
             'education_levels' => $orderedEducation,
             'situations' => $situations,
             'interests' => array_values(array_unique($interests)),

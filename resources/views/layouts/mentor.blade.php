@@ -116,6 +116,10 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Mon parcours
                     </a>
+                    <a href="{{ route('mentor.resources.index') }}"
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Mes Ressources
+                    </a>
                     <a href="{{ route('mentor.stats') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.stats') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Statistiques
@@ -151,6 +155,10 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Mon profil
                             </a>
+                            <a href="{{ route('mentor.wallet.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Mon Portefeuille ({{ auth()->user()->credits_balance }})
+                            </a>
                             <hr class="my-2 border-gray-100">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
@@ -183,6 +191,10 @@
             <a href="{{ route('mentor.roadmap') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Parcours
+            </a>
+            <a href="{{ route('mentor.resources.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.resources.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Ressources
             </a>
             <a href="{{ route('mentor.stats') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.stats') ? 'active' : 'text-gray-600 bg-gray-100' }}">

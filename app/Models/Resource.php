@@ -27,12 +27,14 @@ class Resource extends Model
         'metadata',
         'mbti_types',
         'tags',
+        'targeting',
     ];
 
     protected $casts = [
         'metadata' => 'array',
         'mbti_types' => 'array',
         'tags' => 'array',
+        'targeting' => 'array',
         'is_premium' => 'boolean',
         'is_published' => 'boolean',
         'is_validated' => 'boolean',
