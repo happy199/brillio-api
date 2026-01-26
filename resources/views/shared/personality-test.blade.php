@@ -4,8 +4,8 @@
     // Theme Configuration
     $themeConfig = [
         'jeune' => [
-            'primary_gradient' => 'from-purple-600 to-indigo-600',
-            'secondary_gradient' => 'from-purple-600 to-pink-600',
+            'primary_gradient' => 'bg-purple-600',
+            'secondary_gradient' => 'bg-pink-600',
             'primary_text' => 'text-purple-700',
             'secondary_text' => 'text-pink-600',
             'primary_bg' => 'bg-purple-600',
@@ -23,8 +23,8 @@
             'button_text' => 'text-purple-600',
         ],
         'mentor' => [
-            'primary_gradient' => 'from-orange-500 to-red-600',
-            'secondary_gradient' => 'from-orange-500 to-amber-500',
+            'primary_gradient' => 'bg-orange-600',
+            'secondary_gradient' => 'bg-red-600',
             'primary_text' => 'text-orange-700',
             'secondary_text' => 'text-red-600',
             'primary_bg' => 'bg-orange-600',
@@ -49,26 +49,26 @@
     // Type Colors (Grid & Result)
     if ($theme === 'mentor') {
         // Mentor: All Orange/Red variants
-        $mbtiColors = array_fill_keys(array_keys($mbtiTypes), 'from-orange-500 to-red-600');
+        $mbtiColors = array_fill_keys(array_keys($mbtiTypes), 'bg-orange-600');
     } else {
         // Jeune: Varied Spectrum
         $mbtiColors = [
-            'INTJ' => 'from-purple-500 to-indigo-600',
-            'INTP' => 'from-purple-400 to-blue-500',
-            'ENTJ' => 'from-purple-600 to-pink-500',
-            'ENTP' => 'from-pink-500 to-orange-500',
-            'INFJ' => 'from-green-500 to-teal-500',
-            'INFP' => 'from-green-400 to-cyan-500',
-            'ENFJ' => 'from-green-500 to-emerald-600',
-            'ENFP' => 'from-yellow-500 to-orange-500',
-            'ISTJ' => 'from-blue-600 to-indigo-700',
-            'ISFJ' => 'from-blue-500 to-cyan-600',
-            'ESTJ' => 'from-blue-600 to-blue-800',
-            'ESFJ' => 'from-cyan-500 to-blue-600',
-            'ISTP' => 'from-amber-500 to-yellow-600',
-            'ISFP' => 'from-amber-400 to-orange-500',
-            'ESTP' => 'from-red-500 to-orange-600',
-            'ESFP' => 'from-pink-500 to-rose-600',
+            'INTJ' => 'bg-purple-600',
+            'INTP' => 'bg-blue-600',
+            'ENTJ' => 'bg-purple-700',
+            'ENTP' => 'bg-orange-500',
+            'INFJ' => 'bg-teal-600',
+            'INFP' => 'bg-cyan-600',
+            'ENFJ' => 'bg-emerald-600',
+            'ENFP' => 'bg-yellow-500',
+            'ISTJ' => 'bg-indigo-700',
+            'ISFJ' => 'bg-cyan-700',
+            'ESTJ' => 'bg-blue-800',
+            'ESFJ' => 'bg-blue-600',
+            'ISTP' => 'bg-yellow-600',
+            'ISFP' => 'bg-orange-600',
+            'ESTP' => 'bg-red-600',
+            'ESFP' => 'bg-pink-600',
         ];
     }
 @endphp
@@ -80,7 +80,7 @@
             $colorClass = $mbtiColors[$personalityTest->personality_type] ?? $colors['primary_gradient'];
         @endphp
         <!-- Large Header Card -->
-        <div class="bg-gradient-to-r {{ $colorClass }} rounded-3xl p-8 md:p-12 text-white shadow-xl">
+        <div class="{{ $colorClass }} rounded-3xl p-8 md:p-12 text-white shadow-xl">
             <div class="flex items-start gap-6">
                 <!-- Type Badge -->
                 <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 flex items-center justify-center shadow-lg">
@@ -197,7 +197,7 @@
         @if($theme === 'jeune')
             <div class="flex flex-col md:flex-row gap-4">
                 <button onclick="discussWithAIJeune()"
-                    class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl py-4 px-6 font-bold text-center hover:shadow-lg transition flex items-center justify-center gap-2">
+                    class="flex-1 bg-primary-600 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-primary-700 transition flex items-center justify-center gap-2">
                     <span>Discuter avec l'IA sur mes résultats</span>
                 </button>
                 @if(Route::has('jeune.mentors'))
@@ -252,15 +252,15 @@
                         @endphp
                         <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition"
                             x-data="{
-                                                                                historyData: {
-                                                                                    personality_type: '{{ $historyTest->personality_type }}',
-                                                                                    personality_label: '{{ $mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type }}',
-                                                                                    personality_description: {{ json_encode($historyTest->personality_description ?? '') }},
-                                                                                    completed_at: '{{ $historyTest->completed_at }}',
-                                                                                    traits_scores: {{ json_encode($historyTest->traits_scores ?? []) }},
-                                                                                    recommended_careers: {{ json_encode($historyTest->recommended_careers ?? []) }}
-                                                                                }
-                                                                             }">
+                                                                                            historyData: {
+                                                                                                personality_type: '{{ $historyTest->personality_type }}',
+                                                                                                personality_label: '{{ $mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type }}',
+                                                                                                personality_description: {{ json_encode($historyTest->personality_description ?? '') }},
+                                                                                                completed_at: '{{ $historyTest->completed_at }}',
+                                                                                                traits_scores: {{ json_encode($historyTest->traits_scores ?? []) }},
+                                                                                                recommended_careers: {{ json_encode($historyTest->recommended_careers ?? []) }}
+                                                                                            }
+                                                                                         }">
                             <div class="flex items-center gap-4">
                                 <div
                                     class="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-white text-sm {{ $badgeColor }}">
@@ -292,8 +292,7 @@
             <div class="relative min-h-screen flex items-center justify-center p-4">
                 <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
                     <!-- Header -->
-                    <div
-                        class="bg-gradient-to-r {{ $colors['primary_gradient'] }} px-8 py-6 text-white flex justify-between items-center">
+                    <div class="{{ $colors['primary_gradient'] }} px-8 py-6 text-white flex justify-between items-center">
                         <div>
                             <h2 class="text-2xl font-bold">Détails du test</h2>
                             <p class="text-white/80 text-sm mt-1"
@@ -316,7 +315,7 @@
                                 <!-- Type Info -->
                                 <div class="flex items-center gap-4">
                                     <div
-                                        class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-white text-3xl bg-gradient-to-br {{ $colors['primary_gradient'] }}">
+                                        class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-white text-3xl {{ $colors['primary_gradient'] }}">
                                         <span x-text="selectedHistory.personality_type"></span>
                                     </div>
                                     <div>
@@ -340,7 +339,7 @@
                                                         <span x-text="Math.round(score) + '%'"></span>
                                                     </div>
                                                     <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
-                                                        <div class="h-full bg-gradient-to-r {{ $colors['primary_gradient'] }} rounded-full transition-all"
+                                                        <div class="h-full {{ $colors['primary_gradient'] }} rounded-full transition-all"
                                                             :style="'width: ' + score + '%'"></div>
                                                     </div>
                                                 </div>
@@ -382,7 +381,7 @@
 
     @else
         <!-- Intro Text if no test taken -->
-        <div class="bg-gradient-to-r {{ $colors['primary_gradient'] }} rounded-3xl p-8 text-white text-center shadow-lg">
+        <div class="{{ $colors['primary_gradient'] }} rounded-3xl p-8 text-white text-center shadow-lg">
             <h1 class="text-3xl font-bold mb-4">Découvrez votre type
                 {{ $theme === 'mentor' ? 'de mentor' : 'de personnalité' }}
             </h1>
@@ -403,7 +402,7 @@
                 @foreach($mbtiTypes as $type => $label)
                     @php $gridColor = $mbtiColors[$type] ?? $colors['primary_gradient']; @endphp
                     <div
-                        class="bg-gradient-to-br {{ $gridColor }} rounded-xl p-4 text-white hover:scale-105 transition duration-300 cursor-default shadow-md">
+                        class="{{ $gridColor }} rounded-xl p-4 text-white hover:scale-105 transition duration-300 cursor-default shadow-md">
                         <span class="font-extrabold text-xl block mb-1">{{ $type }}</span>
                         <span class="text-white/90 text-sm font-medium">{{ $label }}</span>
                     </div>
@@ -569,7 +568,7 @@
 
                     <div x-show="currentQuestion === questions.length - 1">
                         <button @click="submitTest()" :disabled="!allAnswered || submitting"
-                            class="px-8 py-3 bg-gradient-to-r {{ $colors['secondary_gradient'] }} text-white rounded-xl font-bold hover:shadow-lg hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                            class="px-8 py-3 {{ $colors['secondary_gradient'] }} text-white rounded-xl font-bold hover:shadow-lg hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                             <span x-show="submitting"
                                 class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                             <span x-text="submitting ? 'Analyse en cours...' : 'Voir mes résultats'"></span>

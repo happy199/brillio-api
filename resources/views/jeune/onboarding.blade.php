@@ -534,9 +534,9 @@
                 // Validation pour chaque étape
                 get canProceedStep0() {
                     return this.formData.birth_date !== '' &&
-                           this.formData.country !== '' &&
-                           this.formData.city !== '' &&
-                           !this.ageError;
+                        this.formData.country !== '' &&
+                        this.formData.city !== '' &&
+                        !this.ageError;
                 },
 
                 get canProceedStep1() {
