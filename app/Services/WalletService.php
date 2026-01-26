@@ -80,13 +80,11 @@ class WalletService
      */
     public function getCreditPrice(string $userType = 'jeune'): int
     {
-        $basePrice = SystemSetting::getValue('credit_price', 50);
-
         if ($userType === 'mentor') {
-            return $basePrice * 2;
+            return SystemSetting::getValue('credit_price_mentor', 100);
         }
 
-        return $basePrice;
+        return SystemSetting::getValue('credit_price_jeune', 50);
     }
 
     /**
