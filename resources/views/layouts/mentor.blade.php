@@ -103,17 +103,14 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.dashboard') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Tableau de bord
                     </a>
-                    <a href="{{ route('mentor.profile') }}"
-                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.profile') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Mon profil
-                    </a>
+
                     <a href="{{ route('mentor.explore') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.explore') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Explorer
                     </a>
                     <a href="{{ route('mentor.personality') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.personality') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Test MBTI
+                        Personnalité
                     </a>
                     <a href="{{ route('mentor.roadmap') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
@@ -174,17 +171,14 @@
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.dashboard') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Dashboard
             </a>
-            <a href="{{ route('mentor.profile') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.profile') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Profil
-            </a>
+
             <a href="{{ route('mentor.explore') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.explore') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Explorer
             </a>
             <a href="{{ route('mentor.personality') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.personality') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Test MBTI
+                Personnalité
             </a>
             <a href="{{ route('mentor.roadmap') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 bg-gray-100' }}">
