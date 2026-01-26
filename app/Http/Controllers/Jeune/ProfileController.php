@@ -122,4 +122,39 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Profil mis à jour avec succès.');
     }
+
+    /**
+     * Publier le profil jeune
+     */
+    public function publishProfile()
+    {
+        $user = auth()->user();
+        $profile = $user->jeuneProfile ?? $user->jeuneProfile()->create();
+
+        // Si déjà public, rien à faire
+        if ($profile->is_public) {
+            return back()->with('info', 'Votre profil est déjà visible.');
+        }
+
+        // Génération du slug si nécessaire (logique idem update)
+        $slug = $profile->public_slug;
+        if (empty($slug)) {
+            $baseSlug = Str::slug(Str::limit($user->name, 30, ''));
+            $hash = substr(md5(uniqid() . time()), 0, 8);
+            $slug = $baseSlug . '-' . $hash;
+
+            $counter = 1;
+            while (\App\Models\JeuneProfile::where('public_slug', $slug)->exists()) {
+                $slug = $baseSlug . '-' . $hash . '-' . $counter;
+                $counter++;
+            }
+        }
+
+        $profile->update([
+            'is_public' => true,
+            'public_slug' => $slug
+        ]);
+
+        return back()->with('success', 'Votre profil est maintenant visible par les mentors !');
+    }
 }
