@@ -12,7 +12,7 @@ class WalletService
     /**
      * Ajoute des crédits à un utilisateur
      */
-    public function addCredits(User $user, int $amount, string $type, string $description = null, $related = null)
+    public function addCredits(User $user, int $amount, string $type, ?string $description = null, $related = null)
     {
         if ($amount <= 0) {
             throw new \Exception("Le montant doit être positif.");
@@ -43,7 +43,7 @@ class WalletService
     /**
      * Dédit des crédits à un utilisateur
      */
-    public function deductCredits(User $user, int $cost, string $type, string $description = null, $related = null)
+    public function deductCredits(User $user, int $cost, string $type, ?string $description = null, $related = null)
     {
         if ($cost <= 0) {
             throw new \Exception("Le coût doit être positif.");
@@ -78,9 +78,15 @@ class WalletService
     /**
      * Récupère le prix d'un crédit en FCFA
      */
-    public function getCreditPrice(): int
+    public function getCreditPrice(string $userType = 'jeune'): int
     {
-        return SystemSetting::getValue('credit_price', 50);
+        $basePrice = SystemSetting::getValue('credit_price', 50);
+
+        if ($userType === 'mentor') {
+            return $basePrice * 2;
+        }
+
+        return $basePrice;
     }
 
     /**

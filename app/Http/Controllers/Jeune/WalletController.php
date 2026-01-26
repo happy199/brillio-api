@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Mentor;
+namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
@@ -25,7 +25,7 @@ class WalletController extends Controller
         $user = Auth::user();
         $transactions = $user->walletTransactions()->latest()->paginate(10);
 
-        $creditPrice = $this->walletService->getCreditPrice('mentor');
+        $creditPrice = $this->walletService->getCreditPrice('jeune');
 
         // Packs suggérés
         $packs = [
@@ -35,7 +35,7 @@ class WalletController extends Controller
             ['credits' => 500, 'price' => 500 * $creditPrice * 0.85, 'bonus' => 15], // 15% reduc
         ];
 
-        return view('mentor.wallet.index', compact('user', 'transactions', 'creditPrice', 'packs'));
+        return view('jeune.wallet.index', compact('user', 'transactions', 'creditPrice', 'packs'));
     }
 
     /**
@@ -78,10 +78,10 @@ class WalletController extends Controller
             return back()->withErrors(['code' => 'Ce coupon est invalide ou expiré.']);
         }
 
-        // Vérifier si déjà utilisé par ce user (Optionnel, mais recommandé)
-        // Pour l'instant on simplifie, mais idéalement on aurait une table coupon_usage
-
         $user = Auth::user();
+
+        // Vérifier si déjà utilisé par ce user
+        // (Simplifié pour le MVP)
 
         try {
             $this->walletService->addCredits(

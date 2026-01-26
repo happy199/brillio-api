@@ -161,6 +161,10 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Mon profil
                             </a>
+                            <a href="{{ route('jeune.wallet.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Mon Portefeuille ({{ auth()->user()->credits_balance }})
+                            </a>
                             <hr class="my-2 border-gray-100">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf

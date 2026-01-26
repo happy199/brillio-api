@@ -167,7 +167,15 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
     Route::put('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'updatePassword'])->name('password.update');
 
     // Ressources pédagogiques
-    Route::resource('ressources', \App\Http\Controllers\Jeune\ResourceController::class)->only(['index', 'show'])->names('resources');
+    Route::resource('ressources', \App\Http\Controllers\Jeune\ResourceController::class)
+        ->only(['index', 'show'])
+        ->names('resources')
+        ->parameters(['ressources' => 'resource']);
+
+    // Portefeuille & Crédits
+    Route::get('/portefeuille', [\App\Http\Controllers\Jeune\WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/portefeuille/achat', [\App\Http\Controllers\Jeune\WalletController::class, 'purchase'])->name('wallet.purchase');
+    Route::post('/portefeuille/coupon', [\App\Http\Controllers\Jeune\WalletController::class, 'redeemCoupon'])->name('wallet.redeem');
 });
 
 // Routes publiques
