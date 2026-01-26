@@ -112,7 +112,7 @@
 
             <div class="flex flex-col sm:flex-row gap-4">
                 <a href="{{ route('jeune.chat', ['prefill' => 'Je viens de passer le test de personnalité et mon profil est ' . $personalityTest->personality_type . ' (' . ($mbtiTypes[$personalityTest->personality_type]['name'] ?? $personalityTest->personality_label) . '). Peux-tu m\'aider à mieux comprendre ce profil et me donner des conseils pour mon orientation professionnelle ?']) }}"
-                    class="flex-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition">Discuter
+                    class="flex-1 bg-primary-600 text-white text-center py-4 rounded-xl font-semibold hover:bg-primary-700 transition">Discuter
                     avec l'IA sur mes resultats</a>
                 <a href="{{ route('jeune.mentors') }}"
                     class="flex-1 bg-white border-2 border-gray-200 text-gray-700 text-center py-4 rounded-xl font-semibold hover:border-primary-500 hover:text-primary-600 transition">Voir
@@ -310,13 +310,14 @@
                             <div class="flex justify-center items-center gap-2 sm:gap-4">
                                 <template x-for="option in answerOptions" :key="option.value">
                                     <div class="flex flex-col items-center gap-2 sm:gap-3">
-                                        <button @click="selectAnswer(option.value)" :class="answers[questions[currentQuestion]?.id] === option.value 
-                                                            ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white' 
-                                                                : option.value === 3 ? 'bg-gray-500 border-gray-600 text-white'
-                                                                : 'bg-purple-500 border-purple-600 text-white')
-                                                            : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50' 
-                                                                : option.value === 3 ? 'border-gray-400 text-gray-400 hover:bg-gray-50'
-                                                                : 'border-purple-500 text-purple-500 hover:bg-purple-50')"
+                                        <button @click="selectAnswer(option.value)"
+                                            :class="answers[questions[currentQuestion]?.id] === option.value 
+                                                                ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white' 
+                                                                    : option.value === 3 ? 'bg-gray-500 border-gray-600 text-white'
+                                                                    : 'bg-purple-500 border-purple-600 text-white')
+                                                                : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50' 
+                                                                    : option.value === 3 ? 'border-gray-400 text-gray-400 hover:bg-gray-50'
+                                                                    : 'border-purple-500 text-purple-500 hover:bg-purple-50')"
                                             class="w-12 h-12 sm:w-20 sm:h-20 border-2 rounded-lg font-bold text-xl sm:text-3xl transition-all duration-200 hover:scale-105 flex items-center justify-center">
                                             <span x-text="option.value"></span>
                                         </button>
@@ -393,7 +394,7 @@
                     </div>
                     <div x-show="!historyLoading && historyTest" class="space-y-6">
                         <!-- En-tête du type -->
-                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+                        <div class="bg-primary-600 rounded-2xl p-6 text-white">
                             <div class="flex items-center gap-4">
                                 <div
                                     class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -413,11 +414,11 @@
                             <h5 class="font-bold text-gray-900 mb-4">Dimensions de personnalité</h5>
                             <div class="space-y-4">
                                 <template x-for="dim in [
-                                                                            {left: 'E', right: 'I', leftName: 'Extraversion', rightName: 'Introversion'},
-                                                                            {left: 'S', right: 'N', leftName: 'Sensation', rightName: 'Intuition'},
-                                                                            {left: 'T', right: 'F', leftName: 'Pensée', rightName: 'Sentiment'},
-                                                                            {left: 'J', right: 'P', leftName: 'Jugement', rightName: 'Perception'}
-                                                                        ]" :key="dim.left">
+                                                                                {left: 'E', right: 'I', leftName: 'Extraversion', rightName: 'Introversion'},
+                                                                                {left: 'S', right: 'N', leftName: 'Sensation', rightName: 'Intuition'},
+                                                                                {left: 'T', right: 'F', leftName: 'Pensée', rightName: 'Sentiment'},
+                                                                                {left: 'J', right: 'P', leftName: 'Jugement', rightName: 'Perception'}
+                                                                            ]" :key="dim.left">
                                     <div>
                                         <div class="flex justify-between mb-1 text-sm">
                                             <span class="text-gray-600"
@@ -429,17 +430,17 @@
                                             <div class="absolute left-1/2 w-px h-full bg-gray-400"></div>
                                             <template x-if="(historyTest?.traits_scores?.[dim.left] || 50) == 50">
                                                 <div>
-                                                    <div class="absolute right-1/2 bg-gradient-to-l from-purple-500 to-pink-500 h-3 rounded-l-full"
+                                                    <div class="absolute right-1/2 bg-primary-600 h-3 rounded-l-full"
                                                         style="width: 25%"></div>
-                                                    <div class="absolute left-1/2 bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-r-full"
+                                                    <div class="absolute left-1/2 bg-primary-600 h-3 rounded-r-full"
                                                         style="width: 25%"></div>
                                                 </div>
                                             </template>
                                             <template x-if="(historyTest?.traits_scores?.[dim.left] || 50) != 50">
-                                                <div class="absolute bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full"
+                                                <div class="absolute bg-primary-600 h-3 rounded-full"
                                                     :style="(historyTest?.traits_scores?.[dim.left] || 50) > 50 
-                                                                                ? 'right: 50%; width: ' + Math.min((historyTest?.traits_scores?.[dim.left] || 50) - 50, 50) + '%; border-radius: 9999px 0 0 9999px;'
-                                                                                : 'left: 50%; width: ' + Math.min(50 - (historyTest?.traits_scores?.[dim.left] || 50), 50) + '%; border-radius: 0 9999px 9999px 0;'">
+                                                                                    ? 'right: 50%; width: ' + Math.min((historyTest?.traits_scores?.[dim.left] || 50) - 50, 50) + '%; border-radius: 9999px 0 0 9999px;'
+                                                                                    : 'left: 50%; width: ' + Math.min(50 - (historyTest?.traits_scores?.[dim.left] || 50), 50) + '%; border-radius: 0 9999px 9999px 0;'">
                                                 </div>
                                             </template>
                                         </div>
