@@ -139,9 +139,12 @@
                         @foreach($jeunes as $jeune)
                             <div
                                 class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition border border-gray-100 flex flex-col items-center text-center">
-                                <div
-                                    class="w-20 h-20 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center text-2xl font-bold text-purple-600 mb-4">
-                                    {{ substr($jeune->name, 0, 1) }}
+                                <div class="w-20 h-20 rounded-full flex-shrink-0 overflow-hidden mx-auto mb-4 {{ $jeune->avatar_url ? '' : 'bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center' }}">
+                                    @if($jeune->avatar_url)
+                                        <img src="{{ $jeune->avatar_url }}" alt="{{ $jeune->name }}" class="w-full h-full object-cover">
+                                    @else
+                                        <span class="text-2xl font-bold text-purple-600">{{ substr($jeune->name, 0, 1) }}</span>
+                                    @endif
                                 </div>
 
                                 <h3 class="font-bold text-gray-900 text-lg mb-1">{{ $jeune->name }}</h3>

@@ -134,6 +134,23 @@ class MentorDashboardController extends Controller
     }
 
     /**
+     * Publier le profil mentor
+     */
+    public function publishProfile()
+    {
+        $user = auth()->user();
+        $profile = $user->mentorProfile;
+
+        if (!$profile) {
+            $profile = MentorProfile::create(['user_id' => $user->id]);
+        }
+
+        $profile->update(['is_published' => true]);
+
+        return back()->with('success', 'Votre profil est maintenant visible par les jeunes !');
+    }
+
+    /**
      * Page du parcours (roadmap)
      */
     public function roadmap()

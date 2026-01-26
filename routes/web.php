@@ -156,6 +156,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'index'])->name('profile');
     Route::post('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profil/publier', [App\Http\Controllers\Jeune\ProfileController::class, 'publishProfile'])->name('profile.publish');
 
     // Account archiving
     Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
@@ -189,6 +190,7 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::get('/', [MentorDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profil', [MentorDashboardController::class, 'profile'])->name('profile');
     Route::put('/profil', [MentorDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profil/publier', [MentorDashboardController::class, 'publishProfile'])->name('profile.publish');
     Route::get('/parcours', [MentorDashboardController::class, 'roadmap'])->name('roadmap');
     Route::get('/parcours/{step}', [MentorDashboardController::class, 'getStep'])->name('roadmap.show');
     Route::post('/parcours', [MentorDashboardController::class, 'storeStep'])->name('roadmap.store');
