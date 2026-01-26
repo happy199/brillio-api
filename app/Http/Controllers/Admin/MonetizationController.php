@@ -16,9 +16,10 @@ class MonetizationController extends Controller
      */
     public function index()
     {
-        $settings = SystemSetting::whereIn('key', ['credit_price', 'feature_cost_advanced_targeting'])->get()->keyBy('key');
+        $settings = SystemSetting::whereIn('key', ['credit_price_jeune', 'credit_price_mentor', 'feature_cost_advanced_targeting'])->get()->keyBy('key');
 
-        $creditPrice = $settings['credit_price']->value ?? 50;
+        $creditPriceJeune = $settings['credit_price_jeune']->value ?? 50;
+        $creditPriceMentor = $settings['credit_price_mentor']->value ?? 100;
         $targetingCost = $settings['feature_cost_advanced_targeting']->value ?? 10;
 
         // Stats basiques
@@ -28,7 +29,7 @@ class MonetizationController extends Controller
         // 50 dernières transactions
         $transactions = WalletTransaction::with('user')->latest()->limit(50)->get();
 
-        return view('admin.monetization.index', compact('creditPrice', 'targetingCost', 'totalCreditsPurchased', 'totalCreditsUsed', 'transactions'));
+        return view('admin.monetization.index', compact('creditPriceJeune', 'creditPriceMentor', 'targetingCost', 'totalCreditsPurchased', 'totalCreditsUsed', 'transactions'));
     }
 
     /**
@@ -37,7 +38,8 @@ class MonetizationController extends Controller
     public function updateSettings(Request $request)
     {
         $validated = $request->validate([
-            'credit_price' => 'required|integer|min:1',
+            'credit_price_jeune' => 'required|integer|min:1',
+            'credit_price_mentor' => 'required|integer|min:1',
             'feature_cost_advanced_targeting' => 'required|integer|min:0',
         ]);
 

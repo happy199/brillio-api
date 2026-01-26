@@ -172,6 +172,8 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
         ->names('resources')
         ->parameters(['ressources' => 'resource']);
 
+    Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class, 'unlock'])->name('resources.unlock');
+
     // Portefeuille & Crédits
     Route::get('/portefeuille', [\App\Http\Controllers\Jeune\WalletController::class, 'index'])->name('wallet.index');
     Route::post('/portefeuille/achat', [\App\Http\Controllers\Jeune\WalletController::class, 'purchase'])->name('wallet.purchase');

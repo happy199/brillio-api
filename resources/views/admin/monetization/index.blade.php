@@ -48,12 +48,21 @@
                         @csrf
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Prix d'un Crédit (FCFA)</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Prix Crédit - JEUNE (FCFA)</label>
                             <div class="relative">
-                                <input type="number" name="credit_price" value="{{ $creditPrice }}"
+                                <input type="number" name="credit_price_jeune" value="{{ $creditPriceJeune }}"
                                     class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
-                                <div
-                                    class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                    FCFA</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Prix Crédit - MENTOR (FCFA)</label>
+                            <div class="relative">
+                                <input type="number" name="credit_price_mentor" value="{{ $creditPriceMentor }}"
+                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                     FCFA</div>
                             </div>
                         </div>
