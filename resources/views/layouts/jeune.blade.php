@@ -248,7 +248,7 @@
                 </div>
             </div>
             <button onclick="acceptCookies()"
-                class="px-6 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-semibold rounded-xl hover:shadow-lg transition whitespace-nowrap">
+                class="px-6 py-2 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition whitespace-nowrap">
                 Accepter
             </button>
         </div>
