@@ -1,4 +1,4 @@
-@extends('layouts.mentor')
+@extends('layouts.jeune')
 
 @section('title', 'Mon Portefeuille')
 
@@ -8,12 +8,12 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Mon Portefeuille</h1>
-                <p class="text-gray-600">Gérez vos crédits Brillio pour accéder aux fonctionnalités premium.</p>
+                <p class="text-gray-600">Gérez vos crédits Brillio pour accéder aux contenus premium.</p>
             </div>
             <div
-                class="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 text-white shadow-lg flex items-center gap-6 transform md:scale-105 transition">
+                class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg flex items-center gap-6 transform md:scale-105 transition">
                 <div>
-                    <p class="text-orange-50 text-sm font-medium">Solde actuel</p>
+                    <p class="text-indigo-100 text-sm font-medium">Solde actuel</p>
                     <div class="flex items-baseline gap-1">
                         <span class="text-4xl font-extrabold">{{ number_format($user->credits_balance) }}</span>
                         <span class="text-sm font-bold opacity-80">Crédits</span>
@@ -32,7 +32,7 @@
             <!-- Recharge -->
             <div class="lg:col-span-2 space-y-6">
                 <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
@@ -42,7 +42,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     @foreach($packs as $pack)
                         <div
-                            class="bg-white border rounded-xl p-5 hover:border-orange-500 hover:shadow-md transition relative group overflow-hidden">
+                            class="bg-white border rounded-xl p-5 hover:border-indigo-500 hover:shadow-md transition relative group overflow-hidden">
                             @if($pack['bonus'] > 0)
                                 <div
                                     class="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
@@ -57,16 +57,16 @@
                                 </div>
                                 <div class="text-right">
                                     <span
-                                        class="block text-lg font-bold text-orange-600">{{ number_format($pack['price'], 0, ',', ' ') }}
+                                        class="block text-lg font-bold text-indigo-600">{{ number_format($pack['price'], 0, ',', ' ') }}
                                         F</span>
                                 </div>
                             </div>
 
-                            <form action="{{ route('mentor.wallet.purchase') }}" method="POST">
+                            <form action="{{ route('jeune.wallet.purchase') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="amount" value="{{ $pack['credits'] }}">
                                 <button type="submit"
-                                    class="w-full py-2 px-3 bg-gray-50 hover:bg-orange-600 text-gray-700 hover:text-white font-semibold rounded-lg transition text-sm">
+                                    class="w-full py-2 px-3 bg-gray-50 hover:bg-indigo-600 text-gray-700 hover:text-white font-semibold rounded-lg transition text-sm">
                                     Acheter maintenant
                                 </button>
                             </form>
@@ -75,14 +75,14 @@
                 </div>
 
                 <!-- Coupon -->
-                <div class="bg-orange-50 rounded-xl p-6 border border-orange-100 mt-6">
-                    <h3 class="font-bold text-orange-900 mb-2">Vous avez un code promo ?</h3>
-                    <form action="{{ route('mentor.wallet.redeem') }}" method="POST" class="flex gap-2">
+                <div class="bg-indigo-50 rounded-xl p-6 border border-indigo-100 mt-6">
+                    <h3 class="font-bold text-indigo-900 mb-2">Vous avez un code promo ?</h3>
+                    <form action="{{ route('jeune.wallet.redeem') }}" method="POST" class="flex gap-2">
                         @csrf
                         <input type="text" name="code" placeholder="Entrez votre code ici"
-                            class="flex-1 bg-white border-0 text-sm rounded-lg focus:ring-2 focus:ring-orange-500 p-3">
+                            class="flex-1 bg-white border-0 text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 p-3">
                         <button type="submit"
-                            class="bg-orange-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-orange-700 transition">
+                            class="bg-indigo-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
                             Valider
                         </button>
                     </form>

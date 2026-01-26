@@ -25,7 +25,7 @@
             @foreach($resources as $resource)
                 <article class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition group flex flex-col h-full">
                     <!-- Image -->
-                    <div class="aspect-video bg-gray-100 relative overflow-hidden">
+                    <a href="{{ route('jeune.resources.show', $resource) }}" class="block aspect-video bg-gray-100 relative overflow-hidden group cursor-pointer">
                         @if($resource->preview_image_path)
                             <img src="{{ Storage::url($resource->preview_image_path) }}" 
                                  alt="{{ $resource->title }}" 
@@ -39,7 +39,7 @@
                         @endif
                         
                         <!-- Badges -->
-                        <div class="absolute top-3 left-3 flex gap-2">
+                        <div class="absolute top-3 left-3 flex gap-2 z-10">
                             @if($resource->is_premium)
                                 <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
                                     Premium
@@ -53,7 +53,7 @@
                                 {{ ucfirst($resource->type) }}
                             </span>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Contenu -->
                     <div class="p-5 flex-1 flex flex-col">
