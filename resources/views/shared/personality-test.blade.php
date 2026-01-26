@@ -252,15 +252,15 @@
                         @endphp
                         <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition"
                             x-data="{
-                                                                    historyData: {
-                                                                        personality_type: '{{ $historyTest->personality_type }}',
-                                                                        personality_label: '{{ $mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type }}',
-                                                                        personality_description: {{ json_encode($historyTest->personality_description ?? '') }},
-                                                                        completed_at: '{{ $historyTest->completed_at }}',
-                                                                        traits_scores: {{ json_encode($historyTest->traits_scores ?? []) }},
-                                                                        recommended_careers: {{ json_encode($historyTest->recommended_careers ?? []) }}
-                                                                    }
-                                                                 }">
+                                                                                historyData: {
+                                                                                    personality_type: '{{ $historyTest->personality_type }}',
+                                                                                    personality_label: '{{ $mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type }}',
+                                                                                    personality_description: {{ json_encode($historyTest->personality_description ?? '') }},
+                                                                                    completed_at: '{{ $historyTest->completed_at }}',
+                                                                                    traits_scores: {{ json_encode($historyTest->traits_scores ?? []) }},
+                                                                                    recommended_careers: {{ json_encode($historyTest->recommended_careers ?? []) }}
+                                                                                }
+                                                                             }">
                             <div class="flex items-center gap-4">
                                 <div
                                     class="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-white text-sm {{ $badgeColor }}">
@@ -428,7 +428,8 @@
                 <div
                     class="bg-gray-50 px-8 py-4 border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
                     <div>
-                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Test MBTI</span>
+                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Test de
+                            personnalité</span>
                         <h2 class="text-xl font-bold text-gray-900">Question <span
                                 x-text="currentQuestion + 1"></span>/<span x-text="questions.length"></span></h2>
                     </div>

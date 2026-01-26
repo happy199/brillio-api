@@ -112,7 +112,7 @@
                     </a>
                     <a href="{{ route('jeune.personality') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.personality') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Test MBTI
+                        Personnalité
                     </a>
                     <a href="{{ route('jeune.chat') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
@@ -179,7 +179,7 @@
             </a>
             <a href="{{ route('jeune.personality') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.personality') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Test MBTI
+                Personnalité
             </a>
             <a href="{{ route('jeune.chat') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 bg-gray-100' }}">
