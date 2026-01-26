@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-push:
-    name: Build & Push to Docker Hub
+    name: 1. Build & Push to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -32,9 +32,92 @@ jobs:
           cache-from: type=registry,ref=brillioafrica/api:buildcache
           cache-to: type=registry,ref=brillioafrica/api:buildcache,mode=max
 
-  deploy:
-    name: Deploy to VM
+  health-check-and-backup:
+    name: 2. Pre-deployment Checks & Backup
     needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+            ssh-private-key: ${{ secrets.GCP_VM_SSH_KEY }}
+
+      - name: Add known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "Scanning host: ${{ secrets.GCP_VM_IP }}"
+          ssh-keyscan -H -t rsa,ed25519 ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts || true
+
+      - name: Run Integrity Checks & Backups
+        run: |
+          ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} << 'ENDSSH'
+            set -e # Stop on first error
+            
+            echo "🔍 STARTING PRE-DEPLOYMENT CHECKS..."
+            cd /opt/brillio-api || { echo "❌ Project directory not found"; exit 1; }
+
+            # 1. Check Docker Accessibility
+            if ! docker info > /dev/null 2>&1; then
+                echo "❌ Docker is not running or not accessible by user!"
+                exit 1
+            fi
+            echo "✅ Docker is running."
+
+            # 2. Check Container Access (if stack is running)
+            if [ -f docker-compose.yml ] && docker-compose ps | grep -q "Up"; then
+                 echo "🔄 Stack is running. Testing container access..."
+                 
+                 # Test App Container
+                 if docker-compose exec -T app php -v > /dev/null; then
+                    echo "✅ App container is accessible."
+                 else
+                    echo "❌ Failed to access App container command line!"
+                    exit 1
+                 fi
+            else
+                 echo "⚠️ Stack not running or fresh install. Skipping container checks."
+            fi
+
+            # 3. Perform Backups
+            echo "📦 STARTING BACKUPS..."
+            mkdir -p backups
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+            # Backup .env
+            if [ -f .env ]; then
+                cp .env "backups/.env.backup.$TIMESTAMP"
+                echo "✅ .env file backed up: backups/.env.backup.$TIMESTAMP"
+            else
+                echo "⚠️ No .env file found!"
+            fi
+
+            # Backup Database
+            if [ -f .env ]; then
+                # Safe grep extraction (basic)
+                DB_USER=$(grep "^DB_USERNAME=" .env | cut -d '=' -f2-)
+                DB_PASS=$(grep "^DB_PASSWORD=" .env | cut -d '=' -f2-)
+                DB_NAME=$(grep "^DB_DATABASE=" .env | cut -d '=' -f2-)
+
+                if [ -n "$DB_NAME" ]; then
+                     echo "💾 Backing up database '$DB_NAME'..."
+                     # Assumes service name is 'mysql'
+                     if docker-compose exec -T mysql mysqldump -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" > "backups/db_$TIMESTAMP.sql"; then
+                        echo "✅ Database backup created: backups/db_$TIMESTAMP.sql"
+                     else
+                        echo "❌ Database backup FAILED! Check credentials or connection."
+                        exit 1
+                     fi
+                else
+                     echo "⚠️ DB_DATABASE not found in .env. Skipping DB backup."
+                fi
+            fi
+
+            echo "✅ ALL CHECKS & BACKUPS PASSED. Ready for deployment."
+          ENDSSH
+
+  deploy:
+    name: 3. Deploy to VM
+    needs: health-check-and-backup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -50,8 +133,6 @@ jobs:
           mkdir -p ~/.ssh
           echo "Scanning host: ${{ secrets.GCP_VM_IP }}"
           ssh-keyscan -H -t rsa,ed25519 ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts || true
-          echo "Known hosts content:"
-          cat ~/.ssh/known_hosts
 
       - name: Copy docker-compose and config files
         run: |
@@ -69,17 +150,16 @@ jobs:
           ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} << 'ENDSSH'
             cd /opt/brillio-api
             
-            # Login to Docker Hub on VM (for private repo)
+            # Login to Docker Hub on VM (for private repo possibility)
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             
-            # Ensure DB_HOST is set to mysql in .env (fix for Connection Refused)
+            # Ensure DB_HOST is set to mysql in .env
             if grep -q "DB_HOST=" .env; then
               sed -i 's/^DB_HOST=.*/DB_HOST=mysql/' .env
             else
               echo "DB_HOST=mysql" >> .env
             fi
 
-            
             # Pull latest image
             docker-compose pull app
             
@@ -90,7 +170,7 @@ jobs:
             echo "Waiting 30s for MySQL to initialize..."
             sleep 30
             
-            # Run migrations (using the pre-built image)
+            # Run migrations
             docker-compose exec -T app php artisan migrate --force
             
             # Optimize Laravel
