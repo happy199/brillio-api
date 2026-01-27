@@ -101,12 +101,10 @@
                         }).catch(console.error);
                     } else {
                         navigator.clipboard.writeText(window.location.href).then(() => {
-                            const btn = document.querySelector('button[onclick="shareProfile()"]');
-                            const originalContent = btn.innerHTML;
-                            btn.innerHTML = `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copié !`;
-                            setTimeout(() => {
-                                btn.innerHTML = originalContent;
-                            }, 2000);
+                            window.showToast('Lien du profil copié !');
+                        }).catch(() => {
+                             // Fallback for older browsers or non-secure context if needed, but Toast error is sufficient here
+                            window.showToast('Impossible de copier le lien', 'error');
                         });
                     }
                 }

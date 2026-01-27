@@ -266,6 +266,20 @@ class ResourceController extends Controller
     }
 
     /**
+     * Valider toutes les ressources en attente
+     */
+    public function approveAll()
+    {
+        Resource::where('is_validated', false)->update([
+            'is_validated' => true,
+            'is_published' => true,
+            'validated_at' => now(),
+        ]);
+
+        return back()->with('success', 'Toutes les ressources en attente ont été validées.');
+    }
+
+    /**
      * Rejeter une ressource
      */
     public function reject(Resource $resource)

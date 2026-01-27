@@ -22,14 +22,60 @@ class MonetizationController extends Controller
         $creditPriceMentor = $settings['credit_price_mentor']->value ?? 100;
         $targetingCost = $settings['feature_cost_advanced_targeting']->value ?? 10;
 
-        // Stats basiques
-        $totalCreditsPurchased = WalletTransaction::where('type', 'purchase')->sum('amount');
-        $totalCreditsUsed = abs(WalletTransaction::where('type', 'expense')->sum('amount'));
+        // Stats Détaillées
+
+        // 1. Crédits Achetés (Montant > 0)
+        $purchasedQuery = WalletTransaction::where('amount', '>', 0)
+            ->join('users', 'wallet_transactions.user_id', '=', 'users.id')
+            ->selectRaw('users.user_type, SUM(amount) as total_credits');
+
+        $purchasedStats = $purchasedQuery->groupBy('users.user_type')->pluck('total_credits', 'user_type');
+
+        $creditsPurchasedJeune = $purchasedStats['jeune'] ?? 0;
+        $creditsPurchasedMentor = $purchasedStats['mentor'] ?? 0;
+        $totalCreditsPurchased = $creditsPurchasedJeune + $creditsPurchasedMentor;
+
+        // Estimation FCFA Achetés (Basé sur prix actuel)
+        $fcfaPurchasedJeune = $creditsPurchasedJeune * $creditPriceJeune;
+        $fcfaPurchasedMentor = $creditsPurchasedMentor * $creditPriceMentor;
+
+
+        // 2. Crédits Consommés (Montant < 0)
+        // On prend la valeur absolue pour l'affichage
+        $consumedQuery = WalletTransaction::where('amount', '<', 0)
+            ->join('users', 'wallet_transactions.user_id', '=', 'users.id')
+            ->selectRaw('users.user_type, SUM(ABS(amount)) as total_consumed');
+
+        $consumedStats = $consumedQuery->groupBy('users.user_type')->pluck('total_consumed', 'user_type');
+
+        $creditsConsumedJeune = $consumedStats['jeune'] ?? 0;
+        $creditsConsumedMentor = $consumedStats['mentor'] ?? 0;
+        $totalCreditsUsed = $creditsConsumedJeune + $creditsConsumedMentor;
+
+        // Estimation FCFA Consommés
+        $fcfaConsumedJeune = $creditsConsumedJeune * $creditPriceJeune;
+        $fcfaConsumedMentor = $creditsConsumedMentor * $creditPriceMentor;
+
 
         // 50 dernières transactions
         $transactions = WalletTransaction::with('user')->latest()->limit(50)->get();
 
-        return view('admin.monetization.index', compact('creditPriceJeune', 'creditPriceMentor', 'targetingCost', 'totalCreditsPurchased', 'totalCreditsUsed', 'transactions'));
+        return view('admin.monetization.index', compact(
+            'creditPriceJeune',
+            'creditPriceMentor',
+            'targetingCost',
+            'totalCreditsPurchased',
+            'creditsPurchasedJeune',
+            'creditsPurchasedMentor',
+            'fcfaPurchasedJeune',
+            'fcfaPurchasedMentor',
+            'totalCreditsUsed',
+            'creditsConsumedJeune',
+            'creditsConsumedMentor',
+            'fcfaConsumedJeune',
+            'fcfaConsumedMentor',
+            'transactions'
+        ));
     }
 
     /**
