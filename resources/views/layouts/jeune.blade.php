@@ -118,6 +118,10 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Assistant IA
                     </a>
+                    <a href="{{ route('jeune.resources.index') }}"
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Ressources
+                    </a>
                     <a href="{{ route('jeune.documents') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Documents
@@ -157,6 +161,10 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Mon profil
                             </a>
+                            <a href="{{ route('jeune.wallet.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Mon Portefeuille ({{ auth()->user()->credits_balance }})
+                            </a>
                             <hr class="my-2 border-gray-100">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
@@ -184,6 +192,10 @@
             <a href="{{ route('jeune.chat') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Assistant
+            </a>
+            <a href="{{ route('jeune.resources.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Ressources
             </a>
             <a href="{{ route('jeune.documents') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 bg-gray-100' }}">
@@ -283,6 +295,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     @stack('scripts')
+    @include('partials.toast')
 </body>
 
 </html>
