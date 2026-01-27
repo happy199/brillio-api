@@ -282,6 +282,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
         // Gestion des ressources
         Route::resource('resources', \App\Http\Controllers\Admin\ResourceController::class);
+        Route::post('resources/approve-all', [\App\Http\Controllers\Admin\ResourceController::class, 'approveAll'])->name('resources.approve_all');
         Route::put('resources/{resource}/approve', [\App\Http\Controllers\Admin\ResourceController::class, 'approve'])->name('resources.approve');
         Route::put('resources/{resource}/reject', [\App\Http\Controllers\Admin\ResourceController::class, 'reject'])->name('resources.reject');
 

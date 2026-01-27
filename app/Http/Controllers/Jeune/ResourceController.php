@@ -14,6 +14,34 @@ class ResourceController extends Controller
 {
     protected $walletService;
 
+    // MBTI Groups configuration
+    protected $mbtiGroups = [
+        'Analystes' => [
+            'INTJ' => 'INTJ - Architecte',
+            'INTP' => 'INTP - Logicien',
+            'ENTJ' => 'ENTJ - Commandant',
+            'ENTP' => 'ENTP - Innovateur'
+        ],
+        'Diplomates' => [
+            'INFJ' => 'INFJ - Avocat',
+            'INFP' => 'INFP - Médiateur',
+            'ENFJ' => 'ENFJ - Protagoniste',
+            'ENFP' => 'ENFP - Inspirateur'
+        ],
+        'Sentinelles' => [
+            'ISTJ' => 'ISTJ - Logisticien',
+            'ISFJ' => 'ISFJ - Défenseur',
+            'ESTJ' => 'ESTJ - Directeur',
+            'ESFJ' => 'ESFJ - Consul'
+        ],
+        'Explorateurs' => [
+            'ISTP' => 'ISTP - Virtuose',
+            'ISFP' => 'ISFP - Aventurier',
+            'ESTP' => 'ESTP - Entrepreneur',
+            'ESFP' => 'ESFP - Amuseur'
+        ]
+    ];
+
     public function __construct(WalletService $walletService)
     {
         $this->walletService = $walletService;
@@ -27,71 +55,220 @@ class ResourceController extends Controller
         $userSituation = $userProfile['current_situation'] ?? null;
         $userInterests = $userProfile['interests'] ?? [];
         $userCountry = $userProfile['country'] ?? null;
+        // User MBTI (clean up if string contains description)
+        $rawMbti = $user->personalityTest?->type_code ?? $userProfile['mbti'] ?? null;
+        $userMbti = $rawMbti ? explode(' ', $rawMbti)[0] : null;
+
+        // Mode de filtrage : 'suggestions' (défaut) ou 'all'
+        // Si l'utilisateur effectue une recherche ou applique des filtres spécifiques, on bascule en mode 'all' pour ne pas masquer les résultats
+        $hasActiveFilters = $request->filled('search') || $request->filled('type') || $request->filled('price') || $request->filled('mbti') || $request->filled('source') || $request->filled('ownership');
+        $filterMode = $request->get('filter', $hasActiveFilters ? 'all' : 'suggestions');
+
+        // IDs des ressources acquises ou consultées
+        $purchasedIds = Purchase::where('user_id', $user->id)->where('item_type', Resource::class)->pluck('item_id');
+        $viewedIds = \App\Models\ResourceView::where('user_id', $user->id)->pluck('resource_id');
+        $myResourceIds = $purchasedIds->merge($viewedIds)->unique();
 
         // Récupérer toutes les ressources validées et publiées
-        $resources = Resource::where('is_published', true)
+        $query = Resource::where('is_published', true)
             ->where('is_validated', true)
             ->with('user') // Le créateur (Mentor/Admin)
-            ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('created_at');
 
-        // Filtrage PHP pour le ciblage
-        $filteredResources = $resources->filter(function ($resource) use ($userEducation, $userSituation, $userInterests, $userCountry) {
-            $targeting = $resource->targeting;
+        // --- FILTRES GLOBAUX ---
 
-            // Si pas de ciblage, c'est pour tout le monde
-            if (empty($targeting)) {
-                return true;
+        // 6. Propriété / Consultation (Nouveau vs Déjà vu)
+        // Par défaut (sans filtre ownership ou avec ownership='new'), on EXCLUT les ressources déjà vues/acquises
+        // Si ownership='mine', on ne garde QUE celles-ci.
+        // Option 'all' pour tout voir (y compris déjà vu) si besoin, mais la demande est "continu de ne voir que nouvelles choses".
+
+        $ownership = $request->get('ownership', 'new'); // Default to 'new' if not specified
+
+        if ($ownership === 'mine') {
+            $query->whereIn('id', $myResourceIds);
+        } elseif ($ownership === 'new') {
+            $query->whereNotIn('id', $myResourceIds);
+        }
+        // else if ownership === 'all' -> do nothing (show everything)
+
+        // 1. Recherche
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('tags', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Filtres basiques
+        if ($request->filled('type') && $request->type !== 'all') {
+            $query->where('type', $request->type);
+        }
+
+        // 3. Prix (Gratuit / Payant)
+        if ($request->filled('price')) {
+            if ($request->price === 'free') {
+                $query->where('is_premium', false);
+            } elseif ($request->price === 'premium') {
+                $query->where('is_premium', true);
             }
+        }
 
-            // Vérification Niveau d'études
-            $targetEducations = $targeting['education_levels'] ?? [];
-            if (!empty($targetEducations) && $userEducation && !in_array($userEducation, $targetEducations)) {
-                return false;
+        // 4. Personnalité (MBTI)
+        // On suppose que le champ mbti_types contient un JSON array des types ciblés
+        if ($request->filled('mbti')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereJsonContains('mbti_types', $request->mbti)
+                    ->orWhereNull('mbti_types'); // On inclut ceux sans restrictions ? Non, restons strict si filtre.
+            })->whereNotNull('mbti_types'); // On exclut ceux qui n'ont pas de mbti défini si on filtre par mbti
+        }
+
+        // 5. Source (Mentor vs Brillio)
+        if ($request->filled('source')) {
+            if ($request->source === 'mentor') {
+                $query->whereHas('user', function ($q) {
+                    $q->where('user_type', 'mentor')
+                        ->where('is_admin', false);
+                });
+            } elseif ($request->source === 'brillio') {
+                $query->whereHas('user', function ($q) {
+                    $q->where('is_admin', true);
+                });
             }
+        }
 
-            // Vérification Situation
-            $targetSituations = $targeting['situations'] ?? [];
-            if (!empty($targetSituations) && $userSituation && !in_array($userSituation, $targetSituations)) {
-                return false;
-            }
+        $resources = $query->get();
 
-            // Vérification Pays
-            $targetCountries = $targeting['countries'] ?? [];
-            // Matching flou pour le pays (ex: "Benin" vs "Bénin") ou inclusion
-            if (!empty($targetCountries) && $userCountry) {
-                // On vérifie si le pays de l'user est dans la liste (simplifié)
-                // Idéalement il faudrait normaliser les noms de pays
-                $match = false;
-                foreach ($targetCountries as $country) {
-                    if (str_contains(strtolower($userCountry), strtolower($country))) {
-                        $match = true;
-                        break;
+        // Logique de Suggestion / Filtrage Intelligent
+        if ($filterMode === 'suggestions') {
+            $resources = $resources->filter(function ($resource) use ($userEducation, $userSituation, $userInterests, $userCountry, $userMbti) {
+                $targeting = $resource->targeting;
+
+                // Si pas de ciblage particulier, on garde (sauf si logique "strict" à définir, mais généralement par défaut on garde tout ce qui n'exclut pas)
+                // Cependant, on veut vérifier aussi les mbti_types (qui peuvent être hors du targeting json, selon implémentation)
+                // On va considérer 'targeting' pour l'instant.
+
+                // Vérification spécifique MBTI (Si la ressource est taguée MBTI)
+                // Assumons mbti_types dans le modèle Resource (qui est cast en array)
+                if (!empty($resource->mbti_types) && $userMbti) {
+                    if (!in_array($userMbti, $resource->mbti_types)) {
+                        return false;
                     }
                 }
-                if (!$match) {
+
+                if (empty($targeting)) {
+                    return true;
+                }
+
+                $matches = 0;
+                $criteriaCount = 0;
+
+                // 1. Éducation
+                $targetEducations = $targeting['education_levels'] ?? [];
+                if (!empty($targetEducations)) {
+                    $criteriaCount++;
+                    if ($userEducation && in_array($userEducation, $targetEducations)) {
+                        $matches++;
+                    }
+                }
+
+                // 2. Situation
+                $targetSituations = $targeting['situations'] ?? [];
+                if (!empty($targetSituations)) {
+                    $criteriaCount++;
+                    if ($userSituation && in_array($userSituation, $targetSituations)) {
+                        $matches++;
+                    }
+                }
+
+                // 3. Pays (Matching souple)
+                $targetCountries = $targeting['countries'] ?? [];
+                if (!empty($targetCountries)) {
+                    $criteriaCount++;
+                    if ($userCountry) {
+                        foreach ($targetCountries as $country) {
+                            if (str_contains(strtolower($userCountry), strtolower($country))) {
+                                $matches++;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // 4. Intérêts (Au moins un commun)
+                $targetInterests = $targeting['interests'] ?? [];
+                if (!empty($targetInterests)) {
+                    $criteriaCount++;
+                    if (!empty($userInterests)) {
+                        $commonInterests = array_intersect($targetInterests, $userInterests);
+                        if (!empty($commonInterests)) {
+                            $matches++;
+                        }
+                    }
+                }
+
+                // Logique de scoring pour suggestion :
+                // Si la ressource a des critères de ciblage, on l'affiche si l'utilisateur matche au moins UN critère fort (Education/Situation)
+                // OU s'il n'y a pas de critère spécifié, c'est pour tout le monde.
+
+                // Ici, on est strict comme avant : si un critère est défini mais ne matche pas, on exclut ? 
+                // La demande : "afficher ou pas dans les suggestion...".
+                // L'ancienne logique excluait si Education ne matchait pas alors que demandé.
+                // Gardons une logique "Si ciblé, doit matcher".
+
+                // Vérification Niveau d'études
+                if (!empty($targetEducations) && $userEducation && !in_array($userEducation, $targetEducations)) {
                     return false;
                 }
-            }
-
-            // Vérification Intérêts (Au moins un intérêt en commun)
-            $targetInterests = $targeting['interests'] ?? [];
-            if (!empty($targetInterests) && !empty($userInterests)) {
-                $commonInterests = array_intersect($targetInterests, $userInterests);
-                if (empty($commonInterests)) {
+                // Vérification Situation
+                if (!empty($targetSituations) && $userSituation && !in_array($userSituation, $targetSituations)) {
                     return false;
                 }
-            }
+                // Vérification Pays
+                if (!empty($targetCountries) && $userCountry) {
+                    $match = false;
+                    foreach ($targetCountries as $country) {
+                        if (str_contains(strtolower($userCountry), strtolower($country))) {
+                            $match = true;
+                            break;
+                        }
+                    }
+                    if (!$match)
+                        return false;
+                }
 
-            return true;
-        });
+                // Vérification Intérêts
+                if (!empty($targetInterests) && !empty($userInterests)) {
+                    $commonInterests = array_intersect($targetInterests, $userInterests);
+                    if (empty($commonInterests)) {
+                        return false;
+                    }
+                }
 
-        // Pagination manuelle après filtrage (si nécessaire, ou juste take/slice)
-        // Pour l'instant on retourne tout (MVP)
+                return true;
+            });
+        }
+
+        // Pagination manuelle après filtrage
+        // Note: Pour de gros volumes, il faudrait faire le filtrage en SQL (JSON queries), mais pour MVP filtre PHP ok.
+        $page = $request->get('page', 1);
+        $perPage = 12;
+        $items = $resources instanceof \Illuminate\Support\Collection ? $resources : \Illuminate\Support\Collection::make($resources);
+
+        $paginatedResources = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items->forPage($page, $perPage),
+            $items->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return view('jeune.resources.index', [
-            'resources' => $filteredResources,
-            'user' => $user
+            'resources' => $paginatedResources,
+            'user' => $user,
+            'currentFilter' => $filterMode,
+            'mbtiGroups' => $this->mbtiGroups
         ]);
     }
 
@@ -103,6 +280,17 @@ class ResourceController extends Controller
         }
 
         $user = auth()->user();
+
+        // Enregistrer la vue si c'est une ressource gratuite
+        // Pour les payantes, on peut aussi enregistrer mais "l'acquisition" est définie par l'achat.
+        // La demande : "consultée car gratuite".
+        if (!$resource->is_premium) {
+            \App\Models\ResourceView::firstOrCreate([
+                'user_id' => $user->id,
+                'resource_id' => $resource->id
+            ]);
+        }
+
         $isLocked = false;
         $unlockCost = 0;
 
@@ -164,17 +352,8 @@ class ResourceController extends Controller
 
         try {
             DB::transaction(function () use ($user, $resource, $unlockCost) {
-                // 1. Débiter l'user
-                $this->walletService->deductCredits(
-                    $user,
-                    $unlockCost,
-                    'expense',
-                    "Déblocage ressource : {$resource->title}",
-                    $resource
-                );
-
-                // 2. Enregistrer l'achat
-                Purchase::create([
+                // 1. Enregistrer l'achat d'abord (pour avoir l'ID et l'objet)
+                $purchase = Purchase::create([
                     'user_id' => $user->id,
                     'item_type' => get_class($resource),
                     'item_id' => $resource->id,
@@ -182,6 +361,29 @@ class ResourceController extends Controller
                     'original_price_fcfa' => $resource->price,
                     'purchased_at' => now(),
                 ]);
+
+                // 2. Débiter l'user (Jeune)
+                // Lié à l'achat pour traçabilité
+                $this->walletService->deductCredits(
+                    $user,
+                    $unlockCost,
+                    'expense',
+                    "Déblocage ressource : {$resource->title}",
+                    $purchase // On lie à l'achat
+                );
+
+                // 3. Créditer le créateur (Mentor)
+                // On crédite 100% pour l'instant
+                $mentor = $resource->user;
+                if ($mentor) {
+                    $this->walletService->addCredits(
+                        $mentor,
+                        $unlockCost,
+                        'income', // Type spécifique pour les revenus
+                        "Achat par {$user->name} de : {$resource->title}",
+                        $purchase // On lie à l'achat (qui contient l'info de l'acheteur via user_id)
+                    );
+                }
             });
 
             return back()->with('success', 'Ressource débloquée avec succès !');

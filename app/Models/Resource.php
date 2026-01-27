@@ -57,4 +57,28 @@ class Resource extends Model
     {
         return $query->where('is_premium', true);
     }
+
+    public function views()
+    {
+        return $this->hasMany(ResourceView::class);
+    }
+
+    public function purchases()
+    {
+        return $this->morphMany(Purchase::class, 'item');
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    protected static function booted()
+    {
+        static::saving(function ($resource) {
+            if (empty($resource->slug)) {
+                $resource->slug = \Illuminate\Support\Str::slug($resource->title);
+            }
+        });
+    }
 }

@@ -42,28 +42,40 @@
 
             <div class="p-8 md:p-12">
                 <!-- Header Content -->
-                <header class="mb-8">
-                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ $resource->title }}</h1>
-                    <div class="flex items-center gap-4 text-gray-500 text-sm">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
-                                @if($resource->user->profile_photo_path)
-                                    <img src="{{ Storage::url($resource->user->profile_photo_path) }}"
-                                        class="w-full h-full object-cover">
-                                @else
-                                    <div
-                                        class="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 text-xs font-bold">
-                                        {{ substr($resource->user->name, 0, 1) }}
-                                    </div>
-                                @endif
+                <header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ $resource->title }}</h1>
+                        <div class="flex items-center gap-4 text-gray-500 text-sm">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
+                                    @if($resource->user->profile_photo_path)
+                                        <img src="{{ Storage::url($resource->user->profile_photo_path) }}"
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <div
+                                            class="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 text-xs font-bold">
+                                            {{ substr($resource->user->name, 0, 1) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <span class="font-medium text-gray-900">{{ $resource->user->name }}</span>
                             </div>
-                            <span class="font-medium text-gray-900">{{ $resource->user->name }}</span>
+                            <span>•</span>
+                            <time datetime="{{ $resource->created_at->toIso8601String() }}">
+                                Publié le {{ $resource->created_at->format('d/m/Y') }}
+                            </time>
                         </div>
-                        <span>•</span>
-                        <time datetime="{{ $resource->created_at->toIso8601String() }}">
-                            Publié le {{ $resource->created_at->format('d/m/Y') }}
-                        </time>
                     </div>
+
+                    <!-- Share Button -->
+                    <button onclick="shareResource()"
+                        class="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition font-medium text-sm border border-indigo-100 shadow-sm shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        Partager
+                    </button>
                 </header>
 
                 <!-- Description -->
@@ -140,4 +152,21 @@
             </div>
         </article>
     </div>
+    <script>
+        function shareResource() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ $resource->title }} - Ressource Brillio',
+                    text: 'Découvre cette ressource pédagogique sur Brillio !',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    window.showToast('Lien copié dans le presse-papier !');
+                }).catch(() => {
+                    window.showToast('Impossible de copier le lien', 'error');
+                });
+            }
+        }
+    </script>
 @endsection
