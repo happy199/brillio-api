@@ -30,3 +30,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Moneroo Webhook (No CSRF Protection in API routes)
+|--------------------------------------------------------------------------
+*/
+Route::post('/webhooks/moneroo', [\App\Http\Controllers\MonerooWebhookController::class, 'handle'])
+    ->name('api.webhooks.moneroo');

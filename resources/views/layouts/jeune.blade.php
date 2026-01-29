@@ -210,18 +210,6 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        @if(session('success'))
-            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-                <p class="text-green-700">{{ session('success') }}</p>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <p class="text-red-700">{{ session('error') }}</p>
-            </div>
-        @endif
-
         @yield('content')
     </main>
 

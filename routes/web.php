@@ -48,6 +48,21 @@ Route::post('/contact', [PublicContactController::class, 'submit'])->name('conta
 Route::post('/newsletter/subscribe', [PublicNewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::get('/newsletter/unsubscribe/{token}', [PublicNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
+/*
+|--------------------------------------------------------------------------
+| Moneroo Payment Routes
+|--------------------------------------------------------------------------
+*/
+
+// Payment callback (user returns from Moneroo checkout)
+Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'handle'])
+    ->name('payments.callback');
+
+// Webhook (Moneroo sends payment notifications here - NO CSRF protection)
+Route::post('/webhooks/moneroo', [\App\Http\Controllers\MonerooWebhookController::class, 'handle'])
+    ->name('webhooks.moneroo')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
 // Pages légales
 Route::get('/politique-de-confidentialite', [PageController::class, 'privacy'])->name('privacy');
 
