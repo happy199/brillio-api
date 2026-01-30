@@ -38,21 +38,171 @@
 
         <!-- Section 1: Revenus (Earnings) -->
         <div x-show="activeTab === 'earnings'" class="space-y-6">
-            <!-- Stats Revenus -->
-            <div
-                class="bg-gradient-to-r from-indigo-600 to-blue-500 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
-                <div>
-                    <h2 class="text-indigo-50 text-sm font-medium uppercase tracking-wide mb-1">Total Revenus Générés</h2>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-4xl font-extrabold">{{ number_format($totalCreditsEarned) }}</span>
-                        <span class="text-sm font-bold opacity-80">Crédits</span>
+            <!-- Stats Revenus avec Payout -->
+            <div x-data="{ 
+                        showPayoutModal: false,
+                        payoutMethods: [],
+                        payoutForm: {
+                            amount: '',
+                            payment_method: '',
+                            phone_number: ''
+                        },
+                        availableBalance: 0,
+                        totalWithdrawn: 0,
+                        loading: false,
+                        error: '',
+
+                        async loadBalance() {
+                            try {
+                                const response = await fetch('/api/mentor/balance', {
+                                    headers: {
+                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                        'Accept': 'application/json'
+                                    }
+                                });
+                                const data = await response.json();
+                                this.availableBalance = data.available_balance || 0;
+                                this.totalWithdrawn = data.total_withdrawn || 0;
+                            } catch (e) {
+                                console.error('Error loading balance:', e);
+                            }
+                        },
+
+                        async loadPayoutMethods() {
+                            try {
+                                const response = await fetch('/api/mentor/payout-methods', {
+                                    headers: {
+                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                        'Accept': 'application/json'
+                                    }
+                                });
+                                const data = await response.json();
+                                this.payoutMethods = data.methods?.data || [];
+                            } catch (e) {
+                                console.error('Error loading payout methods:', e);
+                            }
+                        },
+
+                        async requestPayout() {
+                            this.loading = true;
+                            this.error = '';
+
+                            try {
+                                const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
+                                const response = await fetch('/api/mentor/payout/request', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': csrfToken
+                                    },
+                                    body: JSON.stringify(this.payoutForm)
+                                });
+
+                                const data = await response.json();
+
+                                if (!response.ok) {
+                                    throw new Error(data.message || 'Erreur lors de la demande de retrait');
+                                }
+
+                                this.showPayoutModal = false;
+                                this.payoutForm = { amount: '', payment_method: '', phone_number: '' };
+                                await this.loadBalance();
+                                location.reload(); // Recharger pour afficher l'historique
+                            } catch (e) {
+                                this.error = e.message;
+                            } finally {
+                                this.loading = false;
+                            }
+                        }
+                    }" x-init="loadBalance(); loadPayoutMethods()"
+                class="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h2 class="text-emerald-50 text-sm font-medium uppercase tracking-wide mb-1">Solde Disponible</h2>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-4xl font-extrabold"
+                                x-text="new Intl.NumberFormat('fr-FR').format(availableBalance)">0</span>
+                            <span class="text-sm font-bold opacity-80">FCFA</span>
+                        </div>
+                        <p class="text-emerald-100 text-sm mt-2">Total retiré : <span
+                                x-text="new Intl.NumberFormat('fr-FR').format(totalWithdrawn)">0</span> FCFA</p>
                     </div>
-                    <p class="text-indigo-100 text-sm mt-2">≈ {{ number_format($estimatedValueFcfa, 0, ',', ' ') }} FCFA
-                        (Valeur Estimée)</p>
+                    <div>
+                        <button @click="showPayoutModal = true"
+                            class="bg-white text-emerald-600 font-bold px-6 py-3 rounded-xl hover:bg-emerald-50 transition shadow-md flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
+                            </svg>
+                            Retirer mes gains
+                        </button>
+                    </div>
                 </div>
-                <div class="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/20">
-                    <p class="text-xs text-indigo-50 mb-2 font-semibold uppercase">À venir</p>
-                    <p class="text-sm">Le convertisseur de crédits en FCFA (payout) sera disponible prochainement.</p>
+
+                <!-- Modal Payout -->
+                <div x-show="showPayoutModal" x-cloak
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                    @click.self="showPayoutModal = false">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" @click.stop>
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-900">Demande de Retrait</h3>
+                            <button @click="showPayoutModal = false" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <form @submit.prevent="requestPayout" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Montant (FCFA)</label>
+                                <input type="number" x-model="payoutForm.amount" min="5000" :max="availableBalance" required
+                                    placeholder="Minimum 5 000 FCFA"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">Solde disponible: <span
+                                        x-text="new Intl.NumberFormat('fr-FR').format(availableBalance)"></span> FCFA</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Méthode de paiement</label>
+                                <select x-model="payoutForm.payment_method" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                                    <option value="">Sélectionnez une méthode</option>
+                                    <template x-for="method in payoutMethods" :key="method.code">
+                                        <option :value="method.code" x-text="method.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Numéro de téléphone</label>
+                                <input type="tel" x-model="payoutForm.phone_number" required pattern="[0-9]{8,15}"
+                                    placeholder="Ex: 66000001"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">8 à 15 chiffres</p>
+                            </div>
+
+                            <div x-show="error"
+                                class="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm"
+                                x-text="error"></div>
+
+                            <div class="flex gap-3 pt-4">
+                                <button type="button" @click="showPayoutModal = false"
+                                    class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium">
+                                    Annuler
+                                </button>
+                                <button type="submit" :disabled="loading"
+                                    class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-bold disabled:opacity-50">
+                                    <span x-show="!loading">Confirmer</span>
+                                    <span x-show="loading">Traitement...</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -77,7 +227,8 @@
                             @forelse($incomeTransactions as $transaction)
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                                        {{ $transaction->created_at->format('d/m/Y H:i') }}</td>
+                                        {{ $transaction->created_at->format('d/m/Y H:i') }}
+                                    </td>
                                     <td class="px-6 py-4 text-gray-900 font-medium">{{ $transaction->description }}</td>
                                     <td class="px-6 py-4">
                                         @if($transaction->related && $transaction->related instanceof \App\Models\Purchase)
@@ -120,6 +271,89 @@
                 <!-- Pagination -->
                 <div class="p-4 bg-gray-50 border-t border-gray-100">
                     {{ $incomeTransactions->appends(['wallet_page' => request()->wallet_page, 'active_tab' => 'earnings'])->links() }}
+                </div>
+            </div>
+
+            <!-- Historique des Retraits -->
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden" x-data="{
+                         payoutRequests: [],
+                         async loadPayouts() {
+                             try {
+                                 const response = await fetch('/api/mentor/payout-requests', {
+                                     headers: {
+                                         'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                         'Accept': 'application/json'
+                                     }
+                                 });
+                                 const data = await response.json();
+                                 this.payoutRequests = data.payouts || [];
+                             } catch (e) {
+                                 console.error('Error loading payouts:', e);
+                             }
+                         }
+                     }" x-init="loadPayouts()">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold text-gray-900">Historique des Retraits</h3>
+                    <span
+                        class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Payouts</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold">Date</th>
+                                <th class="px-6 py-3 font-semibold">Montant</th>
+                                <th class="px-6 py-3 font-semibold">Frais</th>
+                                <th class="px-6 py-3 font-semibold">Net</th>
+                                <th class="px-6 py-3 font-semibold">Méthode</th>
+                                <th class="px-6 py-3 font-semibold">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <template x-if="payoutRequests.length === 0">
+                                <tr>
+                                    <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                                </path>
+                                            </svg>
+                                            <p>Aucun retrait effectué pour le moment.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                            <template x-for="payout in payoutRequests" :key="payout.id">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900"
+                                        x-text="new Date(payout.created_at).toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})">
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900"
+                                        x-text="new Intl.NumberFormat('fr-FR').format(payout.amount) + ' FCFA'"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-600"
+                                        x-text="new Intl.NumberFormat('fr-FR').format(payout.fee) + ' FCFA'"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-semibold"
+                                        x-text="new Intl.NumberFormat('fr-FR').format(payout.net_amount) + ' FCFA'"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-600 uppercase"
+                                        x-text="payout.payment_method"></td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span x-show="payout.status === 'pending'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">En
+                                            attente</span>
+                                        <span x-show="payout.status === 'processing'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">En
+                                            cours</span>
+                                        <span x-show="payout.status === 'completed'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Complété</span>
+                                        <span x-show="payout.status === 'failed'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Échoué</span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
