@@ -242,8 +242,8 @@
                 <div class="flex-1">
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Zone de danger</h3>
                     <p class="text-sm text-gray-600 mb-4">
-                        La suppression de votre compte archivera toutes vos données. Vous pourrez réactiver votre compte à
-                        tout moment en vous reconnectant.
+                        Cliquer sur ce bouton archivera vos données. Si aucune connexion ne survient pendant 30 jours, le
+                        système supprimera définitivement votre compte. Vous devrez alors vous réinscrire.
                     </p>
                     <button @click="showDeleteConfirm = true"
                         class="px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition flex items-center gap-2">
@@ -269,8 +269,8 @@
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Êtes-vous sûr ?</h3>
                 <p class="text-gray-600 text-center mb-6">
-                    Votre compte sera archivé et vous serez déconnecté. Vous pourrez le réactiver à tout moment en vous
-                    reconnectant avec vos identifiants.
+                    Votre compte sera archivé et vous serez déconnecté. Vous avez 30 jours pour le réactiver en vous
+                    reconnectant. Au-delà, il sera définitivement supprimé.
                 </p>
 
                 <div class="flex gap-3">

@@ -20,10 +20,10 @@
 
         @if(session('info'))
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md" x-data="{ autoRefresh: true }" x-init="
-                                if (autoRefresh) {
-                                    setTimeout(() => window.location.reload(), 3000);
-                                }
-                            ">
+                                        if (autoRefresh) {
+                                            setTimeout(() => window.location.reload(), 3000);
+                                        }
+                                    ">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 text-blue-500 mr-3 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -182,7 +182,7 @@
                         @endforelse
                     </div>
                     <div class="p-2 bg-gray-50 border-t border-gray-100 text-center">
-                        {{ $transactions->links('pagination::simple-tailwind') }}
+                        {{ $transactions->links('pagination.simple-indigo') }}
                     </div>
                 </div>
             </div>

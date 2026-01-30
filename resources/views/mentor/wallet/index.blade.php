@@ -238,7 +238,7 @@
                         </div>
                         <!-- Pagination -->
                         <div class="p-4 bg-gray-50 border-t border-gray-100">
-                            {{ $walletTransactions->appends(['income_page' => request()->income_page, 'active_tab' => 'recharge'])->links('pagination::simple-tailwind') }}
+                            {{ $walletTransactions->appends(['income_page' => request()->income_page, 'active_tab' => 'recharge'])->links('pagination.simple-orange') }}
                         </div>
                     </div>
                 </div>
