@@ -36,6 +36,16 @@ class WalletService
             // Mettre à jour le solde utilisateur
             $user->increment('credits_balance', $amount);
 
+            // Si c'est un mentor qui gagne des crédits via une vente (type 'income'),
+            // on met aussi à jour son available_balance en FCFA pour les payouts
+            if ($type === 'income' && $user->user_type === 'mentor' && $user->mentorProfile) {
+                // Convertir les crédits en FCFA (prix crédit mentor = 100 FCFA par défaut)
+                $creditPriceFcfa = $this->getCreditPrice('mentor');
+                $amountFcfa = $amount * $creditPriceFcfa;
+
+                $user->mentorProfile->increment('available_balance', $amountFcfa);
+            }
+
             return $transaction;
         });
     }
