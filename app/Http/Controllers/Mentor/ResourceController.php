@@ -194,7 +194,9 @@ class ResourceController extends Controller
      */
     public function edit($id)
     {
-        $resource = auth()->user()->resources()->findOrFail($id);
+        // $id contient le slug car getRouteKeyName() retourne 'slug' dans le modèle
+        $resource = auth()->user()->resources()->where('slug', $id)->firstOrFail();
+
         $targetingOptions = $this->getDynamicTargetingOptions();
         return view('mentor.resources.edit', compact('resource', 'targetingOptions'));
     }
@@ -204,7 +206,8 @@ class ResourceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $resource = auth()->user()->resources()->findOrFail($id);
+        // $id contient le slug
+        $resource = auth()->user()->resources()->where('slug', $id)->firstOrFail();
 
         $messages = [
             'required' => 'Ce champ est obligatoire.',
@@ -294,7 +297,7 @@ class ResourceController extends Controller
      */
     public function destroy($id)
     {
-        $resource = auth()->user()->resources()->findOrFail($id);
+        $resource = auth()->user()->resources()->where('slug', $id)->firstOrFail();
 
         if ($resource->file_path) {
             Storage::disk('public')->delete($resource->file_path);
