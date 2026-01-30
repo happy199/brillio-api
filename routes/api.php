@@ -29,6 +29,14 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Mentor Payout Routes
+    Route::prefix('mentor')->group(function () {
+        Route::get('/balance', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'getBalance']);
+        Route::get('/payout-methods', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'getPayoutMethods']);
+        Route::post('/payout/request', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'requestPayout']);
+        Route::get('/payout-requests', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'getPayoutRequests']);
+    });
 });
 
 /*

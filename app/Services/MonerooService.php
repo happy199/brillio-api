@@ -207,4 +207,150 @@ class MonerooService
             'last_name' => $names[1] ?? $names[0] ?? '', // Use first name as last if no space
         ];
     }
+
+    /**
+     * Récupérer les méthodes de paiement disponibles pour les payouts
+     *
+     * @return array
+     */
+    public function getPayoutMethods(): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Accept' => 'application/json'
+            ])->get($this->apiUrl . '/utils/payout/methods');
+
+            if ($response->successful()) {
+                $data = $response->json();
+                Log::info('Moneroo: Payout methods retrieved', ['data' => $data]);
+                return $data;
+            }
+
+            Log::error('Moneroo: Failed to get payout methods', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+
+            return [];
+        } catch (Exception $e) {
+            Log::error('Moneroo: Exception during getPayoutMethods', [
+                'message' => $e->getMessage()
+            ]);
+
+            return [];
+        }
+    }
+
+    /**
+     * Créer un payout (retrait) pour un mentor
+     *
+     * @param float $amount Montant du payout en FCFA
+     * @param string $phone Numéro de téléphone du bénéficiaire
+     * @param string $method Méthode de paiement (ex: mtn_bj, moov_bj)
+     * @return array
+     */
+    public function createPayout(float $amount, string $phone, string $method): array
+    {
+        try {
+            $payload = [
+                'amount' => (int) $amount, // Montant en unité entière
+                'customer' => [
+                    'phone' => $phone,
+                ],
+                'method' => $method,
+                'description' => 'Retrait de crédits Brillio'
+            ];
+
+            Log::info('Moneroo: Creating payout', $payload);
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json'
+            ])->post($this->apiUrl . '/payouts', $payload);
+
+            $data = $response->json();
+
+            Log::info('Moneroo: Payout response', [
+                'status' => $response->status(),
+                'data' => $data
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $data
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $data['message'] ?? 'Payout failed',
+                'errors' => $data['errors'] ?? []
+            ];
+        } catch (Exception $e) {
+            Log::error('Moneroo: Exception during createPayout', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Vérifier le statut d'un payout
+     *
+     * @param string $payoutId ID du payout Moneroo
+     * @return array
+     */
+    public function getPayoutStatus(string $payoutId): array
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Accept' => 'application/json'
+            ])->get($this->apiUrl . '/payouts/' . $payoutId);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json()
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Failed to get payout status'
+            ];
+        } catch (Exception $e) {
+            Log::error('Moneroo: Exception during getPayoutStatus', [
+                'message' => $e->getMessage()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Calculer les frais de retrait
+     *
+     * @param float $amount Montant du retrait en FCFA
+     * @return float
+     */
+    public function calculateFee(float $amount): float
+    {
+        $feeRate = config('payout.fee_rate', 0.02); // 2% par défaut
+        $minFee = config('payout.min_fee', 100); // 100 FCFA minimum
+
+        $fee = max($amount * $feeRate, $minFee);
+        return round($fee, 2);
+    }
 }
