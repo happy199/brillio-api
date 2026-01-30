@@ -373,8 +373,8 @@
                     <h2 class="text-lg font-bold text-gray-900 mb-4">Photo de profil</h2>
                     
                     <div class="text-center mb-4">
-                        @if($mentor->user->profile_photo)
-                            <img src="{{ Storage::url($mentor->user->profile_photo) }}" 
+                        @if($mentor->user->profile_photo_url)
+                            <img src="{{ $mentor->user->profile_photo_url }}" 
                                  alt="{{ $mentor->user->name }}" 
                                  class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-gray-100">
                         @else
