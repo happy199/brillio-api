@@ -245,6 +245,12 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Gestion des mentors
         Route::get('mentors', [MentorController::class, 'index'])->name('mentors.index');
         Route::get('mentors/{mentor}', [MentorController::class, 'show'])->name('mentors.show');
+        Route::get('mentors/{mentor}/edit', [MentorController::class, 'edit'])->name('mentors.edit');
+        Route::put('mentors/{mentor}', [MentorController::class, 'update'])->name('mentors.update');
+        Route::post('mentors/{mentor}/photo', [MentorController::class, 'updateProfilePhoto'])->name('mentors.update-photo');
+        Route::post('mentors/{mentor}/roadmap', [MentorController::class, 'storeRoadmapStep'])->name('mentors.roadmap.store');
+        Route::put('mentors/{mentor}/roadmap/{step}', [MentorController::class, 'updateRoadmapStep'])->name('mentors.roadmap.update');
+        Route::delete('mentors/{mentor}/roadmap/{step}', [MentorController::class, 'deleteRoadmapStep'])->name('mentors.roadmap.delete');
         Route::patch('mentors/{mentor}/toggle-publish', [MentorController::class, 'togglePublish'])->name('mentors.toggle-publish');
         Route::patch('mentors/{mentor}/toggle-validation', [MentorController::class, 'toggleValidation'])->name('mentors.toggle-validation');
         Route::put('mentors/{mentor}/approve', [MentorController::class, 'approve'])->name('mentors.approve');
