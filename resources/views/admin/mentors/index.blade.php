@@ -65,10 +65,9 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     <div class="h-10 w-10 flex-shrink-0">
-                                        @if($mentor->user->profile_photo)
+                                        @if($mentor->user->profile_photo_url)
                                             <img class="h-10 w-10 rounded-full object-cover"
-                                                src="{{ Storage::url($mentor->user->profile_photo) }}"
-                                                alt="{{ $mentor->user->name }}">
+                                                src="{{ $mentor->user->profile_photo_url }}" alt="{{ $mentor->user->name }}">
                                         @else
                                             <div class="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
                                                 <span class="text-orange-600 font-semibold">
