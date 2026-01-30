@@ -39,84 +39,80 @@
         <!-- Section 1: Revenus (Earnings) -->
         <div x-show="activeTab === 'earnings'" class="space-y-6">
             <!-- Stats Revenus avec Payout -->
+            <!-- Stats Revenus avec Payout -->
             <div x-data="{ 
-                            showPayoutModal: false,
-                            payoutMethods: [],
-                            payoutForm: {
-                                amount: '',
-                                payment_method: '',
-                                phone_number: ''
-                            },
-                            availableBalance: 0,
-                            totalWithdrawn: 0,
-                            loading: false,
-                            error: '',
+                                showPayoutModal: false,
+                                payoutMethods: @json($payoutMethods),
+                                payoutForm: {
+                                    amount: '',
+                                    payment_method: '',
+                                    phone_number: ''
+                                },
+                                availableBalance: @json($estimatedValueFcfa),
+                                totalWithdrawn: @json($user->mentorProfile->total_withdrawn ?? 0),
+                                loading: false,
+                                error: '',
 
-                            async loadBalance() {
-                                try {
-                                    const response = await fetch('/api/mentor/balance', {
-                                        headers: {
-                                            'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                            'Accept': 'application/json'
-                                        }
-                                    });
-                                    const data = await response.json();
-                                    this.availableBalance = data.available_balance || 0;
-                                    this.totalWithdrawn = data.total_withdrawn || 0;
-                                } catch (e) {
-                                    console.error('Error loading balance:', e);
-                                }
-                            },
-
-                            async loadPayoutMethods() {
-                                try {
-                                    const response = await fetch('/api/mentor/payout-methods', {
-                                        headers: {
-                                            'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                            'Accept': 'application/json'
-                                        }
-                                    });
-                                    const data = await response.json();
-                                    this.payoutMethods = data.methods?.data || [];
-                                } catch (e) {
-                                    console.error('Error loading payout methods:', e);
-                                }
-                            },
-
-                            async requestPayout() {
-                                this.loading = true;
-                                this.error = '';
-
-                                try {
-                                    const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
-                                    const response = await fetch('/api/mentor/payout/request', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                            'Content-Type': 'application/json',
-                                            'Accept': 'application/json',
-                                            'X-CSRF-TOKEN': csrfToken
-                                        },
-                                        body: JSON.stringify(this.payoutForm)
-                                    });
-
-                                    const data = await response.json();
-
-                                    if (!response.ok) {
-                                        throw new Error(data.message || 'Erreur lors de la demande de retrait');
+                                async loadBalance() {
+                                    // Déjà chargé par le serveur, mais on peut rafraîchir si besoin après action
+                                    try {
+                                        const response = await fetch('/api/mentor/balance', {
+                                            headers: {
+                                                'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                'Accept': 'application/json'
+                                            }
+                                        });
+                                        const data = await response.json();
+                                        this.availableBalance = data.available_balance || 0;
+                                        this.totalWithdrawn = data.total_withdrawn || 0;
+                                    } catch (e) {
+                                        console.error('Error loading balance:', e);
                                     }
+                                },
 
-                                    this.showPayoutModal = false;
-                                    this.payoutForm = { amount: '', payment_method: '', phone_number: '' };
-                                    await this.loadBalance();
-                                    location.reload(); // Recharger pour afficher l'historique
-                                } catch (e) {
-                                    this.error = e.message;
-                                } finally {
-                                    this.loading = false;
+                                loadPayoutMethods() {
+                                    // Données injectées directement depuis le serveur via $payoutMethods
+                                    // Plus besoin d'appel API, ce qui évite les erreurs de chargement
+                                },
+
+                                async requestPayout() {
+                                    this.loading = true;
+                                    this.error = '';
+
+                                    try {
+                                        const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
+                                        const response = await fetch('/api/mentor/payout/request', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                'Content-Type': 'application/json',
+                                                'Accept': 'application/json',
+                                                'X-CSRF-TOKEN': csrfToken
+                                            },
+                                            body: JSON.stringify(this.payoutForm)
+                                        });
+
+                                        const data = await response.json();
+
+                                        if (!response.ok) {
+                                            throw new Error(data.message || 'Erreur lors de la demande de retrait');
+                                        }
+
+                                        this.showPayoutModal = false;
+                                        this.payoutForm = { amount: '', payment_method: '', phone_number: '' };
+
+                                        // Mettre à jour le solde localement ou recharger
+                                        this.availableBalance -= data.payout.amount; // Optimiste
+
+                                        // Recharger la page pour voir le nouveau solde et l'historique mis à jour
+                                        window.location.reload(); 
+                                    } catch (e) {
+                                        this.error = e.message;
+                                    } finally {
+                                        this.loading = false;
+                                    }
                                 }
-                            }
-                        }" x-init="loadBalance(); loadPayoutMethods()"
+                            }" x-init="loadBalance()"
                 class="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
@@ -276,22 +272,22 @@
 
             <!-- Historique des Retraits -->
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden" x-data="{
-                             payoutRequests: [],
-                             async loadPayouts() {
-                                 try {
-                                     const response = await fetch('/api/mentor/payout-requests', {
-                                         headers: {
-                                             'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                             'Accept': 'application/json'
-                                         }
-                                     });
-                                     const data = await response.json();
-                                     this.payoutRequests = data.payouts || [];
-                                 } catch (e) {
-                                     console.error('Error loading payouts:', e);
+                                 payoutRequests: [],
+                                 async loadPayouts() {
+                                     try {
+                                         const response = await fetch('/api/mentor/payout-requests', {
+                                             headers: {
+                                                 'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                 'Accept': 'application/json'
+                                             }
+                                         });
+                                         const data = await response.json();
+                                         this.payoutRequests = data.payouts || [];
+                                     } catch (e) {
+                                         console.error('Error loading payouts:', e);
+                                     }
                                  }
-                             }
-                         }" x-init="loadPayouts()">
+                             }" x-init="loadPayouts()">
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <h3 class="text-lg font-bold text-gray-900">Historique des Retraits</h3>
                     <span
