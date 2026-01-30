@@ -376,9 +376,15 @@ class ResourceController extends Controller
                 // On crédite 100% pour l'instant
                 $mentor = $resource->user;
                 if ($mentor) {
+                    // IMPORTANT : Convertir le prix FCFA en crédits MENTOR (pas les crédits jeune)
+                    // Prix ressource = 300 FCFA → Jeune paie 6 crédits (300/50)
+                    // Mentor reçoit 3 crédits mentor (300/100)
+                    $mentorCreditPrice = $this->walletService->getCreditPrice('mentor');
+                    $mentorCredits = (int) ceil($resource->price / $mentorCreditPrice);
+
                     $this->walletService->addCredits(
                         $mentor,
-                        $unlockCost,
+                        $mentorCredits, // Crédits mentor (basé sur prix FCFA)
                         'income', // Type spécifique pour les revenus
                         "Achat par {$user->name} de : {$resource->title}",
                         $purchase // On lie à l'achat (qui contient l'info de l'acheteur via user_id)
