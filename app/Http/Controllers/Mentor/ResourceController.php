@@ -27,15 +27,17 @@ class ResourceController extends Controller
     {
         $mentorProfile = auth()->user()->mentorProfile;
 
+        // On récupère toujours les ressources pour savoir si le mentor en a déjà créé
+        $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
+
         // Vérifier si le profil est publié
         if (!$mentorProfile || $mentorProfile->status !== 'published') {
             return view('mentor.resources.index', [
-                'resources' => collect([]),
+                'resources' => $resources, // On passe les ressources pour afficher le message "Ressources masquées"
                 'profileNotPublished' => true
             ]);
         }
 
-        $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
         return view('mentor.resources.index', compact('resources'));
     }
 

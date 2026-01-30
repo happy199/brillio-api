@@ -70,8 +70,15 @@ class ResourceController extends Controller
         $myResourceIds = $purchasedIds->merge($viewedIds)->unique();
 
         // Récupérer toutes les ressources validées et publiées
+        // ET dont l'auteur (si mentor) a un profil PUBLIÉ
         $query = Resource::where('is_published', true)
             ->where('is_validated', true)
+            ->whereHas('user', function ($q) {
+                $q->where('is_admin', true) // Les admins sont toujours OK
+                    ->orWhereHas('mentorProfile', function ($mp) {
+                        $mp->where('status', 'published'); // Les mentors doivent être publiés
+                    });
+            })
             ->with('user') // Le créateur (Mentor/Admin)
             ->orderByDesc('created_at');
 

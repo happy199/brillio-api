@@ -17,6 +17,23 @@
                     La section Ressources est une opportunité unique de monétiser votre savoir. Vous pouvez vendre des documents, vidéos, outils ou exercices pratiques à la communauté des jeunes talents Brillio.
                 </p>
 
+                <!-- Message spécifique si le mentor a déjà des ressources mais a dépublié son profil -->
+                @if(isset($resources) && $resources->count() > 0)
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left flex gap-4">
+                        <div class="flex-shrink-0">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-blue-900 text-sm mb-1">Ressources actuellement masquées</h3>
+                            <p class="text-blue-800 text-sm">
+                                Vous avez déjà créé des ressources, mais elles sont actuellement <strong>invisibles pour les étudiants</strong> car votre profil n'est pas publié. Republiez votre profil pour les rendre à nouveau accessibles.
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8 text-left flex gap-4">
                     <div class="flex-shrink-0">
                         <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
