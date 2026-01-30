@@ -404,7 +404,7 @@
 
                     <!-- Boutons -->
                     <div class="pt-4 border-t border-gray-100 space-y-3">
-                        @if($resource->status === 'approved')
+                        @if($resource->is_validated)
                             <div class="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-lg border border-yellow-200">
                                 <strong>Attention :</strong> Toute modification entraînera une nouvelle validation par l'administration avant d'être visible.
                             </div>

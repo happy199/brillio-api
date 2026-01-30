@@ -268,10 +268,11 @@ class ResourceController extends Controller
 
         $tags = !empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
-        // Si la ressource était validée (approved), la repasser en pending pour nouvelle validation
-        $needsRevalidation = $resource->status === 'approved';
+        // Si la ressource était validée, elle doit être revalidée
+        // On vérifie si elle est actuellement validée (is_validated = true)
+        $wasValidated = $resource->is_validated;
 
-        $resource->update([
+        $updateData = [
             'title' => $validated['title'],
             'description' => $validated['description'],
             'content' => $validated['content'],
@@ -282,10 +283,17 @@ class ResourceController extends Controller
             'mbti_types' => $validated['mbti_types'] ?? [],
             'tags' => $tags,
             'targeting' => $validated['targeting'] ?? [],
-            'status' => $needsRevalidation ? 'pending' : $resource->status, // Repasser en pending si était validée
-        ]);
+        ];
 
-        $message = $needsRevalidation
+        // Si elle était validée, on la dévalide pour forcer une nouvelle validation admin
+        if ($wasValidated) {
+            $updateData['is_validated'] = false;
+            $updateData['validated_at'] = null;
+        }
+
+        $resource->update($updateData);
+
+        $message = $wasValidated
             ? 'Ressource mise à jour. Elle sera à nouveau soumise à validation admin.'
             : 'Ressource mise à jour.';
 
