@@ -25,6 +25,16 @@ class ResourceController extends Controller
      */
     public function index()
     {
+        $mentorProfile = auth()->user()->mentorProfile;
+
+        // Vérifier si le profil est publié
+        if (!$mentorProfile || $mentorProfile->status !== 'published') {
+            return view('mentor.resources.index', [
+                'resources' => collect([]),
+                'profileNotPublished' => true
+            ]);
+        }
+
         $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
         return view('mentor.resources.index', compact('resources'));
     }
@@ -34,6 +44,14 @@ class ResourceController extends Controller
      */
     public function create()
     {
+        $mentorProfile = auth()->user()->mentorProfile;
+
+        // Bloquer si le profil n'est pas publié
+        if (!$mentorProfile || $mentorProfile->status !== 'published') {
+            return redirect()->route('mentor.resources.index')
+                ->withErrors(['profile' => 'Vous devez publier votre profil mentorpour créer des ressources.']);
+        }
+
         $targetingOptions = $this->getDynamicTargetingOptions();
         $targetingCost = $this->walletService->getFeatureCost('advanced_targeting', 10);
         return view('mentor.resources.create', compact('targetingOptions', 'targetingCost'));
@@ -235,7 +253,18 @@ class ResourceController extends Controller
             $resource->preview_image_path = $request->file('preview_image')->store('resources/previews', 'public');
         }
 
+        // Gérer le fichier principal si modifié
+        if ($request->hasFile('file')) {
+            if ($resource->file_path) {
+                Storage::disk('public')->delete($resource->file_path);
+            }
+            $resource->file_path = $request->file('file')->store('resources/files', 'public');
+        }
+
         $tags = !empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
+
+        // Si la ressource était validée (approved), la repasser en pending pour nouvelle validation
+        $needsRevalidation = $resource->status === 'approved';
 
         $resource->update([
             'title' => $validated['title'],
@@ -243,14 +272,19 @@ class ResourceController extends Controller
             'content' => $validated['content'],
             'type' => $validated['type'],
             'price' => $request->is_premium == '1' ? $request->price : 0,
-            'is_premium' => $request->is_premium == '1', // Correction ici
+            'is_premium' => $request->is_premium == '1',
             'metadata' => $validated['metadata'] ?? [],
             'mbti_types' => $validated['mbti_types'] ?? [],
             'tags' => $tags,
             'targeting' => $validated['targeting'] ?? [],
+            'status' => $needsRevalidation ? 'pending' : $resource->status, // Repasser en pending si était validée
         ]);
 
-        return redirect()->route('mentor.resources.index')->with('success', 'Ressource mise à jour.');
+        $message = $needsRevalidation
+            ? 'Ressource mise à jour. Elle sera à nouveau soumise à validation admin.'
+            : 'Ressource mise à jour.';
+
+        return redirect()->route('mentor.resources.index')->with('success', $message);
     }
 
     /**

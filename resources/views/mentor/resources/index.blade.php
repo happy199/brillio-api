@@ -4,6 +4,41 @@
 
 @section('content')
     <div class="space-y-6">
+        @if(isset($profileNotPublished) && $profileNotPublished)
+            <div class="text-center py-12 max-w-2xl mx-auto">
+                <div class="bg-indigo-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Partagez votre expertise</h2>
+                <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                    La section Ressources est une opportunité unique de monétiser votre savoir. Vous pouvez vendre des documents, vidéos, outils ou exercices pratiques à la communauté des jeunes talents Brillio.
+                </p>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8 text-left flex gap-4">
+                    <div class="flex-shrink-0">
+                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-amber-900 text-lg mb-1">Profil requis</h3>
+                        <p class="text-amber-800">
+                            Pour garantir la qualité et la confiance sur la plateforme, <strong>votre profil mentor doit être complété et publié</strong> avant de pouvoir proposer des ressources payantes.
+                        </p>
+                    </div>
+                </div>
+
+                <a href="{{ route('mentor.dashboard') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    Finaliser mon profil
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </a>
+            </div>
+        @else
         <!-- Header -->
         <div class="flex justify-between items-center">
             <div>
@@ -117,5 +152,6 @@
         <div class="mt-4">
             {{ $resources->withQueryString()->links() }}
         </div>
+        @endif
     </div>
 @endsection
