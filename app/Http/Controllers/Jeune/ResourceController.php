@@ -76,7 +76,7 @@ class ResourceController extends Controller
             ->whereHas('user', function ($q) {
                 $q->where('is_admin', true) // Les admins sont toujours OK
                     ->orWhereHas('mentorProfile', function ($mp) {
-                        $mp->where('status', 'published'); // Les mentors doivent être publiés
+                        $mp->where('is_published', true); // Les mentors doivent être publiés
                     });
             })
             ->with('user') // Le créateur (Mentor/Admin)
