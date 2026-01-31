@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MonerooTransaction;
+use App\Models\PayoutRequest;
 use App\Services\MonerooService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
@@ -65,6 +66,16 @@ class MonerooWebhookController extends Controller
         // Handle payment cancelled
         if ($event === 'payment.cancelled') {
             return $this->handlePaymentCancelled($paymentData);
+        }
+
+        // Handle payout success
+        if ($event === 'payout.succeeded' || $event === 'payout.completed') {
+            return $this->handlePayoutSuccess($paymentData);
+        }
+
+        // Handle payout failure
+        if ($event === 'payout.failed') {
+            return $this->handlePayoutFailed($paymentData);
         }
 
         Log::info('Moneroo webhook event not handled', ['event' => $event]);
@@ -159,5 +170,100 @@ class MonerooWebhookController extends Controller
         }
 
         return response()->json(['message' => 'Payment cancellation processed'], 200);
+    }
+
+    /**
+     * Handle successful payout
+     */
+    protected function handlePayoutSuccess(array $payoutData): \Illuminate\Http\JsonResponse
+    {
+        $monerooPayoutId = $payoutData['id'];
+        $payoutRequest = PayoutRequest::where('moneroo_payout_id', $monerooPayoutId)->first();
+
+        if (!$payoutRequest) {
+            Log::error('Moneroo payout not found', ['moneroo_payout_id' => $monerooPayoutId]);
+            return response()->json(['error' => 'Payout not found'], 404);
+        }
+
+        if ($payoutRequest->status === PayoutRequest::STATUS_COMPLETED) {
+            Log::info('Moneroo payout already completed', ['payout_id' => $payoutRequest->id]);
+            return response()->json(['message' => 'Already processed'], 200);
+        }
+
+        try {
+            // Mark payout as completed
+            $payoutRequest->update([
+                'status' => PayoutRequest::STATUS_COMPLETED,
+                'completed_at' => now()
+            ]);
+
+            // Update total withdrawn for mentor
+            $payoutRequest->mentorProfile->increment('total_withdrawn', $payoutRequest->amount);
+
+            Log::info('Moneroo payout completed successfully', [
+                'payout_id' => $payoutRequest->id,
+                'moneroo_payout_id' => $monerooPayoutId,
+                'amount' => $payoutRequest->amount
+            ]);
+
+            return response()->json(['message' => 'Payout completed'], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error processing Moneroo payout success', [
+                'payout_id' => $payoutRequest->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json(['error' => 'Processing failed'], 500);
+        }
+    }
+
+    /**
+     * Handle failed payout
+     */
+    protected function handlePayoutFailed(array $payoutData): \Illuminate\Http\JsonResponse
+    {
+        $monerooPayoutId = $payoutData['id'];
+        $payoutRequest = PayoutRequest::where('moneroo_payout_id', $monerooPayoutId)->first();
+
+        if (!$payoutRequest) {
+            Log::error('Moneroo payout not found for failure', ['moneroo_payout_id' => $monerooPayoutId]);
+            return response()->json(['error' => 'Payout not found'], 404);
+        }
+
+        if ($payoutRequest->status === PayoutRequest::STATUS_FAILED) {
+            Log::info('Moneroo payout already failed', ['payout_id' => $payoutRequest->id]);
+            return response()->json(['message' => 'Already processed'], 200);
+        }
+
+        try {
+            // Mark payout as failed
+            $errorMessage = $payoutData['status'] ?? 'Gateway error occurred';
+            $payoutRequest->update([
+                'status' => PayoutRequest::STATUS_FAILED,
+                'error_message' => $errorMessage
+            ]);
+
+            // CRITICAL: Refund the balance to mentor
+            $payoutRequest->mentorProfile->increment('available_balance', $payoutRequest->amount);
+
+            Log::info('Moneroo payout failed and balance refunded', [
+                'payout_id' => $payoutRequest->id,
+                'moneroo_payout_id' => $monerooPayoutId,
+                'amount_refunded' => $payoutRequest->amount
+            ]);
+
+            return response()->json(['message' => 'Payout failure processed'], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error processing Moneroo payout failure', [
+                'payout_id' => $payoutRequest->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json(['error' => 'Processing failed'], 500);
+        }
     }
 }

@@ -53,20 +53,21 @@ class ProcessPayoutJob implements ShouldQueue
             );
 
             if ($response['success']) {
-                // Payout réussi
+                // Payout initié avec succès - attendre la confirmation webhook
+                // Ne PAS marquer comme "completed" tout de suite!
                 $this->payoutRequest->update([
-                    'status' => PayoutRequest::STATUS_COMPLETED,
+                    'status' => PayoutRequest::STATUS_PROCESSING,
                     'moneroo_payout_id' => $response['data']['data']['id'] ?? null,
-                    'completed_at' => now()
                 ]);
 
-                // Mettre à jour le total withdrawn du mentor
-                $this->payoutRequest->mentorProfile->increment('total_withdrawn', $this->payoutRequest->amount);
-
-                Log::info('ProcessPayoutJob: Payout completed successfully', [
+                Log::info('ProcessPayoutJob: Payout initiated, waiting for webhook confirmation', [
                     'payout_id' => $this->payoutRequest->id,
                     'moneroo_payout_id' => $response['data']['data']['id'] ?? null
                 ]);
+
+                // NOTE: Le statut final sera mis à jour par le webhook
+                // - payout.succeeded => STATUS_COMPLETED + increment total_withdrawn
+                // - payout.failed => STATUS_FAILED + refund available_balance
             } else {
                 // Payout échoué
                 throw new \Exception($response['message'] ?? 'Payout failed');
