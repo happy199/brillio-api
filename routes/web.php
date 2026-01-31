@@ -136,6 +136,15 @@ Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.pu
 
 /*
 |--------------------------------------------------------------------------
+| Common Authenticated Routes (Meeting, etc.)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/meeting/{session}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meeting.show');
+});
+
+/*
+|--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
@@ -247,8 +256,43 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
     Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');
 
-    // Gestion des ressources mentor
-    Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
+    // --- ROUTES MENTORAT (Nécessitent profil publié) ---
+    Route::middleware(['mentor_published'])->group(function () {
+        // Dashboard Mentorat (Roadmap)
+        Route::get('/mentorship/roadmap', [App\Http\Controllers\Mentor\MentorshipController::class, 'roadmap'])->name('mentor.roadmap');
+
+        // Gestion des ressources mentor (URL: /ressources)
+        // Le prefixe 'mentor.' est déjà appliqué par le groupe parent, donc ->names('resources') donnera 'mentor.resources.*'
+        Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
+
+        // Gestion des mentés
+        // Le prefixe 'mentor.' est déjà appliqué. On ajoute 'mentorship.' -> 'mentor.mentorship.*'
+        Route::name('mentorship.')->group(function () {
+            // URL: /mentes
+            Route::get('/mentes', [App\Http\Controllers\Mentor\MentorshipController::class, 'index'])->name('index'); // Liste mentés
+            Route::get('/requests', [App\Http\Controllers\Mentor\MentorshipController::class, 'requests'])->name('requests'); // Demandes
+            Route::post('/{mentorship}/accepter', [App\Http\Controllers\Mentor\MentorshipController::class, 'accept'])->name('accept');
+            Route::post('/{mentorship}/refuser', [App\Http\Controllers\Mentor\MentorshipController::class, 'refuse'])->name('refuse');
+            Route::post('/{mentorship}/deconnecter', [App\Http\Controllers\Mentor\MentorshipController::class, 'disconnect'])->name('disconnect');
+
+            // Calendrier & Dispos (URL: /calendrier)
+            Route::get('/calendrier', [\App\Http\Controllers\Mentor\SessionController::class, 'index'])->name('calendar');
+            Route::post('/availability', [\App\Http\Controllers\Mentor\SessionController::class, 'storeAvailability'])->name('availability.store');
+
+            // Séances
+            // URL: /sessions/... (On garde /sessions pour éviter les conflits d'URL racine trop génériques)
+            Route::get('/sessions/create', [\App\Http\Controllers\Mentor\SessionController::class, 'create'])->name('sessions.create');
+            Route::post('/sessions', [\App\Http\Controllers\Mentor\SessionController::class, 'store'])->name('sessions.store');
+            Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
+            Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
+            Route::post('/sessions/{session}/cancel', [\App\Http\Controllers\Mentor\SessionController::class, 'cancel'])->name('sessions.cancel');
+        });
+    });
+
+    // Page de blocage (Accessible sans middleware mentor_published)
+    Route::get('/mentorship/locked', function () {
+        return view('mentor.mentorship.locked');
+    })->name('mentorship.locked');
 });
 
 /*
