@@ -67,7 +67,7 @@
                     @elseif($session->scheduled_at >= now())
                         @if($session->status === 'confirmed' || $session->status === 'accepted')
                             @if($session->meeting_link)
-                                <a href="{{ $session->meeting_link }}" target="_blank"
+                                <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
                                     class="block w-full text-center py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition mb-3">
                                     En ligne
                                 </a>

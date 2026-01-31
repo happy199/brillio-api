@@ -140,7 +140,7 @@ Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.pu
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/meeting/{session}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meeting.show');
+    Route::get('/meeting/{meetingId}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meeting.show');
 });
 
 /*

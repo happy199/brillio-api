@@ -42,4 +42,14 @@ class MentoringSession extends Model
             ->withPivot('status', 'rejection_reason')
             ->withTimestamps();
     }
+
+    /**
+     * Get the Jitsi room name (meeting ID) from the link
+     */
+    public function getMeetingIdAttribute()
+    {
+        if (!$this->meeting_link)
+            return null;
+        return basename($this->meeting_link);
+    }
 }

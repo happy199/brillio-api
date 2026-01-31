@@ -17,7 +17,8 @@
             <div>
                 <h1 class="font-bold text-sm leading-tight">{{ $session->title }}</h1>
                 <p class="text-xs text-gray-400">Avec {{ $session->mentor->name }} et
-                    {{ $session->mentees->pluck('name')->join(', ') }}</p>
+                    {{ $session->mentees->pluck('name')->join(', ') }}
+                </p>
             </div>
         </div>
 
@@ -32,7 +33,7 @@
                 Ne partagez pas l'URL de cette page.
             </div>
 
-            <a href="{{ $isMentor ? route('mentor.mentorship.sessions.show', $session) : route('jeune.mentorship.sessions.show', $session) }}"
+            <a href="{{ $isMentor ? route('mentor.mentorship.sessions.show', $session) : route('jeune.sessions.show', $session) }}"
                 class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
