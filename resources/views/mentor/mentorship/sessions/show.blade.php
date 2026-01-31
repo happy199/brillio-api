@@ -64,7 +64,7 @@
                             </button>
                         </form>
                     @elseif($session->status === 'confirmed' || $session->status === 'accepted')
-                        <a href="{{ $session->meeting_link }}" target="_blank"
+                        <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
                             class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition flex items-center gap-2 shadow-sm shadow-indigo-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

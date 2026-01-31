@@ -11,9 +11,15 @@ class MeetingController extends Controller
     /**
      * Affiche la salle de conférence sécurisée (iframe)
      */
-    public function show(MentoringSession $session)
+    public function show($meetingId)
     {
         $user = Auth::user();
+
+        // 3. Reconstituer le lien ou chercher via room name
+        // On suppose que meeting_link = https://meet.jit.si/$meetingId
+        // Recherche de la session correspondante
+        // Note: LIKE est plus sûr si jamais le préfixe change un jour, mais ici exact match sur fin de chaine
+        $session = MentoringSession::where('meeting_link', 'LIKE', '%' . $meetingId)->firstOrFail();
 
         // 1. Vérifier si l'utilisateur est participant (Mentor ou Menté)
         $isMentor = $session->mentor_id === $user->id;
@@ -25,11 +31,10 @@ class MeetingController extends Controller
 
         // 2. Vérifier statut session (pas annulée)
         if ($session->status === 'cancelled') {
-            return redirect()->route($isMentor ? 'mentor.mentorship.sessions.show' : 'jeune.mentorship.sessions.show', $session)
+            return redirect()->route($isMentor ? 'mentor.mentorship.sessions.show' : 'jeune.sessions.show', $session)
                 ->with('error', 'Cette séance a été annulée.');
         }
 
-        // 3. Obtenir le lien Jitsi brut (stocké en DB ou généré à la volée)
         $meetingLink = $session->meeting_link;
         // On assure que c'est un lien complet pour l'iframe src.
         // ex: https://meet.jit.si/Brillio_123_XYZ
