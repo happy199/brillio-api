@@ -197,6 +197,17 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
         ->parameters(['ressources' => 'resource']);
 
     Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class, 'unlock'])->name('resources.unlock');
+    Route::post('/mentorship/request', [\App\Http\Controllers\Jeune\MentorshipController::class, 'store'])->name('mentorship.request');
+    Route::post('/mentorship/{mentorship}/cancel', [\App\Http\Controllers\Jeune\MentorshipController::class, 'cancel'])->name('mentorship.cancel');
+    Route::get('/mentorat', [\App\Http\Controllers\Jeune\MentorshipController::class, 'index'])->name('mentorship.index');
+
+    // Séances (Jeune)
+    Route::get('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'index'])->name('sessions.index');
+    Route::get('/mentorat/calendrier', [\App\Http\Controllers\Jeune\SessionController::class, 'calendar'])->name('sessions.calendar');
+    Route::post('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'store'])->name('sessions.store');
+    Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class, 'create'])->name('sessions.create');
+    Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class, 'show'])->name('sessions.show');
+    Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class, 'cancel'])->name('sessions.cancel');
 
     // Portefeuille & Crédits
     Route::get('/portefeuille', [\App\Http\Controllers\Jeune\WalletController::class, 'index'])->name('wallet.index');
@@ -285,6 +296,8 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
             Route::post('/sessions', [\App\Http\Controllers\Mentor\SessionController::class, 'store'])->name('sessions.store');
             Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
             Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
+            Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');
+            Route::post('/sessions/{session}/refuse', [\App\Http\Controllers\Mentor\SessionController::class, 'refuse'])->name('sessions.refuse');
             Route::post('/sessions/{session}/cancel', [\App\Http\Controllers\Mentor\SessionController::class, 'cancel'])->name('sessions.cancel');
         });
     });

@@ -32,7 +32,7 @@ class MentorshipController extends Controller
 
         // Récupérer les refusés/déconnectés pour historique (optionnel)
         $history = $mentor->mentorshipsAsMentor()
-            ->whereIn('status', ['refused', 'disconnected'])
+            ->whereIn('status', ['refused', 'disconnected', 'cancelled'])
             ->with('mentee')
             ->orderByDesc('updated_at')
             ->take(10)
@@ -46,7 +46,7 @@ class MentorshipController extends Controller
      */
     public function accept(Mentorship $mentorship)
     {
-        $this->authorize('update', $mentorship); // Ou check manuel si policy pas encore faite
+        // $this->authorize('update', $mentorship);
 
         if ($mentorship->mentor_id !== Auth::id()) {
             abort(403);
