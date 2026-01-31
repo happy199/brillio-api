@@ -69,7 +69,7 @@ class MonerooWebhookController extends Controller
         }
 
         // Handle payout success
-        if ($event === 'payout.succeeded' || $event === 'payout.completed') {
+        if ($event === 'payout.succeeded' || $event === 'payout.completed' || $event === 'payout.success') {
             return $this->handlePayoutSuccess($paymentData);
         }
 

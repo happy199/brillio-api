@@ -17,6 +17,8 @@ class PayoutRequest extends Model
         'net_amount',
         'payment_method',
         'phone_number',
+        'country_code',
+        'dial_code',
         'moneroo_payout_id',
         'status',
         'error_message',

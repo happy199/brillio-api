@@ -40,85 +40,105 @@
         <div x-show="activeTab === 'earnings'" class="space-y-6">
             <!-- Stats Revenus avec Payout -->
             <div x-data="{ 
-                                    showPayoutModal: false,
-                                    payoutMethods: [],
-                                    payoutForm: {
-                                        amount: '',
-                                        payment_method: '',
-                                        phone_number: '',
-                                        country_code: 'BJ', // Bénin par défaut
-                                        dial_code: '+229' // Indicatif Bénin
-                                    },
-                                    availableBalance: 0,
-                                    totalWithdrawn: 0,
-                                    loading: false,
-                                    error: '',
+                                        showPayoutModal: false,
+                                        payoutMethods: [],
+                                        payoutForm: {
+                                            amount: '',
+                                            payment_method: '',
+                                            phone_number: '',
+                                            country_code: '',
+                                            dial_code: ''
+                                        },
+                                        selectedMethodCountries: [],
 
-                                    async loadBalance() {
-                                        try {
-                                            const response = await fetch('/api/mentor/balance', {
-                                                headers: {
-                                                    'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                    'Accept': 'application/json'
-                                                }
-                                            });
-                                            const data = await response.json();
-                                            this.availableBalance = data.available_balance || 0;
-                                            this.totalWithdrawn = data.total_withdrawn || 0;
-                                        } catch (e) {
-                                            console.error('Error loading balance:', e);
-                                        }
-                                    },
-
-                                    async loadPayoutMethods() {
-                                        try {
-                                            const response = await fetch('/api/mentor/payout-methods', {
-                                                headers: {
-                                                    'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                    'Accept': 'application/json'
-                                                }
-                                            });
-                                            const data = await response.json();
-                                            this.payoutMethods = data.methods?.data || [];
-                                        } catch (e) {
-                                            console.error('Error loading payout methods:', e);
-                                        }
-                                    },
-
-                                    async requestPayout() {
-                                        this.loading = true;
-                                        this.error = '';
-
-                                        try {
-                                            const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
-                                            const response = await fetch('/api/mentor/payout/request', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                    'Content-Type': 'application/json',
-                                                    'Accept': 'application/json',
-                                                    'X-CSRF-TOKEN': csrfToken
-                                                },
-                                                body: JSON.stringify(this.payoutForm)
-                                            });
-
-                                            const data = await response.json();
-
-                                            if (!response.ok) {
-                                                throw new Error(data.message || 'Erreur lors de la demande de retrait');
+                                        selectPaymentMethod(methodCode) {
+                                            this.payoutForm.payment_method = methodCode;
+                                            const method = this.payoutMethods.find(m => m.short_code === methodCode);
+                                            if (method && method.countries && method.countries.length > 0) {
+                                                this.selectedMethodCountries = method.countries;
+                                                this.selectCountry(method.countries[0]);
+                                            } else {
+                                                this.selectedMethodCountries = [];
+                                                this.payoutForm.country_code = '';
+                                                this.payoutForm.dial_code = '';
                                             }
+                                        },
 
-                                            this.showPayoutModal = false;
-                                            this.payoutForm = { amount: '', payment_method: '', phone_number: '', country_code: 'BJ', dial_code: '+229' };
-                                            await this.loadBalance();
-                                            location.reload(); // Recharger pour afficher l'historique
-                                        } catch (e) {
-                                            this.error = e.message;
-                                        } finally {
-                                            this.loading = false;
+                                        selectCountry(country) {
+                                            this.payoutForm.country_code = country.code;
+                                            this.payoutForm.dial_code = country.dial_code;
+                                        },
+                                        availableBalance: 0,
+                                        totalWithdrawn: 0,
+                                        loading: false,
+                                        error: '',
+
+                                        async loadBalance() {
+                                            try {
+                                                const response = await fetch('/api/mentor/balance', {
+                                                    headers: {
+                                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                        'Accept': 'application/json'
+                                                    }
+                                                });
+                                                const data = await response.json();
+                                                this.availableBalance = data.available_balance || 0;
+                                                this.totalWithdrawn = data.total_withdrawn || 0;
+                                            } catch (e) {
+                                                console.error('Error loading balance:', e);
+                                            }
+                                        },
+
+                                        async loadPayoutMethods() {
+                                            try {
+                                                const response = await fetch('/api/mentor/payout-methods', {
+                                                    headers: {
+                                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                        'Accept': 'application/json'
+                                                    }
+                                                });
+                                                const data = await response.json();
+                                                this.payoutMethods = data.methods?.data || [];
+                                            } catch (e) {
+                                                console.error('Error loading payout methods:', e);
+                                            }
+                                        },
+
+                                        async requestPayout() {
+                                            this.loading = true;
+                                            this.error = '';
+
+                                            try {
+                                                const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
+                                                const response = await fetch('/api/mentor/payout/request', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                        'Content-Type': 'application/json',
+                                                        'Accept': 'application/json',
+                                                        'X-CSRF-TOKEN': csrfToken
+                                                    },
+                                                    body: JSON.stringify(this.payoutForm)
+                                                });
+
+                                                const data = await response.json();
+
+                                                if (!response.ok) {
+                                                    throw new Error(data.message || 'Erreur lors de la demande de retrait');
+                                                }
+
+                                                this.showPayoutModal = false;
+                                                this.payoutForm = { amount: '', payment_method: '', phone_number: '', country_code: '', dial_code: '' };
+                                                this.selectedMethodCountries = [];
+                                                await this.loadBalance();
+                                                location.reload(); // Recharger pour afficher l'historique
+                                            } catch (e) {
+                                                this.error = e.message;
+                                            } finally {
+                                                this.loading = false;
+                                            }
                                         }
-                                    }
-                                }" x-init="loadBalance(); loadPayoutMethods()"
+                                    }" x-init="loadBalance(); loadPayoutMethods()"
                 class="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
@@ -171,7 +191,8 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Méthode de paiement</label>
-                                <select x-model="payoutForm.payment_method" required
+                                <select @change="selectPaymentMethod($event.target.value)"
+                                    x-model="payoutForm.payment_method" required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 bg-white">
                                     <option value="" class="text-gray-500">Sélectionnez une méthode</option>
                                     <template x-for="method in payoutMethods" :key="method.short_code">
@@ -181,12 +202,30 @@
                                 </select>
                             </div>
 
+                            <div x-show="selectedMethodCountries.length > 0">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pays</label>
+                                <select x-model="payoutForm.country_code"
+                                    @change="selectCountry(selectedMethodCountries.find(c => c.code === $event.target.value))"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 bg-white">
+                                    <template x-for="country in selectedMethodCountries" :key="country.code">
+                                        <option :value="country.code" x-text="country.name" class="text-gray-900"></option>
+                                    </template>
+                                </select>
+                            </div>
+
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Numéro de téléphone</label>
-                                <input type="tel" x-model="payoutForm.phone_number" required pattern="[0-9]{8,15}"
-                                    placeholder="Ex: 66000001"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 bg-white">
-                                <p class="text-xs text-gray-500 mt-1">8 à 15 chiffres</p>
+                                <div class="flex rounded-lg shadow-sm">
+                                    <span
+                                        class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm font-medium"
+                                        x-show="payoutForm.dial_code" x-text="payoutForm.dial_code">
+                                    </span>
+                                    <input type="tel" x-model="payoutForm.phone_number" required pattern="[0-9]{8,15}"
+                                        placeholder="Ex: 66000001"
+                                        :class="{'rounded-l-none': payoutForm.dial_code, 'rounded-lg': !payoutForm.dial_code}"
+                                        class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 bg-white">
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Ex: 66000001 (Sans l'indicatif)</p>
                             </div>
 
                             <div x-show="error"
@@ -279,22 +318,22 @@
 
             <!-- Historique des Retraits -->
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden" x-data="{
-                                     payoutRequests: [],
-                                     async loadPayouts() {
-                                         try {
-                                             const response = await fetch('/api/mentor/payout-requests', {
-                                                 headers: {
-                                                     'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                     'Accept': 'application/json'
-                                                 }
-                                             });
-                                             const data = await response.json();
-                                             this.payoutRequests = data.payouts || [];
-                                         } catch (e) {
-                                             console.error('Error loading payouts:', e);
+                                         payoutRequests: [],
+                                         async loadPayouts() {
+                                             try {
+                                                 const response = await fetch('/api/mentor/payout-requests', {
+                                                     headers: {
+                                                         'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                         'Accept': 'application/json'
+                                                     }
+                                                 });
+                                                 const data = await response.json();
+                                                 this.payoutRequests = data.payouts || [];
+                                             } catch (e) {
+                                                 console.error('Error loading payouts:', e);
+                                             }
                                          }
-                                     }
-                                 }" x-init="loadPayouts()">
+                                     }" x-init="loadPayouts()">
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <h3 class="text-lg font-bold text-gray-900">Historique des Retraits</h3>
                     <span
