@@ -275,13 +275,14 @@ class MonerooService
 
             $payload = [
                 'amount' => (int) $amount,
-                'currency' => $this->currency, // Ajout de la devise requis
+                'currency' => $this->currency,
                 'description' => 'Retrait de credits Brillio',
                 'customer' => [
                     'email' => $email,
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'phone' => $formattedPhone,
+                    'country' => 'BJ', // ISO 3166-1 alpha-2 pour le Bénin (requis pour éviter l'erreur commonName)
                 ],
                 'method' => $method,
                 'recipient' => [
