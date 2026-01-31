@@ -40,105 +40,128 @@
         <div x-show="activeTab === 'earnings'" class="space-y-6">
             <!-- Stats Revenus avec Payout -->
             <div x-data="{ 
-                                        showPayoutModal: false,
-                                        payoutMethods: [],
-                                        payoutForm: {
-                                            amount: '',
-                                            payment_method: '',
-                                            phone_number: '',
-                                            country_code: '',
-                                            dial_code: ''
-                                        },
-                                        selectedMethodCountries: [],
+                                                showPayoutModal: false,
+                                                payoutMethods: [],
+                                                payoutForm: {
+                                                    amount: '',
+                                                    payment_method: '',
+                                                    phone_number: '',
+                                                    country_code: '',
+                                                    dial_code: ''
+                                                },
+                                                selectedMethodCountries: [],
 
-                                        selectPaymentMethod(methodCode) {
-                                            this.payoutForm.payment_method = methodCode;
-                                            const method = this.payoutMethods.find(m => m.short_code === methodCode);
-                                            if (method && method.countries && method.countries.length > 0) {
-                                                this.selectedMethodCountries = method.countries;
-                                                this.selectCountry(method.countries[0]);
-                                            } else {
-                                                this.selectedMethodCountries = [];
-                                                this.payoutForm.country_code = '';
-                                                this.payoutForm.dial_code = '';
-                                            }
-                                        },
-
-                                        selectCountry(country) {
-                                            this.payoutForm.country_code = country.code;
-                                            this.payoutForm.dial_code = country.dial_code;
-                                        },
-                                        availableBalance: 0,
-                                        totalWithdrawn: 0,
-                                        loading: false,
-                                        error: '',
-
-                                        async loadBalance() {
-                                            try {
-                                                const response = await fetch('/api/mentor/balance', {
-                                                    headers: {
-                                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                        'Accept': 'application/json'
+                                                selectPaymentMethod(methodCode) {
+                                                    this.payoutForm.payment_method = methodCode;
+                                                    const method = this.payoutMethods.find(m => m.short_code === methodCode);
+                                                    if (method && method.countries && method.countries.length > 0) {
+                                                        this.selectedMethodCountries = method.countries;
+                                                        this.selectCountry(method.countries[0]);
+                                                    } else {
+                                                        this.selectedMethodCountries = [];
+                                                        this.payoutForm.country_code = '';
+                                                        this.payoutForm.dial_code = '';
                                                     }
-                                                });
-                                                const data = await response.json();
-                                                this.availableBalance = data.available_balance || 0;
-                                                this.totalWithdrawn = data.total_withdrawn || 0;
-                                            } catch (e) {
-                                                console.error('Error loading balance:', e);
-                                            }
-                                        },
+                                                },
 
-                                        async loadPayoutMethods() {
-                                            try {
-                                                const response = await fetch('/api/mentor/payout-methods', {
-                                                    headers: {
-                                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                        'Accept': 'application/json'
+                                                selectCountry(country) {
+                                                    this.payoutForm.country_code = country.code;
+                                                    this.payoutForm.dial_code = country.dial_code;
+                                                },
+                                                availableBalance: 0,
+                                                totalWithdrawn: 0,
+                                                loading: false,
+                                                error: '',
+
+                                                async loadBalance() {
+                                                    try {
+                                                        const response = await fetch('/api/mentor/balance', {
+                                                            headers: {
+                                                                'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                                'Accept': 'application/json'
+                                                            }
+                                                        });
+                                                        const data = await response.json();
+                                                        this.availableBalance = data.available_balance || 0;
+                                                        this.totalWithdrawn = data.total_withdrawn || 0;
+                                                    } catch (e) {
+                                                        console.error('Error loading balance:', e);
                                                     }
-                                                });
-                                                const data = await response.json();
-                                                this.payoutMethods = data.methods?.data || [];
-                                            } catch (e) {
-                                                console.error('Error loading payout methods:', e);
-                                            }
-                                        },
+                                                },
 
-                                        async requestPayout() {
-                                            this.loading = true;
-                                            this.error = '';
+                                                async loadPayoutMethods() {
+                                                    try {
+                                                        const response = await fetch('/api/mentor/payout-methods', {
+                                                            headers: {
+                                                                'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                                'Accept': 'application/json'
+                                                            }
+                                                        });
+                                                        const data = await response.json();
+                                                        this.payoutMethods = data.methods?.data || [];
+                                                    } catch (e) {
+                                                        console.error('Error loading payout methods:', e);
+                                                    }
+                                                },
 
-                                            try {
-                                                const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
-                                                const response = await fetch('/api/mentor/payout/request', {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                        'Content-Type': 'application/json',
-                                                        'Accept': 'application/json',
-                                                        'X-CSRF-TOKEN': csrfToken
-                                                    },
-                                                    body: JSON.stringify(this.payoutForm)
-                                                });
+                                                async requestPayout() {
+                                                    this.loading = true;
+                                                    this.error = '';
 
-                                                const data = await response.json();
+                                                    try {
+                                                        const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
+                                                        const response = await fetch('/api/mentor/payout/request', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                                'Content-Type': 'application/json',
+                                                                'Accept': 'application/json',
+                                                                'X-CSRF-TOKEN': csrfToken
+                                                            },
+                                                            body: JSON.stringify(this.payoutForm)
+                                                        });
 
-                                                if (!response.ok) {
-                                                    throw new Error(data.message || 'Erreur lors de la demande de retrait');
+                                                        const data = await response.json();
+
+                                                        if (!response.ok) {
+                                                            throw new Error(data.message || 'Erreur lors de la demande de retrait');
+                                                        }
+
+                                                        this.showPayoutModal = false;
+                                                        this.payoutForm = { amount: '', payment_method: '', phone_number: '', country_code: '', dial_code: '' };
+                                                        this.selectedMethodCountries = [];
+                                                        await this.loadBalance();
+                                                        await this.loadPayoutRequests();
+                                                    } catch (e) {
+                                                        this.error = e.message;
+                                                    } finally {
+                                                        this.loading = false;
+                                                    }
+                                                },
+
+                                                payoutRequests: [],
+
+                                                async loadPayoutRequests() {
+                                                    try {
+                                                        const response = await fetch('/api/mentor/payout-requests', {
+                                                            headers: {
+                                                                'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                                'Accept': 'application/json'
+                                                            }
+                                                        });
+                                                        const data = await response.json();
+                                                        this.payoutRequests = data.payouts || []; 
+                                                    } catch (e) {
+                                                        console.error('Error loading payout requests:', e);
+                                                    }
+                                                },
+
+                                                getMethodLabel(code) {
+                                                    if (!code) return '-';
+                                                    const method = this.payoutMethods.find(m => m.short_code === code);
+                                                    return method ? method.name : code;
                                                 }
-
-                                                this.showPayoutModal = false;
-                                                this.payoutForm = { amount: '', payment_method: '', phone_number: '', country_code: '', dial_code: '' };
-                                                this.selectedMethodCountries = [];
-                                                await this.loadBalance();
-                                                location.reload(); // Recharger pour afficher l'historique
-                                            } catch (e) {
-                                                this.error = e.message;
-                                            } finally {
-                                                this.loading = false;
-                                            }
-                                        }
-                                    }" x-init="loadBalance(); loadPayoutMethods()"
+                                            }" x-init="loadBalance(); loadPayoutMethods(); loadPayoutRequests()"
                 class="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
@@ -246,156 +269,160 @@
                         </form>
                     </div>
                 </div>
-            </div>
 
-            <!-- Historique des Ventes -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <h3 class="text-lg font-bold text-gray-900">Historique des Ventes</h3>
-                    <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Ressources &
-                        Services</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-gray-600">
-                        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                            <tr>
-                                <th class="px-6 py-3 font-semibold">Date</th>
-                                <th class="px-6 py-3 font-semibold">Description</th>
-                                <th class="px-6 py-3 font-semibold">Acheteur / Détail</th>
-                                <th class="px-6 py-3 font-semibold text-right">Montant</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @forelse($incomeTransactions as $transaction)
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                                        {{ $transaction->created_at->format('d/m/Y H:i') }}
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-900 font-medium">{{ $transaction->description }}</td>
-                                    <td class="px-6 py-4">
-                                        @if($transaction->related && $transaction->related instanceof \App\Models\Purchase)
-                                            <div class="flex items-center gap-2">
-                                                <div
-                                                    class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600">
-                                                    {{ substr($transaction->related->user->name ?? '?', 0, 1) }}
+
+                <!-- Historique des Ventes -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 class="text-lg font-bold text-gray-900">Historique des Ventes</h3>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Ressources
+                            &
+                            Services</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold">Date</th>
+                                    <th class="px-6 py-3 font-semibold">Description</th>
+                                    <th class="px-6 py-3 font-semibold">Acheteur / Détail</th>
+                                    <th class="px-6 py-3 font-semibold text-right">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse($incomeTransactions as $transaction)
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                                            {{ $transaction->created_at->format('d/m/Y H:i') }}
+                                        </td>
+                                        <td class="px-6 py-4 text-gray-900 font-medium">{{ $transaction->description }}</td>
+                                        <td class="px-6 py-4">
+                                            @if($transaction->related && $transaction->related instanceof \App\Models\Purchase)
+                                                <div class="flex items-center gap-2">
+                                                    <div
+                                                        class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600">
+                                                        {{ substr($transaction->related->user->name ?? '?', 0, 1) }}
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span
+                                                            class="font-medium text-gray-900">{{ $transaction->related->user->name ?? 'Utilisateur Inconnu' }}</span>
+                                                        <span class="text-xs text-gray-500">Acheté le
+                                                            {{ $transaction->related->created_at->format('d/m/Y') }}</span>
+                                                    </div>
                                                 </div>
-                                                <div class="flex flex-col">
-                                                    <span
-                                                        class="font-medium text-gray-900">{{ $transaction->related->user->name ?? 'Utilisateur Inconnu' }}</span>
-                                                    <span class="text-xs text-gray-500">Acheté le
-                                                        {{ $transaction->related->created_at->format('d/m/Y') }}</span>
-                                                </div>
+                                            @else
+                                                <span class="text-gray-400 italic">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 text-right font-bold text-green-600">+{{ $transaction->amount }}
+                                            Cr.
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-8 text-center text-gray-500 italic">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                <p>Aucune vente enregistrée pour le moment.</p>
                                             </div>
-                                        @else
-                                            <span class="text-gray-400 italic">-</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 text-right font-bold text-green-600">+{{ $transaction->amount }} Cr.
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-8 text-center text-gray-500 italic">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            <p>Aucune vente enregistrée pour le moment.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="p-4 bg-gray-50 border-t border-gray-100">
+                        {{ $incomeTransactions->appends(['wallet_page' => request()->wallet_page, 'active_tab' => 'earnings'])->links() }}
+                    </div>
                 </div>
-                <!-- Pagination -->
-                <div class="p-4 bg-gray-50 border-t border-gray-100">
-                    {{ $incomeTransactions->appends(['wallet_page' => request()->wallet_page, 'active_tab' => 'earnings'])->links() }}
-                </div>
-            </div>
 
-            <!-- Historique des Retraits -->
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden" x-data="{
-                                         payoutRequests: [],
-                                         async loadPayouts() {
-                                             try {
-                                                 const response = await fetch('/api/mentor/payout-requests', {
-                                                     headers: {
-                                                         'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                         'Accept': 'application/json'
+                <!-- Historique des Retraits -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden" x-data="{
+                                                 payoutRequests: [],
+                                                 async loadPayouts() {
+                                                     try {
+                                                         const response = await fetch('/api/mentor/payout-requests', {
+                                                             headers: {
+                                                                 'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                                 'Accept': 'application/json'
+                                                             }
+                                                         });
+                                                         const data = await response.json();
+                                                         this.payoutRequests = data.payouts || [];
+                                                     } catch (e) {
+                                                         console.error('Error loading payouts:', e);
                                                      }
-                                                 });
-                                                 const data = await response.json();
-                                                 this.payoutRequests = data.payouts || [];
-                                             } catch (e) {
-                                                 console.error('Error loading payouts:', e);
-                                             }
-                                         }
-                                     }" x-init="loadPayouts()">
-                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <h3 class="text-lg font-bold text-gray-900">Historique des Retraits</h3>
-                    <span
-                        class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Payouts</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-gray-600">
-                        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-                            <tr>
-                                <th class="px-6 py-3 font-semibold">Date</th>
-                                <th class="px-6 py-3 font-semibold">Montant</th>
-                                <th class="px-6 py-3 font-semibold">Frais</th>
-                                <th class="px-6 py-3 font-semibold">Net</th>
-                                <th class="px-6 py-3 font-semibold">Méthode</th>
-                                <th class="px-6 py-3 font-semibold">Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <template x-if="payoutRequests.length === 0">
+                                                 }
+                                             }" x-init="loadPayouts()">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 class="text-lg font-bold text-gray-900">Historique des Retraits</h3>
+                        <span
+                            class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Payouts</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                                 <tr>
-                                    <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-                                                </path>
-                                            </svg>
-                                            <p>Aucun retrait effectué pour le moment.</p>
-                                        </div>
-                                    </td>
+                                    <th class="px-6 py-3 font-semibold">Date</th>
+                                    <th class="px-6 py-3 font-semibold">Montant</th>
+                                    <th class="px-6 py-3 font-semibold">Frais</th>
+                                    <th class="px-6 py-3 font-semibold">Net</th>
+                                    <th class="px-6 py-3 font-semibold">Méthode</th>
+                                    <th class="px-6 py-3 font-semibold">Statut</th>
                                 </tr>
-                            </template>
-                            <template x-for="payout in payoutRequests" :key="payout.id">
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900"
-                                        x-text="new Date(payout.created_at).toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})">
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900"
-                                        x-text="new Intl.NumberFormat('fr-FR').format(payout.amount) + ' FCFA'"></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-600"
-                                        x-text="new Intl.NumberFormat('fr-FR').format(payout.fee) + ' FCFA'"></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-semibold"
-                                        x-text="new Intl.NumberFormat('fr-FR').format(payout.net_amount) + ' FCFA'"></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-600 uppercase"
-                                        x-text="payout.payment_method"></td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span x-show="payout.status === 'pending'"
-                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">En
-                                            attente</span>
-                                        <span x-show="payout.status === 'processing'"
-                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">En
-                                            cours</span>
-                                        <span x-show="payout.status === 'completed'"
-                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Complété</span>
-                                        <span x-show="payout.status === 'failed'"
-                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Échoué</span>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <template x-if="payoutRequests.length === 0">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                                    </path>
+                                                </svg>
+                                                <p>Aucun retrait effectué pour le moment.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template x-for="payout in payoutRequests" :key="payout.id">
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-900"
+                                            x-text="new Date(payout.created_at).toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-900"
+                                            x-text="new Intl.NumberFormat('fr-FR').format(payout.amount) + ' FCFA'"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-600"
+                                            x-text="new Intl.NumberFormat('fr-FR').format(payout.fee) + ' FCFA'"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-semibold"
+                                            x-text="new Intl.NumberFormat('fr-FR').format(payout.net_amount) + ' FCFA'">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-600 uppercase"
+                                            x-text="getMethodLabel(payout.payment_method)"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span x-show="payout.status === 'pending'"
+                                                class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">En
+                                                attente</span>
+                                            <span x-show="payout.status === 'processing'"
+                                                class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">En
+                                                cours</span>
+                                            <span x-show="payout.status === 'completed'"
+                                                class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Complété</span>
+                                            <span x-show="payout.status === 'failed'"
+                                                class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Échoué</span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
