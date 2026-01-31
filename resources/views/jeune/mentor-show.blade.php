@@ -167,6 +167,59 @@
                                 Voir sur LinkedIn
                             </a>
                         @endif
+
+                        @if(isset($existingMentorship) && in_array($existingMentorship->status, ['pending', 'accepted']))
+                            @if($existingMentorship->status === 'pending')
+                                <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-100 text-center">
+                                    <span class="inline-flex items-center gap-2 text-yellow-700 font-medium">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Demande en attente
+                                    </span>
+                                    <p class="text-xs text-yellow-600 mt-1">Le mentor examinera votre demande bientôt.</p>
+                                </div>
+                            @elseif($existingMentorship->status === 'accepted')
+                                <div class="p-4 bg-green-50 rounded-xl border border-green-100 text-center mb-2">
+                                    <span class="inline-flex items-center gap-2 text-green-700 font-medium">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Mentor Actif
+                                    </span>
+                                </div>
+                            @endif
+                        @else
+                            <form action="{{ route('jeune.mentorship.request') }}" method="POST"
+                                x-data="{ showMessage: false }">
+                                @csrf
+                                <input type="hidden" name="mentor_id" value="{{ $mentor->user_id }}">
+
+                                <div x-show="showMessage" class="mb-3" x-transition>
+                                    <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message
+                                        (optionnel)</label>
+                                    <textarea name="message" id="message" rows="3"
+                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                        placeholder="Bonjour, j'aimerais être mentoré par vous car..."></textarea>
+                                </div>
+
+                                <button type="button" @click="showMessage = !showMessage" x-show="!showMessage"
+                                    class="w-full mb-2 text-sm text-indigo-600 hover:text-indigo-800 underline text-center">
+                                    Ajouter un message
+                                </button>
+
+                                <button type="submit"
+                                    class="flex items-center justify-center gap-2 w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                    Demander un mentorat
+                                </button>
+                            </form>
+                        @endif
                         @php
                             // Construire le message pre-rempli
                             $mentorName = $mentor->user->name ?? 'ce mentor';
@@ -270,7 +323,8 @@
                             <div>
                                 <p class="text-sm text-gray-500">Etapes du parcours</p>
                                 <p class="font-medium text-gray-900">
-                                    {{ $mentor->roadmapSteps ? $mentor->roadmapSteps->count() : 0 }}</p>
+                                    {{ $mentor->roadmapSteps ? $mentor->roadmapSteps->count() : 0 }}
+                                </p>
                             </div>
                         </div>
                     </div>

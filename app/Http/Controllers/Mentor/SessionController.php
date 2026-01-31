@@ -127,14 +127,14 @@ class SessionController extends Controller
             'duration_minutes' => $request->duration_minutes,
             'is_paid' => $request->boolean('is_paid'),
             'price' => $request->boolean('is_paid') ? $request->price : 0,
-            'status' => 'proposed', // En attente d'acceptation/paiement du jeune
+            'status' => 'confirmed', // Séance créée par le mentor est automatiquement confirmée
             'meeting_link' => $meetingLink,
             'created_by' => 'mentor',
         ]);
 
         // Attacher les participants (mentees)
         foreach ($request->mentee_ids as $menteeId) {
-            $session->mentees()->attach($menteeId, ['status' => 'pending']);
+            $session->mentees()->attach($menteeId, ['status' => 'accepted']);
         }
 
         return redirect()->route('mentor.mentorship.sessions.show', $session)
@@ -206,5 +206,43 @@ class SessionController extends Controller
 
         return redirect()->route('mentor.mentorship.calendar')
             ->with('success', 'Séance annulée.');
+    }
+    /**
+     * Accepter une demande de séance
+     */
+    public function accept(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Génération lien Jitsi
+        $mentor = Auth::user();
+        $roomName = 'Brillio_' . $mentor->id . '_' . Str::random(10) . '_' . time();
+        $meetingLink = 'https://meet.jit.si/' . $roomName;
+
+        $session->update([
+            'status' => 'confirmed',
+            'meeting_link' => $meetingLink,
+        ]);
+
+        return redirect()->back()->with('success', 'Séance acceptée et planifiée.');
+    }
+
+    /**
+     * Refuser une demande de séance
+     */
+    public function refuse(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $session->update([
+            'status' => 'cancelled',
+            'cancel_reason' => 'Refusée par le mentor', // Ou demander une raison spécifique via formulaire
+        ]);
+
+        return redirect()->back()->with('success', 'Demande de séance refusée.');
     }
 }

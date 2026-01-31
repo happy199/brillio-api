@@ -3,7 +3,7 @@
 @section('title', 'Mes Mentés')
 
 @section('content')
-<div class="container mx-auto px-4 py-8" x-data="{ activeTab: 'pending' }">
+<div class="container mx-auto px-4 py-8" x-data="{ activeTab: 'active' }">
     <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Gestion de mes mentorats</h1>
@@ -21,17 +21,6 @@
     <!-- Tabs -->
     <div class="flex border-b border-gray-200 mb-6 overflow-x-auto">
         <button 
-            @click="activeTab = 'pending'" 
-            :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'pending', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'pending' }"
-            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors flex items-center gap-2"
-        >
-            Demandes en attente
-            @if($pendingRequests->count() > 0)
-                <span class="bg-indigo-100 text-indigo-600 py-0.5 px-2.5 rounded-full text-xs font-bold">{{ $pendingRequests->count() }}</span>
-            @endif
-        </button>
-
-        <button 
             @click="activeTab = 'active'" 
             :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'active', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'active' }"
             class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors flex items-center gap-2"
@@ -39,6 +28,17 @@
             Mentés actifs
             @if($activeMentees->count() > 0)
                 <span class="bg-green-100 text-green-600 py-0.5 px-2.5 rounded-full text-xs font-bold">{{ $activeMentees->count() }}</span>
+            @endif
+        </button>
+
+        <button 
+            @click="activeTab = 'pending'" 
+            :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'pending', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'pending' }"
+            class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors flex items-center gap-2"
+        >
+            Demandes en attente
+            @if($pendingRequests->count() > 0)
+                <span class="bg-indigo-100 text-indigo-600 py-0.5 px-2.5 rounded-full text-xs font-bold">{{ $pendingRequests->count() }}</span>
             @endif
         </button>
 
@@ -53,72 +53,8 @@
 
     <!-- Tab Contents -->
     
-    <!-- PENDING REQUESTS -->
-    <div x-show="activeTab === 'pending'" x-transition.opacity>
-        @if($pendingRequests->isEmpty())
-            <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-gray-400">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900">Aucune demande en attente</h3>
-                <p class="text-gray-500 mt-1">Vous n'avez pas de nouvelles demandes de mentorat pour le moment.</p>
-            </div>
-        @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($pendingRequests as $mentorship)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <div class="flex items-center gap-4 mb-4">
-                            <img src="{{ $mentorship->mentee->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($mentorship->mentee->name) }}" alt="{{ $mentorship->mentee->name }}" class="w-12 h-12 rounded-full object-cover bg-gray-100">
-                            <div>
-                                <h3 class="font-bold text-gray-900">{{ $mentorship->mentee->name }}</h3>
-                                <p class="text-sm text-gray-500">Demande envoyée le {{ $mentorship->created_at->format('d/m/Y') }}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-gray-50 rounded-lg p-4 mb-6 text-sm text-gray-600 italic">
-                            "{{ Str::limit($mentorship->request_message, 150) }}"
-                        </div>
-
-                        <div class="flex gap-3">
-                            <form action="{{ route('mentor.mentorship.accept', $mentorship) }}" method="POST" class="flex-1">
-                                @csrf
-                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition">
-                                    Accepter
-                                </button>
-                            </form>
-                            
-                            <button 
-                                onclick="document.getElementById('refuse-modal-{{ $mentorship->id }}').showModal()"
-                                class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition">
-                                Refuser
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- REFUSE MODAL -->
-                    <dialog id="refuse-modal-{{ $mentorship->id }}" class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50">
-                        <div class="p-6">
-                            <h3 class="font-bold text-lg mb-4 text-gray-900">Refuser la demande ?</h3>
-                            <p class="text-gray-600 mb-4 text-sm">Veuillez expliquer pourquoi vous ne pouvez pas accepter cette demande. Ce message sera envoyé à {{ $mentorship->mentee->name }}.</p>
-                            
-                            <form action="{{ route('mentor.mentorship.refuse', $mentorship) }}" method="POST">
-                                @csrf
-                                <textarea name="refusal_reason" rows="4" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mb-4 text-sm" placeholder="Raison du refus..." required></textarea>
-                                
-                                <div class="flex justify-end gap-3">
-                                    <button type="button" onclick="document.getElementById('refuse-modal-{{ $mentorship->id }}').close()" class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2">Annuler</button>
-                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Confirmer le refus</button>
-                                </div>
-                            </form>
-                        </div>
-                    </dialog>
-                @endforeach
-            </div>
-        @endif
-    </div>
-
-    <!-- ACTIVE MENTEES -->
-    <div x-show="activeTab === 'active'" x-cloak>
+    <!-- ACTIVE MENTEES (Moved first in code too for clarity, though x-show handles display) -->
+    <div x-show="activeTab === 'active'" x-transition.opacity>
         @if($activeMentees->isEmpty())
              <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
                 <div class="bg-indigo-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-indigo-400">
@@ -175,6 +111,78 @@
             </div>
         @endif
     </div>
+
+    <!-- PENDING REQUESTS -->
+    <div x-show="activeTab === 'pending'" x-cloak>
+        @if($pendingRequests->isEmpty())
+            <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-gray-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">Aucune demande en attente</h3>
+                <p class="text-gray-500 mt-1">Vous n'avez pas de nouvelles demandes de mentorat pour le moment.</p>
+            </div>
+        @else
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($pendingRequests as $mentorship)
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <img src="{{ $mentorship->mentee->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($mentorship->mentee->name) }}" alt="{{ $mentorship->mentee->name }}" class="w-12 h-12 rounded-full object-cover bg-gray-100">
+                            <div>
+                                <h3 class="font-bold text-gray-900">{{ $mentorship->mentee->name }}</h3>
+                                <p class="text-sm text-gray-500">Demande envoyée le {{ $mentorship->created_at->format('d/m/Y') }}</p>
+                            </div>
+                        </div>
+                        
+                        @if($mentorship->request_message)
+                            <div class="bg-gray-50 rounded-lg p-4 mb-6 text-sm text-gray-600 italic">
+                                "{{ Str::limit($mentorship->request_message, 150) }}"
+                            </div>
+                        @else
+                            <div class="bg-gray-50 rounded-lg p-4 mb-6 text-sm text-gray-400 italic">
+                                Aucun message
+                            </div>
+                        @endif
+
+                        <div class="flex gap-3">
+                            <form action="{{ route('mentor.mentorship.accept', $mentorship) }}" method="POST" class="flex-1">
+                                @csrf
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition">
+                                    Accepter
+                                </button>
+                            </form>
+                            
+                            <button 
+                                onclick="document.getElementById('refuse-modal-{{ $mentorship->id }}').showModal()"
+                                class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition">
+                                Refuser
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- REFUSE MODAL -->
+                    <dialog id="refuse-modal-{{ $mentorship->id }}" class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50">
+                        <div class="p-6">
+                            <h3 class="font-bold text-lg mb-4 text-gray-900">Refuser la demande ?</h3>
+                            <p class="text-gray-600 mb-4 text-sm">Veuillez expliquer pourquoi vous ne pouvez pas accepter cette demande. Ce message sera envoyé à {{ $mentorship->mentee->name }}.</p>
+                            
+                            <form action="{{ route('mentor.mentorship.refuse', $mentorship) }}" method="POST">
+                                @csrf
+                                <textarea name="refusal_reason" rows="4" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 mb-4 text-sm" placeholder="Raison du refus..." required></textarea>
+                                
+                                <div class="flex justify-end gap-3">
+                                    <button type="button" onclick="document.getElementById('refuse-modal-{{ $mentorship->id }}').close()" class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2">Annuler</button>
+                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Confirmer le refus</button>
+                                </div>
+                            </form>
+                        </div>
+                    </dialog>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
+
 
     <!-- HISTORY -->
     <div x-show="activeTab === 'history'" x-cloak>

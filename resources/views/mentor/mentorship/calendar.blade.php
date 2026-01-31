@@ -88,7 +88,7 @@
                                      <div class="mt-1 flex flex-col gap-1 overflow-y-auto max-h-[60px]">
                                         <!-- Sessions -->
                                         <template x-for="session in getSessionsForDate(date)">
-                                             <a :href="'/mentor/mentorship/sessions/' + session.id"
+                                             <a :href="'/espace-mentor/sessions/' + session.id"
                                                 class="text-[10px] truncate px-1.5 py-0.5 rounded border block w-full"
                                                 :class="session.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-100 text-blue-700 border-blue-200'">
                                                 <span x-text="session.time + ' ' + session.title"></span>
@@ -142,7 +142,7 @@
                                         
                                         <!-- Sessions Overlay -->
                                         <template x-for="session in getSessionsForFullDate(day.date)">
-                                            <a :href="'/mentor/mentorship/sessions/' + session.id"
+                                            <a :href="'/espace-mentor/sessions/' + session.id"
                                                 class="absolute w-[90%] left-[5%] text-[10px] p-1 rounded border z-10 overflow-hidden hover:z-20 shadow-sm transition"
                                                 :class="session.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-100 text-blue-700 border-blue-200'"
                                                 :style="getStyleForSlot(session.time, session.endTime)">
@@ -182,7 +182,7 @@
 
                                 <!-- Sessions -->
                                 <template x-for="session in getSessionsForFullDate(currentDate)">
-                                    <a :href="'/mentor/mentorship/sessions/' + session.id"
+                                    <a :href="'/espace-mentor/sessions/' + session.id"
                                         class="absolute left-10 right-10 p-2 rounded border pointer-events-auto shadow hover:shadow-md transition"
                                         :class="session.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-blue-100 text-blue-700 border-blue-200'"
                                         :style="getStyleForDayView(session.time, session.endTime)">
@@ -203,11 +203,59 @@
                 <!-- Upcoming Sessions List -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h3 class="font-bold text-gray-900 mb-4">Prochaines Séances</h3>
-                    @if($upcomingSessions->isEmpty())
+                    
+                    @php
+                        $pendingRequests = $upcomingSessions->where('status', 'proposed');
+                        $confirmedSessions = $upcomingSessions->whereIn('status', ['confirmed', 'accepted']);
+                    @endphp
+
+                    @if($pendingRequests->isNotEmpty())
+                        <div class="mb-6">
+                            <h4 class="text-xs font-bold text-yellow-600 uppercase tracking-wide mb-3">Demandes en attente</h4>
+                            <div class="space-y-3">
+                                @foreach($pendingRequests as $session)
+                                    <div class="flex items-center gap-4 p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                                        <div class="bg-white text-yellow-600 rounded-lg p-2.5 flex flex-col items-center min-w-[60px] shadow-sm">
+                                            <span class="text-xs font-bold uppercase">{{ $session->scheduled_at->format('M') }}</span>
+                                            <span class="text-xl font-bold">{{ $session->scheduled_at->format('d') }}</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex justify-between items-start">
+                                                <h4 class="font-bold text-gray-900">{{ $session->title }}</h4>
+                                                <span class="px-2 py-0.5 text-[10px] font-bold bg-yellow-200 text-yellow-800 rounded-full">DEMANDE</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600">{{ $session->scheduled_at->format('H:i') }} - {{ $session->scheduled_at->addMinutes($session->duration_minutes)->format('H:i') }}</p>
+                                            <p class="text-xs text-gray-500 mt-1">Avec {{ $session->mentees->pluck('name')->join(', ') }}</p>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <form action="{{ route('mentor.mentorship.sessions.accept', $session) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="text-green-600 hover:text-green-800 p-2 hover:bg-green-100 rounded-full transition" title="Accepter">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('mentor.mentorship.sessions.refuse', $session) }}" method="POST" onsubmit="return confirm('Refuser cette demande ?');">
+                                                @csrf
+                                                <button type="submit" class="text-red-600 hover:text-red-800 p-2 hover:bg-red-100 rounded-full transition" title="Refuser">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                </button>
+                                            </form>
+                                            <a href="{{ route('mentor.mentorship.sessions.show', $session) }}" class="text-yellow-600 hover:text-yellow-800 p-2 hover:bg-yellow-100 rounded-full transition" title="Voir détails">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($confirmedSessions->isEmpty() && $pendingRequests->isEmpty())
                         <p class="text-gray-500 text-sm">Aucune séance prévue prochainement.</p>
-                    @else
+                    @elseif($confirmedSessions->isNotEmpty())
+                         <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-3">Séances confirmées</h4>
                         <div class="space-y-3">
-                            @foreach($upcomingSessions as $session)
+                            @foreach($confirmedSessions as $session)
                                 <div
                                     class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition border border-transparent hover:border-gray-100">
                                     <div
