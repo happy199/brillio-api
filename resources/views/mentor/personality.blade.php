@@ -93,16 +93,16 @@
                     <h2 class="text-xl font-bold text-gray-900 mb-6">Métiers recommandés pour ton profil</h2>
                     <div class="grid md:grid-cols-2 gap-4">
                         @foreach($personalityTest->recommended_careers as $career)
-                            <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-300 hover:shadow-md transition">
+                            <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-indigo-300 hover:shadow-md transition">
                                 <h3 class="font-bold text-gray-900 mb-2">{{ $career['title'] }}</h3>
                                 <p class="text-sm text-gray-600 mb-3">{{ $career['description'] }}</p>
                                 <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                                    <svg class="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <p class="text-xs text-primary-600">{{ $career['match_reason'] }}</p>
+                                    <p class="text-xs text-indigo-600">{{ $career['match_reason'] }}</p>
                                 </div>
                             </div>
                         @endforeach
@@ -112,7 +112,7 @@
 
             <div class="flex flex-col sm:flex-row gap-4">
                 <a href="{{ route('mentor.explore') }}"
-                    class="flex-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition">Voir
+                    class="flex-1 bg-gradient-to-r from-indigo-500 to-pink-500 text-white text-center py-4 rounded-xl font-semibold hover:shadow-lg transition">Voir
                     les talents compatibles</a>
             </div>
 
@@ -143,7 +143,7 @@
                     <p class="text-sm text-gray-600 mb-4">Voici l'évolution de votre personnalité au fil du temps</p>
                     <div class="space-y-3">
                         @foreach($testHistory as $test)
-                            <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-200 transition">
+                            <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-indigo-200 transition">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-4">
                                         <div
@@ -156,7 +156,7 @@
                                         </div>
                                     </div>
                                     <button @click="viewHistoryTest({{ $test->id }})"
-                                        class="px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition">
+                                        class="px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition">
                                         Voir détails
                                     </button>
                                 </div>
@@ -168,7 +168,7 @@
 
             <div class="text-center">
                 <button @click="retakeTest()"
-                    class="px-8 py-3 bg-white border-2 border-primary-500 text-primary-600 font-semibold rounded-xl hover:bg-primary-50 transition">
+                    class="px-8 py-3 bg-white border-2 border-indigo-500 text-indigo-600 font-semibold rounded-xl hover:bg-indigo-50 transition">
                     <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -177,7 +177,7 @@
                 </button>
             </div>
         @else
-            <div class="bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-3xl p-8 text-white text-center">
+            <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-8 text-white text-center">
                 <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -309,12 +309,12 @@
                                     <div class="flex flex-col items-center gap-2 sm:gap-3">
                                         <button @click="selectAnswer(option.value)"
                                             :class="answers[questions[currentQuestion]?.id] === option.value 
-                                                                        ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white' 
-                                                                            : option.value === 3 ? 'bg-gray-500 border-gray-600 text-white'
-                                                                            : 'bg-purple-500 border-purple-600 text-white')
-                                                                        : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50' 
-                                                                            : option.value === 3 ? 'border-gray-400 text-gray-400 hover:bg-gray-50'
-                                                                            : 'border-purple-500 text-purple-500 hover:bg-purple-50')"
+                                                                            ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white' 
+                                                                                : option.value === 3 ? 'bg-gray-500 border-gray-600 text-white'
+                                                                                : 'bg-purple-500 border-purple-600 text-white')
+                                                                            : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50' 
+                                                                                : option.value === 3 ? 'border-gray-400 text-gray-400 hover:bg-gray-50'
+                                                                                : 'border-purple-500 text-purple-500 hover:bg-purple-50')"
                                             class="w-12 h-12 sm:w-20 sm:h-20 border-2 rounded-lg font-bold text-xl sm:text-3xl transition-all duration-200 hover:scale-105 flex items-center justify-center">
                                             <span x-text="option.value"></span>
                                         </button>
@@ -411,11 +411,11 @@
                             <h5 class="font-bold text-gray-900 mb-4">Dimensions de personnalité</h5>
                             <div class="space-y-4">
                                 <template x-for="dim in [
-                                                                                        {left: 'E', right: 'I', leftName: 'Extraversion', rightName: 'Introversion'},
-                                                                                        {left: 'S', right: 'N', leftName: 'Sensation', rightName: 'Intuition'},
-                                                                                        {left: 'T', right: 'F', leftName: 'Pensée', rightName: 'Sentiment'},
-                                                                                        {left: 'J', right: 'P', leftName: 'Jugement', rightName: 'Perception'}
-                                                                                    ]" :key="dim.left">
+                                                                                            {left: 'E', right: 'I', leftName: 'Extraversion', rightName: 'Introversion'},
+                                                                                            {left: 'S', right: 'N', leftName: 'Sensation', rightName: 'Intuition'},
+                                                                                            {left: 'T', right: 'F', leftName: 'Pensée', rightName: 'Sentiment'},
+                                                                                            {left: 'J', right: 'P', leftName: 'Jugement', rightName: 'Perception'}
+                                                                                        ]" :key="dim.left">
                                     <div>
                                         <div class="flex justify-between mb-1 text-sm">
                                             <span class="text-gray-600"
@@ -436,8 +436,8 @@
                                             <template x-if="(historyTest?.traits_scores?.[dim.left] || 50) != 50">
                                                 <div class="absolute bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full"
                                                     :style="(historyTest?.traits_scores?.[dim.left] || 50) > 50 
-                                                                                            ? 'right: 50%; width: ' + Math.min((historyTest?.traits_scores?.[dim.left] || 50) - 50, 50) + '%; border-radius: 9999px 0 0 9999px;'
-                                                                                            : 'left: 50%; width: ' + Math.min(50 - (historyTest?.traits_scores?.[dim.left] || 50), 50) + '%; border-radius: 0 9999px 9999px 0;'">
+                                                                                                ? 'right: 50%; width: ' + Math.min((historyTest?.traits_scores?.[dim.left] || 50) - 50, 50) + '%; border-radius: 9999px 0 0 9999px;'
+                                                                                                : 'left: 50%; width: ' + Math.min(50 - (historyTest?.traits_scores?.[dim.left] || 50), 50) + '%; border-radius: 0 9999px 9999px 0;'">
                                                 </div>
                                             </template>
                                         </div>
