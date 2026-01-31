@@ -253,7 +253,7 @@ class MonerooService
      * @param string $method Méthode de paiement (ex: mtn_bj, moov_bj)
      * @return array
      */
-    public function createPayout(float $amount, string $phone, string $method, array $customer = []): array
+    public function createPayout(float $amount, string $phone, string $method, string $country, string $dialCode, array $customer = []): array
     {
         try {
             // Split name if accessible from authenticated user context, otherwise defaults
@@ -262,12 +262,14 @@ class MonerooService
             $lastName = $customer['last_name'] ?? ($user ? $this->splitName($user->name)['last_name'] : 'Name');
             $email = $customer['email'] ?? ($user ? $user->email : 'no-email@brillio.africa');
 
-            // Normaliser le numéro de téléphone
+            // Normaliser le numéro de téléphone (enlever tout sauf les chiffres)
             $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
 
-            // Si la méthode est béninoise et que le préfixe 229 manque, on l'ajoute
-            if (in_array($method, ['mtn_bj', 'moov_bj', 'celtis_bj']) && !str_starts_with($cleanPhone, '229')) {
-                $cleanPhone = '229' . $cleanPhone;
+            // Le dial_code est déjà fourni depuis le frontend (ex: "+229")
+            // On ajoute l'indicatif s'il n'est pas déjà présent
+            $dialCodeDigits = preg_replace('/[^0-9]/', '', $dialCode); // "229"
+            if (!str_starts_with($cleanPhone, $dialCodeDigits)) {
+                $cleanPhone = $dialCodeDigits . $cleanPhone;
             }
 
             // L'API veut un entier
@@ -282,7 +284,7 @@ class MonerooService
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'phone' => $formattedPhone,
-                    'country' => 'BJ', // ISO 3166-1 alpha-2 pour le Bénin (requis pour éviter l'erreur commonName)
+                    'country' => $country, // Code pays (ex: "BJ") - CRITIQUE pour éviter l'erreur commonName
                 ],
                 'method' => $method,
                 'recipient' => [

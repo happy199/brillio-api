@@ -49,7 +49,9 @@ class ProcessPayoutJob implements ShouldQueue
             $response = $monerooService->createPayout(
                 (float) $this->payoutRequest->net_amount,
                 $this->payoutRequest->phone_number,
-                $this->payoutRequest->payment_method
+                $this->payoutRequest->payment_method,
+                $this->payoutRequest->country_code,
+                $this->payoutRequest->dial_code
             );
 
             if ($response['success']) {

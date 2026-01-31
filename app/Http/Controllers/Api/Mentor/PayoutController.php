@@ -59,10 +59,18 @@ class PayoutController extends Controller
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:5000',
             'payment_method' => 'required|string',
-            'phone_number' => 'required|string|regex:/^[0-9]{8,15}$/'
+            'phone_number' => 'required|string',
+            'country_code' => 'required|string|size:2', // ex: "BJ"
+            'dial_code' => 'required|string|max:10', // ex: "+229"
         ], [
-            'amount.min' => 'Le montant minimum de retrait est de 5000 FCFA',
-            'phone_number.regex' => 'Le numéro de téléphone doit contenir entre 8 et 15 chiffres'
+            'amount.required' => 'Le montant est requis',
+            'amount.numeric' => 'Le montant doit être un nombre',
+            'amount.min' => 'Le montant minimum est 5 000 FCFA',
+            'payment_method.required' => 'La méthode de paiement est requise',
+            'phone_number.required' => 'Le numéro de téléphone est requis',
+            'country_code.required' => 'Le code pays est requis',
+            'country_code.size' => 'Le code pays doit faire 2 caractères',
+            'dial_code.required' => 'L\'indicatif téléphonique est requis',
         ]);
 
         if ($validator->fails()) {
@@ -103,6 +111,8 @@ class PayoutController extends Controller
             'net_amount' => $netAmount,
             'payment_method' => $request->input('payment_method'),
             'phone_number' => $request->input('phone_number'),
+            'country_code' => $request->input('country_code'),
+            'dial_code' => $request->input('dial_code'),
             'status' => PayoutRequest::STATUS_PENDING
         ]);
 
