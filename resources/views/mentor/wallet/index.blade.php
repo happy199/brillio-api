@@ -39,8 +39,6 @@
         <!-- Section 1: Revenus (Earnings) -->
         <div x-show="activeTab === 'earnings'" class="space-y-6">
             <!-- Stats Revenus avec Payout -->
-            <!-- Stats Revenus avec Payout -->
-            <!-- Stats Revenus avec Payout -->
             <div x-data="{ 
                                 showPayoutModal: false,
                                 payoutMethods: [],
@@ -49,8 +47,8 @@
                                     payment_method: '',
                                     phone_number: ''
                                 },
-                                availableBalance: @json($estimatedValueFcfa),
-                                totalWithdrawn: @json($user->mentorProfile->total_withdrawn ?? 0),
+                                availableBalance: 0,
+                                totalWithdrawn: 0,
                                 loading: false,
                                 error: '',
 
@@ -79,69 +77,46 @@
                                             }
                                         });
                                         const data = await response.json();
-
-                                        // Gérer la structure API qui peut varier
-                                        let methods = [];
-                                        if (data.methods && data.methods.data) {
-                                            methods = data.methods.data;
-                                        } else if (data.data) {
-                                            methods = data.data;
-                                        } else if (Array.isArray(data)) {
-                                            methods = data;
-                                        } else if (data.methods && Array.isArray(data.methods)) {
-                                            methods = data.methods; 
-                                        }
-
-                                        this.payoutMethods = methods;
-
-                                        if (this.payoutMethods.length === 0) throw new Error('Empty methods list');
+                                        this.payoutMethods = data.methods?.data || [];
                                     } catch (e) {
-                                        console.warn('API Payout methods failed, using fallback:', e);
-                                        this.payoutMethods = [
-                                            { code: 'mtn_bj', name: 'MTN Mobile Money (Bénin)' },
-                                            { code: 'moov_bj', name: 'Moov Money (Bénin)' }
-                                        ];
+                                        console.error('Error loading payout methods:', e);
                                     }
                                 },
 
-                                    async requestPayout() {
-                                        this.loading = true;
-                                        this.error = '';
+                                async requestPayout() {
+                                    this.loading = true;
+                                    this.error = '';
 
-                                        try {
-                                            const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
-                                            const response = await fetch('/api/mentor/payout/request', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                    'Content-Type': 'application/json',
-                                                    'Accept': 'application/json',
-                                                    'X-CSRF-TOKEN': csrfToken
-                                                },
-                                                body: JSON.stringify(this.payoutForm)
-                                            });
+                                    try {
+                                        const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
+                                        const response = await fetch('/api/mentor/payout/request', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                'Content-Type': 'application/json',
+                                                'Accept': 'application/json',
+                                                'X-CSRF-TOKEN': csrfToken
+                                            },
+                                            body: JSON.stringify(this.payoutForm)
+                                        });
 
-                                            const data = await response.json();
+                                        const data = await response.json();
 
-                                            if (!response.ok) {
-                                                throw new Error(data.message || 'Erreur lors de la demande de retrait');
-                                            }
-
-                                            this.showPayoutModal = false;
-                                            this.payoutForm = { amount: '', payment_method: '', phone_number: '' };
-
-                                            // Mettre à jour le solde localement ou recharger
-                                            this.availableBalance -= data.payout.amount; // Optimiste
-
-                                            // Recharger la page pour voir le nouveau solde et l'historique mis à jour
-                                            window.location.reload(); 
-                                        } catch (e) {
-                                            this.error = e.message;
-                                        } finally {
-                                            this.loading = false;
+                                        if (!response.ok) {
+                                            throw new Error(data.message || 'Erreur lors de la demande de retrait');
                                         }
+
+                                        this.showPayoutModal = false;
+                                        this.payoutForm = { amount: '', payment_method: '', phone_number: '' };
+                                        await this.loadBalance();
+                                        location.reload(); // Recharger pour afficher l'historique
+                                    } catch (e) {
+                                        this.error = e.message;
+                                    } finally {
+                                        this.loading = false;
                                     }
-                                }" x-init="loadBalance()"
+                                }
+                            }" x-init="loadBalance(); loadPayoutMethods()"
                 class="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl p-6 text-white shadow-lg">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
@@ -197,8 +172,9 @@
                                 <select x-model="payoutForm.payment_method" required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 bg-white">
                                     <option value="" class="text-gray-500">Sélectionnez une méthode</option>
-                                    <template x-for="method in payoutMethods" :key="method.code">
-                                        <option :value="method.code" x-text="method.name" class="text-gray-900"></option>
+                                    <template x-for="method in payoutMethods" :key="method.short_code">
+                                        <option :value="method.short_code" x-text="method.name" class="text-gray-900">
+                                        </option>
                                     </template>
                                 </select>
                             </div>
@@ -301,22 +277,22 @@
 
             <!-- Historique des Retraits -->
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden" x-data="{
-                                     payoutRequests: [],
-                                     async loadPayouts() {
-                                         try {
-                                             const response = await fetch('/api/mentor/payout-requests', {
-                                                 headers: {
-                                                     'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
-                                                     'Accept': 'application/json'
-                                                 }
-                                             });
-                                             const data = await response.json();
-                                             this.payoutRequests = data.payouts || [];
-                                         } catch (e) {
-                                             console.error('Error loading payouts:', e);
-                                         }
+                                 payoutRequests: [],
+                                 async loadPayouts() {
+                                     try {
+                                         const response = await fetch('/api/mentor/payout-requests', {
+                                             headers: {
+                                                 'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                 'Accept': 'application/json'
+                                             }
+                                         });
+                                         const data = await response.json();
+                                         this.payoutRequests = data.payouts || [];
+                                     } catch (e) {
+                                         console.error('Error loading payouts:', e);
                                      }
-                                 }" x-init="loadPayouts()">
+                                 }
+                             }" x-init="loadPayouts()">
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <h3 class="text-lg font-bold text-gray-900">Historique des Retraits</h3>
                     <span

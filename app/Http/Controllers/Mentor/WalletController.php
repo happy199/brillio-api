@@ -59,21 +59,6 @@ class WalletController extends Controller
             ['credits' => 500, 'price' => 500 * $creditPrice * 0.85, 'bonus' => 15], // 15% reduc
         ];
 
-        // Récupérer les méthodes de retrait
-        $monerooService = app(\App\Services\MonerooService::class);
-        $payoutMethodsData = $monerooService->getPayoutMethods();
-
-        // Normaliser les données (Moneroo renvoie souvent { data: [...] })
-        $payoutMethods = $payoutMethodsData['data'] ?? $payoutMethodsData ?? [];
-
-        // Si vide ou invalide, fallback
-        if (empty($payoutMethods) || !is_array($payoutMethods)) {
-            $payoutMethods = [
-                ['code' => 'mtn_bj', 'name' => 'MTN Mobile Money (Bénin)'],
-                ['code' => 'moov_bj', 'name' => 'Moov Money (Bénin)'],
-            ];
-        }
-
         return view('mentor.wallet.index', compact(
             'user',
             'walletTransactions',
@@ -81,8 +66,7 @@ class WalletController extends Controller
             'creditPrice',
             'packs',
             'totalCreditsEarned',
-            'estimatedValueFcfa',
-            'payoutMethods'
+            'estimatedValueFcfa'
         ));
     }
 

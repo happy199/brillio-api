@@ -216,10 +216,13 @@ class MonerooService
     public function getPayoutMethods(): array
     {
         try {
+            // L'endpoint est /utils/payment/methods et ne semble pas préfixé par /v1 selon l'API
+            $baseUrl = str_replace('/v1', '', $this->apiUrl);
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->secretKey,
                 'Accept' => 'application/json'
-            ])->get($this->apiUrl . '/utils/payout/methods');
+            ])->get($baseUrl . '/utils/payment/methods');
 
             if ($response->successful()) {
                 $data = $response->json();
