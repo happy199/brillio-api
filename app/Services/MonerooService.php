@@ -253,25 +253,50 @@ class MonerooService
      * @param string $method Méthode de paiement (ex: mtn_bj, moov_bj)
      * @return array
      */
-    public function createPayout(float $amount, string $phone, string $method): array
+    public function createPayout(float $amount, string $phone, string $method, array $customer = []): array
     {
         try {
+            // Split name if accessible from authenticated user context, otherwise defaults
+            $user = auth()->user();
+            $firstName = $customer['first_name'] ?? ($user ? $this->splitName($user->name)['first_name'] : 'Beneficiary');
+            $lastName = $customer['last_name'] ?? ($user ? $this->splitName($user->name)['last_name'] : 'Name');
+            $email = $customer['email'] ?? ($user ? $user->email : 'no-email@brillio.africa');
+
+            // Normaliser le numéro de téléphone
+            $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+
+            // Si la méthode est béninoise et que le préfixe 229 manque, on l'ajoute
+            if (in_array($method, ['mtn_bj', 'moov_bj', 'celtis_bj']) && !str_starts_with($cleanPhone, '229')) {
+                $cleanPhone = '229' . $cleanPhone;
+            }
+
+            // L'API veut un entier
+            $formattedPhone = (int) $cleanPhone;
+
             $payload = [
-                'amount' => (int) $amount, // Montant en unité entière
+                'amount' => (int) $amount,
+                'currency' => $this->currency, // Ajout de la devise requis
+                'description' => 'Retrait de credits Brillio',
                 'customer' => [
-                    'phone' => $phone,
+                    'email' => $email,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'phone' => $formattedPhone,
                 ],
                 'method' => $method,
-                'description' => 'Retrait de crédits Brillio'
+                'recipient' => [
+                    'msisdn' => $formattedPhone
+                ],
             ];
 
             Log::info('Moneroo: Creating payout', $payload);
 
+            // POST /v1/payouts/initialize
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->secretKey,
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json'
-            ])->post($this->apiUrl . '/payouts', $payload);
+            ])->post($this->apiUrl . '/payouts/initialize', $payload);
 
             $data = $response->json();
 
