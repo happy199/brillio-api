@@ -20,10 +20,10 @@
 
         @if(session('info'))
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md" x-data="{ autoRefresh: true }" x-init="
-                                        if (autoRefresh) {
-                                            setTimeout(() => window.location.reload(), 3000);
-                                        }
-                                    ">
+                                                        if (autoRefresh) {
+                                                            setTimeout(() => window.location.reload(), 3000);
+                                                        }
+                                                    ">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 text-blue-500 mr-3 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -106,29 +106,40 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     @foreach($packs as $pack)
                         <div
-                            class="bg-white border rounded-xl p-5 hover:border-indigo-500 hover:shadow-md transition relative group overflow-hidden">
-                            @if($pack['bonus'] > 0)
+                            class="bg-white border rounded-xl p-5 hover:border-indigo-500 hover:shadow-md transition relative group overflow-hidden {{ $pack->is_popular ? 'border-indigo-500 ring-1 ring-indigo-500' : '' }}">
+                            @if($pack->promo_percent > 0)
                                 <div
-                                    class="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
-                                    -{{ $pack['bonus'] }}%
+                                    class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">
+                                    -{{ $pack->promo_percent }}%
+                                </div>
+                            @elseif($pack->is_popular)
+                                <div
+                                    class="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
+                                    POPULAIRE
                                 </div>
                             @endif
 
-                            <div class="flex justify-between items-start mb-4">
+                            <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <span class="block text-2xl font-black text-gray-900">{{ $pack['credits'] }}</span>
+                                    <span class="block text-2xl font-black text-gray-900">{{ $pack->credits }}</span>
                                     <span class="text-xs font-semibold text-gray-500 uppercase">Crédits</span>
                                 </div>
                                 <div class="text-right">
                                     <span
-                                        class="block text-lg font-bold text-indigo-600">{{ number_format($pack['price'], 0, ',', ' ') }}
+                                        class="block text-lg font-bold text-indigo-600">{{ number_format($pack->price, 0, ',', ' ') }}
                                         F</span>
                                 </div>
                             </div>
 
+                            @if($pack->name)
+                                <p class="text-sm text-gray-600 font-medium mb-4">{{ $pack->name }}</p>
+                            @else
+                                <div class="mb-4"></div>
+                            @endif
+
                             <form action="{{ route('jeune.wallet.purchase') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="amount" value="{{ $pack['credits'] }}">
+                                <input type="hidden" name="pack_id" value="{{ $pack->id }}">
                                 <button type="submit"
                                     class="w-full py-2 px-3 bg-gray-50 hover:bg-indigo-600 text-gray-700 hover:text-white font-semibold rounded-lg transition text-sm">
                                     Acheter maintenant

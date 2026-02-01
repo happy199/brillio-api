@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             PersonalityQuestionsSeeder::class,
             PersonalityTestSeeder::class,
             ChatSeeder::class,
+            CreditPackSeeder::class,
+            PersonalityCompatibilitySeeder::class,
         ]);
     }
 }

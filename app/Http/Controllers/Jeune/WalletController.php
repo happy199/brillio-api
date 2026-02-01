@@ -28,13 +28,11 @@ class WalletController extends Controller
 
         $creditPrice = $this->walletService->getCreditPrice('jeune');
 
-        // Packs suggérés
-        $packs = [
-            ['credits' => 10, 'price' => 10 * $creditPrice, 'bonus' => 0],
-            ['credits' => 50, 'price' => 50 * $creditPrice * 0.95, 'bonus' => 5], // 5% reduc
-            ['credits' => 100, 'price' => 100 * $creditPrice * 0.9, 'bonus' => 10], // 10% reduc
-            ['credits' => 500, 'price' => 500 * $creditPrice * 0.85, 'bonus' => 15], // 15% reduc
-        ];
+        // Packs dynamiques depuis la DB
+        $packs = \App\Models\CreditPack::where('user_type', 'jeune')
+            ->where('is_active', true)
+            ->orderBy('display_order')
+            ->get();
 
         return view('jeune.wallet.index', compact('user', 'transactions', 'creditPrice', 'packs'));
     }
@@ -45,14 +43,19 @@ class WalletController extends Controller
     public function purchase(Request $request)
     {
         $validated = $request->validate([
-            'amount' => 'required|integer|min:1',
+            'pack_id' => 'required|exists:credit_packs,id',
         ]);
 
-        $credits = $validated['amount'];
-        $user = Auth::user();
+        $pack = \App\Models\CreditPack::findOrFail($validated['pack_id']);
 
-        // Calculate price in XOF (100 XOF = 1 crédit)
-        $amountXOF = $credits * 100;
+        // Security check
+        if ($pack->user_type !== 'jeune') {
+            return back()->withErrors(['pack_id' => 'Ce pack n\'est pas disponible pour votre type de compte.']);
+        }
+
+        $credits = $pack->credits;
+        $amountXOF = $pack->price;
+        $user = Auth::user();
 
         try {
             $monerooService = app(\App\Services\MonerooService::class);
@@ -68,6 +71,8 @@ class WalletController extends Controller
                 'metadata' => [
                     'user_type' => 'jeune',
                     'user_name' => $user->prenom . ' ' . $user->nom,
+                    'pack_id' => $pack->id,
+                    'pack_name' => $pack->name
                 ],
             ]);
 
@@ -77,7 +82,7 @@ class WalletController extends Controller
             // Initialize Moneroo payment
             $paymentData = $monerooService->initializePayment(
                 amount: $amountXOF,
-                description: "Achat de {$credits} crédits Brillio",
+                description: "Achat : {$pack->name} ({$credits} crédits)",
                 customer: [
                     'email' => $user->email,
                     'first_name' => $nameParts['first_name'],
@@ -89,6 +94,7 @@ class WalletController extends Controller
                     'user_id' => $user->id,
                     'user_type' => 'jeune',
                     'credits' => $credits,
+                    'pack_id' => $pack->id
                 ],
                 returnUrl: route('payments.callback')
             );
@@ -104,7 +110,7 @@ class WalletController extends Controller
         } catch (\Exception $e) {
             \Log::error('Moneroo payment initialization failed', [
                 'user_id' => $user->id,
-                'credits' => $credits,
+                'pack_id' => $pack->id,
                 'error' => $e->getMessage(),
             ]);
 
