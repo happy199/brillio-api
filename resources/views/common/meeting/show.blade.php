@@ -45,12 +45,55 @@
         </div>
     </header>
 
-    <!-- Jitsi Iframe -->
+    <!-- Jitsi Container -->
     <main class="flex-1 relative w-full h-full bg-black">
-        <iframe src="{{ $meetingLink }}" allow="camera; microphone; display-capture; autoplay; clipboard-write"
-            class="absolute inset-0 w-full h-full border-0" allowfullscreen>
-        </iframe>
+        <div id="meet" class="w-full h-full"></div>
     </main>
+
+    <!-- Jitsi External API -->
+    <script src="https://8x8.vc/{{ $appId }}/external_api.js" async onload="initJitsi()"></script>
+    <script>
+        function initJitsi() {
+            const domain = "8x8.vc";
+            const options = {
+                roomName: "{{ $appId }}/{{ $roomName }}",
+                width: '100%',
+                height: '100%',
+                lang: 'fr',
+                parentNode: document.querySelector('#meet'),
+                jwt: "{{ $jwt }}",
+                userInfo: {
+                    displayName: "{{ Auth::user()->name }}",
+                    email: "{{ Auth::user()->email }}"
+                },
+                configOverwrite: {
+                    startWithAudioMuted: false,
+                    startWithVideoMuted: false,
+                    prejoinPageEnabled: false // Disable prejoin page if name is known
+                },
+                interfaceConfigOverwrite: {
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false,
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                        'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                        'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                        'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                        'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
+                        'e2ee'
+                    ]
+                }
+            };
+            const api = new JitsiMeetExternalAPI(domain, options);
+
+            // Handle Hangup
+            api.addEventListeners({
+                videoConferenceLeft: function () {
+                    window.location.href = "{{ $isMentor ? route('mentor.mentorship.sessions.show', $session) : route('jeune.sessions.show', $session) }}";
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
