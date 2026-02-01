@@ -79,7 +79,8 @@
                         </div>
 
                         <div class="mt-auto pt-6 border-t border-gray-100 flex gap-3">
-                             <a href="#" class="flex-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 py-2 px-4 rounded-lg text-sm font-medium transition text-center">
+                             <a href="{{ $mentorship->mentee->jeuneProfile && $mentorship->mentee->jeuneProfile->is_public ? route('jeune.public.show', $mentorship->mentee->jeuneProfile->public_slug) : '#' }}" 
+                                class="flex-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 py-2 px-4 rounded-lg text-sm font-medium transition text-center {{ !($mentorship->mentee->jeuneProfile && $mentorship->mentee->jeuneProfile->is_public) ? 'opacity-50 cursor-not-allowed' : '' }}">
                                 Voir profil
                             </a>
                             <button 

@@ -29,9 +29,13 @@ class SessionController extends Controller
         // Récupérer les disponibilités
         $availabilities = $mentor->mentorAvailabilities()->get();
 
-        // Récupérer historique (passé)
+        // Récupérer historique (passé, annulé ou terminé)
         $pastSessions = $mentor->mentoringSessionsAsMentor()
-            ->where('scheduled_at', '<', now())
+            ->where(function ($query) {
+                $query->where('scheduled_at', '<', now())
+                    ->orWhere('status', 'cancelled')
+                    ->orWhere('status', 'completed');
+            })
             ->orderByDesc('scheduled_at')
             ->take(10)
             ->get();
@@ -180,7 +184,7 @@ class SessionController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'scheduled_at' => 'required|date',
+            'scheduled_at' => 'required|date|after:now',
             'duration_minutes' => 'required|integer|min:15',
             'price' => 'nullable|numeric|min:0',
         ]);
@@ -253,37 +257,54 @@ class SessionController extends Controller
     /**
      * Accepter une demande de séance
      */
-    public function accept(MentoringSession $session)
+    public function accept(Request $request, MentoringSession $session)
     {
         if ($session->mentor_id !== Auth::id()) {
             abort(403);
         }
+
+        $request->validate([
+            'is_paid' => 'boolean',
+            'price' => 'nullable|numeric|min:500|required_if:is_paid,1',
+        ]);
 
         // Génération lien Jitsi
         $mentor = Auth::user();
         $roomName = 'Brillio_' . $mentor->id . '_' . Str::random(10) . '_' . time();
         $meetingLink = 'https://meet.jit.si/' . $roomName;
 
+        $isPaid = $request->boolean('is_paid');
+
         $session->update([
-            'status' => 'confirmed',
+            'status' => $isPaid ? 'pending_payment' : 'confirmed', // Si payant, attend paiement. Sinon confirmé direct.
             'meeting_link' => $meetingLink,
+            'is_paid' => $isPaid,
+            'price' => $isPaid ? $request->price : 0,
         ]);
 
-        return redirect()->back()->with('success', 'Séance acceptée et planifiée.');
+        $message = $isPaid
+            ? 'Séance acceptée. Le jeune doit maintenant procéder au paiement.'
+            : 'Séance acceptée et confirmée.';
+
+        return redirect()->back()->with('success', $message);
     }
 
     /**
      * Refuser une demande de séance
      */
-    public function refuse(MentoringSession $session)
+    public function refuse(Request $request, MentoringSession $session)
     {
         if ($session->mentor_id !== Auth::id()) {
             abort(403);
         }
 
+        $request->validate([
+            'refusal_reason' => 'required|string|max:500',
+        ]);
+
         $session->update([
             'status' => 'cancelled',
-            'cancel_reason' => 'Refusée par le mentor', // Ou demander une raison spécifique via formulaire
+            'cancel_reason' => $request->refusal_reason,
         ]);
 
         return redirect()->back()->with('success', 'Demande de séance refusée.');

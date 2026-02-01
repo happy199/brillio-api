@@ -227,19 +227,18 @@
                                             <p class="text-sm text-gray-600">{{ $session->scheduled_at->format('H:i') }} - {{ $session->scheduled_at->addMinutes($session->duration_minutes)->format('H:i') }}</p>
                                             <p class="text-xs text-gray-500 mt-1">Avec {{ $session->mentees->pluck('name')->join(', ') }}</p>
                                         </div>
-                                        <div class="flex items-center gap-1">
-                                            <form action="{{ route('mentor.mentorship.sessions.accept', $session) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="text-green-600 hover:text-green-800 p-2 hover:bg-green-100 rounded-full transition" title="Accepter">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                </button>
-                                            </form>
-                                            <form action="{{ route('mentor.mentorship.sessions.refuse', $session) }}" method="POST" onsubmit="return confirm('Refuser cette demande ?');">
-                                                @csrf
-                                                <button type="submit" class="text-red-600 hover:text-red-800 p-2 hover:bg-red-100 rounded-full transition" title="Refuser">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                </button>
-                                            </form>
+                                        <div class="flex items-center gap-1" x-data="{ openAcceptModal: false }">
+                                            <!-- Buttons Triggering Modals -->
+                                            <button @click="$dispatch('open-accept-modal', { id: '{{ $session->id }}', title: '{{ addslashes($session->title) }}', mentee: '{{ addslashes($session->mentees->pluck('name')->join(', ')) }}' })" 
+                                                class="text-green-600 hover:text-green-800 p-2 hover:bg-green-100 rounded-full transition" title="Accepter">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            </button>
+                                            
+                                            <button @click="$dispatch('open-refuse-modal', { id: '{{ $session->id }}', title: '{{ addslashes($session->title) }}' })" 
+                                                class="text-red-600 hover:text-red-800 p-2 hover:bg-red-100 rounded-full transition" title="Refuser">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+
                                             <a href="{{ route('mentor.mentorship.sessions.show', $session) }}" class="text-yellow-600 hover:text-yellow-800 p-2 hover:bg-yellow-100 rounded-full transition" title="Voir détails">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                             </a>
@@ -248,6 +247,67 @@
                                 @endforeach
                             </div>
                         </div>
+
+                        <!-- ACCEPT MODAL -->
+                        <dialog id="accept-session-modal" class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50" x-ref="acceptModal">
+                            <div class="p-6" x-data="{ isPaid: false, sessionId: '', sessionTitle: '', sessionMentee: '' }" 
+                                @open-accept-modal.window="sessionId = $event.detail.id; sessionTitle = $event.detail.title; sessionMentee = $event.detail.mentee; $refs.acceptModal.showModal()">
+                                
+                                <h3 class="font-bold text-lg mb-2 text-gray-900">Accepter la séance ?</h3>
+                                <p class="text-gray-600 mb-4 text-sm">Vous allez accepter la demande <strong x-text="sessionTitle"></strong> avec <span x-text="sessionMentee"></span>.</p>
+                                
+                                <form :action="'/espace-mentor/sessions/' + sessionId + '/accept'" method="POST">
+                                    @csrf
+                                    
+                                    <!-- Free/Paid Toggle -->
+                                    <div class="mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                        <label class="flex items-center cursor-pointer justify-between">
+                                            <span class="text-sm font-medium text-gray-900">Cette séance est-elle payante ?</span>
+                                            <div class="relative">
+                                                <input type="checkbox" name="is_paid" value="1" class="sr-only" x-model="isPaid">
+                                                <div class="w-10 h-6 bg-gray-200 rounded-full shadow-inner transition" :class="{'bg-indigo-600': isPaid}"></div>
+                                                <div class="dot absolute w-4 h-4 bg-white rounded-full shadow left-1 top-1 transition transform" :class="{'translate-x-full': isPaid}"></div>
+                                            </div>
+                                        </label>
+
+                                        <div x-show="isPaid" x-collapse class="mt-3 pt-3 border-t border-gray-200">
+                                            <label for="price" class="block text-xs font-medium text-gray-700 mb-1">Prix (FCFA)</label>
+                                            <div class="relative rounded-md shadow-sm">
+                                                <input type="number" name="price" min="500" step="100" class="w-full text-sm border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 pr-12 p-2" placeholder="5000">
+                                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                    <span class="text-gray-500 text-xs">FCFA</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-end gap-3 mt-6">
+                                        <button type="button" @click="$refs.acceptModal.close()" class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2">Annuler</button>
+                                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Confirmer</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </dialog>
+
+                        <!-- REFUSE MODAL -->
+                        <dialog id="refuse-session-modal" class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50" x-ref="refuseModal">
+                            <div class="p-6" x-data="{ sessionId: '', sessionTitle: '' }" 
+                                @open-refuse-modal.window="sessionId = $event.detail.id; sessionTitle = $event.detail.title; $refs.refuseModal.showModal()">
+                                
+                                <h3 class="font-bold text-lg mb-2 text-gray-900">Refuser la séance ?</h3>
+                                <p class="text-gray-600 mb-4 text-sm">Vous allez refuser la demande <strong x-text="sessionTitle"></strong>. Veuillez indiquer la raison (obligatoire).</p>
+                                
+                                <form :action="'/espace-mentor/sessions/' + sessionId + '/refuse'" method="POST">
+                                    @csrf
+                                    <textarea name="refusal_reason" rows="3" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-red-500 focus:ring-red-500 mb-4 text-sm p-3" placeholder="Indisponibilité, contenu inadapté..." required></textarea>
+                                    
+                                    <div class="flex justify-end gap-3">
+                                        <button type="button" @click="$refs.refuseModal.close()" class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2">Annuler</button>
+                                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Refuser</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </dialog>
                     @endif
 
                     @if($confirmedSessions->isEmpty() && $pendingRequests->isEmpty())
@@ -275,6 +335,52 @@
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
                                             </path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Past Sessions List (History) -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-bold text-gray-900 mb-4">Historique des séances</h3>
+                    
+                    @if($pastSessions->isEmpty())
+                        <p class="text-gray-500 text-sm">Aucun historique disponible.</p>
+                    @else
+                        <div class="space-y-3">
+                            @foreach($pastSessions as $session)
+                                <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition border border-transparent hover:border-gray-100 opacity-75 hover:opacity-100">
+                                    <div class="bg-gray-100 text-gray-600 rounded-lg p-2.5 flex flex-col items-center min-w-[60px]">
+                                        <span class="text-xs font-bold uppercase">{{ $session->scheduled_at->format('M') }}</span>
+                                        <span class="text-xl font-bold">{{ $session->scheduled_at->format('d') }}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <h4 class="font-bold text-gray-900">{{ $session->title }}</h4>
+                                            @if($session->status === 'cancelled')
+                                                <span class="px-2 py-0.5 text-[10px] font-bold bg-red-100 text-red-800 rounded-full">ANNULÉE</span>
+                                            @elseif($session->status === 'completed')
+                                                <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-800 rounded-full">TERMINÉE</span>
+                                            @elseif($session->scheduled_at < now())
+                                                  <!-- Should be completed but if not yet marked -->
+                                                <span class="px-2 py-0.5 text-[10px] font-bold bg-gray-100 text-gray-800 rounded-full">PASSÉE</span>
+                                            @else
+                                                <span class="px-2 py-0.5 text-[10px] font-bold bg-gray-100 text-gray-800 rounded-full">{{ strtoupper($session->status) }}</span>
+                                            @endif
+                                        </div>
+                                        <p class="text-sm text-gray-500">{{ $session->scheduled_at->format('H:i') }} -
+                                            {{ $session->scheduled_at->addMinutes($session->duration_minutes)->format('H:i') }} •
+                                            Avec {{ $session->mentees->pluck('name')->join(', ') }}
+                                        </p>
+                                    </div>
+                                    <a href="{{ route('mentor.mentorship.sessions.show', $session) }}"
+                                        class="text-gray-400 hover:text-indigo-600">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                         </svg>
                                     </a>
                                 </div>

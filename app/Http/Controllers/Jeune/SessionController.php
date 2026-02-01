@@ -20,13 +20,15 @@ class SessionController extends Controller
         $upcomingSessions = $user->mentoringSessionsAsMentee()
             ->where('mentoring_sessions.scheduled_at', '>=', now())
             ->where('mentoring_sessions.status', '!=', 'cancelled')
+            ->where('mentoring_sessions.status', '!=', 'completed')
             ->orderBy('mentoring_sessions.scheduled_at', 'asc')
             ->get();
 
         $pastSessions = $user->mentoringSessionsAsMentee()
             ->where(function ($query) {
                 $query->where('mentoring_sessions.scheduled_at', '<', now())
-                    ->orWhere('mentoring_sessions.status', 'cancelled');
+                    ->orWhere('mentoring_sessions.status', 'cancelled')
+                    ->orWhere('mentoring_sessions.status', 'completed');
             })
             ->orderBy('mentoring_sessions.scheduled_at', 'desc')
             ->paginate(10);

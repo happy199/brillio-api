@@ -201,7 +201,7 @@
                                     <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message
                                         (optionnel)</label>
                                     <textarea name="message" id="message" rows="3"
-                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                        class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3"
                                         placeholder="Bonjour, j'aimerais être mentoré par vous car..."></textarea>
                                 </div>
 

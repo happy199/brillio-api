@@ -26,7 +26,7 @@
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Sujet de la séance <span
                             class="text-red-500">*</span></label>
                     <input type="text" name="title" id="title"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
                         placeholder="Ex: Revue de CV, Préparation entretien..." required>
                 </div>
 
@@ -35,7 +35,7 @@
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description / Questions
                         (Optionnel)</label>
                     <textarea name="description" id="description" rows="3"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
                         placeholder="Décrivez ce que vous attendez de cette séance..."></textarea>
                 </div>
 
@@ -45,15 +45,15 @@
                         <label for="scheduled_at" class="block text-sm font-medium text-gray-700 mb-2">Date et Heure <span
                                 class="text-red-500">*</span></label>
                         <input type="datetime-local" name="scheduled_at" id="scheduled_at"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            required>
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
+                            min="{{ now()->format('Y-m-d\TH:i') }}" required>
                         <p class="text-xs text-gray-500 mt-1">Vérifiez les disponibilités du mentor.</p>
                     </div>
                     <div>
                         <label for="duration_minutes" class="block text-sm font-medium text-gray-700 mb-2">Durée <span
                                 class="text-red-500">*</span></label>
                         <select name="duration_minutes" id="duration_minutes"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3">
                             <option value="30">30 min</option>
                             <option value="45">45 min</option>
                             <option value="60" selected>1h (60 min)</option>

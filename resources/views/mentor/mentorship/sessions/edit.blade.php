@@ -24,7 +24,7 @@
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Titre de la séance</label>
                     <input type="text" name="title" id="title" required value="{{ old('title', $session->title) }}"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">
                     @error('title') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
 
@@ -32,7 +32,7 @@
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                     <textarea name="description" id="description" rows="3"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('description', $session->description) }}</textarea>
+                        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">{{ old('description', $session->description) }}</textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -41,7 +41,8 @@
                         <label for="scheduled_at" class="block text-sm font-medium text-gray-700 mb-1">Date et Heure</label>
                         <input type="datetime-local" name="scheduled_at" id="scheduled_at" required
                             value="{{ old('scheduled_at', $session->scheduled_at->format('Y-m-d\TH:i')) }}"
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            min="{{ now()->format('Y-m-d\TH:i') }}"
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">
                         @error('scheduled_at') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
@@ -50,7 +51,7 @@
                         <label for="duration_minutes" class="block text-sm font-medium text-gray-700 mb-1">Durée
                             (minutes)</label>
                         <select name="duration_minutes" id="duration_minutes" required
-                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">
                             <option value="15" {{ $session->duration_minutes == 15 ? 'selected' : '' }}>15 min</option>
                             <option value="30" {{ $session->duration_minutes == 30 ? 'selected' : '' }}>30 min</option>
                             <option value="45" {{ $session->duration_minutes == 45 ? 'selected' : '' }}>45 min</option>
@@ -68,7 +69,7 @@
                         <div class="relative rounded-md shadow-sm">
                             <input type="number" name="price" id="price" required min="500" step="100"
                                 value="{{ old('price', (int) $session->price) }}"
-                                class="w-full border-gray-300 rounded-lg pr-12 focus:ring-indigo-500 focus:border-indigo-500">
+                                class="w-full border-gray-300 rounded-lg pr-12 focus:ring-indigo-500 focus:border-indigo-500 p-3">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">FCFA</span>
                             </div>

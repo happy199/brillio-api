@@ -64,7 +64,7 @@
                         <div class="mb-4 bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
                             <p class="text-sm text-purple-800 font-medium">Séance payante</p>
                             <p class="text-2xl font-bold text-purple-900">{{ $session->credit_cost }} <span class="text-sm font-normal">Crédits</span></p>
-                            @if($session->status === 'confirmed' || $session->status === 'accepted')
+                            @if($session->status === 'confirmed' || $session->status === 'accepted' || $session->status === 'completed')
                                 <span class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded-full">Payée</span>
                             @else
                                 <span class="inline-block mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">À régler</span>
@@ -77,8 +77,12 @@
                             Séance annulée
                         </div>
                     @elseif($session->scheduled_at >= now())
-                        @if($session->status === 'confirmed' || $session->status === 'accepted')
-                            @if(!$session->is_paid || $session->status === 'confirmed')
+                        @if($session->status === 'confirmed' || $session->status === 'accepted' || $session->status === 'completed')
+                            @if($session->status === 'completed')
+                                 <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-center font-bold text-sm mb-3">
+                                    Séance terminée
+                                </div>
+                            @elseif(!$session->is_paid || $session->status === 'confirmed')
                                 <!-- CAS 1: Gratuit OU Payé (et confirmé) -->
                                 @if($session->meeting_link)
                                     <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
@@ -91,8 +95,6 @@
                                         Lien bientôt disponible
                                     </button>
                                 @endif
-                            @elseif($session->is_paid && $session->status !== 'confirmed')
-                                 <!-- Fallback improbable si status confirmed mais is_paid false? Non, couvert par le if au-dessus -->
                             @endif
                         @else
                              <!-- CAS 2: Non confirmé (donc pending_payment pour les payants) -->
@@ -112,6 +114,8 @@
                         @endif
 
                         <!-- Cancel Button & Modal Trigger -->
+                        <!-- Cancel Button & Modal Trigger -->
+                        @if($session->status !== 'completed')
                         <div x-data="{ open: false }">
                             <button @click="open = true"
                                 class="w-full py-2 text-red-600 hover:bg-red-50 font-medium rounded-lg transition text-sm">
@@ -119,50 +123,34 @@
                             </button>
 
                             <!-- Cancel Modal -->
-                            <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-                                <div
-                                    class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                                    <div x-show="open" @click="open = false" class="fixed inset-0 transition-opacity"
-                                        aria-hidden="true">
-                                        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-                                    </div>
+                            <dialog class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50 open:backdrop:animate-fade-in open:animate-scale-in" :open="open">
+                                <div class="p-6">
+                                    <h3 class="font-bold text-lg mb-4 text-red-600">Annuler la séance ?</h3>
+                                    <p class="text-gray-600 mb-4 text-sm">
+                                        Veuillez indiquer la raison de l'annulation. Cette action est irréversible.
+                                    </p>
 
-                                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen"
-                                        aria-hidden="true">&#8203;</span>
+                                    <form action="{{ route('jeune.sessions.cancel', $session) }}" method="POST">
+                                        @csrf
+                                        <textarea name="cancel_reason" rows="3" required
+                                            class="w-full border-gray-300 rounded-lg shadow-sm focus:border-red-500 focus:ring-red-500 mb-4 text-sm p-3"
+                                            placeholder="J'ai un empêchement..."></textarea>
 
-                                    <div x-show="open"
-                                        class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                                        <form action="{{ route('jeune.sessions.cancel', $session) }}" method="POST" class="p-6">
-                                            @csrf
-                                            <h3 class="text-lg font-medium text-gray-900 mb-4">Annuler la séance ?</h3>
-                                            <p class="text-sm text-gray-500 mb-4">
-                                                Veuillez indiquer la raison de l'annulation. Cette action est irréversible.
-                                            </p>
-
-                                            <div class="mb-4">
-                                                <label for="cancel_reason"
-                                                    class="block text-sm font-medium text-gray-700 mb-1">Motif
-                                                    d'annulation</label>
-                                                <textarea name="cancel_reason" id="cancel_reason" rows="3" required
-                                                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                    placeholder="J'ai un empêchement..."></textarea>
-                                            </div>
-
-                                            <div class="mt-5 sm:mt-6 flex gap-3 justify-end">
-                                                <button type="button" @click="open = false"
-                                                    class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
-                                                    Retour
-                                                </button>
-                                                <button type="submit"
-                                                    class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:text-sm">
-                                                    Confirmer l'annulation
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                        <div class="flex justify-end gap-3">
+                                            <button type="button" @click="open = false"
+                                                class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2">
+                                                Retour
+                                            </button>
+                                            <button type="submit"
+                                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                                Confirmer l'annulation
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
-                            </div>
+                            </dialog>
                         </div>
+                        @endif
                     @else
                         <div class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-center font-bold text-sm">
                             Séance terminée

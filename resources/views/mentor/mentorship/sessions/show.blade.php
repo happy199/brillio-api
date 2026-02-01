@@ -3,7 +3,7 @@
 @section('title', $session->title)
 
 @section('content')
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-8" x-data="{ openAcceptModal: false, isPaid: false }">
         <div class="mb-6">
             <a href="{{ route('mentor.mentorship.calendar') }}"
                 class="text-gray-500 hover:text-gray-700 flex items-center gap-2 mb-4 text-sm font-medium">
@@ -49,41 +49,37 @@
 
                 <div class="flex gap-3">
                     <!-- Edit Button (Always visible as requested) -->
-                    <a href="{{ route('mentor.mentorship.sessions.edit', $session) }}"
-                        class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg font-medium transition flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                            </path>
-                        </svg>
-                        Modifier
-                    </a>
+                    @if(!in_array($session->status, ['completed', 'cancelled']))
+                        <a href="{{ route('mentor.mentorship.sessions.edit', $session) }}"
+                            class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg font-medium transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                </path>
+                            </svg>
+                            Modifier
+                        </a>
+                    @endif
 
                     @if($session->status === 'proposed')
-                        <form action="{{ route('mentor.mentorship.sessions.accept', $session) }}" method="POST">
-                            @csrf
-                            <button type="submit"
-                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition flex items-center gap-2 shadow-sm shadow-indigo-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                                    </path>
-                                </svg>
-                                Accepter
-                            </button>
-                        </form>
 
-                        <form action="{{ route('mentor.mentorship.sessions.refuse', $session) }}" method="POST"
-                            onsubmit="return confirm('Voulez-vous vraiment refuser cette demande ?');">
-                            @csrf
-                            <button type="submit"
-                                class="bg-white border border-gray-300 text-gray-700 hover:text-red-600 hover:border-red-200 px-4 py-2.5 rounded-lg font-medium transition flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                Refuser
-                            </button>
-                        </form>
+                        <button @click="$refs.acceptModal.showModal()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition flex items-center gap-2 shadow-sm shadow-indigo-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                                </path>
+                            </svg>
+                            Accepter
+                        </button>
+
+                        <button @click="$refs.refuseModal.showModal()"
+                            class="bg-white border border-gray-300 text-gray-700 hover:text-red-600 hover:border-red-200 px-4 py-2.5 rounded-lg font-medium transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                                </path>
+                            </svg>
+                            Refuser
+                        </button>
                     @elseif($session->status === 'confirmed' || $session->status === 'accepted')
                         <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
                             class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition flex items-center gap-2 shadow-sm shadow-indigo-200">
@@ -157,7 +153,7 @@
                                         la
                                         dernière session</label>
                                     <textarea name="progress" rows="3"
-                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
                                         placeholder="Qu'est-ce qui a été accompli ?">{{ $session->report_content['progress'] ?? '' }}</textarea>
                                 </div>
 
@@ -166,7 +162,7 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-2">2. Sujets abordés &
                                         Obstacles</label>
                                     <textarea name="obstacles" rows="3"
-                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
                                         placeholder="Points clés discutés et blocages identifiés...">{{ $session->report_content['obstacles'] ?? '' }}</textarea>
                                 </div>
 
@@ -178,7 +174,7 @@
                                         <strong>SMART</strong> : Spécifique, Mesurable, Atteignable, Réaliste, Temporel.
                                     </div>
                                     <textarea name="smart_goals" rows="3"
-                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
                                         placeholder="Actions concrètes à réaliser...">{{ $session->report_content['smart_goals'] ?? '' }}</textarea>
                                 </div>
                             </div>
@@ -249,7 +245,7 @@
                 <form action="{{ route('mentor.mentorship.sessions.cancel', $session) }}" method="POST">
                     @csrf
                     <textarea name="cancel_reason" rows="3"
-                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-red-500 focus:ring-red-500 mb-4 text-sm"
+                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-red-500 focus:ring-red-500 mb-4 text-sm p-3"
                         placeholder="Raison de l'annulation..." required></textarea>
 
                     <div class="flex justify-end gap-3">
@@ -258,6 +254,77 @@
                         <button type="submit"
                             class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Confirmer
                             l'annulation</button>
+                    </div>
+                </form>
+            </div>
+        </dialog>
+
+        <!-- ACCEPT MODAL -->
+        <dialog id="accept-session-modal"
+            class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50" x-ref="acceptModal">
+            <div class="p-6">
+                <h3 class="font-bold text-lg mb-2 text-gray-900">Accepter la séance ?</h3>
+                <p class="text-gray-600 mb-4 text-sm">Vous allez accepter la demande <strong
+                        class="text-gray-900">{{ $session->title }}</strong>.</p>
+
+                <form action="{{ route('mentor.mentorship.sessions.accept', $session) }}" method="POST">
+                    @csrf
+
+                    <!-- Free/Paid Toggle -->
+                    <div class="mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <label class="flex items-center cursor-pointer justify-between">
+                            <span class="text-sm font-medium text-gray-900">Cette séance est-elle payante ?</span>
+                            <div class="relative">
+                                <input type="checkbox" name="is_paid" value="1" class="sr-only" x-model="isPaid">
+                                <div class="w-10 h-6 bg-gray-200 rounded-full shadow-inner transition"
+                                    :class="{'bg-indigo-600': isPaid}"></div>
+                                <div class="dot absolute w-4 h-4 bg-white rounded-full shadow left-1 top-1 transition transform"
+                                    :class="{'translate-x-full': isPaid}"></div>
+                            </div>
+                        </label>
+
+                        <div x-show="isPaid" x-collapse class="mt-3 pt-3 border-t border-gray-200">
+                            <label for="price" class="block text-xs font-medium text-gray-700 mb-1">Prix (FCFA)</label>
+                            <div class="relative rounded-md shadow-sm">
+                                <input type="number" name="price" min="500" step="100"
+                                    class="w-full text-sm border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 pr-12 p-3"
+                                    placeholder="5000">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 text-xs">FCFA</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @click="$refs.acceptModal.close()"
+                            class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2">Annuler</button>
+                        <button type="submit"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Confirmer</button>
+                    </div>
+                </form>
+            </div>
+        </dialog>
+
+        <!-- REFUSE MODAL -->
+        <dialog id="refuse-session-modal"
+            class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50" x-ref="refuseModal">
+            <div class="p-6">
+                <h3 class="font-bold text-lg mb-2 text-gray-900">Refuser la séance ?</h3>
+                <p class="text-gray-600 mb-4 text-sm">Vous allez refuser la demande <strong
+                        class="text-gray-900">{{ $session->title }}</strong>. Veuillez indiquer la raison (obligatoire).</p>
+
+                <form action="{{ route('mentor.mentorship.sessions.refuse', $session) }}" method="POST">
+                    @csrf
+                    <textarea name="refusal_reason" rows="3"
+                        class="w-full border-gray-300 rounded-lg shadow-sm focus:border-red-500 focus:ring-red-500 mb-4 text-sm p-3"
+                        placeholder="Indisponibilité, contenu inadapté..." required></textarea>
+
+                    <div class="flex justify-end gap-3">
+                        <button type="button" @click="$refs.refuseModal.close()"
+                            class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2">Annuler</button>
+                        <button type="submit"
+                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Refuser</button>
                     </div>
                 </form>
             </div>
