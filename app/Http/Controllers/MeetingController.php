@@ -11,6 +11,16 @@ class MeetingController extends Controller
     /**
      * Affiche la salle de conférence sécurisée (iframe)
      */
+    protected $jitsiService;
+
+    public function __construct(\App\Services\JitsiService $jitsiService)
+    {
+        $this->jitsiService = $jitsiService;
+    }
+
+    /**
+     * Affiche la salle de conférence sécurisée (iframe)
+     */
     public function show($meetingId)
     {
         $user = Auth::user();
@@ -35,10 +45,16 @@ class MeetingController extends Controller
                 ->with('error', 'Cette séance a été annulée.');
         }
 
-        $meetingLink = $session->meeting_link;
-        // On assure que c'est un lien complet pour l'iframe src.
-        // ex: https://meet.jit.si/Brillio_123_XYZ
+        // Generate JWT for JaaS
+        // Room Name must be the part after the last slash
+        $roomName = basename($session->meeting_link);
+        $jwt = $this->jitsiService->generateToken($user, $roomName, $isMentor);
 
-        return view('common.meeting.show', compact('session', 'meetingLink', 'isMentor'));
+        // Update Link to use 8x8 JaaS domain
+        // Format: https://8x8.vc/<AppID>/<RoomName>
+        $appId = env('JAAS_APP_ID');
+        $meetingLink = "https://8x8.vc/{$appId}/{$roomName}";
+
+        return view('common.meeting.show', compact('session', 'meetingLink', 'jwt', 'isMentor', 'appId', 'roomName'));
     }
 }
