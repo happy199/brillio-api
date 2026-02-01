@@ -62,6 +62,29 @@
                     </div>
                 </div>
 
+                <!-- Participants -->
+                <div>
+                     <label class="block text-sm font-medium text-gray-700 mb-3">Participants invités</label>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-100 rounded-xl">
+                        @foreach($mentees as $mentee)
+                            <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition">
+                                <input type="checkbox" name="mentee_ids[]" value="{{ $mentee->id }}"
+                                    {{ $session->mentees->contains($mentee->id) ? 'checked' : '' }}
+                                    class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300">
+                                
+                                <img src="{{ $mentee->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($mentee->name) }}" 
+                                     alt="" class="w-8 h-8 rounded-full bg-gray-200">
+                                
+                                <div>
+                                    <p class="text-sm font-bold text-gray-900">{{ $mentee->name }}</p>
+                                    <p class="text-xs text-gray-500">{{ $mentee->email }}</p>
+                                </div>
+                            </label>
+                        @endforeach
+                     </div>
+                     <p class="text-xs text-gray-500 mt-2">Cochez ou décochez pour ajouter/retirer des participants.</p>
+                </div>
+
                 <!-- Prix -->
                 @if($session->is_paid)
                     <div>

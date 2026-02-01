@@ -138,8 +138,9 @@ class SessionController extends Controller
         ]);
 
         // Attacher les participants (mentees)
+        $pivotStatus = $request->boolean('is_paid') ? 'pending' : 'accepted';
         foreach ($request->mentee_ids as $menteeId) {
-            $session->mentees()->attach($menteeId, ['status' => 'accepted']);
+            $session->mentees()->attach($menteeId, ['status' => $pivotStatus]);
         }
 
         return redirect()->route('mentor.mentorship.sessions.show', $session)
@@ -169,7 +170,15 @@ class SessionController extends Controller
             abort(403);
         }
 
-        return view('mentor.mentorship.sessions.edit', compact('session'));
+        $mentor = Auth::user();
+        // Récupérer les mentés acceptés pour la liste de choix
+        $mentees = $mentor->mentorshipsAsMentor()
+            ->where('status', 'accepted')
+            ->with('mentee')
+            ->get()
+            ->pluck('mentee');
+
+        return view('mentor.mentorship.sessions.edit', compact('session', 'mentees'));
     }
 
     /**
@@ -187,6 +196,8 @@ class SessionController extends Controller
             'scheduled_at' => 'required|date|after:now',
             'duration_minutes' => 'required|integer|min:15',
             'price' => 'nullable|numeric|min:0',
+            'mentee_ids' => 'sometimes|array', // Optional to allow no changes, but logic below handles it
+            'mentee_ids.*' => 'exists:users,id',
         ]);
 
         $session->update([
@@ -194,9 +205,29 @@ class SessionController extends Controller
             'description' => $request->description,
             'scheduled_at' => $request->scheduled_at,
             'duration_minutes' => $request->duration_minutes,
-            'price' => $session->is_paid ? $request->price : 0, // Update price ONLY if already paid type
-            // Note: We do NOT update 'status' or 'is_paid' here to preserve payment state as requested.
+            'price' => $session->is_paid ? $request->price : 0,
         ]);
+
+        // Gestion des participants (Sync Intelligent)
+        if ($request->has('mentee_ids')) {
+            $newMenteeIds = $request->mentee_ids;
+
+            // 1. Detach removed mentees (those NOT in new list)
+            // But be careful not to detach cancelled ones if we want to keep history?
+            // For simplicity/MVP: User wants to "remove", so we detach.
+            $session->mentees()->wherePivotNotIn('user_id', $newMenteeIds)->detach();
+
+            // 2. Attach NEW mentees
+            // We need to check which ones are already there to preserve their status (e.g. if they paid)
+            $existingMenteeIds = $session->mentees()->pluck('user_id')->toArray();
+            $idsToAttach = array_diff($newMenteeIds, $existingMenteeIds);
+
+            $pivotStatus = $session->is_paid ? 'pending' : 'accepted'; // 'pending' for new paid additions
+
+            foreach ($idsToAttach as $id) {
+                $session->mentees()->attach($id, ['status' => $pivotStatus]);
+            }
+        }
 
         return redirect()->route('mentor.mentorship.sessions.show', $session)
             ->with('success', 'Séance modifiée avec succès.');
@@ -281,6 +312,14 @@ class SessionController extends Controller
             'is_paid' => $isPaid,
             'price' => $isPaid ? $request->price : 0,
         ]);
+
+        // IMPORTANT: Si payant, on remet le statut via pivot à 'pending' pour forcer le paiement
+        if ($isPaid) {
+            // On le fait pour tous les mentees (normalement 1 seul pour une demande)
+            foreach ($session->mentees as $mentee) {
+                $session->mentees()->updateExistingPivot($mentee->id, ['status' => 'pending']);
+            }
+        }
 
         $message = $isPaid
             ? 'Séance acceptée. Le jeune doit maintenant procéder au paiement.'

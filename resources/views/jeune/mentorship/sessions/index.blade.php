@@ -61,9 +61,16 @@
                             </div>
                             
                             <div class="flex gap-2 mt-auto">
+                                @php
+                                    // Check Access Individuellement (Comme dans show.blade.php)
+                                    $currentUserPivot = $session->mentees->find(auth()->id())?->pivot;
+                                    $hasPaid = $currentUserPivot && $currentUserPivot->status === 'accepted';
+                                    $canAccess = !$session->is_paid || $hasPaid;
+                                @endphp
+
                                 @if($session->status === 'confirmed' || $session->status === 'accepted')
-                                    @if(!$session->is_paid || $session->status === 'confirmed')
-                                        <!-- CAS 1: Gratuit OU Payé -->
+                                    @if($canAccess)
+                                        <!-- CAS 1: ACCÈS AUTORISÉ (Gratuit ou Payé) -->
                                         @if($session->meeting_link)
                                             <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank" class="flex-1 text-center py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
                                                 En ligne
@@ -73,8 +80,10 @@
                                                 Lien bientôt dispo
                                             </button>
                                         @endif
-                                    @elseif($session->is_paid && $session->status !== 'confirmed')
-                                        <!-- CAS 2: Payant & Non Payé -->
+                                    @else
+
+                                        <!-- CAS 2: Payant & Non Payé (Même si confirmé globalement OU si pending_payment et pivot accepted par erreur) -->
+                                        <!-- Note: Si on est ici, c'est que $canAccess est faux. Donc il faut payer. -->
                                         <form action="{{ route('jeune.sessions.pay-join', $session) }}" method="POST" class="flex-1">
                                             @csrf
                                             <button type="submit" class="w-full py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2">
@@ -84,9 +93,20 @@
                                         </form>
                                     @endif
                                 @else
-                                    <span class="flex-1 text-center py-2 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-lg">
-                                        En attente
-                                    </span>
+                                    <!-- Status NOT confirmed/accepted (e.g. pending_payment) -->
+                                    @if($session->is_paid) 
+                                         <form action="{{ route('jeune.sessions.pay-join', $session) }}" method="POST" class="flex-1">
+                                            @csrf
+                                            <button type="submit" class="w-full py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Payer & Rejoindre
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="flex-1 text-center py-2 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-lg">
+                                            En attente
+                                        </span>
+                                    @endif
                                 @endif
                                 <a href="{{ route('jeune.sessions.show', $session) }}" class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-gray-500">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -134,7 +154,11 @@
                                         {{ $session->mentor->name }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($session->status === 'cancelled')
+                                        @if($session->pivot->status === 'cancelled')
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Annulée</span>
+                                        @elseif($session->pivot->status === 'rejected')
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Refusée</span>
+                                        @elseif($session->status === 'cancelled')
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Annulée</span>
                                         @elseif($session->status === 'completed')
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Terminée</span>

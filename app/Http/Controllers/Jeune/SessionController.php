@@ -17,18 +17,22 @@ class SessionController extends Controller
     {
         $user = auth()->user();
 
+        // Upcoming: Future sessions + NOT globally cancelled + NOT pivot cancelled
         $upcomingSessions = $user->mentoringSessionsAsMentee()
             ->where('mentoring_sessions.scheduled_at', '>=', now())
             ->where('mentoring_sessions.status', '!=', 'cancelled')
             ->where('mentoring_sessions.status', '!=', 'completed')
+            ->wherePivotNotIn('status', ['cancelled', 'rejected']) // EXCLUDE if I cancelled locally
             ->orderBy('mentoring_sessions.scheduled_at', 'asc')
             ->get();
 
+        // Past: Past dates OR Globally cancelled OR Completed OR Locally cancelled
         $pastSessions = $user->mentoringSessionsAsMentee()
             ->where(function ($query) {
                 $query->where('mentoring_sessions.scheduled_at', '<', now())
                     ->orWhere('mentoring_sessions.status', 'cancelled')
-                    ->orWhere('mentoring_sessions.status', 'completed');
+                    ->orWhere('mentoring_sessions.status', 'completed')
+                    ->orWhereIn('mentoring_session_user.status', ['cancelled', 'rejected']); // INCLUDE if I cancelled locally
             })
             ->orderBy('mentoring_sessions.scheduled_at', 'desc')
             ->paginate(10);
@@ -132,6 +136,9 @@ class SessionController extends Controller
     /**
      * Annuler une séance
      */
+    /**
+     * Annuler une séance (Logic Smart Cancellation)
+     */
     public function cancel(Request $request, MentoringSession $session)
     {
         $user = auth()->user();
@@ -144,13 +151,28 @@ class SessionController extends Controller
             'cancel_reason' => 'required|string|max:500',
         ]);
 
-        $session->update([
+        // 1. Update Pivot for THIS user
+        $session->mentees()->updateExistingPivot($user->id, [
             'status' => 'cancelled',
-            'cancel_reason' => $request->cancel_reason,
+            'rejection_reason' => $request->cancel_reason
         ]);
 
+        // 2. Check if ANY active mentees remain
+        // We count how many are NOT cancelled/rejected
+        $activeMenteesCount = $session->mentees()
+            ->wherePivotNotIn('status', ['cancelled', 'rejected'])
+            ->count();
+
+        // 3. If NO active mentees left, cancel the global session
+        if ($activeMenteesCount === 0) {
+            $session->update([
+                'status' => 'cancelled',
+                'cancel_reason' => 'Tous les participants ont annulé.',
+            ]);
+        }
+
         return redirect()->route('jeune.sessions.index')
-            ->with('success', 'La séance a été annulée avec succès.');
+            ->with('success', 'Votre participation à la séance a été annulée.');
     }
     /**
      * Payer et Rejoindre une séance
@@ -164,8 +186,11 @@ class SessionController extends Controller
             abort(403);
         }
 
-        // 2. Si déjà confirmée ou gratuite => Redirection directe
-        if (!$session->is_paid || $session->status === 'confirmed') {
+        // 2. Vérif du statut de paiement de l'utilisateur (Pivot)
+        $userPivot = $session->mentees()->where('user_id', $user->id)->first()->pivot;
+
+        // Si gratuit ou déjà payé (statut pivot = accepted) => Redirection directe
+        if (!$session->is_paid || $userPivot->status === 'accepted') {
             return redirect()->route('meeting.show', $session->meeting_id ?? 'error');
         }
 

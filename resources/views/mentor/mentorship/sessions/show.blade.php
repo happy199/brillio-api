@@ -118,20 +118,51 @@
                     <!-- Participants -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="font-bold text-gray-900 mb-4">Participants</h3>
-                        <div class="flex -space-x-2 overflow-hidden mb-4">
-                            <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white"
-                                src="{{ $session->mentor->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($session->mentor->name) }}"
-                                alt="{{ $session->mentor->name }}" title="Mentor: {{ $session->mentor->name }}">
+                        <div class="flex flex-wrap gap-4 mb-4">
+                            <!-- Mentor (Toujours là) -->
+                            <div class="relative group">
+                                <img class="h-12 w-12 rounded-full ring-2 ring-white shadow-sm"
+                                    src="{{ $session->mentor->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($session->mentor->name) }}"
+                                    alt="{{ $session->mentor->name }}" title="Mentor: {{ $session->mentor->name }}">
+                                <span class="absolute -bottom-1 -right-1 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded-full border-2 border-white shadow-sm font-bold">M</span>
+                            </div>
+
                             @foreach($session->mentees as $mentee)
-                                <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white"
-                                    src="{{ $mentee->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($mentee->name) }}"
-                                    alt="{{ $mentee->name }}" title="Menté: {{ $mentee->name }}">
+                                <div class="relative group">
+                                    <img class="h-12 w-12 rounded-full ring-2 ring-white shadow-sm"
+                                        src="{{ $mentee->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($mentee->name) }}"
+                                        alt="{{ $mentee->name }}" title="Menté: {{ $mentee->name }}">
+                                    
+                                    {{-- Status Icons --}}
+                                    @if($mentee->pivot->status === 'accepted')
+                                        {{-- Paid / Accepted --}}
+                                        <div class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-0.5 border-2 border-white shadow-sm" title="Confirmé / Payé">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
+                                    @elseif($mentee->pivot->status === 'pending' || $mentee->pivot->status === 'pending_payment')
+                                        {{-- Waiting --}}
+                                        <div class="absolute -bottom-1 -right-1 bg-yellow-400 text-white rounded-full p-0.5 border-2 border-white shadow-sm animate-pulse" title="En attente de paiement">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        </div>
+                                    @elseif($mentee->pivot->status === 'cancelled' || $mentee->pivot->status === 'rejected')
+                                        {{-- Cancelled --}}
+                                        <div class="absolute -bottom-1 -right-1 bg-red-500 text-white rounded-full p-0.5 border-2 border-white shadow-sm" title="Annulé: {{ $mentee->pivot->rejection_reason ?? 'Aucune raison' }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </div>
+                                    @endif
+                                </div>
                             @endforeach
                         </div>
                         <div class="text-sm text-gray-500">
                             Avec :
                             @foreach($session->mentees as $mentee)
-                                <span class="font-medium text-gray-900">{{ $mentee->name }}</span>{{ !$loop->last ? ',' : '' }}
+                                <span class="font-medium text-gray-900 {{ in_array($mentee->pivot->status, ['cancelled', 'rejected']) ? 'line-through decoration-red-500 text-gray-400' : '' }}">
+                                    {{ $mentee->name }}
+                                </span>
+                                @if(in_array($mentee->pivot->status, ['cancelled', 'rejected']))
+                                    <span class="text-xs text-red-500 italic ml-1">(Annulé)</span>
+                                @endif
+                                {{ !$loop->last ? ',' : '' }}
                             @endforeach
                         </div>
                     </div>
