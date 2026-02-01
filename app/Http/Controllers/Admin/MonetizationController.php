@@ -16,11 +16,17 @@ class MonetizationController extends Controller
      */
     public function index()
     {
-        $settings = SystemSetting::whereIn('key', ['credit_price_jeune', 'credit_price_mentor', 'feature_cost_advanced_targeting'])->get()->keyBy('key');
+        $settings = SystemSetting::whereIn('key', [
+            'credit_price_jeune',
+            'credit_price_mentor',
+            'feature_cost_advanced_targeting',
+            'payout_fee_percentage'
+        ])->get()->keyBy('key');
 
         $creditPriceJeune = $settings['credit_price_jeune']->value ?? 50;
         $creditPriceMentor = $settings['credit_price_mentor']->value ?? 100;
         $targetingCost = $settings['feature_cost_advanced_targeting']->value ?? 10;
+        $payoutFeePercentage = $settings['payout_fee_percentage']->value ?? 5;
 
         // Stats Détaillées
 
@@ -64,6 +70,7 @@ class MonetizationController extends Controller
             'creditPriceJeune',
             'creditPriceMentor',
             'targetingCost',
+            'payoutFeePercentage',
             'totalCreditsPurchased',
             'creditsPurchasedJeune',
             'creditsPurchasedMentor',
@@ -87,6 +94,7 @@ class MonetizationController extends Controller
             'credit_price_jeune' => 'required|integer|min:1',
             'credit_price_mentor' => 'required|integer|min:1',
             'feature_cost_advanced_targeting' => 'required|integer|min:0',
+            'payout_fee_percentage' => 'required|integer|min:0|max:100',
         ]);
 
         foreach ($validated as $key => $value) {

@@ -57,6 +57,9 @@ class WalletController extends Controller
             ->orderBy('display_order')
             ->get();
 
+        $payoutFeePercentage = \App\Models\SystemSetting::getValue('payout_fee_percentage', 5);
+        $payoutMinFee = \App\Models\SystemSetting::getValue('payout_min_fee', 100);
+
         return view('mentor.wallet.index', compact(
             'user',
             'walletTransactions',
@@ -64,7 +67,9 @@ class WalletController extends Controller
             'creditPrice',
             'packs',
             'totalCreditsEarned',
-            'estimatedValueFcfa'
+            'estimatedValueFcfa',
+            'payoutFeePercentage',
+            'payoutMinFee'
         ));
     }
 

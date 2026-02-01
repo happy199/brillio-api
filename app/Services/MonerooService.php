@@ -378,8 +378,9 @@ class MonerooService
      */
     public function calculateFee(float $amount): float
     {
-        $feeRate = config('payout.fee_rate', 0.02); // 2% par défaut
-        $minFee = config('payout.min_fee', 100); // 100 FCFA minimum
+        // Récupérer la configuration depuis SystemSetting (ou valeurs par défaut)
+        $feeRate = \App\Models\SystemSetting::getValue('payout_fee_percentage', 5) / 100; // Par défaut 5%
+        $minFee = \App\Models\SystemSetting::getValue('payout_min_fee', 250); // 250 FCFA minimum
 
         $fee = max($amount * $feeRate, $minFee);
         return round($fee, 2);

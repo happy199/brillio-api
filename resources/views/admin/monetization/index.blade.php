@@ -39,14 +39,16 @@
                         <p class="text-lg font-bold text-gray-800">{{ number_format($creditsPurchasedJeune) }} <span
                                 class="text-xs font-normal text-gray-400">crd.</span></p>
                         <p class="text-xs font-medium text-green-600">≈
-                            {{ number_format($fcfaPurchasedJeune, 0, ',', ' ') }} FCFA</p>
+                            {{ number_format($fcfaPurchasedJeune, 0, ',', ' ') }} FCFA
+                        </p>
                     </div>
                     <div class="text-right">
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Mentors</p>
                         <p class="text-lg font-bold text-gray-800">{{ number_format($creditsPurchasedMentor) }} <span
                                 class="text-xs font-normal text-gray-400">crd.</span></p>
                         <p class="text-xs font-medium text-green-600">≈
-                            {{ number_format($fcfaPurchasedMentor, 0, ',', ' ') }} FCFA</p>
+                            {{ number_format($fcfaPurchasedMentor, 0, ',', ' ') }} FCFA
+                        </p>
                     </div>
                 </div>
             </div>
@@ -129,6 +131,20 @@
                             </div>
                             <p class="text-xs text-gray-500 mt-1">Débité lors de la création/maj d'une ressource avec
                                 ciblage.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Commission Retrait Mentor
+                                (%)</label>
+                            <div class="relative">
+                                <input type="number" name="payout_fee_percentage" value="{{ $payoutFeePercentage }}"
+                                    class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12"
+                                    min="0" max="100">
+                                <div
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                    %</div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Pourcentage prélevé sur le solde lors d'un retrait.</p>
                         </div>
 
                         <button type="submit"
