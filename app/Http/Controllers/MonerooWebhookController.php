@@ -248,10 +248,23 @@ class MonerooWebhookController extends Controller
             // CRITICAL: Refund the balance to mentor
             $payoutRequest->mentorProfile->increment('available_balance', $payoutRequest->amount);
 
+            // Refund credits
+            $creditPrice = $this->walletService->getCreditPrice('mentor');
+            $creditsRefund = intval($payoutRequest->amount / $creditPrice);
+
+            $this->walletService->addCredits(
+                $payoutRequest->mentorProfile->user,
+                $creditsRefund,
+                'refund',
+                "Remboursement retrait échoué (Webhook)",
+                $payoutRequest
+            );
+
             Log::info('Moneroo payout failed and balance refunded', [
                 'payout_id' => $payoutRequest->id,
                 'moneroo_payout_id' => $monerooPayoutId,
-                'amount_refunded' => $payoutRequest->amount
+                'amount_refunded' => $payoutRequest->amount,
+                'credits_refunded' => $creditsRefund
             ]);
 
             return response()->json(['message' => 'Payout failure processed'], 200);

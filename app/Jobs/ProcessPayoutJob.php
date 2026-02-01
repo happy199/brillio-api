@@ -91,6 +91,23 @@ class ProcessPayoutJob implements ShouldQueue
                 // Rembourser le solde du mentor
                 $this->payoutRequest->mentorProfile->increment('available_balance', $this->payoutRequest->amount);
 
+                // Rembourser les crédits
+                try {
+                    $walletService = app(\App\Services\WalletService::class);
+                    $creditPrice = $walletService->getCreditPrice('mentor');
+                    $creditsRefund = intval($this->payoutRequest->amount / $creditPrice);
+
+                    $walletService->addCredits(
+                        $this->payoutRequest->mentorProfile->user,
+                        $creditsRefund,
+                        'refund',
+                        "Remboursement retrait échoué",
+                        $this->payoutRequest
+                    );
+                } catch (\Exception $e) {
+                    Log::error('ProcessPayoutJob: Failed to refund credits', ['error' => $e->getMessage()]);
+                }
+
                 Log::error('ProcessPayoutJob: Payout failed permanently after ' . $this->attempts() . ' attempts', [
                     'payout_id' => $this->payoutRequest->id,
                     'error' => $e->getMessage()
@@ -120,6 +137,23 @@ class ProcessPayoutJob implements ShouldQueue
             ]);
 
             $this->payoutRequest->mentorProfile->increment('available_balance', $this->payoutRequest->amount);
+
+            // Rembourser les crédits (Failed job)
+            try {
+                $walletService = app(\App\Services\WalletService::class);
+                $creditPrice = $walletService->getCreditPrice('mentor');
+                $creditsRefund = intval($this->payoutRequest->amount / $creditPrice);
+
+                $walletService->addCredits(
+                    $this->payoutRequest->mentorProfile->user,
+                    $creditsRefund,
+                    'refund',
+                    "Remboursement retrait échoué (Job Failed)",
+                    $this->payoutRequest
+                );
+            } catch (\Exception $e) {
+                Log::error('ProcessPayoutJob: Failed to refund credits in failed()', ['error' => $e->getMessage()]);
+            }
         }
     }
 }

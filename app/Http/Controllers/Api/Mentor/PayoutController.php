@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\Validator;
 class PayoutController extends Controller
 {
     protected MonerooService $monerooService;
+    protected \App\Services\WalletService $walletService;
 
-    public function __construct(MonerooService $monerooService)
+    public function __construct(MonerooService $monerooService, \App\Services\WalletService $walletService)
     {
         $this->monerooService = $monerooService;
+        $this->walletService = $walletService;
     }
 
     /**
@@ -116,8 +118,34 @@ class PayoutController extends Controller
             'status' => PayoutRequest::STATUS_PENDING
         ]);
 
-        // Déduire du solde disponible immédiatement
+        // Déduire du solde disponible immédiatement (FCFA)
         $mentorProfile->decrement('available_balance', $amount);
+
+        // Déduire les crédits correspondants (Conversion inverse)
+        $creditPrice = $this->walletService->getCreditPrice('mentor');
+        $creditsToDeduct = intval($amount / $creditPrice); // ex: 5000 / 100 = 50 crédits
+
+        try {
+            // On déduit les crédits avec le type 'payout'
+            $this->walletService->deductCredits(
+                $request->user(),
+                $creditsToDeduct,
+                'payout',
+                "Retrait de " . number_format($amount, 0, ',', ' ') . " FCFA",
+                $payout
+            );
+        } catch (\Exception $e) {
+            // En cas d'erreur (ex: incohérence solde crédits vs solde FCFA), on annule tout
+            // On re-crédite le solde FCFA
+            $mentorProfile->increment('available_balance', $amount);
+            // On supprime la demande de payout
+            $payout->delete();
+
+            return response()->json([
+                'message' => 'Erreur de cohérence: Solde de crédits insuffisant pour ce retrait.',
+                'error' => $e->getMessage()
+            ], 422);
+        }
 
         // Dispatcher le job pour traitement automatique
         ProcessPayoutJob::dispatch($payout);
