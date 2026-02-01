@@ -223,7 +223,21 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <span class="text-xs">{{ $resource->created_at->format('d M') }}</span>
+                                    <div class="flex flex-col items-end gap-1">
+                                        <div class="flex items-center gap-2 text-xs">
+                                            <span class="flex items-center gap-1 text-gray-400" title="{{ $resource->views_count }} vues">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                {{ $resource->views_count }}
+                                            </span>
+                                            @if($resource->is_premium && $resource->sales_count >= 10)
+                                                <span class="flex items-center gap-1 text-purple-600 font-medium" title="{{ $resource->sales_count }} achats">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                                                    {{ $resource->sales_count }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <span class="text-xs">{{ $resource->created_at->format('d M') }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </article>

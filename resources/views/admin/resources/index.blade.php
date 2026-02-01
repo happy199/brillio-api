@@ -84,6 +84,7 @@
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stats</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créateur
@@ -119,10 +120,10 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase
-                                                    @if($resource->type === 'article') bg-blue-100 text-blue-800
-                                                    @elseif($resource->type === 'video') bg-red-100 text-red-800
-                                                    @elseif($resource->type === 'advertisement') bg-purple-100 text-purple-800
-                                                    @else bg-gray-100 text-gray-800 @endif">
+                                                                    @if($resource->type === 'article') bg-blue-100 text-blue-800
+                                                                    @elseif($resource->type === 'video') bg-red-100 text-red-800
+                                                                    @elseif($resource->type === 'advertisement') bg-purple-100 text-purple-800
+                                                                    @else bg-gray-100 text-gray-800 @endif">
                                 {{ $resource->type === 'advertisement' ? 'Publicité' : $resource->type }}
                             </span>
                         </td>
@@ -134,6 +135,29 @@
                                     F</span>
                                 <span class="ml-1 text-xs text-yellow-600 bg-yellow-100 px-1 rounded">Premium</span>
                             @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center text-xs text-gray-500" title="{{ $resource->views_count }} vues">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    {{ $resource->views_count }} vues
+                                </div>
+                                @if($resource->is_premium)
+                                    <div class="flex items-center text-xs text-purple-600 font-medium"
+                                        title="{{ $resource->sales_count }} achats">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                        {{ $resource->sales_count }} achats
+                                    </div>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($resource->is_published && $resource->is_validated)
@@ -165,7 +189,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                             Aucune ressource trouvée.
                         </td>
                     </tr>

@@ -79,6 +79,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ressource</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stats</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -124,6 +125,20 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center text-xs text-gray-500" title="{{ $resource->views_count }} vues">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        {{ $resource->views_count }} vues
+                                    </div>
+                                    @if($resource->is_premium)
+                                        <div class="flex items-center text-xs text-purple-600 font-medium" title="{{ $resource->sales_count }} achats">
+                                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                                            {{ $resource->sales_count }} achats
+                                        </div>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 @if($resource->is_published && $resource->is_validated)
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>
@@ -151,7 +166,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex flex-col items-center justify-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                                     <p class="text-lg font-medium text-gray-900">Aucune ressource pour le moment</p>

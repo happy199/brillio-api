@@ -117,52 +117,93 @@
                     </div>
                 </div>
 
-                <!-- Fichier -->
-                @if($resource->file_path)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-semibold text-gray-900 mb-4">Fichier joint</h3>
-                        <a href="{{ Storage::url($resource->file_path) }}" target="_blank"
-                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                            <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            </div>
+
+            <!-- Statistiques -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="font-semibold text-gray-900 mb-4">Statistiques</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500">Vues totales</span>
+                        <span class="flex items-center gap-1 font-bold text-gray-900">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                                </path>
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate">Télécharger le fichier</p>
-                                <p class="text-xs text-gray-500">Document attaché</p>
-                            </div>
-                        </a>
+                            {{ $resource->views_count }}
+                        </span>
                     </div>
-                @endif
-
-                <!-- Metadata -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="font-semibold text-gray-900 mb-4">Ciblage</h3>
-
-                    @if(!empty($resource->mbti_types))
-                        <div class="mb-4">
-                            <p class="text-xs text-gray-500 mb-2">Types MBTI</p>
-                            <div class="flex flex-wrap gap-1">
-                                @foreach($resource->mbti_types as $type)
-                                    <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">{{ $type }}</span>
-                                @endforeach
-                            </div>
+                    @if($resource->is_premium)
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Achats</span>
+                            <span class="flex items-center gap-1 font-bold text-purple-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                                {{ $resource->sales_count }}
+                            </span>
                         </div>
-                    @endif
-
-                    @if(!empty($resource->tags))
-                        <div>
-                            <p class="text-xs text-gray-500 mb-2">Tags</p>
-                            <div class="flex flex-wrap gap-1">
-                                @foreach($resource->tags as $tag)
-                                    <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">#{{ trim($tag) }}</span>
-                                @endforeach
+                        <div class="border-t pt-2 mt-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Volume Ventes</span>
+                                <span class="font-bold text-green-600">
+                                    {{ number_format($resource->sales_count * $resource->price, 0, ',', ' ') }} FCFA
+                                </span>
                             </div>
                         </div>
                     @endif
                 </div>
             </div>
+
+            <!-- Fichier -->
+            @if($resource->file_path)
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">Fichier joint</h3>
+                    <a href="{{ Storage::url($resource->file_path) }}" target="_blank"
+                        class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">Télécharger le fichier</p>
+                            <p class="text-xs text-gray-500">Document attaché</p>
+                        </div>
+                    </a>
+                </div>
+            @endif
+
+            <!-- Metadata -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="font-semibold text-gray-900 mb-4">Ciblage</h3>
+
+                @if(!empty($resource->mbti_types))
+                    <div class="mb-4">
+                        <p class="text-xs text-gray-500 mb-2">Types MBTI</p>
+                        <div class="flex flex-wrap gap-1">
+                            @foreach($resource->mbti_types as $type)
+                                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">{{ $type }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                @if(!empty($resource->tags))
+                    <div>
+                        <p class="text-xs text-gray-500 mb-2">Tags</p>
+                        <div class="flex flex-wrap gap-1">
+                            @foreach($resource->tags as $tag)
+                                <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">#{{ trim($tag) }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
         </div>
+    </div>
     </div>
 @endsection

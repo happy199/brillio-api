@@ -288,7 +288,10 @@ class ResourceController extends Controller
 
         $user = auth()->user();
 
-        // Enregistrer la vue si c'est une ressource gratuite
+        // Enregistrer la vue (Compteur global)
+        $resource->increment('views_count');
+
+        // Enregistrer la vue unique (si nécessaire pour la logique "déjà vu")
         // Pour les payantes, on peut aussi enregistrer mais "l'acquisition" est définie par l'achat.
         // La demande : "consultée car gratuite".
         if (!$resource->is_premium) {
@@ -397,6 +400,9 @@ class ResourceController extends Controller
                         $purchase // On lie à l'achat (qui contient l'info de l'acheteur via user_id)
                     );
                 }
+
+                // 4. Incrémenter le compteur de ventes
+                $resource->increment('sales_count');
             });
 
             return back()->with('success', 'Ressource débloquée avec succès !');
