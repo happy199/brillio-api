@@ -64,7 +64,32 @@ class WalletService
         }
 
         return DB::transaction(function () use ($user, $cost, $type, $description, $related) {
-            // Créer la transaction (montant négatif)
+            // Mentor Spending Logic: Consuming earned credits reduces withdrawable balance
+            if ($user->user_type === 'mentor' && $user->mentorProfile) {
+                $creditPriceFcfa = $this->getCreditPrice('mentor');
+                $breakdown = $this->getCreditBreakdown($user);
+
+                // Expenses are deducted from PURCHASED credits first, then EARNED.
+                $purchasedAvailable = $breakdown['purchased'];
+
+                $deductFromPurchased = min($purchasedAvailable, $cost);
+                $deductFromEarned = $cost - $deductFromPurchased;
+
+                if ($deductFromEarned > 0) {
+                    // Calculate FCFA equivalent to remove
+                    $amoutFcfaToRemove = $deductFromEarned * $creditPriceFcfa;
+
+                    // Reduce available balance (clamping to 0 just in case)
+                    if ($user->mentorProfile->available_balance >= $amoutFcfaToRemove) {
+                        $user->mentorProfile->decrement('available_balance', $amoutFcfaToRemove);
+                    } else {
+                        // Edge case: Inconsistent state, reset to 0
+                        $user->mentorProfile->update(['available_balance' => 0]);
+                    }
+                }
+            }
+
+            // Create Transaction
             $transaction = new WalletTransaction([
                 'user_id' => $user->id,
                 'amount' => -$cost,
@@ -78,11 +103,40 @@ class WalletService
 
             $transaction->save();
 
-            // Mettre à jour le solde
+            // Update User Balance
             $user->decrement('credits_balance', $cost);
 
             return $transaction;
         });
+    }
+
+    /**
+     * Get breakdown of credits (Purchased vs Earned) for a Mentor.
+     * Earned credits are derived from the available FCFA balance.
+     */
+    public function getCreditBreakdown(User $user): array
+    {
+        if ($user->user_type !== 'mentor' || !$user->mentorProfile) {
+            return ['purchased' => $user->credits_balance, 'earned' => 0];
+        }
+
+        $creditPrice = $this->getCreditPrice('mentor');
+        if ($creditPrice <= 0)
+            $creditPrice = 100; // Safety
+
+        // Calculate earned credits based on FCFA balance
+        // We floor it because credits are integers
+        $earnedCredits = floor($user->mentorProfile->available_balance / $creditPrice);
+
+        // Ensure we don't exceed total balance (in case of sync issues)
+        $earnedCredits = min($earnedCredits, $user->credits_balance);
+
+        $purchasedCredits = $user->credits_balance - $earnedCredits;
+
+        return [
+            'purchased' => max(0, $purchasedCredits),
+            'earned' => max(0, $earnedCredits)
+        ];
     }
 
     /**

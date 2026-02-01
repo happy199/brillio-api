@@ -208,6 +208,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
     Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class, 'create'])->name('sessions.create');
     Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class, 'show'])->name('sessions.show');
     Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class, 'cancel'])->name('sessions.cancel');
+    Route::post('/mentorat/seances/{session}/pay-join', [\App\Http\Controllers\Jeune\SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
 
     // Portefeuille & Crédits
     Route::get('/portefeuille', [\App\Http\Controllers\Jeune\WalletController::class, 'index'])->name('wallet.index');
@@ -294,6 +295,10 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
             // URL: /sessions/... (On garde /sessions pour éviter les conflits d'URL racine trop génériques)
             Route::get('/sessions/create', [\App\Http\Controllers\Mentor\SessionController::class, 'create'])->name('sessions.create');
             Route::post('/sessions', [\App\Http\Controllers\Mentor\SessionController::class, 'store'])->name('sessions.store');
+            // Edit & Update routes
+            Route::get('/sessions/{session}/edit', [\App\Http\Controllers\Mentor\SessionController::class, 'edit'])->name('sessions.edit');
+            Route::put('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'update'])->name('sessions.update');
+
             Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
             Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
             Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');

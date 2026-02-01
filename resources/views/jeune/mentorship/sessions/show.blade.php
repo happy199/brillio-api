@@ -60,27 +60,55 @@
                         </div>
                     </div>
 
+                    @if($session->is_paid)
+                        <div class="mb-4 bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                            <p class="text-sm text-purple-800 font-medium">Séance payante</p>
+                            <p class="text-2xl font-bold text-purple-900">{{ $session->credit_cost }} <span class="text-sm font-normal">Crédits</span></p>
+                            @if($session->status === 'confirmed' || $session->status === 'accepted')
+                                <span class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded-full">Payée</span>
+                            @else
+                                <span class="inline-block mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">À régler</span>
+                            @endif
+                        </div>
+                    @endif
+
                     @if($session->status === 'cancelled')
                         <div class="bg-red-100 text-red-800 px-4 py-2 rounded-lg text-center font-bold text-sm">
                             Séance annulée
                         </div>
                     @elseif($session->scheduled_at >= now())
                         @if($session->status === 'confirmed' || $session->status === 'accepted')
-                            @if($session->meeting_link)
-                                <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
-                                    class="block w-full text-center py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition mb-3">
-                                    En ligne
-                                </a>
-                            @else
-                                <button disabled
-                                    class="w-full py-2 bg-gray-200 text-gray-500 font-medium rounded-lg cursor-not-allowed mb-3">
-                                    Lien bientôt disponible
-                                </button>
+                            @if(!$session->is_paid || $session->status === 'confirmed')
+                                <!-- CAS 1: Gratuit OU Payé (et confirmé) -->
+                                @if($session->meeting_link)
+                                    <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
+                                        class="block w-full text-center py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition mb-3">
+                                        En ligne
+                                    </a>
+                                @else
+                                    <button disabled
+                                        class="w-full py-2 bg-gray-200 text-gray-500 font-medium rounded-lg cursor-not-allowed mb-3">
+                                        Lien bientôt disponible
+                                    </button>
+                                @endif
+                            @elseif($session->is_paid && $session->status !== 'confirmed')
+                                 <!-- Fallback improbable si status confirmed mais is_paid false? Non, couvert par le if au-dessus -->
                             @endif
                         @else
-                            <div class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg text-center font-bold text-sm mb-3">
-                                En attente de validation
-                            </div>
+                             <!-- CAS 2: Non confirmé (donc pending_payment pour les payants) -->
+                             @if($session->is_paid)
+                                <form action="{{ route('jeune.sessions.pay-join', $session) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="w-full py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition mb-3 flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Payer & Rejoindre
+                                    </button>
+                                </form>
+                             @else
+                                <div class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg text-center font-bold text-sm mb-3">
+                                    En attente de validation
+                                </div>
+                             @endif
                         @endif
 
                         <!-- Cancel Button & Modal Trigger -->

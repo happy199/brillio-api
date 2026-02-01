@@ -49,7 +49,12 @@ class WalletController extends Controller
         // Valeur en FCFA des revenus (Basé sur le prix de rachat/vente actuel ou une valeur fixe)
         // Ici on estime la valeur basée sur le prix d'achat mentor, ou un taux de reversement spécifique
         // Pour l'instant on utilise le prix du crédit mentor comme base de valeur
+        // Valeur en FCFA des revenus (Basé sur le prix de rachat/vente actuel ou une valeur fixe)
+        // Ici on estime la valeur basée sur le prix d'achat mentor, ou un taux de reversement spécifique
+        // Pour l'instant on utilise le prix du crédit mentor comme base de valeur
         $estimatedValueFcfa = $totalCreditsEarned * $creditPrice;
+
+        $creditBreakdown = $this->walletService->getCreditBreakdown($user);
 
         // Packs suggérés
         $packs = [
@@ -66,7 +71,8 @@ class WalletController extends Controller
             'creditPrice',
             'packs',
             'totalCreditsEarned',
-            'estimatedValueFcfa'
+            'estimatedValueFcfa',
+            'creditBreakdown'
         ));
     }
 

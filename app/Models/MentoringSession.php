@@ -52,4 +52,27 @@ class MentoringSession extends Model
             return null;
         return basename($this->meeting_link);
     }
+
+    /**
+     * Calculate the cost in credits based on the FCFA price
+     */
+    public function getCreditCostAttribute()
+    {
+        if (!$this->price)
+            return 0;
+
+        static $jeuneCreditPrice = null;
+
+        if ($jeuneCreditPrice === null) {
+            $jeuneCreditPrice = \App\Models\SystemSetting::where('key', 'credit_price_jeune')->value('value') ?? 50;
+        }
+
+        // Avoid division by zero
+        if ($jeuneCreditPrice <= 0)
+            return (int) $this->price;
+
+        // Session Price (FCFA) / Credit Price (FCFA/Credit) = Credits needed
+        // User requested floor behavior for integer credits
+        return (int) floor($this->price / $jeuneCreditPrice);
+    }
 }
