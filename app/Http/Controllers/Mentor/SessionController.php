@@ -127,7 +127,8 @@ class SessionController extends Controller
             'duration_minutes' => $request->duration_minutes,
             'is_paid' => $request->boolean('is_paid'),
             'price' => $request->boolean('is_paid') ? $request->price : 0,
-            'status' => 'confirmed', // Séance créée par le mentor est automatiquement confirmée
+            // Si payant => pending_payment, sinon confirmed direct
+            'status' => $request->boolean('is_paid') ? 'pending_payment' : 'confirmed',
             'meeting_link' => $meetingLink,
             'created_by' => 'mentor',
         ]);
@@ -153,6 +154,48 @@ class SessionController extends Controller
         }
 
         return view('mentor.mentorship.sessions.show', compact('session'));
+    }
+
+    /**
+     * Formulaire d'édition d'une séance
+     */
+    public function edit(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('mentor.mentorship.sessions.edit', compact('session'));
+    }
+
+    /**
+     * Mettre à jour une séance
+     */
+    public function update(Request $request, MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'scheduled_at' => 'required|date',
+            'duration_minutes' => 'required|integer|min:15',
+            'price' => 'nullable|numeric|min:0',
+        ]);
+
+        $session->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'scheduled_at' => $request->scheduled_at,
+            'duration_minutes' => $request->duration_minutes,
+            'price' => $session->is_paid ? $request->price : 0, // Update price ONLY if already paid type
+            // Note: We do NOT update 'status' or 'is_paid' here to preserve payment state as requested.
+        ]);
+
+        return redirect()->route('mentor.mentorship.sessions.show', $session)
+            ->with('success', 'Séance modifiée avec succès.');
     }
 
     /**

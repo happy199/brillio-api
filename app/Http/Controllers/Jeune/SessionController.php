@@ -150,4 +150,88 @@ class SessionController extends Controller
         return redirect()->route('jeune.sessions.index')
             ->with('success', 'La séance a été annulée avec succès.');
     }
+    /**
+     * Payer et Rejoindre une séance
+     */
+    public function payAndJoin(MentoringSession $session)
+    {
+        $user = auth()->user();
+
+        // 1. Vérif Participant
+        if (!$session->mentees->contains($user->id)) {
+            abort(403);
+        }
+
+        // 2. Si déjà confirmée ou gratuite => Redirection directe
+        if (!$session->is_paid || $session->status === 'confirmed') {
+            return redirect()->route('meeting.show', $session->meeting_id ?? 'error');
+        }
+
+        // 3. Conversion & Vérif Solde
+        // Le prix de la session est en FCFA, on le convertit en Crédits
+        $price = $session->credit_cost;
+        $balance = \App\Models\WalletTransaction::where('user_id', $user->id)->sum('amount');
+
+        if ($balance < $price) {
+            return redirect()->route('jeune.wallet.index')
+                ->with('error', "Solde insuffisant ($balance crédits dispos). Il vous manque " . ($price - $balance) . " crédits pour cette séance.");
+        }
+
+        // 4. Calculate Commission
+        $commissionPercent = \App\Models\SystemSetting::where('key', 'mentorship_commission_percent')->value('value') ?? 10;
+        $commissionAmount = floor($price * ($commissionPercent / 100));
+        $mentorAmount = floor($price - $commissionAmount);
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($user, $session, $price, $mentorAmount, $commissionAmount, $commissionPercent) {
+                $walletService = app(\App\Services\WalletService::class);
+
+                // Debit Jeune
+                $walletService->deductCredits(
+                    $user,
+                    $price,
+                    'expense',
+                    "Paiement séance : {$session->title}",
+                    $session
+                );
+
+                // Credit Mentor (Net)
+                // We need to fetch the mentor User model first
+                $mentor = \App\Models\User::find($session->mentor_id);
+                if ($mentor) {
+                    // NEW LOGIC: Convert Value to Mentor Credits
+                    // 1. Value in FCFA (from Jeune's payment)
+                    $jeuneCreditPrice = $walletService->getCreditPrice('jeune');
+                    $grossFcfa = $price * $jeuneCreditPrice;
+
+                    // 2. Commission
+                    $commissionFcfa = floor($grossFcfa * ($commissionPercent / 100));
+
+                    // 3. Net for Mentor
+                    $netFcfa = $grossFcfa - $commissionFcfa;
+
+                    // 4. Convert to Mentor Credits
+                    $mentorCreditPrice = $walletService->getCreditPrice('mentor');
+                    $mentorCredits = floor($netFcfa / $mentorCreditPrice);
+
+                    $walletService->addCredits(
+                        $mentor,
+                        $mentorCredits,
+                        'income',
+                        "Rémunération séance : {$session->title} (-{$commissionPercent}% com.)",
+                        $session
+                    );
+                }
+
+                // Update Session Status
+                $session->update(['status' => 'confirmed']);
+                $session->mentees()->updateExistingPivot($user->id, ['status' => 'accepted']);
+            });
+
+            return redirect()->route('meeting.show', $session->meeting_id)
+                ->with('success', 'Paiement effectué avec succès. Bon mentorat !');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', "Erreur lors du paiement : " . $e->getMessage());
+        }
+    }
 }

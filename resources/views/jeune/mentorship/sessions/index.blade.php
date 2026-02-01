@@ -45,7 +45,16 @@
                                     {{ \Carbon\Carbon::parse($session->scheduled_at)->format('H:i') }} ({{ $session->duration_minutes }} min)
                                 </span>
                             </div>
-                            <h3 class="font-bold text-gray-900 mb-1">{{ $session->title }}</h3>
+                            
+                            <div class="flex items-center justify-between mb-1">
+                                <h3 class="font-bold text-gray-900">{{ $session->title }}</h3>
+                                @if($session->is_paid)
+                                    <span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded border border-purple-200">
+                                        {{ $session->credit_cost }} Crédits
+                                    </span>
+                                @endif
+                            </div>
+
                             <div class="flex items-center gap-2 mb-4">
                                 <img src="{{ $session->mentor->avatar_url }}" alt="" class="w-6 h-6 rounded-full bg-gray-200">
                                 <span class="text-sm text-gray-600">Avec {{ $session->mentor->name }}</span>
@@ -53,14 +62,26 @@
                             
                             <div class="flex gap-2 mt-auto">
                                 @if($session->status === 'confirmed' || $session->status === 'accepted')
-                                    @if($session->meeting_link)
-                                        <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank" class="flex-1 text-center py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
-                                            En ligne
-                                        </a>
-                                    @else
-                                        <button disabled class="flex-1 py-2 bg-gray-100 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
-                                            Lien bientôt dispo
-                                        </button>
+                                    @if(!$session->is_paid || $session->status === 'confirmed')
+                                        <!-- CAS 1: Gratuit OU Payé -->
+                                        @if($session->meeting_link)
+                                            <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank" class="flex-1 text-center py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
+                                                En ligne
+                                            </a>
+                                        @else
+                                            <button disabled class="flex-1 py-2 bg-gray-100 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
+                                                Lien bientôt dispo
+                                            </button>
+                                        @endif
+                                    @elseif($session->is_paid && $session->status !== 'confirmed')
+                                        <!-- CAS 2: Payant & Non Payé -->
+                                        <form action="{{ route('jeune.sessions.pay-join', $session) }}" method="POST" class="flex-1">
+                                            @csrf
+                                            <button type="submit" class="w-full py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Payer & Rejoindre
+                                            </button>
+                                        </form>
                                     @endif
                                 @else
                                     <span class="flex-1 text-center py-2 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-lg">

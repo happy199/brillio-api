@@ -18,19 +18,29 @@
                 <div>
                     <div class="flex items-center gap-3 mb-2">
                         <h1 class="text-2xl font-bold text-gray-900">{{ $session->title }}</h1>
-                        @if($session->status == 'completed')
-                            <span
-                                class="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase">Terminée</span>
-                        @elseif($session->status == 'cancelled')
-                            <span
-                                class="bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase">Annulée</span>
-                        @elseif($session->status == 'confirmed')
-                            <span
-                                class="bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase">Confirmée</span>
-                        @else
-                            <span
-                                class="bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase">{{ $session->status }}</span>
-                        @endif
+                        @php
+                            $statusColors = [
+                                'pending_payment' => 'bg-orange-100 text-orange-800',
+                                'confirmed' => 'bg-green-100 text-green-800', // Ou Indigo si on préfère
+                                'cancelled' => 'bg-red-100 text-red-800',
+                                'completed' => 'bg-blue-100 text-blue-800',
+                                'proposed' => 'bg-gray-100 text-gray-800',
+                            ];
+                            $statusLabels = [
+                                'pending_payment' => 'En attente de paiement',
+                                'confirmed' => 'Confirmée',
+                                'cancelled' => 'Annulée',
+                                'completed' => 'Terminée',
+                                'proposed' => 'Proposée',
+                            ];
+                            $currentStatus = $session->status;
+                            $colorClass = $statusColors[$currentStatus] ?? 'bg-gray-100 text-gray-800';
+                            $label = $statusLabels[$currentStatus] ?? $currentStatus;
+                        @endphp
+                        <span
+                            class="{{ $colorClass }} px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide">
+                            {{ $label }}
+                        </span>
                     </div>
                     <p class="text-gray-500">{{ $session->scheduled_at->format('d F Y à H:i') }} •
                         {{ $session->duration_minutes }} min
@@ -38,6 +48,17 @@
                 </div>
 
                 <div class="flex gap-3">
+                    <!-- Edit Button (Always visible as requested) -->
+                    <a href="{{ route('mentor.mentorship.sessions.edit', $session) }}"
+                        class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg font-medium transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                            </path>
+                        </svg>
+                        Modifier
+                    </a>
+
                     @if($session->status === 'proposed')
                         <form action="{{ route('mentor.mentorship.sessions.accept', $session) }}" method="POST">
                             @csrf
@@ -71,9 +92,15 @@
                                     d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
                                 </path>
                             </svg>
-                            Rejoindre la visio
+                            Rejoindre
                         </a>
 
+                        <button onclick="document.getElementById('cancel-modal').showModal()"
+                            class="bg-white border border-gray-300 text-gray-700 hover:text-red-600 hover:border-red-200 px-4 py-2.5 rounded-lg font-medium transition">
+                            Annuler
+                        </button>
+                    @elseif($session->status === 'pending_payment')
+                        <!-- Bouton Annuler aussi dispo si en attente de paiement -->
                         <button onclick="document.getElementById('cancel-modal').showModal()"
                             class="bg-white border border-gray-300 text-gray-700 hover:text-red-600 hover:border-red-200 px-4 py-2.5 rounded-lg font-medium transition">
                             Annuler

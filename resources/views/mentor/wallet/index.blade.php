@@ -333,6 +333,19 @@
                                                         {{ $transaction->related->created_at->format('d/m/Y') }}</span>
                                                 </div>
                                             </div>
+                                        @elseif($transaction->related && $transaction->related instanceof \App\Models\MentoringSession)
+                                            <div class="flex items-center gap-2">
+                                                <div
+                                                    class="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-600">
+                                                    {{ substr($transaction->related->mentees->first()->name ?? '?', 0, 1) }}
+                                                </div>
+                                                <div class="flex flex-col">
+                                                    <span
+                                                        class="font-medium text-gray-900">{{ $transaction->related->mentees->first()->name ?? 'Menté Inconnu' }}</span>
+                                                    <span class="text-xs text-gray-500">Séance du
+                                                        {{ $transaction->related->scheduled_at->format('d/m/Y') }}</span>
+                                                </div>
+                                            </div>
                                         @else
                                             <span class="text-gray-400 italic">-</span>
                                         @endif
@@ -488,6 +501,20 @@
                     </div>
                     <p class="text-orange-100 text-sm mt-2">Utilisez ce solde pour promouvoir vos ressources et accéder aux
                         outils premium.</p>
+
+                    @if(isset($creditBreakdown))
+                        <div class="mt-3 flex gap-4 text-xs font-semibold bg-white/10 p-2 rounded-lg">
+                            <div class="flex flex-col">
+                                <span class="text-white/70 uppercase">Achetés</span>
+                                <span class="text-white text-base">{{ number_format($creditBreakdown['purchased']) }}</span>
+                            </div>
+                            <div class="w-px bg-white/20"></div>
+                            <div class="flex flex-col">
+                                <span class="text-white/70 uppercase">Gagnés</span>
+                                <span class="text-white text-base">{{ number_format($creditBreakdown['earned']) }}</span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
                 <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
