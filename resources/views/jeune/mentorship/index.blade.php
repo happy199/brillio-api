@@ -234,10 +234,10 @@
 
                 <form :action="cancelUrl" method="POST">
                     @csrf
-                    <div class="mb-4">
+                    <div class="mb-5">
                         <label for="cancellation_reason" class="block text-sm font-medium text-gray-700 mb-1">Raison (obligatoire)</label>
                         <textarea name="cancellation_reason" id="cancellation_reason" rows="3" required
-                            class="w-full rounded-xl border-gray-300 focus:border-red-500 focus:ring-red-500 text-sm"
+                            class="w-full rounded-xl border-gray-300 focus:border-red-500 focus:ring-red-500 text-sm p-3"
                             placeholder="Pourquoi annulez-vous cette demande ?"></textarea>
                     </div>
 
