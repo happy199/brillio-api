@@ -152,6 +152,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Relation vers les ressources créées par l'utilisateur (mentor/admin)
+     */
+    public function resources(): HasMany
+    {
+        return $this->hasMany(Resource::class);
+    }
+
+    /**
+     * Relation vers les transactions du portefeuille
+     */
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    /**
      * Retourne l'URL complète de la photo de profil
      */
     public function getAvatarUrlAttribute(): ?string

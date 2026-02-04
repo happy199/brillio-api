@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="api-token" content="{{ auth()->user()->createToken('mentor-wallet')->plainTextToken }}">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title', 'Espace Mentor') - Brillio</title>
 
@@ -116,6 +117,10 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Mon parcours
                     </a>
+                    <a href="{{ route('mentor.resources.index') }}"
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Mes Ressources
+                    </a>
                     <a href="{{ route('mentor.stats') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.stats') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Statistiques
@@ -151,6 +156,10 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Mon profil
                             </a>
+                            <a href="{{ route('mentor.wallet.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Mon Portefeuille ({{ auth()->user()->credits_balance }})
+                            </a>
                             <hr class="my-2 border-gray-100">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
@@ -184,6 +193,10 @@
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Parcours
             </a>
+            <a href="{{ route('mentor.resources.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.resources.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Ressources
+            </a>
             <a href="{{ route('mentor.stats') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.stats') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Stats
@@ -193,18 +206,6 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        @if(session('success'))
-            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-                <p class="text-green-700">{{ session('success') }}</p>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <p class="text-red-700">{{ session('error') }}</p>
-            </div>
-        @endif
-
         @yield('content')
     </main>
 
@@ -224,6 +225,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     @stack('scripts')
+    @include('partials.toast')
 </body>
 
 </html>

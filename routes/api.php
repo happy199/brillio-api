@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\V1\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,4 +29,20 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Mentor Payout Routes
+    Route::prefix('mentor')->group(function () {
+        Route::get('/balance', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'getBalance']);
+        Route::get('/payout-methods', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'getPayoutMethods']);
+        Route::post('/payout/request', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'requestPayout']);
+        Route::get('/payout-requests', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'getPayoutRequests']);
+    });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Moneroo Webhook (No CSRF Protection in API routes)
+|--------------------------------------------------------------------------
+*/
+Route::post('/webhooks/moneroo', [\App\Http\Controllers\MonerooWebhookController::class, 'handle'])
+    ->name('api.webhooks.moneroo');

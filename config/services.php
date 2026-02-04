@@ -66,4 +66,14 @@ return [
         'service_role_key' => env('SUPABASE_SERVICE_ROLE_KEY'),
     ],
 
+    // Moneroo Payment Gateway - Paiement pour Afrique de l'Ouest
+    // Documentation: https://moneroo.io/docs
+    'moneroo' => [
+        'secret_key' => env('MONEROO_SECRET_KEY'),
+        'is_sandbox' => env('MONEROO_SANDBOX', true),
+        'webhook_secret' => env('MONEROO_WEBHOOK_SECRET'),
+        'currency' => env('MONEROO_CURRENCY', 'XOF'), // XOF = Franc CFA
+        'api_url' => env('MONEROO_API_URL', 'https://api.moneroo.io/v1'),
+    ],
+
 ];

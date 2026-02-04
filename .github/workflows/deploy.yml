@@ -160,6 +160,23 @@ jobs:
               echo "DB_HOST=mysql" >> .env
             fi
 
+            # Configure Moneroo Production Keys
+            echo "🔐 Configuring Moneroo payment gateway..."
+            
+            # Remove any existing Moneroo config
+            sed -i '/^MONEROO_/d' .env
+            
+            # Add production Moneroo config
+            echo "" >> .env
+            echo "# Moneroo Payment Gateway (Production)" >> .env
+            echo "MONEROO_SECRET_KEY=${{ secrets.MONEROO_LIVE_KEY }}" >> .env
+            echo "MONEROO_SANDBOX=false" >> .env
+            echo "MONEROO_WEBHOOK_SECRET=${{ secrets.MONEROO_WEBHOOK_SECRET }}" >> .env
+            echo "MONEROO_CURRENCY=XOF" >> .env
+            echo "MONEROO_API_URL=https://api.moneroo.io/v1" >> .env
+            
+            echo "✅ Moneroo production keys configured"
+
             # Pull latest image
             docker-compose pull app
             
