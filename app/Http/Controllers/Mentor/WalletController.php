@@ -43,12 +43,36 @@ class WalletController extends Controller
 
         $creditPrice = $this->walletService->getCreditPrice('mentor');
 
-        // Calcul des totaux revenus
+        // Calcul des crédits achetés (Total cumulé)
+        $totalCreditsPurchased = $user->walletTransactions()
+            ->whereIn('type', ['purchase', 'coupon'])
+            ->where('amount', '>', 0)
+            ->sum('amount');
+
+        // Calcul des crédits gagnés (Total cumulé)
         $totalCreditsEarned = $user->walletTransactions()->where('type', 'income')->sum('amount');
 
-        // Valeur en FCFA des revenus (Basé sur le prix de rachat/vente actuel ou une valeur fixe)
-        // Ici on estime la valeur basée sur le prix d'achat mentor, ou un taux de reversement spécifique
-        // Pour l'instant on utilise le prix du crédit mentor comme base de valeur
+        // Calcul des dépenses (Total cumulé)
+        $totalExpenses = abs($user->walletTransactions()
+            ->whereIn('type', ['expense', 'service_fee'])
+            ->sum('amount'));
+
+        // Calcul des retraits (Total cumulé)
+        $totalWithdrawn = abs($user->walletTransactions()
+            ->where('type', 'payout')
+            ->sum('amount'));
+
+        // Breakdown des crédits par source
+        $creditBreakdown = [
+            'purchased' => $totalCreditsPurchased, // Cumulé
+            'earned' => $totalCreditsEarned,     // Cumulé
+            'spent' => $totalExpenses,           // Cumulé
+            'withdrawn' => $totalWithdrawn       // Cumulé
+        ];
+
+        // Breakdown des crédits restants par source
+
+
         // Valeur en FCFA des revenus (Basé sur le prix de rachat/vente actuel ou une valeur fixe)
         // Ici on estime la valeur basée sur le prix d'achat mentor, ou un taux de reversement spécifique
         // Pour l'instant on utilise le prix du crédit mentor comme base de valeur
@@ -72,7 +96,8 @@ class WalletController extends Controller
             'totalCreditsEarned',
             'estimatedValueFcfa',
             'payoutFeePercentage',
-            'payoutMinFee'
+            'payoutMinFee',
+            'creditBreakdown'
         ));
     }
 
