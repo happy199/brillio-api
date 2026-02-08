@@ -119,8 +119,13 @@
                         Assistant IA
                     </a>
                     <a href="{{ route('jeune.resources.index') }}"
-                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        class="nav-item relative px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Ressources
+                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                        </span>
                     </a>
                     <a href="{{ route('jeune.documents') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
@@ -140,15 +145,15 @@
                             <div
                                 class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-purple-500 flex items-center justify-center">
                                 @if(auth()->user()->avatar_url)
-                                    <img src="{{ auth()->user()->avatar_url }}" alt=""
-                                        class="w-8 h-8 rounded-full object-cover">
+                                <img src="{{ auth()->user()->avatar_url }}" alt=""
+                                    class="w-8 h-8 rounded-full object-cover">
                                 @else
-                                    <span
-                                        class="text-sm font-semibold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                <span class="text-sm font-semibold text-white">{{
+                                    strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                                 @endif
                             </div>
-                            <span
-                                class="hidden sm:block text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
+                            <span class="hidden sm:block text-sm font-medium text-gray-700">{{ auth()->user()->name
+                                }}</span>
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
@@ -162,8 +167,10 @@
                                 Mon profil
                             </a>
                             <a href="{{ route('jeune.wallet.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Mon Portefeuille ({{ auth()->user()->credits_balance }})
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
+                                <span>Mon Portefeuille ({{ auth()->user()->credits_balance }})</span>
+                                <span
+                                    class="animate-pulse bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full">NEW</span>
                             </a>
                             <hr class="my-2 border-gray-100">
                             <form action="{{ route('logout') }}" method="POST">
