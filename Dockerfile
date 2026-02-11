@@ -41,6 +41,9 @@ RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
 
+# Create storage symlink (baked into image)
+RUN php artisan storage:link
+
 # Stage 2: Production
 FROM php:8.4-fpm-alpine
 
