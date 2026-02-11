@@ -71,9 +71,29 @@ class WebAuthController extends Controller
     /**
      * Affiche le formulaire d'inscription jeune
      */
-    public function showJeuneRegister()
+    public function showJeuneRegister(Request $request)
     {
-        return view('auth.jeune.register');
+        // Detect referral code from URL (?ref=CODE)
+        if ($request->has('ref')) {
+            $referralCode = $request->get('ref');
+            
+            // Validate that the invitation exists and is valid
+            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                ->where('status', 'pending')
+                ->whereDate('expires_at', '>=', now())
+                ->first();
+            
+            if ($invitation) {
+                // Store referral code in session
+                session(['referral_code' => $referralCode]);
+                session(['organization_name' => $invitation->organization->name]);
+            }
+        }
+        
+        return view('auth.jeune.register', [
+            'referralCode' => session('referral_code'),
+            'organizationName' => session('organization_name'),
+        ]);
     }
 
     /**
@@ -106,6 +126,20 @@ class WebAuthController extends Controller
             ['name' => $validated['name']]
         );
 
+        // Check for referral code in session
+        $referralCode = session('referral_code');
+        $organizationId = null;
+        
+        if ($referralCode) {
+            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                ->where('status', 'pending')
+                ->first();
+            
+            if ($invitation) {
+                $organizationId = $invitation->organization_id;
+            }
+        }
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -113,7 +147,20 @@ class WebAuthController extends Controller
             'user_type' => 'jeune',
             'auth_provider' => 'email',
             'provider_id' => $supabaseResult['user']['id'] ?? null,
+            'sponsored_by_organization_id' => $organizationId,
+            'referral_code_used' => $referralCode,
         ]);
+        
+        // Mark invitation as accepted
+        if ($referralCode && isset($invitation)) {
+            $invitation->update([
+                'status' => 'accepted',
+                'accepted_at' => now(),
+            ]);
+            
+            // Clear referral code from session
+            session()->forget(['referral_code', 'organization_name']);
+        }
 
         try {
             Mail::to($user)->send(new WelcomeEmail($user));
@@ -964,4 +1011,3 @@ class WebAuthController extends Controller
             ->with('info', "Veuillez vous connecter avec votre compte {$user->user_type}.");
     }
 }
-

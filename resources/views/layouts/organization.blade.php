@@ -64,6 +64,18 @@
                         <span class="text-xl font-bold text-gray-900">Brillio<span
                                 class="text-organization-500">Partner</span></span>
                     </a>
+
+                    <!-- Navigation Links -->
+                    <div class="hidden md:ml-10 md:flex md:space-x-8">
+                        <a href="{{ route('organization.dashboard') }}"
+                            class="{{ request()->routeIs('organization.dashboard') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Tableau de bord
+                        </a>
+                        <a href="{{ route('organization.invitations.index') }}"
+                            class="{{ request()->routeIs('organization.invitations.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Invitations
+                        </a>
+                    </div>
                 </div>
 
                 <div class="flex items-center space-x-4">
@@ -85,6 +97,20 @@
         @if(session('success'))
         <div class="mb-6 bg-organization-50 border border-organization-200 text-organization-800 px-4 py-3 rounded-lg">
             {{ session('success') }}
+
+            @if(session('invitation_url'))
+            <div class="mt-3 p-3 bg-white rounded border border-organization-300">
+                <p class="text-sm font-semibold text-gray-700 mb-2">Lien d'invitation :</p>
+                <div class="flex items-center space-x-2">
+                    <input type="text" readonly value="{{ session('invitation_url') }}" id="invitation-url-input"
+                        class="flex-1 text-sm px-3 py-2 border border-gray-300 rounded-md bg-gray-50 font-mono">
+                    <button onclick="copyInvitationUrl()"
+                        class="px-4 py-2 bg-organization-600 text-white text-sm font-medium rounded-md hover:bg-organization-700">
+                        Copier
+                    </button>
+                </div>
+            </div>
+            @endif
         </div>
         @endif
 
@@ -98,6 +124,19 @@
     </main>
 
     @stack('scripts')
+
+    <script>
+        function copyInvitationUrl() {
+            const input = document.getElementById('invitation-url-input');
+            input.select();
+            input.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(input.value).then(function () {
+                alert('Lien copié dans le presse-papiers !');
+            }, function (err) {
+                alert('Erreur lors de la copie');
+            });
+        }
+    </script>
 </body>
 
 </html>
