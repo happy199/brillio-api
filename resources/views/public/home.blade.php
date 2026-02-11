@@ -1,9 +1,13 @@
 @extends('layouts.public')
 
 @section('title', 'Brillio - Ton avenir, ton choix | Orientation professionnelle pour jeunes africains')
-@section('meta_description', 'Brillio est la plateforme d\'orientation professionnelle dédiée aux jeunes africains. Test de personnalité, mentoring, conseils IA et bien plus.')
+@section('meta_description', 'Brillio est la plateforme d\'orientation professionnelle dédiée aux jeunes africains. Test
+de personnalité, mentoring, conseils IA et bien plus.')
 
 @section('content')
+<!-- Alpine.js Data for App Modal -->
+<div x-data="{ showAppModal: false }">
+
     <!-- Hero Section -->
     <section class="gradient-hero min-h-screen flex items-center relative overflow-hidden">
         <!-- Background decoration -->
@@ -17,7 +21,8 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Content -->
                 <div class="text-white" data-aos="fade-right">
-                    <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
+                    <span
+                        class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
                         <!-- TODO: Ajouter badge promotionnel -->
                         Nouveau : Test de personnalité
                     </span>
@@ -40,10 +45,10 @@
                             </svg>
                             Explorer ta carrière
                         </a>
-                        <a href="#telecharger"
+                        <button @click="showAppModal = true"
                             class="px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/10 transition-all duration-300 text-center">
                             Télécharger l'app mobile
-                        </a>
+                        </button>
                     </div>
 
                     <!-- Stats -->
@@ -83,7 +88,8 @@
                                             </svg>
                                         </div>
                                         <h3 class="text-xl font-bold text-gray-800">Brillio</h3>
-                                        <p class="text-gray-600 text-sm mt-2">L'application mobile bientôt disponible</p>
+                                        <p class="text-gray-600 text-sm mt-2">L'application mobile bientôt disponible
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -95,7 +101,8 @@
                         <!-- Decorative elements -->
                         <div class="absolute -top-8 -right-8 w-24 h-24 bg-accent-400 rounded-2xl rotate-12 opacity-80">
                         </div>
-                        <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-secondary-400 rounded-full opacity-80"></div>
+                        <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-secondary-400 rounded-full opacity-80">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,7 +128,8 @@
                         Pourquoi choisir Brillio ?
                     </h2>
                     <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Une plateforme complète pensée pour les jeunes africains, avec des outils adaptés à ton contexte et
+                        Une plateforme complète pensée pour les jeunes africains, avec des outils adaptés à ton contexte
+                        et
                         tes ambitions.
                     </p>
                 </div>
@@ -139,7 +147,8 @@
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 mb-3">Connais-toi mieux</h3>
                         <p class="text-gray-600">
-                            Découvre ta personnalité unique avec notre test MBTI scientifique et reçois des recommandations
+                            Découvre ta personnalité unique avec notre test MBTI scientifique et reçois des
+                            recommandations
                             de métiers adaptés à qui tu es vraiment.
                         </p>
                     </div>
@@ -156,7 +165,8 @@
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 mb-3">Inspire-toi de modèles</h3>
                         <p class="text-gray-600">
-                            Explore les parcours de professionnels africains qui ont réussi dans ton domaine d'intérêt et
+                            Explore les parcours de professionnels africains qui ont réussi dans ton domaine d'intérêt
+                            et
                             apprends de leur expérience.
                         </p>
                     </div>
@@ -173,7 +183,8 @@
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 mb-3">Passe à l'action</h3>
                         <p class="text-gray-600">
-                            Reçois des conseils personnalisés 24/7 de notre IA et construis ton plan d'action concret pour
+                            Reçois des conseils personnalisés 24/7 de notre IA et construis ton plan d'action concret
+                            pour
                             atteindre tes objectifs professionnels.
                         </p>
                     </div>
@@ -213,7 +224,8 @@
                     </p>
                 </div>
 
-                <div class="bg-orange-50 border border-orange-100 rounded-2xl p-8" data-aos="fade-up" data-aos-delay="200">
+                <div class="bg-orange-50 border border-orange-100 rounded-2xl p-8" data-aos="fade-up"
+                    data-aos-delay="200">
                     <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -227,7 +239,8 @@
                     </p>
                 </div>
 
-                <div class="bg-yellow-50 border border-yellow-100 rounded-2xl p-8" data-aos="fade-up" data-aos-delay="300">
+                <div class="bg-yellow-50 border border-yellow-100 rounded-2xl p-8" data-aos="fade-up"
+                    data-aos-delay="300">
                     <div class="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-7 h-7 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -318,22 +331,28 @@
                     </p>
                     <ul class="space-y-2 text-sm text-gray-500">
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             32 questions scientifiques
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Résultats en français
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Métiers suggérés
@@ -359,22 +378,28 @@
                     </p>
                     <ul class="space-y-2 text-sm text-gray-500">
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Réponses personnalisées
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Contexte africain
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Historique sauvegardé
@@ -400,22 +425,28 @@
                     </p>
                     <ul class="space-y-2 text-sm text-gray-500">
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Parcours inspirants
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Roadmaps détaillées
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Tous secteurs
@@ -441,22 +472,28 @@
                     </p>
                     <ul class="space-y-2 text-sm text-gray-500">
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Stockage sécurisé
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Accès hors-ligne
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Organisation facile
@@ -481,22 +518,28 @@
                     </p>
                     <ul class="space-y-2 text-sm text-gray-500">
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Suggestions IA
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Suivi de progression
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Données protégées
@@ -522,22 +565,28 @@
                     </p>
                     <ul class="space-y-2 text-sm text-gray-500">
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Essai complet
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Pas de carte requise
                         </li>
                         <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7">
                                 </path>
                             </svg>
                             Fonctionnalités premium
@@ -624,16 +673,17 @@
                 <!-- Testimonial 1 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm" data-aos="fade-up" data-aos-delay="100">
                     <div class="flex items-center mb-4">
-                        @for ($i = 0; $i < 5; $i++)
-                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        @for ($i = 0; $i < 5; $i++) <svg class="w-5 h-5 text-yellow-400" fill="currentColor"
+                            viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                             </svg>
-                        @endfor
+                            @endfor
                     </div>
                     <p class="text-gray-600 mb-6 italic">
                         <!-- TODO: Ajouter vrai témoignage -->
-                        "Grâce à Brillio, j'ai découvert que j'étais ENFJ et que les métiers du marketing me correspondaient
+                        "Grâce à Brillio, j'ai découvert que j'étais ENFJ et que les métiers du marketing me
+                        correspondaient
                         parfaitement. Aujourd'hui je suis en stage dans une agence !"
                     </p>
                     <div class="flex items-center">
@@ -651,16 +701,17 @@
                 <!-- Testimonial 2 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm" data-aos="fade-up" data-aos-delay="200">
                     <div class="flex items-center mb-4">
-                        @for ($i = 0; $i < 5; $i++)
-                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        @for ($i = 0; $i < 5; $i++) <svg class="w-5 h-5 text-yellow-400" fill="currentColor"
+                            viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                             </svg>
-                        @endfor
+                            @endfor
                     </div>
                     <p class="text-gray-600 mb-6 italic">
                         <!-- TODO: Ajouter vrai témoignage -->
-                        "Le chatbot IA est incroyable ! Il m'a donné des conseils super adaptés à la situation au Cameroun.
+                        "Le chatbot IA est incroyable ! Il m'a donné des conseils super adaptés à la situation au
+                        Cameroun.
                         Je le recommande à tous mes amis."
                     </p>
                     <div class="flex items-center">
@@ -678,16 +729,17 @@
                 <!-- Testimonial 3 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm" data-aos="fade-up" data-aos-delay="300">
                     <div class="flex items-center mb-4">
-                        @for ($i = 0; $i < 5; $i++)
-                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        @for ($i = 0; $i < 5; $i++) <svg class="w-5 h-5 text-yellow-400" fill="currentColor"
+                            viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                             </svg>
-                        @endfor
+                            @endfor
                     </div>
                     <p class="text-gray-600 mb-6 italic">
                         <!-- TODO: Ajouter vrai témoignage -->
-                        "Les profils de mentors m'ont vraiment inspiré. Voir des parcours de professionnels africains qui
+                        "Les profils de mentors m'ont vraiment inspiré. Voir des parcours de professionnels africains
+                        qui
                         ont réussi, ça change tout !"
                     </p>
                     <div class="flex items-center">
@@ -729,7 +781,8 @@
                                 Accède à Brillio depuis ton navigateur
                             </h2>
                             <p class="text-lg text-gray-600 mb-6">
-                                Pas envie de télécharger ? Utilise notre plateforme web pour passer le test de personnalité,
+                                Pas envie de télécharger ? Utilise notre plateforme web pour passer le test de
+                                personnalité,
                                 discuter
                                 avec notre IA et explorer les parcours de mentors africains.
                             </p>
@@ -757,7 +810,8 @@
                                 <p class="text-sm text-gray-500">Decouvre ton profil</p>
                             </div>
                             <div class="bg-white rounded-2xl p-6 shadow-sm">
-                                <div class="w-12 h-12 bg-secondary-100 rounded-xl flex items-center justify-center mb-4">
+                                <div
+                                    class="w-12 h-12 bg-secondary-100 rounded-xl flex items-center justify-center mb-4">
                                     <svg class="w-6 h-6 text-secondary-600" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -810,13 +864,15 @@
                     Pret a construire ton avenir ?
                 </h2>
                 <p class="text-xl text-white/90 mb-10" data-aos="fade-up" data-aos-delay="100">
-                    Telecharge Brillio ou utilise la plateforme web pour commencer ton voyage vers le metier de tes reves.
+                    Telecharge Brillio ou utilise la plateforme web pour commencer ton voyage vers le metier de tes
+                    reves.
                 </p>
 
                 <!-- Download Buttons -->
-                <div class="flex flex-col sm:flex-row justify-center gap-4 mb-12" data-aos="fade-up" data-aos-delay="200">
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mb-12" data-aos="fade-up"
+                    data-aos-delay="200">
                     <!-- App Store -->
-                    <a href="#"
+                    <button @click="showAppModal = true"
                         class="flex items-center justify-center space-x-3 bg-black text-white rounded-xl px-8 py-4 hover:bg-gray-900 transition-colors">
                         <svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -826,9 +882,9 @@
                             <p class="text-xs text-gray-400">Télécharger sur</p>
                             <p class="text-lg font-semibold">App Store</p>
                         </div>
-                    </a>
+                    </button>
                     <!-- Google Play -->
-                    <a href="#"
+                    <button @click="showAppModal = true"
                         class="flex items-center justify-center space-x-3 bg-black text-white rounded-xl px-8 py-4 hover:bg-gray-900 transition-colors">
                         <svg class="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -838,7 +894,7 @@
                             <p class="text-xs text-gray-400">Disponible sur</p>
                             <p class="text-lg font-semibold">Google Play</p>
                         </div>
-                    </a>
+                    </button>
                 </div>
 
                 <!-- Web platform CTA -->
@@ -878,7 +934,8 @@
                             <li class="flex items-start gap-3">
                                 <div
                                     class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M5 13l4 4L19 7" />
                                     </svg>
@@ -892,28 +949,32 @@
                             <li class="flex items-start gap-3">
                                 <div
                                     class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-900">Gagnez en visibilite</p>
-                                    <p class="text-sm text-gray-500">Renforcez votre personal branding aupres de la jeunesse
+                                    <p class="text-sm text-gray-500">Renforcez votre personal branding aupres de la
+                                        jeunesse
                                         africaine</p>
                                 </div>
                             </li>
                             <li class="flex items-start gap-3">
                                 <div
                                     class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-900">Contribuez a l'Afrique</p>
-                                    <p class="text-sm text-gray-500">Aidez a former les leaders de demain sur le continent
+                                    <p class="text-sm text-gray-500">Aidez a former les leaders de demain sur le
+                                        continent
                                     </p>
                                 </div>
                             </li>
@@ -944,7 +1005,8 @@
                                     </div>
                                 </div>
                                 <div class="flex gap-2">
-                                    <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Marketing</span>
+                                    <span
+                                        class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Marketing</span>
                                     <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">12 ans
                                         exp.</span>
                                 </div>
@@ -961,13 +1023,16 @@
                                         <p class="text-sm text-gray-500">CEO, Tech Startup</p>
                                     </div>
                                 </div>
-                                <p class="text-sm text-gray-600 mb-4">"Partager mon parcours avec les jeunes est une facon
+                                <p class="text-sm text-gray-600 mb-4">"Partager mon parcours avec les jeunes est une
+                                    facon
                                     de redonner a ma communaute..."</p>
                                 <div class="flex gap-2 flex-wrap">
                                     <span
                                         class="px-3 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">Entrepreneuriat</span>
-                                    <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Senegal</span>
-                                    <span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Verifie</span>
+                                    <span
+                                        class="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Senegal</span>
+                                    <span
+                                        class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Verifie</span>
                                 </div>
                             </div>
                             <div
@@ -983,7 +1048,8 @@
                                     </div>
                                 </div>
                                 <div class="flex gap-2">
-                                    <span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Tech</span>
+                                    <span
+                                        class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Tech</span>
                                 </div>
                             </div>
                         </div>
@@ -1012,7 +1078,8 @@
                     </button>
                 </form>
                 <p class="text-xs text-gray-500 mt-4">
-                    En t'inscrivant, tu acceptes notre <a href="{{ route('privacy-policy') }}" class="underline">politique
+                    En t'inscrivant, tu acceptes notre <a href="{{ route('privacy-policy') }}"
+                        class="underline">politique
                         de confidentialité</a>.
                 </p>
             </div>
@@ -1037,4 +1104,226 @@
             }
         })();
     </script>
+
+    <!-- App Download Marketing Modal -->
+    <div x-show="showAppModal" x-cloak @click.away="showAppModal = false"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        style="display: none;" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0">
+
+        <div @click.stop class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
+
+            <!-- Close Button -->
+            <button @click="showAppModal = false"
+                class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-lg transition-all duration-200 hover:scale-110">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Header with Gradient -->
+            <div
+                class="relative bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 px-8 pt-12 pb-8 text-white overflow-hidden">
+                <!-- Animated Background Circles -->
+                <div
+                    class="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2 animate-pulse">
+                </div>
+                <div
+                    class="absolute bottom-0 left-0 w-24 h-24 bg-white/20 rounded-full translate-y-1/2 -translate-x-1/2">
+                </div>
+
+                <!-- Emoji/Icon -->
+                <div class="relative text-center mb-4">
+                    <div class="inline-block animate-bounce">
+                        <div class="text-7xl mb-2">🚀</div>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <h3 class="relative text-3xl font-bold text-center mb-3">
+                    L'app arrive bientôt !
+                </h3>
+
+                <p class="relative text-center text-white/90 text-lg font-medium">
+                    Aidons-nous à atteindre <span class="font-bold">500 utilisateurs</span>
+                </p>
+            </div>
+
+            <!-- Content -->
+            <div class="p-8">
+                <!-- Progress Section -->
+                @php
+                $totalUsers = $jeunesCount + $mentorsCount;
+                $targetUsers = 500;
+                $progressPercentage = min(($totalUsers / $targetUsers) * 100, 100);
+                @endphp
+
+                <div class="mb-8">
+                    <div class="flex justify-between items-baseline mb-3">
+                        <span
+                            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            {{ $totalUsers }} utilisateurs
+                        </span>
+                        <span class="text-gray-500 font-medium">Objectif : {{ $targetUsers }}</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="relative h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                        <div class="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-full transition-all duration-1000 ease-out"
+                            style="width: {{ $progressPercentage }}%">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 animate-shimmer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-center text-sm text-gray-600 mt-3">
+                        Plus que <span class="font-bold text-purple-600">{{ max($targetUsers - $totalUsers, 0) }}
+                            utilisateurs</span> pour débloquer l'application mobile ! 🎉
+                    </p>
+                </div>
+
+                <!-- Call to Action Text -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 mb-6 border border-purple-100">
+                    <p class="text-gray-700 text-center leading-relaxed">
+                        <span class="font-semibold text-purple-700">Partage Brillio</span> avec tes proches et tes amis
+                        pour accélérer le lancement de l'application mobile !
+                        <span class="inline-block animate-pulse">✨</span>
+                    </p>
+                </div>
+
+                <!-- Share Buttons -->
+                <div class="space-y-3">
+                    <!-- Native Share -->
+                    <button onclick="shareViaWebAPI()"
+                        class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        Partager avec mes amis
+                    </button>
+
+                    <!-- Copy Link Button -->
+                    <button onclick="copyShareLink()"
+                        class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-purple-200 text-purple-700 font-semibold rounded-xl hover:bg-purple-50 hover:border-purple-300 transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Copier le lien
+                    </button>
+                </div>
+
+                <!-- Alternative: Web Platform -->
+                <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+                    <p class="text-sm text-gray-600 mb-3">En attendant, utilise la version web 👇</p>
+                    <a href="{{ route('auth.choice') }}"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Accéder à la plateforme web
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sharing JavaScript -->
+    <script>
+        const shareMessage = "J'ai découvert cette nouvelle plateforme d'orientation de carrière et de mentorat et je suis sûr que ça va te plaire ! Inscris-toi et fais ton test de personnalité puis on en discute. 🚀";
+        const shareUrl = window.location.origin;
+
+        function shareViaWebAPI() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Brillio - Orientation professionnelle',
+                    text: shareMessage,
+                    url: shareUrl
+                }).then(() => {
+                    showToast('Merci d\'avoir partagé Brillio ! 🎉');
+                }).catch((error) => {
+                    if (error.name !== 'AbortError') {
+                        console.log('Erreur de partage:', error);
+                        fallbackShare();
+                    }
+                });
+            } else {
+                fallbackShare();
+            }
+        }
+
+        function fallbackShare() {
+            // Fallback: WhatsApp Web
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage + ' ' + shareUrl)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function copyShareLink() {
+            const textToCopy = shareMessage + '\n\n' + shareUrl;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    showToast('Lien copié ! Partage-le avec tes amis 📋');
+                }).catch(() => {
+                    fallbackCopy(textToCopy);
+                });
+            } else {
+                fallbackCopy(textToCopy);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Lien copié ! Partage-le avec tes amis 📋');
+            } catch (err) {
+                console.error('Erreur de copie:', err);
+                showToast('Impossible de copier. Veuillez réessayer.', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(message, type = 'success') {
+            // Create toast if window.showToast doesn't exist
+            if (typeof window.showToast === 'function') {
+                window.showToast(message, type);
+            } else {
+                alert(message);
+            }
+        }
+    </script>
+
+    <!-- Add shimmer animation CSS -->
+    <style>
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .animate-shimmer {
+            animation: shimmer 2s infinite;
+        }
+    </style>
+
+</div> <!-- Close Alpine.js wrapper -->
 @endsection
