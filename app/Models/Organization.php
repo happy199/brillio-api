@@ -38,7 +38,17 @@ class Organization extends Model
     {
         static::creating(function (Organization $organization) {
             if (empty($organization->slug)) {
-                $organization->slug = Str::slug($organization->name);
+                $slug = Str::slug($organization->name);
+                $originalSlug = $slug;
+                $counter = 1;
+
+                // Check if slug exists and increment until we find a unique one
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+
+                $organization->slug = $slug;
             }
         });
     }

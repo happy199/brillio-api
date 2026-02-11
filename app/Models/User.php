@@ -24,6 +24,7 @@ class User extends Authenticatable
      */
     public const TYPE_JEUNE = 'jeune';
     public const TYPE_MENTOR = 'mentor';
+    public const TYPE_ORGANIZATION = 'organization';
 
     /**
      * The attributes that are mass assignable.
