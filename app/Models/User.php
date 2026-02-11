@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -48,6 +49,8 @@ class User extends Authenticatable
         'onboarding_data',
         'last_login_at',
         'email_verified_at',
+        'sponsored_by_organization_id',
+        'referral_code_used',
     ];
 
     /**
@@ -190,5 +193,29 @@ class User extends Authenticatable
     public function hasCompletedOnboarding(): bool
     {
         return $this->onboarding_completed === true;
+    }
+
+    /**
+     * Relation vers l'organisation qui a parrainé ce jeune utilisateur
+     */
+    public function sponsoringOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class , 'sponsored_by_organization_id');
+    }
+
+    /**
+     * Scope pour filtrer les utilisateurs sponsorisés par une organisation
+     */
+    public function scopeSponsoredByOrganization($query, $organizationId)
+    {
+        return $query->where('sponsored_by_organization_id', $organizationId);
+    }
+
+    /**
+     * Vérifie si l'utilisateur est sponsorisé par une organisation
+     */
+    public function isSponsoredByOrganization(): bool
+    {
+        return !is_null($this->sponsored_by_organization_id);
     }
 }
