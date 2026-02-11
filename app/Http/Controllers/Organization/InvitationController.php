@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\OrganizationInvitation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Mail\OrganizationInvitationMail;
 
 class InvitationController extends Controller
 {
@@ -86,11 +89,23 @@ class InvitationController extends Controller
                     'expires_at' => now()->addDays($expiresDays),
                 ]);
                 $createdInvitations[] = $invitation;
+
+                // Send invitation email
+                try {
+                    $registrationUrl = route('auth.jeune.register', ['ref' => $invitation->referral_code]);
+                    Mail::to($email)->send(new OrganizationInvitationMail($organization, $invitation, $registrationUrl));
+                }
+                catch (\Exception $e) {
+                    Log::error('Erreur envoi email invitation: ' . $e->getMessage(), [
+                        'email' => $email,
+                        'invitation_id' => $invitation->id,
+                    ]);
+                }
             }
 
             $count = count($createdInvitations);
             return redirect()->route('organization.invitations.index')
-                ->with('success', "{$count} invitation(s) créée(s) avec succès !");
+                ->with('success', "{$count} invitation(s) créée(s) avec succès ! Les emails ont été envoyés.");
         }
         else {
             // No emails, create a single shareable invitation

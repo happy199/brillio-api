@@ -99,7 +99,7 @@
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <a href="#"
+            <a href="{{ route('organization.invitations.create') }}"
                 class="flex items-center justify-center px-4 py-3 border border-organization-300 rounded-md shadow-sm text-sm font-medium text-organization-700 bg-white hover:bg-organization-50 transition-colors">
                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
