@@ -109,4 +109,6 @@ yarn-error.log*
 
 # Deployment
 /.deploy
-/start-queue-worker.sh
+
+# Local dev scripts
+start-queue-worker.sh

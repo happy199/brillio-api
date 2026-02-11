@@ -117,15 +117,40 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Mon parcours
                     </a>
-                    <a href="{{ route('mentor.resources.index') }}"
-                        class="nav-item relative px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Mes Ressources
-                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span
-                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
-                        </span>
-                    </a>
+                    <!-- Mentorat Dropdown -->
+                    <div class="relative" x-data="{ openMentorship: false }" @mouseenter="openMentorship = true"
+                        @mouseleave="openMentorship = false">
+                        <button
+                            class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1 {{ request()->routeIs('mentor.resources.*') || request()->routeIs('mentor.mentorship.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                            Mentorat
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+
+                        <div x-show="openMentorship" x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="transform opacity-0 scale-95"
+                            x-transition:enter-end="transform opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="transform opacity-100 scale-100"
+                            x-transition:leave-end="transform opacity-0 scale-95"
+                            class="absolute left-0 mt-0 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+
+                            <a href="{{ route('mentor.resources.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                Mes Ressources
+                            </a>
+                            <a href="{{ route('mentor.mentorship.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                Mes Mentés
+                            </a>
+                            <a href="{{ route('mentor.mentorship.calendar') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
+                                Calendrier & Séances
+                            </a>
+                        </div>
+                    </div>
                     <a href="{{ route('mentor.stats') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.stats') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Statistiques

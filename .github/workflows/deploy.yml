@@ -177,6 +177,22 @@ jobs:
             
             echo "✅ Moneroo production keys configured"
 
+            # Configure Jitsi (JAAS) Keys
+            echo "🔐 Configuring Jitsi (JAAS) keys..."
+            
+            # Remove any existing JAAS config
+            sed -i '/^JAAS_/d' .env
+            
+            # Add JAAS config from secrets
+            echo "" >> .env
+            echo "# Jitsi (JAAS) Configuration" >> .env
+            echo "JAAS_APP_ID=${{ secrets.JAAS_APP_ID }}" >> .env
+            echo "JAAS_KEY_ID=${{ secrets.JAAS_KEY_ID }}" >> .env
+            # Handle multi-line private key if necessary, though simpler is often better for .env
+            echo "JAAS_PRIVATE_KEY=\"${{ secrets.JAAS_PRIVATE_KEY }}\"" >> .env
+            
+            echo "✅ Jitsi (JAAS) keys configured"
+
             # Pull latest image
             docker-compose pull app
             

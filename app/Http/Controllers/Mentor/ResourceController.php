@@ -30,14 +30,7 @@ class ResourceController extends Controller
         // On récupère toujours les ressources pour savoir si le mentor en a déjà créé
         $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
 
-        // Vérifier si le profil est publié (utilisation du boolean is_published)
-        if (!$mentorProfile || !$mentorProfile->is_published) {
-            return view('mentor.resources.index', [
-                'resources' => $resources, // On passe les ressources pour afficher le message "Ressources masquées"
-                'profileNotPublished' => true
-            ]);
-        }
-
+        // Check middleware handles redirection now
         return view('mentor.resources.index', compact('resources'));
     }
 
@@ -48,11 +41,7 @@ class ResourceController extends Controller
     {
         $mentorProfile = auth()->user()->mentorProfile;
 
-        // Bloquer si le profil n'est pas publié
-        if (!$mentorProfile || !$mentorProfile->is_published) {
-            return redirect()->route('mentor.resources.index')
-                ->withErrors(['profile' => 'Vous devez publier votre profil mentorpour créer des ressources.']);
-        }
+        // Check middleware handles redirection now
 
         $targetingOptions = $this->getDynamicTargetingOptions();
         $targetingCost = $this->walletService->getFeatureCost('advanced_targeting', 10);
