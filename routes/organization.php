@@ -37,6 +37,10 @@ Route::middleware(['auth', 'organization'])->group(function () {
     Route::post('/invitations', [InvitationController::class , 'store'])->name('invitations.store');
     Route::delete('/invitations/{invitation}', [InvitationController::class , 'destroy'])->name('invitations.destroy');
 
+    // Sponsored Users
+    Route::get('/users', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'index'])->name('users.index');
+    Route::get('/users/{user}', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'show'])->name('users.show');
+
     // Logout
     Route::post('/logout', [RegisterController::class , 'logout'])->name('logout');
 });

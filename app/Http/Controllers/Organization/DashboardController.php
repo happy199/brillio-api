@@ -19,16 +19,39 @@ class DashboardController extends Controller
         // For now, we'll find by email match, later we can add organization_user relationship
         $organization = Organization::where('contact_email', $user->email)->firstOrFail();
 
-        //Get basic stats
+        // Get basic stats
+        $sponsoredUsersQuery = $organization->sponsoredUsers();
+
         $stats = [
             'total_invited' => $organization->invitations()->count(),
-            'total_registered' => $organization->sponsoredUsers()->count(),
+            'total_registered' => $sponsoredUsersQuery->count(),
             'pending_invitations' => $organization->invitations()->where('status', 'pending')->count(),
-            'active_users' => $organization->sponsoredUsers()
-            ->where('last_login_at', '>=', now()->subDays(30))
-            ->count(),
+            'active_users' => $sponsoredUsersQuery->where('last_login_at', '>=', now()->subDays(30))->count(),
+            'personality_tests_completed' => $organization->sponsoredUsers()->whereHas('personalityTest', function ($q) {
+            $q->whereNotNull('completed_at');
+        })->count(),
+            // TODO: Implement mentorship tracking when the relationship is defined
+            'users_with_mentors' => 0,
         ];
 
-        return view('organization.dashboard', compact('organization', 'stats'));
+        // Registration Trend (Last 6 months)
+        $registrationData = $organization->sponsoredUsers() // Use $organization->sponsoredUsers() directly to avoid issues with previous where clauses on $sponsoredUsersQuery
+            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, count(*) as count')
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month');
+
+        // Prepare data for Chart.js (ensure all months are present even if 0)
+        $chartLabels = [];
+        $chartData = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $monthKey = $date->format('Y-m');
+            $chartLabels[] = $date->translatedFormat('F'); // Mois en français
+            $chartData[] = $registrationData[$monthKey] ?? 0;
+        }
+
+        return view('organization.dashboard', compact('organization', 'stats', 'chartLabels', 'chartData'));
     }
 }
