@@ -30,8 +30,16 @@ class DashboardController extends Controller
             'personality_tests_completed' => $organization->sponsoredUsers()->whereHas('personalityTest', function ($q) {
             $q->whereNotNull('completed_at');
         })->count(),
-            // TODO: Implement mentorship tracking when the relationship is defined
-            'users_with_mentors' => 0,
+            'users_with_mentors' => $organization->sponsoredUsers()
+            ->whereHas('mentorshipsAsMentee', function ($query) {
+            $query->where('status', 'accepted');
+        })
+            ->count(),
+            'mentoring_sessions_count' => $organization->sponsoredUsers()
+            ->join('mentoring_session_user', 'users.id', '=', 'mentoring_session_user.user_id')
+            ->join('mentoring_sessions', 'mentoring_session_user.mentoring_session_id', '=', 'mentoring_sessions.id')
+            ->where('mentoring_sessions.status', 'completed')
+            ->count(),
         ];
 
         // Registration Trend (Last 6 months)
