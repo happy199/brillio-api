@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -169,6 +170,50 @@ class User extends Authenticatable
     public function walletTransactions(): HasMany
     {
         return $this->hasMany(WalletTransaction::class);
+    }
+
+    // --- MENTORSHIP SYSTEM RELATIONS ---
+
+    /**
+     * Mentorats où l'utilisateur est le mentor
+     */
+    public function mentorshipsAsMentor(): HasMany
+    {
+        return $this->hasMany(Mentorship::class, 'mentor_id');
+    }
+
+    /**
+     * Mentorats où l'utilisateur est le jeune (mentoré)
+     */
+    public function mentorshipsAsMentee(): HasMany
+    {
+        return $this->hasMany(Mentorship::class, 'mentee_id');
+    }
+
+    /**
+     * Disponibilités du mentor
+     */
+    public function mentorAvailabilities(): HasMany
+    {
+        return $this->hasMany(MentorAvailability::class, 'mentor_id');
+    }
+
+    /**
+     * Séances créées par le mentor
+     */
+    public function mentoringSessionsAsMentor(): HasMany
+    {
+        return $this->hasMany(MentoringSession::class, 'mentor_id');
+    }
+
+    /**
+     * Séances auxquelles le jeune participe
+     */
+    public function mentoringSessionsAsMentee(): BelongsToMany
+    {
+        return $this->belongsToMany(MentoringSession::class, 'mentoring_session_user', 'user_id', 'mentoring_session_id')
+            ->withPivot('status', 'rejection_reason')
+            ->withTimestamps();
     }
 
     /**
