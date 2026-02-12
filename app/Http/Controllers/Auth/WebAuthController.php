@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeEmail;
 
@@ -23,6 +25,118 @@ class WebAuthController extends Controller
     public function __construct(
         private SupabaseAuthService $supabase
     ) {
+    }
+
+    /**
+     * Télécharge et stocke l'avatar de l'utilisateur
+     */
+    private function downloadAndStoreAvatar(string $url, User $user): void
+    {
+        try {
+            // Si l'URL n'a pas changé et qu'on a déjà un fichier, on ne fait rien
+            if ($user->profile_photo_url === $url && $user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+                return;
+            }
+
+            // Télécharger l'image
+            $response = Http::get($url);
+
+            if ($response->successful()) {
+                // Supprimer l'ancienne image si elle existe
+                if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+                    Storage::disk('public')->delete($user->profile_photo_path);
+                }
+
+                // Générer un nom de fichier unique
+                $filename = 'profile-photos/' . $user->id . '_' . time() . '.jpg';
+                
+                // Stocker la nouvelle image
+                Storage::disk('public')->put($filename, $response->body());
+
+                // Mettre à jour le chemin
+                $user->profile_photo_path = $filename;
+                $user->save();
+                
+                Log::info('Avatar downloaded and stored', ['user_id' => $user->id, 'path' => $filename]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to download avatar', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Cree ou met a jour un utilisateur mentor
+     */
+    protected function createOrUpdateMentorUser(array $userData): array
+    {
+        $linkedinData = $this->supabase->extractLinkedInData($userData);
+
+        if (empty($linkedinData['email'])) {
+            return [
+                'success' => false,
+                'error' => 'Impossible de recuperer votre adresse email LinkedIn.'
+            ];
+        }
+
+        $user = User::where('email', $linkedinData['email'])->first();
+
+        if ($user) {
+            // Verifier que c'est bien un compte mentor
+            if ($user->user_type !== 'mentor') {
+                // Compte jeune trouvé, proposer la migration
+                return $this->handleCrossTypeReactivation($user, 'mentor', $userData, 'linkedin');
+            }
+
+            $user->update([
+                'auth_provider' => 'linkedin',
+                'provider_id' => $linkedinData['linkedin_id'],
+                'profile_photo_url' => $linkedinData['avatar_url'] ?? $user->profile_photo_url,
+                'last_login_at' => now(),
+            ]);
+
+            // Mettre a jour le profil mentor avec les donnees LinkedIn
+            if ($user->mentorProfile) {
+                $user->mentorProfile->update([
+                    'linkedin_profile_data' => $linkedinData['raw_data'],
+                ]);
+            }
+        } else {
+            // Creer un nouveau compte mentor
+            $user = User::create([
+                'name' => $linkedinData['name'] ?? 'Mentor',
+                'email' => $linkedinData['email'],
+                'password' => Hash::make(Str::random(32)),
+                'user_type' => 'mentor',
+                'auth_provider' => 'linkedin',
+                'provider_id' => $linkedinData['linkedin_id'],
+                'profile_photo_url' => $linkedinData['avatar_url'],
+                'email_verified_at' => now(),
+            ]);
+
+            try {
+                Mail::to($user)->send(new WelcomeEmail($user));
+            } catch (\Exception $e) {
+                Log::error('Erreur envoi email bienvenue (OAuth Mentor): ' . $e->getMessage());
+            }
+
+            // Creer le profil mentor avec les donnees LinkedIn
+            MentorProfile::create([
+                'user_id' => $user->id,
+                'linkedin_profile_data' => $linkedinData['raw_data'],
+            ]);
+        }
+
+        // Télécharger et stocker l'avatar
+        if (!empty($linkedinData['avatar_url'])) {
+            $this->downloadAndStoreAvatar($linkedinData['avatar_url'], $user);
+        }
+
+        Auth::login($user, true);
+
+        return [
+            'success' => true,
+            'redirect' => route('mentor.dashboard')
+        ];
     }
 
     /**
@@ -421,6 +535,11 @@ class WebAuthController extends Controller
             }
         }
 
+        // Télécharger et stocker l'avatar
+        if (!empty($socialData['avatar_url'])) {
+            $this->downloadAndStoreAvatar($socialData['avatar_url'], $user);
+        }
+
         Auth::login($user, true);
 
         $redirect = !$user->onboarding_completed
@@ -615,75 +734,9 @@ class WebAuthController extends Controller
         return redirect($result['redirect']);
     }
 
-    /**
-     * Cree ou met a jour un utilisateur mentor
-     */
-    protected function createOrUpdateMentorUser(array $userData): array
-    {
-        $linkedinData = $this->supabase->extractLinkedInData($userData);
 
-        if (empty($linkedinData['email'])) {
-            return [
-                'success' => false,
-                'error' => 'Impossible de recuperer votre adresse email LinkedIn.'
-            ];
-        }
 
-        $user = User::where('email', $linkedinData['email'])->first();
 
-        if ($user) {
-            // Verifier que c'est bien un compte mentor
-            if ($user->user_type !== 'mentor') {
-                // Compte jeune trouvé, proposer la migration
-                return $this->handleCrossTypeReactivation($user, 'mentor', $userData, 'linkedin');
-            }
-
-            $user->update([
-                'auth_provider' => 'linkedin',
-                'provider_id' => $linkedinData['linkedin_id'],
-                'profile_photo_url' => $linkedinData['avatar_url'] ?? $user->profile_photo_url,
-                'last_login_at' => now(),
-            ]);
-
-            // Mettre a jour le profil mentor avec les donnees LinkedIn
-            if ($user->mentorProfile) {
-                $user->mentorProfile->update([
-                    'linkedin_profile_data' => $linkedinData['raw_data'],
-                ]);
-            }
-        } else {
-            // Creer un nouveau compte mentor
-            $user = User::create([
-                'name' => $linkedinData['name'] ?? 'Mentor',
-                'email' => $linkedinData['email'],
-                'password' => Hash::make(Str::random(32)),
-                'user_type' => 'mentor',
-                'auth_provider' => 'linkedin',
-                'provider_id' => $linkedinData['linkedin_id'],
-                'profile_photo_url' => $linkedinData['avatar_url'],
-                'email_verified_at' => now(),
-            ]);
-
-            try {
-                Mail::to($user)->send(new WelcomeEmail($user));
-            } catch (\Exception $e) {
-                Log::error('Erreur envoi email bienvenue (OAuth Mentor): ' . $e->getMessage());
-            }
-
-            // Creer le profil mentor avec les donnees LinkedIn
-            MentorProfile::create([
-                'user_id' => $user->id,
-                'linkedin_profile_data' => $linkedinData['raw_data'],
-            ]);
-        }
-
-        Auth::login($user, true);
-
-        return [
-            'success' => true,
-            'redirect' => route('mentor.dashboard')
-        ];
-    }
 
     /**
      * Deconnexion
@@ -965,3 +1018,4 @@ class WebAuthController extends Controller
     }
 }
 
+ 
