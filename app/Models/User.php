@@ -179,7 +179,7 @@ class User extends Authenticatable
      */
     public function mentorshipsAsMentor(): HasMany
     {
-        return $this->hasMany(Mentorship::class, 'mentor_id');
+        return $this->hasMany(Mentorship::class , 'mentor_id');
     }
 
     /**
@@ -187,7 +187,7 @@ class User extends Authenticatable
      */
     public function mentorshipsAsMentee(): HasMany
     {
-        return $this->hasMany(Mentorship::class, 'mentee_id');
+        return $this->hasMany(Mentorship::class , 'mentee_id');
     }
 
     /**
@@ -195,7 +195,7 @@ class User extends Authenticatable
      */
     public function mentorAvailabilities(): HasMany
     {
-        return $this->hasMany(MentorAvailability::class, 'mentor_id');
+        return $this->hasMany(MentorAvailability::class , 'mentor_id');
     }
 
     /**
@@ -203,7 +203,7 @@ class User extends Authenticatable
      */
     public function mentoringSessionsAsMentor(): HasMany
     {
-        return $this->hasMany(MentoringSession::class, 'mentor_id');
+        return $this->hasMany(MentoringSession::class , 'mentor_id');
     }
 
     /**
@@ -211,7 +211,7 @@ class User extends Authenticatable
      */
     public function mentoringSessionsAsMentee(): BelongsToMany
     {
-        return $this->belongsToMany(MentoringSession::class, 'mentoring_session_user', 'user_id', 'mentoring_session_id')
+        return $this->belongsToMany(MentoringSession::class , 'mentoring_session_user', 'user_id', 'mentoring_session_id')
             ->withPivot('status', 'rejection_reason')
             ->withTimestamps();
     }
@@ -221,13 +221,13 @@ class User extends Authenticatable
      */
     public function getAvatarUrlAttribute(): ?string
     {
-        // Priorite: photo OAuth > photo uploadee
-        if ($this->attributes['profile_photo_url'] ?? null) {
-            return $this->attributes['profile_photo_url'];
-        }
-
+        // Priorite: photo locale (téléchargée/uploadée) > photo OAuth
         if ($this->profile_photo_path) {
             return asset('storage/' . $this->profile_photo_path);
+        }
+
+        if ($this->attributes['profile_photo_url'] ?? null) {
+            return $this->attributes['profile_photo_url'];
         }
 
         return null;

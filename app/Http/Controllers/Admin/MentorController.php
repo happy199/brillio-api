@@ -165,15 +165,29 @@ class MentorController extends Controller
     /**
      * Met à jour le profil du mentor
      */
+    public function __construct(
+        private \App\Services\UserAvatarService $avatarService
+        )
+    {
+    }
+
+    // ... (keep protected $specializations)
+
+    /**
+     * Met à jour le profil du mentor
+     */
     public function update(Request $request, MentorProfile $mentor)
     {
+        // Pour l'admin, on rend les champs optionnels. 
+        // Si un champ obligatoire (comme name/email) est vide, on garde l'ancienne valeur.
         $validated = $request->validate([
             // Informations utilisateur
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $mentor->user_id,
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $mentor->user_id,
             'phone' => 'nullable|string|max:20',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
+            'profile_photo_url' => 'nullable|url|max:500',
 
             // Informations profil mentor
             'bio' => 'nullable|string|max:2000',
@@ -194,14 +208,35 @@ class MentorController extends Controller
             'is_validated' => 'boolean',
         ]);
 
-        // Mise à jour des informations utilisateur
-        $mentor->user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'city' => $validated['city'] ?? null,
-            'country' => $validated['country'] ?? null,
-        ]);
+        // Mise à jour des informations utilisateur UNIQUEMENT si fournies
+        $userUpdateData = [];
+        if (!empty($validated['name']))
+            $userUpdateData['name'] = $validated['name'];
+        if (!empty($validated['email']))
+            $userUpdateData['email'] = $validated['email'];
+        if (array_key_exists('phone', $validated))
+            $userUpdateData['phone'] = $validated['phone'];
+        if (array_key_exists('city', $validated))
+            $userUpdateData['city'] = $validated['city'];
+        if (array_key_exists('country', $validated))
+            $userUpdateData['country'] = $validated['country'];
+
+        if (!empty($userUpdateData)) {
+            $mentor->user->update($userUpdateData);
+        }
+
+        // Si une URL de photo est fournie, on essaie de la télécharger
+        // On retire la vérification !== pour permettre de forcer le re-téléchargement si nécessaire
+        if (!empty($validated['profile_photo_url'])) {
+            // Si l'URL est différente OU si on veut juste s'assurer qu'elle est bien là
+            if ($validated['profile_photo_url'] !== $mentor->user->profile_photo_url || !$mentor->user->profile_photo_path) {
+                $path = $this->avatarService->downloadFromUrl($mentor->user, $validated['profile_photo_url']);
+
+                if (!$path) {
+                    return back()->withInput()->with('error', "Impossible de télécharger l'image depuis l'URL LinkedIn fournie. L'URL est peut-être expirée ou inaccessible.");
+                }
+            }
+        }
 
         // Mise à jour du profil mentor
         $profileData = [
@@ -226,7 +261,7 @@ class MentorController extends Controller
         $mentor->update($profileData);
 
         return redirect()
-            ->route('admin.mentors.edit', $mentor)
+            ->route('admin.mentors.index')
             ->with('success', "Le profil de {$mentor->user->name} a été mis à jour avec succès.");
     }
 
@@ -240,22 +275,22 @@ class MentorController extends Controller
         ]);
 
         if ($request->hasFile('profile_photo')) {
-            // Supprimer l'ancienne photo si elle existe
-            if ($mentor->user->profile_photo && Storage::disk('public')->exists($mentor->user->profile_photo)) {
-                Storage::disk('public')->delete($mentor->user->profile_photo);
-            }
-
-            // Stocker la nouvelle photo
-            $path = $request->file('profile_photo')->store('profile-photos', 'public');
-
-            $mentor->user->update([
-                'profile_photo' => $path,
-            ]);
+            $this->avatarService->upload($mentor->user, $request->file('profile_photo'));
 
             return back()->with('success', 'Photo de profil mise à jour avec succès.');
         }
 
         return back()->with('error', 'Aucune photo sélectionnée.');
+    }
+
+    /**
+     * Supprime la photo de profil du mentor
+     */
+    public function deleteProfilePhoto(MentorProfile $mentor)
+    {
+        $this->avatarService->delete($mentor->user);
+
+        return back()->with('success', 'Photo de profil supprimée avec succès.');
     }
 
     /**
