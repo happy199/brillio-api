@@ -70,9 +70,11 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">En attente</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Actives</dt>
                             <dd class="text-2xl font-semibold text-gray-900">{{
-                                $organization->invitations()->where('status', 'pending')->count() }}</dd>
+                                $organization->invitations()->where('status', '!=', 'expired')->where(function($q) {
+                                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                                })->count() }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -90,9 +92,9 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Acceptées</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Utilisées</dt>
                             <dd class="text-2xl font-semibold text-gray-900">{{
-                                $organization->invitations()->where('status', 'accepted')->count() }}</dd>
+                                $organization->invitations()->whereNotNull('accepted_at')->count() }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -110,20 +112,20 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center space-x-3">
                             <div class="flex-shrink-0">
-                                @if($invitation->status === 'accepted')
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Acceptée
-                                </span>
-                                @elseif($invitation->isExpired())
+                                @if($invitation->isExpired())
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    Expirée
+                                    Expiré
+                                </span>
+                                @elseif($invitation->uses_count > 0)
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Utilisé ({{ $invitation->uses_count }})
                                 </span>
                                 @else
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    En attente
+                                    Non utilisé
                                 </span>
                                 @endif
                             </div>
@@ -145,7 +147,7 @@
                         </div>
                     </div>
                     <div class="flex items-center space-x-2">
-                        @if($invitation->status === 'pending' && !$invitation->isExpired())
+                        @if(!$invitation->isExpired())
                         <button
                             @click="copyToClipboard('{{ route('auth.jeune.register', ['ref' => $invitation->referral_code]) }}')"
                             class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
@@ -156,7 +158,7 @@
                             Copier le lien
                         </button>
                         @endif
-                        @if($invitation->status === 'pending')
+                        @if(!$invitation->isExpired())
                         <button type="button"
                             @click="confirmDelete('{{ route('organization.invitations.destroy', $invitation) }}')"
                             class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50">

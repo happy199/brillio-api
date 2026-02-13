@@ -51,13 +51,15 @@
                         @if($session->status === 'confirmed') bg-green-100 text-green-800 
                         @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
                         @elseif($session->status === 'cancelled') bg-red-100 text-red-800
-                        @else bg-yellow-100 text-yellow-800 @endif">
+                        @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800
+                        @else bg-gray-100 text-gray-800 @endif">
                         @switch($session->status)
                         @case('confirmed') Confirmée @break
                         @case('completed') Terminée @break
                         @case('cancelled') Annulée @break
-                        @case('pending_payment') Attente paiement @break
+                        @case('pending_payment') En attente de paiement @break
                         @case('proposed') Proposée @break
+                        @default {{ $session->status }}
                         @endswitch
                     </span>
                     <span class="text-xs text-gray-500">{{ $session->scheduled_at->format('d/m/Y H:i') }}</span>

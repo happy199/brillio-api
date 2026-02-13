@@ -25,11 +25,13 @@
                         @if($session->status === 'confirmed') bg-green-100 text-green-800 
                         @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
                         @elseif($session->status === 'cancelled') bg-red-100 text-red-800
-                        @else bg-yellow-100 text-yellow-800 @endif">
+                        @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800
+                        @else bg-gray-100 text-gray-800 @endif">
                         @switch($session->status)
                         @case('confirmed') Confirmée @break
                         @case('completed') Terminée @break
                         @case('cancelled') Annulée @break
+                        @case('pending_payment') En attente de paiement @break
                         @default {{ $session->status }}
                         @endswitch
                     </span>
@@ -48,59 +50,60 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900">{{ $session->scheduled_at->format('d F Y') }}</p>
+                                <p class="font-medium text-gray-900">{{ $session->scheduled_at->translatedFormat('d F
+                                    Y') }}</p>
                                 <p>{{ $session->scheduled_at->format('H:i') }} ({{ $session->duration_minutes }} min)
                                 </p>
                             </div>
                         </div>
-                        @if($session->meeting_link)
-                        <div class="flex items-center text-sm text-gray-600">
-                            <div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
-                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">Lien visioconférence</p>
-                                <p class="truncate max-w-xs text-blue-600">{{ $session->meeting_link }}</p>
-                            </div>
-                        </div>
-                        @endif
                     </div>
                 </div>
             </div>
 
-            <!-- Report (if completed) -->
-            @if($session->status === 'completed' && $session->report_content)
+            <!-- Report (if completed or has content) -->
             <div class="bg-white shadow rounded-lg overflow-hidden">
                 <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
                     <h3 class="text-lg font-medium text-gray-900">Compte-rendu de la séance</h3>
                 </div>
-                <div class="p-6 space-y-6">
-                    @if(isset($session->report_content['progress']))
-                    <div>
-                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Progrès réalisés</h4>
-                        <p class="mt-2 text-gray-700">{{ $session->report_content['progress'] }}</p>
+                <div class="p-6">
+                    @if($session->report_content)
+                    <div class="space-y-6">
+                        @if(isset($session->report_content['progress']))
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Progrès réalisés</h4>
+                            <p class="mt-2 text-gray-700">{{ $session->report_content['progress'] }}</p>
+                        </div>
+                        @endif
+                        @if(isset($session->report_content['obstacles']))
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Obstacles identifiés
+                            </h4>
+                            <p class="mt-2 text-gray-700">{{ $session->report_content['obstacles'] }}</p>
+                        </div>
+                        @endif
+                        @if(isset($session->report_content['smart_goals']))
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Objectifs SMART pour la
+                                suite</h4>
+                            <p class="mt-2 text-gray-700">{{ $session->report_content['smart_goals'] }}</p>
+                        </div>
+                        @endif
                     </div>
-                    @endif
-                    @if(isset($session->report_content['obstacles']))
-                    <div>
-                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Obstacles identifiés</h4>
-                        <p class="mt-2 text-gray-700">{{ $session->report_content['obstacles'] }}</p>
-                    </div>
-                    @endif
-                    @if(isset($session->report_content['smart_goals']))
-                    <div>
-                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Objectifs SMART pour la
-                            suite</h4>
-                        <p class="mt-2 text-gray-700">{{ $session->report_content['smart_goals'] }}</p>
+                    @else
+                    <div class="text-center py-6">
+                        <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p class="mt-2 text-sm text-gray-500 font-medium">Le compte-rendu n'est pas encore disponible.
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1">Il sera rédigé par le mentor après la fin de la séance.
+                        </p>
                     </div>
                     @endif
                 </div>
             </div>
-            @endif
         </div>
 
         <!-- Sidebar Info -->

@@ -39,7 +39,14 @@ class SessionController extends Controller
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
 
-        return view('organization.sessions.calendar', compact('organization'));
+        $sessions = MentoringSession::query()
+            ->whereHas('mentees', function ($q) use ($organization) {
+            $q->where('sponsored_by_organization_id', $organization->id);
+        })
+            ->with(['mentor', 'mentees'])
+            ->get();
+
+        return view('organization.sessions.calendar', compact('organization', 'sessions'));
     }
 
     /**
@@ -92,10 +99,12 @@ class SessionController extends Controller
     private function getStatusColor($status)
     {
         return match ($status) {
-                'confirmed' => '#10b981', // green-500
-                'completed' => '#6366f1', // indigo-500
-                'cancelled' => '#ef4444', // red-500
-                default => '#f59e0b', // amber-500
+                'confirmed' => '#dcfce7', // bg-green-100
+                'completed' => '#e0e7ff', // bg-indigo-100
+                'cancelled' => '#fee2e2', // bg-red-100
+                'pending_payment' => '#fef3c7', // bg-amber-100
+                'proposed' => '#f3f4f6', // bg-gray-100
+                default => '#f3f4f6',
             };
     }
 }

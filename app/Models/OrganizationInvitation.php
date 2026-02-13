@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -56,11 +57,27 @@ class OrganizationInvitation extends Model
     }
 
     /**
-     * Get the user who accepted this invitation.
+     * Get the user who accepted this invitation (legacy relationship for single-use).
      */
     public function acceptedUser(): BelongsTo
     {
         return $this->belongsTo(User::class , 'referral_code', 'referral_code_used');
+    }
+
+    /**
+     * Get all users who joined via this invitation.
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class , 'referral_code_used', 'referral_code');
+    }
+
+    /**
+     * Get the number of times this invitation has been used.
+     */
+    public function getUsesCountAttribute(): int
+    {
+        return $this->users()->count();
     }
 
     /**
@@ -103,14 +120,24 @@ class OrganizationInvitation extends Model
     }
 
     /**
-     * Mark invitation as accepted.
+     * Mark invitation as used/accepted.
      */
     public function markAsAccepted(): void
     {
-        $this->update([
-            'status' => 'accepted',
-            'accepted_at' => now(),
-        ]);
+        // If it's a personal invitation (with email), mark as accepted to stop usage
+        // If it's a generic link (no email), it remains "pending" to allow infinite usage
+        if ($this->invited_email) {
+            $this->update([
+                'status' => 'accepted',
+                'accepted_at' => now(),
+            ]);
+        }
+        else {
+            // Just update accepted_at for the first time it was used
+            if (!$this->accepted_at) {
+                $this->update(['accepted_at' => now()]);
+            }
+        }
     }
 
     /**

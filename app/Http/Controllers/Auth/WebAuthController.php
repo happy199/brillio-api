@@ -239,12 +239,9 @@ class WebAuthController extends Controller
             'referral_code_used' => $referralCode,
         ]);
         
-        // Mark invitation as accepted
+        // Mark invitation as used
         if ($referralCode && isset($invitation)) {
-            $invitation->update([
-                'status' => 'accepted',
-                'accepted_at' => now(),
-            ]);
+            $invitation->markAsAccepted();
             
             // Clear referral code from session
             session()->forget(['referral_code', 'organization_name']);
@@ -549,11 +546,8 @@ class WebAuthController extends Controller
                 if ($invitation) {
                     $organizationId = $invitation->organization_id;
                     
-                    // Mark invitation as accepted
-                    $invitation->update([
-                        'status' => 'accepted',
-                        'accepted_at' => now(),
-                    ]);
+                    // Mark invitation as used
+                    $invitation->markAsAccepted();
                     
                     // Clear referral code from session
                     session()->forget(['referral_code', 'organization_name']);
