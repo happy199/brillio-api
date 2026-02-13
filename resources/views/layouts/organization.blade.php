@@ -76,6 +76,14 @@
                             class="{{ request()->routeIs('organization.users.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Jeunes
                         </a>
+                        <a href="{{ route('organization.mentorships.index') }}"
+                            class="{{ request()->routeIs('organization.mentorships.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Mentorat
+                        </a>
+                        <a href="{{ route('organization.sessions.index') }}"
+                            class="{{ request()->routeIs('organization.sessions.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Calendrier
+                        </a>
                         <a href="{{ route('organization.invitations.index') }}"
                             class="{{ request()->routeIs('organization.invitations.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Invitations
@@ -140,7 +148,7 @@
             }, function (err) {
                 alert('Erreur lors de la copie');
             });
-          </script>
+    </script>
 </body>
 
 </html>

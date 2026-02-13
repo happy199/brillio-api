@@ -41,6 +41,16 @@ Route::middleware(['auth', 'organization'])->group(function () {
     Route::get('/users', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'index'])->name('users.index');
     Route::get('/users/{user}', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'show'])->name('users.show');
 
+    // Mentorships
+    Route::get('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class , 'index'])->name('mentorships.index');
+    Route::get('/mentorships/{mentorship}', [\App\Http\Controllers\Organization\MentorshipController::class , 'show'])->name('mentorships.show');
+
+    // Sessions & Calendar
+    Route::get('/sessions', [\App\Http\Controllers\Organization\SessionController::class , 'index'])->name('sessions.index');
+    Route::get('/sessions/calendar', [\App\Http\Controllers\Organization\SessionController::class , 'calendar'])->name('sessions.calendar');
+    Route::get('/sessions/events', [\App\Http\Controllers\Organization\SessionController::class , 'events'])->name('sessions.events');
+    Route::get('/sessions/{session}', [\App\Http\Controllers\Organization\SessionController::class , 'show'])->name('sessions.show');
+
     // Logout
     Route::post('/logout', [RegisterController::class , 'logout'])->name('logout');
 });
