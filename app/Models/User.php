@@ -172,13 +172,13 @@ class User extends Authenticatable
      */
     public function getAvatarUrlAttribute(): ?string
     {
-        // Priorite: photo OAuth > photo uploadee
-        if ($this->attributes['profile_photo_url'] ?? null) {
-            return $this->attributes['profile_photo_url'];
-        }
-
+        // Priorite: photo locale (téléchargée/uploadée) > photo OAuth
         if ($this->profile_photo_path) {
             return asset('storage/' . $this->profile_photo_path);
+        }
+
+        if ($this->attributes['profile_photo_url'] ?? null) {
+            return $this->attributes['profile_photo_url'];
         }
 
         return null;
