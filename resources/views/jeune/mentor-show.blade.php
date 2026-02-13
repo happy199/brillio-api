@@ -84,18 +84,18 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-6">Mon parcours</h2>
 
                 @if($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0)
-                <div class="relative">
+                <div class="relative pl-20">
                     <!-- Timeline Line -->
                     <div
-                        class="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-500 via-red-500 to-pink-500">
+                        class="absolute left-8 top-0 bottom-0 w-0.5 -ml-px bg-gradient-to-b from-orange-500 via-red-500 to-pink-500">
                     </div>
 
                     <div class="space-y-8">
                         @foreach($mentor->roadmapSteps->sortBy('position') as $step)
-                        <div class="relative pl-16">
+                        <div class="relative">
                             <!-- Timeline Dot -->
                             <div
-                                class="absolute left-4 w-5 h-5 bg-white border-4 border-orange-500 rounded-full transform -translate-x-1/2">
+                                class="absolute -left-12 w-6 h-6 bg-white border-4 border-orange-500 rounded-full transform -translate-x-1/2 top-6 z-10">
                             </div>
 
                             <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-5">
