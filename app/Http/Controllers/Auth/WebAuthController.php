@@ -23,45 +23,9 @@ use App\Mail\WelcomeEmail;
 class WebAuthController extends Controller
 {
     public function __construct(
-        private SupabaseAuthService $supabase
+        private SupabaseAuthService $supabase,
+        private \App\Services\UserAvatarService $avatarService
     ) {
-    }
-
-    /**
-     * Télécharge et stocke l'avatar de l'utilisateur
-     */
-    private function downloadAndStoreAvatar(string $url, User $user): void
-    {
-        try {
-            // Si l'URL n'a pas changé et qu'on a déjà un fichier, on ne fait rien
-            if ($user->profile_photo_url === $url && $user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
-                return;
-            }
-
-            // Télécharger l'image
-            $response = Http::get($url);
-
-            if ($response->successful()) {
-                // Supprimer l'ancienne image si elle existe
-                if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
-                    Storage::disk('public')->delete($user->profile_photo_path);
-                }
-
-                // Générer un nom de fichier unique
-                $filename = 'profile-photos/' . $user->id . '_' . time() . '.jpg';
-                
-                // Stocker la nouvelle image
-                Storage::disk('public')->put($filename, $response->body());
-
-                // Mettre à jour le chemin
-                $user->profile_photo_path = $filename;
-                $user->save();
-                
-                Log::info('Avatar downloaded and stored', ['user_id' => $user->id, 'path' => $filename]);
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed to download avatar', ['user_id' => $user->id, 'error' => $e->getMessage()]);
-        }
     }
 
     /**
@@ -90,7 +54,7 @@ class WebAuthController extends Controller
             $user->update([
                 'auth_provider' => 'linkedin',
                 'provider_id' => $linkedinData['linkedin_id'],
-                'profile_photo_url' => $linkedinData['avatar_url'] ?? $user->profile_photo_url,
+                // On ne touche pas à profile_photo_url ici, le service s'en occupe si besoin
                 'last_login_at' => now(),
             ]);
 
@@ -126,9 +90,9 @@ class WebAuthController extends Controller
             ]);
         }
 
-        // Télécharger et stocker l'avatar
+        // Télécharger et stocker l'avatar via le service
         if (!empty($linkedinData['avatar_url'])) {
-            $this->downloadAndStoreAvatar($linkedinData['avatar_url'], $user);
+            $this->avatarService->downloadFromUrl($user, $linkedinData['avatar_url']);
         }
 
         Auth::login($user, true);
@@ -535,9 +499,9 @@ class WebAuthController extends Controller
             }
         }
 
-        // Télécharger et stocker l'avatar
+        // Télécharger et stocker l'avatar via le service
         if (!empty($socialData['avatar_url'])) {
-            $this->downloadAndStoreAvatar($socialData['avatar_url'], $user);
+            $this->avatarService->downloadFromUrl($user, $socialData['avatar_url']);
         }
 
         Auth::login($user, true);

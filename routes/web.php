@@ -286,6 +286,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('mentors/{mentor}/edit', [MentorController::class, 'edit'])->name('mentors.edit');
         Route::put('mentors/{mentor}', [MentorController::class, 'update'])->name('mentors.update');
         Route::post('mentors/{mentor}/photo', [MentorController::class, 'updateProfilePhoto'])->name('mentors.update-photo');
+        Route::delete('mentors/{mentor}/photo', [MentorController::class, 'deleteProfilePhoto'])->name('mentors.delete-photo');
         Route::post('mentors/{mentor}/roadmap', [MentorController::class, 'storeRoadmapStep'])->name('mentors.roadmap.store');
         Route::put('mentors/{mentor}/roadmap/{step}', [MentorController::class, 'updateRoadmapStep'])->name('mentors.roadmap.update');
         Route::delete('mentors/{mentor}/roadmap/{step}', [MentorController::class, 'deleteRoadmapStep'])->name('mentors.roadmap.delete');
