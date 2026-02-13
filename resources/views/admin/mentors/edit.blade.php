@@ -297,7 +297,7 @@
                                         <p class="text-sm text-gray-500">{{ $step->location }}</p>
                                         @endif
                                         <p class="text-sm text-gray-500 mt-1">
-                                            {{ $step->start_date->format('M Y') }} - {{ $step->end_date?->format('M Y')
+                                            {{ $step->start_date?->format('M Y') }} - {{ $step->end_date?->format('M Y')
                                             ?? 'Présent' }}
                                         </p>
                                         @if($step->description)
@@ -499,7 +499,7 @@
 
                     @if($mentor->validated_at)
                     <p class="text-xs text-gray-500 mt-3">
-                        Validé le {{ $mentor->validated_at->format('d/m/Y à H:i') }}
+                        Validé le {{ $mentor->validated_at?->format('d/m/Y à H:i') }}
                     </p>
                     @endif
                 </div>
@@ -518,7 +518,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-sm text-gray-600">Membre depuis</span>
-                            <span class="font-semibold text-gray-900">{{ $mentor->created_at->format('M Y') }}</span>
+                            <span class="font-semibold text-gray-900">{{ $mentor->created_at?->format('M Y') }}</span>
                         </div>
                     </div>
                 </div>
