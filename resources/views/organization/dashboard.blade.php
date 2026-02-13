@@ -3,7 +3,7 @@
 @section('title', 'Tableau de bord')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-8">
     <!-- Welcome Header -->
     <div class="bg-gradient-to-r from-organization-500 to-organization-600 rounded-xl p-8 text-white">
         <h1 class="text-3xl font-bold">{{ $organization->name }}</h1>
@@ -11,7 +11,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <!-- Total Invited -->
         <div class="bg-white overflow-hidden rounded-lg shadow">
             <div class="p-6">
@@ -54,20 +54,19 @@
             </div>
         </div>
 
-        <!-- Jeunes suivis par un mentor -->
+        <!-- Jeunes suivis par un mentor (Avec Mentor) -->
         <div class="bg-white overflow-hidden rounded-lg shadow">
             <div class="p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 bg-purple-100 rounded-md p-3">
                         <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                            </path>
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Jeunes suivis</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Avec Mentor</dt>
                             <dd class="text-3xl font-semibold text-gray-900">{{ $stats['users_with_mentors'] }}</dd>
                         </dl>
                     </div>
@@ -116,44 +115,67 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Personality Tests -->
-    <div class="bg-white overflow-hidden rounded-lg shadow">
-        <div class="p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-purple-100 rounded-md p-3">
-                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
+        <!-- Personality Tests Stats -->
+        <div class="bg-white overflow-hidden rounded-lg shadow sm:col-span-1 border border-purple-100">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
                         <dt class="text-sm font-medium text-gray-500 truncate">Tests de personnalité</dt>
                         <dd class="text-3xl font-semibold text-gray-900">{{ $stats['personality_tests_completed'] }}
                         </dd>
-                    </dl>
+                    </div>
                 </div>
+
+                @if(isset($stats['top_personalities']) && count($stats['top_personalities']) > 0)
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Top Profils</h4>
+                    <div class="space-y-2">
+                        @foreach($stats['top_personalities'] as $type)
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="font-medium text-gray-700">{{ $type->personality_type }}</span>
+                            <span class="text-gray-500">{{ $type->count }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
-    </div>
 
-    <!-- Users with Mentors -->
-    <div class="bg-white overflow-hidden rounded-lg shadow">
-        <div class="p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
-                    <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+        <!-- Documents & Onboarding (Platform Engagement) -->
+        <div class="bg-white overflow-hidden rounded-lg shadow sm:col-span-2 lg:col-span-3">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0 bg-green-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dt class="text-sm font-medium text-gray-500 truncate">Documents partagés</dt>
+                        <dd class="text-3xl font-semibold text-gray-900">{{ $stats['documents_count'] }}</dd>
+                    </div>
                 </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Avec Mentor</dt>
-                        <dd class="text-3xl font-semibold text-gray-900">{{ $stats['users_with_mentors'] }}</dd>
-                    </dl>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">Profils complétés (Onboarding)</span>
+                        <span class="font-semibold text-gray-900">{{ $stats['onboarding_completed_count'] }}</span>
+                    </div>
+                    @if($stats['total_registered'] > 0)
+                    <div class="mt-2 w-full bg-gray-200 rounded-full h-1.5">
+                        <div class="bg-green-500 h-1.5 rounded-full"
+                            style="width: {{ ($stats['onboarding_completed_count'] / $stats['total_registered']) * 100 }}%">
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -209,11 +231,99 @@
     </div>
 </div>
 </div>
-<!-- Charts -->
+<!-- Activity Chart -->
 <div class="mt-8 bg-white rounded-lg shadow p-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Évolution des inscriptions (6 derniers mois)</h3>
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Activité sur les 30 derniers jours</h3>
     <div class="h-80">
-        <canvas id="registrationChart"></canvas>
+        <canvas id="activityChart"></canvas>
+    </div>
+</div>
+
+<!-- Demographics & Documents -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Demographics -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Démographie</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Top Cities -->
+            <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-3">Top Villes</h4>
+                <ul class="space-y-3">
+                    @forelse($cityStats as $city)
+                    <li class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="w-2 h-2 bg-organization-400 rounded-full mr-2"></span>
+                            <span class="text-sm text-gray-700">{{ $city->city }}</span>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900">{{ $city->count }}</span>
+                    </li>
+                    @empty
+                    <li class="text-sm text-gray-500">Aucune donnée géographique</li>
+                    @endforelse
+                </ul>
+            </div>
+
+            <!-- Age Distribution -->
+            <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-3">Tranches d'âge</h4>
+                <div class="relative pt-1">
+                    @foreach($ageStats as $range => $count)
+                    @if($stats['total_registered'] > 0)
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="text-gray-700 font-medium">{{ $range }} ans</span>
+                            <span class="text-gray-900 font-semibold">{{ $count }}</span>
+                        </div>
+                        <div class="overflow-hidden h-2 text-xs flex rounded bg-organization-100">
+                            <div style="width: {{ ($count / $stats['total_registered']) * 100 }}%"
+                                class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-organization-500">
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @endforeach
+                    @if($stats['total_registered'] == 0)
+                    <p class="text-sm text-gray-500">Aucune donnée d'âge</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Breakdown -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Répartition des documents</h3>
+        <div class="space-y-4">
+            @forelse($documentStats as $doc)
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span
+                        class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 text-blue-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="ml-4 flex-1">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-gray-900">
+                            {{ ucfirst(str_replace('_', ' ', $doc->type)) }}
+                        </p>
+                        <p class="text-sm text-gray-500">{{ $doc->count }}</p>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                        <div class="bg-blue-500 h-1.5 rounded-full"
+                            style="width: {{ $stats['documents_count'] > 0 ? ($doc->count / $stats['documents_count']) * 100 : 0 }}%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <p class="text-sm text-gray-500 text-center py-4">Aucun document partagé</p>
+            @endforelse
+        </div>
     </div>
 </div>
 </div>
@@ -222,43 +332,48 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('registrationChart').getContext('2d');
+        const ctx = document.getElementById('activityChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: @json($chartLabels),
-                datasets: [{
-                    label: 'Nouvelles inscriptions',
-                    data: @json($chartData),
-                    borderColor: '#059669', // organization-600
-                    backgroundColor: 'rgba(5, 150, 105, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#059669',
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
+                labels: @json($activityLabels),
+                datasets: [
+                    {
+                        label: 'Inscriptions',
+                        data: @json($activityData['signups']),
+                        borderColor: '#e11d48', // organization-600
+                        backgroundColor: 'rgba(225, 29, 72, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Tests MBTI',
+                        data: @json($activityData['tests']),
+                        borderColor: '#9333ea', // purple-600
+                        backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Sessions Mentorat',
+                        data: @json($activityData['sessions']),
+                        borderColor: '#4f46e5', // indigo-600
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false
+                        position: 'top',
                     },
                     tooltip: {
-                        backgroundColor: '#1f2937',
-                        padding: 12,
-                        titleFont: { size: 14 },
-                        bodyFont: { size: 13 },
-                        displayColors: false,
-                        callbacks: {
-                            label: function (context) {
-                                return context.parsed.y + ' inscription(s)';
-                            }
-                        }
+                        mode: 'index',
+                        intersect: false,
                     }
                 },
                 scales: {
@@ -269,18 +384,19 @@
                             color: '#e5e7eb'
                         },
                         ticks: {
-                            stepSize: 1,
-                            font: { size: 12 }
+                            stepSize: 1
                         }
                     },
                     x: {
                         grid: {
                             display: false
-                        },
-                        ticks: {
-                            font: { size: 12 }
                         }
                     }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 }
             }
         });
