@@ -50,7 +50,7 @@ class DashboardController extends Controller
             ->join('personality_tests', 'users.id', '=', 'personality_tests.user_id')
             ->where('personality_tests.is_current', true)
             ->whereNotNull('personality_tests.completed_at')
-            ->select('personality_tests.personality_type', \DB::raw('count(*) as count'))
+            ->select('personality_tests.personality_type', DB::raw('count(*) as count'))
             ->groupBy('personality_tests.personality_type')
             ->orderByDesc('count')
             ->limit(3)
@@ -125,7 +125,7 @@ class DashboardController extends Controller
         // 2. Demographics: Top Cities
         $cityStats = $organization->sponsoredUsers()
             ->whereNotNull('city')
-            ->select('city', \DB::raw('count(*) as count'))
+            ->select('city', DB::raw('count(*) as count'))
             ->groupBy('city')
             ->orderByDesc('count')
             ->limit(5)
@@ -151,7 +151,7 @@ class DashboardController extends Controller
         // 4. Document Types
         $documentStats = $organization->sponsoredUsers()
             ->join('academic_documents', 'users.id', '=', 'academic_documents.user_id')
-            ->select('academic_documents.document_type as type', \DB::raw('count(*) as count'))
+            ->select('academic_documents.document_type as type', DB::raw('count(*) as count'))
             ->groupBy('academic_documents.document_type')
             ->orderByDesc('count')
             ->get();

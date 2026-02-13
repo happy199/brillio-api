@@ -20,6 +20,7 @@
         rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -70,6 +71,10 @@
                         <a href="{{ route('organization.dashboard') }}"
                             class="{{ request()->routeIs('organization.dashboard') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Tableau de bord
+                        </a>
+                        <a href="{{ route('organization.users.index') }}"
+                            class="{{ request()->routeIs('organization.users.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Jeunes
                         </a>
                         <a href="{{ route('organization.invitations.index') }}"
                             class="{{ request()->routeIs('organization.invitations.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
@@ -135,8 +140,7 @@
             }, function (err) {
                 alert('Erreur lors de la copie');
             });
-        }
-    </script>
+          </script>
 </body>
 
 </html>

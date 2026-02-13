@@ -18,8 +18,8 @@
         </div>
         <div class="flex space-x-3">
             <span
-                class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium {{ $user->last_login_at && $user->last_login_at->gte(now()->subDays(30)) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                {{ $user->last_login_at && $user->last_login_at->gte(now()->subDays(30)) ? 'Actif' : 'Inactif' }}
+                class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium {{ $user->onboarding_completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                {{ $user->onboarding_completed ? 'Actif' : 'Incomplet' }}
             </span>
         </div>
     </div>
@@ -79,8 +79,8 @@
                         {{ $user->personalityTest->personality_type }}
                     </span>
                     <p class="mt-2 font-medium text-gray-900">{{ $user->personalityTest->personality_label }}</p>
-                    <p class="mt-2 text-sm text-gray-500 text-left">{{
-                        \Illuminate\Support\Str::limit($user->personalityTest->personality_description, 150) }}</p>
+                    <p class="mt-2 text-sm text-gray-500 text-justify">{{
+                        $user->personalityTest->personality_description }}</p>
                 </div>
 
                 @if(isset($user->personalityTest->traits_scores))
@@ -106,6 +106,84 @@
                 </div>
                 @endif
             </div>
+
+            <!-- Onboarding Data Card -->
+            @if($user->onboarding_data)
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Parcours & Objectifs</h3>
+
+                <div class="space-y-4">
+                    @if(isset($user->onboarding_data['current_situation']))
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Situation actuelle</p>
+                        <p class="mt-1 text-gray-900">
+                            @switch($user->onboarding_data['current_situation'])
+                            @case('student') Étudiant @break
+                            @case('employed') En emploi @break
+                            @case('seeking') En recherche d'emploi @break
+                            @case('training') En formation @break
+                            @default {{ ucfirst($user->onboarding_data['current_situation'] ?? '') }}
+                            @endswitch
+                        </p>
+                    </div>
+                    @endif
+
+                    @if(isset($user->onboarding_data['education_level']))
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Niveau d'études</p>
+                        <p class="mt-1 text-gray-900">
+                            @switch($user->onboarding_data['education_level'])
+                            @case('college') Collège @break
+                            @case('lycee') Lycée @break
+                            @case('bac') Bac @break
+                            @case('bac_2') Bac +2 (BTS, DUT...) @break
+                            @case('licence') Licence (Bac +3) @break
+                            @case('master') Master (Bac +5) @break
+                            @case('doctorat') Doctorat @break
+                            @default {{ ucfirst($user->onboarding_data['education_level'] ?? '') }}
+                            @endswitch
+                        </p>
+                    </div>
+                    @endif
+
+                    @if(isset($user->onboarding_data['goals']) && is_array($user->onboarding_data['goals']))
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Objectifs</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @foreach($user->onboarding_data['goals'] as $goal)
+                            <span
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                @switch($goal)
+                                @case('orientation') M'orienter @break
+                                @case('career') Trouver un métier @break
+                                @case('training') Trouver une formation @break
+                                @case('job') Trouver un emploi @break
+                                @case('ia') Découvrir l'IA @break
+                                @case('personnalite') Mieux me connaître @break
+                                @default {{ ucfirst($goal) }}
+                                @endswitch
+                            </span>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    @if(isset($user->onboarding_data['interests']) && is_array($user->onboarding_data['interests']))
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Centres d'intérêt</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @foreach($user->onboarding_data['interests'] as $interest)
+                            <span
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                {{ $interest }}
+                            </span>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Right Column -->

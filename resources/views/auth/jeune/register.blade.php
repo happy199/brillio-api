@@ -62,6 +62,9 @@
     <!-- Email Form -->
     <form action="{{ route('auth.jeune.register.submit') }}" method="POST" class="space-y-4">
         @csrf
+        @if(isset($referralCode) && $referralCode)
+        <input type="hidden" name="referral_code" value="{{ $referralCode }}">
+        @endif
 
         <div>
             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>

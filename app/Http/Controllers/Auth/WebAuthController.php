@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -204,9 +205,15 @@ class WebAuthController extends Controller
             ['name' => $validated['name']]
         );
 
-        // Check for referral code in session
-        $referralCode = session('referral_code');
+        // Check for referral code in request (hidden field) or session
+        $referralCode = $request->input('referral_code') ?? session('referral_code');
         $organizationId = null;
+
+        Log::info('Jeune Registration Debug', [
+            'referral_code_input' => $request->input('referral_code'),
+            'referral_code_session' => session('referral_code'),
+            'resolved_code' => $referralCode
+        ]);
         
         if ($referralCode) {
             $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
@@ -215,6 +222,9 @@ class WebAuthController extends Controller
             
             if ($invitation) {
                 $organizationId = $invitation->organization_id;
+                Log::info('Invitation found', ['organization_id' => $organizationId]);
+            } else {
+                Log::warning('Invitation not found or not pending', ['code' => $referralCode]);
             }
         }
 
@@ -527,8 +537,33 @@ class WebAuthController extends Controller
                 'last_login_at' => now(),
             ]);
         } else {
+            // Check for referral code in session (for OAuth)
+            $referralCode = session('referral_code');
+            $organizationId = null;
+
+            if ($referralCode) {
+                $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                    ->where('status', 'pending')
+                    ->first();
+                
+                if ($invitation) {
+                    $organizationId = $invitation->organization_id;
+                    
+                    // Mark invitation as accepted
+                    $invitation->update([
+                        'status' => 'accepted',
+                        'accepted_at' => now(),
+                    ]);
+                    
+                    // Clear referral code from session
+                    session()->forget(['referral_code', 'organization_name']);
+                }
+            }
+
             // Creer un nouveau compte jeune
             $user = User::create([
+                'sponsored_by_organization_id' => $organizationId,
+                'referral_code_used' => $referralCode,
                 'name' => $socialData['name'] ?? 'Utilisateur',
                 'email' => $socialData['email'],
                 'password' => Hash::make(Str::random(32)),
@@ -792,7 +827,7 @@ class WebAuthController extends Controller
         $token = Str::random(64);
 
         // Stocker le token (expire après 10 minutes)
-        \DB::table('password_reset_tokens')->updateOrInsert(
+        DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],
             [
                 'token' => Hash::make($token),
@@ -1028,5 +1063,6 @@ class WebAuthController extends Controller
             ->with('info', "Veuillez vous connecter avec votre compte {$user->user_type}.");
     }
 }
+
 
  

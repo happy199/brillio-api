@@ -103,15 +103,15 @@
                 <div class="mt-4 border-t border-gray-100 pt-4">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-500">Statut</span>
-                        @if($user->last_login_at && $user->last_login_at->gte(now()->subDays(30)))
+                        @if($user->onboarding_completed)
                         <span
                             class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                             Actif
                         </span>
                         @else
                         <span
-                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                            Inactif
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            Incomplet
                         </span>
                         @endif
                     </div>
