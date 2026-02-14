@@ -17,13 +17,35 @@
             <h1 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h1>
         </div>
         <div class="flex items-center space-x-3">
+            <!-- Export Options -->
+            <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm mr-2">
+                <a href="{{ route('organization.users.export', [$user, 'format' => 'pdf']) }}"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-l-lg border-r border-gray-200"
+                    title="Télécharger en PDF">
+                    <svg class="mr-2 h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" />
+                    </svg>
+                    PDF
+                </a>
+                <a href="{{ route('organization.users.export', [$user, 'format' => 'csv']) }}"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-r-lg"
+                    title="Télécharger en CSV">
+                    <svg class="mr-2 h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    CSV
+                </a>
+            </div>
+
             <div class="text-right mr-2 hidden sm:block">
-                <div class="text-xs text-gray-500 uppercase font-semibold">Complétion du profil</div>
+                <div class="text-xs text-gray-500 uppercase font-semibold">Complétion</div>
                 <div class="text-sm font-bold text-indigo-600">{{ $user->profile_completion_percentage }}%</div>
             </div>
             <span
                 class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium {{ $user->profile_completion_percentage === 100 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                {{ $user->profile_completion_percentage === 100 ? 'Profil complet' : 'Profil incomplet' }}
+                {{ $user->profile_completion_percentage === 100 ? 'Complet' : 'Incomplet' }}
             </span>
         </div>
     </div>

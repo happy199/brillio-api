@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\MentorProfile;
+use App\Models\MentoringSession;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Response;
 
 class SponsoredUsersController extends Controller
 {
@@ -126,5 +129,71 @@ class SponsoredUsersController extends Controller
             'existingMentorship' => null, 
             'layout' => 'layouts.organization',
         ]);
+    }
+
+    /**
+     * Exporter le rapport complet d'un jeune (PDF ou CSV)
+     */
+    public function export(Request $request, User $user)
+    {
+        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+
+        // Sécurité
+        if ($user->sponsored_by_organization_id !== $organization->id) {
+            abort(403);
+        }
+
+        $format = $request->query('format', 'pdf');
+        $user->load(['personalityTest', 'jeuneProfile', 'academicDocuments', 'mentorshipsAsMentee.mentor']);
+        
+        // Mentorship sessions
+        $sessions = MentoringSession::whereHas('mentees', function ($q) use ($user) {
+            $q->where('users.id', $user->id);
+        })->with('mentor')->orderBy('scheduled_at', 'desc')->get();
+
+        $fileName = "rapport_" . str_replace(' ', '_', strtolower($user->name)) . "_" . now()->format('Ymd');
+
+        if ($format === 'pdf') {
+            $title = "Rapport Individuel - " . $user->name;
+            $pdf = Pdf::loadView('reports.mentee_individual', compact('organization', 'user', 'sessions', 'title'));
+            return $pdf->download($fileName . ".pdf");
+        }
+
+        // CSV Export
+        $headers = [
+            "Content-type" => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=" . $fileName . ".csv",
+            "Pragma" => "no-cache"
+        ];
+
+        $callback = function () use ($user, $sessions) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, ['RAPPORT INDIVIDUEL - ' . strtoupper($user->name)]);
+            fputcsv($file, []);
+            fputcsv($file, ['Email', $user->email]);
+            fputcsv($file, ['Ville', $user->city ?? 'N/A']);
+            fputcsv($file, ['Complétion Profil', $user->profile_completion_percentage . '%']);
+            fputcsv($file, ['Date Inscription', $user->created_at->format('d/m/Y')]);
+            fputcsv($file, []);
+            fputcsv($file, ['HISTORIQUE DES SÉANCES']);
+            fputcsv($file, ['Date', 'Mentor', 'Statut', 'Progrès', 'Obstacles', 'Objectifs SMART']);
+
+            foreach ($sessions as $session) {
+                fputcsv($file, [
+                    $session->scheduled_at->format('d/m/Y H:i'),
+                    $session->mentor->name,
+                    $session->translated_status,
+                    $session->report_content['progress'] ?? '-',
+                    $session->report_content['obstacles'] ?? '-',
+                    $session->report_content['smart_goals'] ?? '-'
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return Response::stream($callback, 200, $headers);
     }
 }

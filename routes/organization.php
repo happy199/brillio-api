@@ -3,6 +3,8 @@
 use App\Http\Controllers\Organization\Auth\RegisterController;
 use App\Http\Controllers\Organization\DashboardController;
 use App\Http\Controllers\Organization\InvitationController;
+use App\Http\Controllers\Organization\ExportController;
+use App\Http\Controllers\Organization\SponsoredUsersController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,6 +55,13 @@ Route::middleware(['auth', 'organization'])->group(function () {
     Route::get('/sessions/calendar', [\App\Http\Controllers\Organization\SessionController::class , 'calendar'])->name('sessions.calendar');
     Route::get('/sessions/events', [\App\Http\Controllers\Organization\SessionController::class , 'events'])->name('sessions.events');
     Route::get('/sessions/{session}', [\App\Http\Controllers\Organization\SessionController::class , 'show'])->name('sessions.show');
+
+    // Exports
+    Route::get('/exports', [ExportController::class , 'index'])->name('exports.index'); // Export Center
+    Route::get('/exports/generate', [ExportController::class , 'generate'])->name('exports.generate');
+
+    // Individual User Export
+    Route::get('/users/{user}/export', [SponsoredUsersController::class , 'export'])->name('users.export');
 
     // Logout
     Route::post('/logout', [RegisterController::class , 'logout'])->name('logout');

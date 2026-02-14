@@ -17,11 +17,11 @@ class MentoringSession extends Model
         'duration_minutes',
         'is_paid',
         'price',
-        'status',         // proposed, pending_payment, confirmed, cancelled, completed
+        'status', // proposed, pending_payment, confirmed, cancelled, completed
         'cancel_reason',
         'meeting_link',
         'report_content', // JSON: { progress, obstacles, smart_goals }
-        'created_by',     // mentor, mentee
+        'created_by', // mentor, mentee
     ];
 
     protected $casts = [
@@ -32,13 +32,13 @@ class MentoringSession extends Model
 
     public function mentor()
     {
-        return $this->belongsTo(User::class, 'mentor_id');
+        return $this->belongsTo(User::class , 'mentor_id');
     }
 
     // Participants (Mentees)
     public function mentees()
     {
-        return $this->belongsToMany(User::class, 'mentoring_session_user', 'mentoring_session_id', 'user_id')
+        return $this->belongsToMany(User::class , 'mentoring_session_user', 'mentoring_session_id', 'user_id')
             ->withPivot('status', 'rejection_reason')
             ->withTimestamps();
     }
@@ -69,10 +69,23 @@ class MentoringSession extends Model
 
         // Avoid division by zero
         if ($jeuneCreditPrice <= 0)
-            return (int) $this->price;
+            return (int)$this->price;
 
         // Session Price (FCFA) / Credit Price (FCFA/Credit) = Credits needed
         // User requested floor behavior for integer credits
-        return (int) floor($this->price / $jeuneCreditPrice);
+        return (int)floor($this->price / $jeuneCreditPrice);
+    }
+
+    // Translated status
+    public function getTranslatedStatusAttribute()
+    {
+        return match ($this->status) {
+                'proposed' => 'Proposée',
+                'pending_payment' => 'En attente de paiement',
+                'confirmed' => 'Confirmée',
+                'cancelled' => 'Annulée',
+                'completed' => 'Terminée',
+                default => $this->status,
+            };
     }
 }
