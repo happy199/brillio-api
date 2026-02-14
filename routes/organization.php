@@ -29,9 +29,13 @@ Route::middleware('guest')->group(function () {
 });
 
 // Protected routes (authenticated organizations only)
-Route::middleware(['auth', 'organization'])->group(function () {
+Route::middleware(['auth', 'organization', 'organization_active'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class , 'index'])->name('dashboard');
+
+    // Profile
+    Route::get('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'edit'])->name('profile.edit');
+    Route::put('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'update'])->name('profile.update');
 
     // Invitations
     Route::get('/invitations', [InvitationController::class , 'index'])->name('invitations.index');

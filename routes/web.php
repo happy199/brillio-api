@@ -430,4 +430,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
     Route::get('/mentorship/requests/{mentorship}', [App\Http\Controllers\Admin\MentorshipController::class, 'showRequest'])->name('mentorship.requests.show');
     Route::get('/mentorship/sessions', [App\Http\Controllers\Admin\MentorshipController::class, 'sessions'])->name('mentorship.sessions');
     Route::get('/mentorship/sessions/{session}', [App\Http\Controllers\Admin\MentorshipController::class, 'showSession'])->name('mentorship.sessions.show');
+
+    // Gestion des organisations
+    Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);
 });

@@ -72,6 +72,18 @@
                     </span>
                 </a>
 
+                <a href="{{ route('admin.organizations.index') }}"
+                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.organizations.*') ? 'bg-indigo-800' : '' }}">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                            </path>
+                        </svg>
+                        Organisations
+                    </span>
+                </a>
+
                 <!-- Mentorat Dropdown -->
                 <div
                     x-data="{ open: {{ request()->routeIs('admin.mentors.*') || request()->routeIs('admin.mentorship.*') ? 'true' : 'false' }} }">
@@ -155,7 +167,7 @@
                 </a>
 
                 @php
-                    $pendingSpecializations = \App\Models\Specialization::where('status', 'pending')->count();
+                $pendingSpecializations = \App\Models\Specialization::where('status', 'pending')->count();
                 @endphp
                 <a href="{{ route('admin.specializations.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.specializations.*') ? 'bg-indigo-800' : '' }}">
@@ -169,9 +181,9 @@
                             Domaines d'expertise
                         </span>
                         @if($pendingSpecializations > 0)
-                            <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                {{ $pendingSpecializations }}
-                            </span>
+                        <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            {{ $pendingSpecializations }}
+                        </span>
                         @endif
                     </span>
                 </a>
@@ -188,7 +200,7 @@
                 </a>
 
                 @php
-                    $newMessages = \App\Models\ContactMessage::where('status', 'new')->count();
+                $newMessages = \App\Models\ContactMessage::where('status', 'new')->count();
                 @endphp
                 <a href="{{ route('admin.contact-messages.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.contact-messages.*') ? 'bg-indigo-800' : '' }}">
@@ -202,9 +214,9 @@
                             Messages de contact
                         </span>
                         @if($newMessages > 0)
-                            <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                {{ $newMessages }}
-                            </span>
+                        <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            {{ $newMessages }}
+                        </span>
                         @endif
                     </span>
                 </a>
@@ -222,9 +234,9 @@
                 </a>
 
                 @php
-                    $pendingSupportCount = \App\Models\ChatConversation::where('needs_human_support', true)
-                        ->where('human_support_active', false)
-                        ->count();
+                $pendingSupportCount = \App\Models\ChatConversation::where('needs_human_support', true)
+                ->where('human_support_active', false)
+                ->count();
                 @endphp
                 <a href="{{ route('admin.chat.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.chat.*') ? 'bg-indigo-800' : '' }}">
@@ -238,9 +250,9 @@
                             Chat
                         </span>
                         @if($pendingSupportCount > 0)
-                            <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                                {{ $pendingSupportCount }}
-                            </span>
+                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                            {{ $pendingSupportCount }}
+                        </span>
                         @endif
                     </span>
                 </a>
@@ -264,7 +276,11 @@
             <!-- Top bar -->
             <header class="bg-white shadow-sm">
                 <div class="flex items-center justify-between px-6 py-4">
+                    @hasSection('header_content')
+                    @yield('header_content')
+                    @else
                     <h2 class="text-xl font-semibold text-gray-800">@yield('header', 'Dashboard')</h2>
+                    @endif
 
                     <div class="flex items-center space-x-4">
                         <span class="text-gray-600">{{ auth()->user()->name }}</span>
@@ -282,21 +298,21 @@
             <main class="flex-1 p-6">
                 <!-- Flash messages -->
                 @if(session('success'))
-                    <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                        {{ session('success') }}
-                    </div>
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    {{ session('success') }}
+                </div>
                 @endif
 
                 @if(session('error'))
-                    <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        {{ session('error') }}
-                    </div>
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {{ session('error') }}
+                </div>
                 @endif
 
                 @if(session('warning'))
-                    <div class="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-                        {{ session('warning') }}
-                    </div>
+                <div class="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                    {{ session('warning') }}
+                </div>
                 @endif
 
                 @yield('content')

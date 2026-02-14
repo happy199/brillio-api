@@ -92,14 +92,60 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
-                    <form method="POST" action="{{ route('organization.logout') }}" class="inline">
-                        @csrf
-                        <button type="submit"
-                            class="text-sm text-organization-600 hover:text-organization-700 font-medium">
-                            Déconnexion
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false"
+                            class="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900 focus:outline-none">
+                            @if(auth()->user()->organization && auth()->user()->organization->logo_url)
+                            <img src="{{ auth()->user()->organization->logo_url }}" alt="Logo"
+                                class="h-8 w-8 rounded-full border border-gray-200 object-cover">
+                            @elseif(auth()->user()->organization)
+                            <div
+                                class="h-8 w-8 rounded-full bg-organization-100 flex items-center justify-center text-organization-600 font-bold border border-organization-200 text-xs">
+                                {{ auth()->user()->organization->initials }}
+                            </div>
+                            @else
+                            <div
+                                class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-bold">
+                                {{ substr(auth()->user()->name, 0, 1) }}
+                            </div>
+                            @endif
+                            <span class="font-medium">{{ auth()->user()->name }}</span>
+                            <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
                         </button>
-                    </form>
+
+                        <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="transform opacity-0 scale-95"
+                            x-transition:enter-end="transform opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="transform opacity-100 scale-100"
+                            x-transition:leave-end="transform opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5"
+                            style="display: none;">
+
+                            <a href="{{ route('organization.profile.edit') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Profil
+                            </a>
+
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
+                                title="Bientôt disponible">
+                                Portefeuille
+                            </a>
+
+                            <div class="border-t border-gray-100"></div>
+
+                            <form method="POST" action="{{ route('organization.logout') }}">
+                                @csrf
+                                <button type="submit"
+                                    class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                    Déconnexion
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -146,7 +192,7 @@
             navigator.clipboard.writeText(input.value).then(function () {
                 alert('Lien copié dans le presse-papiers !');
             }, function (err) {
-                alert('Erreur lors de la copie');
+                alerrrela ;
             });
     </script>
 </body>

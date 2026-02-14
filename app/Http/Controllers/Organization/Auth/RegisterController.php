@@ -53,6 +53,7 @@ class RegisterController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'user_type' => 'organization',
+            'organization_id' => $organization->id, // Link to the created organization
             'onboarding_completed' => true,
         ]);
 
@@ -87,6 +88,18 @@ class RegisterController extends Controller
         'user_type' => 'organization'
         ], $request->filled('remember'))) {
             $request->session()->regenerate();
+
+            // Check if organization is active
+            $user = Auth::user();
+            if ($user->organization && $user->organization->status === 'inactive') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Votre compte organisation est inactif. Veuillez contacter le support.',
+                ])->onlyInput('email');
+            }
 
             return redirect()->intended(route('organization.dashboard'))
                 ->with('success', 'Connexion réussie !');

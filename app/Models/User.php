@@ -52,6 +52,7 @@ class User extends Authenticatable
         'last_login_at',
         'email_verified_at',
         'sponsored_by_organization_id',
+        'organization_id',
         'referral_code_used',
     ];
 
@@ -98,6 +99,14 @@ class User extends Authenticatable
     public function isMentor(): bool
     {
         return $this->user_type === self::TYPE_MENTOR;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est une organisation
+     */
+    public function isOrganization(): bool
+    {
+        return $this->user_type === self::TYPE_ORGANIZATION;
     }
 
     /**
@@ -359,5 +368,13 @@ class User extends Authenticatable
     public function isSponsoredByOrganization(): bool
     {
         return !is_null($this->sponsored_by_organization_id);
+    }
+
+    /**
+     * Relation vers l'organisation gérée par cet utilisateur (pour les admins d'orga).
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
     }
 }

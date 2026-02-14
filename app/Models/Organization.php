@@ -86,11 +86,19 @@ class Organization extends Model
     }
 
     /**
-     * Get logo URL with fallback to default.
+     * Get logo URL. Returns null if no logo is set.
      */
-    public function getLogoUrlAttribute($value): string
+    public function getLogoUrlAttribute($value): ?string
     {
-        return $value ?? asset('images/organization-placeholder.png');
+        return $value ? asset('storage/' . $value) : null;
+    }
+
+    /**
+     * Get organization initials (first letter of name).
+     */
+    public function getInitialsAttribute(): string
+    {
+        return strtoupper(substr($this->name, 0, 1));
     }
 
     /**
