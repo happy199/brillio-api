@@ -41,6 +41,9 @@ Route::middleware(['auth', 'organization'])->group(function () {
     Route::get('/users', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'index'])->name('users.index');
     Route::get('/users/{user}', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'show'])->name('users.show');
 
+    // Mentors
+    Route::get('/mentors/{mentor}', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'mentorShow'])->name('mentors.show');
+
     // Mentorships
     Route::get('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class , 'index'])->name('mentorships.index');
     Route::get('/mentorships/{mentorship}', [\App\Http\Controllers\Organization\MentorshipController::class , 'show'])->name('mentorships.show');

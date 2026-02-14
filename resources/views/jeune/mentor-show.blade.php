@@ -1,10 +1,19 @@
-@extends('layouts.jeune')
+@extends($layout ?? 'layouts.jeune')
 
 @section('title', $mentor->user->name ?? 'Profil mentor')
 
 @section('content')
 <div class="space-y-8">
     <!-- Back Button -->
+    @if(request()->routeIs('organization.*'))
+    <button onclick="window.history.back()"
+        class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Retour
+    </button>
+    @else
     <a href="{{ route('jeune.mentors') }}"
         class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,6 +21,7 @@
         </svg>
         Retour aux mentors
     </a>
+    @endif
 
     <!-- Profile Header -->
     <div class="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl overflow-hidden">
@@ -167,6 +177,7 @@
                     </a>
                     @endif
 
+                    @if(!request()->routeIs('organization.*'))
                     @if(isset($existingMentorship) && in_array($existingMentorship->status, ['pending',
                     'accepted']))
                     @if($existingMentorship->status === 'pending')
@@ -260,6 +271,7 @@
                         </svg>
                         Discuter avec l'IA sur ce profil
                     </a>
+                    @endif
                     @endif
                 </div>
             </div>

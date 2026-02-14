@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\User;
+use App\Models\MentorProfile;
 use Illuminate\Http\Request;
 
 class SponsoredUsersController extends Controller
@@ -72,10 +73,58 @@ class SponsoredUsersController extends Controller
 
         $user->load(['personalityTest', 'jeuneProfile', 'academicDocuments']);
 
-        // Activité IA (simulée pour l'instant car pas de relation directe simple)
+        // Activité IA
         $aiConversationsCount = $user->chatConversations()->count();
         $lastAiActivity = $user->chatConversations()->latest('updated_at')->first()?->updated_at;
 
-        return view('organization.users.show', compact('organization', 'user', 'aiConversationsCount', 'lastAiActivity'));
+        // Mentorats
+        $mentorships = $user->mentorshipsAsMentee()->with(['mentor'])->get();
+        foreach ($mentorships as $mentorship) {
+            $mentorship->sessions_count = \App\Models\MentoringSession::where('mentor_id', $mentorship->mentor_id)
+                ->whereHas('mentees', function ($q) use ($user) {
+                    $q->where('users.id', $user->id);
+                })->count();
+        }
+
+        // Ressources (Vues & Achetées)
+        $viewedResources = $user->resourceViews()->with('resource')->latest()->get()->pluck('resource')->unique();
+        $purchasedResources = $user->purchases()->where('item_type', \App\Models\Resource::class)->with('item')->latest()->get()->pluck('item');
+
+        // Mentors consultés
+        $consultedMentors = $user->mentorProfileViews()->with('mentor.mentorProfile')->latest()->get()->pluck('mentor')->unique();
+
+        return view('organization.users.show', compact(
+            'organization', 
+            'user', 
+            'aiConversationsCount', 
+            'lastAiActivity',
+            'mentorships',
+            'viewedResources',
+            'purchasedResources',
+            'consultedMentors'
+        ));
+    }
+
+    /**
+     * Détail d'un mentor pour l'organisation
+     */
+    public function mentorShow(MentorProfile $mentor)
+    {
+        $mentor->load(['user', 'roadmapSteps']);
+
+        // Mentors similaires (meme specialisation)
+        $similarMentors = MentorProfile::where('is_published', true)
+            ->where('id', '!=', $mentor->id)
+            ->where('specialization', $mentor->specialization)
+            ->with('user')
+            ->limit(3)
+            ->get();
+
+        return view('jeune.mentor-show', [
+            'mentor' => $mentor,
+            'similarMentors' => $similarMentors,
+            'existingMentorship' => null, 
+            'layout' => 'layouts.organization',
+        ]);
     }
 }

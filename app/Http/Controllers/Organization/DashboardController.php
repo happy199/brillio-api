@@ -21,13 +21,11 @@ class DashboardController extends Controller
         $organization = Organization::where('contact_email', $user->email)->firstOrFail();
 
         // Get basic stats
-        $sponsoredUsersQuery = $organization->sponsoredUsers();
-
         $stats = [
             'total_invited' => $organization->invitations()->count(),
-            'total_registered' => $sponsoredUsersQuery->count(),
+            'total_registered' => $organization->sponsoredUsers()->count(),
             'pending_invitations' => $organization->invitations()->where('status', 'pending')->count(),
-            'active_users' => $sponsoredUsersQuery->where('last_login_at', '>=', now()->subDays(30))->count(),
+            'active_users' => $organization->sponsoredUsers()->where('last_login_at', '>=', now()->subDays(30))->count(),
             'personality_tests_completed' => $organization->sponsoredUsers()->whereHas('personalityTest', function ($q) {
             $q->whereNotNull('completed_at');
         })->count(),
@@ -42,8 +40,13 @@ class DashboardController extends Controller
             ->where('mentoring_sessions.status', 'completed')
             ->count(),
             'documents_count' => $organization->sponsoredUsers()->withCount('academicDocuments')->get()->sum('academic_documents_count'),
-            'onboarding_completed_count' => $sponsoredUsersQuery->where('onboarding_completed', true)->count(),
         ];
+
+        // Custom calculation for 100% completed profiles
+        $allSponsoredUsers = $organization->sponsoredUsers()->with(['jeuneProfile', 'personalityTest'])->get();
+        $stats['onboarding_completed_count'] = $allSponsoredUsers->filter(function ($u) {
+            return $u->profile_completion_percentage === 100;
+        })->count();
 
         // Personality Types Distribution (Top 3)
         $personalityStats = $organization->sponsoredUsers()

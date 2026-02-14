@@ -149,6 +149,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Relation vers les ressources consultées
+     */
+    public function resourceViews(): HasMany
+    {
+        return $this->hasMany(ResourceView::class);
+    }
+
+    /**
+     * Relation vers les achats effectués
+     */
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    /**
+     * Relation vers les profils mentors consultés par ce jeune
+     */
+    public function mentorProfileViews(): HasMany
+    {
+        return $this->hasMany(MentorProfileView::class , 'user_id');
+    }
+
+    /**
      * Relation vers les documents académiques
      */
     public function academicDocuments(): HasMany
@@ -239,6 +263,78 @@ class User extends Authenticatable
     public function hasCompletedOnboarding(): bool
     {
         return $this->onboarding_completed === true;
+    }
+
+    /**
+     * Calcule le pourcentage de complétion du profil du jeune.
+     * Basé sur 10 critères (10% chacun).
+     */
+    public function getProfileCompletionPercentageAttribute(): int
+    {
+        if (!$this->isJeune()) {
+            return 0;
+        }
+
+        $criteria = [
+            'name' => !empty($this->name),
+            'photo' => !empty($this->profile_photo_path) || !empty($this->profile_photo_url),
+            'phone' => !empty($this->phone),
+            'dob' => !empty($this->date_of_birth),
+            'location' => !empty($this->city) || !empty($this->country),
+            'linkedin' => !empty($this->linkedin_url),
+            'bio' => !empty($this->jeuneProfile?->bio),
+            'cv' => !empty($this->jeuneProfile?->cv_path),
+            'portfolio' => !empty($this->jeuneProfile?->portfolio_url),
+            'personality' => $this->personalityTest()->exists(),
+        ];
+
+        $completedCount = count(array_filter($criteria));
+        return $completedCount * 10;
+    }
+
+    /**
+     * Liste les champs manquants du profil.
+     */
+    public function getMissingProfileFieldsAttribute(): array
+    {
+        if (!$this->isJeune()) {
+            return [];
+        }
+
+        $fields = [
+            'name' => 'Nom complet',
+            'photo' => 'Photo de profil',
+            'phone' => 'Numéro de téléphone',
+            'dob' => 'Date de naissance',
+            'location' => 'Ville ou pays',
+            'linkedin' => 'Lien LinkedIn',
+            'bio' => 'Biographie / Présentation',
+            'cv' => 'Curriculum Vitae',
+            'portfolio' => 'Lien Portfolio',
+            'personality' => 'Test de personnalité',
+        ];
+
+        $criteria = [
+            'name' => !empty($this->name),
+            'photo' => !empty($this->profile_photo_path) || !empty($this->profile_photo_url),
+            'phone' => !empty($this->phone),
+            'dob' => !empty($this->date_of_birth),
+            'location' => !empty($this->city) || !empty($this->country),
+            'linkedin' => !empty($this->linkedin_url),
+            'bio' => !empty($this->jeuneProfile?->bio),
+            'cv' => !empty($this->jeuneProfile?->cv_path),
+            'portfolio' => !empty($this->jeuneProfile?->portfolio_url),
+            'personality' => $this->personalityTest()->exists(),
+        ];
+
+        $missing = [];
+        foreach ($criteria as $field => $isCompleted) {
+            if (!$isCompleted) {
+                $missing[] = $fields[$field];
+            }
+        }
+
+        return $missing;
     }
 
     /**

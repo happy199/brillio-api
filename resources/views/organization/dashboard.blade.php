@@ -166,15 +166,19 @@
                 </div>
                 <div class="mt-4 pt-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500">Profils complétés (Onboarding)</span>
-                        <span class="font-semibold text-gray-900">{{ $stats['onboarding_completed_count'] }}</span>
+                        <span class="text-gray-500 font-medium">Profils complétés à 100% (Onboarding)</span>
+                        <span class="font-bold text-gray-900">{{ $stats['onboarding_completed_count'] }}</span>
                     </div>
                     @if($stats['total_registered'] > 0)
-                    <div class="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-                        <div class="bg-green-500 h-1.5 rounded-full"
+                    <div class="mt-2 w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-green-500 h-1.5 rounded-full transition-all duration-1000"
                             style="width: {{ ($stats['onboarding_completed_count'] / $stats['total_registered']) * 100 }}%">
                         </div>
                     </div>
+                    <p class="mt-2 text-xs text-gray-400">
+                        {{ $stats['onboarding_completed_count'] }} sur {{ $stats['total_registered'] }} jeunes ont un
+                        profil complet.
+                    </p>
                     @endif
                 </div>
             </div>
