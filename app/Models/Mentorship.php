@@ -12,19 +12,30 @@ class Mentorship extends Model
     protected $fillable = [
         'mentor_id',
         'mentee_id',
-        'status',          // pending, accepted, refused, disconnected
+        'status', // pending, accepted, refused, disconnected
         'request_message',
         'refusal_reason',
-        'diction_reason',  // reason for disconnection
+        'diction_reason', // reason for disconnection
     ];
 
     public function mentor()
     {
-        return $this->belongsTo(User::class, 'mentor_id');
+        return $this->belongsTo(User::class , 'mentor_id');
     }
 
     public function mentee()
     {
-        return $this->belongsTo(User::class, 'mentee_id');
+        return $this->belongsTo(User::class , 'mentee_id');
+    }
+
+    public function getTranslatedStatusAttribute()
+    {
+        return match ($this->status) {
+                'pending' => 'En attente',
+                'accepted' => 'Accepté',
+                'refused' => 'Refusé',
+                'disconnected' => 'Terminé', // ou "Déconnecté" selon la terminologie préférée
+                default => $this->status,
+            };
     }
 }

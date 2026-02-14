@@ -151,11 +151,54 @@ class SponsoredUsersController extends Controller
             $q->where('users.id', $user->id);
         })->with('mentor')->orderBy('scheduled_at', 'desc')->get();
 
+        // Data Enrichment
+        // 1. AI Stats
+        $aiStats = [
+            'count' => $user->chatConversations()->count(),
+            'last_activity' => $user->chatConversations()->max('updated_at')
+        ];
+
+        // 2. Mentors
+        $viewedMentors = \App\Models\MentorProfileView::where('user_id', $user->id)
+            ->with('mentor')
+            ->orderBy('viewed_at', 'desc')
+            ->get()
+            ->unique('mentor_id');
+
+        $activeMentorships = $user->mentorshipsAsMentee()->with('mentor')->get();
+
+        // 3. Personality
+        $personalityTest = $user->personalityTest;
+
+        // 4. Resources
+        $resourcesViewedCount = $user->resourceViews()->count();
+
+        // 5. Onboarding Data
+        $onboarding = $user->onboarding_data ?? [];
+        $profileData = [
+            'situation' => $onboarding['situation'] ?? 'Non renseigné',
+            'education_level' => $onboarding['education_level'] ?? 'Non renseigné',
+            'goals' => isset($onboarding['goals']) ? (is_array($onboarding['goals']) ? implode(', ', $onboarding['goals']) : $onboarding['goals']) : 'Non renseigné',
+            'interests' => isset($onboarding['interests']) ? (is_array($onboarding['interests']) ? implode(', ', $onboarding['interests']) : $onboarding['interests']) : 'Non renseigné',
+            'challenges' => isset($onboarding['challenges']) ? (is_array($onboarding['challenges']) ? implode(', ', $onboarding['challenges']) : $onboarding['challenges']) : 'Non renseigné',
+        ];
+
         $fileName = "rapport_" . str_replace(' ', '_', strtolower($user->name)) . "_" . now()->format('Ymd');
 
         if ($format === 'pdf') {
             $title = "Rapport Individuel - " . $user->name;
-            $pdf = Pdf::loadView('reports.mentee_individual', compact('organization', 'user', 'sessions', 'title'));
+            $pdf = Pdf::loadView('reports.mentee_individual', compact(
+                'organization',
+                'user',
+                'sessions',
+                'title',
+                'aiStats',
+                'viewedMentors',
+                'activeMentorships',
+                'personalityTest',
+                'resourcesViewedCount',
+                'profileData'
+            ));
             return $pdf->download($fileName . ".pdf");
         }
 
@@ -166,18 +209,72 @@ class SponsoredUsersController extends Controller
             "Pragma" => "no-cache"
         ];
 
-        $callback = function () use ($user, $sessions) {
+        $callback = function () use ($user, $sessions, $aiStats, $viewedMentors, $activeMentorships, $personalityTest, $resourcesViewedCount, $profileData) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             fputcsv($file, ['RAPPORT INDIVIDUEL - ' . strtoupper($user->name)]);
             fputcsv($file, []);
+
+            // SECTION 1: PROFIL
+            fputcsv($file, ['INFORMATIONS GÉNÉRALES']);
             fputcsv($file, ['Email', $user->email]);
             fputcsv($file, ['Ville', $user->city ?? 'N/A']);
-            fputcsv($file, ['Complétion Profil', $user->profile_completion_percentage . '%']);
+            fputcsv($file, ['Date de naissance', $user->date_of_birth ? $user->date_of_birth->format('d/m/Y') : 'N/A']);
+            fputcsv($file, ['Téléphone', $user->phone ?? 'N/A']);
             fputcsv($file, ['Date Inscription', $user->created_at->format('d/m/Y')]);
+            fputcsv($file, ['Complétion Profil', $user->profile_completion_percentage . '%']);
             fputcsv($file, []);
-            fputcsv($file, ['HISTORIQUE DES SÉANCES']);
+
+            fputcsv($file, ['PARCOURS & OBJECTIFS']);
+            fputcsv($file, ['Situation', $profileData['situation']]);
+            fputcsv($file, ['Niveau d\'études', $profileData['education_level']]);
+            fputcsv($file, ['Objectifs', $profileData['goals']]);
+            fputcsv($file, ['Centres d\'intérêt', $profileData['interests']]);
+            fputcsv($file, ['Défis', $profileData['challenges']]);
+            fputcsv($file, []);
+
+            // SECTION 2: ACTIVITÉ IA & RESSOURCES
+            fputcsv($file, ['ACTIVITÉ IA & RESSOURCES']);
+            fputcsv($file, ['Conversations IA', $aiStats['count']]);
+            fputcsv($file, ['Dernière activité IA', $aiStats['last_activity'] ? \Carbon\Carbon::parse($aiStats['last_activity'])->format('d/m/Y H:i') : 'Jamais']);
+            fputcsv($file, ['Ressources consultées', $resourcesViewedCount]);
+            fputcsv($file, []);
+
+            // SECTION 3: PERSONNALITÉ
+            fputcsv($file, ['PERSONNALITÉ (MBTI)']);
+            if ($personalityTest) {
+                fputcsv($file, ['Type', $personalityTest->personality_type . ' - ' . $personalityTest->personality_label]);
+                fputcsv($file, ['Description', strip_tags($personalityTest->personality_description)]); // Basic strip tags suitable for CSV
+            } else {
+                fputcsv($file, ['Type', 'Test non réalisé']);
+            }
+            fputcsv($file, []);
+
+            // SECTION 4: MENTORS
+            fputcsv($file, ['MENTORS CONSULTÉS ('. $viewedMentors->count() .')']);
+            if ($viewedMentors->count() > 0) {
+                fputcsv($file, ['Nom', 'Vue le']);
+                foreach ($viewedMentors as $view) {
+                    fputcsv($file, [$view->mentor->name, $view->viewed_at->format('d/m/Y H:i')]);
+                }
+            } else {
+                fputcsv($file, ['Aucun mentor consulté']);
+            }
+            fputcsv($file, []);
+
+            fputcsv($file, ['MENTORATS ('. $activeMentorships->count() .')']);
+            if ($activeMentorships->count() > 0) {
+                fputcsv($file, ['Mentor', 'Statut', 'Débuté le']);
+                foreach ($activeMentorships as $mentorship) {
+                    fputcsv($file, [$mentorship->mentor->name, $mentorship->translated_status, $mentorship->created_at->format('d/m/Y')]);
+                }
+            } else {
+                fputcsv($file, ['Aucun mentorat actif']);
+            }
+            fputcsv($file, []);
+
+            fputcsv($file, ['HISTORIQUE DES SÉANCES (' . $sessions->count() . ')']);
             fputcsv($file, ['Date', 'Mentor', 'Statut', 'Progrès', 'Obstacles', 'Objectifs SMART']);
 
             foreach ($sessions as $session) {
