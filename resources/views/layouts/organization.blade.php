@@ -137,7 +137,7 @@
                                 Abonnement
                             </a>
 
-                            <a href="{{ route('organization.subscriptions.index') }}"
+                            <a href="{{ route('organization.wallet.index') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Portefeuille
                             </a>
@@ -201,6 +201,7 @@
             }, function (err) {
                 alert('Erreur lors de la copie.');
             });
+    }
     </script>
 </body>
 

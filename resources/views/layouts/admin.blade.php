@@ -155,6 +155,17 @@
                     </span>
                 </a>
 
+                <a href="{{ route('admin.subscription-plans.index') }}"
+                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.subscription-plans.*') ? 'bg-indigo-800' : '' }}">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M7 7h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z" />
+                        </svg>
+                        Offres d'Abonnement
+                    </span>
+                </a>
+
                 <a href="{{ route('admin.credit-packs.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.credit-packs.*') ? 'bg-indigo-800' : '' }}">
                     <span class="flex items-center">

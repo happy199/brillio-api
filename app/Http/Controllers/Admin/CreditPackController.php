@@ -11,21 +11,30 @@ class CreditPackController extends Controller
 {
     public function index()
     {
-        $jeunePacks = CreditPack::where('user_type', 'jeune')->orderBy('display_order')->get();
-        $mentorPacks = CreditPack::where('user_type', 'mentor')->orderBy('display_order')->get();
+        $jeunePacks = CreditPack::credits()->where('user_type', 'jeune')->orderBy('display_order')->get();
+        $mentorPacks = CreditPack::credits()->where('user_type', 'mentor')->orderBy('display_order')->get();
+        $organizationPacks = CreditPack::credits()->where('user_type', 'organization')->orderBy('display_order')->get();
 
         // Base prices for calculation in view
         $walletService = app(\App\Services\WalletService::class);
         $jeuneCreditPrice = $walletService->getCreditPrice('jeune');
         $mentorCreditPrice = $walletService->getCreditPrice('mentor');
+        $organizationCreditPrice = $walletService->getCreditPrice('organization');
 
-        return view('admin.credit-packs.index', compact('jeunePacks', 'mentorPacks', 'jeuneCreditPrice', 'mentorCreditPrice'));
+        return view('admin.credit-packs.index', compact(
+            'jeunePacks',
+            'mentorPacks',
+            'organizationPacks',
+            'jeuneCreditPrice',
+            'mentorCreditPrice',
+            'organizationCreditPrice'
+        ));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_type' => 'required|in:jeune,mentor',
+            'user_type' => 'required|in:jeune,mentor,organization',
             'credits' => 'required|integer|min:1',
             'price' => 'required|integer|min:0',
             'promo_percent' => 'nullable|integer|min:0|max:100',
@@ -35,6 +44,7 @@ class CreditPackController extends Controller
             'is_popular' => 'boolean'
         ]);
 
+        $validated['type'] = 'credits';
         $validated['promo_percent'] = $validated['promo_percent'] ?? 0;
         $validated['is_popular'] = $request->has('is_popular');
         $validated['is_active'] = $request->has('is_active');

@@ -77,6 +77,13 @@ Route::middleware(['auth', 'organization', 'organization_active'])->group(functi
         Route::get('/subscriptions', [\App\Http\Controllers\Organization\SubscriptionController::class , 'index'])->name('subscriptions.index');
         Route::post('/subscriptions/{plan}', [\App\Http\Controllers\Organization\SubscriptionController::class , 'subscribe'])->name('subscriptions.subscribe');
 
+        // Payments
+        Route::get('/payment/callback', [\App\Http\Controllers\Organization\PaymentController::class , 'callback'])->name('payment.callback');
+
+        // Wallet
+        Route::get('/wallet', [\App\Http\Controllers\Organization\WalletController::class , 'index'])->name('wallet.index');
+        Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class , 'purchase'])->name('wallet.purchase');
+
         // Logout
         Route::post('/logout', [RegisterController::class , 'logout'])->name('logout');
     });

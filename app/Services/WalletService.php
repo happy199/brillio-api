@@ -82,7 +82,8 @@ class WalletService
                     // Reduce available balance (clamping to 0 just in case)
                     if ($user->mentorProfile->available_balance >= $amoutFcfaToRemove) {
                         $user->mentorProfile->decrement('available_balance', $amoutFcfaToRemove);
-                    } else {
+                    }
+                    else {
                         // Edge case: Inconsistent state, reset to 0
                         $user->mentorProfile->update(['available_balance' => 0]);
                     }
@@ -146,6 +147,10 @@ class WalletService
     {
         if ($userType === 'mentor') {
             return SystemSetting::getValue('credit_price_mentor', 100);
+        }
+
+        if ($userType === 'organization') {
+            return SystemSetting::getValue('credit_price_organization', 150); // Default organization price
         }
 
         return SystemSetting::getValue('credit_price_jeune', 50);
