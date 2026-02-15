@@ -136,6 +136,15 @@ Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.pu
 
 /*
 |--------------------------------------------------------------------------
+| Common Authenticated Routes (Meeting, etc.)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/meeting/{meetingId}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meeting.show');
+});
+
+/*
+|--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
@@ -188,6 +197,18 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:je
         ->parameters(['ressources' => 'resource']);
 
     Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class, 'unlock'])->name('resources.unlock');
+    Route::post('/mentorship/request', [\App\Http\Controllers\Jeune\MentorshipController::class, 'store'])->name('mentorship.request');
+    Route::post('/mentorship/{mentorship}/cancel', [\App\Http\Controllers\Jeune\MentorshipController::class, 'cancel'])->name('mentorship.cancel');
+    Route::get('/mentorat', [\App\Http\Controllers\Jeune\MentorshipController::class, 'index'])->name('mentorship.index');
+
+    // Séances (Jeune)
+    Route::get('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'index'])->name('sessions.index');
+    Route::get('/mentorat/calendrier', [\App\Http\Controllers\Jeune\SessionController::class, 'calendar'])->name('sessions.calendar');
+    Route::post('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'store'])->name('sessions.store');
+    Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class, 'create'])->name('sessions.create');
+    Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class, 'show'])->name('sessions.show');
+    Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class, 'cancel'])->name('sessions.cancel');
+    Route::post('/mentorat/seances/{session}/pay-join', [\App\Http\Controllers\Jeune\SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
 
     // Portefeuille & Crédits
     Route::get('/portefeuille', [\App\Http\Controllers\Jeune\WalletController::class, 'index'])->name('wallet.index');
@@ -247,8 +268,49 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
     Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');
 
-    // Gestion des ressources mentor
-    Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
+    // --- ROUTES MENTORAT (Nécessitent profil publié) ---
+    Route::middleware(['mentor_published'])->group(function () {
+        // Dashboard Mentorat (Roadmap)
+        Route::get('/mentorship/roadmap', [App\Http\Controllers\Mentor\MentorshipController::class, 'roadmap'])->name('mentor.roadmap');
+
+        // Gestion des ressources mentor (URL: /ressources)
+        // Le prefixe 'mentor.' est déjà appliqué par le groupe parent, donc ->names('resources') donnera 'mentor.resources.*'
+        Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
+
+        // Gestion des mentés
+        // Le prefixe 'mentor.' est déjà appliqué. On ajoute 'mentorship.' -> 'mentor.mentorship.*'
+        Route::name('mentorship.')->group(function () {
+            // URL: /mentes
+            Route::get('/mentes', [App\Http\Controllers\Mentor\MentorshipController::class, 'index'])->name('index'); // Liste mentés
+            Route::get('/requests', [App\Http\Controllers\Mentor\MentorshipController::class, 'requests'])->name('requests'); // Demandes
+            Route::post('/{mentorship}/accepter', [App\Http\Controllers\Mentor\MentorshipController::class, 'accept'])->name('accept');
+            Route::post('/{mentorship}/refuser', [App\Http\Controllers\Mentor\MentorshipController::class, 'refuse'])->name('refuse');
+            Route::post('/{mentorship}/deconnecter', [App\Http\Controllers\Mentor\MentorshipController::class, 'disconnect'])->name('disconnect');
+
+            // Calendrier & Dispos (URL: /calendrier)
+            Route::get('/calendrier', [\App\Http\Controllers\Mentor\SessionController::class, 'index'])->name('calendar');
+            Route::post('/availability', [\App\Http\Controllers\Mentor\SessionController::class, 'storeAvailability'])->name('availability.store');
+
+            // Séances
+            // URL: /sessions/... (On garde /sessions pour éviter les conflits d'URL racine trop génériques)
+            Route::get('/sessions/create', [\App\Http\Controllers\Mentor\SessionController::class, 'create'])->name('sessions.create');
+            Route::post('/sessions', [\App\Http\Controllers\Mentor\SessionController::class, 'store'])->name('sessions.store');
+            // Edit & Update routes
+            Route::get('/sessions/{session}/edit', [\App\Http\Controllers\Mentor\SessionController::class, 'edit'])->name('sessions.edit');
+            Route::put('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'update'])->name('sessions.update');
+
+            Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
+            Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
+            Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');
+            Route::post('/sessions/{session}/refuse', [\App\Http\Controllers\Mentor\SessionController::class, 'refuse'])->name('sessions.refuse');
+            Route::post('/sessions/{session}/cancel', [\App\Http\Controllers\Mentor\SessionController::class, 'cancel'])->name('sessions.cancel');
+        });
+    });
+
+    // Page de blocage (Accessible sans middleware mentor_published)
+    Route::get('/mentorship/locked', function () {
+        return view('mentor.mentorship.locked');
+    })->name('mentorship.locked');
 });
 
 /*
@@ -363,4 +425,9 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
         Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
     });
+    // Mentorat (Nouveau Groupe)
+    Route::get('/mentorship/requests', [App\Http\Controllers\Admin\MentorshipController::class, 'requests'])->name('mentorship.requests');
+    Route::get('/mentorship/requests/{mentorship}', [App\Http\Controllers\Admin\MentorshipController::class, 'showRequest'])->name('mentorship.requests.show');
+    Route::get('/mentorship/sessions', [App\Http\Controllers\Admin\MentorshipController::class, 'sessions'])->name('mentorship.sessions');
+    Route::get('/mentorship/sessions/{session}', [App\Http\Controllers\Admin\MentorshipController::class, 'showSession'])->name('mentorship.sessions.show');
 });

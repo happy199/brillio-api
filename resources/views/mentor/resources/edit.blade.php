@@ -432,79 +432,144 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Fichiers -->
-                <div class="space-y-5 pt-5 border-t border-gray-100">
-                    <!-- Image -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Couverture</label>
-                        <label for="preview_image_input"
-                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition relative overflow-hidden group">
-                            @if($resource->preview_image_path)
-                            <img src="{{ Storage::url($resource->preview_image_path) }}" alt="Preview"
-                                class="absolute inset-0 w-full h-full object-cover">
+
+                    <!-- Fichiers -->
+                    <div class="space-y-5 pt-5 border-t border-gray-100">
+                        <!-- Image -->
+                        <div x-data="{
+                            hasExisting: {{ $resource->preview_image_path ? 'true' : 'false' }},
+                            existingImage: '{{ $resource->preview_image_path ? Storage::url($resource->preview_image_path) : '' }}',
+                            newPreview: null,
+                            removeExisting: false,
+                            
+                            handleFileSelect(event) {
+                                const file = event.target.files[0];
+                                if (file) {
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => {
+                                        this.newPreview = e.target.result;
+                                        this.removeExisting = false;
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            },
+                            
+                            removeImage() {
+                                this.removeExisting = true;
+                                this.newPreview = null;
+                                document.getElementById('preview_image_input').value = '';
+                            },
+                            
+                            changeImage() {
+                                document.getElementById('preview_image_input').click();
+                            }
+                        }">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Couverture</label>
+
+                            <!-- Preview Area -->
                             <div
-                                class="absolute bottom-0 inset-x-0 bg-black/50 p-1 text-white text-center text-[10px] opacity-0 group-hover:opacity-100 transition">
-                                Changer
+                                class="relative w-full h-32 border-2 border-gray-300 border-dashed rounded-lg overflow-hidden bg-gray-50">
+                                <!-- Existing image (if not removed and no new one) -->
+                                <template x-if="hasExisting && !removeExisting && !newPreview">
+                                    <img :src="existingImage" alt="Couverture actuelle"
+                                        class="absolute inset-0 w-full h-full object-cover">
+                                </template>
+
+                                <!-- New preview -->
+                                <template x-if="newPreview">
+                                    <img :src="newPreview" alt="Nouvelle couverture"
+                                        class="absolute inset-0 w-full h-full object-cover">
+                                </template>
+
+                                <!-- Placeholder when no image -->
+                                <template x-if="(!hasExisting || removeExisting) && !newPreview">
+                                    <div class="flex flex-col items-center justify-center h-full">
+                                        <svg class="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p class="text-xs text-gray-500">Aucune image</p>
+                                    </div>
+                                </template>
                             </div>
-                            @else
-                            <div class="flex flex-col items-center justify-center pt-2 pb-3">
-                                <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                                <p class="text-[10px] text-gray-500">JPG, PNG</p>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-2 mt-2">
+                                <button type="button" @click="changeImage()"
+                                    class="flex-1 px-3 py-2 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded border border-indigo-200 transition">
+                                    <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    <span
+                                        x-text="(hasExisting && !removeExisting && !newPreview) ? 'Changer' : 'Ajouter'"></span>
+                                </button>
+
+                                <button type="button" @click="removeImage()"
+                                    x-show="(hasExisting && !removeExisting) || newPreview"
+                                    class="px-3 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition">
+                                    <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </div>
-                            @endif
+
+                            <p class="text-[10px] text-gray-500 mt-1">Format : JPG, PNG (Max 5 Mo)</p>
+
                             <input id="preview_image_input" type="file" name="preview_image" accept="image/*"
-                                class="hidden" />
-                        </label>
+                                @change="handleFileSelect($event)" class="hidden" />
+                        </div>
+
+                        <!-- PJ -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Fichier
+                                (Optionnel)</label>
+                            <label for="file_input"
+                                class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition">
+                                @if($resource->file_path)
+                                <div class="flex items-center gap-2 text-green-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span class="text-xs font-bold">Fich. ok</span>
+                                </div>
+                                @else
+                                <span class="text-xs text-gray-600 font-medium">Choisir un fichier...</span>
+                                @endif
+                                <input id="file_input" type="file" name="file" class="hidden" />
+                            </label>
+                        </div>
+
+
                     </div>
 
-                    <!-- PJ -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Fichier
-                            (Optionnel)</label>
-                        <label for="file_input"
-                            class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition">
-                            @if($resource->file_path)
-                            <div class="flex items-center gap-2 text-green-600">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span class="text-xs font-bold">Fich. ok</span>
-                            </div>
-                            @else
-                            <span class="text-xs text-gray-600 font-medium">Choisir un fichier...</span>
-                            @endif
-                            <input id="file_input" type="file" name="file" class="hidden" />
-                        </label>
+                    <!-- Boutons -->
+                    <div class="pt-4 border-t border-gray-100 space-y-3">
+                        @if($resource->is_validated)
+                        <div class="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-lg border border-yellow-200">
+                            <strong>Attention :</strong> Toute modification entraînera une nouvelle validation par
+                            l'administration avant d'être visible.
+                        </div>
+                        @endif
+
+                        <button type="submit"
+                            class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                            Mettre à jour et Soumettre
+                        </button>
+
+                        <button type="button"
+                            onclick="if(confirm('Supprimer cette ressource ?')) document.getElementById('delete-form').submit();"
+                            class="w-full text-red-600 text-xs font-semibold hover:text-red-800 transition text-center underline">
+                            Supprimer la ressource
+                        </button>
                     </div>
-                </div>
 
-                <!-- Boutons -->
-                <div class="pt-4 border-t border-gray-100 space-y-3">
-                    @if($resource->is_validated)
-                    <div class="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-lg border border-yellow-200">
-                        <strong>Attention :</strong> Toute modification entraînera une nouvelle validation par
-                        l'administration avant d'être visible.
-                    </div>
-                    @endif
-
-                    <button type="submit"
-                        class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                        Mettre à jour et Soumettre
-                    </button>
-
-                    <button type="button"
-                        onclick="if(confirm('Supprimer cette ressource ?')) document.getElementById('delete-form').submit();"
-                        class="w-full text-red-600 text-xs font-semibold hover:text-red-800 transition text-center underline">
-                        Supprimer la ressource
-                    </button>
                 </div>
             </div>
         </div>

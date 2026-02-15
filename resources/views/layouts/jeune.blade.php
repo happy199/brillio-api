@@ -106,10 +106,14 @@
 
                 <!-- Navigation Items (Desktop) -->
                 <div class="hidden md:flex items-center gap-2">
+                    <!-- Menus directs -->
                     <a href="{{ route('jeune.dashboard') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.dashboard') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Accueil
                     </a>
+
+
+                    <!-- Autres menus -->
                     <a href="{{ route('jeune.personality') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.personality') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Personnalité
@@ -118,23 +122,45 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Assistant IA
                     </a>
-                    <a href="{{ route('jeune.resources.index') }}"
-                        class="nav-item relative px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Ressources
-                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span
-                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                        </span>
-                    </a>
                     <a href="{{ route('jeune.documents') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Documents
                     </a>
-                    <a href="{{ route('jeune.mentors') }}"
-                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.mentors') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Mentors
-                    </a>
+
+                    <!-- Dropdown Mentorat -->
+                    <div class="relative" x-data="{ open: false }" @mouseleave="open = false">
+                        <button @mouseover="open = true"
+                            class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1 {{ request()->routeIs('jeune.mentors', 'jeune.mentorship.*', 'jeune.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                            Mentorat
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="absolute left-0 mt-0 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                            <a href="{{ route('jeune.resources.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Ressources
+                            </a>
+                            <a href="{{ route('jeune.mentorship.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Mes Mentors
+                            </a>
+                            <a href="{{ route('jeune.sessions.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Mes Séances
+                            </a>
+                            <a href="{{ route('jeune.sessions.calendar') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Mon Calendrier
+                            </a>
+                            <a href="{{ route('jeune.mentors') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Trouver un mentor
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Profile Dropdown -->
@@ -210,7 +236,11 @@
             </a>
             <a href="{{ route('jeune.mentors') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentors') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Mentors
+                Explorer
+            </a>
+            <a href="{{ route('jeune.mentorship.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentorship.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Mes Mentors
             </a>
         </div>
     </nav>

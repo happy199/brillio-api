@@ -458,10 +458,10 @@
                             @enderror
                         </div>
                     </div>
-                </div>
 
-                <!-- Fichiers -->
-                <div class="space-y-5 pt-5 border-t border-gray-100" x-data="{
+
+                    <!-- Fichiers -->
+                    <div class="space-y-5 pt-5 border-t border-gray-100" x-data="{
                             coverPreview: null,
                             fileName: null,
                             isUploading: false,
@@ -514,136 +514,140 @@
                             }
                         }">
 
-                    <!-- Global Error Alert -->
-                    @if ($errors->any())
-                    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-red-700">
-                                    Veuillez corriger les erreurs ci-dessous avant de continuer.
-                                </p>
+                        <!-- Global Error Alert -->
+                        @if ($errors->any())
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-red-700">
+                                        Veuillez corriger les erreurs ci-dessous avant de continuer.
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    @endif
+                        @endif
 
-                    <!-- Image -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Couverture</label>
-                        <label for="preview_image_input"
-                            class="relative flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
+                        <!-- Image -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Couverture</label>
+                            <label for="preview_image_input"
+                                class="relative flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
 
-                            <template x-if="!coverPreview">
-                                <div class="flex flex-col items-center justify-center pt-2 pb-3">
-                                    <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                        </path>
-                                    </svg>
-                                    <p class="text-[10px] text-gray-500">JPG, PNG</p>
-                                </div>
-                            </template>
-
-                            <template x-if="coverPreview">
-                                <img :src="coverPreview" class="w-full h-full object-cover">
-                            </template>
-
-                            <input id="preview_image_input" type="file" name="preview_image" accept="image/*"
-                                class="hidden" @change="handleCoverChange" />
-                        </label>
-                        <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG. Taille max : 5 Mo.</p>
-                        @error('preview_image') <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- PJ -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Fichier
-                            (Optionnel)</label>
-
-                        <div class="relative">
-                            <!-- Label input clickable seulement si pas de succès -->
-                            <label for="file_input" x-show="!uploadSuccess"
-                                class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition relative overflow-hidden"
-                                :class="uploadError ? 'border-red-300 bg-red-50' : ''">
-
-                                <!-- État Initial -->
-                                <div x-show="!isUploading && !uploadSuccess" class="flex flex-col items-center">
-                                    <span class="text-xs text-gray-600 font-medium"
-                                        x-text="uploadError ? 'Réessayer' : 'Choisir un fichier...'"></span>
-                                    <span x-show="!uploadError" class="text-[9px] text-gray-400 mt-1">Docs, Images,
-                                        Zip</span>
-                                    <span x-show="uploadError" class="text-[9px] text-red-500 mt-1"
-                                        x-text="uploadError"></span>
-                                </div>
-
-                                <!-- État "Upload" (Loader) -->
-                                <div x-show="isUploading" class="flex flex-col items-center text-indigo-600">
-                                    <svg class="animate-spin h-6 w-6 mb-1" xmlns="http://www.w3.org/2000/svg"
-                                        fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                            stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                        </path>
-                                    </svg>
-                                    <span class="text-[10px] font-semibold animate-pulse">Traitement...</span>
-                                </div>
-                            </label>
-
-                            <!-- input caché, acceptant tout sauf video -->
-                            <input id="file_input" type="file" name="file"
-                                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z,.jpg,.jpeg,.png,.webp"
-                                class="hidden" @change="handleFileChange" />
-
-                            <!-- État Succès (Hors du label pour éviter de réouvrir le file picker au clic sur Supprimer) -->
-                            <div x-show="uploadSuccess"
-                                class="flex items-center justify-between w-full h-20 border border-green-200 bg-green-50 rounded-lg px-4 transition">
-                                <div class="flex items-center gap-3 overflow-hidden">
-                                    <div class="bg-white p-2 rounded-lg border border-green-100 flex-shrink-0">
-                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
+                                <template x-if="!coverPreview">
+                                    <div class="flex flex-col items-center justify-center pt-2 pb-3">
+                                        <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
                                             </path>
                                         </svg>
+                                        <p class="text-[10px] text-gray-500">JPG, PNG</p>
                                     </div>
-                                    <div class="flex flex-col min-w-0">
-                                        <span class="text-xs font-bold text-gray-900 truncate" x-text="fileName"></span>
-                                        <span class="text-[10px] text-green-600 font-medium">Prêt à être publié</span>
-                                    </div>
-                                </div>
-                                <button type="button" @click="removeFile"
-                                    class="p-2 text-gray-400 hover:text-red-500 transition rounded-full hover:bg-white">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-1">Formats acceptés : PDF, Word, Excel, PowerPoint, ZIP,
-                            Images. Taille max : 20 Mo.</p>
-                        @error('file') <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
-                    </div>
-                </div>
+                                </template>
 
-                <!-- Bouton -->
-                <div class="pt-4 border-t border-gray-100">
-                    <button type="submit"
-                        class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                        Publier
-                    </button>
+                                <template x-if="coverPreview">
+                                    <img :src="coverPreview" class="w-full h-full object-cover">
+                                </template>
+
+                                <input id="preview_image_input" type="file" name="preview_image" accept="image/*"
+                                    class="hidden" @change="handleCoverChange" />
+                            </label>
+                            <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG. Taille max : 5 Mo.</p>
+                            @error('preview_image') <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- PJ -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Fichier
+                                (Optionnel)</label>
+
+                            <div class="relative">
+                                <!-- Label input clickable seulement si pas de succès -->
+                                <label for="file_input" x-show="!uploadSuccess"
+                                    class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition relative overflow-hidden"
+                                    :class="uploadError ? 'border-red-300 bg-red-50' : ''">
+
+                                    <!-- État Initial -->
+                                    <div x-show="!isUploading && !uploadSuccess" class="flex flex-col items-center">
+                                        <span class="text-xs text-gray-600 font-medium"
+                                            x-text="uploadError ? 'Réessayer' : 'Choisir un fichier...'"></span>
+                                        <span x-show="!uploadError" class="text-[9px] text-gray-400 mt-1">Docs, Images,
+                                            Zip</span>
+                                        <span x-show="uploadError" class="text-[9px] text-red-500 mt-1"
+                                            x-text="uploadError"></span>
+                                    </div>
+
+                                    <!-- État "Upload" (Loader) -->
+                                    <div x-show="isUploading" class="flex flex-col items-center text-indigo-600">
+                                        <svg class="animate-spin h-6 w-6 mb-1" xmlns="http://www.w3.org/2000/svg"
+                                            fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
+                                        <span class="text-[10px] font-semibold animate-pulse">Traitement...</span>
+                                    </div>
+                                </label>
+
+                                <!-- input caché, acceptant tout sauf video -->
+                                <input id="file_input" type="file" name="file"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z,.jpg,.jpeg,.png,.webp"
+                                    class="hidden" @change="handleFileChange" />
+
+                                <!-- État Succès (Hors du label pour éviter de réouvrir le file picker au clic sur Supprimer) -->
+                                <div x-show="uploadSuccess"
+                                    class="flex items-center justify-between w-full h-20 border border-green-200 bg-green-50 rounded-lg px-4 transition">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <div class="bg-white p-2 rounded-lg border border-green-100 flex-shrink-0">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="text-xs font-bold text-gray-900 truncate"
+                                                x-text="fileName"></span>
+                                            <span class="text-[10px] text-green-600 font-medium">Prêt à être
+                                                publié</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="removeFile"
+                                        class="p-2 text-gray-400 hover:text-red-500 transition rounded-full hover:bg-white">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-gray-400 mt-1">Formats acceptés : PDF, Word, Excel, PowerPoint,
+                                ZIP,
+                                Images. Taille max : 20 Mo.</p>
+                            @error('file') <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <!-- Bouton -->
+                    <div class="pt-4 border-t border-gray-100">
+                        <button type="submit"
+                            class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                            Publier
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

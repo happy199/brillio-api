@@ -483,9 +483,16 @@ class JeuneDashboardController extends Controller
             ->limit(3)
             ->get();
 
+        // Vérifier s'il y a déjà une relation de mentorat (pending ou accepted)
+        $existingMentorship = auth()->user()->mentorshipsAsMentee()
+            ->where('mentor_id', $mentor->user_id)
+            ->latest()
+            ->first();
+
         return view('jeune.mentor-show', [
             'mentor' => $mentor,
             'similarMentors' => $similarMentors,
+            'existingMentorship' => $existingMentorship,
         ]);
     }
 
