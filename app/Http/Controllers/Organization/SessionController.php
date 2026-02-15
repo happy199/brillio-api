@@ -12,22 +12,30 @@ class SessionController extends Controller
     /**
      * Liste des séances des jeunes parrainés
      */
+    /**
+     * Liste des séances des jeunes parrainés
+     */
     public function index(Request $request)
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
 
-        $query = MentoringSession::query()
-            ->whereHas('mentees', function ($q) use ($organization) {
-            $q->where('sponsored_by_organization_id', $organization->id);
-        })
-            ->with(['mentor', 'mentees']);
-
-        // Filtre par statut
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if (!$organization->isPro()) {
+            $sessions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
         }
+        else {
+            $query = MentoringSession::query()
+                ->whereHas('mentees', function ($q) use ($organization) {
+                $q->where('sponsored_by_organization_id', $organization->id);
+            })
+                ->with(['mentor', 'mentees']);
 
-        $sessions = $query->orderBy('scheduled_at', 'desc')->paginate(12)->withQueryString();
+            // Filtre par statut
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            $sessions = $query->orderBy('scheduled_at', 'desc')->paginate(12)->withQueryString();
+        }
 
         return view('organization.sessions.index', compact('organization', 'sessions'));
     }
@@ -39,12 +47,17 @@ class SessionController extends Controller
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
 
-        $sessions = MentoringSession::query()
-            ->whereHas('mentees', function ($q) use ($organization) {
-            $q->where('sponsored_by_organization_id', $organization->id);
-        })
-            ->with(['mentor', 'mentees'])
-            ->get();
+        if (!$organization->isPro()) {
+            $sessions = collect();
+        }
+        else {
+            $sessions = MentoringSession::query()
+                ->whereHas('mentees', function ($q) use ($organization) {
+                $q->where('sponsored_by_organization_id', $organization->id);
+            })
+                ->with(['mentor', 'mentees'])
+                ->get();
+        }
 
         return view('organization.sessions.calendar', compact('organization', 'sessions'));
     }
@@ -55,6 +68,10 @@ class SessionController extends Controller
     public function events(Request $request)
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+
+        if (!$organization->isPro()) {
+            return response()->json([]);
+        }
 
         $sessions = MentoringSession::query()
             ->whereHas('mentees', function ($q) use ($organization) {
@@ -91,7 +108,9 @@ class SessionController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
-        $session->load(['mentor', 'mentees']);
+        if ($organization->isPro()) {
+            $session->load(['mentor', 'mentees']);
+        }
 
         return view('organization.sessions.show', compact('organization', 'session'));
     }

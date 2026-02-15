@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'organization' => \App\Http\Middleware\EnsureUserIsOrganization::class,
             'mentor_published' => \App\Http\Middleware\EnsureMentorProfilePublished::class,
             'organization_active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
+            'organization_subscription' => \App\Http\Middleware\CheckOrganizationSubscription::class,
         ]);
 
         // Redirection pour les non-authentifiés

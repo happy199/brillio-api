@@ -12,6 +12,7 @@
             </p>
         </div>
         <div class="mt-4 sm:mt-0">
+            @if($organization->isPro())
             <a href="{{ route('organization.sessions.calendar') }}"
                 class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500">
                 <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,6 +21,16 @@
                 </svg>
                 Voir le calendrier
             </a>
+            @else
+            <a href="{{ route('organization.subscriptions.index') }}"
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Débloquer le Calendrier
+            </a>
+            @endif
         </div>
     </div>
 
@@ -42,17 +53,67 @@
     </div>
 
     <!-- Session Grid -->
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="relative min-h-[400px]">
+        @if(!$organization->isPro())
+        <div
+            class="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-lg flex flex-col items-center justify-center text-center p-8">
+            <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-200 max-w-md">
+                <div
+                    class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 mb-6">
+                    @if($organization->isPro())
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                    @else
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    @endif
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Fonctionnalité Pro</h3>
+                <p class="text-gray-500 mb-8">
+                    L'accès au calendrier détaillé et à l'historique des séances est réservé aux membres Pro.
+                </p>
+                <a href="{{ route('organization.subscriptions.index') }}"
+                    class="inline-flex w-full justify-center items-center rounded-md bg-indigo-600 px-5 py-3 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors">
+                    Passer au plan Pro
+                </a>
+            </div>
+        </div>
+        @endif
+
+        <div
+            class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 {{ !$organization->isPro() ? 'filter blur-[4px] select-none pointer-events-none' : '' }}">
+            @if(!$organization->isPro())
+            {{-- Mock data --}}
+            @for($i = 0; $i < 6; $i++) <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="h-5 bg-gray-200 rounded-full w-24"></div>
+                        <div class="h-4 bg-gray-200 rounded w-20"></div>
+                    </div>
+                    <div class="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div class="space-y-2">
+                        <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                        <div class="h-4 bg-gray-200 rounded w-1/3"></div>
+                    </div>
+                </div>
+        </div>
+        @endfor
+        @else
         @forelse($sessions as $session)
         <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
             <div class="p-5">
                 <div class="flex justify-between items-start">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                        @if($session->status === 'confirmed') bg-green-100 text-green-800 
-                        @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
-                        @elseif($session->status === 'cancelled') bg-red-100 text-red-800
-                        @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800
-                        @else bg-gray-100 text-gray-800 @endif">
+                                @if($session->status === 'confirmed') bg-green-100 text-green-800 
+                                @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
+                                @elseif($session->status === 'cancelled') bg-red-100 text-red-800
+                                @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800
+                                @else bg-gray-100 text-gray-800 @endif">
                         @switch($session->status)
                         @case('confirmed') Confirmée @break
                         @case('completed') Terminée @break
@@ -104,11 +165,13 @@
             <p class="text-gray-500 italic">Aucune séance trouvée.</p>
         </div>
         @endforelse
+        @endif
     </div>
+</div>
 
-    <!-- Pagination -->
-    <div class="mt-6">
-        {{ $sessions->links() }}
-    </div>
+<!-- Pagination -->
+<div class="mt-6">
+    {{ $sessions->links() }}
+</div>
 </div>
 @endsection

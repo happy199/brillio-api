@@ -57,7 +57,11 @@ class SponsoredUsersController extends Controller
             }
         }
 
-        $users = $query->latest()->paginate(12)->withQueryString();
+        if (!$organization->isPro()) {
+            $users = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+        } else {
+            $users = $query->latest()->paginate(12)->withQueryString();
+        }
 
         return view('organization.users.index', compact('organization', 'users'));
     }
@@ -72,6 +76,21 @@ class SponsoredUsersController extends Controller
         // Vérification de sécurité : l'utilisateur doit être parrainé par cette organisation
         if ($user->sponsored_by_organization_id !== $organization->id) {
             abort(403, 'Accès non autorisé');
+        }
+
+        if (!$organization->isPro()) {
+             // Return view without loading sensitive data, view will handle blur
+            return view('organization.users.show', [
+                'organization' => $organization,
+                'user' => $user,
+                // Pass empty/null data to avoid undefined variable errors in view
+                'aiConversationsCount' => 0,
+                'lastAiActivity' => null,
+                'mentorships' => collect(),
+                'viewedResources' => collect(),
+                'purchasedResources' => collect(),
+                'consultedMentors' => collect(),
+            ]);
         }
 
         $user->load(['personalityTest', 'jeuneProfile', 'academicDocuments']);

@@ -937,7 +937,7 @@ class WebAuthController extends Controller
             'user_id' => $user->id,
             'old_type' => $user->user_type,
             'new_type' => $newType,
-            'token' => \Str::random(64),
+            'token' => Str::random(64),
             'oauth_data' => [
                 'provider' => $provider,
                 'provider_id' => $oauthData['id'] ?? null,

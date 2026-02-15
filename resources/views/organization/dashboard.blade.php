@@ -219,17 +219,63 @@
 
 </div>
 <!-- Activity Chart -->
-<div class="mt-8 bg-white rounded-lg shadow p-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Activité sur les 30 derniers jours</h3>
-    <div class="h-80">
+<div class="mt-8 bg-white rounded-lg shadow p-6 relative overflow-hidden">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Activité sur les 30 derniers jours</h3>
+        @if(!$isPro)
+        <span class="inline-flex items-center rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-800">
+            <svg class="mr-1.5 h-3 w-3 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                    clip-rule="evenodd" />
+            </svg>
+            Pro
+        </span>
+        @endif
+    </div>
+
+    <div class="h-80 {{ !$isPro ? 'filter blur-sm select-none' : '' }}">
         <canvas id="activityChart"></canvas>
     </div>
+
+    @if(!$isPro)
+    <div class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
+        <div class="text-center p-6 bg-white rounded-xl shadow-2xl border border-pink-100 max-w-md mx-auto">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 mb-4">
+                <svg class="h-6 w-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Débloquez les statistiques détaillées</h3>
+            <p class="text-sm text-gray-500 mb-6">
+                Suivez l'engagement quotidien, les inscriptions et l'impact de vos programmes avec le plan Pro.
+            </p>
+            <a href="{{ route('organization.subscriptions.index') }}"
+                class="inline-flex items-center rounded-md bg-pink-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600">
+                Passer au plan Pro
+            </a>
+        </div>
+    </div>
+    @endif
 </div>
 
 <!-- Demographics & Documents -->
-<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
+    <!-- Overlay for non-Pro -->
+    @if(!$isPro)
+    <div
+        class="absolute inset-0 z-10 flex items-center justify-center bg-gray-50/50 backdrop-blur-[1px] rounded-lg border-2 border-dashed border-gray-300">
+        <div class="text-center">
+            <h3 class="text-sm font-medium text-gray-900">Analyses démographiques & Documents</h3>
+            <p class="mt-1 text-sm text-gray-500">Disponibles dans l'offre Pro</p>
+        </div>
+    </div>
+    @endif
+
     <!-- Demographics -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6 {{ !$isPro ? 'filter blur-sm opacity-50 pointer-events-none' : '' }}">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Démographie</h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -279,7 +325,7 @@
     </div>
 
     <!-- Documents Breakdown -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6 {{ !$isPro ? 'filter blur-sm opacity-50 pointer-events-none' : '' }}">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Répartition des documents</h3>
         <div class="space-y-4">
             @forelse($documentStats as $doc)

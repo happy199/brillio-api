@@ -18,145 +18,173 @@
         <p class="text-gray-500 text-sm">Visualisez l'emploi du temps de tous vos jeunes.</p>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-        <!-- Navigation & View Select -->
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-            <div class="flex items-center gap-4">
-                <h2 class="text-lg font-bold text-gray-900 capitalize" x-text="calendarTitle"></h2>
-                <div class="flex bg-gray-100 rounded-lg p-1">
-                    <button @click="changeView('month')" class="px-3 py-1 text-xs font-medium rounded-md transition"
-                        :class="view === 'month' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
-                        Mois
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 relative min-h-[600px]">
+        @if(!$organization->isPro())
+        <div
+            class="absolute inset-0 z-10 bg-white/60 backdrop-blur-[4px] rounded-3xl flex flex-col items-center justify-center text-center p-8">
+            <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-200 max-w-md sticky top-1/4">
+                <div
+                    class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 mb-6">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Fonctionnalité Pro</h3>
+                <p class="text-gray-500 mb-8">
+                    L'accès au calendrier interactif est réservé aux membres Pro.
+                </p>
+                <a href="{{ route('organization.subscriptions.index') }}"
+                    class="inline-flex w-full justify-center items-center rounded-md bg-indigo-600 px-5 py-3 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors">
+                    Passer au plan Pro
+                </a>
+            </div>
+        </div>
+        @endif
+
+        <div
+            class="{{ !$organization->isPro() ? 'filter blur-[10px] select-none pointer-events-none opacity-40' : '' }}">
+            <!-- Navigation & View Select -->
+            <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-lg font-bold text-gray-900 capitalize" x-text="calendarTitle"></h2>
+                    <div class="flex bg-gray-100 rounded-lg p-1">
+                        <button @click="changeView('month')" class="px-3 py-1 text-xs font-medium rounded-md transition"
+                            :class="view === 'month' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
+                            Mois
+                        </button>
+                        <button @click="changeView('week')" class="px-3 py-1 text-xs font-medium rounded-md transition"
+                            :class="view === 'week' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
+                            Semaine
+                        </button>
+                        <button @click="changeView('day')" class="px-3 py-1 text-xs font-medium rounded-md transition"
+                            :class="view === 'day' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
+                            Jour
+                        </button>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button @click="prev()" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
                     </button>
-                    <button @click="changeView('week')" class="px-3 py-1 text-xs font-medium rounded-md transition"
-                        :class="view === 'week' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
-                        Semaine
+                    <button @click="today()"
+                        class="px-3 py-1 text-sm font-medium hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
+                        Aujourd'hui
                     </button>
-                    <button @click="changeView('day')" class="px-3 py-1 text-xs font-medium rounded-md transition"
-                        :class="view === 'day' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
-                        Jour
+                    <button @click="next()" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
                     </button>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button @click="prev()" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
-                        </path>
-                    </svg>
-                </button>
-                <button @click="today()"
-                    class="px-3 py-1 text-sm font-medium hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
-                    Aujourd'hui
-                </button>
-                <button @click="next()" class="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
 
-        <div x-show="view === 'month'" x-cloak>
-            <div class="grid grid-cols-7 mb-2">
-                <template x-for="day in ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']">
-                    <div class="text-center text-xs font-medium text-gray-400 uppercase py-2" x-text="day"></div>
-                </template>
-            </div>
-            <div class="grid grid-cols-7 gap-1">
-                <template x-for="blank in blankDays">
-                    <div class="h-24 bg-gray-50/50 rounded-lg"></div>
-                </template>
-                <template x-for="date in no_of_days">
-                    <div class="min-h-[6rem] border border-gray-100 rounded-lg p-1 relative hover:border-organization-200 transition bg-white flex flex-col"
-                        :class="{'bg-organization-50 border-organization-200': isToday(date)}">
-                        <span class="text-sm font-medium text-gray-700 ml-1"
-                            :class="{'text-organization-600 font-bold': isToday(date)}" x-text="date"></span>
+            <div x-show="view === 'month'" x-cloak>
+                <div class="grid grid-cols-7 mb-2">
+                    <template x-for="day in ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']">
+                        <div class="text-center text-xs font-medium text-gray-400 uppercase py-2" x-text="day"></div>
+                    </template>
+                </div>
+                <div class="grid grid-cols-7 gap-1">
+                    <template x-for="blank in blankDays">
+                        <div class="h-24 bg-gray-50/50 rounded-lg"></div>
+                    </template>
+                    <template x-for="date in no_of_days">
+                        <div class="min-h-[6rem] border border-gray-100 rounded-lg p-1 relative hover:border-organization-200 transition bg-white flex flex-col"
+                            :class="{'bg-organization-50 border-organization-200': isToday(date)}">
+                            <span class="text-sm font-medium text-gray-700 ml-1"
+                                :class="{'text-organization-600 font-bold': isToday(date)}" x-text="date"></span>
 
-                        <!-- Events -->
-                        <div class="mt-1 flex flex-col gap-1 overflow-y-auto max-h-[60px]">
-                            <template x-for="session in getSessionsForDate(date)">
-                                <a :href="'/organization/sessions/' + session.id"
-                                    class="text-[10px] truncate px-1.5 py-0.5 rounded border block w-full transition-colors"
-                                    :style="`background-color: ${session.bgColor}; color: ${session.textColor}; border-color: ${session.borderColor}`">
-                                    <span x-text="session.time + ' ' + session.title"></span>
-                                </a>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <!-- Week View -->
-        <div x-show="view === 'week'" x-cloak class="overflow-x-auto">
-            <div class="min-w-[600px]">
-                <div class="grid grid-cols-8 border-b border-gray-100">
-                    <div class="p-2 text-xs text-gray-400 text-center border-r border-gray-100">Heure</div>
-                    <template x-for="(day, index) in weekDays" :key="index">
-                        <div class="p-2 text-center border-r border-gray-100"
-                            :class="{'bg-organization-50': isDateToday(day.date)}">
-                            <div class="text-xs text-gray-500 uppercase" x-text="day.dayName"></div>
-                            <div class="font-bold text-gray-900"
-                                :class="{'text-organization-600': isDateToday(day.date)}" x-text="day.dayNumber"></div>
+                            <!-- Events -->
+                            <div class="mt-1 flex flex-col gap-1 overflow-y-auto max-h-[60px]">
+                                <template x-for="session in getSessionsForDate(date)">
+                                    <a :href="'/organization/sessions/' + session.id"
+                                        class="text-[10px] truncate px-1.5 py-0.5 rounded border block w-full transition-colors"
+                                        :style="`background-color: ${session.bgColor}; color: ${session.textColor}; border-color: ${session.borderColor}`">
+                                        <span x-text="session.time + ' ' + session.title"></span>
+                                    </a>
+                                </template>
+                            </div>
                         </div>
                     </template>
                 </div>
-                <div class="relative grid grid-cols-8" style="height: 600px; overflow-y: auto;">
-                    <!-- Time Slots -->
-                    <div class="col-span-1 border-r border-gray-100 bg-gray-50">
-                        <template x-for="hour in hours">
-                            <div class="h-12 border-b border-gray-100 text-xs text-gray-400 text-center pt-1"
-                                x-text="hour + ':00'"></div>
+            </div>
+
+            <!-- Week View -->
+            <div x-show="view === 'week'" x-cloak class="overflow-x-auto">
+                <div class="min-w-[600px]">
+                    <div class="grid grid-cols-8 border-b border-gray-100">
+                        <div class="p-2 text-xs text-gray-400 text-center border-r border-gray-100">Heure</div>
+                        <template x-for="(day, index) in weekDays" :key="index">
+                            <div class="p-2 text-center border-r border-gray-100"
+                                :class="{'bg-organization-50': isDateToday(day.date)}">
+                                <div class="text-xs text-gray-500 uppercase" x-text="day.dayName"></div>
+                                <div class="font-bold text-gray-900"
+                                    :class="{'text-organization-600': isDateToday(day.date)}" x-text="day.dayNumber">
+                                </div>
+                            </div>
                         </template>
                     </div>
-                    <!-- Days Columns -->
-                    <template x-for="(day, dayIndex) in weekDays" :key="dayIndex">
-                        <div class="col-span-1 border-r border-gray-100 relative h-full">
-                            <!-- Grid Lines -->
-                            <template x-for="_ in hours">
-                                <div class="h-12 border-b border-gray-100"></div>
-                            </template>
-
-                            <!-- Sessions Overlay -->
-                            <template x-for="session in getSessionsForFullDate(day.date)">
-                                <a :href="'/organization/sessions/' + session.id"
-                                    class="absolute w-[90%] left-[5%] text-[10px] p-1 rounded border z-10 overflow-hidden hover:z-20 shadow-sm transition"
-                                    :style="getStyleForSlot(session.time, session.endTime) + `; background-color: ${session.bgColor}; color: ${session.textColor}; border-color: ${session.borderColor}`">
-                                    <span class="font-bold block" x-text="session.time"></span>
-                                    <span x-text="session.title"></span>
-                                </a>
+                    <div class="relative grid grid-cols-8" style="height: 600px; overflow-y: auto;">
+                        <!-- Time Slots -->
+                        <div class="col-span-1 border-r border-gray-100 bg-gray-50">
+                            <template x-for="hour in hours">
+                                <div class="h-12 border-b border-gray-100 text-xs text-gray-400 text-center pt-1"
+                                    x-text="hour + ':00'"></div>
                             </template>
                         </div>
-                    </template>
+                        <!-- Days Columns -->
+                        <template x-for="(day, dayIndex) in weekDays" :key="dayIndex">
+                            <div class="col-span-1 border-r border-gray-100 relative h-full">
+                                <!-- Grid Lines -->
+                                <template x-for="_ in hours">
+                                    <div class="h-12 border-b border-gray-100"></div>
+                                </template>
+
+                                <!-- Sessions Overlay -->
+                                <template x-for="session in getSessionsForFullDate(day.date)">
+                                    <a :href="'/organization/sessions/' + session.id"
+                                        class="absolute w-[90%] left-[5%] text-[10px] p-1 rounded border z-10 overflow-hidden hover:z-20 shadow-sm transition"
+                                        :style="getStyleForSlot(session.time, session.endTime) + `; background-color: ${session.bgColor}; color: ${session.textColor}; border-color: ${session.borderColor}`">
+                                        <span class="font-bold block" x-text="session.time"></span>
+                                        <span x-text="session.title"></span>
+                                    </a>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Day View -->
-        <div x-show="view === 'day'" x-cloak
-            class="overflow-y-auto h-[600px] relative border border-gray-100 rounded-lg">
-            <div class="grid grid-cols-1 divide-y divide-gray-100">
-                <template x-for="hour in hours">
-                    <div class="h-20 flex group hover:bg-gray-50/50 transition-colors">
-                        <div class="w-16 text-[10px] font-bold text-gray-400 text-right pr-4 py-2 border-r border-gray-100"
-                            x-text="hour + ':00'"></div>
-                        <div class="flex-1"></div>
-                    </div>
-                </template>
-
-                <div class="absolute top-0 left-16 right-0 bottom-0 pointer-events-none">
-                    <!-- Sessions -->
-                    <template x-for="session in getSessionsForFullDate(currentDate)">
-                        <a :href="'/organization/sessions/' + session.id"
-                            class="absolute left-4 right-4 p-3 rounded-lg border pointer-events-auto shadow-sm hover:shadow-md transition-all flex flex-col justify-center"
-                            :style="getStyleForDayView(session.time, session.endTime) + `; background-color: ${session.bgColor}; color: ${session.textColor}; border-color: ${session.borderColor}`">
-                            <div class="text-[10px] font-bold opacity-70 mb-1"
-                                x-text="session.time + ' - ' + session.endTime"></div>
-                            <div class="text-sm font-bold leading-tight truncate" x-text="session.title"></div>
-                            <div class="text-[10px] opacity-80" x-text="'Mentor: ' + session.mentor_name"></div>
-                        </a>
+            <!-- Day View -->
+            <div x-show="view === 'day'" x-cloak
+                class="overflow-y-auto h-[600px] relative border border-gray-100 rounded-lg">
+                <div class="grid grid-cols-1 divide-y divide-gray-100">
+                    <template x-for="hour in hours">
+                        <div class="h-20 flex group hover:bg-gray-50/50 transition-colors">
+                            <div class="w-16 text-[10px] font-bold text-gray-400 text-right pr-4 py-2 border-r border-gray-100"
+                                x-text="hour + ':00'"></div>
+                            <div class="flex-1"></div>
+                        </div>
                     </template>
+
+                    <div class="absolute top-0 left-16 right-0 bottom-0 pointer-events-none">
+                        <!-- Sessions -->
+                        <template x-for="session in getSessionsForFullDate(currentDate)">
+                            <a :href="'/organization/sessions/' + session.id"
+                                class="absolute left-4 right-4 p-3 rounded-lg border pointer-events-auto shadow-sm hover:shadow-md transition-all flex flex-col justify-center"
+                                :style="getStyleForDayView(session.time, session.endTime) + `; background-color: ${session.bgColor}; color: ${session.textColor}; border-color: ${session.borderColor}`">
+                                <div class="text-[10px] font-bold opacity-70 mb-1"
+                                    x-text="session.time + ' - ' + session.endTime"></div>
+                                <div class="text-sm font-bold leading-tight truncate" x-text="session.title"></div>
+                                <div class="text-[10px] opacity-80" x-text="'Mentor: ' + session.mentor_name"></div>
+                            </a>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>

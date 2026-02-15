@@ -72,6 +72,7 @@
                             class="{{ request()->routeIs('organization.dashboard') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Tableau de bord
                         </a>
+
                         <a href="{{ route('organization.users.index') }}"
                             class="{{ request()->routeIs('organization.users.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Jeunes
@@ -84,6 +85,7 @@
                             class="{{ request()->routeIs('organization.sessions.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Calendrier
                         </a>
+
                         <a href="{{ route('organization.invitations.index') }}"
                             class="{{ request()->routeIs('organization.invitations.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Invitations
@@ -130,8 +132,13 @@
                                 Profil
                             </a>
 
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-400 cursor-not-allowed"
-                                title="Bientôt disponible">
+                            <a href="{{ route('organization.subscriptions.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Abonnement
+                            </a>
+
+                            <a href="{{ route('organization.subscriptions.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Portefeuille
                             </a>
 
@@ -192,7 +199,7 @@
             navigator.clipboard.writeText(input.value).then(function () {
                 alert('Lien copié dans le presse-papiers !');
             }, function (err) {
-                alerrrela ;
+                alert('Erreur lors de la copie.');
             });
     </script>
 </body>

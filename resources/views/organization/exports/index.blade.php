@@ -18,10 +18,35 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Export Configuration Form -->
-        <div class="lg:col-span-2">
-            <div class="bg-white shadow rounded-lg overflow-hidden">
-                <form action="{{ route('organization.exports.generate') }}" method="GET" class="p-6 space-y-8">
+        <div class="lg:col-span-2 relative">
 
+            @if(!$organization->isEnterprise())
+            <div
+                class="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-lg flex flex-col items-center justify-center text-center p-8">
+                <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-200 max-w-md">
+                    <div
+                        class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-900 text-white mb-6">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Fonctionnalité Entreprise</h3>
+                    <p class="text-gray-500 mb-8">
+                        Le Centre d'Exportation est réservé aux organisations sous contrat Entreprise.
+                        Générez des rapports PDF et CSV illimités pour vos bilans d'impact.
+                    </p>
+                    <a href="{{ route('organization.subscriptions.index') }}"
+                        class="inline-flex w-full justify-center items-center rounded-md bg-gray-900 px-5 py-3 text-base font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 transition-colors">
+                        Voir l'offre Entreprise
+                    </a>
+                </div>
+            </div>
+            @endif
+
+            <div
+                class="bg-white shadow rounded-lg overflow-hidden {{ !$organization->isEnterprise() ? 'filter blur-[1px]' : '' }}">
+                <form action="{{ route('organization.exports.generate') }}" method="GET" class="p-6 space-y-8">
                     <!-- Section 1: Type de rapport -->
                     <div>
                         <label class="text-base font-semibold text-gray-900">1. Type de rapport</label>
@@ -153,7 +178,8 @@
                     <!-- Submit Button -->
                     <div class="pt-8">
                         <button type="submit"
-                            class="w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-md shadow-lg text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-[1.01] active:scale-[0.99]">
+                            class="w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-md shadow-lg text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                            {{ !$organization->isEnterprise() ? 'disabled' : '' }}>
                             <svg class="mr-2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

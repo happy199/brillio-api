@@ -18,7 +18,8 @@ class ExportController extends Controller
      */
     public function index()
     {
-        return view('organization.exports.index');
+        $organization = $this->getCurrentOrganization();
+        return view('organization.exports.index', compact('organization'));
     }
 
     /**

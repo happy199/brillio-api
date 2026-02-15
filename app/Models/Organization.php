@@ -25,10 +25,19 @@ class Organization extends Model
     ];
 
     /**
-     * The attributes that should be cast.
+     * Subscription Plans
+     */
+    public const PLAN_FREE = 'free';
+    public const PLAN_PRO = 'pro';
+    public const PLAN_ENTERPRISE = 'enterprise';
+
+    /**
+     * Get the attributes that should be cast.
      */
     protected $casts = [
         'status' => 'string',
+        'subscription_expires_at' => 'datetime',
+        'auto_renew' => 'boolean',
     ];
 
     /**
@@ -125,5 +134,53 @@ class Organization extends Model
         return $this->sponsoredUsers()
             ->where('last_login_at', '>=', now()->subDays(30))
             ->count();
+    }
+
+    // --- SUBSCRIPTION HELPERS ---
+
+    /**
+     * Check if organization has an active subscription (not expired if paid).
+     * Free plan is always considered "active" but limited.
+     */
+    public function hasActiveSubscription(): bool
+    {
+        if ($this->subscription_plan === self::PLAN_FREE) {
+            return true;
+        }
+
+        return $this->subscription_expires_at && $this->subscription_expires_at->isFuture();
+    }
+
+    /**
+     * Check if organization is on PRO plan or higher (Enterprise).
+     */
+    public function isPro(): bool
+    {
+        return $this->hasActiveSubscription() &&
+            in_array($this->subscription_plan, [self::PLAN_PRO, self::PLAN_ENTERPRISE]);
+    }
+
+    /**
+     * Check if organization is on ENTERPRISE plan.
+     */
+    public function isEnterprise(): bool
+    {
+        return $this->hasActiveSubscription() && $this->subscription_plan === self::PLAN_ENTERPRISE;
+    }
+
+    /**
+     * Get readable subscription status
+     */
+    public function getSubscriptionStatusLabelAttribute(): string
+    {
+        if ($this->subscription_plan === self::PLAN_FREE) {
+            return 'Gratuit';
+        }
+
+        if (!$this->hasActiveSubscription()) {
+            return 'Expiré';
+        }
+
+        return ucfirst($this->subscription_plan);
     }
 }
