@@ -10,22 +10,37 @@ use Illuminate\Support\Facades\DB;
 class WalletService
 {
     /**
-     * Ajoute des crédits à un utilisateur
+     * Ajoute des crédits à un utilisateur ou une organisation
      */
-    public function addCredits(User $user, int $amount, string $type, ?string $description = null, $related = null)
+    public function addCredits($entity, int $amount, string $type, ?string $description = null, $related = null)
     {
         if ($amount <= 0) {
             throw new \Exception("Le montant doit être positif.");
         }
 
-        return DB::transaction(function () use ($user, $amount, $type, $description, $related) {
+        return DB::transaction(function () use ($entity, $amount, $type, $description, $related) {
+            $isUser = $entity instanceof User;
+            $isOrg = $entity instanceof \App\Models\Organization;
+
+            if (!$isUser && !$isOrg) {
+                throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
+            }
+
             // Créer la transaction
-            $transaction = new WalletTransaction([
-                'user_id' => $user->id,
+            $transactionData = [
                 'amount' => $amount,
                 'type' => $type,
                 'description' => $description,
-            ]);
+            ];
+
+            if ($isUser) {
+                $transactionData['user_id'] = $entity->id;
+            }
+            else {
+                $transactionData['organization_id'] = $entity->id;
+            }
+
+            $transaction = new WalletTransaction($transactionData);
 
             if ($related) {
                 $transaction->related()->associate($related);
@@ -33,17 +48,17 @@ class WalletService
 
             $transaction->save();
 
-            // Mettre à jour le solde utilisateur
-            $user->increment('credits_balance', $amount);
+            // Mettre à jour le solde
+            $entity->increment('credits_balance', $amount);
 
             // Si c'est un mentor qui gagne des crédits via une vente (type 'income'),
             // on met aussi à jour son available_balance en FCFA pour les payouts
-            if ($type === 'income' && $user->user_type === 'mentor' && $user->mentorProfile) {
+            if ($isUser && $type === 'income' && $entity->user_type === 'mentor' && $entity->mentorProfile) {
                 // Convertir les crédits en FCFA (prix crédit mentor = 100 FCFA par défaut)
                 $creditPriceFcfa = $this->getCreditPrice('mentor');
                 $amountFcfa = $amount * $creditPriceFcfa;
 
-                $user->mentorProfile->increment('available_balance', $amountFcfa);
+                $entity->mentorProfile->increment('available_balance', $amountFcfa);
             }
 
             return $transaction;
@@ -51,23 +66,30 @@ class WalletService
     }
 
     /**
-     * Dédit des crédits à un utilisateur
+     * Dédit des crédits à un utilisateur ou une organisation
      */
-    public function deductCredits(User $user, int $cost, string $type, ?string $description = null, $related = null)
+    public function deductCredits($entity, int $cost, string $type, ?string $description = null, $related = null)
     {
         if ($cost <= 0) {
             throw new \Exception("Le coût doit être positif.");
         }
 
-        if ($user->credits_balance < $cost) {
+        if ($entity->credits_balance < $cost) {
             throw new \Exception("Solde insuffisant.");
         }
 
-        return DB::transaction(function () use ($user, $cost, $type, $description, $related) {
+        return DB::transaction(function () use ($entity, $cost, $type, $description, $related) {
+            $isUser = $entity instanceof User;
+            $isOrg = $entity instanceof \App\Models\Organization;
+
+            if (!$isUser && !$isOrg) {
+                throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
+            }
+
             // Mentor Spending Logic: Consuming earned credits reduces withdrawable balance
-            if ($user->user_type === 'mentor' && $user->mentorProfile) {
+            if ($isUser && $entity->user_type === 'mentor' && $entity->mentorProfile) {
                 $creditPriceFcfa = $this->getCreditPrice('mentor');
-                $breakdown = $this->getCreditBreakdown($user);
+                $breakdown = $this->getCreditBreakdown($entity);
 
                 // Expenses are deducted from PURCHASED credits first, then EARNED.
                 $purchasedAvailable = $breakdown['purchased'];
@@ -80,23 +102,31 @@ class WalletService
                     $amoutFcfaToRemove = $deductFromEarned * $creditPriceFcfa;
 
                     // Reduce available balance (clamping to 0 just in case)
-                    if ($user->mentorProfile->available_balance >= $amoutFcfaToRemove) {
-                        $user->mentorProfile->decrement('available_balance', $amoutFcfaToRemove);
+                    if ($entity->mentorProfile->available_balance >= $amoutFcfaToRemove) {
+                        $entity->mentorProfile->decrement('available_balance', $amoutFcfaToRemove);
                     }
                     else {
                         // Edge case: Inconsistent state, reset to 0
-                        $user->mentorProfile->update(['available_balance' => 0]);
+                        $entity->mentorProfile->update(['available_balance' => 0]);
                     }
                 }
             }
 
             // Create Transaction
-            $transaction = new WalletTransaction([
-                'user_id' => $user->id,
+            $transactionData = [
                 'amount' => -$cost,
                 'type' => $type,
                 'description' => $description,
-            ]);
+            ];
+
+            if ($isUser) {
+                $transactionData['user_id'] = $entity->id;
+            }
+            else {
+                $transactionData['organization_id'] = $entity->id;
+            }
+
+            $transaction = new WalletTransaction($transactionData);
 
             if ($related) {
                 $transaction->related()->associate($related);
@@ -104,8 +134,8 @@ class WalletService
 
             $transaction->save();
 
-            // Update User Balance
-            $user->decrement('credits_balance', $cost);
+            // Update Balance
+            $entity->decrement('credits_balance', $cost);
 
             return $transaction;
         });

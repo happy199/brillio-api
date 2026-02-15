@@ -17,7 +17,7 @@
     </div>
 
     <!-- Stats Rapides -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Crédits Achetés -->
         <div class="bg-white rounded-xl border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-4">
@@ -33,22 +33,24 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50">
+            <div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-50">
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Jeunes</p>
-                    <p class="text-lg font-bold text-gray-800">{{ number_format($creditsPurchasedJeune) }} <span
-                            class="text-xs font-normal text-gray-400">crd.</span></p>
-                    <p class="text-xs font-medium text-green-600">≈
-                        {{ number_format($fcfaPurchasedJeune, 0, ',', ' ') }} FCFA
-                    </p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Jeunes</p>
+                    <p class="text-sm font-bold text-gray-800">{{ number_format($creditsPurchasedJeune) }}</p>
+                    <p class="text-[10px] font-medium text-green-600">≈ {{ number_format($fcfaPurchasedJeune, 0, ',', '
+                        ') }}</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Mentors</p>
+                    <p class="text-sm font-bold text-gray-800">{{ number_format($creditsPurchasedMentor) }}</p>
+                    <p class="text-[10px] font-medium text-green-600">≈ {{ number_format($fcfaPurchasedMentor, 0, ',', '
+                        ') }}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Mentors</p>
-                    <p class="text-lg font-bold text-gray-800">{{ number_format($creditsPurchasedMentor) }} <span
-                            class="text-xs font-normal text-gray-400">crd.</span></p>
-                    <p class="text-xs font-medium text-green-600">≈
-                        {{ number_format($fcfaPurchasedMentor, 0, ',', ' ') }} FCFA
-                    </p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Orgs</p>
+                    <p class="text-sm font-bold text-gray-800">{{ number_format($creditsPurchasedOrg) }}</p>
+                    <p class="text-[10px] font-medium text-green-600">≈ {{ number_format($fcfaPurchasedOrg, 0, ',', ' ')
+                        }}</p>
                 </div>
             </div>
         </div>
@@ -68,21 +70,46 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50">
+            <div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-50">
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Jeunes</p>
-                    <p class="text-lg font-bold text-gray-800">{{ number_format($creditsConsumedJeune) }} <span
-                            class="text-xs font-normal text-gray-400">crd.</span></p>
-                    <p class="text-xs font-medium text-blue-600">≈ {{ number_format($fcfaConsumedJeune, 0, ',', ' ') }}
-                        FCFA</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Jeunes</p>
+                    <p class="text-sm font-bold text-gray-800">{{ number_format($creditsConsumedJeune) }}</p>
+                    <p class="text-[10px] font-medium text-blue-600">≈ {{ number_format($fcfaConsumedJeune, 0, ',', ' ')
+                        }}</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Mentors</p>
+                    <p class="text-sm font-bold text-gray-800">{{ number_format($creditsConsumedMentor) }}</p>
+                    <p class="text-[10px] font-medium text-blue-600">≈ {{ number_format($fcfaConsumedMentor, 0, ',', '
+                        ') }}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Mentors</p>
-                    <p class="text-lg font-bold text-gray-800">{{ number_format($creditsConsumedMentor) }} <span
-                            class="text-xs font-normal text-gray-400">crd.</span></p>
-                    <p class="text-xs font-medium text-blue-600">≈ {{ number_format($fcfaConsumedMentor, 0, ',', ' ') }}
-                        FCFA</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Orgs</p>
+                    <p class="text-sm font-bold text-gray-800">{{ number_format($creditsConsumedOrg) }}</p>
+                    <p class="text-[10px] font-medium text-blue-600">≈ {{ number_format($fcfaConsumedOrg, 0, ',', ' ')
+                        }}</p>
                 </div>
+            </div>
+        </div>
+
+        <!-- Revenus Organisations -->
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Revenus Organisations</p>
+                    <div class="flex items-baseline gap-2">
+                        <p class="text-4xl font-bold text-indigo-600 mt-1">{{ number_format($orgRevenue, 0, ',', ' ') }}
+                        </p>
+                        <span class="text-xs font-semibold text-gray-400 uppercase">FCFA</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-indigo-50 rounded-full">
+                    <span class="text-2xl">🏢</span>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-gray-50">
+                <p class="text-xs text-gray-500">Cumul des achats de packs et abonnements effectués par les
+                    organisations.</p>
             </div>
         </div>
     </div>
@@ -112,6 +139,18 @@
                             (FCFA)</label>
                         <div class="relative">
                             <input type="number" name="credit_price_mentor" value="{{ $creditPriceMentor }}"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                            <div
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                FCFA</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Prix Crédit - ORGANISATION
+                            (FCFA)</label>
+                        <div class="relative">
+                            <input type="number" name="credit_price_organization" value="{{ $creditPriceOrganization }}"
                                 class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                             <div
                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
@@ -179,7 +218,16 @@
                                     {{ $transaction->created_at->format('d/m/Y H:i') }}
                                 </td>
                                 <td class="px-6 py-3 font-medium text-gray-900">
+                                    @if($transaction->user->user_type === 'organization' &&
+                                    $transaction->user->organization)
+                                    <div class="flex flex-col">
+                                        <span>{{ $transaction->user->organization->name }}</span>
+                                        <span class="text-[10px] text-gray-400 font-normal">Par: {{
+                                            $transaction->user->name }}</span>
+                                    </div>
+                                    @else
                                     {{ $transaction->user->name ?? 'Utilisateur supprimé' }}
+                                    @endif
                                 </td>
                                 <td class="px-6 py-3">
                                     @if($transaction->amount > 0)

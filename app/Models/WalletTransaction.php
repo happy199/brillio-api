@@ -13,6 +13,7 @@ class WalletTransaction extends Model
 
     protected $fillable = [
         'user_id',
+        'organization_id',
         'amount',
         'type',
         'description',
@@ -23,6 +24,11 @@ class WalletTransaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
     }
 
     public function related(): MorphTo

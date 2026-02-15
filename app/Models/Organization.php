@@ -22,6 +22,10 @@ class Organization extends Model
         'sector',
         'description',
         'status',
+        'credits_balance',
+        'subscription_plan',
+        'subscription_expires_at',
+        'auto_renew',
     ];
 
     /**
@@ -68,6 +72,14 @@ class Organization extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(OrganizationInvitation::class);
+    }
+
+    /**
+     * Get all wallet transactions for this organization.
+     */
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class);
     }
 
     /**

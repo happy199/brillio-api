@@ -75,6 +75,7 @@ Route::middleware(['auth', 'organization', 'organization_active'])->group(functi
 
         // Subscriptions
         Route::get('/subscriptions', [\App\Http\Controllers\Organization\SubscriptionController::class , 'index'])->name('subscriptions.index');
+        Route::post('/subscriptions/downgrade', [\App\Http\Controllers\Organization\SubscriptionController::class , 'downgrade'])->name('subscriptions.downgrade');
         Route::post('/subscriptions/{plan}', [\App\Http\Controllers\Organization\SubscriptionController::class , 'subscribe'])->name('subscriptions.subscribe');
 
         // Payments

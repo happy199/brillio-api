@@ -74,6 +74,23 @@ class SubscriptionController extends Controller
         // 2. Initiate Payment
         $monerooService = app(\App\Services\MonerooService::class);
         $user = auth()->user();
+
+        // Create pending transaction record
+        $localTransaction = \App\Models\MonerooTransaction::create([
+            'user_id' => $user->id,
+            'user_type' => get_class($user),
+            'amount' => $amount,
+            'currency' => 'XOF',
+            'status' => 'pending',
+            'credits_amount' => 0,
+            'metadata' => [
+                'reference' => $reference,
+                'plan_id' => $actualPlan->id,
+                'billing_cycle' => $billingCycle,
+                'user_type' => 'organization'
+            ],
+        ]);
+
         $customer = [
             'email' => $user->email,
             'first_name' => $monerooService->splitName($user->name)['first_name'],
@@ -85,14 +102,34 @@ class SubscriptionController extends Controller
             $amount,
             $description,
             $customer,
-        ['reference' => $reference],
+        ['reference' => $reference, 'transaction_id' => $localTransaction->id],
             $returnUrl
         );
 
         if (isset($paymentData['checkout_url'])) {
+            $localTransaction->update(['moneroo_transaction_id' => $paymentData['id']]);
             return redirect($paymentData['checkout_url']);
         }
 
         return redirect()->back()->with('error', "Erreur lors de l'initialisation du paiement.");
+    }
+
+    /**
+     * Handle subscription downgrade (Disable auto-renew).
+     * The plan remains active until subscription_expires_at.
+     */
+    public function downgrade(Request $request)
+    {
+        $organization = auth()->user()->organization;
+
+        if (!$organization->isPro() && !$organization->isEnterprise()) {
+            return redirect()->back()->with('error', 'Vous êtes déjà sur le plan Standard.');
+        }
+
+        $organization->update([
+            'auto_renew' => false,
+        ]);
+
+        return redirect()->route('organization.subscriptions.index')->with('success', 'Votre demande de rétrogradation a été enregistrée. Votre plan actuel restera actif jusqu\'au ' . $organization->subscription_expires_at->format('d/m/Y') . '.');
     }
 }

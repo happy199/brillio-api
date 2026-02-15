@@ -109,27 +109,48 @@ class MonerooWebhookController extends Controller
                 return response()->json(['error' => 'User not found'], 404);
             }
 
-            // Add credits to user wallet
-            $this->walletService->addCredits(
-                $user,
-                $transaction->credits_amount,
-                'purchase',
-                "Achat de {$transaction->credits_amount} crédits via Moneroo",
-                $transaction
-            );
+            // Determine if this is an organization transaction
+            $isOrgTransaction = ($transaction->metadata['user_type'] ?? '') === 'organization';
+            $entity = $user;
+
+            if ($isOrgTransaction && $user->organization) {
+                $entity = $user->organization;
+                Log::info('Target entity for transaction', ['entity_id' => $entity->id, 'entity_type' => get_class($entity)]);
+            }
+
+            // 1. Handle Subscription Activation if applicable
+            $reference = $transaction->metadata['reference'] ?? '';
+            if (str_starts_with($reference, 'SUB-')) {
+                $this->handleSubscriptionActivation($transaction, $entity);
+            }
+
+            // 2. Add credits if amount > 0
+            if ($transaction->credits_amount > 0) {
+                $this->walletService->addCredits(
+                    $entity,
+                    $transaction->credits_amount,
+                    'purchase',
+                    "Achat de {$transaction->credits_amount} crédits via Moneroo",
+                    $transaction
+                );
+            }
 
             // Mark transaction as completed
-            $transaction->markAsCompleted();
+            if ($transaction->status !== 'completed') {
+                $transaction->markAsCompleted();
+            }
 
             Log::info('Moneroo payment processed successfully', [
                 'transaction_id' => $transaction->id,
-                'user_id' => $user->id,
+                'entity_id' => $entity->id,
+                'entity_type' => get_class($entity),
                 'credits' => $transaction->credits_amount,
             ]);
 
             return response()->json(['message' => 'Payment processed'], 200);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error('Error processing Moneroo payment', [
                 'transaction_id' => $transaction->id,
                 'error' => $e->getMessage(),
@@ -208,7 +229,8 @@ class MonerooWebhookController extends Controller
 
             return response()->json(['message' => 'Payout completed'], 200);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error('Error processing Moneroo payout success', [
                 'payout_id' => $payoutRequest->id,
                 'error' => $e->getMessage(),
@@ -269,7 +291,8 @@ class MonerooWebhookController extends Controller
 
             return response()->json(['message' => 'Payout failure processed'], 200);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error('Error processing Moneroo payout failure', [
                 'payout_id' => $payoutRequest->id,
                 'error' => $e->getMessage(),
@@ -278,5 +301,46 @@ class MonerooWebhookController extends Controller
 
             return response()->json(['error' => 'Processing failed'], 500);
         }
+    }
+
+    /**
+     * Activate organization subscription based on transaction metadata.
+     */
+    protected function handleSubscriptionActivation($transaction, $entity): void
+    {
+        if (!($entity instanceof \App\Models\Organization)) {
+            Log::warning('Subscription payment received but entity is not an organization', [
+                'transaction_id' => $transaction->id,
+                'entity_type' => get_class($entity)
+            ]);
+            return;
+        }
+
+        $metadata = $transaction->metadata;
+        $planId = $metadata['plan_id'] ?? null;
+        $billingCycle = $metadata['billing_cycle'] ?? 'monthly';
+
+        if (!$planId) {
+            Log::error('Subscription plan ID missing in transaction metadata', ['transaction_id' => $transaction->id]);
+            return;
+        }
+
+        $plan = \App\Models\CreditPack::find($planId);
+        if (!$plan) {
+            Log::error('Subscription plan not found', ['plan_id' => $planId, 'transaction_id' => $transaction->id]);
+            return;
+        }
+
+        $entity->update([
+            'subscription_plan' => $plan->target_plan,
+            'subscription_expires_at' => ($billingCycle === 'yearly') ? now()->addYear() : now()->addMonth(),
+            'auto_renew' => true,
+        ]);
+
+        Log::info('Organization subscription activated via webhook', [
+            'org_id' => $entity->id,
+            'plan_name' => $plan->name,
+            'plan_target' => $plan->target_plan
+        ]);
     }
 }

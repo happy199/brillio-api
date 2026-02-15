@@ -71,7 +71,11 @@ class SponsoredUsersController extends Controller
      */
     public function show(User $user)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = auth()->user()->organization;
+
+        if (!$organization) {
+            $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        }
 
         // Vérification de sécurité : l'utilisateur doit être parrainé par cette organisation
         if ($user->sponsored_by_organization_id !== $organization->id) {
@@ -83,7 +87,6 @@ class SponsoredUsersController extends Controller
             return view('organization.users.show', [
                 'organization' => $organization,
                 'user' => $user,
-                // Pass empty/null data to avoid undefined variable errors in view
                 'aiConversationsCount' => 0,
                 'lastAiActivity' => null,
                 'mentorships' => collect(),

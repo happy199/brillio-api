@@ -44,6 +44,22 @@ class WalletController extends Controller
 
         $monerooService = app(\App\Services\MonerooService::class);
         $user = auth()->user();
+
+        // Create pending transaction record
+        $localTransaction = \App\Models\MonerooTransaction::create([
+            'user_id' => $user->id,
+            'user_type' => get_class($user),
+            'amount' => $amount,
+            'currency' => 'XOF',
+            'status' => 'pending',
+            'credits_amount' => $pack->credits,
+            'metadata' => [
+                'reference' => $reference,
+                'pack_id' => $pack->id,
+                'user_type' => 'organization'
+            ],
+        ]);
+
         $customer = [
             'email' => $user->email,
             'first_name' => $monerooService->splitName($user->name)['first_name'],
@@ -55,11 +71,19 @@ class WalletController extends Controller
             $amount,
             $description,
             $customer,
-        ['reference' => $reference],
+        [
+            'reference' => $reference,
+            'transaction_id' => $localTransaction->id
+        ],
             $returnUrl
         );
 
         if (isset($paymentData['checkout_url'])) {
+            // Save Moneroo transaction ID
+            $localTransaction->update([
+                'moneroo_transaction_id' => $paymentData['id'],
+            ]);
+
             return redirect($paymentData['checkout_url']);
         }
 

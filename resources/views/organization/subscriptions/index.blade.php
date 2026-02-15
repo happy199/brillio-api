@@ -37,6 +37,11 @@
             <div class="mt-12 grid gap-8 lg:grid-cols-3 lg:gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 <!-- Free Plan -->
+                @php
+                $isFree = auth()->user()->organization->subscription_plan === \App\Models\Organization::PLAN_FREE;
+                $isPro = auth()->user()->organization->isPro();
+                $isEnterprise = auth()->user()->organization->isEnterprise();
+                @endphp
                 <div
                     class="relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-lg transition-shadow">
                     <div class="mb-4">
@@ -60,17 +65,29 @@
                             Gestion de liste des jeunes
                         </li>
                     </ul>
-                    <a href="#"
-                        class="mt-8 block w-full rounded-md bg-pink-50 px-3 py-2 text-center text-sm font-semibold text-pink-600 hover:bg-pink-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600">
+                    @if($isFree)
+                    <div
+                        class="mt-8 block w-full rounded-md bg-pink-50 px-3 py-2 text-center text-sm font-semibold text-pink-600">
                         Votre plan actuel
-                    </a>
+                    </div>
+                    @else
+                    <form action="{{ route('organization.subscriptions.downgrade') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                            onclick="return confirm('Êtes-vous sûr de vouloir repasser au plan Standard ? Votre accès Pro restera actif jusqu\'à la fin de la période en cours.')"
+                            class="mt-8 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-center text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+                            Rétrograder vers Standard
+                        </button>
+                    </form>
+                    @endif
                 </div>
 
                 <!-- Pro Plan -->
                 @php
                 $proPlan = $monthlyPlans->where('target_plan', 'pro')->first();
                 @endphp
-                <div class="relative flex flex-col rounded-2xl border-2 border-pink-600 bg-white p-8 shadow-xl">
+                <div
+                    class="relative flex flex-col rounded-2xl border-2 {{ $isPro ? 'border-pink-600 ring-2 ring-pink-600 ring-opacity-50' : 'border-pink-600' }} bg-white p-8 shadow-xl">
                     <div
                         class="absolute -top-5 left-0 right-0 mx-auto w-32 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 px-3 py-1 text-center text-xs font-semibold text-white shadow-sm">
                         Populaire
@@ -114,6 +131,12 @@
                         @endif
                     </ul>
 
+                    @if($isPro)
+                    <div
+                        class="mt-8 block w-full rounded-md bg-pink-50 px-3 py-2 text-center text-sm font-semibold text-pink-600 border border-pink-200">
+                        Votre plan actuel
+                    </div>
+                    @else
                     <form action="{{ route('organization.subscriptions.subscribe', $proPlan->id) }}" method="POST">
                         @csrf
                         <input type="hidden" name="billing_cycle" :value="annual ? 'yearly' : 'monthly'">
@@ -122,6 +145,7 @@
                             Passer au plan Pro
                         </button>
                     </form>
+                    @endif
                     @else
                     <button disabled
                         class="mt-8 block w-full rounded-md bg-gray-300 px-3 py-2 text-center text-sm font-semibold text-white cursor-not-allowed">

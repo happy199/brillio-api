@@ -26,13 +26,16 @@ class AccountingController extends Controller
         if ($period === 'today') {
             $startDate = Carbon::today();
             $endDate = Carbon::today()->endOfDay();
-        } elseif ($period === 'week') {
+        }
+        elseif ($period === 'week') {
             $startDate = Carbon::now()->startOfWeek();
             $endDate = Carbon::now()->endOfWeek();
-        } elseif ($period === 'year') {
+        }
+        elseif ($period === 'year') {
             $startDate = Carbon::now()->startOfYear();
             $endDate = Carbon::now()->endOfYear();
-        } elseif ($period === 'custom' && $customStart && $customEnd) {
+        }
+        elseif ($period === 'custom' && $customStart && $customEnd) {
             $startDate = Carbon::parse($customStart)->startOfDay();
             $endDate = Carbon::parse($customEnd)->endOfDay();
         }
@@ -58,16 +61,26 @@ class AccountingController extends Controller
 
         $estimatedTargetingRevenueFcfa = $targetingRevenueCredits * 100;
 
-        // 5. Données pour le Graphique (Évolution journalière sur la période)
+        // 5. Revenus Organisations (Achats de packs + Subscriptions via Moneroo)
+        $orgRevenue = MonerooTransaction::where('status', 'completed')
+            ->where('user_type', 'App\Models\User')
+            ->whereHas('user', function ($q) {
+            $q->where('user_type', 'organization');
+        })
+            ->whereBetween('completed_at', [$startDate, $endDate])
+            ->sum('amount');
+
+        // 6. Données pour le Graphique (Évolution journalière sur la période)
         $chartData = $this->getChartData($startDate, $endDate);
 
-        // 6. Transactions Récentes (Fusionnées)
+        // 7. Transactions Récentes (Fusionnées)
         $recentTransactions = $this->getRecentTransactions($startDate, $endDate);
 
         return view('admin.accounting.index', compact(
             'revenue',
             'payouts',
             'netIncome',
+            'orgRevenue',
             'targetingRevenueCredits',
             'estimatedTargetingRevenueFcfa',
             'chartData',
@@ -81,33 +94,33 @@ class AccountingController extends Controller
     public function history(Request $request)
     {
         // Récupérer TOUTES les transactions (sans limite de date par défaut, ou paginées)
-        $revenueTransactions = MonerooTransaction::where('status', 'completed')
+        $revenueTransactions = MonerooTransaction::with(['user', 'user.organization'])->where('status', 'completed')
             ->orderBy('completed_at', 'desc')
             ->get()
             ->map(function ($t) {
-                return [
-                    'date' => $t->completed_at,
-                    'type' => 'in', // Entrée
-                    'label' => 'Achat Crédits',
-                    'amount' => $t->amount,
-                    'user' => $t->user,
-                    'reference' => 'MON-' . $t->id
-                ];
-            });
+            return [
+            'date' => $t->completed_at,
+            'type' => 'in', // Entrée
+            'label' => 'Achat Crédits',
+            'amount' => $t->amount,
+            'user' => $t->user,
+            'reference' => 'MON-' . $t->id
+            ];
+        });
 
-        $payoutTransactions = PayoutRequest::where('status', PayoutRequest::STATUS_COMPLETED)
+        $payoutTransactions = PayoutRequest::with(['mentorProfile.user', 'mentorProfile.user.organization'])->where('status', PayoutRequest::STATUS_COMPLETED)
             ->orderBy('completed_at', 'desc')
             ->get()
             ->map(function ($p) {
-                return [
-                    'date' => $p->completed_at,
-                    'type' => 'out', // Sortie
-                    'label' => 'Retrait Mentor',
-                    'amount' => $p->amount,
-                    'user' => $p->mentorProfile->user,
-                    'reference' => 'PAY-' . $p->id
-                ];
-            });
+            return [
+            'date' => $p->completed_at,
+            'type' => 'out', // Sortie
+            'label' => 'Retrait Mentor',
+            'amount' => $p->amount,
+            'user' => $p->mentorProfile->user,
+            'reference' => 'PAY-' . $p->id
+            ];
+        });
 
         // Fusionner et trier
         $allTransactions = $revenueTransactions->concat($payoutTransactions)->sortByDesc('date');
@@ -124,8 +137,8 @@ class AccountingController extends Controller
             $allTransactions->count(),
             $perPage,
             $page,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        ['path' => $request->url(), 'query' => $request->query()]
+            );
 
         return view('admin.accounting.history', compact('transactions'));
     }
@@ -170,37 +183,37 @@ class AccountingController extends Controller
     private function getRecentTransactions($startDate, $endDate)
     {
         // On récupère les 20 dernières opérations (Mix Moneroo et Payouts)
-        $latestRevenue = MonerooTransaction::where('status', 'completed')
+        $latestRevenue = MonerooTransaction::with(['user', 'user.organization'])->where('status', 'completed')
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->orderBy('completed_at', 'desc')
             ->limit(20)
             ->get()
             ->map(function ($t) {
-                return [
-                    'date' => $t->completed_at,
-                    'type' => 'in', // Entrée
-                    'label' => 'Achat Crédits',
-                    'amount' => $t->amount,
-                    'user' => $t->user,
-                    'reference' => 'MON-' . $t->id
-                ];
-            });
+            return [
+            'date' => $t->completed_at,
+            'type' => 'in', // Entrée
+            'label' => 'Achat Crédits',
+            'amount' => $t->amount,
+            'user' => $t->user,
+            'reference' => 'MON-' . $t->id
+            ];
+        });
 
-        $latestPayouts = PayoutRequest::where('status', PayoutRequest::STATUS_COMPLETED)
+        $latestPayouts = PayoutRequest::with(['mentorProfile.user', 'mentorProfile.user.organization'])->where('status', PayoutRequest::STATUS_COMPLETED)
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->orderBy('completed_at', 'desc')
             ->limit(20)
             ->get()
             ->map(function ($p) {
-                return [
-                    'date' => $p->completed_at,
-                    'type' => 'out', // Sortie
-                    'label' => 'Retrait Mentor',
-                    'amount' => $p->amount,
-                    'user' => $p->mentorProfile->user,
-                    'reference' => 'PAY-' . $p->id
-                ];
-            });
+            return [
+            'date' => $p->completed_at,
+            'type' => 'out', // Sortie
+            'label' => 'Retrait Mentor',
+            'amount' => $p->amount,
+            'user' => $p->mentorProfile->user,
+            'reference' => 'PAY-' . $p->id
+            ];
+        });
 
         $merged = $latestRevenue->concat($latestPayouts)
             ->sortByDesc('date')
