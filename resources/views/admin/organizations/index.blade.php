@@ -31,6 +31,10 @@
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Plan
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Statut
                         </th>
                         <th scope="col"
@@ -73,6 +77,12 @@
                             <span
                                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                 {{ $organization->sponsored_users_count }} Jeunes
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $organization->subscription_plan === 'free' ? 'bg-gray-100 text-gray-800' : ($organization->subscription_plan === 'pro' ? 'bg-purple-100 text-purple-800' : 'bg-indigo-100 text-indigo-800') }}">
+                                {{ $organization->subscription_status_label }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
