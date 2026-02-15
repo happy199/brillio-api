@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Mentor;
 use App\Http\Controllers\Controller;
 use App\Models\MentorProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MentorDashboardController extends Controller
 {
@@ -67,19 +69,43 @@ class MentorDashboardController extends Controller
             'website_url' => 'nullable|url|max:255',
             'advice' => 'nullable|string|max:1000',
             'is_published' => 'nullable|boolean',
+            'profile_photo' => 'nullable|image|max:5120', // 5MB max
         ]);
 
         $validated['is_published'] = $request->has('is_published');
 
-
         $user = auth()->user();
         $profile = $user->mentorProfile;
+
+        // Validation pour la publication
+        if ($validated['is_published']) {
+            // Vérifier si l'utilisateur a une photo (locale ou URL) et si l'upload en cours n'est pas vide
+            $hasPhoto = $user->profile_photo_path || $user->profile_photo_url;
+            $isUploading = $request->hasFile('profile_photo');
+
+            if (!$hasPhoto && !$isUploading) {
+                return back()->withErrors(['is_published' => 'Vous devez ajouter une photo de profil pour rendre votre profil visible aux jeunes.'])->withInput();
+            }
+        }
+
+        // Gérer l'upload de la photo
+        if ($request->hasFile('profile_photo')) {
+            // Supprimer l'ancienne photo si elle est locale
+            if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+
+            // Stocker la nouvelle photo
+            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $user->profile_photo_path = $path;
+            $user->save();
+        }
 
         // Gérer la spécialisation
         if ($validated['specialization_id'] === 'new' && !empty($validated['new_specialization_name'])) {
             // Vérifier si une spécialisation avec ce nom existe déjà
             $existingSpec = \App\Models\Specialization::where('name', $validated['new_specialization_name'])
-                ->orWhere('slug', \Illuminate\Support\Str::slug($validated['new_specialization_name']))
+                ->orWhere('slug', Str::slug($validated['new_specialization_name']))
                 ->first();
 
             if ($existingSpec) {
@@ -111,6 +137,7 @@ class MentorDashboardController extends Controller
 
         // Supprimer les champs non nécessaires
         unset($validated['new_specialization_name']);
+        unset($validated['profile_photo']);
 
         if ($profile) {
             $profile->update($validated);

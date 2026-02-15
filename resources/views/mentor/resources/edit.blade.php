@@ -159,6 +159,10 @@
                     @endphp
 
                     <div class="space-y-4">
+                        <div class="flex justify-end -mt-10 mb-6">
+                            <button type="button" onclick="toggleAll('mbti_types[]', true)"
+                                class="text-xs text-gray-500 hover:text-indigo-600 underline">Tout sélectionner</button>
+                        </div>
                         @foreach($mbtiGroups as $groupName => $group)
                         <div>
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ $groupName }}
@@ -209,11 +213,22 @@
                         Pas encore de données utilisateurs suffisantes pour le ciblage dynamique.
                     </div>
                     @else
+                    <div class="flex justify-between items-center mb-4">
+                        <button type="button" onclick="selectAllGlobal()"
+                            class="text-indigo-600 text-xs font-semibold hover:text-indigo-800 underline">
+                            Tout sélectionner (Public large)
+                        </button>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Niveau d'études -->
                         @if(!empty($targetingOptions['education_levels']))
                         <div class="space-y-3">
-                            <label class="block text-sm font-medium text-gray-700">Niveau d'études</label>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Niveau d'études</label>
+                                <button type="button" onclick="toggleAll('targeting[education_levels][]', true)"
+                                    class="text-xs text-gray-500 hover:text-indigo-600 underline">Tous</button>
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($targetingOptions['education_levels'] as $key => $label)
                                 <label class="cursor-pointer">
@@ -232,14 +247,18 @@
                         <!-- Situation -->
                         @if(!empty($targetingOptions['situations']))
                         <div class="space-y-3">
-                            <label class="block text-sm font-medium text-gray-700">Situation</label>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Situation</label>
+                                <button type="button" onclick="toggleAll('targeting[situations][]', true)"
+                                    class="text-xs text-gray-500 hover:text-indigo-600 underline">Tous</button>
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($targetingOptions['situations'] as $key => $label)
                                 <label class="cursor-pointer">
                                     <input type="checkbox" name="targeting[situations][]" value="{{ $key }}" {{
                                         in_array($key, $selectedSit) ? 'checked' : '' }} class="peer sr-only">
                                     <span
-                                        class="inline-block px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-full hover:bg-gray-50 peer-checked:bg-purple-100 peer-checked:border-purple-400 peer-checked:text-purple-800 transition select-none">
+                                        class="inline-block px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-full hover:bg-purple-100 hover:text-purple-800 peer-checked:bg-purple-100 peer-checked:border-purple-400 peer-checked:text-purple-800 transition select-none">
                                         {{ $label }}
                                     </span>
                                 </label>
@@ -254,9 +273,13 @@
                         <!-- Pays (Nouveau Design) -->
                         @if(!empty($targetingOptions['countries']))
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Pays cibles <span
-                                    class="text-xs text-gray-500 font-normal">(Basé sur les jeunes
-                                    inscrits)</span></label>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Pays cibles <span
+                                        class="text-xs text-gray-500 font-normal">(Basé sur les jeunes
+                                        inscrits)</span></label>
+                                <button type="button" onclick="toggleAll('targeting[countries][]', true)"
+                                    class="text-xs text-gray-500 hover:text-indigo-600 underline">Tous</button>
+                            </div>
                             <div class="flex flex-wrap gap-3">
                                 @foreach($targetingOptions['countries'] as $label => $value)
                                 <label class="cursor-pointer group">
@@ -285,9 +308,16 @@
                                     } else {
                                         this.selected.push(option);
                                     }
+                                },
+                                selectAll() {
+                                    this.selected = [...this.options];
                                 }
-                            }" class="space-y-2 pt-2">
-                            <label class="block text-sm font-medium text-gray-700">Intérêts principaux</label>
+                            }" @select-all-interests.window="selectAll()" class="space-y-2 pt-2">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Intérêts principaux</label>
+                                <button type="button" @click="selectAll()"
+                                    class="text-xs text-gray-500 hover:text-indigo-600 underline">Tous</button>
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 <template x-for="option in options" :key="option">
                                     <button type="button" @click="toggle(option)"
@@ -514,6 +544,48 @@
                             <input id="file_input" type="file" name="file" class="hidden" />
                         </label>
                     </div>
+
+                    <!-- PJ -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Fichier
+                            (Optionnel)</label>
+                        <label for="file_input"
+                            class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition">
+                            @if($resource->file_path)
+                            <div class="flex items-center gap-2 text-green-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="text-xs font-bold">Fich. ok</span>
+                            </div>
+                            @else
+                            <span class="text-xs text-gray-600 font-medium">Choisir un fichier...</span>
+                            @endif
+                            <input id="file_input" type="file" name="file" class="hidden" />
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div class="pt-4 border-t border-gray-100 space-y-3">
+                    @if($resource->is_validated)
+                    <div class="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-lg border border-yellow-200">
+                        <strong>Attention :</strong> Toute modification entraînera une nouvelle validation par
+                        l'administration avant d'être visible.
+                    </div>
+                    @endif
+
+                    <button type="submit"
+                        class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                        Mettre à jour et Soumettre
+                    </button>
+
+                    <button type="button"
+                        onclick="if(confirm('Supprimer cette ressource ?')) document.getElementById('delete-form').submit();"
+                        class="w-full text-red-600 text-xs font-semibold hover:text-red-800 transition text-center underline">
+                        Supprimer la ressource
+                    </button>
                 </div>
 
                 <!-- Boutons -->
@@ -550,4 +622,26 @@
 
 @push('scripts')
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    function toggleAll(name, checked) {
+        document.getElementsByName(name).forEach(el => {
+            el.checked = checked;
+            el.dispatchEvent(new Event('change'));
+        });
+    }
+
+    function selectAllGlobal() {
+        // MBTI
+        toggleAll('mbti_types[]', true);
+        // Education
+        toggleAll('targeting[education_levels][]', true);
+        // Situations
+        toggleAll('targeting[situations][]', true);
+        // Countries
+        toggleAll('targeting[countries][]', true);
+
+        // Interests (Alpine)
+        window.dispatchEvent(new CustomEvent('select-all-interests'));
+    }
+</script>
 @endpush
