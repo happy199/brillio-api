@@ -33,6 +33,9 @@ Route::middleware(['auth', 'organization', 'organization_active'])->group(functi
     // Dashboard
     Route::get('/dashboard', [DashboardController::class , 'index'])->name('dashboard');
 
+    // Credit Distribution
+    Route::post('/credits/distribute', [\App\Http\Controllers\Organization\CreditDistributionController::class , 'distribute'])->name('credits.distribute');
+
     // Profile
     Route::get('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'update'])->name('profile.update');

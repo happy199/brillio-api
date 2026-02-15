@@ -120,6 +120,22 @@
             <div class="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
                 <h2 class="text-lg font-bold text-gray-900 mb-6 pb-2 border-b border-gray-100">Configuration</h2>
 
+                @if(session('success'))
+                <div class="mb-4 p-4 bg-green-50 border-l-4 border-green-400 text-green-700 text-sm">
+                    {{ session('success') }}
+                </div>
+                @endif
+
+                @if($errors->any())
+                <div class="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700 text-sm">
+                    <ul class="list-disc list-inside">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
                 <form action="{{ route('admin.monetization.settings.update') }}" method="POST" class="space-y-5">
                     @csrf
 
@@ -156,6 +172,20 @@
                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                 FCFA</div>
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Commission Mise en Relation
+                            (%)</label>
+                        <div class="relative">
+                            <input type="number" name="mentorship_commission_percent" value="{{ $commissionPercent }}"
+                                class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12"
+                                min="0" max="100">
+                            <div
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                %</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Commission prélevée sur le coût des sessions.</p>
                     </div>
 
                     <div>
