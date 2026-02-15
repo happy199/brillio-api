@@ -77,7 +77,7 @@ class MonetizationController extends Controller
             ->sum('amount');
 
         // 50 dernières transactions (Include organization relationship)
-        $transactions = WalletTransaction::with(['user', 'user.organization'])->latest()->limit(50)->get();
+        $transactions = WalletTransaction::with(['user', 'user.organization', 'organization'])->latest()->limit(50)->get();
 
         return view('admin.monetization.index', compact(
             'creditPriceJeune',

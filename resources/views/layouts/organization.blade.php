@@ -47,6 +47,12 @@
         }
     </script>
 
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+
     @stack('styles')
 </head>
 
@@ -201,7 +207,7 @@
             }, function (err) {
                 alert('Erreur lors de la copie.');
             });
-    }
+        }
     </script>
 </body>
 

@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->web(append: [
+            \App\Http\Middleware\UpdateLastLogin::class,
+        ]);
+
         // Alias pour les middlewares personnalisés
         $middleware->alias([
             'is_admin' => \App\Http\Middleware\IsAdmin::class,

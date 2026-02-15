@@ -220,8 +220,58 @@
 </div>
 <!-- Activity Chart -->
 <div class="mt-8 bg-white rounded-lg shadow p-6 relative overflow-hidden">
+    <div class="mb-6 bg-gray-50 rounded-xl p-4 border border-gray-100">
+        <form action="{{ route('organization.dashboard') }}" method="GET" class="flex flex-wrap items-end gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <label for="period"
+                    class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Période</label>
+                <select name="period" id="period" onchange="toggleCustomDates(this.value)"
+                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm">
+                    <option value="7_days" {{ $period=='7_days' ? 'selected' : '' }}>7 derniers jours</option>
+                    <option value="30_days" {{ $period=='30_days' ? 'selected' : '' }}>30 derniers jours</option>
+                    <option value="this_month" {{ $period=='this_month' ? 'selected' : '' }}>Ce mois-ci</option>
+                    <option value="last_month" {{ $period=='last_month' ? 'selected' : '' }}>Mois dernier</option>
+                    <option value="this_year" {{ $period=='this_year' ? 'selected' : '' }}>Cette année</option>
+                    <option value="custom" {{ $period=='custom' ? 'selected' : '' }}>Personnalisé</option>
+                </select>
+            </div>
+
+            <div id="custom-dates" class="flex gap-4 {{ $period != 'custom' ? 'hidden' : '' }}">
+                <div>
+                    <label for="start_date"
+                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Début</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ $startDate->format('Y-m-d') }}"
+                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm">
+                </div>
+                <div>
+                    <label for="end_date"
+                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Fin</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ $endDate->format('Y-m-d') }}"
+                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm">
+                </div>
+            </div>
+
+            <button type="submit"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-organization-600 hover:bg-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500 transition-colors">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filtrer
+            </button>
+        </form>
+    </div>
+
     <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-900">Activité sur les 30 derniers jours</h3>
+        <h3 class="text-lg font-semibold text-gray-900">
+            @if($period == '7_days') Activité sur les 7 derniers jours
+            @elseif($period == '30_days') Activité sur les 30 derniers jours
+            @elseif($period == 'this_month') Activité de ce mois-ci
+            @elseif($period == 'last_month') Activité du mois dernier
+            @elseif($period == 'this_year') Activité de cette année
+            @else Activité du {{ $startDate->format('d/m/Y') }} au {{ $endDate->format('d/m/Y') }}
+            @endif
+        </h3>
         @if(!$isPro)
         <span class="inline-flex items-center rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-800">
             <svg class="mr-1.5 h-3 w-3 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
@@ -394,6 +444,14 @@
                         backgroundColor: 'rgba(79, 70, 229, 0.1)',
                         tension: 0.4,
                         fill: true
+                    },
+                    {
+                        label: 'Connexions',
+                        data: @json($activityData['connections']),
+                        borderColor: '#06b6d4', // cyan-500
+                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                        tension: 0.4,
+                        fill: true
                     }
                 ]
             },
@@ -434,6 +492,15 @@
             }
         });
     });
+
+    function toggleCustomDates(value) {
+        const customDates = document.getElementById('custom-dates');
+        if (value === 'custom') {
+            customDates.classList.remove('hidden');
+        } else {
+            customDates.classList.add('hidden');
+        }
+    }
 </script>
 @endpush
 @endsection

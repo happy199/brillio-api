@@ -55,6 +55,7 @@ class RegisterController extends Controller
             'user_type' => 'organization',
             'organization_id' => $organization->id, // Link to the created organization
             'onboarding_completed' => true,
+            'last_login_at' => now(),
         ]);
 
         // Auto-login
@@ -89,8 +90,10 @@ class RegisterController extends Controller
         ], $request->filled('remember'))) {
             $request->session()->regenerate();
 
-            // Check if organization is active
             $user = Auth::user();
+            $user->update(['last_login_at' => now()]);
+
+            // Check if organization is active
             if ($user->organization && $user->organization->status === 'inactive') {
                 Auth::logout();
                 $request->session()->invalidate();

@@ -76,6 +76,7 @@ class WebAuthController extends Controller
                 'provider_id' => $linkedinData['linkedin_id'],
                 'profile_photo_url' => $linkedinData['avatar_url'],
                 'email_verified_at' => now(),
+                'last_login_at' => now(),
             ]);
 
             try {
@@ -237,6 +238,7 @@ class WebAuthController extends Controller
             'provider_id' => $supabaseResult['user']['id'] ?? null,
             'sponsored_by_organization_id' => $organizationId,
             'referral_code_used' => $referralCode,
+            'last_login_at' => now(),
         ]);
         
         // Mark invitation as used
@@ -566,6 +568,7 @@ class WebAuthController extends Controller
                 'provider_id' => $userData['id'] ?? null,
                 'profile_photo_url' => $socialData['avatar_url'],
                 'email_verified_at' => $socialData['email_verified'] ? now() : null,
+                'last_login_at' => now(),
             ]);
 
             try {

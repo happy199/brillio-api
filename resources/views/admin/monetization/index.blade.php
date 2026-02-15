@@ -218,15 +218,20 @@
                                     {{ $transaction->created_at->format('d/m/Y H:i') }}
                                 </td>
                                 <td class="px-6 py-3 font-medium text-gray-900">
-                                    @if($transaction->user->user_type === 'organization' &&
+                                    @if($transaction->user && $transaction->user->user_type === 'organization' &&
                                     $transaction->user->organization)
                                     <div class="flex flex-col">
                                         <span>{{ $transaction->user->organization->name }}</span>
                                         <span class="text-[10px] text-gray-400 font-normal">Par: {{
                                             $transaction->user->name }}</span>
                                     </div>
+                                    @elseif($transaction->organization)
+                                    <div class="flex flex-col">
+                                        <span>{{ $transaction->organization->name }}</span>
+                                        <span class="text-[10px] text-gray-400 font-normal italic">Système</span>
+                                    </div>
                                     @else
-                                    {{ $transaction->user->name ?? 'Utilisateur supprimé' }}
+                                    {{ optional($transaction->user)->name ?? 'Utilisateur supprimé' }}
                                     @endif
                                 </td>
                                 <td class="px-6 py-3">
