@@ -159,6 +159,10 @@
                     @endphp
 
                     <div class="space-y-4">
+                        <div class="flex justify-end -mt-10 mb-6">
+                            <button type="button" onclick="toggleAll('mbti_types[]', true)"
+                                class="text-xs text-gray-500 hover:text-indigo-600 underline">Tout sélectionner</button>
+                        </div>
                         @foreach($mbtiGroups as $groupName => $group)
                         <div>
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ $groupName }}
@@ -209,11 +213,22 @@
                         Pas encore de données utilisateurs suffisantes pour le ciblage dynamique.
                     </div>
                     @else
+                    <div class="flex justify-between items-center mb-4">
+                        <button type="button" onclick="selectAllGlobal()"
+                            class="text-indigo-600 text-xs font-semibold hover:text-indigo-800 underline">
+                            Tout sélectionner (Public large)
+                        </button>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Niveau d'études -->
                         @if(!empty($targetingOptions['education_levels']))
                         <div class="space-y-3">
-                            <label class="block text-sm font-medium text-gray-700">Niveau d'études</label>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Niveau d'études</label>
+                                <button type="button" onclick="toggleAll('targeting[education_levels][]', true)"
+                                    class="text-xs text-gray-500 hover:text-indigo-600 underline">Tous</button>
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($targetingOptions['education_levels'] as $key => $label)
                                 <label class="cursor-pointer">
@@ -232,14 +247,18 @@
                         <!-- Situation -->
                         @if(!empty($targetingOptions['situations']))
                         <div class="space-y-3">
-                            <label class="block text-sm font-medium text-gray-700">Situation</label>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Situation</label>
+                                <button type="button" onclick="toggleAll('targeting[situations][]', true)"
+                                    class="text-xs text-gray-500 hover:text-indigo-600 underline">Tous</button>
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($targetingOptions['situations'] as $key => $label)
                                 <label class="cursor-pointer">
                                     <input type="checkbox" name="targeting[situations][]" value="{{ $key }}" {{
                                         in_array($key, $selectedSit) ? 'checked' : '' }} class="peer sr-only">
                                     <span
-                                        class="inline-block px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-full hover:bg-gray-50 peer-checked:bg-purple-100 peer-checked:border-purple-400 peer-checked:text-purple-800 transition select-none">
+                                        class="inline-block px-3 py-1.5 text-xs text-gray-600 border border-gray-200 rounded-full hover:bg-purple-100 hover:text-purple-800 peer-checked:bg-purple-100 peer-checked:border-purple-400 peer-checked:text-purple-800 transition select-none">
                                         {{ $label }}
                                     </span>
                                 </label>
@@ -254,9 +273,13 @@
                         <!-- Pays (Nouveau Design) -->
                         @if(!empty($targetingOptions['countries']))
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Pays cibles <span
-                                    class="text-xs text-gray-500 font-normal">(Basé sur les jeunes
-                                    inscrits)</span></label>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Pays cibles <span
+                                        class="text-xs text-gray-500 font-normal">(Basé sur les jeunes
+                                        inscrits)</span></label>
+                                <button type="button" onclick="toggleAll('targeting[countries][]', true)"
+                                    class="text-xs text-gray-500 hover:text-indigo-600 underline">Tous</button>
+                            </div>
                             <div class="flex flex-wrap gap-3">
                                 @foreach($targetingOptions['countries'] as $label => $value)
                                 <label class="cursor-pointer group">
@@ -285,9 +308,16 @@
                                     } else {
                                         this.selected.push(option);
                                     }
+                                },
+                                selectAll() {
+                                    this.selected = [...this.options];
                                 }
-                            }" class="space-y-2 pt-2">
-                            <label class="block text-sm font-medium text-gray-700">Intérêts principaux</label>
+                            }" @select-all-interests.window="selectAll()" class="space-y-2 pt-2">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Intérêts principaux</label>
+                                <button type="button" @click="selectAll()"
+                                    class="text-xs text-gray-500 hover:text-indigo-600 underline">Tous</button>
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 <template x-for="option in options" :key="option">
                                     <button type="button" @click="toggle(option)"
@@ -402,12 +432,12 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Fichiers -->
-                <div class="space-y-5 pt-5 border-t border-gray-100">
-                    <!-- Image -->
-                    <div x-data="{
+
+                    <!-- Fichiers -->
+                    <div class="space-y-5 pt-5 border-t border-gray-100">
+                        <!-- Image -->
+                        <div x-data="{
                             hasExisting: {{ $resource->preview_image_path ? 'true' : 'false' }},
                             existingImage: '{{ $resource->preview_image_path ? Storage::url($resource->preview_image_path) : '' }}',
                             newPreview: null,
@@ -435,106 +465,111 @@
                                 document.getElementById('preview_image_input').click();
                             }
                         }">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Couverture</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Couverture</label>
 
-                        <!-- Preview Area -->
-                        <div
-                            class="relative w-full h-32 border-2 border-gray-300 border-dashed rounded-lg overflow-hidden bg-gray-50">
-                            <!-- Existing image (if not removed and no new one) -->
-                            <template x-if="hasExisting && !removeExisting && !newPreview">
-                                <img :src="existingImage" alt="Couverture actuelle"
-                                    class="absolute inset-0 w-full h-full object-cover">
-                            </template>
+                            <!-- Preview Area -->
+                            <div
+                                class="relative w-full h-32 border-2 border-gray-300 border-dashed rounded-lg overflow-hidden bg-gray-50">
+                                <!-- Existing image (if not removed and no new one) -->
+                                <template x-if="hasExisting && !removeExisting && !newPreview">
+                                    <img :src="existingImage" alt="Couverture actuelle"
+                                        class="absolute inset-0 w-full h-full object-cover">
+                                </template>
 
-                            <!-- New preview -->
-                            <template x-if="newPreview">
-                                <img :src="newPreview" alt="Nouvelle couverture"
-                                    class="absolute inset-0 w-full h-full object-cover">
-                            </template>
+                                <!-- New preview -->
+                                <template x-if="newPreview">
+                                    <img :src="newPreview" alt="Nouvelle couverture"
+                                        class="absolute inset-0 w-full h-full object-cover">
+                                </template>
 
-                            <!-- Placeholder when no image -->
-                            <template x-if="(!hasExisting || removeExisting) && !newPreview">
-                                <div class="flex flex-col items-center justify-center h-full">
-                                    <svg class="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor"
+                                <!-- Placeholder when no image -->
+                                <template x-if="(!hasExisting || removeExisting) && !newPreview">
+                                    <div class="flex flex-col items-center justify-center h-full">
+                                        <svg class="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p class="text-xs text-gray-500">Aucune image</p>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-2 mt-2">
+                                <button type="button" @click="changeImage()"
+                                    class="flex-1 px-3 py-2 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded border border-indigo-200 transition">
+                                    <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                     </svg>
-                                    <p class="text-xs text-gray-500">Aucune image</p>
-                                </div>
-                            </template>
-                        </div>
+                                    <span
+                                        x-text="(hasExisting && !removeExisting && !newPreview) ? 'Changer' : 'Ajouter'"></span>
+                                </button>
 
-                        <!-- Action Buttons -->
-                        <div class="flex gap-2 mt-2">
-                            <button type="button" @click="changeImage()"
-                                class="flex-1 px-3 py-2 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded border border-indigo-200 transition">
-                                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                </svg>
-                                <span
-                                    x-text="(hasExisting && !removeExisting && !newPreview) ? 'Changer' : 'Ajouter'"></span>
-                            </button>
-
-                            <button type="button" @click="removeImage()"
-                                x-show="(hasExisting && !removeExisting) || newPreview"
-                                class="px-3 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition">
-                                <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <p class="text-[10px] text-gray-500 mt-1">Format : JPG, PNG (Max 5 Mo)</p>
-
-                        <input id="preview_image_input" type="file" name="preview_image" accept="image/*"
-                            @change="handleFileSelect($event)" class="hidden" />
-                    </div>
-
-                    <!-- PJ -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Fichier
-                            (Optionnel)</label>
-                        <label for="file_input"
-                            class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition">
-                            @if($resource->file_path)
-                            <div class="flex items-center gap-2 text-green-600">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span class="text-xs font-bold">Fich. ok</span>
+                                <button type="button" @click="removeImage()"
+                                    x-show="(hasExisting && !removeExisting) || newPreview"
+                                    class="px-3 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition">
+                                    <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </div>
-                            @else
-                            <span class="text-xs text-gray-600 font-medium">Choisir un fichier...</span>
-                            @endif
-                            <input id="file_input" type="file" name="file" class="hidden" />
-                        </label>
+
+                            <p class="text-[10px] text-gray-500 mt-1">Format : JPG, PNG (Max 5 Mo)</p>
+
+                            <input id="preview_image_input" type="file" name="preview_image" accept="image/*"
+                                @change="handleFileSelect($event)" class="hidden" />
+                        </div>
+
+                        <!-- PJ -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Fichier
+                                (Optionnel)</label>
+                            <label for="file_input"
+                                class="flex flex-col items-center justify-center w-full h-20 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition">
+                                @if($resource->file_path)
+                                <div class="flex items-center gap-2 text-green-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span class="text-xs font-bold">Fich. ok</span>
+                                </div>
+                                @else
+                                <span class="text-xs text-gray-600 font-medium">Choisir un fichier...</span>
+                                @endif
+                                <input id="file_input" type="file" name="file" class="hidden" />
+                            </label>
+                        </div>
+
+
                     </div>
-                </div>
 
-                <!-- Boutons -->
-                <div class="pt-4 border-t border-gray-100 space-y-3">
-                    @if($resource->is_validated)
-                    <div class="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-lg border border-yellow-200">
-                        <strong>Attention :</strong> Toute modification entraînera une nouvelle validation par
-                        l'administration avant d'être visible.
+                    <!-- Boutons -->
+                    <div class="pt-4 border-t border-gray-100 space-y-3">
+                        @if($resource->is_validated)
+                        <div class="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-lg border border-yellow-200">
+                            <strong>Attention :</strong> Toute modification entraînera une nouvelle validation par
+                            l'administration avant d'être visible.
+                        </div>
+                        @endif
+
+                        <button type="submit"
+                            class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                            Mettre à jour et Soumettre
+                        </button>
+
+                        <button type="button"
+                            onclick="if(confirm('Supprimer cette ressource ?')) document.getElementById('delete-form').submit();"
+                            class="w-full text-red-600 text-xs font-semibold hover:text-red-800 transition text-center underline">
+                            Supprimer la ressource
+                        </button>
                     </div>
-                    @endif
 
-                    <button type="submit"
-                        class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                        Mettre à jour et Soumettre
-                    </button>
-
-                    <button type="button"
-                        onclick="if(confirm('Supprimer cette ressource ?')) document.getElementById('delete-form').submit();"
-                        class="w-full text-red-600 text-xs font-semibold hover:text-red-800 transition text-center underline">
-                        Supprimer la ressource
-                    </button>
                 </div>
             </div>
         </div>
@@ -550,4 +585,26 @@
 
 @push('scripts')
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    function toggleAll(name, checked) {
+        document.getElementsByName(name).forEach(el => {
+            el.checked = checked;
+            el.dispatchEvent(new Event('change'));
+        });
+    }
+
+    function selectAllGlobal() {
+        // MBTI
+        toggleAll('mbti_types[]', true);
+        // Education
+        toggleAll('targeting[education_levels][]', true);
+        // Situations
+        toggleAll('targeting[situations][]', true);
+        // Countries
+        toggleAll('targeting[countries][]', true);
+
+        // Interests (Alpine)
+        window.dispatchEvent(new CustomEvent('select-all-interests'));
+    }
+</script>
 @endpush

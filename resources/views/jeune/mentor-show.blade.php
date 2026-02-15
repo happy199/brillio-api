@@ -28,16 +28,13 @@
         <div class="p-8 text-white">
             <div class="flex flex-col md:flex-row md:items-start gap-6">
                 <div
-                    class="w-28 h-28 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 bg-white shadow-lg">
+                    class="w-28 h-28 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 {{ $mentor->user && $mentor->user->avatar_url ? 'bg-white shadow-lg' : 'bg-white/20 backdrop-blur-sm' }}">
                     @if($mentor->user && $mentor->user->avatar_url)
                     <img src="{{ $mentor->user->avatar_url }}" alt="{{ $mentor->user->name }}"
-                        class="w-full h-full object-cover"
-                        onerror="this.onerror=null; this.parentElement.classList.remove('bg-white', 'shadow-lg'); this.parentElement.classList.add('bg-white/20', 'backdrop-blur-sm'); this.parentElement.innerHTML='<span class=\'text-4xl font-bold text-white\'>{{ strtoupper(substr($mentor->user->name ?? '?', 0, 2)) }}</span>';">
+                        class="w-full h-full object-cover">
                     @else
-                    <div class="w-full h-full flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                        <span class="text-4xl font-bold text-white">{{ strtoupper(substr($mentor->user->name ?? '?', 0,
-                            2)) }}</span>
-                    </div>
+                    <span class="text-4xl font-bold text-white">{{ strtoupper(substr($mentor->user->name ?? '?', 0, 2))
+                        }}</span>
                     @endif
                 </div>
                 <div class="flex-1">
@@ -49,6 +46,16 @@
                             <p class="text-white/70">{{ $mentor->current_company }}</p>
                             @endif
                         </div>
+                        @if($mentor->is_validated)
+                        <span
+                            class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Profil verifie
+                        </span>
+                        @endif
                     </div>
                     <div class="flex flex-wrap gap-2 mt-4">
                         @if($mentor->specialization)
@@ -87,18 +94,18 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-6">Mon parcours</h2>
 
                 @if($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0)
-                <div class="relative">
+                <div class="relative pl-20">
                     <!-- Timeline Line -->
                     <div
-                        class="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-500 via-red-500 to-pink-500">
+                        class="absolute left-8 top-0 bottom-0 w-0.5 -ml-px bg-gradient-to-b from-orange-500 via-red-500 to-pink-500">
                     </div>
 
                     <div class="space-y-8">
                         @foreach($mentor->roadmapSteps->sortBy('position') as $step)
-                        <div class="relative pl-16">
+                        <div class="relative">
                             <!-- Timeline Dot -->
                             <div
-                                class="absolute left-4 w-5 h-5 bg-white border-4 border-orange-500 rounded-full transform -translate-x-1/2">
+                                class="absolute -left-12 w-6 h-6 bg-white border-4 border-orange-500 rounded-full transform -translate-x-1/2 top-6 z-10">
                             </div>
 
                             <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-5">
@@ -231,48 +238,48 @@
                         </button>
                     </form>
                     @endif
-
-                    @php
-                    $mentorName = $mentor->user->name ?? 'ce mentor';
-                    $mentorPosition = $mentor->current_position ?? '';
-                    $mentorCompany = $mentor->current_company ?? '';
-                    $mentorSpecialization = $mentor->specialization_label ?? '';
-                    $user = auth()->user();
-                    $userName = explode(' ', $user->name ?? '')[0] ?? '';
-                    $roadmapSummary = '';
-                    if ($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0) {
-                    $steps = $mentor->roadmapSteps->sortBy('position')->take(3);
-                    $stepDescriptions = $steps->map(fn($s) => $s->title . ($s->organization ? ' chez ' .
-                    $s->organization : ''))->implode(', ');
-                    $roadmapSummary = "Son parcours inclut: " . $stepDescriptions . ".";
-                    }
-                    $prefilledMessage = "Bonjour ! Je suis inspiré(e) par le profil de {$mentorName}";
-                    if ($mentorPosition) {
-                    $prefilledMessage .= " qui travaille actuellement comme {$mentorPosition}";
-                    if ($mentorCompany) {
-                    $prefilledMessage .= " chez {$mentorCompany}";
-                    }
-                    }
-                    $prefilledMessage .= ". ";
-                    if ($roadmapSummary) {
-                    $prefilledMessage .= $roadmapSummary . " ";
-                    }
-                    $prefilledMessage .= "J'aimerais avoir un parcours similaire dans le domaine " .
-                    ($mentorSpecialization ?: "de ce professionnel") . ". ";
-                    $prefilledMessage .= "Quelles sont les étapes clés que je devrais suivre pour atteindre un
-                    profil similaire ? Quelles formations ou compétences dois-je acquérir ?";
-                    @endphp
-                    @if($mentor->is_validated)
-                    <a href="{{ route('jeune.chat') }}?mentor_id={{ $mentor->id }}&prefill={{ urlencode($prefilledMessage) }}"
-                        class="flex items-center justify-center gap-2 w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                        Discuter avec l'IA sur ce profil
-                    </a>
-                    @endif
-                    @endif
+                    <<<<<<< HEAD=======>>>>>>> main
+                        @php
+                        $mentorName = $mentor->user->name ?? 'ce mentor';
+                        $mentorPosition = $mentor->current_position ?? '';
+                        $mentorCompany = $mentor->current_company ?? '';
+                        $mentorSpecialization = $mentor->specialization_label ?? '';
+                        $user = auth()->user();
+                        $userName = explode(' ', $user->name ?? '')[0] ?? '';
+                        $roadmapSummary = '';
+                        if ($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0) {
+                        $steps = $mentor->roadmapSteps->sortBy('position')->take(3);
+                        $stepDescriptions = $steps->map(fn($s) => $s->title . ($s->organization ? ' chez ' .
+                        $s->organization : ''))->implode(', ');
+                        $roadmapSummary = "Son parcours inclut: " . $stepDescriptions . ".";
+                        }
+                        $prefilledMessage = "Bonjour ! Je suis inspiré(e) par le profil de {$mentorName}";
+                        if ($mentorPosition) {
+                        $prefilledMessage .= " qui travaille actuellement comme {$mentorPosition}";
+                        if ($mentorCompany) {
+                        $prefilledMessage .= " chez {$mentorCompany}";
+                        }
+                        }
+                        $prefilledMessage .= ". ";
+                        if ($roadmapSummary) {
+                        $prefilledMessage .= $roadmapSummary . " ";
+                        }
+                        $prefilledMessage .= "J'aimerais avoir un parcours similaire dans le domaine " .
+                        ($mentorSpecialization ?: "de ce professionnel") . ". ";
+                        $prefilledMessage .= "Quelles sont les étapes clés que je devrais suivre pour atteindre un
+                        profil similaire ? Quelles formations ou compétences dois-je acquérir ?";
+                        @endphp
+                        @if($mentor->is_validated)
+                        <a href="{{ route('jeune.chat') }}?mentor_id={{ $mentor->id }}&prefill={{ urlencode($prefilledMessage) }}"
+                            class="flex items-center justify-center gap-2 w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Discuter avec l'IA sur ce profil
+                        </a>
+                        @endif
+                        @endif
                 </div>
             </div>
 
@@ -338,7 +345,8 @@
                         <div>
                             <p class="text-sm text-gray-500">Etapes du parcours</p>
                             <p class="font-medium text-gray-900">
-                                {{ $mentor->roadmapSteps ? $mentor->roadmapSteps->count() : 0 }}</p>
+                                {{ $mentor->roadmapSteps ? $mentor->roadmapSteps->count() : 0 }}
+                            </p>
                         </div>
                     </div>
                 </div>
