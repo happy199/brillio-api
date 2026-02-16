@@ -1,8 +1,8 @@
 @extends('layouts.public')
 
-@section('title', 'Brillio - Ton avenir, ton choix | Orientation professionnelle pour jeunes africains')
-@section('meta_description', 'Brillio est la plateforme d\'orientation professionnelle dédiée aux jeunes africains. Test
-de personnalité, mentoring, conseils IA et bien plus.')
+{{-- SEO Meta Tags --}}
+<x-seo-meta page="home" />
+
 
 @section('content')
 <!-- Alpine.js Data for App Modal -->
