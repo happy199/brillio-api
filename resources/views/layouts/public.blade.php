@@ -171,15 +171,18 @@
     </style>
 
     <!-- JSON-LD Structured Data for SEO -->
+    {{-- Organization Schema --}}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Brillio",
+        "legalName": "Brillio Africa",
         "description": "Plateforme de mentorat connectant jeunes talents et mentors expérimentés en Afrique pour l'orientation professionnelle et le développement de carrière",
         "url": "https://brillio.africa",
         "logo": "{{ asset('android-chrome-512x512.png') }}",
-       "sameAs": [
+        "foundingDate": "2026-01-19",
+        "sameAs": [
             "https://www.facebook.com/share/1E5k4UqPqB",
             "https://www.instagram.com/brillioafrica/",
             "https://www.linkedin.com/company/brillio-africa",
@@ -190,24 +193,82 @@
         "contactPoint": {
             "@type": "ContactPoint",
             "contactType": "Customer Service",
-            "email": "contact@brillio.africa"
+            "email": "contact@brillio.africa",
+            "telephone": "+229 01 66 30 17 36",
+            "areaServed": ["DZ", "AO", "BJ", "BW", "BF", "BI", "CM", "CV", "CF", "TD", "KM", "CG", "CD", "CI", "DJ", "EG", "GQ", "ER", "SZ", "ET", "GA", "GM", "GH", "GN", "GW", "KE", "LS", "LR", "LY", "MG", "MW", "ML", "MR", "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN", "SC", "SL", "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "EH", "ZM", "ZW"],
+            "availableLanguage": ["French", "English"]
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cotonou",
+            "addressRegion": "Littoral",
+            "addressCountry": "BJ"
         }
     }
     </script>
 
+    {{-- WebSite Schema with Search Action --}}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Brillio",
+        "alternateName": "Brillio Africa",
         "url": "https://brillio.africa",
+        "description": "Plateforme de mentorat professionnel en Afrique - Orientation carrière et développement personnel",
         "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://brillio.africa/mentors?q={search_term_string}",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://brillio.africa/search?q={search_term_string}"
+            },
             "query-input": "required name=search_term_string"
-        }
+        },
+        "inLanguage": ["fr", "en"]
     }
     </script>
+
+    {{-- Service/Product Schema --}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Mentorat Professionnel Brillio",
+        "description": "Service de mentorat professionnel connectant jeunes talents avec experts pour orientation carrière et développement personnel en Afrique",
+        "provider": {
+            "@type": "Organization",
+            "name": "Brillio"
+        },
+        "serviceType": "Career Mentoring and Professional Guidance",
+        "areaServed": {
+            "@type": "GeoCircle",
+            "geoMidpoint": {
+                "@type": "GeoCoordinates",
+                "latitude": "6.3703",
+                "longitude": "2.3912"
+            },
+            "geoRadius": "5000000"
+        },
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Young African Professionals and Students",
+            "geographicArea": {
+                "@type": "AdministrativeArea",
+                "name": "Africa"
+            }
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "XOF",
+            "availability": "https://schema.org/InStock",
+            "description": "Accès gratuit à la plateforme de mentorat"
+        },
+        "category": ["Career Counseling", "Professional Development", "Mentorship"]
+    }
+    </script>
+
+    @stack('schemas')
 
     @stack('styles')
 </head>
