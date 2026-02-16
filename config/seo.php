@@ -113,6 +113,7 @@ return [
 
     'keywords' => [
         'primary_fr' => [
+            // Mentorat & Orientation
             'mentorat professionnel afrique',
             'orientation carrière afrique',
             'coaching jeunes africains',
@@ -120,7 +121,77 @@ return [
             'conseiller orientation professionnelle',
             'développement carrière afrique',
             'mentor bénin',
+            'trouver un mentor',
+            'mentorat personnalisé',
+
+            // Formation & Éducation
+            'formation professionnelle afrique',
+            'formation en ligne gratuite',
+            'apprentissage professionnel',
+            'éducation en afrique',
+            'formation continue',
+            'certification professionnelle',
+            'cours en ligne afrique',
+            'e-learning afrique',
+            'plateforme éducative',
+            'formation diplômante',
+
+            // Emploi & Recrutement
+            'recherche emploi afrique',
+            'offre emploi jeunes',
+            'recrutement afrique',
+            'opportunités professionnelles',
+            'insertion professionnelle',
+            'premier emploi afrique',
+            'stage professionnel',
+            'emploi jeunes diplômés',
+
+            // Compétences & Développement
+            'compétences professionnelles',
+            'soft skills',
+            'développement personnel',
+            'montée en compétences',
+            'leadership afrique',
+            'savoir-faire professionnel',
+            'intelligence émotionnelle',
+
+            // CV, Portfolio & Candidature
+            'rédaction cv afrique',
+            'lettre de motivation',
+            'portfolio professionnel',
+            'cv en ligne',
+            'optimiser son cv',
+            'candidature emploi',
+            'personal branding',
+
+            // Coaching & Accompagnement
+            'coaching carrière',
+            'accompagnement professionnel',
+            'conseil carrière',
+            'bilan de compétences',
+            'coaching en ligne',
+            'développement carrière',
+
+            // Test & Personnalité
             'test MBTI gratuit afrique',
+            'test personnalité professionnelle',
+            'test orientation',
+            'découvrir sa personnalité',
+            'profil professionnel',
+
+            // Technologie & Outils
+            'visioconférence afrique',
+            'meeting en ligne',
+            'plateforme collaborative',
+            'networking professionnel',
+            'réseau professionnel afrique',
+
+            // Secteurs spécifiques
+            'école de commerce afrique',
+            'formation technique',
+            'entrepreneuriat afrique',
+            'startup afrique',
+            'innovation afrique',
         ],
 
         'primary_en' => [
@@ -132,15 +203,50 @@ return [
             'find mentor africa',
             'professional development africa',
             'career coaching online',
+            'job search africa',
+            'skills training africa',
+            'online learning platform',
+            'professional networking',
+            'resume building',
+            'interview preparation',
+            'career advancement',
         ],
 
         'secondary_fr' => [
-            'formation professionnelle',
+            // Parcours professionnel
+            'reconversion professionnelle',
+            'évolution de carrière',
+            'promotion professionnelle',
+            'mobilité professionnelle',
+            'projet professionnel',
+
+            // Secteurs d'activité
             'secteur privé afrique',
+            'fonction publique',
+            'ong afrique',
+            'organisations internationales',
+            'entreprises africaines',
+
+            // Formation continue
+            'formation adulte',
+            'formation courte durée',
+            'atelier professionnel',
+            'webinaire gratuit',
+            'masterclass',
+
+            // Jeunesse & Insertion
             'emploi jeunes africains',
-            'compétences professionnelles',
-            'réorientation professionnelle',
-            'coaching carrière en ligne',
+            'programme jeunes talents',
+            'insertion jeunes diplômés',
+            'jeunes entrepreneurs',
+            'génération z emploi',
+
+            // Outils professionnels
+            'entretien embauche',
+            'préparation entretien',
+            'simulation entretien',
+            'négociation salaire',
+            'plan de carrière',
         ],
 
         'secondary_en' => [
@@ -149,14 +255,62 @@ return [
             'career development programs',
             'online career guidance',
             'mentorship programs africa',
+            'professional certification',
+            'job interview preparation',
+            'career transition',
+            'entrepreneurship training',
+            'leadership development',
         ],
 
         'long_tail_fr' => [
+            // Questions pratiques
             'comment trouver un mentor au bénin',
+            'comment trouver un mentor au sénégal',
+            'comment trouver un mentor en côte d\'ivoire',
+            'où trouver un mentor professionnel gratuit',
+            'plateforme gratuite mentorat afrique',
+
+            // Orientation
             'orientation professionnelle en ligne gratuite',
+            'quel métier choisir en afrique',
+            'choisir sa carrière professionnelle',
+            'comment bien s\'orienter professionnellement',
+
+            // Tests & Évaluation
             'test de personnalité mbti gratuit afrique',
+            'test orientation professionnelle gratuit',
+            'évaluation compétences professionnelles',
+            'découvrir ses talents',
+
+            // Formation
+            'formation gratuite en ligne avec certificat',
+            'meilleure formation en ligne afrique',
+            'cours gratuits développement personnel',
+            'certification professionnelle reconnue',
+
+            // Emploi
+            'comment trouver un emploi rapidement afrique',
+            'premier emploi après études',
+            'stage professionnel rémunéré',
+            'opportunités emploi jeunes diplômés',
+
+            // CV & Candidature
+            'comment faire un bon cv afrique',
+            'exemple lettre de motivation',
+            'créer portfolio professionnel gratuit',
+            'rédiger cv sans expérience',
+
+            // Développement
             'développement de carrière pour les jeunes',
             'meilleur plateforme de mentorat afrique',
+            'coaching carrière en ligne gratuit',
+            'apprendre nouvelles compétences gratuitement',
+
+            // Domaines spécifiques
+            'mentorat développement web afrique',
+            'mentor business afrique',
+            'coaching entrepreneuriat gratuit',
+            'formation marketing digital afrique',
         ],
 
         'long_tail_en' => [
@@ -164,8 +318,15 @@ return [
             'best career guidance platforms africa',
             'free personality test mbti',
             'professional mentorship online',
+            'how to choose a career path',
+            'free online courses with certificates',
+            'career development for young professionals',
+            'job search tips africa',
+            'resume writing help',
+            'interview skills training',
         ],
     ],
+
 
     /*
      |--------------------------------------------------------------------------
@@ -224,7 +385,7 @@ return [
             'MA', // Maroc
             'TN', // Tunisie
             'EH', // Sahara occidental
-            
+
             // Afrique de l'Ouest
             'BJ', // Bénin
             'BF', // Burkina Faso
@@ -242,7 +403,7 @@ return [
             'SN', // Sénégal
             'SL', // Sierra Leone
             'TG', // Togo
-            
+
             // Afrique Centrale
             'AO', // Angola
             'CM', // Cameroun
@@ -253,7 +414,7 @@ return [
             'GQ', // Guinée équatoriale
             'GA', // Gabon
             'ST', // São Tomé-et-Príncipe
-            
+
             // Afrique de l'Est
             'BI', // Burundi
             'KM', // Comores
@@ -274,7 +435,7 @@ return [
             'UG', // Ouganda
             'ZM', // Zambie
             'ZW', // Zimbabwe
-            
+
             // Afrique Australe
             'BW', // Botswana
             'LS', // Lesotho
