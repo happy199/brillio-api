@@ -17,7 +17,7 @@
     <meta property="og:title" content="@yield('og_title', 'Brillio - Ton avenir, ton choix')">
     <meta property="og:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
-    <meta property="og:image" content="@yield('og_image', asset('images/og-image.jpg'))">
+    <meta property="og:image" content="@yield('og_image', asset('images/og-image.png'))">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
@@ -25,6 +25,15 @@
     <meta property="twitter:title" content="@yield('og_title', 'Brillio - Ton avenir, ton choix')">
     <meta property="twitter:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
+    <script>
+   taLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PPX01GY0R9');
+    </script>
 
     <title>@yield('title', 'Brillio - Plateforme de Mentorat en Afrique')</title>
 
@@ -84,7 +93,7 @@
                             700: '#c2410c',
                             800: '#9a3412',
                             900: '#7c2d12',
-                        }
+                    }
                     },
                     fontFamily: {
                         sans: ['Poppins', 'sans-serif'],
@@ -171,40 +180,104 @@
     </style>
 
     <!-- JSON-LD Structured Data for SEO -->
+    {{-- Organization Schema --}}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Brillio",
+        "legalName": "Brillio Africa",
         "description": "Plateforme de mentorat connectant jeunes talents et mentors expérimentés en Afrique pour l'orientation professionnelle et le développement de carrière",
         "url": "https://brillio.africa",
         "logo": "{{ asset('android-chrome-512x512.png') }}",
-       "sameAs": [
-            "https://www.facebook.com/brillioafrica",
-            "https://www.linkedin.com/company/brillioafrica",
-            "https://twitter.com/brillioafrica"
+        "foundingDate": "2026-01-19",
+        "sameAs": [
+            "https://www.facebook.com/share/1E5k4UqPqB",
+            "https://www.instagram.com/brillioafrica/",
+            "https://www.linkedin.com/company/brillio-africa",
+            "https://www.threads.com/@brillioafrica",
+            "https://www.tiktok.com/@brillioafrica",
+            "https://www.youtube.com/channel/UCGUzyoVoVLXzNGxhRN8tXCg"
         ],
         "contactPoint": {
             "@type": "ContactPoint",
             "contactType": "Customer Service",
-            "email": "contact@brillio.africa"
+            "email": "contact@brillio.africa",
+            "telephone": "+229 01 66 30 17 36",
+            "areaServed": ["DZ", "AO", "BJ", "BW", "BF", "BI", "CM", "CV", "CF", "TD", "KM", "CG", "CD", "CI", "DJ", "EG", "GQ", "ER", "SZ", "ET", "GA", "GM", "GH", "GN", "GW", "KE", "LS", "LR", "LY", "MG", "MW", "ML", "MR", "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN", "SC", "SL", "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "EH", "ZM", "ZW"],
+            "availableLanguage": ["French", "English"]
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cotonou",
+            "addressRegion": "Littoral",
+            "addressCountry": "BJ"
         }
     }
     </script>
 
+    {{-- WebSite Schema with Search Action --}}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Brillio",
+        "alternateName": "Brillio Africa",
         "url": "https://brillio.africa",
+        "description": "Plateforme de mentorat professionnel en Afrique - Orientation carrière et développement personnel",
         "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://brillio.africa/mentors?q={search_term_string}",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://brillio.africa/search?q={search_term_string}"
+            },
             "query-input": "required name=search_term_string"
-        }
+        },
+        "inLanguage": ["fr", "en"]
     }
     </script>
+
+    {{-- Service/Product Schema --}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Mentorat Professionnel Brillio",
+        "description": "Service de mentorat professionnel connectant jeunes talents avec experts pour orientation carrière et développement personnel en Afrique",
+        "provider": {
+            "@type": "Organization",
+            "name": "Brillio"
+        },
+        "serviceType": "Career Mentoring and Professional Guidance",
+        "areaServed": {
+            "@type": "GeoCircle",
+            "geoMidpoint": {
+                "@type": "GeoCoordinates",
+                "latitude": "6.3703",
+                "longitude": "2.3912"
+            },
+            "geoRadius": "5000000"
+        },
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Young African Professionals and Students",
+            "geographicArea": {
+                "@type": "AdministrativeArea",
+                "name": "Africa"
+            }
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "XOF",
+            "availability": "https://schema.org/InStock",
+            "description": "Accès gratuit à la plateforme de mentorat"
+        },
+        "category": ["Career Counseling", "Professional Development", "Mentorship"]
+    }
+    </script>
+
+    @stack('schemas')
 
     @stack('styles')
 </head>
@@ -327,32 +400,54 @@
                     </p>
                     <!-- Social Links -->
                     <div class="flex space-x-4">
-                        <a href="#"
+                        <!-- Facebook -->
+                        <a href="https://www.facebook.com/share/1E5k4UqPqB" target="_blank" rel="noopener noreferrer"
                             class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary-600 transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path
-                                    d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                                    d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
                             </svg>
                         </a>
-                        <a href="#"
+                        <!-- Instagram -->
+                        <a href="https://www.instagram.com/brillioafrica/" target="_blank" rel="noopener noreferrer"
                             class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary-600 transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                             </svg>
                         </a>
-                        <a href="#"
+                        <!-- LinkedIn -->
+                        <a href="https://www.linkedin.com/company/brillio-africa" target="_blank"
+                            rel="noopener noreferrer"
                             class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary-600 transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                             </svg>
                         </a>
-                        <a href="#"
+                        <!-- Threads -->
+                        <a href="https://www.threads.com/@brillioafrica" target="_blank" rel="noopener noreferrer"
                             class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary-600 transition-colors">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path
-                                    d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                                    d="M12.186 3.995c-5.569 0-9.214 3.645-9.214 9.213 0 5.569 3.645 9.214 9.214 9.214 5.568 0 9.213-3.645 9.213-9.214 0-5.568-3.645-9.213-9.213-9.213zm3.439 12.417c-.448.448-1.048.672-1.797.672-.598 0-1.122-.149-1.572-.448a3.432 3.432 0 01-1.123-1.272 3.432 3.432 0 01-1.123 1.272c-.449.299-.973.448-1.572.448-.748 0-1.348-.224-1.797-.672-.448-.449-.672-1.048-.672-1.797 0-.598.149-1.123.448-1.572a3.432 3.432 0 011.272-1.123 3.432 3.432 0 01-1.272-1.123 3.08 3.08 0 01-.448-1.572c0-.748.224-1.348.672-1.797.449-.448 1.049-.672 1.797-.672.599 0 1.123.15 1.572.448a3.432 3.432 0 011.123 1.272 3.432 3.432 0 011.123-1.272c.449-.299.974-.448 1.572-.448.749 0 1.349.224 1.797.672.449.449.672 1.049.672 1.797 0 .599-.149 1.123-.448 1.572a3.432 3.432 0 01-1.272 1.123c.523.3.948.698 1.272 1.123.299.449.448.974.448 1.572 0 .749-.223 1.348-.672 1.797z" />
+                            </svg>
+                        </a>
+                        <!-- TikTok -->
+                        <a href="https://www.tiktok.com/@brillioafrica" target="_blank" rel="noopener noreferrer"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary-600 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
+                            </svg>
+                        </a>
+                        <!-- YouTube -->
+                        <a href="https://www.youtube.com/channel/UCGUzyoVoVLXzNGxhRN8tXCg" target="_blank"
+                            rel="noopener noreferrer"
+                            class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary-600 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                             </svg>
                         </a>
                     </div>

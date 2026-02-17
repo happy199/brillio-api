@@ -188,10 +188,21 @@ jobs:
             echo "# Jitsi (JAAS) Configuration" >> .env
             echo "JAAS_APP_ID=${{ secrets.JAAS_APP_ID }}" >> .env
             echo "JAAS_KEY_ID=${{ secrets.JAAS_KEY_ID }}" >> .env
-            # Handle multi-line private key if necessary, though simpler is often better for .env
-            echo "JAAS_PRIVATE_KEY=\"${{ secrets.JAAS_PRIVATE_KEY }}\"" >> .env
+            # Use printf with %s to safely handle multiline private key
+            printf 'JAAS_PRIVATE_KEY="%s"\n' '${{ secrets.JAAS_PRIVATE_KEY }}' >> .env
             
             echo "✅ Jitsi (JAAS) keys configured"
+
+            # Validate .env syntax before proceeding
+            echo "🔍 Validating .env syntax..."
+            if docker run --rm -v /opt/brillio-api/.env:/tmp/.env php:8.2-cli php -r 'parse_ini_file("/tmp/.env", false, INI_SCANNER_RAW);' 2>/dev/null; then
+                echo "✅ .env syntax is valid"
+            else
+                echo "❌ ERROR: .env syntax is INVALID! Deployment aborted."
+                echo "📋 Last 10 lines of .env for debugging:"
+                tail -10 .env
+                exit 1
+            fi
 
             # Pull latest image
             docker-compose pull app
