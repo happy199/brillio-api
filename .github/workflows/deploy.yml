@@ -134,6 +134,40 @@ jobs:
           echo "Scanning host: ${{ secrets.GCP_VM_IP }}"
           ssh-keyscan -H -t rsa,ed25519 ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts || true
 
+      - name: Check Permissions
+        run: |
+          ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} << 'ENDSSH'
+            echo "🔍 Checking write permissions on target..."
+            TARGET="/opt/brillio-api"
+            
+            if [ -d "$TARGET" ]; then
+                # Check main directory
+                if [ ! -w "$TARGET" ]; then
+                    echo "❌ CRTICAL: $TARGET is not writable by current user ($(whoami))."
+                    exit 1
+                fi
+                
+                # Check problematic subdirectories if they exist
+                for SUBDIR in public/build storage bootstrap/cache; do
+                    FULLPATH="$TARGET/$SUBDIR"
+                    if [ -d "$FULLPATH" ]; then
+                        # Try to touch a temporary file to verify true write access (handles ownership issues better than -w sometimes)
+                        if ! touch "$FULLPATH/.perm_test" 2>/dev/null; then
+                            echo "❌ CRITICAL: Cannot write to $FULLPATH. Likely owned by root."
+                            ls -ld "$FULLPATH"
+                            exit 1
+                        else
+                            rm "$FULLPATH/.perm_test"
+                        fi
+                    fi
+                done
+                
+                echo "✅ Permissions OK."
+            else
+                 echo "⚠️ Target directory $TARGET does not exist yet. Skipping check."
+            fi
+          ENDSSH
+
       - name: Copy docker-compose and config files
         run: |
           rsync -avz --delete --no-owner --no-group --no-perms --no-times \
