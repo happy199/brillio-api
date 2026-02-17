@@ -72,10 +72,15 @@ class JitsiService
         ];
 
         try {
-            return JWT::encode($payload, $this->privateKey, 'RS256', null, $headers);
+            Log::info("Jitsi JWT: Attempting to encode with key length: " . strlen($this->privateKey));
+            $token = JWT::encode($payload, $this->privateKey, 'RS256', null, $headers);
+            Log::info("Jitsi JWT: Successfully generated token of length: " . strlen($token));
+            return $token;
         }
         catch (\Exception $e) {
             Log::error("Jitsi JWT Generation Error: " . $e->getMessage());
+            Log::error("Jitsi JWT Error Class: " . get_class($e));
+            Log::error("Jitsi JWT Key starts with: " . substr($this->privateKey, 0, 50));
             return null;
         }
     }
