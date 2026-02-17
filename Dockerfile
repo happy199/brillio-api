@@ -10,6 +10,8 @@ RUN chmod +x /usr/local/bin/install-php-extensions && \
 RUN apk add --no-cache \
     git \
     curl \
+    nodejs \
+    npm \
     libpng-dev \
     libzip-dev \
     zip \
@@ -32,6 +34,9 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
 # Copy application code
 COPY . .
+
+# Install Node dependencies and build assets
+RUN npm ci && npm run build
 
 # Generate optimized autoload files
 RUN composer dump-autoload --optimize
