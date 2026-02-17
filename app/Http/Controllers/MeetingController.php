@@ -23,7 +23,17 @@ class MeetingController extends Controller
      */
     public function show($meetingId)
     {
-        $user = Auth::user();
+        Log::info("MeetingController: Request for meeting ID: " . $meetingId);
+        
+        try {
+            $user = Auth::user();
+            Log::info("MeetingController: User ID: " . ($user ? $user->id : 'NULL'));
+
+            if (!$user) {
+                Log::error("MeetingController: Unexpected NULL user in auth protected route");
+                abort(403, 'User not authenticated');
+            }
+
 
         // 3. Reconstituer le lien ou chercher via room name
         // On suppose que meeting_link = https://meet.jit.si/$meetingId
