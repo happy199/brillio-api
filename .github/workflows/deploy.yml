@@ -195,6 +195,13 @@ jobs:
             
             echo "✅ Jitsi (JAAS) keys configured"
 
+            # Deploy JAAS private key as separate PEM file
+            echo "🔐 Deploying JAAS private key file..."
+            echo '${{ secrets.JAAS_PRIVATE_KEY }}' | sudo tee storage/jaas_private.pem > /dev/null
+            sudo chmod 600 storage/jaas_private.pem
+            sudo chown www-data:www-data storage/jaas_private.pem
+            echo "✅ JAAS private key file deployed: storage/jaas_private.pem"
+
             # Validate .env syntax before proceeding
             echo "🔍 Validating .env syntax..."
             if docker run --rm -v /opt/brillio-api/.env:/tmp/.env php:8.2-cli php -r 'parse_ini_file("/tmp/.env", false, INI_SCANNER_RAW);' 2>/dev/null; then
