@@ -17,7 +17,7 @@
     <meta property="og:title" content="@yield('og_title', 'Brillio - Ton avenir, ton choix')">
     <meta property="og:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
-    <meta property="og:image" content="@yield('og_image', asset('images/og-image.jpg'))">
+    <meta property="og:image" content="@yield('og_image', asset('images/og-image.png'))">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
@@ -25,6 +25,15 @@
     <meta property="twitter:title" content="@yield('og_title', 'Brillio - Ton avenir, ton choix')">
     <meta property="twitter:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
+    <script>
+   taLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PPX01GY0R9');
+    </script>
 
     <title>@yield('title', 'Brillio - Plateforme de Mentorat en Afrique')</title>
 
@@ -84,7 +93,7 @@
                             700: '#c2410c',
                             800: '#9a3412',
                             900: '#7c2d12',
-                        }
+                    }
                     },
                     fontFamily: {
                         sans: ['Poppins', 'sans-serif'],
@@ -171,15 +180,18 @@
     </style>
 
     <!-- JSON-LD Structured Data for SEO -->
+    {{-- Organization Schema --}}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "Brillio",
+        "legalName": "Brillio Africa",
         "description": "Plateforme de mentorat connectant jeunes talents et mentors expérimentés en Afrique pour l'orientation professionnelle et le développement de carrière",
         "url": "https://brillio.africa",
         "logo": "{{ asset('android-chrome-512x512.png') }}",
-       "sameAs": [
+        "foundingDate": "2026-01-19",
+        "sameAs": [
             "https://www.facebook.com/share/1E5k4UqPqB",
             "https://www.instagram.com/brillioafrica/",
             "https://www.linkedin.com/company/brillio-africa",
@@ -190,24 +202,82 @@
         "contactPoint": {
             "@type": "ContactPoint",
             "contactType": "Customer Service",
-            "email": "contact@brillio.africa"
+            "email": "contact@brillio.africa",
+            "telephone": "+229 01 66 30 17 36",
+            "areaServed": ["DZ", "AO", "BJ", "BW", "BF", "BI", "CM", "CV", "CF", "TD", "KM", "CG", "CD", "CI", "DJ", "EG", "GQ", "ER", "SZ", "ET", "GA", "GM", "GH", "GN", "GW", "KE", "LS", "LR", "LY", "MG", "MW", "ML", "MR", "MU", "MA", "MZ", "NA", "NE", "NG", "RW", "ST", "SN", "SC", "SL", "SO", "ZA", "SS", "SD", "TZ", "TG", "TN", "UG", "EH", "ZM", "ZW"],
+            "availableLanguage": ["French", "English"]
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cotonou",
+            "addressRegion": "Littoral",
+            "addressCountry": "BJ"
         }
     }
     </script>
 
+    {{-- WebSite Schema with Search Action --}}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Brillio",
+        "alternateName": "Brillio Africa",
         "url": "https://brillio.africa",
+        "description": "Plateforme de mentorat professionnel en Afrique - Orientation carrière et développement personnel",
         "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://brillio.africa/mentors?q={search_term_string}",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://brillio.africa/search?q={search_term_string}"
+            },
             "query-input": "required name=search_term_string"
-        }
+        },
+        "inLanguage": ["fr", "en"]
     }
     </script>
+
+    {{-- Service/Product Schema --}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Mentorat Professionnel Brillio",
+        "description": "Service de mentorat professionnel connectant jeunes talents avec experts pour orientation carrière et développement personnel en Afrique",
+        "provider": {
+            "@type": "Organization",
+            "name": "Brillio"
+        },
+        "serviceType": "Career Mentoring and Professional Guidance",
+        "areaServed": {
+            "@type": "GeoCircle",
+            "geoMidpoint": {
+                "@type": "GeoCoordinates",
+                "latitude": "6.3703",
+                "longitude": "2.3912"
+            },
+            "geoRadius": "5000000"
+        },
+        "audience": {
+            "@type": "Audience",
+            "audienceType": "Young African Professionals and Students",
+            "geographicArea": {
+                "@type": "AdministrativeArea",
+                "name": "Africa"
+            }
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "XOF",
+            "availability": "https://schema.org/InStock",
+            "description": "Accès gratuit à la plateforme de mentorat"
+        },
+        "category": ["Career Counseling", "Professional Development", "Mentorship"]
+    }
+    </script>
+
+    @stack('schemas')
 
     @stack('styles')
 </head>

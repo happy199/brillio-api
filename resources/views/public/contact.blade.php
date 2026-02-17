@@ -1,8 +1,8 @@
 @extends('layouts.public')
 
-@section('title', 'Contact - Brillio | Contactez-nous')
-@section('meta_description', 'Contactez l\'équipe Brillio pour toute question, suggestion ou partenariat. Nous sommes là
-pour vous aider.')
+{{-- SEO Meta Tags --}}
+<x-seo-meta page="contact" />
+
 
 @section('content')
 <!-- Hero Section -->
