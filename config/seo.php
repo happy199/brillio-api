@@ -65,6 +65,7 @@ return [
             'keywords' => 'mentorat professionnel afrique, plateforme mentorat, orientation carrière jeunes africains, coaching professionnel, mentor bénin, MBTI afrique, développement carrière',
             'og_title' => 'Brillio - Plateforme de Mentorat #1 en Afrique',
             'og_description' => 'Trouve ton mentor expert parmi +500 professionnels. Développement web, business, médecine, ingénierie. Gratuit pour les jeunes.',
+            'og_image' => '/images/og-image.png',
             'schema_type' => 'WebSite',
         ],
 
@@ -74,6 +75,7 @@ return [
             'keywords' => 'trouver mentor afrique, mentors experts, coaching professionnel, orientation carrière, find mentor africa, professional guidance',
             'og_title' => 'Trouvez Votre Mentor Parmi +500 Experts Africains',
             'og_description' => 'Connectez avec des professionnels expérimentés dans votre domaine. Gratuit et accessible à tous les jeunes.',
+            'og_image' => '/images/og-image.png',
         ],
 
         'contact' => [
@@ -82,6 +84,7 @@ return [
             'keywords' => 'contact brillio, support mentorat, partenariat afrique, brillio cotonou, contact mentor afrique',
             'og_title' => 'Contactez Brillio - Support & Partenariats',
             'og_description' => 'Questions, partenariats, support technique. Notre équipe à Cotonou répond à toutes vos demandes.',
+            'og_image' => '/images/og-image.png',
         ],
 
         'about' => [
@@ -89,19 +92,31 @@ return [
             'description' => 'Brillio est la plateforme de mentorat professionnelle qui connecte jeunes talents et experts en Afrique. Notre mission : démocratiser l\'accès à l\'orientation de carrière.',
             'keywords' => 'à propos brillio, mission mentorat afrique, vision brillio, impact jeunes africains, plateforme orientation',
             'og_title' => 'Notre Mission : Démocratiser le Mentorat en Afrique',
-            'og_description' => 'Depuis 2024, nous connectons des milliers de jeunes avec des mentors experts pour construire l\'avenir de l\'Afrique.',
+            'og_description' => 'Depuis janvier 2026, nous connectons des milliers de jeunes avec des mentors experts pour construire l\'avenir de l\'Afrique.',
+            'og_image' => '/images/og-image.png',
         ],
 
         'privacy' => [
             'title' => 'Politique de Confidentialité | Brillio - Protection des Données',
             'description' => 'Politique de confidentialité et protection des données personnelles sur Brillio. Conformité RGPD et transparence totale sur l\'utilisation de vos informations.',
             'keywords' => 'politique confidentialité, protection données, RGPD brillio, privacy policy africa',
+            'og_image' => '/images/og-image.png',
         ],
 
         'terms' => [
             'title' => 'Conditions d\'Utilisation | Brillio - Règles & Engagement',
             'description' => 'Conditions générales d\'utilisation de la plateforme Brillio. Droits, devoirs et engagement pour une communauté de mentorat respectueuse et professionnelle.',
             'keywords' => 'conditions utilisation, CGU brillio, règles plateforme, terms of service',
+            'og_image' => '/images/og-image.png',
+        ],
+
+        'login' => [
+            'title' => 'Connexion | Brillio - Accédez à Votre Espace',
+            'description' => 'Connectez-vous à Brillio pour accéder à votre espace personnel, échanger avec des mentors, consulter vos sessions et continuer votre parcours professionnel.',
+            'keywords' => 'connexion brillio, login, se connecter, espace personnel, authentification',
+            'og_title' => 'Connectez-vous à Brillio',
+            'og_description' => 'Accédez à votre espace pour continuer votre parcours avec +500 mentors africains.',
+            'og_image' => '/images/og-image.png',
         ],
     ],
 

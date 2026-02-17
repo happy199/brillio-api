@@ -17,7 +17,7 @@
     <meta property="og:title" content="@yield('og_title', 'Brillio - Ton avenir, ton choix')">
     <meta property="og:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
-    <meta property="og:image" content="@yield('og_image', asset('images/og-image.jpg'))">
+    <meta property="og:image" content="@yield('og_image', asset('images/og-image.png'))">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
@@ -25,6 +25,15 @@
     <meta property="twitter:title" content="@yield('og_title', 'Brillio - Ton avenir, ton choix')">
     <meta property="twitter:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
+    <script>
+   taLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PPX01GY0R9');
+    </script>
 
     <title>@yield('title', 'Brillio - Plateforme de Mentorat en Afrique')</title>
 
@@ -84,7 +93,7 @@
                             700: '#c2410c',
                             800: '#9a3412',
                             900: '#7c2d12',
-                        }
+                    }
                     },
                     fontFamily: {
                         sans: ['Poppins', 'sans-serif'],

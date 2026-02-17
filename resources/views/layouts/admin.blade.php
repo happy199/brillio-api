@@ -8,6 +8,15 @@
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title', 'Dashboard') - Brillio Admin</title>
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-PPX01GY0R9');
+    </script>
+
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
@@ -155,7 +164,7 @@
                 </a>
 
                 @php
-                    $pendingSpecializations = \App\Models\Specialization::where('status', 'pending')->count();
+                $pendingSpecializations = \App\Models\Specialization::where('status', 'pending')->count();
                 @endphp
                 <a href="{{ route('admin.specializations.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.specializations.*') ? 'bg-indigo-800' : '' }}">
@@ -169,9 +178,9 @@
                             Domaines d'expertise
                         </span>
                         @if($pendingSpecializations > 0)
-                            <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                {{ $pendingSpecializations }}
-                            </span>
+                        <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            {{ $pendingSpecializations }}
+                        </span>
                         @endif
                     </span>
                 </a>
@@ -188,7 +197,7 @@
                 </a>
 
                 @php
-                    $newMessages = \App\Models\ContactMessage::where('status', 'new')->count();
+                $newMessages = \App\Models\ContactMessage::where('status', 'new')->count();
                 @endphp
                 <a href="{{ route('admin.contact-messages.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.contact-messages.*') ? 'bg-indigo-800' : '' }}">
@@ -202,9 +211,9 @@
                             Messages de contact
                         </span>
                         @if($newMessages > 0)
-                            <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                {{ $newMessages }}
-                            </span>
+                        <span class="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            {{ $newMessages }}
+                        </span>
                         @endif
                     </span>
                 </a>
@@ -222,9 +231,9 @@
                 </a>
 
                 @php
-                    $pendingSupportCount = \App\Models\ChatConversation::where('needs_human_support', true)
-                        ->where('human_support_active', false)
-                        ->count();
+                $pendingSupportCount = \App\Models\ChatConversation::where('needs_human_support', true)
+                ->where('human_support_active', false)
+                ->count();
                 @endphp
                 <a href="{{ route('admin.chat.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.chat.*') ? 'bg-indigo-800' : '' }}">
@@ -238,9 +247,9 @@
                             Chat
                         </span>
                         @if($pendingSupportCount > 0)
-                            <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                                {{ $pendingSupportCount }}
-                            </span>
+                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                            {{ $pendingSupportCount }}
+                        </span>
                         @endif
                     </span>
                 </a>
@@ -282,21 +291,21 @@
             <main class="flex-1 p-6">
                 <!-- Flash messages -->
                 @if(session('success'))
-                    <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                        {{ session('success') }}
-                    </div>
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    {{ session('success') }}
+                </div>
                 @endif
 
                 @if(session('error'))
-                    <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        {{ session('error') }}
-                    </div>
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {{ session('error') }}
+                </div>
                 @endif
 
                 @if(session('warning'))
-                    <div class="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-                        {{ session('warning') }}
-                    </div>
+                <div class="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                    {{ session('warning') }}
+                </div>
                 @endif
 
                 @yield('content')

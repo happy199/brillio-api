@@ -597,6 +597,153 @@
         </div>
     </section>
 
+    <!-- Active Mentorship Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <!-- Left: Content -->
+                    <div data-aos="fade-right">
+                        <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">
+                            Mentorat Actif
+                        </span>
+                        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4 mb-6">
+                            Un accompagnement personnalisé avec des professionnels africains
+                        </h2>
+                        <p class="text-lg text-gray-600 mb-8">
+                            Ne te contente pas de lire des parcours : échange directement avec des mentors
+                            qui comprennent ton contexte et peuvent t'aider concrètement à atteindre tes objectifs.
+                        </p>
+
+                        <!-- Features list -->
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-4">
+                                <div
+                                    class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Réservation simple</h4>
+                                    <p class="text-gray-600 text-sm">
+                                        Choisis ton mentor, consulte ses disponibilités et réserve une session en
+                                        quelques clics.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4">
+                                <div
+                                    class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-secondary-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Visioconférence intégrée</h4>
+                                    <p class="text-gray-600 text-sm">
+                                        Rejoins tes sessions directement depuis l'application, pas besoin d'outils
+                                        externes.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4">
+                                <div
+                                    class="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-accent-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900 mb-1">Suivi de progression</h4>
+                                    <p class="text-gray-600 text-sm">
+                                        Garde une trace de tes sessions, objectifs et conseils reçus pour mesurer ton
+                                        évolution.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('auth.choice') }}"
+                            class="inline-flex items-center mt-8 px-6 py-3 bg-primary-600 text-white font-semibold rounded-full hover:bg-primary-700 transition-all duration-300">
+                            Rejoindre Brillio
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Right: Visual -->
+                    <div data-aos="fade-left">
+                        <div class="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-3xl p-8">
+                            <!-- Illustration mentorat -->
+                            <div class="text-center space-y-6">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <!-- Session card preview -->
+                                    <div class="bg-white rounded-xl p-4 shadow-sm text-left">
+                                        <div
+                                            class="w-12 h-12 bg-primary-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm font-semibold text-gray-700 mb-1">Session prévue</p>
+                                        <p class="text-xs text-gray-500">Vendredi 14h00</p>
+                                        <div class="mt-2 flex items-center gap-1">
+                                            <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                            <span class="text-xs text-gray-600">Dr. Koffi</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white rounded-xl p-4 shadow-sm text-left">
+                                        <div
+                                            class="w-12 h-12 bg-green-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm font-semibold text-gray-700 mb-1">Complétées</p>
+                                        <p class="text-2xl font-bold text-gray-900">3</p>
+                                        <p class="text-xs text-gray-500">sessions</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-xl p-4 shadow-sm">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-sm font-semibold text-gray-700">Ta progression</span>
+                                        <span class="text-sm text-primary-600 font-semibold">75%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full"
+                                            style="width: 75%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                    <p class="text-sm font-medium text-gray-700">+500 mentors actifs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- How it Works Section -->
     <section class="py-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
