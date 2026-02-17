@@ -193,6 +193,17 @@ jobs:
             
             echo "✅ Jitsi (JAAS) keys configured"
 
+            # Validate .env syntax before proceeding
+            echo "🔍 Validating .env syntax..."
+            if docker run --rm -v /opt/brillio-api/.env:/tmp/.env php:8.2-cli php -r 'parse_ini_file("/tmp/.env", false, INI_SCANNER_RAW);' 2>/dev/null; then
+                echo "✅ .env syntax is valid"
+            else
+                echo "❌ ERROR: .env syntax is INVALID! Deployment aborted."
+                echo "📋 Last 10 lines of .env for debugging:"
+                tail -10 .env
+                exit 1
+            fi
+
             # Pull latest image
             docker-compose pull app
             
