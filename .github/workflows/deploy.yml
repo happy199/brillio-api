@@ -183,13 +183,15 @@ jobs:
             # Remove any existing JAAS config
             sed -i '/^JAAS_/d' .env
             
+            # Decode base64 JAAS_PRIVATE_KEY and escape newlines for .env
+            JAAS_KEY=$(echo '${{ secrets.JAAS_PRIVATE_KEY }}' | base64 -d | awk '{printf "%s\\n", $0}' | sed '$ s/\\n$//')
+            
             # Add JAAS config from secrets
             echo "" >> .env
             echo "# Jitsi (JAAS) Configuration" >> .env
             echo "JAAS_APP_ID=${{ secrets.JAAS_APP_ID }}" >> .env
             echo "JAAS_KEY_ID=${{ secrets.JAAS_KEY_ID }}" >> .env
-            # Use printf with %s to safely handle multiline private key
-            printf 'JAAS_PRIVATE_KEY="%s"\n' '${{ secrets.JAAS_PRIVATE_KEY }}' >> .env
+            echo "JAAS_PRIVATE_KEY=\"$JAAS_KEY\"" >> .env
             
             echo "✅ Jitsi (JAAS) keys configured"
 
