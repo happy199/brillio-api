@@ -26,10 +26,9 @@ class MentorshipNotificationService
         $mentor = $mentorship->mentor;
         $mentee = $mentorship->mentee;
 
-        $acceptUrl = route('mentor.mentorship.accept', ['mentorship' => $mentorship->id]);
-        $refuseUrl = route('mentor.mentorship.refuse', ['mentorship' => $mentorship->id]);
+        $requestsUrl = route('mentor.mentorship.requests');
 
-        Mail::to($mentor->email)->send(new MentorshipRequested($mentorship, $mentor, $mentee, $acceptUrl, $refuseUrl));
+        Mail::to($mentor->email)->send(new MentorshipRequested($mentorship, $mentor, $mentee, $requestsUrl, $requestsUrl));
     }
 
     /**

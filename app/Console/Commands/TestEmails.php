@@ -145,10 +145,9 @@ class TestEmails extends Command
             'status' => 'pending',
         ]);
 
-        $acceptUrl = route('mentor.mentorship.accept', ['mentorship' => 1]);
-        $refuseUrl = route('mentor.mentorship.refuse', ['mentorship' => 1]);
+        $requestsUrl = route('mentor.mentorship.requests');
 
-        Mail::to($recipient)->send(new MentorshipRequested($mentorship, $mentor, $mentee, $acceptUrl, $refuseUrl));
+        Mail::to($recipient)->send(new MentorshipRequested($mentorship, $mentor, $mentee, $requestsUrl, $requestsUrl));
     }
 
     private function testMentorshipAccepted($recipient)
@@ -218,8 +217,8 @@ class TestEmails extends Command
         $creditPrice = SystemSetting::getValue('credit_price_jeune', 50);
         $menteeCredits = (int)floor(7500 / $creditPrice); // 7500 FCFA = 150 crédits si 1 crédit = 50 FCFA
 
-        $acceptUrl = url('/jeune/sessions/' . ($session->id ?? 1) . '/accept');
-        $refuseUrl = url('/jeune/sessions/' . ($session->id ?? 1) . '/refuse');
+        $acceptUrl = route('jeune.sessions.show', ['session' => $session->id ?? 1]);
+        $refuseUrl = route('jeune.sessions.show', ['session' => $session->id ?? 1]);
 
         Mail::to($recipient)->send(new SessionProposed(
             $session,
@@ -407,7 +406,9 @@ class TestEmails extends Command
                     'current_company' => 'Brillio Corp',
                     'years_of_experience' => 10,
                     'specialization' => 'tech',
-                    'specializationModel' => (object)['name' => 'Technologie & IT']
+                    'specializationModel' => (object)['name' => 'Technologie & IT'],
+                    'public_slug' => 'dr-ousmane-sow-f2abccfe',
+                    'getRouteKeyName' => 'public_slug' // Mocking property for consistency if needed, though route helper usually checks method
                 ]);
             }
         }

@@ -27,12 +27,8 @@
     <tr>
         <td align="center">
             <a href="{{ $acceptUrl }}"
-                style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">
-                ✓ Accepter
-            </a>
-            <a href="{{ $refuseUrl }}"
-                style="display: inline-block; background-color: #f3f4f6; color: #6b7280; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
-                Refuser
+                style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+                🔍 Consulter la demande
             </a>
         </td>
     </tr>

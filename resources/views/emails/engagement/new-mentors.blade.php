@@ -14,26 +14,28 @@
         🌟 Les nouveaux visages</h3>
 
     @foreach($mentors as $mentor)
-    <div
-        style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center;">
-        <div style="flex-grow: 1;">
-            <p style="margin: 0 0 5px; font-weight: 700; color: #334155; font-size: 17px;">{{ $mentor->name }}</p>
-            <p style="margin: 0 0 5px; color: #64748b; font-size: 14px;">
-                <strong>{{ $mentor->mentorProfile->current_position }}</strong> @ {{
-                $mentor->mentorProfile->current_company }}
-            </p>
-            <p style="margin: 0; color: #6366f1; font-size: 13px; font-weight: 600;">
-                🎯 Expert en {{ $mentor->mentorProfile->specializationModel->name ??
-                $mentor->mentorProfile->specialization }}
-            </p>
-        </div>
-        <div style="margin-left: 15px;">
-            <a href="{{ route('jeune.mentors.show', ['mentor' => $mentor->id]) }}"
-                style="background: #ffffff; color: #6366f1; border: 1px solid #6366f1; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600;">
-                Voir profil
-            </a>
-        </div>
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0"
+        style="margin-bottom: 25px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px;">
+        <tr>
+            <td style="vertical-align: middle;">
+                <p style="margin: 0 0 5px; font-weight: 700; color: #334155; font-size: 17px;">{{ $mentor->name }}</p>
+                <p style="margin: 0 0 5px; color: #64748b; font-size: 14px;">
+                    <strong>{{ $mentor->mentorProfile->current_position }}</strong> @ {{
+                    $mentor->mentorProfile->current_company }}
+                </p>
+                <p style="margin: 0; color: #6366f1; font-size: 13px; font-weight: 600;">
+                    🎯 Expert en {{ $mentor->mentorProfile->specializationModel->name ??
+                    $mentor->mentorProfile->specialization }}
+                </p>
+            </td>
+            <td style="vertical-align: middle; text-align: right; width: 120px;">
+                <a href="{{ route('jeune.mentors.show', ['mentor' => $mentor->mentorProfile]) }}"
+                    style="display: inline-block; background-color: #ffffff; color: #6366f1; border: 1px solid #6366f1; padding: 10px 16px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; white-space: nowrap;">
+                    Voir profil
+                </a>
+            </td>
+        </tr>
+    </table>
     @endforeach
 </div>
 

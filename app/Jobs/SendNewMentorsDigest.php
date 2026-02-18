@@ -29,8 +29,14 @@ class SendNewMentorsDigest implements ShouldQueue
             ->with(['mentorProfile.specializationModel'])
             ->get();
 
-        if ($newMentors->isEmpty()) {
+        // Check for at least 3 mentors
+        if ($newMentors->count() < 3) {
             return;
+        }
+
+        // Limit to maximum 10 mentors
+        if ($newMentors->count() > 10) {
+            $newMentors = $newMentors->take(10);
         }
 
         // 2. Récupérer tous les jeunes actifs

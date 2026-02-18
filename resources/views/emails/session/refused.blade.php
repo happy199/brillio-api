@@ -29,9 +29,9 @@
 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
     <tr>
         <td align="center">
-            <a href="{{ route('jeune.sessions.create', ['mentor' => $mentor->id]) }}"
+            <a href="{{ route('jeune.sessions.index') }}"
                 style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
-                📅 Proposer un autre créneau
+                📅 Voir mes séances
             </a>
         </td>
     </tr>
