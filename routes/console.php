@@ -19,6 +19,11 @@ Schedule::job(new \App\Jobs\SendNewMentorsDigest())
     ->at('16:00')
     ->timezone('Africa/Abidjan');
 
+// Mentor report reminders (escrow release): daily at 10 AM
+Schedule::job(new \App\Jobs\SendMentorReportReminders())
+    ->dailyAt('10:00')
+    ->timezone('Africa/Abidjan');
+
 // Synchroniser les questions de personnalité tous les trimestres (1er jour de chaque trimestre à 2h du matin)
 Schedule::command('personality:sync-questions')
     ->quarterly()
