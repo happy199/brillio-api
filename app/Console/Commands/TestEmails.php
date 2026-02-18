@@ -16,6 +16,7 @@ use App\Mail\Engagement\NewMentorsWeekly;
 use App\Mail\Wallet\CreditRecharged;
 use App\Mail\Wallet\SessionPaid;
 use App\Mail\Wallet\PaymentReceived;
+use App\Mail\Wallet\IncomeReleased;
 use App\Mail\Wallet\PayoutRequested;
 use App\Mail\Wallet\PayoutProcessed;
 use App\Models\Mentorship;
@@ -69,9 +70,10 @@ class TestEmails extends Command
                 'payment-received',
                 'payout-requested',
                 'payout-processed',
+                'income-released',
                 'all'
             ],
-                16
+                17
             );
         }
 
@@ -123,6 +125,9 @@ class TestEmails extends Command
             case 'payout-processed':
                 $this->testPayoutProcessed($recipient);
                 break;
+            case 'income-released':
+                $this->testIncomeReleased($recipient);
+                break;
             case 'all':
                 $this->testMentorshipRequest($recipient);
                 $this->testMentorshipAccepted($recipient);
@@ -140,6 +145,7 @@ class TestEmails extends Command
                 $this->testPaymentReceived($recipient);
                 $this->testPayoutRequested($recipient);
                 $this->testPayoutProcessed($recipient);
+                $this->testIncomeReleased($recipient);
                 break;
             default:
                 $this->error("Email type inconnu : {$emailType}");
@@ -528,5 +534,16 @@ class TestEmails extends Command
         ]);
         $payoutFail->setRelation('mentorProfile', $mentorProfile);
         Mail::to($recipient)->send(new PayoutProcessed($payoutFail));
+    }
+
+    private function testIncomeReleased($recipient)
+    {
+        $this->line('🎉 Envoi Income Released...');
+        $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
+        $session = new MentoringSession([
+            'title' => 'Session de coaching Tech',
+            'scheduled_at' => now()->subDay(),
+        ]);
+        Mail::to($recipient)->send(new IncomeReleased($mentor, $session, 45));
     }
 }

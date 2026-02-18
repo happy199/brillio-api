@@ -140,7 +140,7 @@ class SessionController extends Controller
      * Annuler une séance
      */
     /**
-     * Annuler une séance (Logic Smart Cancellation)
+     * Annuler une séance (Logic Smart Cancellation with Refund Rules)
      */
     public function cancel(Request $request, MentoringSession $session)
     {
@@ -154,19 +154,30 @@ class SessionController extends Controller
             'cancel_reason' => 'required|string|max:500',
         ]);
 
-        // 1. Update Pivot for THIS user
+        $walletService = app(\App\Services\WalletService::class);
+
+        // 1. Refund Logic
+        if ($session->is_paid) {
+            $hoursToSession = now()->diffInHours($session->scheduled_at, false);
+
+            // If session is more than 24h away -> 100% refund. Otherwise 75%.
+            $refundRatio = ($hoursToSession >= 24) ? 1.0 : 0.75;
+
+            $walletService->refundJeune($session, $user, $refundRatio);
+        }
+
+        // 2. Update Pivot for THIS user
         $session->mentees()->updateExistingPivot($user->id, [
             'status' => 'cancelled',
             'rejection_reason' => $request->cancel_reason
         ]);
 
-        // 2. Check if ANY active mentees remain
-        // We count how many are NOT cancelled/rejected
+        // 3. Check if ANY active mentees remain
         $activeMenteesCount = $session->mentees()
             ->wherePivotNotIn('status', ['cancelled', 'rejected'])
             ->count();
 
-        // 3. If NO active mentees left, cancel the global session
+        // 4. If NO active mentees left, cancel the global session
         if ($activeMenteesCount === 0) {
             $session->update([
                 'status' => 'cancelled',
@@ -174,12 +185,13 @@ class SessionController extends Controller
             ]);
         }
 
-        // Notification email d'annulation (au mentor et aux éventuels autres participants)
+        // Notification email d'annulation
         app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, $user);
 
         return redirect()->route('jeune.sessions.index')
-            ->with('success', 'Votre participation à la séance a été annulée.');
+            ->with('success', 'Votre participation à la séance a été annulée. ' . ($session->is_paid ? 'Votre remboursement a été traité.' : ''));
     }
+
     /**
      * Payer et Rejoindre une séance
      */
@@ -201,22 +213,16 @@ class SessionController extends Controller
         }
 
         // 3. Conversion & Vérif Solde
-        // Le prix de la session est en FCFA, on le convertit en Crédits
         $price = $session->credit_cost;
-        $balance = \App\Models\WalletTransaction::where('user_id', $user->id)->sum('amount');
+        $balance = $user->credits_balance;
 
         if ($balance < $price) {
             return redirect()->route('jeune.wallet.index')
                 ->with('error', "Solde insuffisant ($balance crédits dispos). Il vous manque " . ($price - $balance) . " crédits pour cette séance.");
         }
 
-        // 4. Calculate Commission
-        $commissionPercent = \App\Models\SystemSetting::where('key', 'mentorship_commission_percent')->value('value') ?? 10;
-        $commissionAmount = floor($price * ($commissionPercent / 100));
-        $mentorAmount = floor($price - $commissionAmount);
-
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($user, $session, $price, $mentorAmount, $commissionAmount, $commissionPercent) {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($user, $session, $price) {
                 $walletService = app(\App\Services\WalletService::class);
 
                 // Debit Jeune
@@ -224,37 +230,12 @@ class SessionController extends Controller
                     $user,
                     $price,
                     'expense',
-                    "Paiement séance : {$session->title}",
+                    "Paiement séance (Escrow) : {$session->title}",
                     $session
                 );
 
-                // Credit Mentor (Net)
-                // We need to fetch the mentor User model first
-                $mentor = \App\Models\User::find($session->mentor_id);
-                if ($mentor) {
-                    // NEW LOGIC: Convert Value to Mentor Credits
-                    // 1. Value in FCFA (from Jeune's payment)
-                    $jeuneCreditPrice = $walletService->getCreditPrice('jeune');
-                    $grossFcfa = $price * $jeuneCreditPrice;
-
-                    // 2. Commission
-                    $commissionFcfa = floor($grossFcfa * ($commissionPercent / 100));
-
-                    // 3. Net for Mentor
-                    $netFcfa = $grossFcfa - $commissionFcfa;
-
-                    // 4. Convert to Mentor Credits
-                    $mentorCreditPrice = $walletService->getCreditPrice('mentor');
-                    $mentorCredits = floor($netFcfa / $mentorCreditPrice);
-
-                    $walletService->addCredits(
-                        $mentor,
-                        $mentorCredits,
-                        'income',
-                        "Rémunération séance : {$session->title} (-{$commissionPercent}% com.)",
-                        $session
-                    );
-                }
+                // NOTE: We no longer credit the mentor immediately.
+                // The payout is triggered upon report submission in Mentor\SessionController.
 
                 // Update Session Status
                 $session->update(['status' => 'confirmed']);
@@ -264,13 +245,16 @@ class SessionController extends Controller
                 $notificationService = app(\App\Services\MentorshipNotificationService::class);
                 $notificationService->sendSessionConfirmed($session);
                 $notificationService->sendSessionPayment($session, $user, $price);
+
+                // Notify mentor that payment is received but PENDING (Escrow)
+                $mentor = $session->mentor;
                 if ($mentor) {
-                    $notificationService->sendPaymentReceived($session, $mentor, $mentorCredits);
+                    $notificationService->sendPaymentReceived($session, $mentor, $session->price);
                 }
             });
 
             return redirect()->route('meeting.show', $session->meeting_id)
-                ->with('success', 'Paiement effectué avec succès. Bon mentorat !');
+                ->with('success', 'Paiement effectué avec succès. Les fonds sont en attente et seront libérés au mentor après la séance.');
         }
         catch (\Exception $e) {
             return redirect()->back()->with('error', "Erreur lors du paiement : " . $e->getMessage());

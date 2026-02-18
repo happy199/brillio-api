@@ -13,6 +13,7 @@ use App\Mail\Session\SessionCancelled;
 use App\Mail\Wallet\CreditRecharged;
 use App\Mail\Wallet\SessionPaid;
 use App\Mail\Wallet\PaymentReceived;
+use App\Mail\Wallet\IncomeReleased;
 use App\Mail\Wallet\PayoutRequested;
 use App\Mail\Wallet\PayoutProcessed;
 use App\Models\MentoringSession;
@@ -205,5 +206,13 @@ class MentorshipNotificationService
     public function sendPayoutProcessed(\App\Models\PayoutRequest $payout)
     {
         Mail::to($payout->mentorProfile->user->email)->send(new PayoutProcessed($payout));
+    }
+
+    /**
+     * Envoyer une notification de revenus libérés (après compte rendu)
+     */
+    public function sendIncomeReleased(MentoringSession $session, User $mentor, int $amount)
+    {
+        Mail::to($mentor->email)->send(new IncomeReleased($mentor, $session, $amount));
     }
 }

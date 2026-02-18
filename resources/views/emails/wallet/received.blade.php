@@ -3,20 +3,21 @@
 @section('content')
 <p style="margin: 0 0 20px;">Bonjour <strong>{{ $mentor->name }}</strong>,</p>
 
-<p style="margin: 0 0 30px; font-size: 18px;">
-    💰 Vous avez reçu un nouveau paiement !
-</p>
-
-<div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #bbf7d0;">
-    <p style="margin: 0 0 15px; font-weight: 600; color: #166534; font-size: 16px;">💸 Revenus de séance</p>
+<div style="background-color: #fffbeb; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #fde68a;">
+    <p style="margin: 0 0 15px; font-weight: 600; color: #92400e; font-size: 16px;">⏳ Revenus en attente</p>
     <p style="margin: 0 0 8px; color: #374151;">
         <strong>Séance :</strong> {{ $session->title }}<br>
         <strong>Date :</strong> {{ $session->scheduled_at->translatedFormat('l j F Y à H:i') }}
     </p>
-    <p style="margin: 15px 0 0; color: #15803d; font-weight: 700; font-size: 18px;">
-        + {{ number_format($amount, 0, ',', ' ') }} crédits (disponibles pour retrait)
+    <p style="margin: 15px 0 0; color: #b45309; font-weight: 700; font-size: 18px;">
+        Estimation : + {{ number_format($amount, 0, ',', ' ') }} FCFA (brut)
     </p>
 </div>
+
+<p style="margin: 20px 0; color: #374151; font-style: italic;">
+    <strong>Note importante :</strong> Conformément à notre politique de qualité, vos revenus seront crédités sur votre
+    portefeuille <strong>immédiatement après la soumission de votre compte rendu</strong> de séance.
+</p>
 
 <p style="margin: 20px 0; color: #374151;">
     Vos revenus cumulés peuvent être retirés à tout moment depuis votre portefeuille vers votre compte Mobile Money.

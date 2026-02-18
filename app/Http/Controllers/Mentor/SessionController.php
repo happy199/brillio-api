@@ -262,10 +262,15 @@ class SessionController extends Controller
             'status' => 'completed', // Marquer comme terminée si compte rendu fait
         ]);
 
+        // CRITICAL: Trigger Payout to Mentor now that the report is submitted
+        if ($session->is_paid) {
+            app(\App\Services\WalletService::class)->payoutMentor($session);
+        }
+
         // Notification email de fin de séance
         app(\App\Services\MentorshipNotificationService::class)->sendSessionCompleted($session);
 
-        return redirect()->back()->with('success', 'Compte rendu enregistré.');
+        return redirect()->back()->with('success', 'Compte rendu enregistré. Votre rémunération a été créditée sur votre portefeuille.');
     }
 
     /**
@@ -281,6 +286,14 @@ class SessionController extends Controller
             'cancel_reason' => 'required|string|max:500',
         ]);
 
+        // 1. Refund all paid mentees (100% since it's mentor's cancellation)
+        if ($session->is_paid) {
+            $walletService = app(\App\Services\WalletService::class);
+            foreach ($session->mentees as $mentee) {
+                $walletService->refundJeune($session, $mentee, 1.0);
+            }
+        }
+
         $session->update([
             'status' => 'cancelled',
             'cancel_reason' => $request->cancel_reason,
@@ -289,10 +302,8 @@ class SessionController extends Controller
         // Notification email d'annulation
         app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, Auth::user());
 
-        // Remboursement éventuel à gérer ici si déjà payé via Wallet (TODO)
-
         return redirect()->route('mentor.mentorship.calendar')
-            ->with('success', 'Séance annulée.');
+            ->with('success', 'Séance annulée. ' . ($session->is_paid ? 'Les participants ont été intégralement remboursés.' : ''));
     }
     /**
      * Accepter une demande de séance
