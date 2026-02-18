@@ -64,12 +64,15 @@ class MentorshipController extends Controller
             return back()->with('error', 'Vous avez déjà une demande en cours ou active avec ce mentor.');
         }
 
-        Mentorship::create([
+        $mentorship = Mentorship::create([
             'mentee_id' => $user->id,
             'mentor_id' => $mentorId,
             'status' => 'pending',
             'request_message' => $validated['message'] ?? null,
         ]);
+
+        // Notification email au mentor
+        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipRequest($mentorship);
 
         return back()->with('success', 'Votre demande de mentorat a été envoyée avec succès.');
     }

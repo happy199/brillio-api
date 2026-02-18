@@ -57,7 +57,8 @@ class MentorshipController extends Controller
             'updated_at' => now(),
         ]);
 
-        // Notification logique ici (TODO)
+        // Notification email au jeune
+        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipAccepted($mentorship);
 
         return redirect()->back()->with('success', 'Demande de mentorat acceptée avec succès.');
     }

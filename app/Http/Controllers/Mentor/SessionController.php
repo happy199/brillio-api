@@ -32,10 +32,10 @@ class SessionController extends Controller
         // Récupérer historique (passé, annulé ou terminé)
         $pastSessions = $mentor->mentoringSessionsAsMentor()
             ->where(function ($query) {
-                $query->where('scheduled_at', '<', now())
-                    ->orWhere('status', 'cancelled')
-                    ->orWhere('status', 'completed');
-            })
+            $query->where('scheduled_at', '<', now())
+                ->orWhere('status', 'cancelled')
+                ->orWhere('status', 'completed');
+        })
             ->orderByDesc('scheduled_at')
             ->take(10)
             ->get();
@@ -142,6 +142,9 @@ class SessionController extends Controller
         foreach ($request->mentee_ids as $menteeId) {
             $session->mentees()->attach($menteeId, ['status' => $pivotStatus]);
         }
+
+        // Notification email au jeune
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionProposed($session);
 
         return redirect()->route('mentor.mentorship.sessions.show', $session)
             ->with('success', 'Séance proposée avec succès.');
@@ -259,6 +262,9 @@ class SessionController extends Controller
             'status' => 'completed', // Marquer comme terminée si compte rendu fait
         ]);
 
+        // Notification email de fin de séance
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionCompleted($session);
+
         return redirect()->back()->with('success', 'Compte rendu enregistré.');
     }
 
@@ -324,6 +330,11 @@ class SessionController extends Controller
         $message = $isPaid
             ? 'Séance acceptée. Le jeune doit maintenant procéder au paiement.'
             : 'Séance acceptée et confirmée.';
+
+        // Si gratuit (confirmé direct), notifier
+        if (!$isPaid) {
+            app(\App\Services\MentorshipNotificationService::class)->sendSessionConfirmed($session);
+        }
 
         return redirect()->back()->with('success', $message);
     }

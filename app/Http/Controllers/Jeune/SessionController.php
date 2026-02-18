@@ -29,11 +29,11 @@ class SessionController extends Controller
         // Past: Past dates OR Globally cancelled OR Completed OR Locally cancelled
         $pastSessions = $user->mentoringSessionsAsMentee()
             ->where(function ($query) {
-                $query->where('mentoring_sessions.scheduled_at', '<', now())
-                    ->orWhere('mentoring_sessions.status', 'cancelled')
-                    ->orWhere('mentoring_sessions.status', 'completed')
-                    ->orWhereIn('mentoring_session_user.status', ['cancelled', 'rejected']); // INCLUDE if I cancelled locally
-            })
+            $query->where('mentoring_sessions.scheduled_at', '<', now())
+                ->orWhere('mentoring_sessions.status', 'cancelled')
+                ->orWhere('mentoring_sessions.status', 'completed')
+                ->orWhereIn('mentoring_session_user.status', ['cancelled', 'rejected']); // INCLUDE if I cancelled locally
+        })
             ->orderBy('mentoring_sessions.scheduled_at', 'desc')
             ->paginate(10);
 
@@ -111,6 +111,9 @@ class SessionController extends Controller
 
         // Attacher le jeune
         $session->mentees()->attach($user->id, ['status' => 'accepted']); // Le jeune accepte sa propre demande
+
+        // Notification email au mentor
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionProposed($session);
 
         return redirect()->route('jeune.sessions.index')->with('success', 'Votre demande de séance a été envoyée au mentor.');
     }
@@ -253,11 +256,15 @@ class SessionController extends Controller
                 // Update Session Status
                 $session->update(['status' => 'confirmed']);
                 $session->mentees()->updateExistingPivot($user->id, ['status' => 'accepted']);
+
+                // Notification email de confirmation
+                app(\App\Services\MentorshipNotificationService::class)->sendSessionConfirmed($session);
             });
 
             return redirect()->route('meeting.show', $session->meeting_id)
                 ->with('success', 'Paiement effectué avec succès. Bon mentorat !');
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return redirect()->back()->with('error', "Erreur lors du paiement : " . $e->getMessage());
         }
     }
