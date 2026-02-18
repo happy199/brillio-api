@@ -13,6 +13,11 @@ use App\Mail\Session\SessionRefused;
 use App\Mail\Session\SessionCancelled;
 use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Mail\Engagement\NewMentorsWeekly;
+use App\Mail\Wallet\CreditRecharged;
+use App\Mail\Wallet\SessionPaid;
+use App\Mail\Wallet\PaymentReceived;
+use App\Mail\Wallet\PayoutRequested;
+use App\Mail\Wallet\PayoutProcessed;
 use App\Models\Mentorship;
 use App\Models\MentoringSession;
 use App\Models\SystemSetting;
@@ -59,9 +64,14 @@ class TestEmails extends Command
                 'session-cancelled',
                 'profile-reminder',
                 'new-mentors-digest',
+                'credit-recharge',
+                'session-paid',
+                'payment-received',
+                'payout-requested',
+                'payout-processed',
                 'all'
             ],
-                11
+                16
             );
         }
 
@@ -98,6 +108,21 @@ class TestEmails extends Command
             case 'new-mentors-digest':
                 $this->testNewMentorsDigest($recipient);
                 break;
+            case 'credit-recharge':
+                $this->testCreditRecharge($recipient);
+                break;
+            case 'session-paid':
+                $this->testSessionPaid($recipient);
+                break;
+            case 'payment-received':
+                $this->testPaymentReceived($recipient);
+                break;
+            case 'payout-requested':
+                $this->testPayoutRequested($recipient);
+                break;
+            case 'payout-processed':
+                $this->testPayoutProcessed($recipient);
+                break;
             case 'all':
                 $this->testMentorshipRequest($recipient);
                 $this->testMentorshipAccepted($recipient);
@@ -110,6 +135,11 @@ class TestEmails extends Command
                 $this->testSessionCancelled($recipient);
                 $this->testProfileReminder($recipient);
                 $this->testNewMentorsDigest($recipient);
+                $this->testCreditRecharge($recipient);
+                $this->testSessionPaid($recipient);
+                $this->testPaymentReceived($recipient);
+                $this->testPayoutRequested($recipient);
+                $this->testPayoutProcessed($recipient);
                 break;
             default:
                 $this->error("Email type inconnu : {$emailType}");
@@ -414,5 +444,89 @@ class TestEmails extends Command
         }
 
         Mail::to($recipient)->send(new NewMentorsWeekly($jeune, $mentors));
+    }
+
+    private function testCreditRecharge($recipient)
+    {
+        $this->line('💳 Envoi Credit Recharge...');
+        $user = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Kouassi', 'credits_balance' => 500]);
+        Mail::to($recipient)->send(new CreditRecharged($user, 100, $user->credits_balance));
+    }
+
+    private function testSessionPaid($recipient)
+    {
+        $this->line('✅ Envoi Session Paid...');
+        $jeune = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Kouassi']);
+        $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
+        $session = new MentoringSession([
+            'title' => 'Session de coaching Tech',
+            'scheduled_at' => now()->addDays(2)->setTime(14, 0),
+        ]);
+        $session->mentor = $mentor;
+        Mail::to($recipient)->send(new SessionPaid($jeune, $session, 50));
+    }
+
+    private function testPaymentReceived($recipient)
+    {
+        $this->line('💰 Envoi Payment Received...');
+        $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
+        $session = new MentoringSession([
+            'title' => 'Session de coaching Tech',
+            'scheduled_at' => now()->addDays(2)->setTime(14, 0),
+        ]);
+        Mail::to($recipient)->send(new PaymentReceived($mentor, $session, 45));
+    }
+
+    private function testPayoutRequested($recipient)
+    {
+        $this->line('📩 Envoi Payout Requested...');
+        $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
+        $mentorProfile = (object)[
+            'user' => $mentor,
+        ];
+        $payout = new \App\Models\PayoutRequest([
+            'amount' => 10000,
+            'fee' => 500,
+            'net_amount' => 9500,
+            'payment_method' => 'Orange Money',
+            'phone_number' => '+225 0707070707',
+        ]);
+        $payout->setRelation('mentorProfile', $mentorProfile);
+        Mail::to($recipient)->send(new PayoutRequested($payout));
+    }
+
+    private function testPayoutProcessed($recipient)
+    {
+        $this->line('✨ Envoi Payout Processed (Success)...');
+        $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
+        $mentorProfile = (object)[
+            'user' => $mentor,
+        ];
+
+        // Test Success
+        $payoutSuccess = new \App\Models\PayoutRequest([
+            'amount' => 10000,
+            'fee' => 500,
+            'net_amount' => 9500,
+            'payment_method' => 'Orange Money',
+            'phone_number' => '+225 0707070707',
+            'status' => \App\Models\PayoutRequest::STATUS_COMPLETED,
+        ]);
+        $payoutSuccess->setRelation('mentorProfile', $mentorProfile);
+        Mail::to($recipient)->send(new PayoutProcessed($payoutSuccess));
+
+        $this->line('⚠️ Envoi Payout Processed (Failed)...');
+        // Test Fail
+        $payoutFail = new \App\Models\PayoutRequest([
+            'amount' => 10000,
+            'fee' => 500,
+            'net_amount' => 9500,
+            'payment_method' => 'Orange Money',
+            'phone_number' => '+225 0707070707',
+            'status' => \App\Models\PayoutRequest::STATUS_FAILED,
+            'error_message' => 'Numéro de téléphone invalide ou solde insuffisant sur le compte émetteur.',
+        ]);
+        $payoutFail->setRelation('mentorProfile', $mentorProfile);
+        Mail::to($recipient)->send(new PayoutProcessed($payoutFail));
     }
 }

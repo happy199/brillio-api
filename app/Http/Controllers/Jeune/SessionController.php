@@ -261,7 +261,12 @@ class SessionController extends Controller
                 $session->mentees()->updateExistingPivot($user->id, ['status' => 'accepted']);
 
                 // Notification email de confirmation
-                app(\App\Services\MentorshipNotificationService::class)->sendSessionConfirmed($session);
+                $notificationService = app(\App\Services\MentorshipNotificationService::class);
+                $notificationService->sendSessionConfirmed($session);
+                $notificationService->sendSessionPayment($session, $user, $price);
+                if ($mentor) {
+                    $notificationService->sendPaymentReceived($session, $mentor, $mentorCredits);
+                }
             });
 
             return redirect()->route('meeting.show', $session->meeting_id)

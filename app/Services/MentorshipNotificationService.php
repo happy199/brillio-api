@@ -10,6 +10,11 @@ use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionRefused;
 use App\Mail\Session\SessionCancelled;
+use App\Mail\Wallet\CreditRecharged;
+use App\Mail\Wallet\SessionPaid;
+use App\Mail\Wallet\PaymentReceived;
+use App\Mail\Wallet\PayoutRequested;
+use App\Mail\Wallet\PayoutProcessed;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\SystemSetting;
@@ -160,5 +165,45 @@ class MentorshipNotificationService
                 Mail::to($mentee->email)->send(new SessionCancelled($session, $mentee, $cancelledBy, $mentees));
             }
         }
+    }
+
+    /**
+     * Envoyer une notification pour une recharge de crédits réussie (au jeune)
+     */
+    public function sendCreditRecharge(User $user, int $amount)
+    {
+        Mail::to($user->email)->send(new CreditRecharged($user, $amount, $user->credits_balance));
+    }
+
+    /**
+     * Envoyer une notification de paiement de séance (au jeune)
+     */
+    public function sendSessionPayment(MentoringSession $session, User $jeune, int $amount)
+    {
+        Mail::to($jeune->email)->send(new SessionPaid($jeune, $session, $amount));
+    }
+
+    /**
+     * Envoyer une notification de revenus reçus (au mentor)
+     */
+    public function sendPaymentReceived(MentoringSession $session, User $mentor, int $amount)
+    {
+        Mail::to($mentor->email)->send(new PaymentReceived($mentor, $session, $amount));
+    }
+
+    /**
+     * Envoyer une notification de demande de retrait soumise (au mentor)
+     */
+    public function sendPayoutRequested(\App\Models\PayoutRequest $payout)
+    {
+        Mail::to($payout->mentorProfile->user->email)->send(new PayoutRequested($payout));
+    }
+
+    /**
+     * Envoyer une notification de retrait traité (succès ou échec) (au mentor)
+     */
+    public function sendPayoutProcessed(\App\Models\PayoutRequest $payout)
+    {
+        Mail::to($payout->mentorProfile->user->email)->send(new PayoutProcessed($payout));
     }
 }
