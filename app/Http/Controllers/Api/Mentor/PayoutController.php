@@ -150,6 +150,9 @@ class PayoutController extends Controller
         // Dispatcher le job pour traitement automatique
         ProcessPayoutJob::dispatch($payout);
 
+        // Notification email
+        app(\App\Services\MentorshipNotificationService::class)->sendPayoutRequested($payout);
+
         return response()->json([
             'message' => 'Demande de retrait créée avec succès',
             'payout' => [
