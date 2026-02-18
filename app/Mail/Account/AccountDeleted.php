@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class AccountArchived extends Mailable
+class AccountDeleted extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -31,7 +31,7 @@ class AccountArchived extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Information concernant votre compte Brillio",
+            subject: "Suppression de votre compte Brillio",
         );
     }
 
@@ -41,7 +41,7 @@ class AccountArchived extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.account.account-archived',
+            view: 'emails.account.account-deleted',
         );
     }
 }

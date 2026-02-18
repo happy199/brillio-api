@@ -14,7 +14,8 @@ use App\Mail\Session\SessionCompleted;
 use App\Mail\Session\SessionRefused;
 use App\Mail\Session\SessionCancelled;
 use App\Mail\Session\ReportReminder;
-use App\Mail\Account\AccountArchived;
+use App\Mail\Account\AccountDeleted;
+use App\Mail\Account\AccountArchivedByUser;
 use App\Mail\Support\ContactConfirmation;
 use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Mail\Engagement\NewMentorsWeekly;
@@ -79,11 +80,12 @@ class TestEmails extends Command
                 'welcome-jeune',
                 'welcome-mentor',
                 'report-reminder',
-                'account-archived',
+                'account-deleted',
+                'account-archived-user',
                 'contact-confirmation',
                 'all'
             ],
-                22
+                23
             );
         }
 
@@ -147,8 +149,11 @@ class TestEmails extends Command
             case 'report-reminder':
                 $this->testReportReminder($recipient);
                 break;
-            case 'account-archived':
-                $this->testAccountArchived($recipient);
+            case 'account-deleted':
+                $this->testAccountDeleted($recipient);
+                break;
+            case 'account-archived-user':
+                $this->testAccountArchivedByUser($recipient);
                 break;
             case 'contact-confirmation':
                 $this->testContactConfirmation($recipient);
@@ -174,7 +179,8 @@ class TestEmails extends Command
                 $this->testWelcomeJeune($recipient);
                 $this->testWelcomeMentor($recipient);
                 $this->testReportReminder($recipient);
-                $this->testAccountArchived($recipient);
+                $this->testAccountDeleted($recipient);
+                $this->testAccountArchivedByUser($recipient);
                 $this->testContactConfirmation($recipient);
                 break;
             default:
@@ -611,11 +617,18 @@ class TestEmails extends Command
         Mail::to($recipient)->send(new ReportReminder($session));
     }
 
-    private function testAccountArchived($recipient)
+    private function testAccountDeleted($recipient)
     {
-        $this->line('🚫 Envoi Account Archived...');
+        $this->line('🚫 Envoi Account Deleted...');
+        $user = new User(['name' => 'Utilisateur Supprimé', 'email' => $recipient]);
+        Mail::to($recipient)->send(new AccountDeleted($user, "Violation des conditions d'utilisation."));
+    }
+
+    private function testAccountArchivedByUser($recipient)
+    {
+        $this->line('📥 Envoi Account Archived By User...');
         $user = new User(['name' => 'Utilisateur Archivé', 'email' => $recipient]);
-        Mail::to($recipient)->send(new AccountArchived($user, "Inactivité prolongée (plus de 6 mois)."));
+        Mail::to($recipient)->send(new AccountArchivedByUser($user));
     }
 
     private function testContactConfirmation($recipient)

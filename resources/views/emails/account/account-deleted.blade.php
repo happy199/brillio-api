@@ -4,7 +4,8 @@
 <p style="margin: 0 0 20px;">Bonjour <strong>{{ $user->name }}</strong>,</p>
 
 <p style="margin: 0 0 20px; color: #374151; line-height: 1.6;">
-    Nous vous informons que votre compte sur la plateforme <strong>Brillio</strong> a été archivé.
+    Nous vous informons que votre compte sur la plateforme <strong>Brillio</strong> a été été <strong>définitivement
+        supprimé</strong> par notre équipe d'administration.
 </p>
 
 @if($reason)

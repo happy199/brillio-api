@@ -11,7 +11,8 @@ use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionRefused;
 use App\Mail\Session\SessionCancelled;
 use App\Mail\Session\ReportReminder;
-use App\Mail\Account\AccountArchived;
+use App\Mail\Account\AccountDeleted;
+use App\Mail\Account\AccountArchivedByUser;
 use App\Mail\Support\ContactConfirmation;
 use App\Mail\Onboarding\WelcomeJeune;
 use App\Mail\Onboarding\WelcomeMentor;
@@ -245,11 +246,19 @@ class MentorshipNotificationService
     }
 
     /**
-     * Envoyer une notification de compte archivé
+     * Envoyer une notification de compte supprimé par l'admin
      */
-    public function sendAccountArchived(User $user, string $reason = '')
+    public function sendAccountDeleted(User $user, string $reason = '')
     {
-        Mail::to($user->email)->send(new AccountArchived($user, $reason));
+        Mail::to($user->email)->send(new AccountDeleted($user, $reason));
+    }
+
+    /**
+     * Envoyer une notification de compte archivé par l'utilisateur
+     */
+    public function sendAccountArchivedByUser(User $user)
+    {
+        Mail::to($user->email)->send(new AccountArchivedByUser($user));
     }
 
     /**
