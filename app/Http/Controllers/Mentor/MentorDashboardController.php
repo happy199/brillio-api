@@ -322,7 +322,7 @@ class MentorDashboardController extends Controller
     /**
      * Importer les données LinkedIn depuis un PDF
      */
-    public function importLinkedInData(Request $request)
+    public function importLinkedInData(Request $request, \App\Services\LinkedInPdfParserService $parserService)
     {
         $user = auth()->user();
         $profile = $user->mentorProfile;
@@ -341,40 +341,60 @@ class MentorDashboardController extends Controller
             $fullPath = storage_path('app/' . $pdfPath);
 
             // Parser le PDF
-            $parserService = new \App\Services\LinkedInPdfParserService();
             $profileData = $parserService->parsePdf($fullPath);
 
             \Log::info('LinkedIn PDF parsed', ['data' => $profileData]);
 
-            // 🔒 SÉCURITÉ : Vérifier que l'email correspond
+            // 🔒 SÉCURITÉ : Vérifier que l'email ou le nom correspond
+            $isOwner = false;
+            $mismatchContext = [];
+
+            // 1. Vérification par Email
             if (!empty($profileData['contact']['email'])) {
                 $pdfEmail = strtolower(trim($profileData['contact']['email']));
                 $userEmail = strtolower(trim($user->email));
 
-                if ($pdfEmail !== $userEmail) {
-                    // Supprimer le fichier temporaire
-                    \Storage::disk('local')->delete($pdfPath);
+                if ($pdfEmail === $userEmail) {
+                    $isOwner = true;
+                    \Log::info('✅ Email validation passed', ['email' => $userEmail]);
+                } else {
+                    $mismatchContext['email'] = ['pdf' => $pdfEmail, 'user' => $userEmail];
+                }
+            }
 
-                    \Log::warning('LinkedIn import email mismatch', [
-                        'user_id' => $user->id,
-                        'user_email' => $userEmail,
-                        'pdf_email' => $pdfEmail
-                    ]);
+            // 2. Vérification par Nom (si email ne correspond pas ou est absent)
+            if (!$isOwner && !empty($profileData['name'])) {
+                $pdfName = strtolower(trim($profileData['name']));
+                $userName = strtolower(trim($user->name));
 
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'L\'email dans le PDF (' . $pdfEmail . ') ne correspond pas à votre compte (' . $userEmail . '). Veuillez utiliser votre propre profil LinkedIn.'
-                    ], 422);
+                // On vérifie si le nom complet correspond ou si l'un contient l'autre (match partiel pour plus de souplesse)
+                if ($pdfName === $userName || str_contains($pdfName, $userName) || str_contains($userName, $pdfName)) {
+                    $isOwner = true;
+                    \Log::info('✅ Name validation passed', ['name' => $userName, 'pdf_name' => $pdfName]);
+                } else {
+                    $mismatchContext['name'] = ['pdf' => $pdfName, 'user' => $userName];
+                }
+            }
+
+            // Si aucune vérification n'a fonctionné
+            if (!$isOwner) {
+                // Supprimer le fichier temporaire
+                \Storage::disk('local')->delete($pdfPath);
+
+                \Log::warning('LinkedIn import ownership mismatch', [
+                    'user_id' => $user->id,
+                    'context' => $mismatchContext
+                ]);
+
+                $errorMessage = 'Ce profil LinkedIn ne semble pas vous appartenir.';
+                if (isset($mismatchContext['name'])) {
+                    $errorMessage .= ' Le nom dans le PDF (' . $profileData['name'] . ') ne correspond pas à votre nom (' . $user->name . ').';
                 }
 
-                \Log::info('✅ Email validation passed', [
-                    'email' => $userEmail
-                ]);
-            } else {
-                // Pas d'email trouvé dans le PDF - warning mais on continue
-                \Log::warning('No email found in LinkedIn PDF', [
-                    'user_id' => $user->id
-                ]);
+                return response()->json([
+                    'success' => false,
+                    'error' => $errorMessage
+                ], 422);
             }
 
             // Stocker le PDF définitivement

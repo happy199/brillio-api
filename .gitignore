@@ -15,6 +15,7 @@ Homestead.yaml
 
 # Application
 /storage/*.key
+/storage/*.pem
 /public/storage
 /public/hot
 
