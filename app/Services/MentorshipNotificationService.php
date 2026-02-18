@@ -10,6 +10,8 @@ use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionRefused;
 use App\Mail\Session\SessionCancelled;
+use App\Mail\Onboarding\WelcomeJeune;
+use App\Mail\Onboarding\WelcomeMentor;
 use App\Mail\Wallet\CreditRecharged;
 use App\Mail\Wallet\SessionPaid;
 use App\Mail\Wallet\PaymentReceived;
@@ -214,5 +216,18 @@ class MentorshipNotificationService
     public function sendIncomeReleased(MentoringSession $session, User $mentor, int $amount)
     {
         Mail::to($mentor->email)->send(new IncomeReleased($mentor, $session, $amount));
+    }
+
+    /**
+     * Envoyer l'email de bienvenue (Onboarding personnalisé)
+     */
+    public function sendWelcomeEmail(User $user)
+    {
+        if ($user->isMentor()) {
+            Mail::to($user->email)->send(new WelcomeMentor($user));
+        }
+        else {
+            Mail::to($user->email)->send(new WelcomeJeune($user));
+        }
     }
 }

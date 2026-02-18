@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Mail\Mentorship\MentorshipAccepted;
 use App\Mail\Mentorship\MentorshipRequested;
 use App\Mail\Mentorship\MentorshipRefused;
+use App\Mail\Onboarding\WelcomeJeune;
+use App\Mail\Onboarding\WelcomeMentor;
 use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionReminder;
@@ -71,9 +73,11 @@ class TestEmails extends Command
                 'payout-requested',
                 'payout-processed',
                 'income-released',
+                'welcome-jeune',
+                'welcome-mentor',
                 'all'
             ],
-                17
+                19
             );
         }
 
@@ -128,6 +132,12 @@ class TestEmails extends Command
             case 'income-released':
                 $this->testIncomeReleased($recipient);
                 break;
+            case 'welcome-jeune':
+                $this->testWelcomeJeune($recipient);
+                break;
+            case 'welcome-mentor':
+                $this->testWelcomeMentor($recipient);
+                break;
             case 'all':
                 $this->testMentorshipRequest($recipient);
                 $this->testMentorshipAccepted($recipient);
@@ -146,6 +156,8 @@ class TestEmails extends Command
                 $this->testPayoutRequested($recipient);
                 $this->testPayoutProcessed($recipient);
                 $this->testIncomeReleased($recipient);
+                $this->testWelcomeJeune($recipient);
+                $this->testWelcomeMentor($recipient);
                 break;
             default:
                 $this->error("Email type inconnu : {$emailType}");
@@ -545,5 +557,19 @@ class TestEmails extends Command
             'scheduled_at' => now()->subDay(),
         ]);
         Mail::to($recipient)->send(new IncomeReleased($mentor, $session, 45));
+    }
+
+    private function testWelcomeJeune($recipient)
+    {
+        $this->line('👋 Envoi Welcome Jeune...');
+        $user = new User(['name' => 'Jean Jeune', 'email' => $recipient, 'user_type' => 'jeune']);
+        Mail::to($recipient)->send(new WelcomeJeune($user));
+    }
+
+    private function testWelcomeMentor($recipient)
+    {
+        $this->line('🌟 Envoi Welcome Mentor...');
+        $user = new User(['name' => 'Marc Mentor', 'email' => $recipient, 'user_type' => 'mentor']);
+        Mail::to($recipient)->send(new WelcomeMentor($user));
     }
 }
