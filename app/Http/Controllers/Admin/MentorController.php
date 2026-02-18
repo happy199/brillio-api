@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MentorProfile;
 use App\Models\RoadmapStep;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -136,6 +137,11 @@ class MentorController extends Controller
 
         // Le fichier est stocké sur le disque 'local' (storage/app/linkedin-pdfs)
         if (!Storage::disk('local')->exists($mentor->linkedin_pdf_path)) {
+            \Log::warning('Missing LinkedIn PDF file requested for download', [
+                'mentor_id' => $mentor->id,
+                'mentor_name' => $mentor->user->name,
+                'file_path' => $mentor->linkedin_pdf_path
+            ]);
             return back()->with('error', 'Fichier introuvable sur le serveur.');
         }
 
