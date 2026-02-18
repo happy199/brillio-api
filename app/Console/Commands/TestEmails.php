@@ -13,6 +13,9 @@ use App\Mail\Session\SessionReminder;
 use App\Mail\Session\SessionCompleted;
 use App\Mail\Session\SessionRefused;
 use App\Mail\Session\SessionCancelled;
+use App\Mail\Session\ReportReminder;
+use App\Mail\Account\AccountArchived;
+use App\Mail\Support\ContactConfirmation;
 use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Mail\Engagement\NewMentorsWeekly;
 use App\Mail\Wallet\CreditRecharged;
@@ -75,9 +78,12 @@ class TestEmails extends Command
                 'income-released',
                 'welcome-jeune',
                 'welcome-mentor',
+                'report-reminder',
+                'account-archived',
+                'contact-confirmation',
                 'all'
             ],
-                19
+                22
             );
         }
 
@@ -138,6 +144,15 @@ class TestEmails extends Command
             case 'welcome-mentor':
                 $this->testWelcomeMentor($recipient);
                 break;
+            case 'report-reminder':
+                $this->testReportReminder($recipient);
+                break;
+            case 'account-archived':
+                $this->testAccountArchived($recipient);
+                break;
+            case 'contact-confirmation':
+                $this->testContactConfirmation($recipient);
+                break;
             case 'all':
                 $this->testMentorshipRequest($recipient);
                 $this->testMentorshipAccepted($recipient);
@@ -158,6 +173,9 @@ class TestEmails extends Command
                 $this->testIncomeReleased($recipient);
                 $this->testWelcomeJeune($recipient);
                 $this->testWelcomeMentor($recipient);
+                $this->testReportReminder($recipient);
+                $this->testAccountArchived($recipient);
+                $this->testContactConfirmation($recipient);
                 break;
             default:
                 $this->error("Email type inconnu : {$emailType}");
@@ -571,5 +589,39 @@ class TestEmails extends Command
         $this->line('🌟 Envoi Welcome Mentor...');
         $user = new User(['name' => 'Marc Mentor', 'email' => $recipient, 'user_type' => 'mentor']);
         Mail::to($recipient)->send(new WelcomeMentor($user));
+    }
+
+    private function testReportReminder($recipient)
+    {
+        $this->line('⏳ Envoi Report Reminder...');
+        $session = MentoringSession::has('mentor')->has('mentees')->first();
+
+        if (!$session) {
+            $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marc Mentor']);
+            $mentee = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Jeune']);
+            $session = new MentoringSession([
+                'id' => 99, // Fake ID
+                'title' => 'Session de coaching Tech (Mock)',
+                'scheduled_at' => now()->subDay(),
+            ]);
+            $session->setRelation('mentor', $mentor);
+            $session->setRelation('mentees', collect([$mentee]));
+        }
+
+        Mail::to($recipient)->send(new ReportReminder($session));
+    }
+
+    private function testAccountArchived($recipient)
+    {
+        $this->line('🚫 Envoi Account Archived...');
+        $user = new User(['name' => 'Utilisateur Archivé', 'email' => $recipient]);
+        Mail::to($recipient)->send(new AccountArchived($user, "Inactivité prolongée (plus de 6 mois)."));
+    }
+
+    private function testContactConfirmation($recipient)
+    {
+        $this->line('📩 Envoi Contact Confirmation...');
+        $user = new User(['name' => 'Visiteur', 'email' => $recipient]);
+        Mail::to($recipient)->send(new ContactConfirmation($user, ['subject' => 'Question sur les tarifs']));
     }
 }

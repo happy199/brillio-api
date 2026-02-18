@@ -10,6 +10,9 @@ use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionRefused;
 use App\Mail\Session\SessionCancelled;
+use App\Mail\Session\ReportReminder;
+use App\Mail\Account\AccountArchived;
+use App\Mail\Support\ContactConfirmation;
 use App\Mail\Onboarding\WelcomeJeune;
 use App\Mail\Onboarding\WelcomeMentor;
 use App\Mail\Wallet\CreditRecharged;
@@ -229,5 +232,31 @@ class MentorshipNotificationService
         else {
             Mail::to($user->email)->send(new WelcomeJeune($user));
         }
+    }
+
+    /**
+     * Envoyer un rappel de compte rendu au mentor
+     */
+    public function sendReportReminder(MentoringSession $session)
+    {
+        if ($session->mentor) {
+            Mail::to($session->mentor->email)->send(new ReportReminder($session));
+        }
+    }
+
+    /**
+     * Envoyer une notification de compte archivé
+     */
+    public function sendAccountArchived(User $user, string $reason = '')
+    {
+        Mail::to($user->email)->send(new AccountArchived($user, $reason));
+    }
+
+    /**
+     * Envoyer une confirmation de réception de message de contact
+     */
+    public function sendContactConfirmation(User $user, array $data)
+    {
+        Mail::to($user->email)->send(new ContactConfirmation($user, $data));
     }
 }
