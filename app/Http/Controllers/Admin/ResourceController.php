@@ -8,16 +8,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\MentorshipNotificationService;
 
 class ResourceController extends Controller
 {
-    protected $notificationService;
-
-    public function __construct(MentorshipNotificationService $notificationService)
-    {
-        $this->notificationService = $notificationService;
-    }
     /**
      * Liste des ressources
      */
@@ -29,11 +22,9 @@ class ResourceController extends Controller
         if ($request->filled('status')) {
             if ($request->status === 'pending') {
                 $query->where('is_validated', false);
-            }
-            elseif ($request->status === 'published') {
+            } elseif ($request->status === 'published') {
                 $query->where('is_published', true)->where('is_validated', true);
-            }
-            elseif ($request->status === 'draft') {
+            } elseif ($request->status === 'draft') {
                 $query->where('is_published', false);
             }
         }
@@ -271,8 +262,6 @@ class ResourceController extends Controller
             'validated_at' => now(),
         ]);
 
-        $this->notificationService->sendResourceValidated($resource);
-
         return back()->with('success', 'Ressource validée et publiée.');
     }
 
@@ -281,17 +270,11 @@ class ResourceController extends Controller
      */
     public function approveAll()
     {
-        $resources = Resource::where('is_validated', false)->get();
-
         Resource::where('is_validated', false)->update([
             'is_validated' => true,
             'is_published' => true,
             'validated_at' => now(),
         ]);
-
-        foreach ($resources as $resource) {
-            $this->notificationService->sendResourceValidated($resource);
-        }
 
         return back()->with('success', 'Toutes les ressources en attente ont été validées.');
     }
@@ -305,8 +288,6 @@ class ResourceController extends Controller
             'is_published' => false,
             // On garde is_validated a false ou on pourrait ajouter un champ 'rejected_at'
         ]);
-
-        $this->notificationService->sendResourceRejected($resource);
 
         return back()->with('warning', 'Ressource retirée de la publication.');
     }
@@ -359,8 +340,7 @@ class ResourceController extends Controller
                 $level = $data['education_level'];
                 if (isset($educationLabels[$level])) {
                     $educationLevels[$level] = $educationLabels[$level];
-                }
-                else {
+                } else {
                     $educationLevels[$level] = ucfirst($level);
                 }
             }
@@ -370,8 +350,7 @@ class ResourceController extends Controller
                 $sit = $data['current_situation'];
                 if (isset($situationLabels[$sit])) {
                     $situations[$sit] = $situationLabels[$sit];
-                }
-                else {
+                } else {
                     $situations[$sit] = ucfirst($sit);
                 }
             }

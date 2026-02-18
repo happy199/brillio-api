@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\MentorshipNotificationService;
+use App\Models\MentorProfile;
 use App\Services\SupabaseAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
+use App\Mail\WelcomeEmail;
 
 /**
  * Controller pour l'authentification web (jeunes et mentors)
@@ -24,8 +24,7 @@ class WebAuthController extends Controller
 {
     public function __construct(
         private SupabaseAuthService $supabase,
-        private \App\Services\UserAvatarService $avatarService,
-        private MentorshipNotificationService $notificationService
+        private \App\Services\UserAvatarService $avatarService
     ) {
     }
 
@@ -79,7 +78,7 @@ class WebAuthController extends Controller
             ]);
 
             try {
-                $this->notificationService->sendWelcomeEmail($user);
+                Mail::to($user)->send(new WelcomeEmail($user));
             } catch (\Exception $e) {
                 Log::error('Erreur envoi email bienvenue (OAuth Mentor): ' . $e->getMessage());
             }
@@ -195,7 +194,7 @@ class WebAuthController extends Controller
         ]);
 
         try {
-            $this->notificationService->sendWelcomeEmail($user);
+            Mail::to($user)->send(new WelcomeEmail($user));
         } catch (\Exception $e) {
             Log::error('Erreur envoi email bienvenue: ' . $e->getMessage());
         }
@@ -494,7 +493,7 @@ class WebAuthController extends Controller
             ]);
 
             try {
-                $this->notificationService->sendWelcomeEmail($user);
+                Mail::to($user)->send(new WelcomeEmail($user));
             } catch (\Exception $e) {
                 Log::error('Erreur envoi email bienvenue (OAuth Jeune): ' . $e->getMessage());
             }
@@ -983,5 +982,4 @@ class WebAuthController extends Controller
     }
 }
 
- 
  
