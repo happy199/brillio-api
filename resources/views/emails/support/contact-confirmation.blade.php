@@ -23,7 +23,7 @@
 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
     <tr>
         <td align="center">
-            <a href="{{ url('/') }}"
+            <a href="{{ route('home') }}"
                 style="display: inline-block; background-color: #0ea5e9; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
                 🏠 Retour au site
             </a>

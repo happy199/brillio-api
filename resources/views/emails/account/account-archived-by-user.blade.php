@@ -26,7 +26,7 @@
 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
     <tr>
         <td align="center">
-            <a href="{{ url('/login') }}"
+            <a href="{{ route('auth.login') }}"
                 style="display: inline-block; background-color: #10b981; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
                 🔓 Me reconnecter pour annuler
             </a>
