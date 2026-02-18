@@ -53,16 +53,16 @@ class MentorshipNotificationService
             $creditPrice = SystemSetting::getValue('credit_price_jeune', 50);
             $menteeCredits = (int)floor($session->price / $creditPrice);
 
-            $acceptUrl = url("/jeune/sessions/{$session->id}/accept");
-            $refuseUrl = url("/jeune/sessions/{$session->id}/refuse");
+            // Pour une séance proposée, on redirige vers le détail de la séance dans l'espace jeune
+            $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
 
             Mail::to($mentee->email)->send(new SessionProposed(
                 $session,
                 $mentor,
                 $mentee,
                 $menteeCredits,
-                $acceptUrl,
-                $refuseUrl
+                $sessionUrl, // acceptUrl (le jeune pourra agir sur la page)
+                $sessionUrl // refuseUrl
                 ));
         }
     }
@@ -93,7 +93,7 @@ class MentorshipNotificationService
         $mentor = $session->mentor;
         $mentees = $session->mentees;
 
-        $sessionUrlBase = url('/jeune/sessions/' . $session->id);
+        $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
         $bookingUrl = route('jeune.sessions.create', ['mentor' => $mentor->id]);
 
         // Envoyer au mentor
@@ -101,7 +101,7 @@ class MentorshipNotificationService
             $session,
             $mentor,
             $mentees,
-            route('mentor.mentorship.sessions.show', $session),
+            route('mentor.mentorship.sessions.show', ['session' => $session->id]),
             ''
             ));
 
@@ -111,7 +111,7 @@ class MentorshipNotificationService
                 $session,
                 $mentee,
                 $mentees,
-                $sessionUrlBase,
+                $sessionUrl,
                 $bookingUrl
                 ));
         }
