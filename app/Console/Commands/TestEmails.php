@@ -17,6 +17,10 @@ use App\Mail\Session\ReportReminder;
 use App\Mail\Account\AccountDeleted;
 use App\Mail\Account\AccountArchivedByUser;
 use App\Mail\Support\ContactConfirmation;
+use App\Mail\Resource\ResourceValidated;
+use App\Mail\Resource\ResourceRejected;
+use App\Mail\Resource\ResourcePurchased;
+use App\Models\Resource;
 use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Mail\Engagement\NewMentorsWeekly;
 use App\Mail\Wallet\CreditRecharged;
@@ -83,9 +87,12 @@ class TestEmails extends Command
                 'account-deleted',
                 'account-archived-user',
                 'contact-confirmation',
+                'resource-validated',
+                'resource-rejected',
+                'resource-purchased',
                 'all'
             ],
-                23
+                26
             );
         }
 
@@ -158,6 +165,15 @@ class TestEmails extends Command
             case 'contact-confirmation':
                 $this->testContactConfirmation($recipient);
                 break;
+            case 'resource-validated':
+                $this->testResourceValidated($recipient);
+                break;
+            case 'resource-rejected':
+                $this->testResourceRejected($recipient);
+                break;
+            case 'resource-purchased':
+                $this->testResourcePurchased($recipient);
+                break;
             case 'all':
                 $this->testMentorshipRequest($recipient);
                 $this->testMentorshipAccepted($recipient);
@@ -182,6 +198,9 @@ class TestEmails extends Command
                 $this->testAccountDeleted($recipient);
                 $this->testAccountArchivedByUser($recipient);
                 $this->testContactConfirmation($recipient);
+                $this->testResourceValidated($recipient);
+                $this->testResourceRejected($recipient);
+                $this->testResourcePurchased($recipient);
                 break;
             default:
                 $this->error("Email type inconnu : {$emailType}");
@@ -634,7 +653,35 @@ class TestEmails extends Command
     private function testContactConfirmation($recipient)
     {
         $this->line('📩 Envoi Contact Confirmation...');
-        $user = new User(['name' => 'Visiteur', 'email' => $recipient]);
-        Mail::to($recipient)->send(new ContactConfirmation($user, ['subject' => 'Question sur les tarifs']));
+        $user = new User(['name' => 'Utilisateur Support', 'email' => $recipient]);
+        Mail::to($recipient)->send(new ContactConfirmation($user, ['subject' => 'Question technique', 'message' => 'Comment ça marche ?']));
+    }
+
+    private function testResourceValidated($recipient)
+    {
+        $this->line('🎉 Envoi Resource Validated...');
+        $user = new User(['id' => 1, 'name' => 'Mentor Créateur', 'email' => $recipient]);
+        $resource = new Resource(['id' => 1, 'title' => 'Ma Super Ressource', 'user_id' => 1]);
+        $resource->setRelation('user', $user);
+        Mail::to($recipient)->send(new ResourceValidated($resource));
+    }
+
+    private function testResourceRejected($recipient)
+    {
+        $this->line('⚠️ Envoi Resource Rejected...');
+        $user = new User(['id' => 1, 'name' => 'Mentor Créateur', 'email' => $recipient]);
+        $resource = new Resource(['id' => 1, 'title' => 'Ma Ressource Rejetée', 'user_id' => 1]);
+        $resource->setRelation('user', $user);
+        Mail::to($recipient)->send(new ResourceRejected($resource));
+    }
+
+    private function testResourcePurchased($recipient)
+    {
+        $this->line('💰 Envoi Resource Purchased...');
+        $mentor = new User(['id' => 1, 'name' => 'Mentor Créateur', 'email' => $recipient]);
+        $buyer = new User(['id' => 2, 'name' => 'Jeune Acheteur']);
+        $resource = new Resource(['id' => 1, 'title' => 'Guide Complet Laravel', 'user_id' => 1]);
+        $resource->setRelation('user', $mentor);
+        Mail::to($recipient)->send(new ResourcePurchased($resource, $buyer, 5));
     }
 }

@@ -22,8 +22,12 @@ use App\Mail\Wallet\PaymentReceived;
 use App\Mail\Wallet\IncomeReleased;
 use App\Mail\Wallet\PayoutRequested;
 use App\Mail\Wallet\PayoutProcessed;
+use App\Mail\Resource\ResourceValidated;
+use App\Mail\Resource\ResourceRejected;
+use App\Mail\Resource\ResourcePurchased;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
+use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -267,5 +271,35 @@ class MentorshipNotificationService
     public function sendContactConfirmation(User $user, array $data)
     {
         Mail::to($user->email)->send(new ContactConfirmation($user, $data));
+    }
+
+    /**
+     * Envoyer une notification de ressource validée
+     */
+    public function sendResourceValidated(Resource $resource)
+    {
+        if ($resource->user) {
+            Mail::to($resource->user->email)->send(new ResourceValidated($resource));
+        }
+    }
+
+    /**
+     * Envoyer une notification de ressource rejetée
+     */
+    public function sendResourceRejected(Resource $resource)
+    {
+        if ($resource->user) {
+            Mail::to($resource->user->email)->send(new ResourceRejected($resource));
+        }
+    }
+
+    /**
+     * Envoyer une notification d'achat de ressource
+     */
+    public function sendResourcePurchased(Resource $resource, User $buyer, int $creditsEarned)
+    {
+        if ($resource->user) {
+            Mail::to($resource->user->email)->send(new ResourcePurchased($resource, $buyer, $creditsEarned));
+        }
     }
 }
