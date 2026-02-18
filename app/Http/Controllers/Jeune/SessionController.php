@@ -174,6 +174,9 @@ class SessionController extends Controller
             ]);
         }
 
+        // Notification email d'annulation (au mentor et aux éventuels autres participants)
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, $user);
+
         return redirect()->route('jeune.sessions.index')
             ->with('success', 'Votre participation à la séance a été annulée.');
     }

@@ -82,6 +82,9 @@ class MentorshipController extends Controller
             'updated_at' => now(),
         ]);
 
+        // Notification email au jeune
+        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipRefused($mentorship, $request->refusal_reason);
+
         return redirect()->back()->with('success', 'Demande refusée.');
     }
 

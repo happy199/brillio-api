@@ -286,6 +286,9 @@ class SessionController extends Controller
             'cancel_reason' => $request->cancel_reason,
         ]);
 
+        // Notification email d'annulation
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, Auth::user());
+
         // Remboursement éventuel à gérer ici si déjà payé via Wallet (TODO)
 
         return redirect()->route('mentor.mentorship.calendar')
@@ -356,6 +359,9 @@ class SessionController extends Controller
             'status' => 'cancelled',
             'cancel_reason' => $request->refusal_reason,
         ]);
+
+        // Notification email de refus au jeune
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionRefused($session, $request->refusal_reason);
 
         return redirect()->back()->with('success', 'Demande de séance refusée.');
     }

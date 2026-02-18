@@ -7,6 +7,18 @@ Schedule::command('sessions:send-reminders')
     ->dailyAt('08:00')
     ->timezone('Africa/Abidjan');
 
+// Profil completion reminders: run every Monday at 9 AM
+Schedule::job(new \App\Jobs\SendProfileCompletionReminders())
+    ->mondays()
+    ->at('09:00')
+    ->timezone('Africa/Abidjan');
+
+// Weekly new mentors digest: run every Friday at 4 PM
+Schedule::job(new \App\Jobs\SendNewMentorsDigest())
+    ->fridays()
+    ->at('16:00')
+    ->timezone('Africa/Abidjan');
+
 // Synchroniser les questions de personnalité tous les trimestres (1er jour de chaque trimestre à 2h du matin)
 Schedule::command('personality:sync-questions')
     ->quarterly()

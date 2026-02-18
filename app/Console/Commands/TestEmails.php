@@ -4,10 +4,15 @@ namespace App\Console\Commands;
 
 use App\Mail\Mentorship\MentorshipAccepted;
 use App\Mail\Mentorship\MentorshipRequested;
+use App\Mail\Mentorship\MentorshipRefused;
 use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionReminder;
 use App\Mail\Session\SessionCompleted;
+use App\Mail\Session\SessionRefused;
+use App\Mail\Session\SessionCancelled;
+use App\Mail\Engagement\ProfileCompletionReminder;
+use App\Mail\Engagement\NewMentorsWeekly;
 use App\Models\Mentorship;
 use App\Models\MentoringSession;
 use App\Models\SystemSetting;
@@ -45,13 +50,18 @@ class TestEmails extends Command
             [
                 'mentorship-request',
                 'mentorship-accepted',
+                'mentorship-refused',
                 'session-proposed',
                 'session-confirmed',
                 'session-reminder',
                 'session-completed',
+                'session-refused',
+                'session-cancelled',
+                'profile-reminder',
+                'new-mentors-digest',
                 'all'
             ],
-                6
+                11
             );
         }
 
@@ -61,8 +71,8 @@ class TestEmails extends Command
             case 'mentorship-request':
                 $this->testMentorshipRequest($recipient);
                 break;
-            case 'mentorship-accepted':
-                $this->testMentorshipAccepted($recipient);
+            case 'mentorship-refused':
+                $this->testMentorshipRefused($recipient);
                 break;
             case 'session-proposed':
                 $this->testSessionProposed($recipient);
@@ -76,13 +86,30 @@ class TestEmails extends Command
             case 'session-completed':
                 $this->testSessionCompleted($recipient);
                 break;
+            case 'session-refused':
+                $this->testSessionRefused($recipient);
+                break;
+            case 'session-cancelled':
+                $this->testSessionCancelled($recipient);
+                break;
+            case 'profile-reminder':
+                $this->testProfileReminder($recipient);
+                break;
+            case 'new-mentors-digest':
+                $this->testNewMentorsDigest($recipient);
+                break;
             case 'all':
                 $this->testMentorshipRequest($recipient);
                 $this->testMentorshipAccepted($recipient);
+                $this->testMentorshipRefused($recipient);
                 $this->testSessionProposed($recipient);
                 $this->testSessionConfirmed($recipient);
                 $this->testSessionReminder($recipient);
                 $this->testSessionCompleted($recipient);
+                $this->testSessionRefused($recipient);
+                $this->testSessionCancelled($recipient);
+                $this->testProfileReminder($recipient);
+                $this->testNewMentorsDigest($recipient);
                 break;
             default:
                 $this->error("Email type inconnu : {$emailType}");
@@ -308,5 +335,83 @@ class TestEmails extends Command
             $sessionUrl,
             $bookingUrl
             ));
+    }
+
+    private function testMentorshipRefused($recipient)
+    {
+        $this->line('❌ Envoi Mentorship Refused...');
+
+        $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
+        $mentee = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Kouassi']);
+        $mentorship = new Mentorship([
+            'mentor_id' => $mentor->id ?? 1,
+            'mentee_id' => $mentee->id ?? 2,
+        ]);
+
+        Mail::to($recipient)->send(new MentorshipRefused($mentorship, $mentor, $mentee, "Je n'ai malheureusement pas de disponibilité pour un nouveau mentoré en ce moment."));
+    }
+
+    private function testSessionRefused($recipient)
+    {
+        $this->line('❌ Envoi Session Refused...');
+
+        $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
+        $mentee = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Kouassi']);
+        $session = new MentoringSession([
+            'mentor_id' => $mentor->id ?? 1,
+            'scheduled_at' => now()->addDays(2),
+        ]);
+
+        Mail::to($recipient)->send(new SessionRefused($session, $mentor, $mentee, "Un imprévu professionnel m'empêche d'être présent à ce créneau."));
+    }
+
+    private function testSessionCancelled($recipient)
+    {
+        $this->line('🚫 Envoi Session Cancelled...');
+
+        $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont', 'user_type' => 'mentor']);
+        $mentee = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Kouassi', 'user_type' => 'jeune']);
+        $session = new MentoringSession([
+            'mentor_id' => $mentor->id ?? 1,
+            'scheduled_at' => now()->addDays(2),
+        ]);
+
+        Mail::to($recipient)->send(new SessionCancelled($session, $mentee, $mentor, collect([$mentee])));
+    }
+
+    private function testProfileReminder($recipient)
+    {
+        $this->line('🚀 Envoi Profile Reminder...');
+
+        $user = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Kouassi', 'user_type' => 'jeune']);
+        $missing = ["Passer le test MBTI", "Ajouter une biographie", "Ajouter une photo de profil"];
+
+        Mail::to($recipient)->send(new ProfileCompletionReminder($user, $missing));
+    }
+
+    private function testNewMentorsDigest($recipient)
+    {
+        $this->line('👥 Envoi New Mentors Digest...');
+
+        $jeune = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Kouassi']);
+
+        $mentors = User::where('user_type', 'mentor')->with('mentorProfile.specializationModel')->take(3)->get();
+        if ($mentors->isEmpty()) {
+            $mentors = collect([
+                new User(['name' => 'Adeline Koné', 'user_type' => 'mentor']),
+                new User(['name' => 'Moussa Traoré', 'user_type' => 'mentor']),
+            ]);
+            foreach ($mentors as $m) {
+                $m->setRelation('mentorProfile', (object)[
+                    'current_position' => 'Expert',
+                    'current_company' => 'Brillio Corp',
+                    'years_of_experience' => 10,
+                    'specialization' => 'tech',
+                    'specializationModel' => (object)['name' => 'Technologie & IT']
+                ]);
+            }
+        }
+
+        Mail::to($recipient)->send(new NewMentorsWeekly($jeune, $mentors));
     }
 }

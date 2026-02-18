@@ -4,9 +4,12 @@ namespace App\Services;
 
 use App\Mail\Mentorship\MentorshipAccepted;
 use App\Mail\Mentorship\MentorshipRequested;
+use App\Mail\Mentorship\MentorshipRefused;
 use App\Mail\Session\SessionCompleted;
 use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionProposed;
+use App\Mail\Session\SessionRefused;
+use App\Mail\Session\SessionCancelled;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\SystemSetting;
@@ -114,6 +117,49 @@ class MentorshipNotificationService
                 $sessionUrl,
                 $bookingUrl
                 ));
+        }
+    }
+
+    /**
+     * Envoyer une notification pour un mentorat refusé (au jeune)
+     */
+    public function sendMentorshipRefused(Mentorship $mentorship, ?string $reason = null)
+    {
+        $mentor = $mentorship->mentor;
+        $mentee = $mentorship->mentee;
+
+        Mail::to($mentee->email)->send(new MentorshipRefused($mentorship, $mentor, $mentee, $reason));
+    }
+
+    /**
+     * Envoyer une notification pour une séance refusée (au jeune)
+     */
+    public function sendSessionRefused(MentoringSession $session, ?string $reason = null)
+    {
+        $mentor = $session->mentor;
+        foreach ($session->mentees as $mentee) {
+            Mail::to($mentee->email)->send(new SessionRefused($session, $mentor, $mentee, $reason));
+        }
+    }
+
+    /**
+     * Envoyer une notification pour une séance annulée (à tous)
+     */
+    public function sendSessionCancelled(MentoringSession $session, User $cancelledBy)
+    {
+        $mentor = $session->mentor;
+        $mentees = $session->mentees;
+
+        // Notifier le mentor si ce n'est pas lui qui a annulé
+        if ($mentor->id !== $cancelledBy->id) {
+            Mail::to($mentor->email)->send(new SessionCancelled($session, $mentor, $cancelledBy, $mentees));
+        }
+
+        // Notifier les jeunes qui n'ont pas annulé
+        foreach ($mentees as $mentee) {
+            if ($mentee->id !== $cancelledBy->id) {
+                Mail::to($mentee->email)->send(new SessionCancelled($session, $mentee, $cancelledBy, $mentees));
+            }
         }
     }
 }
