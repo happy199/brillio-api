@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 class ResourceController extends Controller
 {
     protected $walletService;
-    protected $notificationService;
 
     // MBTI Groups configuration
     protected $mbtiGroups = [
@@ -43,10 +42,9 @@ class ResourceController extends Controller
         ]
     ];
 
-    public function __construct(WalletService $walletService, \App\Services\MentorshipNotificationService $notificationService)
+    public function __construct(WalletService $walletService)
     {
         $this->walletService = $walletService;
-        $this->notificationService = $notificationService;
     }
     public function index(Request $request)
     {
@@ -401,12 +399,9 @@ class ResourceController extends Controller
                         "Achat par {$user->name} de : {$resource->title}",
                         $purchase // On lie à l'achat (qui contient l'info de l'acheteur via user_id)
                     );
-
-                    // 4. Notifier le mentor de la vente
-                    $this->notificationService->sendResourcePurchased($resource, $user, $mentorCredits);
                 }
 
-                // 5. Incrémenter le compteur de ventes
+                // 4. Incrémenter le compteur de ventes
                 $resource->increment('sales_count');
             });
 

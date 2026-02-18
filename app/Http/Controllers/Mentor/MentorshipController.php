@@ -57,8 +57,7 @@ class MentorshipController extends Controller
             'updated_at' => now(),
         ]);
 
-        // Notification email au jeune
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipAccepted($mentorship);
+        // Notification logique ici (TODO)
 
         return redirect()->back()->with('success', 'Demande de mentorat acceptée avec succès.');
     }
@@ -81,9 +80,6 @@ class MentorshipController extends Controller
             'refusal_reason' => $request->refusal_reason,
             'updated_at' => now(),
         ]);
-
-        // Notification email au jeune
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipRefused($mentorship, $request->refusal_reason);
 
         return redirect()->back()->with('success', 'Demande refusée.');
     }
