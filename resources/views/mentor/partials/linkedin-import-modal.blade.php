@@ -1,6 +1,23 @@
 <!-- Modal Import LinkedIn -->
 <div id="linkedinImportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
     style="display: none;" x-data="linkedInImporter()">
+    <style>
+        @keyframes progress-stripes {
+            from {
+                background-position: 1rem 0;
+            }
+
+            to {
+                background-position: 0 0;
+            }
+        }
+
+        .progress-bar-striped {
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+            background-size: 1rem 1rem;
+            animation: progress-stripes 1s linear infinite;
+        }
+    </style>
     <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b sticky top-0 bg-white rounded-t-3xl">
             <div class="flex items-center justify-between">
@@ -18,8 +35,8 @@
             <!-- Messages d'erreur/succès -->
             <div x-show="errorMessage" x-cloak class="bg-red-50 border border-red-200 rounded-xl p-4">
                 <div class="flex gap-3">
-                    <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -32,8 +49,8 @@
 
             <div x-show="successMessage" x-cloak class="bg-green-50 border border-green-200 rounded-xl p-4">
                 <div class="flex gap-3">
-                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -69,8 +86,8 @@
                 <input type="file" accept=".pdf" @change="handleFileUpload($event)" class="hidden" x-ref="fileInput">
                 <div @click="$refs.fileInput.click()"
                     class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
-                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" width="64" height="64" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
+                    <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" width="64" height="64" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
@@ -79,12 +96,23 @@
                 </div>
             </div>
 
-            <!-- Loader -->
-            <div x-show="uploading" class="text-center py-12">
-                <div
-                    class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent">
+            <!-- Progress Bar & Amusing Messages -->
+            <div x-show="uploading" class="text-center py-12 space-y-6">
+                <div class="max-w-md mx-auto">
+                    <!-- Progress Bar Container -->
+                    <div
+                        class="h-6 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200 shadow-inner relative">
+                        <div class="h-full bg-gradient-to-r from-orange-400 to-orange-600 transition-all duration-300 ease-out progress-bar-striped"
+                            :style="`width: ${progress}%`"></div>
+                        <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-orange-900/50"
+                            x-text="Math.round(progress) + '%'"></div>
+                    </div>
                 </div>
-                <p class="mt-4 text-gray-600 font-medium">Analyse du PDF en cours...</p>
+
+                <div class="space-y-3">
+                    <p class="text-2xl font-black text-orange-600 animate-bounce" x-text="currentAmusingMessage"></p>
+                    <p class="text-sm text-gray-500 font-medium">Analyse méticuleuse de votre brillante carrière...</p>
+                </div>
             </div>
 
             <!-- Prévisualisation -->
@@ -112,8 +140,8 @@
                 <div x-show="parsedData?.suggestions" x-cloak
                     class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                     <div class="flex gap-3">
-                        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -149,16 +177,62 @@
     function linkedInImporter() {
         return {
             uploading: false,
+            progress: 0,
+            currentAmusingMessage: 'Initialisation...',
+            amusingMessages: {
+                0: "Décollage imminent... 🚀",
+                10: "Wow, quel parcours impressionnant ! ✨",
+                20: "Ouverture du PDF... C'est du lourd ! 📄",
+                30: "Analyse des compétences... Génie détecté ! 🧠",
+                40: "Beaucoup d'expérience, c'est du solide ! 💪",
+                50: "Extraction de vos exploits... Incroyable ! 🌟",
+                60: "L'IA est en pleine réflexion pour vous magnifier... 🤔",
+                70: "Encore quelques secondes de patience... ⏳",
+                80: "Aussi il faudra être résilient, on arrive au bout... 🔥",
+                90: "Finalisation du chef-d'œuvre... 🎨",
+                100: "Prêt ! Préparez-vous à être bluffé ! 🏁"
+            },
+            progressInterval: null,
             parsedData: null,
             pdfFile: null,
             errorMessage: '',
             successMessage: '',
 
+            startProgress() {
+                this.progress = 0;
+                this.updateMessage();
+
+                // Simulation réaliste : rapide au début, lente à la fin
+                this.progressInterval = setInterval(() => {
+                    if (this.progress < 95) {
+                        let step = (100 - this.progress) / 20; // Ralentit quand on approche de 100
+                        this.progress += Math.random() * step;
+                        this.updateMessage();
+                    }
+                }, 400);
+            },
+
+            updateMessage() {
+                // Trouver le message correspondant au palier atteint
+                const thresholds = Object.keys(this.amusingMessages).sort((a, b) => b - a);
+                for (let t of thresholds) {
+                    if (this.progress >= parseInt(t)) {
+                        this.currentAmusingMessage = this.amusingMessages[t];
+                        break;
+                    }
+                }
+            },
+
+            stopProgress() {
+                clearInterval(this.progressInterval);
+                this.progress = 100;
+                this.updateMessage();
+            },
+
             async handleFileUpload(event) {
                 const file = event.target.files[0];
                 if (!file) return;
 
-                // Réinitialiser les messages
                 this.errorMessage = '';
                 this.successMessage = '';
 
@@ -167,21 +241,19 @@
                     return;
                 }
 
-                // Vérifier la taille (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    this.errorMessage = 'Le fichier est trop volumineux (maximum 5MB)';
+                if (file.size > 10 * 1024 * 1024) { // Augmenté à 10MB car 10 pages peuvent être lourdes
+                    this.errorMessage = 'Le fichier est trop volumineux (maximum 10MB)';
                     return;
                 }
 
                 this.pdfFile = file;
                 this.uploading = true;
+                this.startProgress();
 
                 try {
-                    // Créer FormData pour envoyer le PDF
                     const formData = new FormData();
                     formData.append('pdf', file);
 
-                    // Envoyer au backend pour parsing
                     const response = await fetch('/espace-mentor/profil/linkedin-import', {
                         method: 'POST',
                         headers: {
@@ -204,26 +276,25 @@
                     this.errorMessage = 'Erreur de connexion au serveur. Veuillez réessayer.';
                     console.error('Upload error:', error);
                     this.reset();
+                } finally {
+                    this.stopProgress();
+                    setTimeout(() => {
+                        this.uploading = false;
+                    }, 500);
                 }
-
-                this.uploading = false;
             },
 
             async confirmImport() {
-                // Les données sont déjà sauvegardées, on recharge juste la page
                 this.successMessage = 'Profil importé avec succès ! Rechargement...';
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                setTimeout(() => window.location.reload(), 1500);
             },
 
             reset() {
                 this.parsedData = null;
                 this.uploading = false;
                 this.pdfFile = null;
-                if (this.$refs.fileInput) {
-                    this.$refs.fileInput.value = '';
-                }
+                clearInterval(this.progressInterval);
+                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
             },
 
             closeModal() {

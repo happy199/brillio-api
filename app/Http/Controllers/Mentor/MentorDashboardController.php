@@ -379,7 +379,7 @@ class MentorDashboardController extends Controller
             // Si aucune vérification n'a fonctionné
             if (!$isOwner) {
                 // Supprimer le fichier temporaire
-                \Storage::disk('local')->delete($pdfPath);
+                Storage::disk('local')->delete($pdfPath);
 
                 \Log::warning('LinkedIn import ownership mismatch', [
                     'user_id' => $user->id,
