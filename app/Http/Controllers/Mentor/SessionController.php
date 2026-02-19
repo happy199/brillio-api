@@ -32,10 +32,10 @@ class SessionController extends Controller
         // Récupérer historique (passé, annulé ou terminé)
         $pastSessions = $mentor->mentoringSessionsAsMentor()
             ->where(function ($query) {
-                $query->where('scheduled_at', '<', now())
-                    ->orWhere('status', 'cancelled')
-                    ->orWhere('status', 'completed');
-            })
+            $query->where('scheduled_at', '<', now())
+                ->orWhere('status', 'cancelled')
+                ->orWhere('status', 'completed');
+        })
             ->orderByDesc('scheduled_at')
             ->take(10)
             ->get();
@@ -142,6 +142,9 @@ class SessionController extends Controller
         foreach ($request->mentee_ids as $menteeId) {
             $session->mentees()->attach($menteeId, ['status' => $pivotStatus]);
         }
+
+        // Notification email au jeune
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionProposed($session);
 
         return redirect()->route('mentor.mentorship.sessions.show', $session)
             ->with('success', 'Séance proposée avec succès.');
@@ -259,7 +262,15 @@ class SessionController extends Controller
             'status' => 'completed', // Marquer comme terminée si compte rendu fait
         ]);
 
-        return redirect()->back()->with('success', 'Compte rendu enregistré.');
+        // CRITICAL: Trigger Payout to Mentor now that the report is submitted
+        if ($session->is_paid) {
+            app(\App\Services\WalletService::class)->payoutMentor($session);
+        }
+
+        // Notification email de fin de séance
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionCompleted($session);
+
+        return redirect()->back()->with('success', 'Compte rendu enregistré. Votre rémunération a été créditée sur votre portefeuille.');
     }
 
     /**
@@ -275,15 +286,24 @@ class SessionController extends Controller
             'cancel_reason' => 'required|string|max:500',
         ]);
 
+        // 1. Refund all paid mentees (100% since it's mentor's cancellation)
+        if ($session->is_paid) {
+            $walletService = app(\App\Services\WalletService::class);
+            foreach ($session->mentees as $mentee) {
+                $walletService->refundJeune($session, $mentee, 1.0);
+            }
+        }
+
         $session->update([
             'status' => 'cancelled',
             'cancel_reason' => $request->cancel_reason,
         ]);
 
-        // Remboursement éventuel à gérer ici si déjà payé via Wallet (TODO)
+        // Notification email d'annulation
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, Auth::user());
 
         return redirect()->route('mentor.mentorship.calendar')
-            ->with('success', 'Séance annulée.');
+            ->with('success', 'Séance annulée. ' . ($session->is_paid ? 'Les participants ont été intégralement remboursés.' : ''));
     }
     /**
      * Accepter une demande de séance
@@ -325,6 +345,11 @@ class SessionController extends Controller
             ? 'Séance acceptée. Le jeune doit maintenant procéder au paiement.'
             : 'Séance acceptée et confirmée.';
 
+        // Si gratuit (confirmé direct), notifier
+        if (!$isPaid) {
+            app(\App\Services\MentorshipNotificationService::class)->sendSessionConfirmed($session);
+        }
+
         return redirect()->back()->with('success', $message);
     }
 
@@ -345,6 +370,9 @@ class SessionController extends Controller
             'status' => 'cancelled',
             'cancel_reason' => $request->refusal_reason,
         ]);
+
+        // Notification email de refus au jeune
+        app(\App\Services\MentorshipNotificationService::class)->sendSessionRefused($session, $request->refusal_reason);
 
         return redirect()->back()->with('success', 'Demande de séance refusée.');
     }

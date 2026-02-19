@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use App\Services\MentorshipNotificationService;
 
 /**
  * Controller pour l'authentification API
@@ -20,6 +22,10 @@ use Illuminate\Support\Facades\Storage;
  */
 class AuthController extends Controller
 {
+    public function __construct(
+        private MentorshipNotificationService $notificationService
+    ) {}
+
     /**
      * Inscription d'un nouvel utilisateur
      *
@@ -40,6 +46,13 @@ class AuthController extends Controller
             'country' => $validated['country'] ?? null,
             'city' => $validated['city'] ?? null,
         ]);
+
+        // Envoyer l'email de bienvenue
+        try {
+            $this->notificationService->sendWelcomeEmail($user);
+        } catch (\Exception $e) {
+            \Log::error('Erreur envoi email bienvenue API: ' . $e->getMessage());
+        }
 
         // Créer le token d'accès
         $token = $user->createToken('auth_token')->plainTextToken;
