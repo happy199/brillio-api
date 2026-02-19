@@ -229,6 +229,26 @@ jobs:
             
             echo "✅ Jitsi (JAAS) keys configured"
 
+            # Configure SMTP Production Keys
+            echo "🔐 Configuring SMTP (Namecheap) keys..."
+            
+            # Remove any existing Mail config
+            sed -i '/^MAIL_/d' .env
+            
+            # Add production Mail config
+            echo "" >> .env
+            echo "# Mail Configuration (Production - Namecheap)" >> .env
+            echo "MAIL_MAILER=smtp" >> .env
+            echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> .env
+            echo "MAIL_PORT=${{ secrets.MAIL_PORT }}" >> .env
+            echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" >> .env
+            echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
+            echo "MAIL_ENCRYPTION=${{ secrets.MAIL_ENCRYPTION }}" >> .env
+            echo "MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}" >> .env
+            echo "MAIL_FROM_NAME=\"${APP_NAME}\"" >> .env
+            
+            echo "✅ SMTP production keys configured"
+
             # Deploy JAAS private key as separate PEM file
             echo "🔐 Deploying JAAS private key file..."
             echo '${{ secrets.JAAS_PRIVATE_KEY }}' | base64 -d | sudo tee storage/jaas_private.pem > /dev/null
