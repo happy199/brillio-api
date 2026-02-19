@@ -245,7 +245,7 @@ jobs:
             echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
             echo "MAIL_ENCRYPTION=${{ secrets.MAIL_ENCRYPTION }}" >> .env
             echo "MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}" >> .env
-            echo "MAIL_FROM_NAME=\"${APP_NAME}\"" >> .env
+            echo "MAIL_FROM_NAME=\"Brillio\"" >> .env
             
             echo "✅ SMTP production keys configured"
 
