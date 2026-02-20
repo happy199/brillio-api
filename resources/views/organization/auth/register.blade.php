@@ -2,8 +2,8 @@
 
 @section('title', isset($invitation) ? 'Rejoindre ' . $invitation->organization->name : 'Inscription Organisation')
 @section('heading', isset($invitation) ? 'Rejoindre l\'équipe' : 'Devenir Partenaire')
-@section('subheading', isset($invitation) ? 'Rejoignez ' . $invitation->organization->name . ' sur Brillio' : 'Rejoignez
-Brillio pour recruter et former les talents de demain')
+@section('subheading', isset($invitation) ? 'Rejoignez ' . $invitation->organization->name . ' sur Brillio' : 'Sponsorez
+des talents et accompagnez l\'avenir de la jeunesse avec Brillio')
 @section('card_width', 'sm:max-w-2xl')
 
 @section('content')
@@ -65,7 +65,7 @@ Brillio pour recruter et former les talents de demain')
                 <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone</label>
                 <input id="phone" name="phone" type="tel"
                     class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all"
-                    value="{{ old('phone') }}" placeholder="+225 ...">
+                    value="{{ old('phone') }}" placeholder="+229 ...">
             </div>
         </div>
 
