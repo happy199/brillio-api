@@ -66,8 +66,10 @@
                     <select id="role" name="role"
                         class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md px-4 py-3">
                         <option value="jeune" selected>Jeune Sponsorisé (Accès apprenant)</option>
+                        @if($organization->isEnterprise())
                         <option value="admin">Administrateur (Gestion complète de l'organisation)</option>
                         <option value="viewer">Observateur (Consultation en lecture seule)</option>
+                        @endif
                     </select>
                 </div>
                 <p class="mt-2 text-sm text-gray-500">

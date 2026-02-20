@@ -119,9 +119,23 @@
 
                         <!-- Branding & Customization Section -->
                         <div class="pt-6 border-t border-gray-200">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Personnalisation (Marque
-                                Blanche)</h3>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">
+                                Personnalisation (Marque Blanche)
+                                @if(!$organization->isEnterprise())
+                                <span
+                                    class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <svg class="-ml-0.5 mr-1.5 h-3 w-3 text-yellow-400" fill="currentColor"
+                                        viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Plan Enterprise Requis
+                                </span>
+                                @endif
+                            </h3>
 
+                            @if($organization->isEnterprise())
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <!-- Primary Color -->
                                 <div>
@@ -200,6 +214,28 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
+                            @else
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Fonctionnalité Premium "Marque
+                                    Blanche"</h3>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Sublimez votre espace partenaire avec vos propres couleurs (primaire, secondaire) et
+                                    votre nom de domaine personnalisé. Intégration transparente pour votre équipe.<br>
+                                    Accessible uniquement avec le plan <strong>Enterprise (50.000 FCFA/mois)</strong>.
+                                </p>
+                                <div class="mt-6">
+                                    <a href="{{ route('organization.subscriptions.index') }}"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-organization-600 hover:bg-organization-700">
+                                        Mettre à niveau le plan
+                                    </a>
+                                </div>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -238,7 +274,7 @@
                 }
             }
 
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURfiles[0]);
         }
     }
 </script>

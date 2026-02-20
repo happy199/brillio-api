@@ -78,6 +78,11 @@ class InvitationController extends Controller
         $expiresDays = (int)($validated['expires_days'] ?? 30);
         $role = $validated['role'] ?? 'jeune';
 
+        // Security check: Only Enterprise organizations can invite staff (Admins/Viewers)
+        if (in_array($role, ['admin', 'viewer']) && !$organization->isEnterprise()) {
+            $role = 'jeune';
+        }
+
         $createdInvitations = [];
 
         // If emails provided, create one invitation per email

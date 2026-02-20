@@ -181,9 +181,24 @@
                         @else
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            Marque Blanche (Logo & Couleurs)
+                        </li>
+                        <li class="flex gap-x-3">
+                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            Nom de domaine personnalisé
+                        </li>
+                        <li class="flex gap-x-3">
+                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
                             Centre d'Export (PDF, Excel, CSV)
                         </li>
-                        <!-- ... original support text ... -->
+                        <li class="flex gap-x-3">
+                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            Support dédié
+                        </li>
+                        <li class="flex gap-x-3">
+                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            50 Crédits/mois offerts
+                        </li>
                         @endif
                     </ul>
                     <a href="mailto:contact@brillio.africa?subject=Demande%20Plan%20Entreprise%20-%20{{ auth()->user()->organization->name ?? '' }}"

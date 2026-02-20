@@ -2,6 +2,15 @@
 <html lang="fr">
 
 <head>
+    @php
+    $org = auth()->check() ? auth()->user()->organization : null;
+    $primary = $org?->primary_color ?? '#f43f5e';
+
+    // Si pas de couleur secondaire, on assombrit légèrement la primaire (simulation basique)
+    // Pour faire propre sans librairie, on utilise soit la secondaire en DB, soit une fallback hardcodée par défaut
+    $secondary = $org?->secondary_color ?? '#e11d48';
+    $accent = $org?->accent_color ?? '#fb7185';
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -12,7 +21,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#f43f5e">
+    <meta name="theme-color" content="{{ $primary }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,15 +31,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
-        @php
-        $org = auth() -> check() ? auth() -> user() -> organization : null;
-        $primary = $org ? -> primary_color ?? '#f43f5e';
-
-        // Si pas de couleur secondaire, on assombrit légèrement la primaire (simulation basique)
-        // Pour faire propre sans librairie, on utilise soit la secondaire en DB, soit une fallback hardcodée par défaut
-        $secondary = $org ? -> secondary_color ?? '#e11d48';
-        $accent = $org ? -> accent_color ?? '#fb7185';
-        @endphp
 
         tailwind.config = {
             theme: {
@@ -213,7 +213,7 @@
             input.select();
             input.setSelectionRange(0, 99999); // For mobile devices
             navigator.clipboard.writeText(input.value).then(function () {
-                alert('Lien copié dans le presse-papiers !');
+                alerien copié dans le presse - papiers!');
             }, function (err) {
                 alert('Erreur lors de la copie.');
             });

@@ -73,9 +73,10 @@ class OrganizationSubscriptionSeeder extends Seeder
             'target_plan' => Organization::PLAN_ENTERPRISE,
             'price' => 50000,
             'credits' => 50, // 50 credits offered per month
-            'description' => 'Support dédié, exports complets, 50 crédits offerts.',
+            'description' => 'Personnalisation totale (Marque Blanche), domaine personnalisé et support dédié.',
             'features' => [
-                'Tout du plan Pro',
+                'Marque Blanche (Logo & Couleurs)',
+                'Nom de domaine personnalisé',
                 'Centre d\'Export',
                 'Support dédié',
                 '50 Crédits/mois offerts'
@@ -98,7 +99,7 @@ class OrganizationSubscriptionSeeder extends Seeder
             'target_plan' => Organization::PLAN_ENTERPRISE,
             'price' => 500000, // 2 months free
             'credits' => 600, // 50 * 12
-            'description' => 'Support dédié, exports complets, crédits inclus. (2 mois offerts)',
+            'description' => 'Personnalisation totale (Marque Blanche), domaine personnalisé et crédits inclus. (2 mois offerts)',
             'features' => [
                 'Tout du plan Mensuel',
                 '2 mois offerts'

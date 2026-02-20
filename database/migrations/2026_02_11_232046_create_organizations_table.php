@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('logo_url')->nullable();
-            $table->string('primary_color')->default('#10b981'); // Green
+            $table->string('primary_color')->default('#f43f5e'); // Brillio Red
             $table->string('contact_email');
             $table->string('phone')->nullable();
             $table->string('website')->nullable();
