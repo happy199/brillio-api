@@ -1,24 +1,31 @@
 #!/bin/bash
 
-# Script de backup MySQL automatique
+# Script de backup automatique (DB + Fichiers)
 # À exécuter via cron : 0 2 * * * /path/to/backup-mysql.sh
 
 set -e
 
 # Configuration
-BACKUP_DIR="/var/backups/mysql"
+BACKUP_DIR="/var/backups/brillio"
 DB_NAME="${DB_DATABASE:-brillioapi}"
 DB_USER="${DB_USERNAME:-root}"
 DB_PASS="${DB_PASSWORD}"
 DB_HOST="${DB_HOST:-localhost}"
 RETENTION_DAYS=30
 DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="${BACKUP_DIR}/backup_${DB_NAME}_${DATE}.sql.gz"
+
+# Fichiers de backup
+BACKUP_SQL="${BACKUP_DIR}/backup_${DB_NAME}_${DATE}.sql.gz"
+BACKUP_FILES="${BACKUP_DIR}/backup_files_${DATE}.tar.gz"
+
+# Répertoires à sauvegarder
+APP_ROOT="/opt/brillio-api"
+STORAGE_DIR="${APP_ROOT}/storage/app"
 
 # Créer le répertoire de backup s'il n'existe pas
 mkdir -p "$BACKUP_DIR"
 
-# Effectuer le backup
+# 1. Backup de la Base de Données
 echo "🔄 Début du backup de la base de données ${DB_NAME}..."
 mysqldump -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" \
     --single-transaction \
@@ -27,24 +34,30 @@ mysqldump -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" \
     --routines \
     --triggers \
     --events \
-    | gzip > "$BACKUP_FILE"
+    | gzip > "$BACKUP_SQL"
 
-# Vérifier que le backup a réussi
 if [ $? -eq 0 ]; then
-    echo "✅ Backup créé avec succès : $BACKUP_FILE"
-    FILE_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
-    echo "📦 Taille du fichier : $FILE_SIZE"
+    echo "✅ Backup SQL créé : $BACKUP_SQL ($(du -h "$BACKUP_SQL" | cut -f1))"
 else
-    echo "❌ Erreur lors du backup"
+    echo "❌ Erreur lors du backup SQL"
     exit 1
 fi
 
-# Supprimer les backups de plus de X jours
+# 2. Backup des Fichiers (LinkedIn PDFs, Photos, etc.)
+echo "📂 Début du backup des fichiers de stockage..."
+if [ -d "$STORAGE_DIR" ]; then
+    tar -czf "$BACKUP_FILES" -C "$STORAGE_DIR" .
+    echo "✅ Backup fichiers créé : $BACKUP_FILES ($(du -h "$BACKUP_FILES" | cut -f1))"
+else
+    echo "⚠️ Répertoire de stockage non trouvé : $STORAGE_DIR"
+fi
+
+# 3. Nettoyage des anciens backups
 echo "🗑️  Suppression des backups de plus de ${RETENTION_DAYS} jours..."
-find "$BACKUP_DIR" -name "backup_*.sql.gz" -mtime +$RETENTION_DAYS -delete
+find "$BACKUP_DIR" -name "backup_*.gz" -mtime +$RETENTION_DAYS -delete
 
-# Lister les backups restants
-echo "📋 Backups disponibles :"
-ls -lh "$BACKUP_DIR"/backup_*.sql.gz 2>/dev/null || echo "Aucun backup trouvé"
+# Liste récapitulative
+echo "📋 Backups disponibles dans $BACKUP_DIR :"
+ls -lh "$BACKUP_DIR" | grep "backup_"
 
-echo "✅ Backup terminé avec succès"
+echo "✅ Sauvegarde terminée avec succès"

@@ -134,6 +134,40 @@ jobs:
           echo "Scanning host: ${{ secrets.GCP_VM_IP }}"
           ssh-keyscan -H -t rsa,ed25519 ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts || true
 
+      - name: Check Permissions
+        run: |
+          ssh ${{ secrets.GCP_VM_USER }}@${{ secrets.GCP_VM_IP }} << 'ENDSSH'
+            echo "🔍 Checking write permissions on target..."
+            TARGET="/opt/brillio-api"
+            
+            if [ -d "$TARGET" ]; then
+                # Check main directory
+                if [ ! -w "$TARGET" ]; then
+                    echo "❌ CRTICAL: $TARGET is not writable by current user ($(whoami))."
+                    exit 1
+                fi
+                
+                # Check problematic subdirectories if they exist
+                for SUBDIR in public/build storage bootstrap/cache; do
+                    FULLPATH="$TARGET/$SUBDIR"
+                    if [ -d "$FULLPATH" ]; then
+                        # Try to touch a temporary file to verify true write access (handles ownership issues better than -w sometimes)
+                        if ! touch "$FULLPATH/.perm_test" 2>/dev/null; then
+                            echo "❌ CRITICAL: Cannot write to $FULLPATH. Likely owned by root."
+                            ls -ld "$FULLPATH"
+                            exit 1
+                        else
+                            rm "$FULLPATH/.perm_test"
+                        fi
+                    fi
+                done
+                
+                echo "✅ Permissions OK."
+            else
+                 echo "⚠️ Target directory $TARGET does not exist yet. Skipping check."
+            fi
+          ENDSSH
+
       - name: Copy docker-compose and config files
         run: |
           rsync -avz --delete --no-owner --no-group --no-perms --no-times \
@@ -183,15 +217,44 @@ jobs:
             # Remove any existing JAAS config
             sed -i '/^JAAS_/d' .env
             
+            # Decode base64 JAAS_PRIVATE_KEY and escape newlines for .env
+            JAAS_KEY=$(echo '${{ secrets.JAAS_PRIVATE_KEY }}' | base64 -d | awk '{printf "%s\\n", $0}' | sed '$ s/\\n$//')
+            
             # Add JAAS config from secrets
             echo "" >> .env
             echo "# Jitsi (JAAS) Configuration" >> .env
             echo "JAAS_APP_ID=${{ secrets.JAAS_APP_ID }}" >> .env
             echo "JAAS_KEY_ID=${{ secrets.JAAS_KEY_ID }}" >> .env
-            # Use printf with %s to safely handle multiline private key
-            printf 'JAAS_PRIVATE_KEY="%s"\n' '${{ secrets.JAAS_PRIVATE_KEY }}' >> .env
+            echo "JAAS_PRIVATE_KEY=\"$JAAS_KEY\"" >> .env
             
             echo "✅ Jitsi (JAAS) keys configured"
+
+            # Configure SMTP Production Keys
+            echo "🔐 Configuring SMTP (Namecheap) keys..."
+            
+            # Remove any existing Mail config
+            sed -i '/^MAIL_/d' .env
+            
+            # Add production Mail config
+            echo "" >> .env
+            echo "# Mail Configuration (Production - Namecheap)" >> .env
+            echo "MAIL_MAILER=smtp" >> .env
+            echo "MAIL_HOST=${{ secrets.MAIL_HOST }}" >> .env
+            echo "MAIL_PORT=${{ secrets.MAIL_PORT }}" >> .env
+            echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" >> .env
+            echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
+            echo "MAIL_ENCRYPTION=${{ secrets.MAIL_ENCRYPTION }}" >> .env
+            echo "MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}" >> .env
+            echo "MAIL_FROM_NAME=\"Brillio\"" >> .env
+            
+            echo "✅ SMTP production keys configured"
+
+            # Deploy JAAS private key as separate PEM file
+            echo "🔐 Deploying JAAS private key file..."
+            echo '${{ secrets.JAAS_PRIVATE_KEY }}' | base64 -d | sudo tee storage/jaas_private.pem > /dev/null
+            sudo chmod 644 storage/jaas_private.pem
+            sudo chown root:root storage/jaas_private.pem
+            echo "✅ JAAS private key file deployed: storage/jaas_private.pem"
 
             # Validate .env syntax before proceeding
             echo "🔍 Validating .env syntax..."

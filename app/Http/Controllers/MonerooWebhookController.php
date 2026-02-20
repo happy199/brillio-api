@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MonerooTransaction;
 use App\Models\PayoutRequest;
+use App\Services\MentorshipNotificationService;
 use App\Services\MonerooService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
@@ -13,11 +14,13 @@ class MonerooWebhookController extends Controller
 {
     protected MonerooService $monerooService;
     protected WalletService $walletService;
+    protected MentorshipNotificationService $notificationService;
 
-    public function __construct(MonerooService $monerooService, WalletService $walletService)
+    public function __construct(MonerooService $monerooService, WalletService $walletService, MentorshipNotificationService $notificationService)
     {
         $this->monerooService = $monerooService;
         $this->walletService = $walletService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -147,6 +150,9 @@ class MonerooWebhookController extends Controller
                 'credits' => $transaction->credits_amount,
             ]);
 
+            // Notification email
+            $this->notificationService->sendCreditRecharge($user, $transaction->credits_amount);
+
             return response()->json(['message' => 'Payment processed'], 200);
 
         }
@@ -227,6 +233,9 @@ class MonerooWebhookController extends Controller
                 'amount' => $payoutRequest->amount
             ]);
 
+            // Notification email
+            $this->notificationService->sendPayoutProcessed($payoutRequest);
+
             return response()->json(['message' => 'Payout completed'], 200);
 
         }
@@ -288,6 +297,9 @@ class MonerooWebhookController extends Controller
                 'amount_refunded' => $payoutRequest->amount,
                 'credits_refunded' => $creditsRefund
             ]);
+
+            // Notification email
+            $this->notificationService->sendPayoutProcessed($payoutRequest);
 
             return response()->json(['message' => 'Payout failure processed'], 200);
 

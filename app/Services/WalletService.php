@@ -194,4 +194,92 @@ class WalletService
         // Exemple keys: feature_cost_advanced_targeting
         return SystemSetting::getValue('feature_cost_' . $featureKey, $default);
     }
+    /**
+     * Effectue le paiement différé au mentor après la séance (Une fois le compte rendu soumis)
+     */
+    public function payoutMentor(\App\Models\MentoringSession $session)
+    {
+        if (!$session->is_paid || $session->status !== 'completed') {
+            return;
+        }
+
+        // Vérifier si déjà payé pour éviter les doublons
+        $alreadyPaid = WalletTransaction::where('user_id', $session->mentor_id)
+            ->where('related_type', \App\Models\MentoringSession::class)
+            ->where('related_id', $session->id)
+            ->where('type', 'income')
+            ->exists();
+
+        if ($alreadyPaid) {
+            return;
+        }
+
+        return DB::transaction(function () use ($session) {
+            $mentor = $session->mentor;
+
+            // Calcul des montants
+            $commissionPercent = SystemSetting::getValue('mentorship_commission_percent', 10);
+
+            $jeuneCreditPrice = $this->getCreditPrice('jeune');
+            $grossFcfa = $session->price; // Total payé par le jeune en FCFA (via crédits)
+
+            $commissionFcfa = floor($grossFcfa * ($commissionPercent / 100));
+            $netFcfa = $grossFcfa - $commissionFcfa;
+
+            $mentorCreditPrice = $this->getCreditPrice('mentor');
+            $mentorCredits = floor($netFcfa / $mentorCreditPrice);
+
+            $this->addCredits(
+                $mentor,
+                $mentorCredits,
+                'income',
+                "Rémunération séance terminée : {$session->title} (-{$commissionPercent}% com.)",
+                $session
+            );
+
+            // Notification au mentor que l'argent est libéré
+            app(\App\Services\MentorshipNotificationService::class)->sendIncomeReleased($session, $mentor, $mentorCredits);
+        });
+    }
+
+    /**
+     * Rembourse un jeune suite à une annulation
+     * @param float $ratio Facteur de remboursement (0.75 ou 1.0)
+     */
+    public function refundJeune(\App\Models\MentoringSession $session, User $user, float $ratio = 1.0)
+    {
+        if (!$session->is_paid) {
+            return;
+        }
+
+        // On cherche la transaction de débit initiale pour cette séance
+        $debitTransaction = WalletTransaction::where('user_id', $user->id)
+            ->where('related_type', \App\Models\MentoringSession::class)
+            ->where('related_id', $session->id)
+            ->where('amount', '<', 0)
+            ->first();
+
+        if (!$debitTransaction) {
+            return;
+        }
+
+        $paidAmount = abs($debitTransaction->amount);
+        $refundAmount = floor($paidAmount * $ratio);
+
+        if ($refundAmount <= 0) {
+            return;
+        }
+
+        $description = $ratio < 1.0
+            ? "Remboursement partiel (75%) annulation tardive : {$session->title}"
+            : "Remboursement intégral annulation : {$session->title}";
+
+        return $this->addCredits(
+            $user,
+            $refundAmount,
+            'refund',
+            $description,
+            $session
+        );
+    }
 }

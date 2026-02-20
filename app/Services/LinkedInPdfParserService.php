@@ -7,11 +7,19 @@ use Illuminate\Support\Facades\Log;
 
 class LinkedInPdfParserService
 {
+    private DeepSeekService $deepSeekService;
+
+    public function __construct(DeepSeekService $deepSeekService)
+    {
+        $this->deepSeekService = $deepSeekService;
+    }
+
     /**
-     * Parse un PDF LinkedIn et extrait les informations
+     * Parse un PDF LinkedIn et extrait les informations (Hybride: IA avec Fallback Regex)
      */
     public function parsePdf($pdfPath)
     {
+        $text = '';
         try {
             $parser = new Parser();
             $pdf = $parser->parseFile($pdfPath);
@@ -24,37 +32,81 @@ class LinkedInPdfParserService
                 'first_1000_chars' => substr($text, 0, 1000)
             ]);
 
-            // Nettoyer et diviser en lignes
-            $lines = $this->cleanAndSplitText($text);
+            // Tentative de parsing via IA
+            return $this->parseWithAI($text);
 
-            // Parser les différentes sections
-            $data = [
-                'name' => $this->extractName($lines),
-                'headline' => $this->extractHeadline($lines),
-                'contact' => $this->extractContact($lines),
-                'summary' => '', // Rarement présent dans les PDFs LinkedIn
-                'experience' => $this->extractExperience($lines),
-                'education' => $this->extractEducation($lines),
-                'skills' => $this->extractSkills($lines),
-            ];
-
-            // Logger chaque champ extrait
-            Log::info('✅ LinkedIn PDF Parsing Results', [
-                'name' => $data['name'],
-                'headline' => $data['headline'],
-                'contact' => $data['contact'],
-                'experience_count' => count($data['experience']),
-                'education_count' => count($data['education']),
-                'skills_count' => count($data['skills']),
-                'skills' => $data['skills']
+        }
+        catch (\Exception $e) {
+            Log::warning('⚠️ AI Parsing failed, falling back to legacy regex parser', [
+                'error' => $e->getMessage()
             ]);
 
-            return $data;
-
-        } catch (\Exception $e) {
-            Log::error('❌ PDF Parsing Error', ['error' => $e->getMessage()]);
-            throw new \Exception('Impossible de lire le PDF : ' . $e->getMessage());
+            // Fallback sur l'ancien système si l'IA échoue
+            return $this->parseLegacy($text);
         }
+    }
+
+    /**
+     * Parsing via IA (DeepSeek/Gemini)
+     */
+    private function parseWithAI($text)
+    {
+        $systemPrompt = "Tu es un expert en extraction de données de CV (Resume Parser).\n" .
+            "Ta mission est d'analyser le texte brut d'un profil LinkedIn PDF et d'en extraire les informations structurées au format JSON STRICT.\n\n" .
+            "RÈGLES IMPORTANTES :\n" .
+            "- Ne jamais inventer d'information. Si une info est manquante, mets null ou une chaine vide.\n" .
+            "- Répont UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n" .
+            "- Le format de sortie doit respecter exactement la structure demandée.\n\n" .
+            "STRUCTURE JSON ATTENDUE :\n" .
+            '{"name": "Nom complet", "headline": "Titre du profil ou poste actuel", "contact": {"email": "email found or empty", "phone": "phone found or empty", "linkedin": "linkedin url or empty", "website": "website url or empty"}, "summary": "Bio", "skills": ["Compétence 1"], "experience": [{"title": "Poste", "company": "Entreprise", "description": "Tâches", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD", "duration_years": 0, "duration_months": 0}], "education": [{"school": "Ecole", "degree": "Diplôme", "year_start": 0, "year_end": 0}]}';
+
+        $prompt = "Voici le contenu brut du PDF LinkedIn. Extrais les données en JSON :\n\n" . substr($text, 0, 60000);
+
+        Log::info('🤖 Sending PDF text to AI...');
+        $jsonResponse = $this->deepSeekService->analyzeText($prompt, $systemPrompt);
+
+        $cleanJson = $this->deepSeekService->cleanJson($jsonResponse);
+        $data = json_decode($cleanJson, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('Erreur lors du décodage de la réponse IA: ' . json_last_error_msg());
+        }
+
+        // Stats
+        Log::info('✅ AI Parsing Successful', [
+            'name' => $data['name'] ?? 'Unknown'
+        ]);
+
+        return $data;
+    }
+
+    /**
+     * Ancien système de parsing basé sur les Regex (Fallback)
+     */
+    private function parseLegacy($text)
+    {
+        if (empty($text)) {
+            throw new \Exception('Texte extrait vide, impossible d\'utiliser le fallback.');
+        }
+
+        Log::info('🕵️ Using Legacy Regex Parser Fallback');
+
+        // Nettoyer et diviser en lignes
+        $lines = $this->cleanAndSplitText($text);
+
+        // Parser les différentes sections
+        $data = [
+            'name' => $this->extractName($lines),
+            'headline' => $this->extractHeadline($lines),
+            'contact' => $this->extractContact($lines),
+            'summary' => '',
+            'experience' => $this->extractExperience($lines),
+            'education' => $this->extractEducation($lines),
+            'skills' => $this->extractSkills($lines),
+            'is_fallback' => true // Flag pour info
+        ];
+
+        return $data;
     }
 
     /**
@@ -62,10 +114,7 @@ class LinkedInPdfParserService
      */
     private function cleanAndSplitText($text)
     {
-        // Supprimer les numéros de page
         $text = preg_replace('/Page \d+ of \d+/', '', $text);
-
-        // Diviser en lignes et nettoyer
         $lines = explode("\n", $text);
         $cleanLines = [];
 
@@ -79,109 +128,59 @@ class LinkedInPdfParserService
         return $cleanLines;
     }
 
-    /**
-     * Extraire le nom (3 lignes avant "Expérience")
-     */
     private function extractName($lines)
     {
-        // Trouver l'index de "Expérience"
         foreach ($lines as $i => $line) {
             $lineLower = strtolower(trim($line));
-
             if (str_contains($lineLower, 'expérience') || $lineLower === 'experience') {
-                // Remonter de 3 lignes pour trouver le nom
-                if ($i >= 3) {
+                if ($i >= 3)
                     return trim($lines[$i - 3]);
-                }
                 break;
             }
         }
-
         return '';
     }
 
-    /**
-     * Extraire le headline (2 lignes avant "Expérience")
-     */
     private function extractHeadline($lines)
     {
-        // Trouver l'index de "Expérience"
         foreach ($lines as $i => $line) {
             $lineLower = strtolower(trim($line));
-
             if (str_contains($lineLower, 'expérience') || $lineLower === 'experience') {
-                // Remonter de 2 lignes pour trouver le headline
-                if ($i >= 2) {
+                if ($i >= 2)
                     return trim($lines[$i - 2]);
-                }
                 break;
             }
         }
-
         return '';
     }
 
-    /**
-     * Extraire les informations de contact
-     */
     private function extractContact($lines)
     {
-        $contact = [
-            'email' => '',
-            'phone' => '',
-            'linkedin' => '',
-            'website' => ''
-        ];
-
-        $linkedinUrl = '';
-
+        $contact = ['email' => '', 'phone' => '', 'linkedin' => '', 'website' => ''];
         foreach ($lines as $i => $line) {
-            // Email
-            if (preg_match('/[\w\.-]+@[\w\.-]+\.\w+/', $line, $matches)) {
+            if (preg_match('/[\w\.-]+@[\w\.-]+\.\w+/', $line, $matches))
                 $contact['email'] = $matches[0];
-            }
-
-            // LinkedIn URL (peut être sur 2 lignes)
             if (preg_match('/linkedin\.com\/in\/([\w-]+)/', $line, $matches)) {
-                $linkedinUrl = 'linkedin.com/in/' . $matches[1];
-
-                // Vérifier la ligne suivante pour la suite de l'URL
-                if (isset($lines[$i + 1])) {
-                    $nextLine = $lines[$i + 1];
-                    // Si la ligne suivante contient (LinkedIn), extraire la partie avant
-                    if (str_contains($nextLine, '(LinkedIn)')) {
-                        $urlPart = trim(str_replace('(LinkedIn)', '', $nextLine));
-                        $linkedinUrl .= $urlPart;
-                    }
+                $url = 'https://linkedin.com/in/' . $matches[1];
+                if (isset($lines[$i + 1]) && str_contains($lines[$i + 1], '(LinkedIn)')) {
+                    $url .= trim(str_replace('(LinkedIn)', '', $lines[$i + 1]));
                 }
-
-                $contact['linkedin'] = 'https://' . $linkedinUrl;
+                $contact['linkedin'] = $url;
             }
-
-            // Site web (format: domain.ext (Company))
-            if (preg_match('/([a-z0-9-]+\.[a-z]{2,}(?:\.[a-z]{2,})?)\s*\(Company\)/i', $line, $matches)) {
+            if (preg_match('/([a-z0-9-]+\.[a-z]{2,})\s*\(Company\)/i', $line, $matches))
                 $contact['website'] = 'https://' . $matches[1];
-            }
-
-            // Téléphone
-            if (preg_match('/\+?\d{10,}/', $line, $matches)) {
+            if (preg_match('/\+?\d{10,}/', $line, $matches))
                 $contact['phone'] = $matches[0];
-            }
         }
-
         return $contact;
     }
 
-    /**
-     * Extraire les compétences (après "Principales compétences", avant nom/headline/location)
-     */
     private function extractSkills($lines)
     {
         $skills = [];
         $inSkillsSection = false;
         $experienceIndex = null;
 
-        // Trouver l'index de "Expérience" d'abord
         foreach ($lines as $i => $line) {
             if (stripos($line, 'Expérience') !== false || stripos($line, 'Experience') !== false) {
                 $experienceIndex = $i;
@@ -190,173 +189,108 @@ class LinkedInPdfParserService
         }
 
         foreach ($lines as $i => $line) {
-            // Détecter "Principales compétences"
             if (stripos($line, 'Principales compétences') !== false || stripos($line, 'Skills') !== false) {
                 $inSkillsSection = true;
                 continue;
             }
-
             if ($inSkillsSection) {
-                // Arrêter 3 lignes avant "Expérience" (pour exclure nom, headline, localisation)
-                if ($experienceIndex !== null && $i >= ($experienceIndex - 3)) {
+                if ($experienceIndex !== null && $i >= ($experienceIndex - 3))
                     break;
-                }
-
-                // Ajouter la ligne comme compétence
-                if (strlen($line) > 2 && strlen($line) < 100) {
+                if (strlen($line) > 2 && strlen($line) < 100)
                     $skills[] = $line;
-                }
             }
         }
-
         return array_unique($skills);
     }
 
-    /**
-     * Extraire les expériences (blocs de 4 lignes après "Expérience")
-     */
     private function extractExperience($lines)
     {
         $experiences = [];
-        $inExperienceSection = false;
-        $currentBlock = [];
+        $inSection = false;
+        $block = [];
 
-        foreach ($lines as $i => $line) {
-            // Détecter la section "Expérience"
+        foreach ($lines as $line) {
             if (stripos($line, 'Expérience') !== false || stripos($line, 'Experience') !== false) {
-                $inExperienceSection = true;
+                $inSection = true;
                 continue;
             }
-
-            // Arrêter à "Formation"
-            if (stripos($line, 'Formation') !== false || stripos($line, 'Education') !== false) {
+            if (stripos($line, 'Formation') !== false || stripos($line, 'Education') !== false)
                 break;
-            }
 
-            if ($inExperienceSection) {
-                $currentBlock[] = $line;
-
-                // Tous les 4 lignes = une expérience
-                if (count($currentBlock) === 4) {
-                    $exp = $this->parseExperienceBlock($currentBlock);
-                    if ($exp) {
+            if ($inSection) {
+                $block[] = $line;
+                if (count($block) === 4) {
+                    $exp = $this->parseExperienceBlock($block);
+                    if ($exp)
                         $experiences[] = $exp;
-                    }
-                    $currentBlock = [];
+                    $block = [];
                 }
             }
         }
-
         return $experiences;
     }
 
-    /**
-     * Parser un bloc d'expérience (4 lignes)
-     */
     private function parseExperienceBlock($block)
     {
-        if (count($block) < 4) {
-            return null;
+        $company = $block[0];
+        $title = $block[1];
+        $dates = $block[2];
+        $location = $block[3];
+
+        $startDate = $endDate = null;
+        $years = $months = 0;
+
+        if (preg_match('/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\s*-\s*(?:.*?(\d{4})|Present)/i', $dates, $m)) {
+            $startDate = $m[2];
+            $endDate = $m[3] ?? null;
         }
 
-        $company = $block[0]; // Ligne 1: Entreprise
-        $title = $block[1];   // Ligne 2: Poste
-        $dates = $block[2];   // Ligne 3: Dates
-        $location = $block[3]; // Ligne 4: Localisation
-
-        // Extraire les dates
-        $startDate = null;
-        $endDate = null;
-        $durationYears = 0;
-        $durationMonths = 0;
-
-        if (preg_match('/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\s*-\s*(?:(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})|Present)/i', $dates, $matches)) {
-            $startDate = $matches[2];
-            $endDate = isset($matches[4]) ? $matches[4] : null;
+        if (preg_match('/\((\d+)\s+ans?\s*(?:(\d+)\s+mois)?\)/i', $dates, $m)) {
+            $years = (int)$m[1];
+            $months = (int)($m[2] ?? 0);
         }
-
-        // Extraire la durée des parenthèses : (7 ans 1 mois)
-        if (preg_match('/\((\d+)\s+ans?\s*(?:(\d+)\s+mois)?\)/i', $dates, $durationMatches)) {
-            $durationYears = (int) $durationMatches[1];
-            $durationMonths = isset($durationMatches[2]) ? (int) $durationMatches[2] : 0;
-        }
-        // Ou juste des mois : (5 mois)
-        elseif (preg_match('/\((\d+)\s+mois\)/i', $dates, $durationMatches)) {
-            $durationMonths = (int) $durationMatches[1];
+        elseif (preg_match('/\((\d+)\s+mois\)/i', $dates, $m)) {
+            $months = (int)$m[1];
         }
 
         return [
-            'title' => $title,
-            'company' => $company,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'description' => $location,
-            'duration_years' => $durationYears,
-            'duration_months' => $durationMonths,
+            'title' => $title, 'company' => $company, 'start_date' => $startDate, 'end_date' => $endDate,
+            'description' => $location, 'duration_years' => $years, 'duration_months' => $months
         ];
     }
 
-    /**
-     * Extraire l'éducation (blocs de 2 lignes après "Formation")
-     */
     private function extractEducation($lines)
     {
         $education = [];
-        $inEducationSection = false;
-        $currentBlock = [];
+        $inSection = false;
+        $block = [];
 
         foreach ($lines as $line) {
-            // Détecter la section "Formation"
             if (stripos($line, 'Formation') !== false || stripos($line, 'Education') !== false) {
-                $inEducationSection = true;
+                $inSection = true;
                 continue;
             }
-
-            if ($inEducationSection) {
-                // Ignorer "Page X of Y"
-                if (preg_match('/Page \d+ of \d+/', $line)) {
+            if ($inSection) {
+                if (preg_match('/Page \d+ of \d+/', $line))
                     continue;
-                }
-
-                $currentBlock[] = $line;
-
-                // Tous les 2 lignes = une formation
-                if (count($currentBlock) === 2) {
-                    $school = $currentBlock[0];
-                    $degree = $currentBlock[1];
-
-                    // Extraire les années de la parenthèse : (octobre 2020 - juillet 2022)
-                    $yearStart = null;
-                    $yearEnd = null;
-
-                    // Chercher le pattern avec 2 années séparées par un tiret
-                    if (preg_match('/\(.*?(\d{4}).*?-.*?(\d{4})\)/', $degree, $matches)) {
-                        $yearStart = (int) $matches[1];  // Première année = début
-                        $yearEnd = (int) $matches[2];    // Deuxième année = fin
-                        \Log::info('Education years extracted', [
-                            'degree' => $degree,
-                            'year_start' => $yearStart,
-                            'year_end' => $yearEnd
-                        ]);
+                $block[] = $line;
+                if (count($block) === 2) {
+                    $school = $block[0];
+                    $degree = $block[1];
+                    $start = $end = null;
+                    if (preg_match('/\(.*?(\d{4}).*?-.*?(\d{4})\)/', $degree, $m)) {
+                        $start = (int)$m[1];
+                        $end = (int)$m[2];
                     }
-                    // Ou juste une année de début
-                    elseif (preg_match('/\(.*?(\d{4})/', $degree, $matches)) {
-                        $yearStart = (int) $matches[1];
-                        $yearEnd = date('Y'); // Année courante si pas de fin
+                    elseif (preg_match('/\(.*?(\d{4})/', $degree, $m)) {
+                        $start = (int)$m[1];
+                        $end = (int)date('Y');
                     }
-
-                    $education[] = [
-                        'school' => $school,
-                        'degree' => $degree,
-                        'year_start' => $yearStart,
-                        'year_end' => $yearEnd,
-                    ];
-
-                    $currentBlock = [];
+                    $education[] = ['school' => $school, 'degree' => $degree, 'year_start' => $start, 'year_end' => $end];
+                    $block = [];
                 }
             }
         }
-
         return $education;
     }
 }
