@@ -20,12 +20,14 @@ class AcademicDocument extends Model
     public const TYPE_BULLETIN = 'bulletin';
     public const TYPE_RELEVE_NOTES = 'releve_notes';
     public const TYPE_DIPLOME = 'diplome';
+    public const TYPE_ATTESTATION = 'attestation';
     public const TYPE_AUTRE = 'autre';
 
     public const DOCUMENT_TYPES = [
         self::TYPE_BULLETIN => 'Bulletin scolaire',
         self::TYPE_RELEVE_NOTES => 'Relevé de notes',
         self::TYPE_DIPLOME => 'Diplôme',
+        self::TYPE_ATTESTATION => 'Attestation',
         self::TYPE_AUTRE => 'Autre document',
     ];
 

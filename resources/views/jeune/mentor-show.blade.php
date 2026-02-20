@@ -1,10 +1,19 @@
-@extends('layouts.jeune')
+@extends($layout ?? 'layouts.jeune')
 
 @section('title', $mentor->user->name ?? 'Profil mentor')
 
 @section('content')
 <div class="space-y-8">
     <!-- Back Button -->
+    @if(request()->routeIs('organization.*'))
+    <button onclick="window.history.back()"
+        class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Retour
+    </button>
+    @else
     <a href="{{ route('jeune.mentors') }}"
         class="inline-flex items-center text-gray-600 hover:text-gray-900 transition">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,6 +21,7 @@
         </svg>
         Retour aux mentors
     </a>
+    @endif
 
     <!-- Profile Header -->
     <div class="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl overflow-hidden">
@@ -54,12 +64,15 @@
                         @endif
                         @if($mentor->years_of_experience)
                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $mentor->years_of_experience }} ans
-                            d'experience</span>
+                            d'expérience</span>
                         @endif
                         @if($mentor->user && $mentor->user->country)
                         <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $mentor->user->country }}</span>
                         @endif
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ $mentor->roadmapSteps ?
+                            $mentor->roadmapSteps->count() : 0 }} étapes</span>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -100,12 +113,14 @@
                                     <h3 class="font-bold text-gray-900">{{ $step->title }}</h3>
                                     @if($step->year_start || $step->year_end)
                                     <span class="text-sm text-gray-500">
-                                        {{ $step->year_start }}{{ $step->year_end ? ' - ' . $step->year_end : '' }}
+                                        {{ $step->year_start }}{{ $step->year_end ? ' - ' . $step->year_end : ''
+                                        }}
                                     </span>
                                     @endif
                                 </div>
                                 @if($step->organization)
-                                <p class="text-sm text-orange-600 font-medium mb-2">{{ $step->organization }}</p>
+                                <p class="text-sm text-orange-600 font-medium mb-2">{{ $step->organization }}
+                                </p>
                                 @endif
                                 @if($step->description)
                                 <p class="text-gray-600 text-sm">{{ $step->description }}</p>
@@ -113,7 +128,8 @@
                                 @if($step->skills && is_array($step->skills))
                                 <div class="flex flex-wrap gap-2 mt-3">
                                     @foreach($step->skills as $skill)
-                                    <span class="px-2 py-1 bg-white text-gray-600 text-xs rounded-full">{{ $skill
+                                    <span class="px-2 py-1 bg-white text-gray-600 text-xs rounded-full">{{
+                                        $skill
                                         }}</span>
                                     @endforeach
                                 </div>
@@ -168,7 +184,9 @@
                     </a>
                     @endif
 
-                    @if(isset($existingMentorship) && in_array($existingMentorship->status, ['pending', 'accepted']))
+                    @if(!request()->routeIs('organization.*'))
+                    @if(isset($existingMentorship) && in_array($existingMentorship->status, ['pending',
+                    'accepted']))
                     @if($existingMentorship->status === 'pending')
                     <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-100 text-center">
                         <span class="inline-flex items-center gap-2 text-yellow-700 font-medium">
@@ -220,49 +238,48 @@
                         </button>
                     </form>
                     @endif
-                    @php
-                    // Construire le message pre-rempli
-                    $mentorName = $mentor->user->name ?? 'ce mentor';
-                    $mentorPosition = $mentor->current_position ?? '';
-                    $mentorCompany = $mentor->current_company ?? '';
-                    $mentorSpecialization = $mentor->specialization_label ?? '';
-
-                    $user = auth()->user();
-                    $userName = explode(' ', $user->name ?? '')[0] ?? '';
-
-                    // Construire les etapes du parcours pour le contexte
-                    $roadmapSummary = '';
-                    if ($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0) {
-                    $steps = $mentor->roadmapSteps->sortBy('position')->take(3);
-                    $stepDescriptions = $steps->map(fn($s) => $s->title . ($s->organization ? ' chez ' .
-                    $s->organization : ''))->implode(', ');
-                    $roadmapSummary = "Son parcours inclut: " . $stepDescriptions . ".";
-                    }
-
-                    $prefilledMessage = "Bonjour ! Je suis inspire(e) par le profil de {$mentorName}";
-                    if ($mentorPosition) {
-                    $prefilledMessage .= " qui travaille actuellement comme {$mentorPosition}";
-                    if ($mentorCompany) {
-                    $prefilledMessage .= " chez {$mentorCompany}";
-                    }
-                    }
-                    $prefilledMessage .= ". ";
-                    if ($roadmapSummary) {
-                    $prefilledMessage .= $roadmapSummary . " ";
-                    }
-                    $prefilledMessage .= "J'aimerais avoir un parcours similaire dans le domaine " .
-                    ($mentorSpecialization ?: "de ce professionnel") . ". ";
-                    $prefilledMessage .= "Quelles sont les etapes cles que je devrais suivre pour atteindre un profil
-                    similaire ? Quelles formations ou competences dois-je acquerir ?";
-                    @endphp
-                    <a href="{{ route('jeune.chat') }}?mentor_id={{ $mentor->id }}&prefill={{ urlencode($prefilledMessage) }}"
-                        class="flex items-center justify-center gap-2 w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                        Discuter avec l'IA sur ce profil
-                    </a>
+                    <<<<<<< HEAD=======>>>>>>> main
+                        @php
+                        $mentorName = $mentor->user->name ?? 'ce mentor';
+                        $mentorPosition = $mentor->current_position ?? '';
+                        $mentorCompany = $mentor->current_company ?? '';
+                        $mentorSpecialization = $mentor->specialization_label ?? '';
+                        $user = auth()->user();
+                        $userName = explode(' ', $user->name ?? '')[0] ?? '';
+                        $roadmapSummary = '';
+                        if ($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0) {
+                        $steps = $mentor->roadmapSteps->sortBy('position')->take(3);
+                        $stepDescriptions = $steps->map(fn($s) => $s->title . ($s->organization ? ' chez ' .
+                        $s->organization : ''))->implode(', ');
+                        $roadmapSummary = "Son parcours inclut: " . $stepDescriptions . ".";
+                        }
+                        $prefilledMessage = "Bonjour ! Je suis inspiré(e) par le profil de {$mentorName}";
+                        if ($mentorPosition) {
+                        $prefilledMessage .= " qui travaille actuellement comme {$mentorPosition}";
+                        if ($mentorCompany) {
+                        $prefilledMessage .= " chez {$mentorCompany}";
+                        }
+                        }
+                        $prefilledMessage .= ". ";
+                        if ($roadmapSummary) {
+                        $prefilledMessage .= $roadmapSummary . " ";
+                        }
+                        $prefilledMessage .= "J'aimerais avoir un parcours similaire dans le domaine " .
+                        ($mentorSpecialization ?: "de ce professionnel") . ". ";
+                        $prefilledMessage .= "Quelles sont les étapes clés que je devrais suivre pour atteindre un
+                        profil similaire ? Quelles formations ou compétences dois-je acquérir ?";
+                        @endphp
+                        @if($mentor->is_validated)
+                        <a href="{{ route('jeune.chat') }}?mentor_id={{ $mentor->id }}&prefill={{ urlencode($prefilledMessage) }}"
+                            class="flex items-center justify-center gap-2 w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Discuter avec l'IA sur ce profil
+                        </a>
+                        @endif
+                        @endif
                 </div>
             </div>
 
@@ -311,7 +328,9 @@
                         <div>
                             <p class="text-sm text-gray-500">Localisation</p>
                             <p class="font-medium text-gray-900">
-                                {{ $mentor->user->city ? $mentor->user->city . ', ' : '' }}{{ $mentor->user->country }}
+                                {{ $mentor->user->city ? $mentor->user->city . ', ' : '' }}{{
+                                $mentor->user->country
+                                }}
                             </p>
                         </div>
                     </div>
@@ -347,12 +366,15 @@
                             <img src="{{ $similar->user->avatar_url }}" alt="{{ $similar->user->name }}"
                                 class="w-full h-full object-cover">
                             @else
-                            <span class="text-white font-bold text-sm">{{ strtoupper(substr($similar->user->name ?? '?',
+                            <span class="text-white font-bold text-sm">{{ strtoupper(substr($similar->user->name
+                                ??
+                                '?',
                                 0, 2)) }}</span>
                             @endif
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="font-medium text-gray-900 truncate">{{ $similar->user->name ?? 'Mentor' }}</p>
+                            <p class="font-medium text-gray-900 truncate">{{ $similar->user->name ?? 'Mentor' }}
+                            </p>
                             <p class="text-xs text-gray-500 truncate">{{ $similar->current_position }}</p>
                         </div>
                     </a>

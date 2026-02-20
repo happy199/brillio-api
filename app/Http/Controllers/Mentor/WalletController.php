@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
+use App\Models\WalletTransaction;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,14 +30,14 @@ class WalletController extends Controller
 
         // 1. Historique RECHARGEMENT / DÉPENSES (Lié au wallet perso pour les features)
         // Types: 'purchase' (achat crédits), 'expense' (consommation features), 'coupon', 'service_fee'
-        $walletTransactions = $user->walletTransactions()
+        $walletTransactions = WalletTransaction::where('user_id', $user->id)
             ->whereIn('type', ['purchase', 'expense', 'coupon', 'service_fee'])
             ->latest()
             ->paginate(10, ['*'], 'wallet_page');
 
         // 2. Historique REVENUS (Ventes ressources, sessions, etc.)
         // Types: 'income'
-        $incomeTransactions = $user->walletTransactions()
+        $incomeTransactions = WalletTransaction::where('user_id', $user->id)
             ->where('type', 'income')
             ->latest()
             ->paginate(10, ['*'], 'income_page');
@@ -44,21 +45,23 @@ class WalletController extends Controller
         $creditPrice = $this->walletService->getCreditPrice('mentor');
 
         // Calcul des crédits achetés (Total cumulé)
-        $totalCreditsPurchased = $user->walletTransactions()
+        $totalCreditsPurchased = WalletTransaction::where('user_id', $user->id)
             ->whereIn('type', ['purchase', 'coupon'])
             ->where('amount', '>', 0)
             ->sum('amount');
 
         // Calcul des crédits gagnés (Total cumulé)
-        $totalCreditsEarned = $user->walletTransactions()->where('type', 'income')->sum('amount');
+        $totalCreditsEarned = WalletTransaction::where('user_id', $user->id)
+            ->where('type', 'income')
+            ->sum('amount');
 
         // Calcul des dépenses (Total cumulé)
-        $totalExpenses = abs($user->walletTransactions()
+        $totalExpenses = abs(WalletTransaction::where('user_id', $user->id)
             ->whereIn('type', ['expense', 'service_fee'])
             ->sum('amount'));
 
         // Calcul des retraits (Total cumulé)
-        $totalWithdrawn = abs($user->walletTransactions()
+        $totalWithdrawn = abs(WalletTransaction::where('user_id', $user->id)
             ->where('type', 'payout')
             ->sum('amount'));
 
@@ -172,7 +175,7 @@ class WalletController extends Controller
             return redirect($paymentData['checkout_url']);
 
         } catch (\Exception $e) {
-            \Log::error('Moneroo payment initialization failed', [
+            Log::error('Moneroo payment initialization failed', [
                 'user_id' => $user->id,
                 'pack_id' => $pack->id,
                 'error' => $e->getMessage(),

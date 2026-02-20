@@ -1,0 +1,134 @@
+@extends('layouts.organization')
+
+@section('title', 'Détails du Mentorat')
+
+@section('content')
+<div class="space-y-6">
+    <div class="flex items-center space-x-4">
+        <a href="{{ route('organization.mentorships.index') }}"
+            class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
+            <svg class="mr-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Retour à la liste
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900">Détails du Mentorat</h1>
+    </div>
+
+    <div class="relative min-h-[600px]">
+        @if(!$organization->isPro())
+        <div
+            class="absolute inset-0 z-10 bg-white/60 backdrop-blur-[4px] rounded-lg flex flex-col items-center justify-center text-center p-8">
+            <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-200 max-w-md sticky top-1/3">
+                <div
+                    class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 mb-6">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Fonctionnalité Pro</h3>
+                <p class="text-gray-500 mb-8">
+                    Les détails complets de la relation de mentorat sont réservés aux membres Pro.
+                </p>
+                <a href="{{ route('organization.subscriptions.index') }}"
+                    class="inline-flex w-full justify-center items-center rounded-md bg-indigo-600 px-5 py-3 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors">
+                    Passer au plan Pro
+                </a>
+            </div>
+        </div>
+        @endif
+
+        <div
+            class="grid grid-cols-1 gap-6 lg:grid-cols-3 {{ !$organization->isPro() ? 'filter blur-[6px] select-none pointer-events-none opacity-50' : '' }}">
+            <!-- Mentee Info -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-lg font-medium text-gray-900">Élève (Menté)</h3>
+                </div>
+                <div class="p-6 text-center">
+                    @if($mentorship->mentee && $mentorship->mentee->avatar_url)
+                    <img class="h-24 w-24 rounded-full object-cover mx-auto" src="{{ $mentorship->mentee->avatar_url }}"
+                        alt="">
+                    @else
+                    <div
+                        class="h-24 w-24 rounded-full bg-organization-100 flex items-center justify-center text-organization-600 font-bold text-3xl mx-auto">
+                        {{ substr($mentorship->mentee->name ?? 'U', 0, 1) }}
+                    </div>
+                    @endif
+                    <h4 class="mt-4 text-xl font-bold text-gray-900">{{ $mentorship->mentee->name ?? 'Utilisateur' }}
+                    </h4>
+                    <p class="text-sm text-gray-500">{{ $mentorship->mentee->email ?? 'Email caché' }}</p>
+                    <div class="mt-4">
+                        <a href="{{ route('organization.users.show', $mentorship->mentee) }}"
+                            class="text-sm font-medium text-organization-600 hover:text-organization-500">
+                            Voir profil complet
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relationship Info -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-lg font-medium text-gray-900">Relation de Mentorat</h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Statut</span>
+                        <span class="mt-1 px-2.5 py-0.5 rounded-full text-sm font-semibold 
+                            @if($mentorship->status === 'accepted') bg-green-100 text-green-800 
+                            @elseif($mentorship->status === 'pending') bg-yellow-100 text-yellow-800
+                            @elseif($mentorship->status === 'refused') bg-red-100 text-red-800
+                            @else bg-gray-100 text-gray-800 @endif">
+                            @switch($mentorship->status)
+                            @case('accepted') Actif / Accepté @break
+                            @case('pending') En attente @break
+                            @case('refused') Refusé @break
+                            @case('disconnected') Terminé @break
+                            @default {{ $mentorship->status }}
+                            @endswitch
+                        </span>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Date de début</span>
+                        <p class="mt-1 text-sm text-gray-900">{{ $mentorship->created_at->format('d/m/Y') }}</p>
+                    </div>
+                    @if($mentorship->request_message)
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Message de demande</span>
+                        <p class="mt-1 text-sm text-gray-900 italic">"{{ $mentorship->request_message }}"</p>
+                    </div>
+                    @endif
+                    @if($mentorship->refusal_reason)
+                    <div class="p-3 bg-red-50 rounded-md">
+                        <span class="block text-sm font-medium text-red-800">Raison du refus</span>
+                        <p class="mt-1 text-sm text-red-700">{{ $mentorship->refusal_reason }}</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Mentor Info -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-lg font-medium text-gray-900">Mentor</h3>
+                </div>
+                <div class="p-6 text-center">
+                    @if($mentorship->mentor && $mentorship->mentor->avatar_url)
+                    <img class="h-24 w-24 rounded-full object-cover mx-auto" src="{{ $mentorship->mentor->avatar_url }}"
+                        alt="">
+                    @else
+                    <div
+                        class="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-3xl mx-auto">
+                        {{ substr($mentorship->mentor->name ?? 'M', 0, 1) }}
+                    </div>
+                    @endif
+                    <h4 class="mt-4 text-xl font-bold text-gray-900">{{ $mentorship->mentor->name ?? 'Mentor' }}</h4>
+                    <p class="text-sm text-gray-500">Mentor Certifié</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

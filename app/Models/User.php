@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,6 +25,7 @@ class User extends Authenticatable
      */
     public const TYPE_JEUNE = 'jeune';
     public const TYPE_MENTOR = 'mentor';
+    public const TYPE_ORGANIZATION = 'organization';
 
     /**
      * The attributes that are mass assignable.
@@ -49,6 +51,9 @@ class User extends Authenticatable
         'onboarding_data',
         'last_login_at',
         'email_verified_at',
+        'sponsored_by_organization_id',
+        'organization_id',
+        'referral_code_used',
     ];
 
     /**
@@ -94,6 +99,14 @@ class User extends Authenticatable
     public function isMentor(): bool
     {
         return $this->user_type === self::TYPE_MENTOR;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est une organisation
+     */
+    public function isOrganization(): bool
+    {
+        return $this->user_type === self::TYPE_ORGANIZATION;
     }
 
     /**
@@ -145,6 +158,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Relation vers les ressources consultées
+     */
+    public function resourceViews(): HasMany
+    {
+        return $this->hasMany(ResourceView::class);
+    }
+
+    /**
+     * Relation vers les achats effectués
+     */
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    /**
+     * Relation vers les profils mentors consultés par ce jeune
+     */
+    public function mentorProfileViews(): HasMany
+    {
+        return $this->hasMany(MentorProfileView::class , 'user_id');
+    }
+
+    /**
      * Relation vers les documents académiques
      */
     public function academicDocuments(): HasMany
@@ -175,7 +212,7 @@ class User extends Authenticatable
      */
     public function mentorshipsAsMentor(): HasMany
     {
-        return $this->hasMany(Mentorship::class, 'mentor_id');
+        return $this->hasMany(Mentorship::class , 'mentor_id');
     }
 
     /**
@@ -183,7 +220,7 @@ class User extends Authenticatable
      */
     public function mentorshipsAsMentee(): HasMany
     {
-        return $this->hasMany(Mentorship::class, 'mentee_id');
+        return $this->hasMany(Mentorship::class , 'mentee_id');
     }
 
     /**
@@ -191,7 +228,7 @@ class User extends Authenticatable
      */
     public function mentorAvailabilities(): HasMany
     {
-        return $this->hasMany(MentorAvailability::class, 'mentor_id');
+        return $this->hasMany(MentorAvailability::class , 'mentor_id');
     }
 
     /**
@@ -199,7 +236,7 @@ class User extends Authenticatable
      */
     public function mentoringSessionsAsMentor(): HasMany
     {
-        return $this->hasMany(MentoringSession::class, 'mentor_id');
+        return $this->hasMany(MentoringSession::class , 'mentor_id');
     }
 
     /**
@@ -207,7 +244,7 @@ class User extends Authenticatable
      */
     public function mentoringSessionsAsMentee(): BelongsToMany
     {
-        return $this->belongsToMany(MentoringSession::class, 'mentoring_session_user', 'user_id', 'mentoring_session_id')
+        return $this->belongsToMany(MentoringSession::class , 'mentoring_session_user', 'user_id', 'mentoring_session_id')
             ->withPivot('status', 'rejection_reason')
             ->withTimestamps();
     }
@@ -235,5 +272,109 @@ class User extends Authenticatable
     public function hasCompletedOnboarding(): bool
     {
         return $this->onboarding_completed === true;
+    }
+
+    /**
+     * Calcule le pourcentage de complétion du profil du jeune.
+     * Basé sur 10 critères (10% chacun).
+     */
+    public function getProfileCompletionPercentageAttribute(): int
+    {
+        if (!$this->isJeune()) {
+            return 0;
+        }
+
+        $criteria = [
+            'name' => !empty($this->name),
+            'photo' => !empty($this->profile_photo_path) || !empty($this->profile_photo_url),
+            'phone' => !empty($this->phone),
+            'dob' => !empty($this->date_of_birth),
+            'location' => !empty($this->city) || !empty($this->country),
+            'linkedin' => !empty($this->linkedin_url),
+            'bio' => !empty($this->jeuneProfile?->bio),
+            'cv' => !empty($this->jeuneProfile?->cv_path),
+            'portfolio' => !empty($this->jeuneProfile?->portfolio_url),
+            'personality' => $this->personalityTest()->exists(),
+        ];
+
+        $completedCount = count(array_filter($criteria));
+        return $completedCount * 10;
+    }
+
+    /**
+     * Liste les champs manquants du profil.
+     */
+    public function getMissingProfileFieldsAttribute(): array
+    {
+        if (!$this->isJeune()) {
+            return [];
+        }
+
+        $fields = [
+            'name' => 'Nom complet',
+            'photo' => 'Photo de profil',
+            'phone' => 'Numéro de téléphone',
+            'dob' => 'Date de naissance',
+            'location' => 'Ville ou pays',
+            'linkedin' => 'Lien LinkedIn',
+            'bio' => 'Biographie / Présentation',
+            'cv' => 'Curriculum Vitae',
+            'portfolio' => 'Lien Portfolio',
+            'personality' => 'Test de personnalité',
+        ];
+
+        $criteria = [
+            'name' => !empty($this->name),
+            'photo' => !empty($this->profile_photo_path) || !empty($this->profile_photo_url),
+            'phone' => !empty($this->phone),
+            'dob' => !empty($this->date_of_birth),
+            'location' => !empty($this->city) || !empty($this->country),
+            'linkedin' => !empty($this->linkedin_url),
+            'bio' => !empty($this->jeuneProfile?->bio),
+            'cv' => !empty($this->jeuneProfile?->cv_path),
+            'portfolio' => !empty($this->jeuneProfile?->portfolio_url),
+            'personality' => $this->personalityTest()->exists(),
+        ];
+
+        $missing = [];
+        foreach ($criteria as $field => $isCompleted) {
+            if (!$isCompleted) {
+                $missing[] = $fields[$field];
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Relation vers l'organisation qui a parrainé ce jeune utilisateur
+     */
+    public function sponsoringOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class , 'sponsored_by_organization_id');
+    }
+
+    /**
+     * Scope pour filtrer les utilisateurs sponsorisés par une organisation
+     */
+    public function scopeSponsoredByOrganization($query, $organizationId)
+    {
+        return $query->where('sponsored_by_organization_id', $organizationId);
+    }
+
+    /**
+     * Vérifie si l'utilisateur est sponsorisé par une organisation
+     */
+    public function isSponsoredByOrganization(): bool
+    {
+        return !is_null($this->sponsored_by_organization_id);
+    }
+
+    /**
+     * Relation vers l'organisation gérée par cet utilisateur (pour les admins d'orga).
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
     }
 }

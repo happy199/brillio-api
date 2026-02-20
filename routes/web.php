@@ -37,7 +37,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Page d'accueil
-Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/', function() {
+    if (app()->bound('current_organization')) {
+        return redirect()->route('organization.login');
+    }
+    return app(PageController::class)->home();
+})->name('home');
 
 // Pages informatives
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
@@ -373,8 +378,9 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('monetisation/coupons', [MonetizationController::class, 'storeCoupon'])->name('monetization.coupons.store');
         Route::delete('monetisation/coupons/{coupon}', [MonetizationController::class, 'destroyCoupon'])->name('monetization.coupons.destroy');
 
-        // Gestion des Packs de Crédits
+        // Gestion des Packs de Crédits et Abonnements
         Route::resource('credit-packs', \App\Http\Controllers\Admin\CreditPackController::class);
+        Route::resource('subscription-plans', \App\Http\Controllers\Admin\SubscriptionPlanController::class);
 
         // Payouts Mentors
         Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
@@ -430,4 +436,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
     Route::get('/mentorship/requests/{mentorship}', [App\Http\Controllers\Admin\MentorshipController::class, 'showRequest'])->name('mentorship.requests.show');
     Route::get('/mentorship/sessions', [App\Http\Controllers\Admin\MentorshipController::class, 'sessions'])->name('mentorship.sessions');
     Route::get('/mentorship/sessions/{session}', [App\Http\Controllers\Admin\MentorshipController::class, 'showSession'])->name('mentorship.sessions.show');
+
+    // Gestion des organisations
+    Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);
 });

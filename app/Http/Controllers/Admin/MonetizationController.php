@@ -19,6 +19,7 @@ class MonetizationController extends Controller
         $settings = SystemSetting::whereIn('key', [
             'credit_price_jeune',
             'credit_price_mentor',
+            'credit_price_organization',
             'feature_cost_advanced_targeting',
             'payout_fee_percentage',
             'mentorship_commission_percent'
@@ -26,6 +27,7 @@ class MonetizationController extends Controller
 
         $creditPriceJeune = $settings['credit_price_jeune']->value ?? 50;
         $creditPriceMentor = $settings['credit_price_mentor']->value ?? 100;
+        $creditPriceOrganization = $settings['credit_price_organization']->value ?? 150;
         $targetingCost = $settings['feature_cost_advanced_targeting']->value ?? 10;
         $payoutFeePercentage = $settings['payout_fee_percentage']->value ?? 5;
         $commissionPercent = $settings['mentorship_commission_percent']->value ?? 10;
@@ -41,15 +43,15 @@ class MonetizationController extends Controller
 
         $creditsPurchasedJeune = $purchasedStats['jeune'] ?? 0;
         $creditsPurchasedMentor = $purchasedStats['mentor'] ?? 0;
-        $totalCreditsPurchased = $creditsPurchasedJeune + $creditsPurchasedMentor;
+        $creditsPurchasedOrg = $purchasedStats['organization'] ?? 0;
+        $totalCreditsPurchased = $creditsPurchasedJeune + $creditsPurchasedMentor + $creditsPurchasedOrg;
 
         // Estimation FCFA Achetés (Basé sur prix actuel)
         $fcfaPurchasedJeune = $creditsPurchasedJeune * $creditPriceJeune;
         $fcfaPurchasedMentor = $creditsPurchasedMentor * $creditPriceMentor;
-
+        $fcfaPurchasedOrg = $creditsPurchasedOrg * $creditPriceOrganization;
 
         // 2. Crédits Consommés (Montant < 0)
-        // On prend la valeur absolue pour l'affichage
         $consumedQuery = WalletTransaction::where('amount', '<', 0)
             ->join('users', 'wallet_transactions.user_id', '=', 'users.id')
             ->selectRaw('users.user_type, SUM(ABS(amount)) as total_consumed');
@@ -58,32 +60,46 @@ class MonetizationController extends Controller
 
         $creditsConsumedJeune = $consumedStats['jeune'] ?? 0;
         $creditsConsumedMentor = $consumedStats['mentor'] ?? 0;
-        $totalCreditsUsed = $creditsConsumedJeune + $creditsConsumedMentor;
+        $creditsConsumedOrg = $consumedStats['organization'] ?? 0;
+        $totalCreditsUsed = $creditsConsumedJeune + $creditsConsumedMentor + $creditsConsumedOrg;
 
         // Estimation FCFA Consommés
         $fcfaConsumedJeune = $creditsConsumedJeune * $creditPriceJeune;
         $fcfaConsumedMentor = $creditsConsumedMentor * $creditPriceMentor;
+        $fcfaConsumedOrg = $creditsConsumedOrg * $creditPriceOrganization;
 
+        // Revenue Réel Organizations (Payments completed)
+        $orgRevenue = \App\Models\MonerooTransaction::where('status', 'completed')
+            ->where('user_type', 'App\Models\User')
+            ->whereHas('user', function ($q) {
+            $q->where('user_type', 'organization');
+        })
+            ->sum('amount');
 
-        // 50 dernières transactions
-        $transactions = WalletTransaction::with('user')->latest()->limit(50)->get();
+        // 50 dernières transactions (Include organization relationship)
+        $transactions = WalletTransaction::with(['user', 'user.organization', 'organization'])->latest()->limit(50)->get();
 
         return view('admin.monetization.index', compact(
             'creditPriceJeune',
             'creditPriceMentor',
+            'creditPriceOrganization',
             'targetingCost',
             'payoutFeePercentage',
             'totalCreditsPurchased',
             'creditsPurchasedJeune',
             'creditsPurchasedMentor',
+            'creditsPurchasedOrg',
             'fcfaPurchasedJeune',
             'fcfaPurchasedMentor',
+            'fcfaPurchasedOrg',
             'totalCreditsUsed',
             'creditsConsumedJeune',
             'creditsConsumedMentor',
+            'creditsConsumedOrg',
             'fcfaConsumedJeune',
             'fcfaConsumedMentor',
-            'fcfaConsumedMentor',
+            'fcfaConsumedOrg',
+            'orgRevenue',
             'commissionPercent',
             'transactions'
         ));
@@ -97,9 +113,10 @@ class MonetizationController extends Controller
         $validated = $request->validate([
             'credit_price_jeune' => 'required|integer|min:1',
             'credit_price_mentor' => 'required|integer|min:1',
+            'credit_price_organization' => 'required|integer|min:1',
             'feature_cost_advanced_targeting' => 'required|integer|min:0',
             'payout_fee_percentage' => 'required|integer|min:0|max:100',
-            'mentorship_commission_percent' => 'required|integer|min:0|max:100', // Percentage validation
+            'mentorship_commission_percent' => 'required|integer|min:0|max:100',
         ]);
 
         foreach ($validated as $key => $value) {

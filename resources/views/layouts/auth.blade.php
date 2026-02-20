@@ -173,7 +173,7 @@
         </div>
 
         <!-- Card -->
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="mt-8 sm:mx-auto sm:w-full @yield('card_width', 'sm:max-w-md')">
             <div class="glass-card py-8 px-6 shadow-2xl rounded-2xl sm:px-10">
                 @if(session('error'))
                 <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">

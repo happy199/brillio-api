@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Jeune;
 use App\Http\Controllers\Controller;
 use App\Models\ChatConversation;
 use App\Models\MentorProfile;
+use App\Models\MentorProfileView;
 use App\Models\PersonalityQuestion;
 use App\Models\PersonalityTest;
 use App\Services\DeepSeekService;
@@ -470,8 +471,16 @@ class JeuneDashboardController extends Controller
      */
     public function mentorShow(MentorProfile $mentor)
     {
-        // Incrémenter le compteur de vues
+        // Incrémenter le compteur de vues (global)
         $mentor->increment('profile_views');
+        // Enregistrer la vue spécifique de l'utilisateur
+        if (auth()->check()) {
+            MentorProfileView::create([
+                'user_id' => auth()->id(),
+                'mentor_id' => $mentor->user_id,
+                'viewed_at' => now(),
+            ]);
+        }
 
         $mentor->load(['user', 'roadmapSteps']);
 
