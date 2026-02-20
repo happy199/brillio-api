@@ -15,9 +15,21 @@ class RegisterController extends Controller
     /**
      * Show the registration form
      */
-    public function showRegistrationForm()
+    public function showRegistrationForm(Request $request)
     {
-        return view('organization.auth.register');
+        $invitation = null;
+        if ($request->has('ref')) {
+            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $request->ref)
+                ->whereIn('role', ['admin', 'viewer'])
+                ->first();
+
+            if (!$invitation || !$invitation->isValid()) {
+                return redirect()->route('organization.login')
+                    ->with('error', 'Le lien d\'invitation est invalide ou expiré.');
+            }
+        }
+
+        return view('organization.auth.register', compact('invitation'));
     }
 
     /**
@@ -25,27 +37,57 @@ class RegisterController extends Controller
      */
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'organization_name' => ['required', 'string', 'max:255'],
+        // Check for invitation
+        $invitation = null;
+        $isJoining = false;
+
+        if ($request->has('ref')) {
+            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $request->ref)
+                ->whereIn('role', ['admin', 'viewer'])
+                ->first();
+
+            if ($invitation && $invitation->isValid()) {
+                $isJoining = true;
+            }
+        }
+
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
-            'sector' => ['nullable', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'website' => ['nullable', 'url', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-        ]);
+        ];
 
-        // Create organization
-        $organization = Organization::create([
-            'name' => $validated['organization_name'],
-            'contact_email' => $validated['email'],
-            'sector' => $validated['sector'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'website' => $validated['website'] ?? null,
-            'description' => $validated['description'] ?? null,
-            'status' => 'active',
-        ]);
+        // Only require organization details if NOT joining an existing one
+        if (!$isJoining) {
+            $rules['organization_name'] = ['required', 'string', 'max:255'];
+            $rules['sector'] = ['nullable', 'string', 'max:100'];
+            $rules['phone'] = ['nullable', 'string', 'max:20'];
+            $rules['website'] = ['nullable', 'url', 'max:255'];
+            $rules['description'] = ['nullable', 'string', 'max:1000'];
+        }
+
+        $validated = $request->validate($rules);
+
+        if ($isJoining) {
+            $organization = $invitation->organization;
+            $role = $invitation->role; // 'admin' or 'viewer'
+
+            // Mark invitation as used
+            $invitation->markAsAccepted();
+        }
+        else {
+            // Create new organization
+            $organization = Organization::create([
+                'name' => $validated['organization_name'],
+                'contact_email' => $validated['email'],
+                'sector' => $validated['sector'] ?? null,
+                'phone' => $validated['phone'] ?? null,
+                'website' => $validated['website'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'status' => 'active',
+            ]);
+            $role = 'owner';
+        }
 
         // Create user account for organization
         $user = User::create([
@@ -53,7 +95,8 @@ class RegisterController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'user_type' => 'organization',
-            'organization_id' => $organization->id, // Link to the created organization
+            'organization_id' => $organization->id, // Link to the organization
+            'organization_role' => $role, // owner, admin, or viewer
             'onboarding_completed' => true,
             'last_login_at' => now(),
         ]);
@@ -62,7 +105,7 @@ class RegisterController extends Controller
         Auth::login($user);
 
         return redirect()->route('organization.dashboard')
-            ->with('success', 'Bienvenue ! Votre compte organisation a été créé avec succès.');
+            ->with('success', $isJoining ? "Bienvenue ! Vous avez rejoint l'équipe avec succès." : "Bienvenue ! Votre compte organisation a été créé avec succès.");
     }
 
     /**

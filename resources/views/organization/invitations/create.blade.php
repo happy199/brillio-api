@@ -57,7 +57,26 @@
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
-
+            <!-- Role -->
+            <div>
+                <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                    Type d'invitation (Rôle)
+                </label>
+                <div class="mt-1">
+                    <select id="role" name="role"
+                        class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md px-4 py-3">
+                        <option value="jeune" selected>Jeune Sponsorisé (Accès apprenant)</option>
+                        <option value="admin">Administrateur (Gestion complète de l'organisation)</option>
+                        <option value="viewer">Observateur (Consultation en lecture seule)</option>
+                    </select>
+                </div>
+                <p class="mt-2 text-sm text-gray-500">
+                    Détermine le niveau d'accès de la personne que vous invitez.
+                </p>
+                @error('role')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
             <!-- Expiration -->
             <div>
                 <label for="expires_days" class="block text-sm font-medium text-gray-700 mb-2">

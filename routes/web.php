@@ -37,7 +37,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Page d'accueil
-Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/', function() {
+    if (app()->bound('current_organization')) {
+        return redirect()->route('organization.login');
+    }
+    return app(PageController::class)->home();
+})->name('home');
 
 // Pages informatives
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');

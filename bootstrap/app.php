@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             \App\Http\Middleware\UpdateLastLogin::class,
+            \App\Http\Middleware\ResolveOrganizationByDomain::class,
         ]);
 
         // Alias pour les middlewares personnalisés
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'mentor_published' => \App\Http\Middleware\EnsureMentorProfilePublished::class,
             'organization_active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
             'organization_subscription' => \App\Http\Middleware\CheckOrganizationSubscription::class,
+            'organization_role' => \App\Http\Middleware\EnsureOrganizationRole::class,
         ]);
 
         // Redirection pour les non-authentifiés

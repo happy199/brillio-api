@@ -116,6 +116,91 @@
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        <!-- Branding & Customization Section -->
+                        <div class="pt-6 border-t border-gray-200">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Personnalisation (Marque
+                                Blanche)</h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                <!-- Primary Color -->
+                                <div>
+                                    <label for="primary_color" class="block text-sm font-medium text-gray-700">Couleur
+                                        Principale</label>
+                                    <div
+                                        class="mt-1 flex items-center shadow-sm border border-gray-300 rounded-md overflow-hidden">
+                                        <input type="color" name="primary_color" id="primary_color"
+                                            value="{{ old('primary_color', $organization->primary_color ?? '#f43f5e') }}"
+                                            class="h-10 w-12 border-0 p-0 rounded-l-md cursor-pointer">
+                                        <input type="text"
+                                            value="{{ old('primary_color', $organization->primary_color ?? '#f43f5e') }}"
+                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 px-3 uppercase font-mono"
+                                            onchange="document.getElementById('primary_color').value = this.value">
+                                    </div>
+                                    @error('primary_color')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- Secondary Color -->
+                                <div>
+                                    <label for="secondary_color" class="block text-sm font-medium text-gray-700">Couleur
+                                        Secondaire</label>
+                                    <div
+                                        class="mt-1 flex items-center shadow-sm border border-gray-300 rounded-md overflow-hidden">
+                                        <input type="color" name="secondary_color" id="secondary_color"
+                                            value="{{ old('secondary_color', $organization->secondary_color ?? '#e11d48') }}"
+                                            class="h-10 w-12 border-0 p-0 rounded-l-md cursor-pointer">
+                                        <input type="text"
+                                            value="{{ old('secondary_color', $organization->secondary_color ?? '#e11d48') }}"
+                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 px-3 uppercase font-mono"
+                                            onchange="document.getElementById('secondary_color').value = this.value">
+                                    </div>
+                                    @error('secondary_color')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- Accent Color -->
+                                <div>
+                                    <label for="accent_color" class="block text-sm font-medium text-gray-700">Couleur
+                                        d'Accent</label>
+                                    <div
+                                        class="mt-1 flex items-center shadow-sm border border-gray-300 rounded-md overflow-hidden">
+                                        <input type="color" name="accent_color" id="accent_color"
+                                            value="{{ old('accent_color', $organization->accent_color ?? '#fb7185') }}"
+                                            class="h-10 w-12 border-0 p-0 rounded-l-md cursor-pointer">
+                                        <input type="text"
+                                            value="{{ old('accent_color', $organization->accent_color ?? '#fb7185') }}"
+                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 px-3 uppercase font-mono"
+                                            onchange="document.getElementById('accent_color').value = this.value">
+                                    </div>
+                                    @error('accent_color')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="custom_domain" class="block text-sm font-medium text-gray-700">Alias d'URL
+                                    personnalisé (Ex: mondomaine.brillio.africa)</label>
+                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    <input type="text" name="custom_domain" id="custom_domain"
+                                        value="{{ old('custom_domain', str_replace('.brillio.africa', '', $organization->custom_domain)) }}"
+                                        class="focus:ring-organization-500 focus:border-organization-500 flex-1 block w-full sm:text-sm border-gray-300 rounded-none rounded-l-md"
+                                        placeholder="mondomaine">
+                                    <span
+                                        class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                                        .brillio.africa
+                                    </span>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">Laissez vide pour utiliser l'URL par défaut de
+                                    Brillio.</p>
+                                @error('custom_domain')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                 </div>
 

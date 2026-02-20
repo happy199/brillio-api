@@ -34,17 +34,27 @@ Route::middleware(['auth', 'organization', 'organization_active'])->group(functi
     Route::get('/dashboard', [DashboardController::class , 'index'])->name('dashboard');
 
     // Credit Distribution
-    Route::post('/credits/distribute', [\App\Http\Controllers\Organization\CreditDistributionController::class , 'distribute'])->name('credits.distribute');
+    Route::post('/credits/distribute', [\App\Http\Controllers\Organization\CreditDistributionController::class , 'distribute'])
+        ->middleware('organization_role:admin')
+        ->name('credits.distribute');
 
     // Profile
     Route::get('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'edit'])->name('profile.edit');
-    Route::put('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'update'])->name('profile.update');
+    Route::put('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'update'])
+        ->middleware('organization_role:admin')
+        ->name('profile.update');
 
     // Invitations
     Route::get('/invitations', [InvitationController::class , 'index'])->name('invitations.index');
-    Route::get('/invitations/create', [InvitationController::class , 'create'])->name('invitations.create');
-    Route::post('/invitations', [InvitationController::class , 'store'])->name('invitations.store');
-    Route::delete('/invitations/{invitation}', [InvitationController::class , 'destroy'])->name('invitations.destroy');
+    Route::get('/invitations/create', [InvitationController::class , 'create'])
+        ->middleware('organization_role:admin')
+        ->name('invitations.create');
+    Route::post('/invitations', [InvitationController::class , 'store'])
+        ->middleware('organization_role:admin')
+        ->name('invitations.store');
+    Route::delete('/invitations/{invitation}', [InvitationController::class , 'destroy'])
+        ->middleware('organization_role:admin')
+        ->name('invitations.destroy');
 
     // Pro Features (Jeunes, Mentorships, Sessions)
     Route::middleware('organization_subscription:pro')->group(function () {
@@ -73,20 +83,27 @@ Route::middleware(['auth', 'organization', 'organization_active'])->group(functi
         // Exports
         Route::get('/exports', [ExportController::class , 'index'])->name('exports.index'); // Export Center (Viewable by all, but protected actions)
     
-        Route::middleware('organization_subscription:enterprise')->get('/exports/generate', [ExportController::class , 'generate'])->name('exports.generate');
-
+        Route::middleware('organization_subscription:enterprise')
+            ->get('/exports/generate', [ExportController::class , 'generate'])
+            ->name('exports.generate');
 
         // Subscriptions
         Route::get('/subscriptions', [\App\Http\Controllers\Organization\SubscriptionController::class , 'index'])->name('subscriptions.index');
-        Route::post('/subscriptions/downgrade', [\App\Http\Controllers\Organization\SubscriptionController::class , 'downgrade'])->name('subscriptions.downgrade');
-        Route::post('/subscriptions/{plan}', [\App\Http\Controllers\Organization\SubscriptionController::class , 'subscribe'])->name('subscriptions.subscribe');
+        Route::post('/subscriptions/downgrade', [\App\Http\Controllers\Organization\SubscriptionController::class , 'downgrade'])
+            ->middleware('organization_role:admin')
+            ->name('subscriptions.downgrade');
+        Route::post('/subscriptions/{plan}', [\App\Http\Controllers\Organization\SubscriptionController::class , 'subscribe'])
+            ->middleware('organization_role:admin')
+            ->name('subscriptions.subscribe');
 
         // Payments
         Route::get('/payment/callback', [\App\Http\Controllers\Organization\PaymentController::class , 'callback'])->name('payment.callback');
 
         // Wallet
         Route::get('/wallet', [\App\Http\Controllers\Organization\WalletController::class , 'index'])->name('wallet.index');
-        Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class , 'purchase'])->name('wallet.purchase');
+        Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class , 'purchase'])
+            ->middleware('organization_role:admin')
+            ->name('wallet.purchase');
 
         // Logout
         Route::post('/logout', [RegisterController::class , 'logout'])->name('logout');

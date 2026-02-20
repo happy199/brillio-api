@@ -22,6 +22,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
+        @php
+        $org = auth() -> check() ? auth() -> user() -> organization : null;
+        $primary = $org ? -> primary_color ?? '#f43f5e';
+
+        // Si pas de couleur secondaire, on assombrit légèrement la primaire (simulation basique)
+        // Pour faire propre sans librairie, on utilise soit la secondaire en DB, soit une fallback hardcodée par défaut
+        $secondary = $org ? -> secondary_color ?? '#e11d48';
+        $accent = $org ? -> accent_color ?? '#fb7185';
+        @endphp
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -33,11 +43,11 @@
                             50: '#fff1f2',
                             100: '#ffe4e6',
                             200: '#fecdd3',
-                            300: '#fda4af',
-                            400: '#fb7185',
-                            500: '#f43f5e',
-                            600: '#e11d48',
-                            700: '#be123c',
+                            300: '{{ $accent }}',
+                            400: '{{ $accent }}',
+                            500: '{{ $primary }}',
+                            600: '{{ $secondary }}',
+                            700: '{{ $secondary }}',
                             800: '#9f1239',
                             900: '#881337',
                         }

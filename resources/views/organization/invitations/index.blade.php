@@ -107,6 +107,7 @@
         @if($invitations->count() > 0)
         <ul role="list" class="divide-y divide-gray-200">
             @foreach($invitations as $invitation)
+            @php /** @var \App\Models\OrganizationInvitation $invitation */ @endphp
             <li class="px-6 py-4 hover:bg-gray-50">
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
@@ -130,8 +131,20 @@
                                 @endif
                             </div>
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-900 font-mono">{{ $invitation->referral_code }}
-                                </p>
+                                <div class="flex items-center space-x-2">
+                                    <p class="text-sm font-medium text-gray-900 font-mono">{{ $invitation->referral_code
+                                        }}</p>
+                                    @if($invitation->role === 'admin')
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">Admin</span>
+                                    @elseif($invitation->role === 'viewer')
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Observateur</span>
+                                    @else
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Jeune</span>
+                                    @endif
+                                </div>
                                 @if($invitation->invited_email)
                                 <p class="text-sm text-gray-500">{{ $invitation->invited_email }}</p>
                                 @endif
@@ -149,7 +162,7 @@
                     <div class="flex items-center space-x-2">
                         @if(!$invitation->isExpired())
                         <button
-                            @click="copyToClipboard('{{ route('auth.jeune.register', ['ref' => $invitation->referral_code]) }}')"
+                            @click="copyToClipboard('{{ $invitation->role === 'jeune' ? route('auth.jeune.register', ['ref' => $invitation->referral_code]) : route('organization.register', ['ref' => $invitation->referral_code]) }}')"
                             class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
