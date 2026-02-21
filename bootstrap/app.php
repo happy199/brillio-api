@@ -33,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'organization_active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
             'organization_subscription' => \App\Http\Middleware\CheckOrganizationSubscription::class,
             'organization_role' => \App\Http\Middleware\EnsureOrganizationRole::class,
+            'jeune_published' => \App\Http\Middleware\EnsureJeuneProfilePublished::class,
         ]);
 
         // Redirection pour les non-authentifiés
