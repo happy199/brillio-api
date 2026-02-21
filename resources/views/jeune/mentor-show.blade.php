@@ -238,48 +238,48 @@
                         </button>
                     </form>
                     @endif
-                    <<<<<<< HEAD=======>>>>>>> main
-                        @php
-                        $mentorName = $mentor->user->name ?? 'ce mentor';
-                        $mentorPosition = $mentor->current_position ?? '';
-                        $mentorCompany = $mentor->current_company ?? '';
-                        $mentorSpecialization = $mentor->specialization_label ?? '';
-                        $user = auth()->user();
-                        $userName = explode(' ', $user->name ?? '')[0] ?? '';
-                        $roadmapSummary = '';
-                        if ($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0) {
-                        $steps = $mentor->roadmapSteps->sortBy('position')->take(3);
-                        $stepDescriptions = $steps->map(fn($s) => $s->title . ($s->organization ? ' chez ' .
-                        $s->organization : ''))->implode(', ');
-                        $roadmapSummary = "Son parcours inclut: " . $stepDescriptions . ".";
-                        }
-                        $prefilledMessage = "Bonjour ! Je suis inspiré(e) par le profil de {$mentorName}";
-                        if ($mentorPosition) {
-                        $prefilledMessage .= " qui travaille actuellement comme {$mentorPosition}";
-                        if ($mentorCompany) {
-                        $prefilledMessage .= " chez {$mentorCompany}";
-                        }
-                        }
-                        $prefilledMessage .= ". ";
-                        if ($roadmapSummary) {
-                        $prefilledMessage .= $roadmapSummary . " ";
-                        }
-                        $prefilledMessage .= "J'aimerais avoir un parcours similaire dans le domaine " .
-                        ($mentorSpecialization ?: "de ce professionnel") . ". ";
-                        $prefilledMessage .= "Quelles sont les étapes clés que je devrais suivre pour atteindre un
-                        profil similaire ? Quelles formations ou compétences dois-je acquérir ?";
-                        @endphp
-                        @if($mentor->is_validated)
-                        <a href="{{ route('jeune.chat') }}?mentor_id={{ $mentor->id }}&prefill={{ urlencode($prefilledMessage) }}"
-                            class="flex items-center justify-center gap-2 w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                            Discuter avec l'IA sur ce profil
-                        </a>
-                        @endif
-                        @endif
+                    @endif
+                    @php
+                    $mentorName = $mentor->user->name ?? 'ce mentor';
+                    $mentorPosition = $mentor->current_position ?? '';
+                    $mentorCompany = $mentor->current_company ?? '';
+                    $mentorSpecialization = $mentor->specialization_label ?? '';
+                    $user = auth()->user();
+                    $userName = explode(' ', $user->name ?? '')[0] ?? '';
+                    $roadmapSummary = '';
+                    if ($mentor->roadmapSteps && $mentor->roadmapSteps->count() > 0) {
+                    $steps = $mentor->roadmapSteps->sortBy('position')->take(3);
+                    $stepDescriptions = $steps->map(fn($s) => $s->title . ($s->organization ? ' chez ' .
+                    $s->organization : ''))->implode(', ');
+                    $roadmapSummary = "Son parcours inclut: " . $stepDescriptions . ".";
+                    }
+                    $prefilledMessage = "Bonjour ! Je suis inspiré(e) par le profil de {$mentorName}";
+                    if ($mentorPosition) {
+                    $prefilledMessage .= " qui travaille actuellement comme {$mentorPosition}";
+                    if ($mentorCompany) {
+                    $prefilledMessage .= " chez {$mentorCompany}";
+                    }
+                    }
+                    $prefilledMessage .= ". ";
+                    if ($roadmapSummary) {
+                    $prefilledMessage .= $roadmapSummary . " ";
+                    }
+                    $prefilledMessage .= "J'aimerais avoir un parcours similaire dans le domaine " .
+                    ($mentorSpecialization ?: "de ce professionnel") . ". ";
+                    $prefilledMessage .= "Quelles sont les étapes clés que je devrais suivre pour atteindre un
+                    profil similaire ? Quelles formations ou compétences dois-je acquérir ?";
+                    @endphp
+                    @if($mentor->is_validated)
+                    <a href="{{ route('jeune.chat') }}?mentor_id={{ $mentor->id }}&prefill={{ urlencode($prefilledMessage) }}"
+                        class="flex items-center justify-center gap-2 w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        Discuter avec l'IA sur ce profil
+                    </a>
+                    @endif
+                    @endif
                 </div>
             </div>
 

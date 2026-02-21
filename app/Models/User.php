@@ -265,7 +265,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Retourne l'URL complète de la photo de profil
      */
-    public function getAvatarUrlAttribute(): ?string
+    public function getAvatarUrlAttribute(): string
     {
         // Priorite: photo locale (téléchargée/uploadée) > photo OAuth
         if ($this->profile_photo_path) {
@@ -276,7 +276,8 @@ class User extends Authenticatable implements MustVerifyEmail
             return $this->attributes['profile_photo_url'];
         }
 
-        return null;
+        // Fallback: Initiales
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 
     /**

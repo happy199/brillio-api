@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class MentorshipController extends Controller
 {
@@ -15,6 +16,9 @@ class MentorshipController extends Controller
     public function index()
     {
         $user = auth()->user();
+
+        // Si le profil n'est pas public, on pourrait aussi gérer ici, mais le middleware est plus propre
+        // On garde l'index standard ici, le middleware fera son travail
 
         // Récupérer les mentorats par statut
         $activeMentorships = $user->mentorshipsAsMentee()
@@ -39,6 +43,19 @@ class MentorshipController extends Controller
     }
 
     /**
+     * Page de verrouillage si profil non publié
+     */
+    public function lockedIndex()
+    {
+        // Si le profil est déjà public, on redirige vers l'index
+        if (auth()->user()->jeuneProfile?->is_public) {
+            return redirect()->route('jeune.mentorship.index');
+        }
+
+        return view('jeune.mentorship.locked');
+    }
+
+    /**
      * Envoyer une demande de mentorat
      */
     public function store(Request $request)
@@ -49,6 +66,17 @@ class MentorshipController extends Controller
         ]);
 
         $user = auth()->user();
+        $jeuneProfile = $user->jeuneProfile;
+
+        // Si le profil n'est pas public, le publier de manière transparente
+        if ($jeuneProfile && !$jeuneProfile->is_public) {
+            $jeuneProfile->update([
+                'is_public' => true,
+                'published_at' => now(),
+                'public_slug' => $jeuneProfile->public_slug ?? \Str::slug($user->name) . '-' . \Str::random(6)
+            ]);
+        }
+
         $mentorId = $validated['mentor_id'];
 
         // Vérifier si le mentor existe et est bien un mentor

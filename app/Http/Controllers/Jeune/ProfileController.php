@@ -61,6 +61,16 @@ class ProfileController extends Controller
             $user->update($userUpdates);
         }
 
+        // Gestion de la photo de profil
+        if ($request->hasFile('photo')) {
+            // Supprimer l'ancienne photo si existante
+            if ($user->profile_photo_path) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+            $path = $request->file('photo')->store('profile-photos', 'public');
+            $user->update(['profile_photo_path' => $path]);
+        }
+
         // Gestion du CV
         if ($request->hasFile('cv')) {
             // Supprimer l'ancien CV si existant
@@ -106,7 +116,8 @@ class ProfileController extends Controller
         if ($request->has('is_public')) {
             $profileUpdates['is_public'] = $isPublic;
             $profileUpdates['public_slug'] = $isPublic ? $slug : $slug;
-        } else if ($isPublic && empty($profile->public_slug)) {
+        }
+        else if ($isPublic && empty($profile->public_slug)) {
             // Cas rare: on était déjà public mais sans slug (ex: migration), on force update slug
             $profileUpdates['public_slug'] = $slug;
         }

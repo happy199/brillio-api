@@ -248,8 +248,16 @@
                 Explorer
             </a>
             <a href="{{ route('jeune.mentorship.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentorship.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentorship.index') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Mes Mentors
+            </a>
+            <a href="{{ route('jeune.sessions.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->is('espace-jeune/mentorat/seances*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Séances
+            </a>
+            <a href="{{ route('jeune.sessions.calendar') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.sessions.calendar') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Calendrier
             </a>
         </div>
     </nav>
