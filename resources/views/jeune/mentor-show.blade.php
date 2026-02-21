@@ -279,7 +279,6 @@
                         Discuter avec l'IA sur ce profil
                     </a>
                     @endif
-                    @endif
                 </div>
             </div>
 

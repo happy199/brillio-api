@@ -72,10 +72,33 @@ class MentorDashboardController extends Controller
             'profile_photo' => 'nullable|image|max:5120', // 5MB max
         ]);
 
+        // Nettoyer les URLs avant de continuer (si non vides et sans protocole)
+        $request->merge([
+            'linkedin_url' => $this->formatUrl($request->linkedin_url),
+            'website_url' => $this->formatUrl($request->website_url),
+        ]);
+
+        // Re-valider uniquement les URLs après formatage pour être sur qu'elles passent
+        $request->validate([
+            'linkedin_url' => 'nullable|url|max:255',
+            'website_url' => 'nullable|url|max:255',
+        ]);
+
+        // Mettre à jour les données validées avec les URLs formatées
+        $validated['linkedin_url'] = $request->linkedin_url;
+        $validated['website_url'] = $request->website_url;
+
         $validated['is_published'] = $request->has('is_published');
 
         $user = auth()->user();
         $profile = $user->mentorProfile;
+
+        // 📸 LOG DE SÉCURITÉ : On trace l'état des photos avant la mise à jour
+        \Log::info('🛡️ Photo safety check - Before updateProfile', [
+            'user_id' => $user->id,
+            'photo_path' => $user->profile_photo_path,
+            'photo_url' => $user->profile_photo_url
+        ]);
 
         // Validation pour la publication
         if ($validated['is_published']) {
@@ -156,6 +179,13 @@ class MentorDashboardController extends Controller
             ]);
             $profile->specialization?->updateMentorCount();
         }
+
+        // 📸 LOG DE SÉCURITÉ : On trace l'état des photos après la mise à jour
+        \Log::info('🛡️ Photo safety check - After updateProfile', [
+            'user_id' => $user->id,
+            'photo_path' => $user->profile_photo_path,
+            'photo_url' => $user->profile_photo_url
+        ]);
 
         return back()->with('success', $message);
     }
@@ -327,6 +357,13 @@ class MentorDashboardController extends Controller
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
+        // 📸 LOG DE SÉCURITÉ : On trace l'état des photos avant l'import
+        \Log::info('🛡️ Photo safety check - Before LinkedIn Import', [
+            'user_id' => $user->id,
+            'photo_path' => $user->profile_photo_path,
+            'photo_url' => $user->profile_photo_url
+        ]);
+
         if (!$profile) {
             $profile = MentorProfile::create(['user_id' => $user->id]);
         }
@@ -418,6 +455,8 @@ class MentorDashboardController extends Controller
             $latestExperience = !empty($profileData['experience']) ? $profileData['experience'][0] : null;
 
             // Sauvegarder les données
+            // NOTE: On ne touche JAMAIS aux champs de photo de l'utilisateur ici (profile_photo_path, profile_photo_url)
+            // car le PDF LinkedIn ne contient pas de photo. On préserve les données existantes si le PDF est incomplet.
             $profile->update([
                 'linkedin_raw_data' => $profileData,
                 'linkedin_imported_at' => now(),
@@ -425,20 +464,20 @@ class MentorDashboardController extends Controller
                 'linkedin_pdf_original_name' => $originalName,
                 'linkedin_import_count' => $profile->linkedin_import_count + 1,
 
-                // Poste actuel = titre de la dernière expérience
-                'current_position' => $latestExperience['title'] ?? $profile->current_position,
+                // Poste actuel = titre de la dernière expérience (on préserve si vide)
+                'current_position' => ($latestExperience['title'] ?? null) ?: $profile->current_position,
 
-                // Entreprise actuelle = company de la dernière expérience
-                'current_company' => $latestExperience['company'] ?? $profile->current_company,
+                // Entreprise actuelle = company de la dernière expérience (on préserve si vide)
+                'current_company' => ($latestExperience['company'] ?? null) ?: $profile->current_company,
 
-                // Bio = headline (description de l'entreprise)
-                'bio' => $profileData['headline'] ?? $profile->bio,
+                // Bio = headline (on préserve si vide)
+                'bio' => ($profileData['headline'] ?? null) ?: $profile->bio,
 
-                'skills' => $profileData['skills'] ?? $profile->skills,
+                'skills' => (!empty($profileData['skills'])) ? $profileData['skills'] : $profile->skills,
 
-                // Nouveaux mappings
-                'linkedin_url' => $profileData['contact']['linkedin'] ?? $profile->linkedin_url,
-                'website_url' => $profileData['contact']['website'] ?? $profile->website_url,
+                // Nouveaux mappings - formatage robuste des URLs
+                'linkedin_url' => $this->formatUrl(($profileData['contact']['linkedin'] ?? null) ?: $profile->linkedin_url),
+                'website_url' => $this->formatUrl(($profileData['contact']['website'] ?? null) ?: $profile->website_url),
                 'years_of_experience' => $yearsOfExperience > 0 ? $yearsOfExperience : $profile->years_of_experience,
             ]);
 
@@ -533,10 +572,26 @@ class MentorDashboardController extends Controller
                 ] : null
             ]);
 
+            // 📸 LOG DE SÉCURITÉ : On trace l'état des photos après l'import
+            \Log::info('🛡️ Photo safety check - After LinkedIn Import (Success)', [
+                'user_id' => $user->id,
+                'photo_path' => $user->profile_photo_path,
+                'photo_url' => $user->profile_photo_url
+            ]);
+
+            return $response;
+
         } catch (\Throwable $e) {
             \Log::error('LinkedIn PDF import error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
+            ]);
+
+            // 📸 LOG DE SÉCURITÉ : On trace même en cas d'erreur
+            \Log::warning('🛡️ Photo safety check - After LinkedIn Import (Failed)', [
+                'user_id' => $user->id,
+                'photo_path' => $user->profile_photo_path,
+                'photo_url' => $user->profile_photo_url
             ]);
 
             return response()->json([
@@ -544,6 +599,26 @@ class MentorDashboardController extends Controller
                 'error' => 'Erreur critique lors du parsing : ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()
             ], 500);
         }
+    }
+
+    /**
+     * Formater une URL pour s'assurer qu'elle commence par http(s)://
+     */
+    private function formatUrl(?string $url): ?string
+    {
+        if (empty($url)) {
+            return $url;
+        }
+
+        $url = trim($url);
+
+        // Si l'URL ne commence pas par http:// ou https://
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            // Si elle commence par www., ou juste par un nom de domaine
+            return 'https://' . ltrim($url, '/');
+        }
+
+        return $url;
     }
 
     /**
