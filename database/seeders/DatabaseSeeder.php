@@ -12,15 +12,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            SpecializationSeeder::class,
-            AdminSeeder::class,
-            UserSeeder::class,
-            MentorSeeder::class,
-            PersonalityQuestionsSeeder::class,
-            PersonalityTestSeeder::class,
-            ChatSeeder::class,
-            CreditPackSeeder::class,
-            PersonalityCompatibilitySeeder::class,
+            SpecializationSeeder::class ,
+            AdminSeeder::class ,
+            UserSeeder::class ,
+            MentorSeeder::class ,
+            PersonalityQuestionsSeeder::class ,
+            PersonalityTestSeeder::class ,
+            ChatSeeder::class ,
+            CreditPackSeeder::class ,
+            PersonalityCompatibilitySeeder::class ,
+            OrganizationSubscriptionSeeder::class ,
         ]);
     }
 }
