@@ -52,7 +52,7 @@
                         <label class="text-base font-semibold text-gray-900">1. Type de rapport</label>
                         <p class="text-sm text-gray-500 mb-4">Quelles données souhaitez-vous exporter ?</p>
 
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <!-- General Stats -->
                             <label
                                 class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none border-gray-200 hover:border-indigo-300 transition-all">
@@ -60,8 +60,8 @@
                                 <span class="flex flex-1">
                                     <span class="flex flex-col">
                                         <span class="block text-sm font-bold text-gray-900">Stats Générales</span>
-                                        <span class="mt-1 flex items-center text-xs text-gray-500">Résumé global de
-                                            l'activité</span>
+                                        <span class="mt-1 flex items-center text-xs text-gray-500">Résumé global (Jeunes
+                                            & Mentors)</span>
                                     </span>
                                 </span>
                                 <div class="radio-indicator absolute -inset-px rounded-lg border-2 border-transparent pointer-events-none"
@@ -77,6 +77,21 @@
                                         <span class="block text-sm font-bold text-gray-900">Liste des Jeunes</span>
                                         <span class="mt-1 flex items-center text-xs text-gray-500">Détails des profils
                                             parrainés</span>
+                                    </span>
+                                </span>
+                                <div class="radio-indicator absolute -inset-px rounded-lg border-2 border-transparent pointer-events-none"
+                                    aria-hidden="true"></div>
+                            </label>
+
+                            <!-- Mentors List -->
+                            <label
+                                class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none border-gray-200 hover:border-indigo-300 transition-all">
+                                <input type="radio" name="type" value="mentors" class="sr-only">
+                                <span class="flex flex-1">
+                                    <span class="flex flex-col">
+                                        <span class="block text-sm font-bold text-gray-900">Liste des Mentors</span>
+                                        <span class="mt-1 flex items-center text-xs text-gray-500">Mentors internes et
+                                            externes</span>
                                     </span>
                                 </span>
                                 <div class="radio-indicator absolute -inset-px rounded-lg border-2 border-transparent pointer-events-none"

@@ -303,7 +303,7 @@
                     @endif
 
                     <div class="flex items-center space-x-4">
-                        <span class="text-gray-600">{{ auth()->user()->name }}</span>
+                        <span class="text-gray-600">{{ auth()->user()?->name }}</span>
                         <form action="{{ route('admin.logout') }}" method="POST" class="inline">
                             @csrf
                             <button type="submit" class="text-gray-600 hover:text-gray-800">

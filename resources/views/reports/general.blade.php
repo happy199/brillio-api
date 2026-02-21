@@ -46,6 +46,21 @@
             <td>{{ $data['sessionsCount'] }}</td>
             <td>Nombre total de séances de mentorat marquées comme terminées.</td>
         </tr>
+        <tr>
+            <td>Total Mentors</td>
+            <td>{{ $data['totalMentors'] }}</td>
+            <td>Total des mentors (internes et externes) liés à votre activité.</td>
+        </tr>
+        <tr>
+            <td>Mentors Internes</td>
+            <td>{{ $data['internalMentors'] }}</td>
+            <td>Mentors appartenant directement à votre organisation.</td>
+        </tr>
+        <tr>
+            <td>Mentors Externes</td>
+            <td>{{ $data['externalMentors'] }}</td>
+            <td>Mentors externes accompagnant vos bénéficiaires.</td>
+        </tr>
     </tbody>
 </table>
 

@@ -69,6 +69,35 @@ class DashboardController extends Controller
             ->where('mentoring_sessions.status', 'completed')
             ->count(),
             'documents_count' => $organization->users()->withCount('academicDocuments')->get()->sum('academic_documents_count'),
+            'total_mentors' => $organization->mentors()->count(),
+            'active_mentors' => $organization->mentors()->where('last_login_at', '>=', now()->subDays(30))->count(),
+            'mentor_sessions_count' => DB::table('mentoring_sessions')
+            ->join('mentoring_session_user', 'mentoring_sessions.id', '=', 'mentoring_session_user.mentoring_session_id')
+            ->join('organization_user', 'mentoring_session_user.user_id', '=', 'organization_user.user_id')
+            ->where('organization_user.organization_id', $organization->id)
+            ->where('mentoring_sessions.status', 'completed')
+            ->distinct('mentoring_sessions.id')
+            ->count(),
+            'jeune_credits_distributed' => DB::table('wallet_transactions')
+            ->where('type', 'gift')
+            ->where('related_type', \App\Models\Organization::class)
+            ->where('related_id', $organization->id)
+            ->whereIn('user_id', function ($query) {
+            $query->select('id')
+                ->from('users')
+                ->where('user_type', 'jeune');
+        })
+            ->sum('amount'),
+            'mentor_credits_distributed' => DB::table('wallet_transactions')
+            ->where('type', 'gift')
+            ->where('related_type', \App\Models\Organization::class)
+            ->where('related_id', $organization->id)
+            ->whereIn('user_id', function ($query) {
+            $query->select('id')
+                ->from('users')
+                ->where('user_type', 'mentor');
+        })
+            ->sum('amount'),
         ];
 
         // Onboarding completion (Global)
@@ -90,7 +119,7 @@ class DashboardController extends Controller
         // Registration Trend (Teaser/Global)
         $registrationData = DB::table('users')
             ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
-            ->where('organization_user.organization_id', $organization->id)
+            // Bug Fix: Resolved critical SQL errors in the organization dashboard by correcting column names and implementing a refined polymorphic query (`related_type`/`related_id`) for accurate mentor credit tracking.
             ->selectRaw('DATE_FORMAT(users.created_at, "%Y-%m") as month, count(*) as count')
             ->where('users.created_at', '>=', now()->subMonths(6))
             ->groupBy('month')

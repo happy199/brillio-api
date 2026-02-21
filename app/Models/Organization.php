@@ -93,6 +93,17 @@ class Organization extends Model
     }
 
     /**
+     * Get all mentors linked to this organization via the pivot table.
+     */
+    public function mentors(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class , 'organization_user')
+            ->where('users.user_type', 'mentor')
+            ->withPivot('referral_code_used')
+            ->withTimestamps();
+    }
+
+    /**
      * Get all sponsored users (legacy 1-N relationship for original source tracking).
      */
     public function sponsoredUsers(): HasMany

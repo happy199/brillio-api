@@ -93,6 +93,10 @@
                             class="{{ request()->routeIs('organization.users.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Jeunes
                         </a>
+                        <a href="{{ route('organization.mentors.index') }}"
+                            class="{{ request()->routeIs('organization.mentors.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Mentors
+                        </a>
                         <a href="{{ route('organization.mentorships.index') }}"
                             class="{{ request()->routeIs('organization.mentorships.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Mentorat
@@ -207,15 +211,63 @@
 
     @stack('scripts')
 
+    <!-- Toast Notification -->
+    <div x-data="{ 
+        showToast: false, 
+        toastMessage: '', 
+        toastType: 'success',
+        show(message, type = 'success') {
+            this.toastMessage = message;
+            this.toastType = type;
+            this.showToast = true;
+            setTimeout(() => this.showToast = false, 3000);
+        }
+    }" @copy-notification.window="show($event.detail.message, $event.detail.type)"
+        class="fixed bottom-5 right-5 z-[100]">
+        <div x-show="showToast" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-4"
+            class="bg-white border-l-4 rounded-lg shadow-xl p-4 flex items-center space-x-3 min-w-[300px]"
+            :class="toastType === 'success' ? 'border-organization-500' : 'border-red-500'" style="display: none;">
+            <div class="flex-shrink-0">
+                <template x-if="toastType === 'success'">
+                    <svg class="h-6 w-6 text-organization-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </template>
+                <template x-if="toastType === 'error'">
+                    <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </template>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-900" x-text="toastMessage"></p>
+            </div>
+            <button @click="showToast = false" class="ml-auto text-gray-400 hover:text-gray-500">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <script>
         function copyInvitationUrl() {
             const input = document.getElementById('invitation-url-input');
             input.select();
             input.setSelectionRange(0, 99999); // For mobile devices
             navigator.clipboard.writeText(input.value).then(function () {
-                alerien copié dans le presse - papiers!');
+                window.dispatchEvent(new CustomEvent('copy-notification', {
+                    detail: { message: 'Lien d\'invitation copié !', type: 'success' }
+                }));
             }, function (err) {
-                alert('Erreur lors de la copie.');
+                window.dispatchEvent(new CustomEvent('copy-notification', {
+                    detail: { message: 'Erreur lors de la copie.', type: 'error' }
+                }));
             });
         }
     </script>

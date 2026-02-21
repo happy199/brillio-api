@@ -40,7 +40,13 @@ class CreditDistributionController extends Controller
         }
         else {
             $targetUsers = User::whereIn('id', $request->user_ids)
-                ->where('sponsored_by_organization_id', $organization->id)
+                ->where(function ($q) use ($organization) {
+                $q->where('sponsored_by_organization_id', $organization->id)
+                    ->orWhereHas('organizations', function ($sq) use ($organization) {
+                    $sq->where('organizations.id', $organization->id);
+                }
+                );
+            })
                 ->get();
         }
 

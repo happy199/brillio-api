@@ -55,7 +55,7 @@ class InvitationController extends Controller
         $validated = $request->validate([
             'invited_emails' => ['nullable', 'string'],
             'expires_days' => ['nullable', 'integer', 'min:1', 'max:365'],
-            'role' => ['nullable', 'string', 'in:jeune,admin,viewer'],
+            'role' => ['nullable', 'string', 'in:jeune,mentor,admin,viewer'],
         ]);
 
         // Parse emails (one per line or comma-separated)
@@ -99,9 +99,7 @@ class InvitationController extends Controller
 
                 // Send invitation email
                 try {
-                    $registrationUrl = $role === 'jeune'
-                        ? route('auth.jeune.register', ['ref' => $invitation->referral_code])
-                        : route('organization.register', ['ref' => $invitation->referral_code]);
+                    $registrationUrl = route('auth.choice', ['ref' => $invitation->referral_code]);
 
                     Mail::to($email)->send(new OrganizationInvitationMail($organization, $invitation, $registrationUrl));
                 }
@@ -128,9 +126,7 @@ class InvitationController extends Controller
             ]);
 
             // Get invitation URL
-            $invitationUrl = $role === 'jeune'
-                ? route('auth.jeune.register', ['ref' => $invitation->referral_code])
-                : route('organization.register', ['ref' => $invitation->referral_code]);
+            $invitationUrl = route('auth.choice', ['ref' => $invitation->referral_code]);
 
             return redirect()->route('organization.invitations.index')
                 ->with('success', 'Invitation créée avec succès !')
