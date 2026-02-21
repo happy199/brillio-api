@@ -2,7 +2,8 @@
 
 @section('title', isset($invitation) ? 'Rejoindre ' . $invitation->organization->name : 'Inscription Organisation')
 @section('heading', isset($invitation) ? 'Rejoindre l\'équipe' : 'Devenir Partenaire')
-@section('subheading', isset($invitation) ? 'Rejoignez ' . $invitation->organization->name . ' sur Brillio' : 'Sponsorez
+@section('subheading', isset($invitation) ? 'Rejoignez ' . $invitation->organization->name . ' sur Brillio' :
+'Sponsorisez
 des talents et accompagnez l\'avenir de la jeunesse avec Brillio')
 @section('card_width', 'sm:max-w-2xl')
 
