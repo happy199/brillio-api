@@ -88,7 +88,9 @@ class DashboardController extends Controller
         $documentStats = [];
 
         // Registration Trend (Teaser/Global)
-        $registrationData = $organization->users()
+        $registrationData = DB::table('users')
+            ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+            ->where('organization_user.organization_id', $organization->id)
             ->selectRaw('DATE_FORMAT(users.created_at, "%Y-%m") as month, count(*) as count')
             ->where('users.created_at', '>=', now()->subMonths(6))
             ->groupBy('month')
@@ -107,8 +109,9 @@ class DashboardController extends Controller
         // --- FILTERED ANALYTICS (PRO FEATURES) ---
         if ($isPro) {
             // Personality Types (Filtered)
-            $personalityStats = $organization->users()
-                ->join('personality_tests', 'users.id', '=', 'personality_tests.user_id')
+            $personalityStats = DB::table('personality_tests')
+                ->join('organization_user', 'personality_tests.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
                 ->where('personality_tests.is_current', true)
                 ->whereNotNull('personality_tests.completed_at')
                 ->whereBetween('personality_tests.completed_at', [$startDate, $endDate])
@@ -124,23 +127,27 @@ class DashboardController extends Controller
             $carbonPeriod = \Carbon\CarbonPeriod::create($startDate, $endDate);
 
             // Fetch grouped data
-            $dailySignupsData = $organization->users()
-                ->selectRaw('DATE(created_at) as date, count(*) as count')
-                ->whereBetween('created_at', [$startDate, $endDate])
+            $dailySignupsData = DB::table('users')
+                ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
+                ->selectRaw('DATE(users.created_at) as date, count(*) as count')
+                ->whereBetween('users.created_at', [$startDate, $endDate])
                 ->groupBy('date')
                 ->pluck('count', 'date')->toArray();
 
-            $dailyTestsData = $organization->users()
-                ->join('personality_tests', 'users.id', '=', 'personality_tests.user_id')
+            $dailyTestsData = DB::table('personality_tests')
+                ->join('organization_user', 'personality_tests.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
                 ->whereNotNull('personality_tests.completed_at')
                 ->whereBetween('personality_tests.completed_at', [$startDate, $endDate])
                 ->selectRaw('DATE(personality_tests.completed_at) as date, count(*) as count')
                 ->groupBy('date')
                 ->pluck('count', 'date')->toArray();
 
-            $dailySessionsData = $organization->users()
-                ->join('mentoring_session_user', 'users.id', '=', 'mentoring_session_user.user_id')
-                ->join('mentoring_sessions', 'mentoring_session_user.mentoring_session_id', '=', 'mentoring_sessions.id')
+            $dailySessionsData = DB::table('mentoring_sessions')
+                ->join('mentoring_session_user', 'mentoring_sessions.id', '=', 'mentoring_session_user.mentoring_session_id')
+                ->join('organization_user', 'mentoring_session_user.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
                 ->where('mentoring_sessions.status', 'completed')
                 ->whereBetween('mentoring_sessions.scheduled_at', [$startDate, $endDate])
                 ->selectRaw('DATE(mentoring_sessions.scheduled_at) as date, count(*) as count')
@@ -164,11 +171,13 @@ class DashboardController extends Controller
             }
 
             // Demographics: Top Cities (Filtered by registration date)
-            $cityStats = $organization->users()
-                ->whereNotNull('city')
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->select('city', DB::raw('count(*) as count'))
-                ->groupBy('city')
+            $cityStats = DB::table('users')
+                ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
+                ->whereNotNull('users.city')
+                ->whereBetween('users.created_at', [$startDate, $endDate])
+                ->select('users.city', DB::raw('count(*) as count'))
+                ->groupBy('users.city')
                 ->orderByDesc('count')
                 ->limit(5)
                 ->get();
@@ -187,8 +196,9 @@ class DashboardController extends Controller
             }
 
             // Document Types (Filtered)
-            $documentStats = $organization->users()
-                ->join('academic_documents', 'users.id', '=', 'academic_documents.user_id')
+            $documentStats = DB::table('academic_documents')
+                ->join('organization_user', 'academic_documents.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
                 ->whereBetween('academic_documents.created_at', [$startDate, $endDate])
                 ->select('academic_documents.document_type as type', DB::raw('count(*) as count'))
                 ->groupBy('academic_documents.document_type')
