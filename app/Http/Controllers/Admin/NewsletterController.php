@@ -29,6 +29,7 @@ class NewsletterController extends Controller
             'total' => NewsletterSubscriber::count(),
             'active' => NewsletterSubscriber::active()->count(),
             'unsubscribed' => NewsletterSubscriber::unsubscribed()->count(),
+            'total_users' => \App\Models\User::count(),
         ];
 
         return view('admin.newsletter.index', compact('subscribers', 'stats'));
@@ -108,19 +109,50 @@ class NewsletterController extends Controller
         $request->validate([
             'subject' => 'required|string|max:255',
             'body' => 'required|string',
-            'recipients' => 'required|array',
-            'recipients.*' => 'email',
+            'recipient_type' => 'required|string|in:all,all_users,custom,selected',
+            'recipients' => 'nullable|array',
+            'custom_emails' => 'nullable|string',
         ]);
+
+        $recipientEmails = [];
+
+        switch ($request->recipient_type) {
+            case 'all':
+                $recipientEmails = NewsletterSubscriber::active()->pluck('email')->toArray();
+                break;
+            case 'all_users':
+                // On prend tous les utilisateurs qui ne sont pas archivés
+                $recipientEmails = \App\Models\User::whereNull('archived_at')->pluck('email')->toArray();
+                break;
+            case 'custom':
+                if ($request->filled('custom_emails')) {
+                    // Split par virgule, point-virgule ou retour à la ligne
+                    $emails = preg_split('/[,\n\r;]+/', $request->custom_emails);
+                    $recipientEmails = array_filter(array_map('trim', $emails), function ($email) {
+                        return filter_var($email, FILTER_VALIDATE_EMAIL);
+                    });
+                }
+                break;
+            case 'selected':
+                $recipientEmails = $request->recipients ?? [];
+                break;
+        }
+
+        if (empty($recipientEmails)) {
+            return back()->with('error', '⚠️ Aucun destinataire valide trouvé pour cette sélection.');
+        }
+
+        $recipientEmails = array_values(array_unique($recipientEmails));
 
         // Créer la campagne
         $campaign = EmailCampaign::create([
             'subject' => $request->subject,
             'body' => $request->body,
             'type' => 'newsletter',
-            'recipients_count' => count($request->recipients),
-            'status' => 'queued', // Statut initial mis en file d'attente
+            'recipients_count' => count($recipientEmails),
+            'status' => 'queued',
             'sent_by' => auth()->id(),
-            'recipient_emails' => $request->recipients,
+            'recipient_emails' => $recipientEmails,
         ]);
 
         // Dispatcher le Job dans la queue
