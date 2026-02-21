@@ -29,10 +29,10 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
     <script>
-   taLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-PPX01GY0R9');
+        taLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-PPX01GY0R9');
     </script>
 
     <title>@yield('title', 'Brillio - Plateforme de Mentorat en Afrique')</title>
@@ -93,7 +93,7 @@
                             700: '#c2410c',
                             800: '#9a3412',
                             900: '#7c2d12',
-                    }
+                        }
                     },
                     fontFamily: {
                         sans: ['Poppins', 'sans-serif'],
@@ -321,11 +321,11 @@
                     <a href="{{ route('auth.login') }}"
                         class="px-5 py-2.5 font-semibold rounded-full transition-all duration-300"
                         :class="scrolled ? 'text-primary-600 hover:bg-primary-50' : 'text-white hover:bg-white/10'">
-                        Explorer ta carriere
+                        Explorer ta carrière
                     </a>
                     <a href="#telecharger"
                         class="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300">
-                        Telecharger l'app
+                        Télécharger l'app
                     </a>
                 </div>
 
@@ -353,7 +353,7 @@
                 <a href="{{ route('home') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Accueil</a>
                 <a href="{{ route('home') }}#fonctionnalites"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Fonctionnalites</a>
+                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Fonctionnalités</a>
                 <a href="{{ route('about') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">A
                     propos</a>
@@ -362,11 +362,11 @@
                 <div class="mt-4 space-y-2">
                     <a href="{{ route('auth.login') }}"
                         class="block py-3 px-4 border border-primary-600 text-primary-600 text-center font-semibold rounded-lg hover:bg-primary-50">
-                        Explorer ta carriere
+                        Explorer ta carrière
                     </a>
                     <a href="#telecharger"
                         class="block py-3 px-4 bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-center font-semibold rounded-lg">
-                        Telecharger l'app
+                        Télécharger l'app
                     </a>
                 </div>
             </div>

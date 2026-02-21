@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 
 @section('title', 'Rejoignez Brillio')
-@section('heading', 'Rejoignez la communaute Brillio')
+@section('heading', 'Rejoignez la communauté Brillio')
 @section('subheading', 'Choisissez votre profil pour commencer')
 
 @section('content')
@@ -20,7 +20,7 @@
             <div class="flex-1">
                 <h3 class="text-xl font-bold text-gray-900">Je suis un Jeune</h3>
                 <p class="text-gray-600 text-sm mt-1">
-                    Decouvrez votre personnalite, explorez des carrieres et trouvez votre voie grace a nos mentors.
+                    Découvrez votre personnalité, explorez des carrières et trouvez votre voie grâce à nos mentors.
                 </p>
             </div>
             <svg class="w-6 h-6 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all"
@@ -54,7 +54,7 @@
             <div class="flex-1">
                 <h3 class="text-xl font-bold text-gray-900">Je suis un Mentor</h3>
                 <p class="text-gray-600 text-sm mt-1">
-                    Partagez votre parcours professionnel et inspirez la prochaine generation de talents africains.
+                    Partagez votre parcours professionnel et inspirez la prochaine génération de talents africains.
                 </p>
             </div>
             <svg class="w-6 h-6 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"
@@ -106,7 +106,7 @@
                 <path
                     d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
             </svg>
-            Mentors : Connexion exclusive via LinkedIn pour verifier votre profil professionnel
+            Mentors : Connexion exclusive via LinkedIn pour vérifier votre profil professionnel
         </p>
     </div>
 </div>
@@ -114,7 +114,7 @@
 
 @section('footer')
 <p class="text-white/80 text-sm">
-    Deja inscrit ?
+    Déjà inscrit ?
     <a href="{{ route('auth.login') }}" class="text-white font-semibold hover:underline">Se connecter</a>
 </p>
 @endsection

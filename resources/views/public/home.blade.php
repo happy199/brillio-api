@@ -954,7 +954,7 @@
                                     </svg>
                                 </div>
                                 <h4 class="font-bold text-gray-900">Test de personnalité</h4>
-                                <p class="text-sm text-gray-500">Decouvre ton profil</p>
+                                <p class="text-sm text-gray-500">Découvre ton profil</p>
                             </div>
                             <div class="bg-white rounded-2xl p-6 shadow-sm">
                                 <div
@@ -1008,11 +1008,11 @@
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="max-w-4xl mx-auto text-center text-white">
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6" data-aos="fade-up">
-                    Pret a construire ton avenir ?
+                    Prêt à construire ton avenir ?
                 </h2>
                 <p class="text-xl text-white/90 mb-10" data-aos="fade-up" data-aos-delay="100">
-                    Telecharge Brillio ou utilise la plateforme web pour commencer ton voyage vers le metier de tes
-                    reves.
+                    Télécharge Brillio ou utilise la plateforme web pour commencer ton voyage vers le métier de tes
+                    rêves.
                 </p>
 
                 <!-- Download Buttons -->
@@ -1046,7 +1046,7 @@
 
                 <!-- Web platform CTA -->
                 <div class="mt-8 pt-8 border-t border-white/20" data-aos="fade-up" data-aos-delay="300">
-                    <p class="text-white/80 mb-4">Ou accede directement depuis ton navigateur</p>
+                    <p class="text-white/80 mb-4">Ou accède directement depuis ton navigateur</p>
                     <a href="{{ route('auth.choice') }}"
                         class="inline-flex items-center gap-2 px-8 py-4 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-full hover:bg-white/30 transition-all duration-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1071,11 +1071,11 @@
                             Pour les professionnels
                         </span>
                         <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                            Devenez mentor et inspirez la prochaine generation
+                            Devenez mentor et inspirez la prochaine génération
                         </h2>
                         <p class="text-lg text-gray-600 mb-6">
-                            Vous etes un professionnel africain qui a reussi ? Partagez votre parcours, vos conseils et
-                            inspirez des milliers de jeunes a suivre leurs reves.
+                            Vous êtes un professionnel africain qui a réussi ? Partagez votre parcours, vos conseils et
+                            inspirez des milliers de jeunes à suivre leurs rêves.
                         </p>
                         <ul class="space-y-4 mb-8">
                             <li class="flex items-start gap-3">
@@ -1103,8 +1103,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-900">Gagnez en visibilite</p>
-                                    <p class="text-sm text-gray-500">Renforcez votre personal branding aupres de la
+                                    <p class="font-semibold text-gray-900">Gagnez en visibilité</p>
+                                    <p class="text-sm text-gray-500">Renforcez votre personal branding auprès de la
                                         jeunesse
                                         africaine</p>
                                 </div>
@@ -1119,8 +1119,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-900">Contribuez a l'Afrique</p>
-                                    <p class="text-sm text-gray-500">Aidez a former les leaders de demain sur le
+                                    <p class="font-semibold text-gray-900">Contribuez à l'Afrique</p>
+                                    <p class="text-sm text-gray-500">Aidez à former les leaders de demain sur le
                                         continent
                                     </p>
                                 </div>
@@ -1171,15 +1171,15 @@
                                     </div>
                                 </div>
                                 <p class="text-sm text-gray-600 mb-4">"Partager mon parcours avec les jeunes est une
-                                    facon
-                                    de redonner a ma communaute..."</p>
+                                    façon
+                                    de redonner à ma communauté..."</p>
                                 <div class="flex gap-2 flex-wrap">
                                     <span
                                         class="px-3 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">Entrepreneuriat</span>
                                     <span
                                         class="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Senegal</span>
                                     <span
-                                        class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Verifie</span>
+                                        class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Vérifié</span>
                                 </div>
                             </div>
                             <div
@@ -1191,7 +1191,7 @@
                                     </div>
                                     <div>
                                         <p class="font-semibold text-gray-900 text-sm">Fatou N.</p>
-                                        <p class="text-xs text-gray-500">Ingenieure Data</p>
+                                        <p class="text-xs text-gray-500">Ingénieure Data</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-2">

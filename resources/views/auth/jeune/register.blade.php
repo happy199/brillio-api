@@ -1,8 +1,8 @@
 @extends('layouts.auth')
 
 @section('title', 'Inscription Jeune')
-@section('heading', 'Creez votre compte')
-@section('subheading', 'Commencez votre voyage vers une carriere epanouissante')
+@section('heading', 'Créez votre compte')
+@section('subheading', 'Commencez votre voyage vers une carrière épanouissante')
 
 @section('content')
 <div class="space-y-6">
@@ -107,7 +107,7 @@
 
         <button type="submit"
             class="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-accent-600 text-white font-semibold rounded-xl hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all shadow-lg">
-            Creer mon compte
+            Créer mon compte
         </button>
     </form>
 
@@ -117,14 +117,14 @@
         <a href="{{ route('terms') }}" class="text-primary-600 hover:underline">Conditions d'utilisation</a>
         et notre
         <a href="{{ route('privacy-policy') }}" class="text-primary-600 hover:underline">Politique de
-            confidentialite</a>.
+            confidentialité</a>.
     </p>
 </div>
 @endsection
 
 @section('footer')
 <p class="text-white/80 text-sm">
-    Deja un compte ?
+    Déjà un compte ?
     <a href="{{ route('auth.jeune.login') }}" class="text-white font-semibold hover:underline">Se connecter</a>
 </p>
 @endsection
