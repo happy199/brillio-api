@@ -249,6 +249,11 @@ class WebAuthController extends Controller
         
         // Mark invitation as used
         if ($referralCode && isset($invitation)) {
+            // Link user to organization in pivot table
+            $user->organizations()->syncWithoutDetaching([
+                $organizationId => ['referral_code_used' => $referralCode]
+            ]);
+
             $invitation->markAsAccepted();
             
             // Clear referral code from session
@@ -301,6 +306,27 @@ class WebAuthController extends Controller
             $request->session()->regenerate();
 
             $user->update(['last_login_at' => now()]);
+
+            // Check for referral code in session (existing user logging in via link)
+            $referralCode = session('referral_code');
+            if ($referralCode) {
+                $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                    ->where('status', 'pending')
+                    ->first();
+                
+                if ($invitation) {
+                    // Link existing user to organization in pivot table
+                    $user->organizations()->syncWithoutDetaching([
+                        $invitation->organization_id => ['referral_code_used' => $referralCode]
+                    ]);
+                    
+                    // Mark invitation as used
+                    $invitation->markAsAccepted();
+                    
+                    // Clear referral code from session
+                    session()->forget(['referral_code', 'organization_name']);
+                }
+            }
 
             // Reactivate archived account automatically
             if ($user->is_archived) {
@@ -547,6 +573,27 @@ class WebAuthController extends Controller
                 'profile_photo_url' => $socialData['avatar_url'] ?? $user->profile_photo_url,
                 'last_login_at' => now(),
             ]);
+
+            // Check for referral code in session (existing user logging in via link)
+            $referralCode = session('referral_code');
+            if ($referralCode) {
+                $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                    ->where('status', 'pending')
+                    ->first();
+                
+                if ($invitation) {
+                    // Link existing user to organization in pivot table
+                    $user->organizations()->syncWithoutDetaching([
+                        $invitation->organization_id => ['referral_code_used' => $referralCode]
+                    ]);
+                    
+                    // Mark invitation as used
+                    $invitation->markAsAccepted();
+                    
+                    // Clear referral code from session
+                    session()->forget(['referral_code', 'organization_name']);
+                }
+            }
         } else {
             // Check for referral code in session (for OAuth)
             $referralCode = session('referral_code');
@@ -582,6 +629,13 @@ class WebAuthController extends Controller
                 'email_verified_at' => now(), // Social login users are considered verified
                 'last_login_at' => now(),
             ]);
+
+            // Also link to organization via pivot table if registering via link
+            if ($organizationId) {
+                $user->organizations()->syncWithoutDetaching([
+                    $organizationId => ['referral_code_used' => $referralCode]
+                ]);
+            }
 
             try {
                 $this->notificationService->sendWelcomeEmail($user);

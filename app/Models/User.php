@@ -391,4 +391,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo(Organization::class);
     }
+
+    /**
+     * Relation vers toutes les organisations auxquelles appartient l'utilisateur
+     */
+    public function organizations(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Organization::class, 'organization_user')
+            ->withPivot('referral_code_used')
+            ->withTimestamps();
+    }
 }
