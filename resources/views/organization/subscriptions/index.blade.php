@@ -185,7 +185,7 @@
                         </li>
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Nom de domaine personnalisé
+                            Sous-domaine personnalisé
                         </li>
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
@@ -201,10 +201,26 @@
                         </li>
                         @endif
                     </ul>
-                    <a href="mailto:contact@brillio.africa?subject=Demande%20Plan%20Entreprise%20-%20{{ auth()->user()->organization->name ?? '' }}"
-                        class="mt-8 block w-full rounded-md bg-gray-900 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
-                        Contacter les ventes
-                    </a>
+                    @if($isEnterprise)
+                    <div
+                        class="mt-8 block w-full rounded-md bg-organization-50 px-3 py-2 text-center text-sm font-semibold text-organization-600 border border-organization-200">
+                        Votre plan actuel
+                    </div>
+                    @elseif($entPlan)
+                    <form action="{{ route('organization.subscriptions.subscribe', $entPlan->id) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="billing_cycle" :value="annual ? 'yearly' : 'monthly'">
+                        <button type="submit"
+                            class="mt-8 block w-full rounded-md bg-gray-900 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+                            Passer au plan Entreprise
+                        </button>
+                    </form>
+                    @else
+                    <button disabled
+                        class="mt-8 block w-full rounded-md bg-gray-300 px-3 py-2 text-center text-sm font-semibold text-white cursor-not-allowed">
+                        Non disponible
+                    </button>
+                    @endif
                 </div>
             </div>
 
