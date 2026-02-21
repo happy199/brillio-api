@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organization\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -54,7 +55,7 @@ class RegisterController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ];
 
         // Only require organization details if NOT joining an existing one
@@ -66,7 +67,17 @@ class RegisterController extends Controller
             $rules['description'] = ['nullable', 'string', 'max:1000'];
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'name.required' => 'Le nom complet est obligatoire.',
+            'email.required' => 'L\'adresse email est obligatoire.',
+            'email.email' => 'L\'adresse email doit être valide.',
+            'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'organization_name.required' => 'Le nom de l\'organisation est obligatoire.',
+            'website.url' => 'L\'URL du site web est invalide.',
+        ]);
 
         if ($isJoining) {
             $organization = $invitation->organization;
@@ -101,6 +112,8 @@ class RegisterController extends Controller
             'last_login_at' => now(),
         ]);
 
+        event(new Registered($user));
+
         // Auto-login
         Auth::login($user);
 
@@ -124,6 +137,10 @@ class RegisterController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+        ], [
+            'email.required' => 'L\'adresse email est obligatoire.',
+            'email.email' => 'L\'adresse email doit être valide.',
+            'password.required' => 'Le mot de passe est obligatoire.',
         ]);
 
         // Attempt login

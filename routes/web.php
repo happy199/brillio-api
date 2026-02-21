@@ -111,7 +111,21 @@ Route::prefix('jeune')->name('auth.jeune.')->group(function () {
     });
 
     // Route process sans middleware guest (car appelée en AJAX après callback)
-    Route::post('/oauth/{provider}/process', [WebAuthController::class, 'jeuneOAuthProcess'])->name('oauth.process');
+    Route::post('/oauth/{provider}/process', [WebAuthController::class , 'jeuneOAuthProcess'])->name('oauth.process');
+});
+
+// Email Verification (Authenticated but not necessarily verified)
+Route::middleware('auth')->name('verification.')->group(function () {
+    Route::get('/verify-email', [\App\Http\Controllers\Auth\VerifyEmailController::class, 'notice'])
+        ->name('notice');
+
+    Route::get('/verify-email/{id}/{hash}', [\App\Http\Controllers\Auth\VerifyEmailController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verify');
+
+    Route::post('/email/verification-notification', [\App\Http\Controllers\Auth\VerifyEmailController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('resend');
 });
 
 // Routes de confirmation de changement de type (accessible sans authentification)
@@ -160,7 +174,7 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'user_type:jeune'])->group(function () {
+Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', 'user_type:jeune'])->group(function () {
     // Onboarding
     Route::get('/bienvenue', [OnboardingController::class, 'index'])->name('onboarding');
     Route::post('/bienvenue', [OnboardingController::class, 'complete'])->name('onboarding.complete');

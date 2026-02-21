@@ -53,15 +53,15 @@
                     </div>
                     <ul role="list" class="mb-8 space-y-4 text-sm leading-6 text-gray-600 flex-1">
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Parrainage illimité de jeunes
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Tableau de bord standard
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Gestion de liste des jeunes
                         </li>
                     </ul>
@@ -107,21 +107,21 @@
                         @if($proPlan->features && is_array($proPlan->features))
                         @foreach($proPlan->features as $feature)
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             {{ $feature }}
                         </li>
                         @endforeach
                         @else
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Statistiques détaillées (Engagement)
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Calendrier global des séances
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Suivi des statuts de séances
                         </li>
                         @endif
@@ -174,29 +174,29 @@
                         @if($entPlan && $entPlan->features && is_array($entPlan->features))
                         @foreach($entPlan->features as $feature)
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             {{ $feature }}
                         </li>
                         @endforeach
                         @else
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Marque Blanche (Logo & Couleurs)
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Nom de domaine personnalisé
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Centre d'Export (PDF, Excel, CSV)
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Support dédié
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-green-500 h-6 w-5 flex-none"></i>
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             50 Crédits/mois offerts
                         </li>
                         @endif

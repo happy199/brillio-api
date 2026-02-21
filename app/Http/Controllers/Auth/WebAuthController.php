@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Auth\Events\Registered;
 
 /**
  * Controller pour l'authentification web (jeunes et mentors)
@@ -192,11 +193,16 @@ class WebAuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)->letters()->numbers()],
         ], [
-            'email.unique' => 'Cette adresse email est deja utilisee.',
-            'password.min' => 'Le mot de passe doit contenir au moins 8 caracteres.',
+            'name.required' => 'Le nom complet est obligatoire.',
+            'email.required' => 'L\'adresse email est obligatoire.',
+            'email.email' => 'L\'adresse email doit être valide.',
+            'email.unique' => 'Cette adresse email est déjà utilisée.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+            'password' => 'Le mot de passe doit contenir au moins 8 caractères, une lettre et un chiffre.',
         ]);
 
         // Optionnellement, creer l'utilisateur dans Supabase aussi
@@ -254,7 +260,9 @@ class WebAuthController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur envoi email bienvenue: ' . $e->getMessage());
         }
-
+ 
+        event(new Registered($user));
+ 
         Auth::login($user);
 
         if (!$user->onboarding_completed) {
@@ -272,6 +280,10 @@ class WebAuthController extends Controller
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+        ], [
+            'email.required' => 'L\'adresse email est obligatoire.',
+            'email.email' => 'L\'adresse email doit être valide.',
+            'password.required' => 'Le mot de passe est obligatoire.',
         ]);
 
         // Verifier que c'est un compte jeune
@@ -567,7 +579,7 @@ class WebAuthController extends Controller
                 'auth_provider' => $provider,
                 'provider_id' => $userData['id'] ?? null,
                 'profile_photo_url' => $socialData['avatar_url'],
-                'email_verified_at' => $socialData['email_verified'] ? now() : null,
+                'email_verified_at' => now(), // Social login users are considered verified
                 'last_login_at' => now(),
             ]);
 

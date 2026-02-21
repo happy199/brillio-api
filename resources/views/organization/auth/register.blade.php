@@ -118,6 +118,7 @@ des talents et accompagnez l\'avenir de la jeunesse avec Brillio')
                 <input id="password" name="password" type="password" required
                     class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all"
                     placeholder="••••••••">
+                <p class="mt-1 text-xs text-gray-500 italic">Minimum 8 caractères, une lettre et un chiffre.</p>
                 @error('password')
                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                 @enderror

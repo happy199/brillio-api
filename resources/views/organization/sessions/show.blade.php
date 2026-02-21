@@ -47,7 +47,7 @@
                     <div class="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                         <h3 class="text-lg font-medium text-gray-900">{{ $session->title }}</h3>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold 
-                            @if($session->status === 'confirmed') bg-green-100 text-green-800 
+                            @if($session->status === 'confirmed') bg-organization-100 text-organization-800 
                             @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
                             @elseif($session->status === 'cancelled') bg-red-100 text-red-800
                             @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800
@@ -179,7 +179,7 @@
                                     </div>
                                     <span class="text-xs text-gray-500">
                                         @if($mentee->sponsored_by_organization_id === $organization->id)
-                                        <span class="text-green-600 font-medium">Parrainé</span>
+                                        <span class="text-organization-600 font-medium">Parrainé</span>
                                         @endif
                                     </span>
                                 </div>
