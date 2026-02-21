@@ -88,7 +88,7 @@
             <div class="flex-1">
                 <h3 class="text-xl font-bold text-gray-900">Je suis une Organisation</h3>
                 <p class="text-gray-600 text-sm mt-1">
-                    Sponsorez des talents, soutenez la communauté et suivez l'impact de vos jeunes talents dans leur
+                    Sponsorisez des talents, soutenez la communauté et suivez l'impact de vos jeunes talents dans leur
                     carrière.
                 </p>
             </div>
