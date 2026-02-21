@@ -236,8 +236,8 @@
     </div>
 
     <!-- Pagination -->
-    <div class="flex justify-center">
-        {{ $mentors->links() }}
+    <div class="mt-8">
+        {{ $mentors->links('pagination.modern-pagination') }}
     </div>
     @else
     <!-- Empty State -->
