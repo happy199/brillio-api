@@ -63,22 +63,53 @@
 
             <!-- Instructions -->
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                <h4 class="font-bold text-blue-900 mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h4 class="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" width="20" height="20" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Comment exporter votre profil LinkedIn
+                    Comment exporter votre profil LinkedIn en PDF
                 </h4>
-                <ol class="list-decimal list-inside space-y-2 text-blue-800 text-sm">
-                    <li>Connectez-vous à <strong>LinkedIn</strong></li>
-                    <li>Cliquez sur votre <strong>photo de profil</strong> (en haut à droite)</li>
-                    <li>Sélectionnez <strong>"Voir le profil"</strong></li>
-                    <li>Cliquez sur <strong>"Plus"</strong> (bouton avec 3 points)</li>
-                    <li>Choisissez <strong>"Enregistrer au format PDF"</strong></li>
-                    <li>Le téléchargement démarre automatiquement</li>
-                    <li>Revenez ici et uploadez le fichier PDF ci-dessous</li>
-                </ol>
+
+                <p class="text-xs text-blue-700 mb-4 leading-relaxed">
+                    Pour que l’équipe Brillio et les jeunes voient clairement votre parcours, merci d’exporter votre
+                    profil LinkedIn en PDF depuis le <strong>site web</strong> (pas l’application mobile).
+                </p>
+
+                <div class="space-y-4">
+                    <div>
+                        <p
+                            class="text-[10px] font-bold text-blue-900 uppercase tracking-wider mb-2 opacity-70 font-mono">
+                            Sur ordinateur ou navigateur mobile (linkedin.com)</p>
+                        <ol class="list-decimal list-inside space-y-1.5 text-blue-800 text-sm">
+                            <li class="pl-1">Ouvrez votre navigateur (Chrome, Safari, etc.)</li>
+                            <li class="pl-1">Allez sur : <a href="https://www.linkedin.com" target="_blank"
+                                    class="underline font-medium hover:text-blue-600">https://www.linkedin.com</a></li>
+                            <li class="pl-1">En haut de la page, cliquez sur votre photo ou sur <strong>“Vous”</strong>
+                            </li>
+                            <li class="pl-1">Cliquez sur <strong>“Voir le profil”</strong></li>
+                            <li class="pl-1">Sous votre titre (headline), cliquez sur le bouton
+                                <strong>“Ressources”</strong></li>
+                            <li class="pl-1">Choisissez <strong>“Enregistrer au format PDF”</strong></li>
+                            <li class="pl-1">Une fois le fichier téléchargé, revenez ici et uploadez le PDF ci‑dessous.
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-white/60 rounded-xl p-3 border border-blue-100 shadow-sm">
+                        <p
+                            class="text-xs text-blue-900 font-bold mb-1 flex items-center gap-1.5 font-mono uppercase tracking-tight">
+                            <span
+                                class="flex items-center justify-center w-5 h-5 bg-amber-100 text-amber-600 rounded-full text-[10px]">!</span>
+                            Important :
+                        </p>
+                        <p class="text-xs text-blue-800 leading-relaxed ml-6 italic">
+                            L’application mobile LinkedIn ne permet pas l’export PDF.
+                            Sur téléphone, ouvrez LinkedIn dans votre navigateur et suivez les mêmes étapes.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <!-- Zone d'upload -->

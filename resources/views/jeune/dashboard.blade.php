@@ -206,8 +206,8 @@
                         d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-gray-900">Test de personnalite</h3>
-            <p class="text-gray-500 text-sm mt-1">Decouvrez votre type MBTI et les carrieres qui vous correspondent</p>
+            <h3 class="text-lg font-bold text-gray-900">Test de personnalité</h3>
+            <p class="text-gray-500 text-sm mt-1">Découvrez votre type MBTI et les carrières qui vous correspondent</p>
             <div class="mt-4 flex items-center text-primary-600 font-medium text-sm">
                 @if($stats['personality_completed'])
                 Voir mon resultat
@@ -232,7 +232,7 @@
             </div>
             <h3 class="text-lg font-bold text-gray-900">Assistant IA</h3>
             <p class="text-gray-500 text-sm mt-1">Posez vos questions sur l'orientation et obtenez des conseils
-                personnalises</p>
+                personnalisés</p>
             <div class="mt-4 flex items-center text-primary-600 font-medium text-sm">
                 Demarrer une discussion
                 <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
@@ -252,7 +252,7 @@
                 </svg>
             </div>
             <h3 class="text-lg font-bold text-gray-900">Explorer les mentors</h3>
-            <p class="text-gray-500 text-sm mt-1">Decouvrez les parcours inspirants de professionnels africains</p>
+            <p class="text-gray-500 text-sm mt-1">Découvrez les parcours inspirants de professionnels africains</p>
             <div class="mt-4 flex items-center text-primary-600 font-medium text-sm">
                 Voir les mentors
                 <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
