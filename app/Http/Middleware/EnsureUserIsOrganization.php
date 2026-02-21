@@ -25,6 +25,14 @@ class EnsureUserIsOrganization
             abort(403, 'Accès refusé. Cette section est réservée aux organisations partenaires.');
         }
 
+        // Email Verification check for Organizations
+        if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&
+        !auth()->user()->hasVerifiedEmail()) {
+            return $request->expectsJson()
+                ? abort(403, 'Votre adresse email n\'est pas vérifiée.')
+                : redirect()->route('organization.verification.notice');
+        }
+
         return $next($request);
     }
 }

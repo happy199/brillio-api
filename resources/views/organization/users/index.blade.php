@@ -183,8 +183,8 @@
                 <div>
                     <!-- Success Icon -->
                     <template x-if="feedbackType === 'success'">
-                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6 scale-up-center">
-                            <svg class="h-10 w-10 text-green-600 animate-bounce-short" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-organization-100 mb-6 scale-up-center">
+                            <svg class="h-10 w-10 text-organization-600 animate-bounce-short" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
@@ -207,7 +207,7 @@
 
                 <div class="mt-8">
                     <button type="button" @click="closeFeedback()"
-                        :class="feedbackType === 'success' ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'"
+                        :class="feedbackType === 'success' ? 'bg-organization-600 hover:bg-organization-700 focus:ring-organization-500' : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'"
                         class="inline-flex justify-center w-full px-6 py-3 text-base font-bold text-white transition-all border border-transparent rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2">
                         Continuer
                     </button>
@@ -301,7 +301,7 @@
                         <span class="text-gray-500">Statut</span>
                         @if($user->onboarding_completed)
                         <span
-                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-organization-100 text-organization-800">
                             Actif
                         </span>
                         @else

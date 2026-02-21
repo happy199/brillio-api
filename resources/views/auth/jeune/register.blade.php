@@ -90,7 +90,8 @@
             <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
             <input type="password" id="password" name="password" required
                 class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-colors @error('password') border-red-500 @enderror"
-                placeholder="Minimum 8 caracteres">
+                placeholder="••••••••">
+            <p class="mt-1 text-xs text-gray-500 italic">Minimum 8 caractères, une lettre et un chiffre.</p>
             @error('password')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror

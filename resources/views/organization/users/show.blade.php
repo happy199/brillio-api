@@ -30,7 +30,7 @@
                 <a href="{{ route('organization.users.export', [$user, 'format' => 'csv']) }}"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-r-lg"
                     title="Télécharger en CSV">
-                    <svg class="mr-2 h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="mr-2 h-4 w-4 text-organization-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
                             clip-rule="evenodd" />
@@ -44,7 +44,7 @@
                 <div class="text-sm font-bold text-indigo-600">{{ $user->profile_completion_percentage }}%</div>
             </div>
             <span
-                class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium {{ $user->profile_completion_percentage === 100 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium {{ $user->profile_completion_percentage === 100 ? 'bg-organization-100 text-organization-800' : 'bg-yellow-100 text-yellow-800' }}">
                 {{ $user->profile_completion_percentage === 100 ? 'Complet' : 'Incomplet' }}
             </span>
         </div>
@@ -177,12 +177,12 @@
                         </div>
                 </div>
                 @else
-                <div class="mt-4 p-3 bg-green-50 rounded-lg flex items-center gap-2">
-                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="mt-4 p-3 bg-organization-50 rounded-lg flex items-center gap-2">
+                    <svg class="w-5 h-5 text-organization-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p class="text-sm text-green-700 font-medium">Profil complété à 100%</p>
+                    <p class="text-sm text-organization-700 font-medium">Profil complété à 100%</p>
                 </div>
                 @endif
             </div>
@@ -377,8 +377,8 @@
                 <div class="bg-white overflow-hidden shadow rounded-lg">
                     <div class="p-5">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-green-100 rounded-md p-3">
-                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor"
+                            <div class="flex-shrink-0 bg-organization-100 rounded-md p-3">
+                                <svg class="h-6 w-6 text-organization-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -456,7 +456,7 @@
                                     </div>
                                 </div>
                                 <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ ($mentorship->status === 'active' || $mentorship->status === 'accepted') ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ ($mentorship->status === 'active' || $mentorship->status === 'accepted') ? 'bg-organization-100 text-organization-800' : 'bg-blue-100 text-blue-800' }}">
                                     @switch($mentorship->status)
                                     @case('active') Actif @break
                                     @case('accepted') Accepté @break
@@ -495,14 +495,14 @@
                     <div class="space-y-6">
                         <!-- Purchased -->
                         <div>
-                            <h4 class="text-sm font-semibold text-gray-700 mb-3 border-l-4 border-green-500 pl-2">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-3 border-l-4 border-organization-500 pl-2">
                                 Ressources débloquées</h4>
                             @if($purchasedResources->count() > 0)
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach($purchasedResources as $resource)
                                 <div class="bg-gray-50 border rounded-md p-3">
                                     <p class="text-sm font-medium text-gray-900 truncate">{{ $resource->title }}</p>
-                                    <p class="text-xs text-green-600 font-medium">Débloquée le {{
+                                    <p class="text-xs text-organization-600 font-medium">Débloquée le {{
                                         $resource->pivot?->purchased_at ?
                                         \Carbon\Carbon::parse($resource->pivot->purchased_at)->format('d/m/Y') : '' }}
                                     </p>

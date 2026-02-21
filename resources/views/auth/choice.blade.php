@@ -88,7 +88,8 @@
             <div class="flex-1">
                 <h3 class="text-xl font-bold text-gray-900">Je suis une Organisation</h3>
                 <p class="text-gray-600 text-sm mt-1">
-                    Recrutez des talents, proposez des stages et participez a la formation de la jeunesse.
+                    Sponsorez des talents, soutenez la communauté et suivez l'impact de vos jeunes talents dans leur
+                    carrière.
                 </p>
             </div>
             <svg class="w-6 h-6 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all"

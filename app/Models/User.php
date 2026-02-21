@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -16,7 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
  *
  * Gère les deux types d'utilisateurs : jeunes et mentors
  */
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -99,6 +100,18 @@ class User extends Authenticatable
     public function isMentor(): bool
     {
         return $this->user_type === self::TYPE_MENTOR;
+    }
+
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        if ($this->isOrganization()) {
+            $this->notify(new \App\Notifications\VerifyOrganizationEmail());
+        } else {
+            $this->notify(new \App\Notifications\VerifyEmail());
+        }
     }
 
     /**

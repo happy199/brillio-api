@@ -109,7 +109,7 @@
             <div class="p-5">
                 <div class="flex justify-between items-start">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                @if($session->status === 'confirmed') bg-green-100 text-green-800 
+                                @if($session->status === 'confirmed') bg-organization-100 text-organization-800 
                                 @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
                                 @elseif($session->status === 'cancelled') bg-red-100 text-red-800
                                 @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800

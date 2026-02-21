@@ -53,7 +53,7 @@
                     @if(isset($pack->features) && is_array($pack->features))
                     @foreach($pack->features as $feature)
                     <li class="flex items-start">
-                        <i class="fas fa-check text-green-500 mt-1 mr-2 text-xs"></i>
+                        <i class="fas fa-check text-organization-500 mt-1 mr-2 text-xs"></i>
                         <span class="text-sm text-gray-600">{{ $feature }}</span>
                     </li>
                     @endforeach

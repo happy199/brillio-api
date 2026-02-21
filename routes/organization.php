@@ -28,36 +28,53 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [RegisterController::class , 'login'])->name('login.submit');
 });
 
-// Protected routes (authenticated organizations only)
-Route::middleware(['auth', 'organization', 'organization_active'])->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class , 'index'])->name('dashboard');
+// Email Verification (Authenticated but not necessarily verified)
+Route::middleware('auth')->prefix('email')->name('verification.')->group(function () {
+    Route::get('/verify', [App\Http\Controllers\Organization\Auth\VerifyEmailController::class , 'notice'])
+        ->name('notice');
 
-    // Credit Distribution
-    Route::post('/credits/distribute', [\App\Http\Controllers\Organization\CreditDistributionController::class , 'distribute'])
-        ->middleware('organization_role:admin')
-        ->name('credits.distribute');
+    Route::get('/verify/{id}/{hash}', [App\Http\Controllers\Organization\Auth\VerifyEmailController::class , 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verify');
 
-    // Profile
-    Route::get('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'edit'])->name('profile.edit');
-    Route::put('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'update'])
-        ->middleware('organization_role:admin')
-        ->name('profile.update');
+    Route::post('/verification-notification', [App\Http\Controllers\Organization\Auth\VerifyEmailController::class , 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('resend');
+});
 
-    // Invitations
-    Route::get('/invitations', [InvitationController::class , 'index'])->name('invitations.index');
-    Route::get('/invitations/create', [InvitationController::class , 'create'])
-        ->middleware('organization_role:admin')
-        ->name('invitations.create');
-    Route::post('/invitations', [InvitationController::class , 'store'])
-        ->middleware('organization_role:admin')
-        ->name('invitations.store');
-    Route::delete('/invitations/{invitation}', [InvitationController::class , 'destroy'])
-        ->middleware('organization_role:admin')
-        ->name('invitations.destroy');
+// Authenticated Organization Routes
+Route::middleware('auth')->group(function () {
+    
+    // Protected routes (authenticated + verified + active organization)
+    Route::middleware(['organization', 'organization_active'])->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [DashboardController::class , 'index'])->name('dashboard');
 
-    // Pro Features (Jeunes, Mentorships, Sessions)
-    Route::middleware('organization_subscription:pro')->group(function () {
+        // Credit Distribution
+        Route::post('/credits/distribute', [\App\Http\Controllers\Organization\CreditDistributionController::class , 'distribute'])
+            ->middleware('organization_role:admin')
+            ->name('credits.distribute');
+
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'edit'])->name('profile.edit');
+        Route::put('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'update'])
+            ->middleware('organization_role:admin')
+            ->name('profile.update');
+
+        // Invitations
+        Route::get('/invitations', [InvitationController::class , 'index'])->name('invitations.index');
+        Route::get('/invitations/create', [InvitationController::class , 'create'])
+            ->middleware('organization_role:admin')
+            ->name('invitations.create');
+        Route::post('/invitations', [InvitationController::class , 'store'])
+            ->middleware('organization_role:admin')
+            ->name('invitations.store');
+        Route::delete('/invitations/{invitation}', [InvitationController::class , 'destroy'])
+            ->middleware('organization_role:admin')
+            ->name('invitations.destroy');
+
+        // Pro Features (Jeunes, Mentorships, Sessions)
+        Route::middleware('organization_subscription:pro')->group(function () {
             // Sponsored Users
             Route::get('/users', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'index'])->name('users.index');
             Route::get('/users/{user}', [\App\Http\Controllers\Organization\SponsoredUsersController::class , 'show'])->name('users.show');
@@ -77,11 +94,10 @@ Route::middleware(['auth', 'organization', 'organization_active'])->group(functi
 
             // Individual User Export (moved here as it's part of user details)
             Route::get('/users/{user}/export', [SponsoredUsersController::class , 'export'])->name('users.export');
-        }
-        );
+        });
 
         // Exports
-        Route::get('/exports', [ExportController::class , 'index'])->name('exports.index'); // Export Center (Viewable by all, but protected actions)
+        Route::get('/exports', [ExportController::class , 'index'])->name('exports.index');
     
         Route::middleware('organization_subscription:enterprise')
             ->get('/exports/generate', [ExportController::class , 'generate'])
@@ -104,7 +120,8 @@ Route::middleware(['auth', 'organization', 'organization_active'])->group(functi
         Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class , 'purchase'])
             ->middleware('organization_role:admin')
             ->name('wallet.purchase');
-
-        // Logout
-        Route::post('/logout', [RegisterController::class , 'logout'])->name('logout');
     });
+
+    // Logout (Accessible even if unverified/inactive)
+    Route::post('/logout', [RegisterController::class , 'logout'])->name('logout');
+});
