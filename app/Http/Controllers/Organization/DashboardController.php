@@ -53,26 +53,55 @@ class DashboardController extends Controller
         // Get basic stats (Global for organization)
         $stats = [
             'total_invited' => $organization->invitations()->count(),
-            'total_registered' => $organization->sponsoredUsers()->count(),
+            'total_registered' => $organization->users()->count(),
             'pending_invitations' => $organization->invitations()->where('status', 'pending')->count(),
-            'active_users' => $organization->sponsoredUsers()->where('last_login_at', '>=', now()->subDays(30))->count(),
-            'personality_tests_completed' => $organization->sponsoredUsers()->whereHas('personalityTest', function ($q) {
+            'active_users' => $organization->users()->where('last_login_at', '>=', now()->subDays(30))->count(),
+            'personality_tests_completed' => $organization->users()->whereHas('personalityTest', function ($q) {
             $q->whereNotNull('completed_at');
         })->count(),
-            'users_with_mentors' => $organization->sponsoredUsers()
+            'users_with_mentors' => $organization->users()
             ->whereHas('mentorshipsAsMentee', function ($query) {
             $query->where('status', 'accepted');
         })->count(),
-            'mentoring_sessions_count' => $organization->sponsoredUsers()
+            'mentoring_sessions_count' => $organization->users()
             ->join('mentoring_session_user', 'users.id', '=', 'mentoring_session_user.user_id')
             ->join('mentoring_sessions', 'mentoring_session_user.mentoring_session_id', '=', 'mentoring_sessions.id')
             ->where('mentoring_sessions.status', 'completed')
             ->count(),
-            'documents_count' => $organization->sponsoredUsers()->withCount('academicDocuments')->get()->sum('academic_documents_count'),
+            'documents_count' => $organization->users()->withCount('academicDocuments')->get()->sum('academic_documents_count'),
+            'total_mentors' => $organization->mentors()->count(),
+            'active_mentors' => $organization->mentors()->where('last_login_at', '>=', now()->subDays(30))->count(),
+            'mentor_sessions_count' => DB::table('mentoring_sessions')
+            ->join('mentoring_session_user', 'mentoring_sessions.id', '=', 'mentoring_session_user.mentoring_session_id')
+            ->join('organization_user', 'mentoring_session_user.user_id', '=', 'organization_user.user_id')
+            ->where('organization_user.organization_id', $organization->id)
+            ->where('mentoring_sessions.status', 'completed')
+            ->distinct('mentoring_sessions.id')
+            ->count(),
+            'jeune_credits_distributed' => DB::table('wallet_transactions')
+            ->where('type', 'gift')
+            ->where('related_type', \App\Models\Organization::class)
+            ->where('related_id', $organization->id)
+            ->whereIn('user_id', function ($query) {
+            $query->select('id')
+                ->from('users')
+                ->where('user_type', 'jeune');
+        })
+            ->sum('amount'),
+            'mentor_credits_distributed' => DB::table('wallet_transactions')
+            ->where('type', 'gift')
+            ->where('related_type', \App\Models\Organization::class)
+            ->where('related_id', $organization->id)
+            ->whereIn('user_id', function ($query) {
+            $query->select('id')
+                ->from('users')
+                ->where('user_type', 'mentor');
+        })
+            ->sum('amount'),
         ];
 
         // Onboarding completion (Global)
-        $allSponsoredUsers = $organization->sponsoredUsers()->with(['jeuneProfile', 'personalityTest'])->get();
+        $allSponsoredUsers = $organization->users()->with(['jeuneProfile', 'personalityTest'])->get();
         $stats['onboarding_completed_count'] = $allSponsoredUsers->filter(function ($u) {
             return $u->profile_completion_percentage === 100;
         })->count();
@@ -88,9 +117,11 @@ class DashboardController extends Controller
         $documentStats = [];
 
         // Registration Trend (Teaser/Global)
-        $registrationData = $organization->sponsoredUsers()
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, count(*) as count')
-            ->where('created_at', '>=', now()->subMonths(6))
+        $registrationData = DB::table('users')
+            ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+            // Bug Fix: Resolved critical SQL errors in the organization dashboard by correcting column names and implementing a refined polymorphic query (`related_type`/`related_id`) for accurate mentor credit tracking.
+            ->selectRaw('DATE_FORMAT(users.created_at, "%Y-%m") as month, count(*) as count')
+            ->where('users.created_at', '>=', now()->subMonths(6))
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('count', 'month');
@@ -107,8 +138,9 @@ class DashboardController extends Controller
         // --- FILTERED ANALYTICS (PRO FEATURES) ---
         if ($isPro) {
             // Personality Types (Filtered)
-            $personalityStats = $organization->sponsoredUsers()
-                ->join('personality_tests', 'users.id', '=', 'personality_tests.user_id')
+            $personalityStats = DB::table('personality_tests')
+                ->join('organization_user', 'personality_tests.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
                 ->where('personality_tests.is_current', true)
                 ->whereNotNull('personality_tests.completed_at')
                 ->whereBetween('personality_tests.completed_at', [$startDate, $endDate])
@@ -124,23 +156,27 @@ class DashboardController extends Controller
             $carbonPeriod = \Carbon\CarbonPeriod::create($startDate, $endDate);
 
             // Fetch grouped data
-            $dailySignupsData = $organization->sponsoredUsers()
-                ->selectRaw('DATE(created_at) as date, count(*) as count')
-                ->whereBetween('created_at', [$startDate, $endDate])
+            $dailySignupsData = DB::table('users')
+                ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
+                ->selectRaw('DATE(users.created_at) as date, count(*) as count')
+                ->whereBetween('users.created_at', [$startDate, $endDate])
                 ->groupBy('date')
                 ->pluck('count', 'date')->toArray();
 
-            $dailyTestsData = $organization->sponsoredUsers()
-                ->join('personality_tests', 'users.id', '=', 'personality_tests.user_id')
+            $dailyTestsData = DB::table('personality_tests')
+                ->join('organization_user', 'personality_tests.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
                 ->whereNotNull('personality_tests.completed_at')
                 ->whereBetween('personality_tests.completed_at', [$startDate, $endDate])
                 ->selectRaw('DATE(personality_tests.completed_at) as date, count(*) as count')
                 ->groupBy('date')
                 ->pluck('count', 'date')->toArray();
 
-            $dailySessionsData = $organization->sponsoredUsers()
-                ->join('mentoring_session_user', 'users.id', '=', 'mentoring_session_user.user_id')
-                ->join('mentoring_sessions', 'mentoring_session_user.mentoring_session_id', '=', 'mentoring_sessions.id')
+            $dailySessionsData = DB::table('mentoring_sessions')
+                ->join('mentoring_session_user', 'mentoring_sessions.id', '=', 'mentoring_session_user.mentoring_session_id')
+                ->join('organization_user', 'mentoring_session_user.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
                 ->where('mentoring_sessions.status', 'completed')
                 ->whereBetween('mentoring_sessions.scheduled_at', [$startDate, $endDate])
                 ->selectRaw('DATE(mentoring_sessions.scheduled_at) as date, count(*) as count')
@@ -164,17 +200,19 @@ class DashboardController extends Controller
             }
 
             // Demographics: Top Cities (Filtered by registration date)
-            $cityStats = $organization->sponsoredUsers()
-                ->whereNotNull('city')
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->select('city', DB::raw('count(*) as count'))
-                ->groupBy('city')
+            $cityStats = DB::table('users')
+                ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
+                ->whereNotNull('users.city')
+                ->whereBetween('users.created_at', [$startDate, $endDate])
+                ->select('users.city', DB::raw('count(*) as count'))
+                ->groupBy('users.city')
                 ->orderByDesc('count')
                 ->limit(5)
                 ->get();
 
             // Demographics: Age Distribution (Static but for sponsored users)
-            $users = $organization->sponsoredUsers()->whereNotNull('date_of_birth')->get();
+            $users = $organization->users()->whereNotNull('date_of_birth')->get();
             $ageStats = ['18-24' => 0, '25-30' => 0, '30+' => 0];
             foreach ($users as $user) {
                 $age = \Carbon\Carbon::parse($user->date_of_birth)->age;
@@ -187,8 +225,9 @@ class DashboardController extends Controller
             }
 
             // Document Types (Filtered)
-            $documentStats = $organization->sponsoredUsers()
-                ->join('academic_documents', 'users.id', '=', 'academic_documents.user_id')
+            $documentStats = DB::table('academic_documents')
+                ->join('organization_user', 'academic_documents.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
                 ->whereBetween('academic_documents.created_at', [$startDate, $endDate])
                 ->select('academic_documents.document_type as type', DB::raw('count(*) as count'))
                 ->groupBy('academic_documents.document_type')

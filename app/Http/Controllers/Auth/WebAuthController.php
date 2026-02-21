@@ -98,6 +98,34 @@ class WebAuthController extends Controller
             $this->avatarService->downloadFromUrl($user, $linkedinData['avatar_url']);
         }
 
+        // --- NEW: Mentor Auto-linking via Invitations ---
+        $referralCode = session('referral_code');
+        if ($referralCode) {
+            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                ->where('status', 'pending')
+                ->whereDate('expires_at', '>=', now())
+                ->first();
+            
+            if ($invitation) {
+                // Link mentor to organization in pivot table
+                $user->organizations()->syncWithoutDetaching([
+                    $invitation->organization_id => ['referral_code_used' => $referralCode]
+                ]);
+                
+                // Mark invitation as used
+                $invitation->markAsAccepted();
+                
+                // Clear referral code from session
+                session()->forget(['referral_code', 'organization_name']);
+                
+                Log::info('Mentor auto-linked to organization via invitation', [
+                    'user_id' => $user->id,
+                    'organization_id' => $invitation->organization_id,
+                    'referral_code' => $referralCode
+                ]);
+            }
+        }
+
         Auth::login($user, true);
 
         return [
@@ -109,8 +137,31 @@ class WebAuthController extends Controller
     /**
      * Affiche la page de choix du type de compte (inscription)
      */
-    public function showChoice()
+    public function showChoice(Request $request)
     {
+        // Detect referral code from URL (?ref=CODE)
+        if ($request->has('ref')) {
+            $referralCode = $request->get('ref');
+            
+            // Validate that the invitation exists
+            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
+            
+            if ($invitation) {
+                if ($invitation->isValid()) {
+                    // Store referral code in session
+                    session(['referral_code' => $referralCode]);
+                    session(['organization_name' => $invitation->organization->name]);
+                    session()->forget('invitation_expired'); // Just in case
+                } else {
+                    // Invitation exists but is NOT valid (expired or accepted)
+                    session(['invitation_expired' => true]);
+                    session()->forget(['referral_code', 'organization_name']);
+                }
+            } else {
+                session()->forget(['referral_code', 'organization_name', 'invitation_expired']);
+            }
+        }
+
         // Si l'utilisateur est déjà connecté, le rediriger vers son espace
         if (Auth::check()) {
             $user = Auth::user();
@@ -158,22 +209,26 @@ class WebAuthController extends Controller
         if ($request->has('ref')) {
             $referralCode = $request->get('ref');
             
-            // Validate that the invitation exists and is valid
-            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
-                ->where('status', 'pending')
-                ->whereDate('expires_at', '>=', now())
-                ->first();
+            // Validate that the invitation exists
+            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
             
             if ($invitation) {
-                // Store referral code in session
-                session(['referral_code' => $referralCode]);
-                session(['organization_name' => $invitation->organization->name]);
+                if ($invitation->isValid()) {
+                    // Store referral code in session
+                    session(['referral_code' => $referralCode]);
+                    session(['organization_name' => $invitation->organization->name]);
+                    session()->forget('invitation_expired');
+                } else {
+                    session(['invitation_expired' => true]);
+                    session()->forget(['referral_code', 'organization_name']);
+                }
             }
         }
         
         return view('auth.jeune.register', [
             'referralCode' => session('referral_code'),
             'organizationName' => session('organization_name'),
+            'isExpired' => session('invitation_expired', false),
         ]);
     }
 
@@ -225,13 +280,14 @@ class WebAuthController extends Controller
         if ($referralCode) {
             $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
                 ->where('status', 'pending')
+                ->whereDate('expires_at', '>=', now()) // Only if NOT expired
                 ->first();
             
             if ($invitation) {
                 $organizationId = $invitation->organization_id;
-                Log::info('Invitation found', ['organization_id' => $organizationId]);
+                Log::info('Invitation found and valid', ['organization_id' => $organizationId]);
             } else {
-                Log::warning('Invitation not found or not pending', ['code' => $referralCode]);
+                Log::warning('Invitation not found, not pending or expired', ['code' => $referralCode]);
             }
         }
 
@@ -249,6 +305,11 @@ class WebAuthController extends Controller
         
         // Mark invitation as used
         if ($referralCode && isset($invitation)) {
+            // Link user to organization in pivot table
+            $user->organizations()->syncWithoutDetaching([
+                $organizationId => ['referral_code_used' => $referralCode]
+            ]);
+
             $invitation->markAsAccepted();
             
             // Clear referral code from session
@@ -301,6 +362,28 @@ class WebAuthController extends Controller
             $request->session()->regenerate();
 
             $user->update(['last_login_at' => now()]);
+
+            // Check for referral code in session (existing user logging in via link)
+            $referralCode = session('referral_code');
+            if ($referralCode) {
+                $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                    ->where('status', 'pending')
+                    ->whereDate('expires_at', '>=', now())
+                    ->first();
+                
+                if ($invitation) {
+                    // Link existing user to organization in pivot table
+                    $user->organizations()->syncWithoutDetaching([
+                        $invitation->organization_id => ['referral_code_used' => $referralCode]
+                    ]);
+                    
+                    // Mark invitation as used
+                    $invitation->markAsAccepted();
+                    
+                    // Clear referral code from session
+                    session()->forget(['referral_code', 'organization_name']);
+                }
+            }
 
             // Reactivate archived account automatically
             if ($user->is_archived) {
@@ -547,6 +630,28 @@ class WebAuthController extends Controller
                 'profile_photo_url' => $socialData['avatar_url'] ?? $user->profile_photo_url,
                 'last_login_at' => now(),
             ]);
+
+            // Check for referral code in session (existing user logging in via link)
+            $referralCode = session('referral_code');
+            if ($referralCode) {
+                $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                    ->where('status', 'pending')
+                    ->whereDate('expires_at', '>=', now())
+                    ->first();
+                
+                if ($invitation) {
+                    // Link existing user to organization in pivot table
+                    $user->organizations()->syncWithoutDetaching([
+                        $invitation->organization_id => ['referral_code_used' => $referralCode]
+                    ]);
+                    
+                    // Mark invitation as used
+                    $invitation->markAsAccepted();
+                    
+                    // Clear referral code from session
+                    session()->forget(['referral_code', 'organization_name']);
+                }
+            }
         } else {
             // Check for referral code in session (for OAuth)
             $referralCode = session('referral_code');
@@ -555,6 +660,7 @@ class WebAuthController extends Controller
             if ($referralCode) {
                 $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
                     ->where('status', 'pending')
+                    ->whereDate('expires_at', '>=', now())
                     ->first();
                 
                 if ($invitation) {
@@ -583,6 +689,13 @@ class WebAuthController extends Controller
                 'last_login_at' => now(),
             ]);
 
+            // Also link to organization via pivot table if registering via link
+            if ($organizationId) {
+                $user->organizations()->syncWithoutDetaching([
+                    $organizationId => ['referral_code_used' => $referralCode]
+                ]);
+            }
+
             try {
                 $this->notificationService->sendWelcomeEmail($user);
             } catch (\Exception $e) {
@@ -610,9 +723,31 @@ class WebAuthController extends Controller
     /**
      * Affiche la page de connexion mentor (LinkedIn uniquement)
      */
-    public function showMentorLogin()
+    public function showMentorLogin(Request $request)
     {
-        return view('auth.mentor.login');
+        // Detect referral code from URL (?ref=CODE)
+        if ($request->has('ref')) {
+            $referralCode = $request->get('ref');
+            
+            // Validate that the invitation exists
+            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
+            
+            if ($invitation) {
+                if ($invitation->isValid()) {
+                    // Store referral code in session
+                    session(['referral_code' => $referralCode]);
+                    session(['organization_name' => $invitation->organization->name]);
+                    session()->forget('invitation_expired');
+                } else {
+                    session(['invitation_expired' => true]);
+                    session()->forget(['referral_code', 'organization_name']);
+                }
+            }
+        }
+
+        return view('auth.mentor.login', [
+            'isExpired' => session('invitation_expired', false),
+        ]);
     }
 
     /**

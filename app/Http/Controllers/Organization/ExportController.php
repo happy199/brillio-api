@@ -37,7 +37,7 @@ class ExportController extends Controller
     public function generate(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:general,jeunes,sessions',
+            'type' => 'required|in:general,jeunes,sessions,mentors',
             'format' => 'required|in:csv,pdf',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
@@ -64,6 +64,8 @@ class ExportController extends Controller
                     return $this->exportJeunesCsv($organizationId, $fullFileName);
                 case 'sessions':
                     return $this->exportSessionsCsv($organizationId, $startDate, $endDate, $fullFileName);
+                case 'mentors':
+                    return $this->exportMentorsCsv($organization, $fullFileName);
             }
         }
         else {
@@ -74,6 +76,8 @@ class ExportController extends Controller
                     return $this->exportJeunesPdf($organization, $fullFileName);
                 case 'sessions':
                     return $this->exportSessionsPdf($organization, $startDate, $endDate, $fullFileName);
+                case 'mentors':
+                    return $this->exportMentorsPdf($organization, $fullFileName);
             }
         }
 
@@ -127,6 +131,27 @@ class ExportController extends Controller
                 fputcsv($file, ['Jeunes inscrits', $totalRegistered, 'Nombre de jeunes ayant rejoint la plateforme']);
                 fputcsv($file, ['Utilisateurs actifs', $activeUsers, 'Utilisateurs connectés au cours des 30 derniers jours']);
                 fputcsv($file, ['Sessions réalisées', $sessionsCount, 'Nombre total de sessions de mentorat terminées']);
+
+                // Mentor Metrics
+                $organization = \App\Models\Organization::find($organizationId);
+                $internalMentorsIds = $organization->mentors()->pluck('users.id');
+                
+                $activeMentorsIds = MentoringSession::whereHas('mentees', function ($q) use ($organizationId) {
+                    $q->where('sponsored_by_organization_id', $organizationId);
+                })
+                    ->pluck('mentor_id')
+                    ->unique();
+
+                $externalMentorsCount = User::where('user_type', 'mentor')
+                    ->whereNotIn('id', $internalMentorsIds)
+                    ->whereIn('id', $activeMentorsIds)
+                    ->count();
+
+                $totalMentorsCount = $internalMentorsIds->count() + $externalMentorsCount;
+
+                fputcsv($file, ['Total Mentors', $totalMentorsCount, 'Nombre total de mentors (internes et externes)']);
+                fputcsv($file, ['Mentors Internes', $internalMentorsIds->count(), 'Mentors liés directement à votre organisation']);
+                fputcsv($file, ['Mentors Externes', $externalMentorsCount, 'Mentors externes accompagnant vos bénéficiaires']);
 
                 fclose($file);
             };
@@ -249,6 +274,19 @@ class ExportController extends Controller
             ->when($endDate, fn($q) => $q->where('scheduled_at', '<=', $endDate))
             ->count();
 
+        // Mentor Metrics
+        $internalMentorsIds = $organization->mentors()->pluck('users.id');
+        $activeMentorsIds = MentoringSession::whereHas('mentees', function ($q) use ($organizationId) {
+            $q->where('sponsored_by_organization_id', $organizationId);
+        })
+            ->pluck('mentor_id')
+            ->unique();
+
+        $externalMentorsCount = User::where('user_type', 'mentor')
+            ->whereNotIn('id', $internalMentorsIds)
+            ->whereIn('id', $activeMentorsIds)
+            ->count();
+
         // Demographics: Top Cities
         $cityStats = User::where('sponsored_by_organization_id', $organizationId)
             ->whereNotNull('city')
@@ -286,6 +324,9 @@ class ExportController extends Controller
             'totalRegistered' => $totalRegistered,
             'activeUsers' => $activeUsers,
             'sessionsCount' => $sessionsCount,
+            'totalMentors' => $internalMentorsIds->count() + $externalMentorsCount,
+            'internalMentors' => $internalMentorsIds->count(),
+            'externalMentors' => $externalMentorsCount,
             'cityStats' => $cityStats,
             'ageStats' => $ageStats,
             'documentStats' => $documentStats,
@@ -336,6 +377,81 @@ class ExportController extends Controller
             'sessions' => $sessions,
             'startDate' => $startDate,
             'endDate' => $endDate
+        ]);
+
+        return $pdf->download($fileName);
+    }
+
+    private function exportMentorsCsv($organization, $fileName)
+    {
+        $headers = [
+            "Content-type" => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $callback = function () use ($organization) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, ['Nom', 'Email', 'Type', 'Ville', 'Entreprise', 'Titre']);
+
+            $internalMentorsIds = $organization->mentors()->pluck('users.id');
+            $activeMentorsIds = MentoringSession::whereHas('mentees', function ($q) use ($organization) {
+                $q->where('sponsored_by_organization_id', $organization->id);
+            })->pluck('mentor_id')->unique();
+
+            $mentors = User::where('user_type', 'mentor')
+                ->where(function ($query) use ($internalMentorsIds, $activeMentorsIds) {
+                    $query->whereIn('id', $internalMentorsIds)
+                        ->orWhereIn('id', $activeMentorsIds);
+                })
+                ->with(['mentorProfile'])
+                ->get();
+
+            foreach ($mentors as $mentor) {
+                $type = $internalMentorsIds->contains($mentor->id) ? 'Interne' : 'Externe';
+                fputcsv($file, [
+                    $mentor->name,
+                    $mentor->email,
+                    $type,
+                    $mentor->city ?? '-',
+                    $mentor->mentorProfile->company ?? '-',
+                    $mentor->mentorProfile->job_title ?? '-'
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return Response::stream($callback, 200, $headers);
+    }
+
+    private function exportMentorsPdf($organization, $fileName)
+    {
+        $internalMentorsIds = $organization->mentors()->pluck('users.id');
+        $activeMentorsIds = MentoringSession::whereHas('mentees', function ($q) use ($organization) {
+            $q->where('sponsored_by_organization_id', $organization->id);
+        })->pluck('mentor_id')->unique();
+
+        $mentors = User::where('user_type', 'mentor')
+            ->where(function ($query) use ($internalMentorsIds, $activeMentorsIds) {
+                $query->whereIn('id', $internalMentorsIds)
+                    ->orWhereIn('id', $activeMentorsIds);
+            })
+            ->with(['mentorProfile'])
+            ->get();
+
+        foreach ($mentors as $mentor) {
+            $mentor->is_internal = $internalMentorsIds->contains($mentor->id);
+        }
+
+        $pdf = Pdf::loadView('reports.mentors', [
+            'organization' => $organization,
+            'title' => 'Liste des Mentors',
+            'mentors' => $mentors
         ]);
 
         return $pdf->download($fileName);

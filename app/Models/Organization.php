@@ -83,7 +83,28 @@ class Organization extends Model
     }
 
     /**
-     * Get all sponsored users (young users who registered via this organization's invitation).
+     * Get all users linked to this organization via the pivot table.
+     */
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class , 'organization_user')
+            ->withPivot('referral_code_used')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get all mentors linked to this organization via the pivot table.
+     */
+    public function mentors(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class , 'organization_user')
+            ->where('users.user_type', 'mentor')
+            ->withPivot('referral_code_used')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get all sponsored users (legacy 1-N relationship for original source tracking).
      */
     public function sponsoredUsers(): HasMany
     {
@@ -143,7 +164,7 @@ class Organization extends Model
      */
     public function getActiveUsersCountAttribute(): int
     {
-        return $this->sponsoredUsers()
+        return $this->users()
             ->where('last_login_at', '>=', now()->subDays(30))
             ->count();
     }

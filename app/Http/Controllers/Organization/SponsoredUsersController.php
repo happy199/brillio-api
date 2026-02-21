@@ -20,7 +20,7 @@ class SponsoredUsersController extends Controller
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
         
-        $query = $organization->sponsoredUsers()->with(['personalityTest', 'jeuneProfile']);
+        $query = $organization->users()->with(['personalityTest', 'jeuneProfile']);
 
         // Recherche textuelle
         if ($request->filled('search')) {
@@ -77,8 +77,8 @@ class SponsoredUsersController extends Controller
             $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
         }
 
-        // Vérification de sécurité : l'utilisateur doit être parrainé par cette organisation
-        if ($user->sponsored_by_organization_id !== $organization->id) {
+        // Vérification de sécurité : l'utilisateur doit être lié à cette organisation
+        if (!$organization->users()->where('users.id', $user->id)->exists()) {
             abort(403, 'Accès non autorisé');
         }
 
@@ -161,7 +161,7 @@ class SponsoredUsersController extends Controller
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
 
         // Sécurité
-        if ($user->sponsored_by_organization_id !== $organization->id) {
+        if (!$organization->users()->where('users.id', $user->id)->exists()) {
             abort(403);
         }
 

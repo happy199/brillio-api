@@ -10,177 +10,200 @@
         <p class="mt-2 text-organization-100">Bienvenue dans votre espace partenaire</p>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- Total Invited -->
-        <div class="bg-white overflow-hidden rounded-lg shadow">
-            <div class="p-6">
+    <!-- Stats Cards Grid -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- BLOCK 1: ACQUISITION -->
+
+        <!-- Invitations sent -->
+        <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-gray-100 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-500">Invitations envoyées</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ $stats['total_invited'] }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registered Youths -->
+        <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-blue-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-500">Jeunes inscrits</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ $stats['total_registered'] }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linked Mentors -->
+        <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-indigo-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-500">Mentors liés</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ $stats['total_mentors'] }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOCK 2: ACTIVITY -->
+
+        <!-- Active Youths -->
+        <div
+            class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-rose-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-rose-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-500">Jeunes actifs (30j)</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ $stats['active_users'] }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Mentors -->
+        <div
+            class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-indigo-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-indigo-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-500">Mentors actifs (30j)</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ $stats['active_mentors'] }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions -->
+        <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-500">Séances réalisées</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ $stats['mentor_sessions_count'] }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOCK 3: FINANCIALS / INCENTIVES -->
+
+        <!-- Credits to Youths -->
+        <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-green-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-500">Crédits offerts aux jeunes</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ number_format($stats['jeune_credits_distributed'],
+                        0, ',', ' ') }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credits to Mentors -->
+        <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-yellow-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-500">Crédits offerts aux mentors</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ number_format($stats['mentor_credits_distributed'],
+                        0, ',', ' ') }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impact: MBTI -->
+        <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-purple-100 p-6">
+            <div class="flex items-center mb-4">
+                <div class="flex-shrink-0 bg-purple-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <dt class="text-sm font-medium text-gray-500">Tests de personnalité</dt>
+                    <dd class="text-2xl font-bold text-gray-900">{{ $stats['personality_tests_completed'] }}</dd>
+                </div>
+            </div>
+            @if(isset($stats['top_personalities']) && count($stats['top_personalities']) > 0)
+            <div class="mt-2 pt-2 border-t border-gray-50 space-y-1">
+                @foreach($stats['top_personalities'] as $type)
+                <div class="flex items-center justify-between text-xs">
+                    <span class="font-medium text-gray-600">{{ $type->personality_type }}</span>
+                    <span class="text-gray-400">{{ $type->count }}</span>
+                </div>
+                @endforeach
+            </div>
+            @endif
+        </div>
+
+        <!-- Impact: Onboarding & Documents -->
+        <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6 lg:col-span-3">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-organization-100 rounded-md p-3">
-                        <svg class="h-6 w-6 text-organization-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Invitations envoyées</dt>
-                            <dd class="text-3xl font-semibold text-gray-900">{{ $stats['total_invited'] }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Registered -->
-        <div class="bg-white overflow-hidden rounded-lg shadow">
-            <div class="p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-organization-100 rounded-md p-3">
-                        <svg class="h-6 w-6 text-organization-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Jeunes inscrits</dt>
-                            <dd class="text-3xl font-semibold text-gray-900">{{ $stats['total_registered'] }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Jeunes suivis par un mentor (Avec Mentor) -->
-        <div class="bg-white overflow-hidden rounded-lg shadow">
-            <div class="p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-purple-100 rounded-md p-3">
-                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Avec Mentor</dt>
-                            <dd class="text-3xl font-semibold text-gray-900">{{ $stats['users_with_mentors'] }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sessions Réalisées -->
-        <div class="bg-white overflow-hidden rounded-lg shadow">
-            <div class="p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
-                        <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                            </path>
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Sessions réalisées</dt>
-                            <dd class="text-3xl font-semibold text-gray-900">{{ $stats['mentoring_sessions_count'] }}
-                            </dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Users (last 30 days) -->
-        <div class="bg-white overflow-hidden rounded-lg shadow">
-            <div class="p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 bg-blue-100 rounded-md p-3">
-                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Utilisateurs actifs</dt>
-                            <dd class="text-3xl font-semibold text-gray-900">{{ $stats['active_users'] }}</dd>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Personality Tests Stats -->
-        <div class="bg-white overflow-hidden rounded-lg shadow sm:col-span-1 border border-purple-100">
-            <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <div class="flex-shrink-0 bg-purple-100 rounded-md p-3">
-                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dt class="text-sm font-medium text-gray-500 truncate">Tests de personnalité</dt>
-                        <dd class="text-3xl font-semibold text-gray-900">{{ $stats['personality_tests_completed'] }}
-                        </dd>
-                    </div>
-                </div>
-
-                @if(isset($stats['top_personalities']) && count($stats['top_personalities']) > 0)
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Top Profils</h4>
-                    <div class="space-y-2">
-                        @foreach($stats['top_personalities'] as $type)
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="font-medium text-gray-700">{{ $type->personality_type }}</span>
-                            <span class="text-gray-500">{{ $type->count }}</span>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Documents & Onboarding (Platform Engagement) -->
-        <div class="bg-white overflow-hidden rounded-lg shadow sm:col-span-2 lg:col-span-3">
-            <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <div class="flex-shrink-0 bg-organization-100 rounded-md p-3">
+                    <div class="flex-shrink-0 bg-organization-50 rounded-lg p-3">
                         <svg class="h-6 w-6 text-organization-600" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dt class="text-sm font-medium text-gray-500 truncate">Documents partagés</dt>
-                        <dd class="text-3xl font-semibold text-gray-900">{{ $stats['documents_count'] }}</dd>
+                    <div class="ml-4">
+                        <dt class="text-sm font-medium text-gray-500">Documents partagés</dt>
+                        <dd class="text-2xl font-bold text-gray-900">{{ $stats['documents_count'] }}</dd>
                     </div>
                 </div>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500 font-medium">Profils complétés à 100% (Onboarding)</span>
-                        <span class="font-bold text-gray-900">{{ $stats['onboarding_completed_count'] }}</span>
+
+                <div class="flex-1 max-w-xl">
+                    <div class="flex items-center justify-between text-sm mb-2">
+                        <span class="text-gray-600">Onboarding complété (100%)</span>
+                        <span class="font-bold text-gray-900">{{ $stats['onboarding_completed_count'] }} / {{
+                            $stats['total_registered'] }}</span>
                     </div>
-                    @if($stats['total_registered'] > 0)
-                    <div class="mt-2 w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-organization-500 h-1.5 rounded-full transition-all duration-1000"
-                            style="width: {{ ($stats['onboarding_completed_count'] / $stats['total_registered']) * 100 }}%">
+                    <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div class="bg-organization-500 h-2 rounded-full transition-all duration-1000"
+                            style="width: {{ $stats['total_registered'] > 0 ? ($stats['onboarding_completed_count'] / $stats['total_registered']) * 100 : 0 }}%">
                         </div>
                     </div>
-                    <p class="mt-2 text-xs text-gray-400">
-                        {{ $stats['onboarding_completed_count'] }} sur {{ $stats['total_registered'] }} jeunes ont un
-                        profil complet.
-                    </p>
-                    @endif
                 </div>
             </div>
         </div>
