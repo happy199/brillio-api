@@ -495,7 +495,7 @@ class MentorDashboardController extends Controller
                         $startDate = strlen($exp['start_date']) === 4 ? $exp['start_date'] . '-01-01' : $exp['start_date'];
                     }
 
-                    if (isset($exp['end_date'])) {
+                    if (array_key_exists('end_date', $exp)) {
                         if (!empty($exp['end_date'])) {
                             // S'assurer que le format est YYYY-MM-DD
                             $endDate = strlen($exp['end_date']) === 4 ? $exp['end_date'] . '-12-31' : $exp['end_date'];
