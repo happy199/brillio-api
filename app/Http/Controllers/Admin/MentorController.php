@@ -112,7 +112,47 @@ class MentorController extends Controller
         $mentor->validated_at = now();
         $mentor->save();
 
+        // Notifier le mentor
+        try {
+            \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
+        }
+        catch (\Exception $e) {
+            \Log::error('Erreur envoi email validation mentor (approve): ' . $e->getMessage());
+        }
+
         return back()->with('success', "Le profil de {$mentor->user->name} a été validé et publié");
+    }
+
+    /**
+     * Toggle validation du profil mentor
+     */
+    public function toggleValidation(MentorProfile $mentor)
+    {
+        $oldValue = $mentor->is_validated;
+        $mentor->is_validated = !$mentor->is_validated;
+
+        if ($mentor->is_validated) {
+            $mentor->validated_at = now();
+        }
+
+        $mentor->save();
+
+        // Si on passe de non-validé à validé, on envoie l'email
+        if (!$oldValue && $mentor->is_validated) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
+            }
+            catch (\Exception $e) {
+                \Log::error('Erreur envoi email validation mentor (toggle): ' . $e->getMessage());
+            }
+        }
+
+        return back()->with(
+            'success',
+            $mentor->is_validated
+            ? "Profil de {$mentor->user->name} marqué comme vérifié."
+            : "Profil de {$mentor->user->name} n'est plus marqué comme vérifié."
+        );
     }
 
     /**
@@ -259,12 +299,26 @@ class MentorController extends Controller
             'is_validated' => $request->has('is_validated'),
         ];
 
-        // Si validé pour la première fois, enregistrer la date
-        if ($request->has('is_validated') && !$mentor->is_validated) {
-            $profileData['validated_at'] = now();
-        }
+        // Si validé pour la première fois, enregistrer la date et notifier
+        $previouslyValidated = $mentor->is_validated;
+        $newValidated = $request->has('is_validated');
 
-        $mentor->update($profileData);
+        if ($newValidated && !$previouslyValidated) {
+            $profileData['validated_at'] = now();
+
+            // On envoie l'email après l'update pour être sûr que tout est en base
+            $mentor->update($profileData);
+
+            try {
+                \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
+            }
+            catch (\Exception $e) {
+                \Log::error('Erreur envoi email validation mentor (update): ' . $e->getMessage());
+            }
+        }
+        else {
+            $mentor->update($profileData);
+        }
 
         return redirect()
             ->route('admin.mentors.index')
@@ -381,7 +435,8 @@ class MentorController extends Controller
         // 2. Notifier l'utilisateur
         try {
             \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\DemotionNotificationMail($user));
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Erreur envoi notification rétrogradation: ' . $e->getMessage());
         }
 
