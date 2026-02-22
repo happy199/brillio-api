@@ -558,4 +558,45 @@
         </div>
     </div>
 </section>
+@endsection }
+            .animate-scroll {
+                display: flex;
+                width: max-content;
+                animation: scroll 30s linear infinite;
+            }
+            .animate-scroll:hover {
+                animation-play-state: paused;
+            }
+        </style>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 gradient-hero relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-20 -left-40 w-96 h-96 bg-secondary-500/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-3xl mx-auto text-center text-white">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-6" data-aos="fade-up">
+                Rejoins le mouvement
+            </h2>
+            <p class="text-xl text-white/90 mb-8" data-aos="fade-up" data-aos-delay="100">
+                Télécharge Brillio et fais partie des milliers de jeunes africains qui construisent leur avenir.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
+                <a href="{{ route('home') }}#telecharger"
+                    class="px-8 py-4 bg-white text-primary-600 font-bold rounded-full hover:bg-gray-100 hover:shadow-xl transition-all duration-300">
+                    Télécharger l'app
+                </a>
+                <a href="{{ route('contact') }}"
+                    class="px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/10 transition-all duration-300">
+                    Nous contacter
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 @endsection
