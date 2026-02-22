@@ -90,7 +90,8 @@
                             </li>
                             <li class="pl-1">Cliquez sur <strong>“Voir le profil”</strong></li>
                             <li class="pl-1">Sous votre titre (headline), cliquez sur le bouton
-                                <strong>“Ressources”</strong></li>
+                                <strong>“Ressources”</strong>
+                            </li>
                             <li class="pl-1">Choisissez <strong>“Enregistrer au format PDF”</strong></li>
                             <li class="pl-1">Une fois le fichier téléchargé, revenez ici et uploadez le PDF ci‑dessous.
                             </li>
@@ -260,8 +261,20 @@
                 this.updateMessage();
             },
 
+            isDragging: false,
+
             async handleFileUpload(event) {
                 const file = event.target.files[0];
+                this.processFile(file);
+            },
+
+            async handleDrop(event) {
+                this.isDragging = false;
+                const file = event.dataTransfer.files[0];
+                this.processFile(file);
+            },
+
+            async processFile(file) {
                 if (!file) return;
 
                 this.errorMessage = '';
