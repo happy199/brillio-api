@@ -540,27 +540,110 @@
             @endif
         </div>
 
-        <div class="text-center mt-12" data-aos="fade-up">
-            <p class="text-gray-600 mb-8">Vous souhaitez devenir partenaire ?</p>
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
-                <a href="{{ route('organization.register') }}"
-                    class="px-8 py-4 bg-primary-600 text-white font-bold rounded-full hover:bg-primary-700 hover:shadow-lg transition-all transform hover:-translate-y-1">
-                    Inscrivez-vous en tant qu'organisation
-                    <svg class="w-5 h-5 ml-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                        </path>
-                    </svg>
-                </a>
-                <a href="{{ route('contact') }}" class="text-primary-600 font-semibold hover:underline group">
-                    Contactez-nous
-                    <svg class="w-5 h-5 ml-2 inline-block transition-transform group-hover:translate-x-1" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3">
-                        </path>
-                    </svg>
-                </a>
+        <!-- Organization Value Proposition Block -->
+        <div class="mt-24 mb-16" data-aos="fade-up">
+            <div
+                class="bg-gradient-to-br from-primary-900 to-primary-800 rounded-3xl overflow-hidden shadow-2xl relative">
+                <!-- Decorative background elements -->
+                <div
+                    class="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-primary-700 rounded-full opacity-20 blur-3xl">
+                </div>
+                <div
+                    class="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-primary-600 rounded-full opacity-20 blur-3xl">
+                </div>
+
+                <div class="px-8 py-16 md:px-16 md:py-20 relative z-10">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-6">Pourquoi rejoindre Brillio en
+                            tant qu'organisation ?</h2>
+                        <p class="text-primary-100 text-lg max-w-2xl mx-auto">Offrez à vos membres un accompagnement
+                            d'élite et transformez votre impact grâce à une plateforme conçue pour l'excellence
+                            institutionnelle.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                        <!-- Feature 1 -->
+                        <div
+                            class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all group">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-bold mb-2">Suivi en temps réel</h3>
+                            <p class="text-primary-100 text-sm">Monitorez la progression de vos jeunes et l'activité de
+                                vos mentors sur un tableau de bord unifié.</p>
+                        </div>
+
+                        <!-- Feature 2 -->
+                        <div
+                            class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all group">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-bold mb-2">Gestion des Crédits</h3>
+                            <p class="text-primary-100 text-sm">Distribuez facilement des crédits de mentorat à vos
+                                membres pour financer leurs séances de coaching.</p>
+                        </div>
+
+                        <!-- Feature 3 -->
+                        <div
+                            class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all group">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-bold mb-2">Marque Blanche</h3>
+                            <p class="text-primary-100 text-sm">Proposez une expérience 100% à vos couleurs avec votre
+                                propre logo, domaine et identité visuelle.</p>
+                        </div>
+
+                        <!-- Feature 4 -->
+                        <div
+                            class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all group">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-bold mb-2">Rapports d'Impact</h3>
+                            <p class="text-primary-100 text-sm">Générez des rapports détaillés pour mesurer concrètement
+                                l'évolution et la réussite de vos programmes.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
+                        <a href="{{ route('organization.register') }}"
+                            class="px-10 py-5 bg-white text-primary-900 font-extrabold rounded-full hover:bg-primary-50 hover:shadow-xl transition-all transform hover:-translate-y-1 text-center w-full sm:w-auto">
+                            Rejoindre en tant qu'organisation
+                        </a>
+                        <a href="{{ route('contact') }}"
+                            class="px-10 py-5 border-2 border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all text-center w-full sm:w-auto group">
+                            Demander une démo
+                            <svg class="w-5 h-5 ml-2 inline-block transition-transform group-hover:translate-x-1"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3">
+                                </path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
