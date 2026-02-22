@@ -140,7 +140,7 @@
         <div class="container">
             <div class="header">
                 <div class="badge-icon">
-                    <img src="{{ config('app.url') }}/favicon-32x32.png" alt="Brillio"
+                    <img src="{{ $message->embed(public_path('favicon-32x32.png')) }}" alt="Brillio"
                         style="width: 48px; height: 48px; border-radius: 50%;">
                 </div>
                 <h1>FÉLICITATIONS !</h1>
