@@ -58,7 +58,7 @@ class LinkedInPdfParserService
             "- Répont UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n" .
             "- Le format de sortie doit respecter exactement la structure demandée.\n\n" .
             "STRUCTURE JSON ATTENDUE :\n" .
-            '{"name": "Nom complet", "headline": "Titre du profil ou poste actuel", "contact": {"email": "email found or empty", "phone": "phone found or empty", "linkedin": "linkedin url or empty", "website": "website url or empty"}, "summary": "Bio", "skills": ["Compétence 1"], "experience": [{"title": "Poste", "company": "Entreprise", "description": "Tâches", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD", "duration_years": 0, "duration_months": 0}], "education": [{"school": "Ecole", "degree": "Diplôme", "year_start": 0, "year_end": 0}]}';
+            '{"name": "Nom complet", "headline": "Titre du profil ou poste actuel", "contact": {"email": "email found or empty", "phone": "phone found or empty", "linkedin": "linkedin url or empty", "website": "website url or empty"}, "summary": "Bio", "skills": ["Compétence 1"], "experience": [{"title": "Poste", "company": "Entreprise", "description": "Tâches", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD or null if currently in this role", "duration_years": 0, "duration_months": 0}], "education": [{"school": "Ecole", "degree": "Diplôme", "year_start": 0, "year_end": 0}]}';
 
         $prompt = "Voici le contenu brut du PDF LinkedIn. Extrais les données en JSON :\n\n" . substr($text, 0, 60000);
 
@@ -240,9 +240,9 @@ class LinkedInPdfParserService
         $startDate = $endDate = null;
         $years = $months = 0;
 
-        if (preg_match('/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\s*-\s*(?:.*?(\d{4})|Present)/i', $dates, $m)) {
+        if (preg_match('/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\s*-\s*(?:.*?(\d{4})|Present|Aujourd’hui|Présent)/i', $dates, $m)) {
             $startDate = $m[2];
-            $endDate = $m[3] ?? null;
+            $endDate = (!empty($m[3])) ? $m[3] : null;
         }
 
         if (preg_match('/\((\d+)\s+ans?\s*(?:(\d+)\s+mois)?\)/i', $dates, $m)) {
