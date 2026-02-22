@@ -317,7 +317,7 @@
             <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
                 data-aos="fade-up" data-aos-delay="200">
                 <div class="w-24 h-24 mx-auto mb-4 relative">
-                    <img src="{{ asset('images/team/emmanuella-ahouanse.jpg') }}" alt="Emmanuella Ahouanse"
+                    <img src="{{ asset('images/team/emmanuella.jpeg') }}" alt="Emmanuella Ahouanse"
                         class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
                 </div>
                 <h3 class="text-lg font-bold text-gray-900 leading-tight">Emmanuella Ahouanse</h3>
