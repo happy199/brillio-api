@@ -29,3 +29,8 @@ Schedule::command('personality:sync-questions')
     ->quarterly()
     ->at('02:00')
     ->timezone('Africa/Dakar');
+
+// Downgrade expired organization subscriptions daily at 1 AM
+Schedule::command('organizations:downgrade-expired')
+    ->dailyAt('01:00')
+    ->timezone('Africa/Abidjan');
