@@ -140,6 +140,20 @@
                             </div>
                         </div>
 
+                        <div id="subscription_expiry_container"
+                            class="{{ old('subscription_plan', $organization->subscription_plan ?? 'free') == 'free' ? 'hidden' : '' }}">
+                            <label for="subscription_expires_at"
+                                class="block text-sm font-semibold text-gray-700 mb-2">Date d'expiration</label>
+                            <input type="date" name="subscription_expires_at" id="subscription_expires_at"
+                                value="{{ old('subscription_expires_at', (isset($organization) && $organization->subscription_expires_at) ? $organization->subscription_expires_at->format('Y-m-d') : '') }}"
+                                class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full transition-all">
+                            @error('subscription_expires_at')
+                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                            <p class="text-[11px] text-gray-500 mt-2 font-medium">Obligatoire pour les plans Pro et
+                                Enterprise.</p>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Logo de l'organisation</label>
                             <div class="flex items-center gap-6">
