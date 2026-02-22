@@ -176,7 +176,7 @@
                     automatiquement.</p>
 
                 <div class="cta-container">
-                    <a href="{{ url('/mentor/profile') }}" class="btn">Accéder à mon tableau de bord</a>
+                    <a href="{{ route('mentor.dashboard') }}" class="btn">Accéder à mon tableau de bord</a>
                 </div>
 
                 <div class="social-invite">
