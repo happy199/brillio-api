@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Models\MentorProfile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -47,6 +48,14 @@ class WebAuthController extends Controller
         $user = User::where('email', $linkedinData['email'])->first();
 
         if ($user) {
+            // Vérifier si l'utilisateur est bloqué
+            if ($user->is_blocked) {
+                return [
+                    'success' => false,
+                    'error' => 'Votre accès Mentor a été suspendu par l\'administration. Motif : ' . ($user->blocked_reason ?? 'Non spécifié')
+                ];
+            }
+
             // Verifier que c'est bien un compte mentor
             if ($user->user_type !== 'mentor') {
                 // Compte jeune trouvé, proposer la migration
@@ -56,9 +65,16 @@ class WebAuthController extends Controller
             $user->update([
                 'auth_provider' => 'linkedin',
                 'provider_id' => $linkedinData['linkedin_id'],
-                // On ne touche pas à profile_photo_url ici, le service s'en occupe si besoin
                 'last_login_at' => now(),
+                // Reactivation automatique si archive
+                'is_archived' => false,
+                'archived_at' => null,
+                'archived_reason' => null,
             ]);
+
+            if ($user->wasChanged('is_archived')) {
+                session()->flash('success', 'Bon retour ! Votre profil Mentor a été réactivé automatiquement.');
+            }
 
             // Mettre a jour le profil mentor avec les donnees LinkedIn
             if ($user->mentorProfile) {
@@ -358,6 +374,13 @@ class WebAuthController extends Controller
             ])->withInput();
         }
 
+        // Vérifier si l'utilisateur est bloqué
+        if ($user->is_blocked) {
+            return back()->withErrors([
+                'email' => 'Votre accès à Brillio a été suspendu pour non-respect des règles de la plateforme. Motif : ' . ($user->blocked_reason ?? 'Non spécifié'),
+            ])->withInput();
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
@@ -617,6 +640,14 @@ class WebAuthController extends Controller
         $user = User::where('email', $socialData['email'])->first();
 
         if ($user) {
+            // Vérifier si l'utilisateur est bloqué
+            if ($user->is_blocked) {
+                return [
+                    'success' => false,
+                    'error' => 'Votre accès Jeune a été suspendu par l\'administration. Motif : ' . ($user->blocked_reason ?? 'Non spécifié')
+                ];
+            }
+
             // Verifier que c'est bien un compte jeune
             if ($user->user_type !== 'jeune') {
                 // Compte mentor trouvé, proposer la migration
@@ -629,7 +660,15 @@ class WebAuthController extends Controller
                 'provider_id' => $userData['id'] ?? $user->provider_id,
                 'profile_photo_url' => $socialData['avatar_url'] ?? $user->profile_photo_url,
                 'last_login_at' => now(),
+                // Reactivation automatique si archive
+                'is_archived' => false,
+                'archived_at' => null,
+                'archived_reason' => null,
             ]);
+
+            if ($user->wasChanged('is_archived')) {
+                session()->flash('success', 'Bon retour ! Votre compte a été réactivé automatiquement.');
+            }
 
             // Check for referral code in session (existing user logging in via link)
             $referralCode = session('referral_code');
@@ -1206,6 +1245,31 @@ class WebAuthController extends Controller
         return redirect()->route($route)
             ->with('info', "Veuillez vous connecter avec votre compte {$user->user_type}.");
     }
+
+    /**
+     * Traite l'acceptation de promotion (Lien magique depuis l'email)
+     */
+    public function acceptPromotion(Request $request, User $user)
+    {
+        // 1. Archiver le compte actuel (Jeune) pour libérer l'accès
+        $user->update([
+            'is_archived' => true,
+            'archived_at' => now(),
+            'archived_reason' => 'Acceptation de la promotion au statut Mentor (Automatique).',
+        ]);
+
+        // 2. Déconnecter l'utilisateur s'il est connecté pour éviter les conflits de session
+        if (Auth::check() && Auth::id() === $user->id) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        // 3. Rediriger directement vers la connexion Mentor via LinkedIn
+        return redirect()->route('auth.mentor.login')
+            ->with('success', 'Félicitations ! Votre compte Jeune a été archivé. Vous pouvez maintenant vous connecter via LinkedIn pour activer votre profil Mentor.');
+    }
+
 }
 
  

@@ -132,6 +132,9 @@ Route::middleware('auth')->name('verification.')->group(function () {
 Route::get('/auth/confirm-type-change', [WebAuthController::class, 'showConfirmTypeChange'])->name('auth.confirm-type-change');
 Route::post('/auth/confirm-type-change', [WebAuthController::class, 'confirmTypeChange'])->name('auth.confirm-type-change.post');
 
+// Route d'acceptation de promotion (automatique sur clic)
+Route::get('/auth/accept-promotion/{user}', [WebAuthController::class, 'acceptPromotion'])->name('auth.accept-promotion')->middleware('signed');
+
 // Authentification Mentors (LinkedIn uniquement)
 Route::prefix('mentor')->name('auth.mentor.')->group(function () {
     Route::middleware('guest')->group(function () {
@@ -367,6 +370,9 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class)->only(['index', 'show', 'destroy']);
         Route::put('users/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('users.toggle-admin');
         Route::put('users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
+        Route::post('users/{user}/propose-promotion', [UserController::class, 'proposePromotion'])->name('users.propose-promotion');
+        Route::post('users/{user}/block', [UserController::class, 'block'])->name('users.block');
+        Route::post('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
 
         // Gestion des mentors
         Route::get('mentors', [MentorController::class, 'index'])->name('mentors.index');
@@ -382,6 +388,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::patch('mentors/{mentor}/toggle-validation', [MentorController::class, 'toggleValidation'])->name('mentors.toggle-validation');
         Route::put('mentors/{mentor}/approve', [MentorController::class, 'approve'])->name('mentors.approve');
         Route::put('mentors/{mentor}/reject', [MentorController::class, 'reject'])->name('mentors.reject');
+        Route::put('mentors/{mentor}/demote', [MentorController::class, 'demote'])->name('mentors.demote');
         Route::get('mentors/{mentor}/download-linkedin', [MentorController::class, 'downloadLinkeInProfile'])->name('mentors.download-linkedin');
 
         // Gestion des ressources
