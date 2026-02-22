@@ -55,6 +55,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'sponsored_by_organization_id',
         'organization_id',
         'referral_code_used',
+        'is_archived',
+        'archived_at',
+        'archived_reason',
+        'is_blocked',
+        'blocked_at',
+        'blocked_reason',
     ];
 
     /**
@@ -82,7 +88,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'onboarding_completed' => 'boolean',
             'onboarding_data' => 'array',
             'last_login_at' => 'datetime',
+            'is_archived' => 'boolean',
             'archived_at' => 'datetime',
+            'is_blocked' => 'boolean',
+            'blocked_at' => 'datetime',
         ];
     }
 

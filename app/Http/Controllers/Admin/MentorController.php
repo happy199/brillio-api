@@ -363,4 +363,29 @@ class MentorController extends Controller
 
         return back()->with('success', 'Étape supprimée avec succès.');
     }
+    /**
+     * Rétrograde un mentor en jeune
+     */
+    public function demote(MentorProfile $mentor)
+    {
+        $user = $mentor->user;
+
+        // 1. Archiver le compte mentor
+        $user->update([
+            'user_type' => 'jeune',
+            'is_archived' => true,
+            'archived_at' => now(),
+            'archived_reason' => 'Rétrogradation administrative de Mentor à Jeune.',
+        ]);
+
+        // 2. Notifier l'utilisateur
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\DemotionNotificationMail($user));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur envoi notification rétrogradation: ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "Le mentor {$user->name} a été rétrogradé en jeune et son compte a été archivé pour la transition.");
+    }
 }

@@ -73,7 +73,20 @@
                 @endif
 
                 <div class="flex-1">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $publicData['name'] }}</h1>
+                    <div class="flex items-center gap-2 mb-2">
+                        <h1 class="text-3xl font-bold text-gray-900">{{ $publicData['name'] }}</h1>
+                        @if($mentor->is_validated)
+                        <span
+                            class="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full"
+                            title="Profil vérifié">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                        @endif
+                    </div>
                     <p class="text-xl text-gray-600 mb-2">{{ $publicData['current_position'] }}{{
                         $publicData['current_company'] ? ' chez ' . $publicData['current_company'] : '' }}</p>
 

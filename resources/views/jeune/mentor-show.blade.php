@@ -40,7 +40,20 @@
                 <div class="flex-1">
                     <div class="flex items-start justify-between">
                         <div>
-                            <h1 class="text-3xl font-bold">{{ $mentor->user->name ?? 'Mentor' }}</h1>
+                            <div class="flex items-center gap-2">
+                                <h1 class="text-3xl font-bold">{{ $mentor->user->name ?? 'Mentor' }}</h1>
+                                @if($mentor->is_validated)
+                                <span
+                                    class="inline-flex items-center justify-center w-6 h-6 bg-white/20 backdrop-blur-sm text-white rounded-full"
+                                    title="Profil vérifié">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                </span>
+                                @endif
+                            </div>
                             <p class="text-white/90 text-lg mt-1">{{ $mentor->current_position }}</p>
                             @if($mentor->current_company)
                             <p class="text-white/70">{{ $mentor->current_company }}</p>
@@ -48,12 +61,13 @@
                         </div>
                         @if($mentor->is_validated)
                         <span
-                            class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
+                            class="hidden md:flex px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd"></path>
                             </svg>
-                            Profil verifie
+                            PROFIL VÉRIFIÉ
                         </span>
                         @endif
                     </div>

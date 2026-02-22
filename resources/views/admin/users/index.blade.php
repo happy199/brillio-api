@@ -99,6 +99,16 @@
                                 @endif
                             </div>
                             <div class="text-sm text-gray-500">{{ $user->email }}</div>
+                            @if($user->is_blocked)
+                            <div class="mt-1 flex items-center space-x-1">
+                                <span
+                                    class="px-2 py-0.5 text-[10px] bg-red-600 text-white rounded font-bold uppercase tracking-wider">Bloqué</span>
+                                @if($user->blocked_reason)
+                                <span class="text-xs text-red-500 italic">"{{ Str::limit($user->blocked_reason, 20)
+                                    }}"</span>
+                                @endif
+                            </div>
+                            @endif
                             @if($user->is_archived && $user->archived_reason)
                             <div class="text-xs text-red-500 mt-1 italic">"{{ Str::limit($user->archived_reason, 30) }}"
                             </div>
@@ -134,6 +144,16 @@
                         Voir
                     </a>
 
+                    @if($user->is_blocked)
+                    <form action="{{ route('admin.users.unblock', $user) }}" method="POST" class="inline"
+                        onsubmit="return confirm('Débloquer cet utilisateur ?')">
+                        @csrf
+                        <button type="submit" class="text-indigo-600 hover:text-indigo-900 mr-3 font-medium">
+                            Débloquer
+                        </button>
+                    </form>
+                    @endif
+
                     @if($user->is_archived)
                     <form action="{{ route('admin.users.reactivate', $user) }}" method="POST" class="inline"
                         onsubmit="return confirm('Réactiver ce compte ?')">
@@ -154,6 +174,15 @@
                     </form>
 
                     @elseif($user->id !== auth()->id())
+                    @if($user->isJeune())
+                    <form action="{{ route('admin.users.propose-promotion', $user) }}" method="POST" class="inline"
+                        onsubmit="return confirm('Proposer à cet étudiant de devenir Mentor ? Un mail lui sera envoyé.')">
+                        @csrf
+                        <button type="submit" class="text-purple-600 hover:text-purple-900 mr-3">
+                            Promouvoir
+                        </button>
+                    </form>
+                    @endif
                     <form action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="inline">
                         @csrf
                         @method('PUT')
@@ -161,6 +190,16 @@
                             {{ $user->is_admin ? 'Retirer admin' : 'Rendre admin' }}
                         </button>
                     </form>
+                    @if(!$user->is_blocked)
+                    <form action="{{ route('admin.users.block', $user) }}" method="POST" class="inline"
+                        onsubmit="let reason = prompt('Motif du blocage :', 'Non-respect des règles de la plateforme.'); if (reason) { this.reason.value = reason; return true; } return false;">
+                        @csrf
+                        <input type="hidden" name="reason" value="">
+                        <button type="submit" class="text-red-600 hover:text-red-900 mr-3">
+                            Bloquer
+                        </button>
+                    </form>
+                    @endif
                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
                         onsubmit="return confirm('Supprimer cet utilisateur ?')">
                         @csrf

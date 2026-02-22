@@ -74,16 +74,24 @@ class WalletService
             throw new \Exception("Le coût doit être positif.");
         }
 
-        if ($entity->credits_balance < $cost) {
-            throw new \Exception("Solde insuffisant.");
-        }
-
         return DB::transaction(function () use ($entity, $cost, $type, $description, $related) {
             $isUser = $entity instanceof User;
             $isOrg = $entity instanceof \App\Models\Organization;
 
             if (!$isUser && !$isOrg) {
                 throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
+            }
+
+            // Pessimistic locking to prevent race conditions during balance check
+            if ($isUser) {
+                $entity = User::where('id', $entity->id)->lockForUpdate()->first();
+            }
+            else {
+                $entity = \App\Models\Organization::where('id', $entity->id)->lockForUpdate()->first();
+            }
+
+            if ($entity->credits_balance < $cost) {
+                throw new \Exception("Solde insuffisant.");
             }
 
             // Mentor Spending Logic: Consuming earned credits reduces withdrawable balance

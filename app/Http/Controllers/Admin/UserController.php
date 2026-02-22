@@ -39,13 +39,14 @@ class UserController extends Controller
         // Filtre par statut d'archivage
         if ($request->has('archived')) {
             $query->where('is_archived', true);
-        } else {
-            // Par défaut, on ne montre pas les archivés sauf si demandé explicitement
-            // OU on peut décider de tout montrer et utiliser un badget.
-            // Pour l'instant, faisons un filtre explicite : ?archived=1 pour voir les archives
-            // $query->where('is_archived', false); 
-            // ^ Si on décommente ça, ils sont masqués par défaut. 
-            // Mais l'utilisateur veut un onglet séparé, donc le filtre est logique.
+        }
+        else {
+        // Par défaut, on ne montre pas les archivés sauf si demandé explicitement
+        // OU on peut décider de tout montrer et utiliser un badget.
+        // Pour l'instant, faisons un filtre explicite : ?archived=1 pour voir les archives
+        // $query->where('is_archived', false); 
+        // ^ Si on décommente ça, ils sont masqués par défaut. 
+        // Mais l'utilisateur veut un onglet séparé, donc le filtre est logique.
         }
 
         // Tri
@@ -130,5 +131,65 @@ class UserController extends Controller
             : "{$user->name} n'est plus administrateur";
 
         return back()->with('success', $message);
+    }
+
+    /**
+     * Propose une promotion à un jeune pour devenir mentor
+     */
+    public function proposePromotion(User $user)
+    {
+        if (!$user->isJeune()) {
+            return back()->with('error', "Cet utilisateur n'est pas un étudiant.");
+        }
+
+        // 1. Archiver le compte Jeune immédiatement pour libérer l'accès
+        $user->update([
+            'is_archived' => true,
+            'archived_at' => now(),
+            'archived_reason' => 'Promotion administrative initiée vers le statut Mentor.',
+        ]);
+
+        $acceptUrl = \Illuminate\Support\Facades\URL::signedRoute('auth.accept-promotion', ['user' => $user->id]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\PromotionProposalMail($user, $acceptUrl));
+            return back()->with('success', "Le compte de {$user->name} a été archivé et la proposition de promotion a été envoyée.");
+        }
+        catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur envoi proposition promotion: ' . $e->getMessage());
+            return back()->with('error', "Le compte a été archivé mais une erreur est survenue lors de l'envoi de l'e-mail.");
+        }
+    }
+
+    /**
+     * Bloque un utilisateur
+     */
+    public function block(Request $request, User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', "Vous ne pouvez pas vous bloquer vous-même.");
+        }
+
+        $user->update([
+            'is_blocked' => true,
+            'blocked_at' => now(),
+            'blocked_reason' => $request->input('reason', 'Non-respect des règles de la plateforme.'),
+        ]);
+
+        return back()->with('success', "L'utilisateur {$user->name} a été bloqué.");
+    }
+
+    /**
+     * Débloque un utilisateur
+     */
+    public function unblock(User $user)
+    {
+        $user->update([
+            'is_blocked' => false,
+            'blocked_at' => null,
+            'blocked_reason' => null,
+        ]);
+
+        return back()->with('success', "L'utilisateur {$user->name} a été débloqué.");
     }
 }

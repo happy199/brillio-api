@@ -203,12 +203,16 @@ class SessionController extends Controller
             'mentee_ids.*' => 'exists:users,id',
         ]);
 
+        // Sécurité : Ne pas autoriser le changement de prix si la séance est déjà confirmée ou terminée
+        $canChangePrice = !in_array($session->status, ['confirmed', 'completed']);
+        $newPrice = ($session->is_paid && $canChangePrice) ? $request->price : $session->price;
+
         $session->update([
             'title' => $request->title,
             'description' => $request->description,
             'scheduled_at' => $request->scheduled_at,
             'duration_minutes' => $request->duration_minutes,
-            'price' => $session->is_paid ? $request->price : 0,
+            'price' => $newPrice,
         ]);
 
         // Gestion des participants (Sync Intelligent)
