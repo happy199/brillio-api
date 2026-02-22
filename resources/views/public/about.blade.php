@@ -508,7 +508,7 @@
 
         <div class="relative overflow-hidden mb-16" data-aos="fade-up">
             @if($partners->count() > 0)
-            <div class="flex animate-scroll whitespace-nowrap">
+            <div class="flex {{ $partners->count() >= 6 ? 'animate-scroll' : 'justify-center' }} whitespace-nowrap">
                 <!-- First set of logos -->
                 <div class="flex space-x-12 items-center mx-6">
                     @foreach($partners as $partner)
@@ -519,7 +519,9 @@
                     </div>
                     @endforeach
                 </div>
-                <!-- Duplicate set for infinite loop -->
+
+                @if($partners->count() >= 6)
+                <!-- Duplicate set for infinite loop (only if enough items) -->
                 <div class="flex space-x-12 items-center mx-6">
                     @foreach($partners as $partner)
                     <div
@@ -529,6 +531,7 @@
                     </div>
                     @endforeach
                 </div>
+                @endif
             </div>
             @else
             <div class="text-center text-gray-500 italic">
