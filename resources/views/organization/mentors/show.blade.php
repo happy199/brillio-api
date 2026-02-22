@@ -84,7 +84,20 @@
                             {{ substr($mentor->name, 0, 1) }}
                         </div>
                         @endif
-                        <h2 class="mt-4 text-xl font-bold text-gray-900">{{ $mentor->name }}</h2>
+                        <div class="flex items-center gap-2 mt-4">
+                            <h2 class="text-xl font-bold text-gray-900">{{ $mentor->name }}</h2>
+                            @if($mentor->mentorProfile->is_validated)
+                            <span
+                                class="inline-flex items-center justify-center w-5 h-5 bg-green-100 text-green-600 rounded-full"
+                                title="Profil vérifié">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </span>
+                            @endif
+                        </div>
                         <p class="text-sm text-indigo-600 font-medium">{{ $mentor->mentorProfile->current_position ??
                             'Mentor' }}</p>
                         <p class="text-gray-500 text-sm italic">{{ $mentor->mentorProfile->current_company ?? '-' }}</p>

@@ -337,6 +337,11 @@ class ResourceController extends Controller
 
     public function unlock(Request $request, Resource $resource)
     {
+        // Sécurité : Vérifier que la ressource est toujours valide et publiée
+        if (!$resource->is_published || !$resource->is_validated) {
+            return redirect()->route('jeune.resources.index')->with('error', 'Cette ressource n\'est plus disponible.');
+        }
+
         if (!$resource->is_premium) {
             return back();
         }

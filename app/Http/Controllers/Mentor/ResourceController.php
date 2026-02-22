@@ -91,7 +91,7 @@ class ResourceController extends Controller
             !empty($validated['targeting']['situations']) ||
             !empty($validated['targeting']['countries']) ||
             !empty($validated['targeting']['interests'])
-        );
+            );
 
         // Validation conditionnelle pour le prix
         if ($request->is_premium == '1') {
@@ -112,7 +112,8 @@ class ResourceController extends Controller
                 if (auth()->user()->credits_balance < $cost) {
                     return back()->withInput()->withErrors(['targeting' => "Crédits insuffisants. Le ciblage avancé coûte {$cost} crédits. Votre solde: " . auth()->user()->credits_balance]);
                 }
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 return back()->withInput()->withErrors(['targeting' => $e->getMessage()]);
             }
         }
@@ -169,7 +170,8 @@ class ResourceController extends Controller
 
             DB::commit();
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             DB::rollBack();
             // Nettoyage fichiers si erreur (optionnel mais propre)
             return back()->withInput()->with('error', "Erreur lors de la création : " . $e->getMessage());
@@ -230,6 +232,29 @@ class ResourceController extends Controller
             'targeting' => 'nullable|array',
         ], $messages);
 
+        // Vérification des crédits pour le ciblage (Loophole fix)
+        $hasTargeting = !empty($validated['targeting']) && (
+            !empty($validated['targeting']['education_levels']) ||
+            !empty($validated['targeting']['situations']) ||
+            !empty($validated['targeting']['countries']) ||
+            !empty($validated['targeting']['interests'])
+            );
+
+        $alreadyPaid = \App\Models\WalletTransaction::where('related_type', Resource::class)
+            ->where('related_id', $resource->id)
+            ->where('type', 'service_fee')
+            ->exists();
+
+        $needsPayment = $hasTargeting && !$alreadyPaid;
+        $cost = 0;
+
+        if ($needsPayment) {
+            $cost = $this->walletService->getFeatureCost('advanced_targeting', 10);
+            if (auth()->user()->credits_balance < $cost) {
+                return back()->withInput()->withErrors(['targeting' => "Crédits insuffisants. Le ciblage avancé coûte {$cost} crédits. Votre solde: " . auth()->user()->credits_balance]);
+            }
+        }
+
         // Validation conditionnelle pour le prix
         if ($request->is_premium == '1') {
             $request->validate([
@@ -280,7 +305,28 @@ class ResourceController extends Controller
             $updateData['validated_at'] = null;
         }
 
-        $resource->update($updateData);
+        try {
+            DB::beginTransaction();
+
+            $resource->update($updateData);
+
+            // Débit réel si besoin de paiement
+            if ($needsPayment && isset($cost)) {
+                $this->walletService->deductCredits(
+                    auth()->user(),
+                    $cost,
+                    'service_fee',
+                    "Ciblage avancé pour: {$validated['title']}",
+                    $resource
+                );
+            }
+
+            DB::commit();
+        }
+        catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', "Erreur lors de la mise à jour : " . $e->getMessage());
+        }
 
         $message = $wasValidated
             ? 'Ressource mise à jour. Elle sera à nouveau soumise à validation admin.'
@@ -356,7 +402,8 @@ class ResourceController extends Controller
                 $level = $data['education_level'];
                 if (isset($educationLabels[$level])) {
                     $educationLevels[$level] = $educationLabels[$level];
-                } else {
+                }
+                else {
                     $educationLevels[$level] = ucfirst($level);
                 }
             }
@@ -366,7 +413,8 @@ class ResourceController extends Controller
                 $sit = $data['current_situation'];
                 if (isset($situationLabels[$sit])) {
                     $situations[$sit] = $situationLabels[$sit];
-                } else {
+                }
+                else {
                     $situations[$sit] = ucfirst($sit);
                 }
             }
