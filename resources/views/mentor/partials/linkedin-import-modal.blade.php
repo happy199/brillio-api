@@ -116,15 +116,20 @@
             <!-- Zone d'upload -->
             <div x-show="!uploading && !parsedData">
                 <input type="file" accept=".pdf" @change="handleFileUpload($event)" class="hidden" x-ref="fileInput">
-                <div @click="$refs.fileInput.click()"
-                    class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
+                <div @click="$refs.fileInput.click()" @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop($event)"
+                    :class="{ 'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging }"
+                    class="border-2 border-dashed rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
                     <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" width="64" height="64" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
+                        stroke="currentColor" viewBox="0 0 24 24" :class="{ 'text-blue-500': isDragging }">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <p class="text-lg font-semibold text-gray-700">Cliquez pour choisir votre PDF LinkedIn</p>
-                    <p class="text-sm text-gray-500 mt-2">ou glissez-déposez le fichier ici (max 5MB)</p>
+                    <p class="text-sm text-gray-500 mt-2" x-show="!isDragging">ou glissez-déposez le fichier ici (max
+                        5MB)</p>
+                    <p class="text-sm text-blue-600 mt-2 font-bold" x-show="isDragging">Déposez votre fichier maintenant
+                        !</p>
                 </div>
             </div>
 
