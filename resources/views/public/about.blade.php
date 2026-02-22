@@ -94,21 +94,19 @@
                 </div>
             </div>
 
-            <div data-aos="fade-left">
-                <!-- TODO: Ajouter image/illustration de la mission -->
-                <div
-                    class="bg-gradient-to-br from-primary-100 to-secondary-100 rounded-3xl p-8 aspect-square flex items-center justify-center">
-                    <div class="text-center">
-                        <div
-                            class="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-3xl flex items-center justify-center">
-                            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                </path>
-                            </svg>
-                        </div>
-                        <p class="text-gray-600">Image de la mission</p>
+            <div data-aos="fade-left" class="relative group">
+                <div class="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-secondary-600/10 rounded-3xl -rotate-3 group-hover:rotate-0 transition-transform duration-500"></div>
+                <img src="{{ asset('images/about/mission-graduation.png') }}" alt="Mission Brillio - Réussite" 
+                     class="relative z-10 w-full h-full object-cover rounded-3xl shadow-2xl transition-all duration-500 group-hover:scale-[1.01]">
+                
+                <!-- Brillio Branding Overlay -->
+                <div class="absolute bottom-6 right-6 z-20 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 border border-white/20">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
                     </div>
+                    <span class="text-gray-900 font-bold text-sm tracking-tight">Brillio</span>
                 </div>
             </div>
         </div>
