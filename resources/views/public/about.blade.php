@@ -429,7 +429,7 @@
                         class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
                 </div>
                 <h3 class="text-lg font-bold text-gray-900 leading-tight">Aminath Tidjani</h3>
-                <p class="text-primary-600 text-sm font-medium mb-3">Impact & Recherche</p>
+                <p class="text-primary-600 text-sm font-medium mb-3">Recherche Scientifique & Impact</p>
                 <div class="flex justify-center space-x-3 mt-4">
                     <a href="https://www.linkedin.com/in/aminathf%C3%A8mietidjani/" target="_blank"
                         class="text-gray-400 hover:text-primary-600 transition-colors">
