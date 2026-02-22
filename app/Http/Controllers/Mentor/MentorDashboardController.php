@@ -486,17 +486,32 @@ class MentorDashboardController extends Controller
 
             if (!empty($profileData['experience'])) {
                 foreach ($profileData['experience'] as $exp) {
-                    // Calculer les années de début et fin basées sur la durée
-                    $currentYear = date('Y');
-                    $durationYears = $exp['duration_years'] ?? 0;
+                    $startDate = null;
+                    $endDate = null;
 
-                    if ($durationYears > 0) {
-                        $endYear = $currentYear;
-                        $startYear = $currentYear - $durationYears;
+                    // 1. Utiliser les dates fournies par le parser si valides
+                    if (!empty($exp['start_date'])) {
+                        // S'assurer que le format est YYYY-MM-DD
+                        $startDate = strlen($exp['start_date']) === 4 ? $exp['start_date'] . '-01-01' : $exp['start_date'];
+                    }
+
+                    if (isset($exp['end_date'])) {
+                        if (!empty($exp['end_date'])) {
+                            // S'assurer que le format est YYYY-MM-DD
+                            $endDate = strlen($exp['end_date']) === 4 ? $exp['end_date'] . '-12-31' : $exp['end_date'];
+                        } else {
+                            // end_date est explictement vide ou null (Present)
+                            $endDate = null;
+                        }
                     } else {
-                        // Si durée = 0, début = fin = année courante
-                        $startYear = $currentYear;
-                        $endYear = $currentYear;
+                        // Pas de end_date dans le JSON, on essaie de calculer avec la durée comme fallback de dernier recours
+                        $currentYear = date('Y');
+                        $durationYears = $exp['duration_years'] ?? 0;
+
+                        if ($durationYears > 0) {
+                            $endDate = $currentYear . '-12-31';
+                            $startDate = ($currentYear - $durationYears) . '-01-01';
+                        }
                     }
 
                     $profile->roadmapSteps()->create([
@@ -504,8 +519,8 @@ class MentorDashboardController extends Controller
                         'title' => $exp['title'] ?? 'Sans titre',
                         'institution_company' => $exp['company'] ?? null,
                         'description' => trim($exp['description'] ?? ''),
-                        'start_date' => $startYear . '-01-01',
-                        'end_date' => $endYear . '-12-31',
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
                         'position' => $stepPosition++,
                     ]);
                 }
