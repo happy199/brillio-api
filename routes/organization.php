@@ -60,6 +60,8 @@ Route::middleware('auth')->group(function () {
             Route::put('/profile', [\App\Http\Controllers\Organization\ProfileController::class , 'update'])
                 ->middleware('organization_role:admin')
                 ->name('profile.update');
+            Route::get('/profile/check-domain', [\App\Http\Controllers\Organization\ProfileController::class , 'checkDomainAvailability'])
+                ->name('profile.check-domain');
 
             // Invitations
             Route::get('/invitations', [InvitationController::class , 'index'])->name('invitations.index');

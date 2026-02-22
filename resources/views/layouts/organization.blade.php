@@ -73,13 +73,20 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="{{ route('organization.dashboard') }}" class="flex items-center space-x-3">
-                        <div
-                            class="w-8 h-8 bg-gradient-to-br from-organization-400 to-organization-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">B</span>
+                    <a href="{{ route('organization.dashboard') }}" class="flex items-center">
+                        @if($org && $org->isEnterprise() && $org->logo_url)
+                        <img src="{{ $org->logo_url }}" alt="{{ $org->name }}"
+                            class="h-10 w-auto max-w-[150px] object-contain">
+                        @else
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-8 h-8 bg-gradient-to-br from-organization-400 to-organization-600 rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">B</span>
+                            </div>
+                            <span class="text-xl font-bold text-gray-900">Brillio<span
+                                    class="text-organization-500">Partner</span></span>
                         </div>
-                        <span class="text-xl font-bold text-gray-900">Brillio<span
-                                class="text-organization-500">Partner</span></span>
+                        @endif
                     </a>
 
                     <!-- Navigation Links -->

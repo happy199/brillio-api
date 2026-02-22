@@ -37,7 +37,11 @@ class PageController extends Controller
      */
     public function about()
     {
-        return view('public.about');
+        $partners = \App\Models\Organization::active()
+            ->whereNotNull('logo_url')
+            ->get();
+
+        return view('public.about', compact('partners'));
     }
 
     /**

@@ -16,6 +16,8 @@ class Organization extends Model
         'slug',
         'logo_url',
         'primary_color',
+        'secondary_color',
+        'accent_color',
         'contact_email',
         'phone',
         'website',

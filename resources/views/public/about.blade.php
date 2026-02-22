@@ -95,15 +95,21 @@
             </div>
 
             <div data-aos="fade-left" class="relative group">
-                <div class="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-secondary-600/10 rounded-3xl -rotate-3 group-hover:rotate-0 transition-transform duration-500"></div>
-                <img src="{{ asset('images/about/mission-graduation.png') }}" alt="Mission Brillio - Réussite" 
-                     class="relative z-10 w-full h-full object-cover rounded-3xl shadow-2xl transition-all duration-500 group-hover:scale-[1.01]">
-                
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-primary-600/10 to-secondary-600/10 rounded-3xl -rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                </div>
+                <img src="{{ asset('images/about/mission-graduation.png') }}" alt="Mission Brillio - Réussite"
+                    class="relative z-10 w-full h-full object-cover rounded-3xl shadow-2xl transition-all duration-500 group-hover:scale-[1.01]">
+
                 <!-- Brillio Branding Overlay -->
-                <div class="absolute bottom-6 right-6 z-20 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 border border-white/20">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
+                <div
+                    class="absolute bottom-6 right-6 z-20 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl flex items-center gap-3 border border-white/20">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center shadow-lg shadow-primary-500/30">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
                         </svg>
                     </div>
                     <span class="text-gray-900 font-bold text-sm tracking-tight">Brillio</span>
@@ -273,75 +279,218 @@
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <!-- Team Member 1 -->
-            <div class="bg-white rounded-2xl p-6 text-center shadow-sm" data-aos="fade-up" data-aos-delay="100">
-                <!-- TODO: Ajouter photo -->
-                <div
-                    class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-2xl font-bold">
-                    HT
+            <!-- Team Member 1: Happy Tidjani -->
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+                data-aos="fade-up" data-aos-delay="100">
+                <div class="w-24 h-24 mx-auto mb-4 relative">
+                    <img src="{{ asset('images/team/happy.jpg') }}" alt="Happy Tidjani"
+                        class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
                 </div>
-                <h3 class="text-lg font-bold text-gray-900">Happy Tidjani</h3>
-                <p class="text-primary-600 text-sm mb-3">Fondateur & CEO</p>
-                <p class="text-gray-600 text-sm">
-                    <!-- TODO: Ajouter bio -->
-                    Passionné par l'éducation et la tech.
-                </p>
+                <h3 class="text-lg font-bold text-gray-900 leading-tight">Happy Tidjani</h3>
+                <p class="text-primary-600 text-sm font-medium mb-3">Fondateur & CEO</p>
                 <div class="flex justify-center space-x-3 mt-4">
-                    <a href="#" class="text-gray-400 hover:text-primary-600">
+                    <a href="https://www.linkedin.com/in/happytidjani/" target="_blank"
+                        class="text-gray-400 hover:text-primary-600 transition-colors">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path
                                 d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                         </svg>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-primary-600">
+                    <a href="https://www.facebook.com/happy.tidjani.1" target="_blank"
+                        class="text-gray-400 hover:text-blue-600 transition-colors">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path
-                                d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                    <a href="http://happytidjani.com/" target="_blank"
+                        class="text-gray-400 hover:text-accent-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9-9H3m9 9V3m0 18v-9" />
                         </svg>
                     </a>
                 </div>
             </div>
 
-            <!-- Team Member 2 - Placeholder -->
-            <div class="bg-white rounded-2xl p-6 text-center shadow-sm" data-aos="fade-up" data-aos-delay="200">
-                <!-- TODO: Ajouter membre de l'équipe -->
-                <div
-                    class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-2xl font-bold">
-                    ?
+            <!-- Team Member 2: Emmanuella Ahouanse -->
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+                data-aos="fade-up" data-aos-delay="200">
+                <div class="w-24 h-24 mx-auto mb-4 relative">
+                    <img src="{{ asset('images/team/emmanuella.jpeg') }}" alt="Emmanuella Ahouanse"
+                        class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
                 </div>
-                <h3 class="text-lg font-bold text-gray-900">Nom Prénom</h3>
-                <p class="text-primary-600 text-sm mb-3">Rôle</p>
-                <p class="text-gray-600 text-sm">
-                    Description du membre de l'équipe.
-                </p>
+                <h3 class="text-lg font-bold text-gray-900 leading-tight">Emmanuella Ahouanse</h3>
+                <p class="text-primary-600 text-sm font-medium mb-3">Co-fondatrice & COO</p>
+                <div class="flex justify-center space-x-3 mt-4">
+                    <a href="https://www.linkedin.com/in/ahouanse-mahutin-emmanuella-b31947205/" target="_blank"
+                        class="text-gray-400 hover:text-primary-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.facebook.com/emmanuella.ahouanse.3" target="_blank"
+                        class="text-gray-400 hover:text-blue-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                </div>
             </div>
 
-            <!-- Team Member 3 - Placeholder -->
-            <div class="bg-white rounded-2xl p-6 text-center shadow-sm" data-aos="fade-up" data-aos-delay="300">
-                <!-- TODO: Ajouter membre de l'équipe -->
-                <div
-                    class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-2xl font-bold">
-                    ?
+            <!-- Team Member 3: Melvina Kouton -->
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+                data-aos="fade-up" data-aos-delay="300">
+                <div class="w-24 h-24 mx-auto mb-4 relative">
+                    <img src="{{ asset('images/team/melvina.jpg') }}" alt="Melvina Kouton"
+                        class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
                 </div>
-                <h3 class="text-lg font-bold text-gray-900">Nom Prénom</h3>
-                <p class="text-primary-600 text-sm mb-3">Rôle</p>
-                <p class="text-gray-600 text-sm">
-                    Description du membre de l'équipe.
-                </p>
+                <h3 class="text-lg font-bold text-gray-900 leading-tight">Melvina Kouton</h3>
+                <p class="text-primary-600 text-sm font-medium mb-3">Conseillère Juridique</p>
+                <div class="flex justify-center space-x-3 mt-4">
+                    <a href="https://www.facebook.com/Melvina.Kouton" target="_blank"
+                        class="text-gray-400 hover:text-blue-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                </div>
             </div>
 
-            <!-- Team Member 4 - Placeholder -->
-            <div class="bg-white rounded-2xl p-6 text-center shadow-sm" data-aos="fade-up" data-aos-delay="400">
-                <!-- TODO: Ajouter membre de l'équipe -->
-                <div
-                    class="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-2xl font-bold">
-                    ?
+            <!-- Team Member 4: Ornella Vidjannagni -->
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+                data-aos="fade-up" data-aos-delay="400">
+                <div class="w-24 h-24 mx-auto mb-4 relative">
+                    <img src="{{ asset('images/team/ornella.jpeg') }}" alt="Ornella Vidjannagni"
+                        class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
                 </div>
-                <h3 class="text-lg font-bold text-gray-900">Nom Prénom</h3>
-                <p class="text-primary-600 text-sm mb-3">Rôle</p>
-                <p class="text-gray-600 text-sm">
-                    Description du membre de l'équipe.
-                </p>
+                <h3 class="text-lg font-bold text-gray-900 leading-tight">Ornella Vidjannagni</h3>
+                <p class="text-primary-600 text-sm font-medium mb-3 whitespace-nowrap">Responsable Produit & UX/UI</p>
+                <div class="flex justify-center space-x-3 mt-4">
+                    <a href="https://www.linkedin.com/in/ornellavidjannagni/" target="_blank"
+                        class="text-gray-400 hover:text-primary-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.facebook.com/profile.php?id=100008320955940" target="_blank"
+                        class="text-gray-400 hover:text-blue-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.designbyornella.com/" target="_blank"
+                        class="text-gray-400 hover:text-accent-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9-9H3m9 9V3m0 18v-9" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Team Member 5: Jérémie Atcho -->
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+                data-aos="fade-up" data-aos-delay="100">
+                <div class="w-24 h-24 mx-auto mb-4 relative">
+                    <img src="{{ asset('images/team/jerémie.jpeg') }}" alt="Jérémie Atcho"
+                        class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 leading-tight">Jérémie Atcho</h3>
+                <p class="text-primary-600 text-sm font-medium mb-3">Consultant Com Digitale</p>
+                <div class="flex justify-center space-x-3 mt-4">
+                    <a href="https://www.linkedin.com/in/j%C3%A9r%C3%A9mie-atcho-30252a213/" target="_blank"
+                        class="text-gray-400 hover:text-primary-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.facebook.com/jeremie.dieudonne.atcho" target="_blank"
+                        class="text-gray-400 hover:text-blue-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Team Member 6: Aminath Tidjani -->
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+                data-aos="fade-up" data-aos-delay="200">
+                <div class="w-24 h-24 mx-auto mb-4 relative">
+                    <img src="{{ asset('images/team/aminath.jpeg') }}" alt="Aminath Tidjani"
+                        class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 leading-tight">Aminath Tidjani</h3>
+                <p class="text-primary-600 text-sm font-medium mb-3">Recherche Scientifique & Impact</p>
+                <div class="flex justify-center space-x-3 mt-4">
+                    <a href="https://www.linkedin.com/in/aminathf%C3%A8mietidjani/" target="_blank"
+                        class="text-gray-400 hover:text-primary-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.facebook.com/aminath.tidjani.58" target="_blank"
+                        class="text-gray-400 hover:text-blue-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Team Member 7: Conseiller Pédagogique -->
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+                data-aos="fade-up" data-aos-delay="300">
+                <div
+                    class="w-24 h-24 mx-auto mb-4 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-2xl font-extrabold shadow-inner">
+                    CP
+                </div>
+                <h3 class="text-lg font-bold text-gray-400 leading-tight italic">À venir</h3>
+                <p class="text-gray-400 text-sm font-medium mb-3">Conseiller Pédagogique</p>
+                <div class="flex justify-center space-x-3 mt-4 opacity-30">
+                    <a href="https://linkedin.com" target="_blank" class="text-gray-400">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                    <a href="https://facebook.com" target="_blank" class="text-gray-400">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Team Member 8: Jude Dossou -->
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm hover:shadow-md transition-shadow"
+                data-aos="fade-up" data-aos-delay="400">
+                <div class="w-24 h-24 mx-auto mb-4 relative">
+                    <img src="{{ asset('images/team/jude.jpeg') }}" alt="Jude Dossou"
+                        class="w-full h-full object-cover rounded-full shadow-md border-2 border-primary-50">
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 leading-tight">Jude Dossou</h3>
+                <p class="text-primary-600 text-sm font-medium mb-3">Designer Graphique</p>
+                <div class="flex justify-center space-x-3 mt-4">
+                    <a href="https://www.linkedin.com/in/jude-dossou-a48140225/" target="_blank"
+                        class="text-gray-400 hover:text-primary-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -357,27 +506,168 @@
             </h2>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
-            <!-- TODO: Ajouter logos des partenaires -->
-            @for ($i = 1; $i <= 6; $i++) <div
-                class="bg-gray-100 rounded-xl p-6 flex items-center justify-center aspect-video" data-aos="fade-up"
-                data-aos-delay="{{ $i * 50 }}">
-                <span class="text-gray-400 text-sm">Partenaire {{ $i }}</span>
-        </div>
-        @endfor
-    </div>
+        <div class="relative overflow-hidden mb-16" data-aos="fade-up">
+            @if($partners->count() > 0)
+            <div class="flex {{ $partners->count() >= 6 ? 'animate-scroll' : 'justify-center' }} whitespace-nowrap">
+                <!-- First set of logos -->
+                <div class="flex space-x-12 items-center mx-6">
+                    @foreach($partners as $partner)
+                    <div
+                        class="flex-shrink-0 bg-gray-50 rounded-xl p-4 flex items-center justify-center w-48 h-24 shadow-sm hover:shadow-md transition-shadow grayscale hover:grayscale-0">
+                        <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
+                            class="max-w-full max-h-full object-contain">
+                    </div>
+                    @endforeach
+                </div>
 
-    <div class="text-center mt-12" data-aos="fade-up">
-        <p class="text-gray-600 mb-4">Vous souhaitez devenir partenaire ?</p>
-        <a href="{{ route('contact') }}"
-            class="inline-flex items-center text-primary-600 font-semibold hover:underline">
-            Contactez-nous
-            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
-                </path>
-            </svg>
-        </a>
-    </div>
+                @if($partners->count() >= 6)
+                <!-- Duplicate set for infinite loop (only if enough items) -->
+                <div class="flex space-x-12 items-center mx-6">
+                    @foreach($partners as $partner)
+                    <div
+                        class="flex-shrink-0 bg-gray-50 rounded-xl p-4 flex items-center justify-center w-48 h-24 shadow-sm hover:shadow-md transition-shadow grayscale hover:grayscale-0">
+                        <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
+                            class="max-w-full max-h-full object-contain">
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+            @else
+            <div class="text-center text-gray-500 italic">
+                <p>Devenez notre premier partenaire institutionnel !</p>
+            </div>
+            @endif
+        </div>
+
+        <!-- Organization Value Proposition Block -->
+        <div class="mt-24 mb-16" data-aos="fade-up">
+            <div
+                class="bg-gradient-to-br from-primary-900 to-primary-800 rounded-3xl overflow-hidden shadow-2xl relative">
+                <!-- Decorative background elements -->
+                <div
+                    class="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-primary-700 rounded-full opacity-20 blur-3xl">
+                </div>
+                <div
+                    class="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-primary-600 rounded-full opacity-20 blur-3xl">
+                </div>
+
+                <div class="px-8 py-16 md:px-16 md:py-20 relative z-10">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-6">Pourquoi rejoindre Brillio en
+                            tant qu'organisation ?</h2>
+                        <p class="text-primary-100 text-lg max-w-2xl mx-auto">Offrez à vos membres un accompagnement
+                            d'élite et transformez votre impact grâce à une plateforme conçue pour l'excellence
+                            institutionnelle.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                        <!-- Feature 1 -->
+                        <div
+                            class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all group">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-bold mb-2">Suivi en temps réel</h3>
+                            <p class="text-primary-100 text-sm">Monitorez la progression de vos jeunes et l'activité de
+                                vos mentors sur un tableau de bord unifié.</p>
+                        </div>
+
+                        <!-- Feature 2 -->
+                        <div
+                            class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all group">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-bold mb-2">Gestion des Crédits</h3>
+                            <p class="text-primary-100 text-sm">Distribuez facilement des crédits de mentorat à vos
+                                membres pour financer leurs séances de coaching.</p>
+                        </div>
+
+                        <!-- Feature 3 -->
+                        <div
+                            class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all group">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-bold mb-2">Marque Blanche</h3>
+                            <p class="text-primary-100 text-sm">Proposez une expérience 100% à vos couleurs avec votre
+                                propre logo, domaine et identité visuelle.</p>
+                        </div>
+
+                        <!-- Feature 4 -->
+                        <div
+                            class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 hover:bg-white/15 transition-all group">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-bold mb-2">Rapports d'Impact</h3>
+                            <p class="text-primary-100 text-sm">Générez des rapports détaillés pour mesurer concrètement
+                                l'évolution et la réussite de vos programmes.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
+                        <a href="{{ route('organization.register') }}"
+                            class="px-10 py-5 bg-white text-primary-900 font-extrabold rounded-full hover:bg-primary-50 hover:shadow-xl transition-all transform hover:-translate-y-1 text-center w-full sm:w-auto">
+                            Rejoindre en tant qu'organisation
+                        </a>
+                        <a href="{{ route('contact') }}"
+                            class="px-10 py-5 border-2 border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all text-center w-full sm:w-auto group">
+                            Demander une démo
+                            <svg class="w-5 h-5 ml-2 inline-block transition-transform group-hover:translate-x-1"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3">
+                                </path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            @keyframes scroll {
+                0% {
+                    transform: translateX(0);
+                }
+
+                100% {
+                    transform: translateX(-50%);
+                }
+            }
+
+            .animate-scroll {
+                display: flex;
+                width: max-content;
+                animation: scroll 30s linear infinite;
+            }
+
+            .animate-scroll:hover {
+                animation-play-state: paused;
+            }
+        </style>
     </div>
 </section>
 

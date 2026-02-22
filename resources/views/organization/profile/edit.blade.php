@@ -195,19 +195,75 @@
                                 </div>
                             </div>
 
+                            <!-- Success Banner for Domain Update -->
+                            @if(session('domain_updated'))
+                            <div
+                                class="mb-8 bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg shadow-sm animate-pulse-subtle">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-sm font-bold text-green-800 uppercase tracking-wide">
+                                            Félicitations ! Votre espace est prêt</h3>
+                                        <div class="mt-2 text-sm text-green-700">
+                                            <p>Votre organisation est désormais accessible via votre propre lien
+                                                personnalisé. Vous pouvez dès à présent l'utiliser pour inviter vos
+                                                membres.</p>
+                                        </div>
+                                        <div class="mt-4">
+                                            <a href="{{ session('new_url') }}" target="_blank"
+                                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-all">
+                                                Accéder à mon nouvel espace
+                                                <svg class="ml-2 -mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                        <p class="mt-3 text-xs text-green-600 italic">* Vous pourriez avoir besoin de
+                                            vous reconnecter sur la nouvelle URL pour des raisons de sécurité.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+
                             <div>
                                 <label for="custom_domain" class="block text-sm font-medium text-gray-700">Alias d'URL
-                                    personnalisé (Ex: mondomaine.brillio.africa)</label>
-                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    personnalisé (Ex: mondomaine.{{ parse_url(config('app.url'), PHP_URL_HOST) ??
+                                    'brillio.africa' }})</label>
+                                <div class="mt-1 flex rounded-md shadow-sm relative">
                                     <input type="text" name="custom_domain" id="custom_domain"
-                                        value="{{ old('custom_domain', str_replace('.brillio.africa', '', $organization->custom_domain)) }}"
+                                        value="{{ old('custom_domain', str_replace('.' . (parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa'), '', $organization->custom_domain)) }}"
                                         class="focus:ring-organization-500 focus:border-organization-500 flex-1 block w-full sm:text-sm border-gray-300 rounded-none rounded-l-md"
-                                        placeholder="mondomaine">
+                                        placeholder="mondomaine" autocomplete="off">
                                     <span
                                         class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                                        .brillio.africa
+                                        .{{ parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa' }}
                                     </span>
                                 </div>
+
+                                <!-- Availability Indicator -->
+                                <div id="domain-checker-feedback" class="mt-2 text-xs hidden flex items-center">
+                                    <span id="checker-spinner" class="mr-2 hidden">
+                                        <svg class="animate-spin h-3 w-3 text-gray-400"
+                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
+                                    </span>
+                                    <span id="checker-status-text"></span>
+                                </div>
+
                                 <p class="mt-2 text-xs text-gray-500">Laissez vide pour utiliser l'URL par défaut de
                                     Brillio.</p>
                                 @error('custom_domain')
@@ -274,7 +330,58 @@
                 }
             }
 
-            reader.readAsDataURfiles[0]);
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Domain availability check
+    const domainInput = document.getElementById('custom_domain');
+    const feedbackText = document.getElementById('checker-status-text');
+    const feedbackContainer = document.getElementById('domain-checker-feedback');
+    const spinner = document.getElementById('checker-spinner');
+    let debounceTimer;
+
+    if (domainInput) {
+        domainInput.addEventListener('input', function () {
+            const domain = this.value.trim();
+
+            clearTimeout(debounceTimer);
+
+            if (domain.length < 2) {
+                feedbackContainer.classList.add('hidden');
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                checkDomain(domain);
+            }, 500);
+        });
+    }
+
+    async function checkDomain(domain) {
+        feedbackContainer.classList.remove('hidden');
+        spinner.classList.remove('hidden');
+        feedbackText.innerText = 'Vérification...';
+        feedbackText.className = 'text-gray-500';
+
+        try {
+            const response = await fetch(`{{ route('organization.profile.check-domain') }}?domain=${encodeURIComponent(domain)}`);
+            const data = await response.json();
+
+            spinner.classList.add('hidden');
+
+            if (data.available) {
+                feedbackText.innerText = data.message;
+                feedbackText.className = 'text-green-600 font-medium';
+            } else {
+                feedbackText.innerText = data.message;
+                feedbackText.className = 'text-red-500 font-medium';
+            }
+        } catch (error) {
+            spinner.classList.add('hidden');
+            feedbackText.innerText = 'Erreur lors de la vérification.';
+            feedbackText.className = 'text-red-500';
+            console.error('Domain check error:', error);
         }
     }
 </script>
