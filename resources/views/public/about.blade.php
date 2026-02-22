@@ -506,64 +506,78 @@
             </h2>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
-            <!-- TODO: Ajouter logos des partenaires -->
-            @for ($i = 1; $i <= 6; $i++) <div
-                class="bg-gray-100 rounded-xl p-6 flex items-center justify-center aspect-video" data-aos="fade-up"
-                data-aos-delay="{{ $i * 50 }}">
-                <span class="text-gray-400 text-sm">Partenaire {{ $i }}</span>
+        <div class="relative overflow-hidden mb-16" data-aos="fade-up">
+            @if($partners->count() > 0)
+            <div class="flex animate-scroll whitespace-nowrap">
+                <!-- First set of logos -->
+                <div class="flex space-x-12 items-center mx-6">
+                    @foreach($partners as $partner)
+                    <div
+                        class="flex-shrink-0 bg-gray-50 rounded-xl p-4 flex items-center justify-center w-48 h-24 shadow-sm hover:shadow-md transition-shadow grayscale hover:grayscale-0">
+                        <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
+                            class="max-w-full max-h-full object-contain">
+                    </div>
+                    @endforeach
+                </div>
+                <!-- Duplicate set for infinite loop -->
+                <div class="flex space-x-12 items-center mx-6">
+                    @foreach($partners as $partner)
+                    <div
+                        class="flex-shrink-0 bg-gray-50 rounded-xl p-4 flex items-center justify-center w-48 h-24 shadow-sm hover:shadow-md transition-shadow grayscale hover:grayscale-0">
+                        <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
+                            class="max-w-full max-h-full object-contain">
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @else
+            <div class="text-center text-gray-500 italic">
+                <p>Devenez notre premier partenaire institutionnel !</p>
+            </div>
+            @endif
         </div>
-        @endfor
-    </div>
 
-    <div class="text-center mt-12" data-aos="fade-up">
-        <p class="text-gray-600 mb-4">Vous souhaitez devenir partenaire ?</p>
-        <a href="{{ route('contact') }}"
-            class="inline-flex items-center text-primary-600 font-semibold hover:underline">
-            Contactez-nous
-            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
-                </path>
-            </svg>
-        </a>
-    </div>
-    </div>
-</section>
-
-<!-- CTA Section -->
-<section class="py-20 gradient-hero relative overflow-hidden">
-    <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-20 -left-40 w-96 h-96 bg-secondary-500/20 rounded-full blur-3xl"></div>
-    </div>
-
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="max-w-3xl mx-auto text-center text-white">
-            <h2 class="text-3xl sm:text-4xl font-bold mb-6" data-aos="fade-up">
-                Rejoins le mouvement
-            </h2>
-            <p class="text-xl text-white/90 mb-8" data-aos="fade-up" data-aos-delay="100">
-                Télécharge Brillio et fais partie des milliers de jeunes africains qui construisent leur avenir.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
-                <a href="{{ route('home') }}#telecharger"
-                    class="px-8 py-4 bg-white text-primary-600 font-bold rounded-full hover:bg-gray-100 hover:shadow-xl transition-all duration-300">
-                    Télécharger l'app
+        <div class="text-center mt-12" data-aos="fade-up">
+            <p class="text-gray-600 mb-8">Vous souhaitez devenir partenaire ?</p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
+                <a href="{{ route('organization.register') }}"
+                    class="px-8 py-4 bg-primary-600 text-white font-bold rounded-full hover:bg-primary-700 hover:shadow-lg transition-all transform hover:-translate-y-1">
+                    Inscrivez-vous en tant qu'organisation
+                    <svg class="w-5 h-5 ml-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                        </path>
+                    </svg>
                 </a>
-                <a href="{{ route('contact') }}"
-                    class="px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/10 transition-all duration-300">
-                    Nous contacter
+                <a href="{{ route('contact') }}" class="text-primary-600 font-semibold hover:underline group">
+                    Contactez-nous
+                    <svg class="w-5 h-5 ml-2 inline-block transition-transform group-hover:translate-x-1" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 8l4 4m0 0l-4 4m4-4H3">
+                        </path>
+                    </svg>
                 </a>
             </div>
         </div>
-    </div>
-</section>
-@endsection }
+
+        <style>
+            @keyframes scroll {
+                0% {
+                    transform: translateX(0);
+                }
+
+                100% {
+                    transform: translateX(-50%);
+                }
+            }
+
             .animate-scroll {
                 display: flex;
                 width: max-content;
                 animation: scroll 30s linear infinite;
             }
+
             .animate-scroll:hover {
                 animation-play-state: paused;
             }
