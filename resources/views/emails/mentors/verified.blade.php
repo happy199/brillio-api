@@ -45,15 +45,8 @@
             background-color: rgba(255, 255, 255, 0.2);
             border-radius: 40px;
             margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .badge-icon svg {
-            width: 48px;
-            height: 48px;
-            color: #ffffff;
+            text-align: center;
+            line-height: 80px;
         }
 
         .content {
@@ -141,7 +134,7 @@
             <div class="header">
                 <div class="badge-icon">
                     <img src="{{ $message->embed(public_path('favicon-32x32.png')) }}" alt="Brillio"
-                        style="width: 48px; height: 48px; border-radius: 50%;">
+                        style="width: 48px; height: 48px; border-radius: 50%; vertical-align: middle; display: inline-block;">
                 </div>
                 <h1>FÉLICITATIONS !</h1>
                 <p style="opacity: 0.9; margin: 0;">Votre excellence est désormais reconnue</p>
