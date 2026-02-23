@@ -1300,22 +1300,4 @@ class WebAuthController extends Controller
 
 }
 
-            'archived_at' => now(),
-            'archived_reason' => 'Acceptation de la promotion au statut Mentor (Automatique).',
-        ]);
-
-        // 2. Déconnecter l'utilisateur s'il est connecté pour éviter les conflits de session
-        if (Auth::check() && Auth::id() === $user->id) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-        }
-
-        // 3. Rediriger directement vers la connexion Mentor via LinkedIn
-        return redirect()->route('auth.mentor.login')
-            ->with('success', 'Félicitations ! Votre compte Jeune a été archivé. Vous pouvez maintenant vous connecter via LinkedIn pour activer votre profil Mentor.');
-    }
-
-}
-
  
