@@ -58,8 +58,8 @@ class WebAuthController extends Controller
                 // Compte jeune trouvé, proposer la migration
                 return $this->handleCrossTypeReactivation($user, 'mentor', $userData, 'linkedin');
             }
-
-            $user->update([
+            // Mettre a jour les infos
+            $updateData = [
                 'auth_provider' => 'linkedin',
                 'provider_id' => $linkedinData['linkedin_id'],
                 'last_login_at' => now(),
@@ -67,7 +67,9 @@ class WebAuthController extends Controller
                 'is_archived' => false,
                 'archived_at' => null,
                 'archived_reason' => null,
-            ]);
+            ];
+
+            $user->update($updateData);
 
             if ($user->wasChanged('is_archived')) {
                 session()->flash('success', 'Bon retour ! Votre profil Mentor a été réactivé automatiquement.');
@@ -148,7 +150,7 @@ class WebAuthController extends Controller
         if ($user->user_type === 'organization') {
             return [
                 'success' => true,
-                'redirect' => route('organization.dashboard')
+                'redirect' => route('organization.dashboard'),
             ];
         }
 
@@ -670,10 +672,9 @@ class WebAuthController extends Controller
             }
 
             // Mettre a jour les infos
-            $user->update([
+            $updateData = [
                 'auth_provider' => $provider,
                 'provider_id' => $userData['id'] ?? $user->provider_id,
-                'profile_photo_url' => $socialData['avatar_url'] ?? $user->profile_photo_url,
                 'last_login_at' => now(),
                 // Reactivation automatique si archive
                 'is_archived' => false,

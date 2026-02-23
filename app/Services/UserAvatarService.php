@@ -22,7 +22,7 @@ class UserAvatarService
                 // Si c'est un mentor, on est très conservateur :
                 // on ne remplace la photo que si la nouvelle URL est LinkedIn ET différente de l'actuelle
                 if ($user->isMentor()) {
-                    if (!$this->isLinkedInUrl($url)) {
+                    if (! $this->isLinkedInUrl($url)) {
                         Log::info('[Safety Check] skipping avatar download for mentor: incoming URL is not LinkedIn', [
                             'user_id' => $user->id,
                             'url' => $url,
@@ -34,8 +34,7 @@ class UserAvatarService
                     if ($user->profile_photo_url === $url) {
                         return $user->profile_photo_path;
                     }
-                }
-                else {
+                } else {
                     // Pour les autres types de comptes, comportement standard :
                     // on ne télécharge que si l'URL a changé
                     if ($user->profile_photo_url === $url) {
@@ -52,7 +51,7 @@ class UserAvatarService
                 $this->deleteCurrentAvatar($user);
 
                 // Générer un nom de fichier unique
-                $filename = 'profile-photos/' . $user->id . '_' . time() . '.jpg';
+                $filename = 'profile-photos/'.$user->id.'_'.time().'.jpg';
 
                 // Stocker la nouvelle image
                 Storage::disk('public')->put($filename, $response->body());
@@ -67,8 +66,7 @@ class UserAvatarService
 
                 return $filename;
             }
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Failed to download avatar via Service', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
 
@@ -114,5 +112,17 @@ class UserAvatarService
             'profile_photo_path' => null,
             'profile_photo_url' => null,
         ])->save();
+    }
+
+    /**
+     * Vérifie si une URL provient de LinkedIn
+     */
+    public function isLinkedInUrl(?string $url): bool
+    {
+        if (! $url) {
+            return false;
+        }
+
+        return str_contains($url, 'licdn.com') || str_contains($url, 'linkedin.com');
     }
 }
