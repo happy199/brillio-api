@@ -144,6 +144,13 @@ class WebAuthController extends Controller
 
         Auth::login($user, true);
 
+        if ($user->user_type === 'organization') {
+            return [
+                'success' => true,
+                'redirect' => route('organization.dashboard')
+            ];
+        }
+
         return [
             'success' => true,
             'redirect' => route('mentor.dashboard')
@@ -418,8 +425,8 @@ class WebAuthController extends Controller
                 session()->flash('success', 'Bon retour ! Votre compte a été réactivé automatiquement.');
             }
 
-            if (!$user->onboarding_completed) {
-                return redirect()->route('jeune.onboarding');
+            if ($user->user_type === 'organization') {
+                 return redirect()->intended(route('organization.dashboard'));
             }
 
             return redirect()->intended(route('jeune.dashboard'));
