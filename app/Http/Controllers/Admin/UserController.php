@@ -86,7 +86,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'user_type' => 'required|in:jeune,mentor,admin',
+            'user_type' => 'required|in:jeune,mentor,admin,organization',
         ]);
 
         $password = Str::random(12);
@@ -118,10 +118,25 @@ class UserController extends Controller
             ]);
         }
         elseif ($userType === 'jeune') {
-            JeuneProfile::create([
-                'user_id' => $user->id,
-                'bio' => 'Compte de démonstration.',
+            if (class_exists('App\Models\JeuneProfile')) {
+                \App\Models\JeuneProfile::create([
+                    'user_id' => $user->id,
+                    'bio' => 'Compte de démonstration.',
+                ]);
+            }
+        }
+        elseif ($userType === 'organization') {
+            Organization::create([
+                'name' => $user->name,
+                'contact_email' => $user->email,
+                'status' => 'active',
+                'subscription_plan' => 'free',
             ]);
+            // Link the user to the organization they just created as a member/admin
+            $org = Organization::where('contact_email', $user->email)->first();
+            if ($org) {
+                $user->organizations()->attach($org->id);
+            }
         }
 
         return redirect()->route('admin.users.index')

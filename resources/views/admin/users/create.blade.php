@@ -55,6 +55,8 @@
                             <option value="jeune" {{ old('user_type')=='jeune' ? 'selected' : '' }}>Jeune (Étudiant)
                             </option>
                             <option value="mentor" {{ old('user_type')=='mentor' ? 'selected' : '' }}>Mentor</option>
+                            <option value="organization" {{ old('user_type')=='organization' ? 'selected' : '' }}>
+                                Organisation</option>
                             <option value="admin" {{ old('user_type')=='admin' ? 'selected' : '' }}>Administrateur
                             </option>
                         </select>
