@@ -2,7 +2,12 @@
     "name": "brillio/api",
     "type": "project",
     "description": "Brillio MVP - API Backend & Admin Dashboard",
-    "keywords": ["laravel", "api", "orientation", "africa"],
+    "keywords": [
+        "laravel",
+        "api",
+        "orientation",
+        "africa"
+    ],
     "license": "proprietary",
     "require": {
         "php": "^8.2",
@@ -12,6 +17,7 @@
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "sentry/sentry-laravel": "^4.12",
         "smalot/pdfparser": "^2.12"
     },
     "require-dev": {
