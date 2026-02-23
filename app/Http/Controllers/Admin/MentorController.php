@@ -198,7 +198,7 @@ class MentorController extends Controller
     {
         $mentor->load(['user', 'roadmapSteps', 'specializationModel']);
 
-        $specializations = \App\Models\Specialization::where('status', 'active')
+        $specializations = \App\Models\Specialization::where('status', 'approved')
             ->orderBy('name')
             ->get();
 
