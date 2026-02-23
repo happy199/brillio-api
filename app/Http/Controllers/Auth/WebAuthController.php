@@ -1278,5 +1278,3 @@ class WebAuthController extends Controller
     }
 
 }
-
- 
