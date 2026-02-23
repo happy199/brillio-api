@@ -367,7 +367,9 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Gestion des utilisateurs
-        Route::resource('users', UserController::class)->only(['index', 'show', 'destroy']);
+        Route::resource('users', UserController::class)->only(['index', 'show', 'create', 'store', 'destroy']);
+        Route::post('users/{user}/link-organization', [UserController::class, 'linkOrganization'])->name('users.link-organization');
+        Route::delete('users/{user}/unlink-organization/{organization}', [UserController::class, 'unlinkOrganization'])->name('users.unlink-organization');
         Route::put('users/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('users.toggle-admin');
         Route::put('users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
         Route::post('users/{user}/propose-promotion', [UserController::class, 'proposePromotion'])->name('users.propose-promotion');

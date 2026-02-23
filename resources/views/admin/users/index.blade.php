@@ -16,6 +16,42 @@
     </a>
 </div>
 
+<div class="mb-6 flex justify-end">
+    <a href="{{ route('admin.users.create') }}"
+        class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
+        <i class="fas fa-plus mr-2"></i> Créer un utilisateur
+    </a>
+</div>
+
+@if(session('generated_password'))
+<div class="mb-6 p-6 bg-green-50 border-2 border-green-200 rounded-2xl shadow-sm">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <i class="fas fa-key text-green-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+            <h3 class="text-lg font-bold text-green-800">Compte créé avec succès !</h3>
+            <div class="mt-2 text-green-700">
+                <p>Voici les identifiants pour le compte de démonstration :</p>
+                <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-3 rounded-lg border border-green-100">
+                        <span class="block text-xs uppercase text-gray-400 font-bold">Email</span>
+                        <span class="text-lg font-mono font-bold text-gray-800">{{ session('generated_email') }}</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-green-100">
+                        <span class="block text-xs uppercase text-gray-400 font-bold">Mot de passe temporaire</span>
+                        <span class="text-lg font-mono font-bold text-gray-800">{{ session('generated_password')
+                            }}</span>
+                    </div>
+                </div>
+                <p class="mt-4 text-sm italic">Note : Copiez bien ces identifiants maintenant, ils ne seront plus
+                    affichés après rafraîchissement de la page.</p>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Filtres -->
 <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
     <form action="{{ route('admin.users.index') }}" method="GET" class="flex flex-wrap gap-4 items-end">
