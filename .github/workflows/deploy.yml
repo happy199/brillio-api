@@ -7,8 +7,35 @@ on:
   workflow_dispatch:
 
 jobs:
+  ci:
+    name: 0. CI (Lint, Audit, Tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite
+          coverage: none
+
+      - name: Install Dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Run Security Audit
+        run: composer audit
+
+      - name: Run Pint (Lint)
+        run: ./vendor/bin/pint --test
+
+      - name: Run Tests
+        run: php artisan test
+
   build-and-push:
     name: 1. Build & Push to Docker Hub
+    needs: ci
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
