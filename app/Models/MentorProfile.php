@@ -186,7 +186,15 @@ class MentorProfile extends Model
      */
     public function getSpecializationLabelAttribute(): string
     {
-        return $this->specialization?->name ?? 'Non définie';
+        if ($this->specializationModel) {
+            return $this->specializationModel->name;
+        }
+
+        if ($this->specialization) {
+            return self::SPECIALIZATIONS[$this->specialization] ?? $this->specialization;
+        }
+
+        return 'Non définie';
     }
 
     /**
