@@ -76,8 +76,12 @@ class WebAuthController extends Controller
                 session()->flash('success', 'Bon retour ! Votre profil Mentor a été réactivé automatiquement.');
             }
 
-            // Mettre a jour le profil mentor avec les donnees LinkedIn
+            // Mettre a jour le profil mentor avec les donnees LinkedIn (Safety check)
             if ($user->mentorProfile) {
+                Log::info('[Safety Check] Updating linkedin_profile_data for mentor', [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]);
                 $user->mentorProfile->update([
                     'linkedin_profile_data' => $linkedinData['raw_data'],
                 ]);
@@ -654,17 +658,32 @@ class WebAuthController extends Controller
                 return $this->handleCrossTypeReactivation($user, 'jeune', $userData, $provider);
             }
 
-            // Mettre a jour les infos
-            $user->update([
+            // Mettre a jour les infos (Safety check pour les mentors)
+            $updateData = [
                 'auth_provider' => $provider,
                 'provider_id' => $userData['id'] ?? $user->provider_id,
-                'profile_photo_url' => $socialData['avatar_url'] ?? $user->profile_photo_url,
                 'last_login_at' => now(),
                 // Reactivation automatique si archive
                 'is_archived' => false,
                 'archived_at' => null,
                 'archived_reason' => null,
-            ]);
+            ];
+
+            // Si c'est un mentor, on ne met à jour l'avatar_url QUE si c'est du LinkedIn
+            $isLinkedIn = $this->avatarService->isLinkedInUrl($socialData['avatar_url'] ?? '');
+            
+            if ($user->isMentor() && !$isLinkedIn && $user->profile_photo_path) {
+                Log::info('[Safety Check] skipping profile_photo_url update for mentor: incoming URL is not LinkedIn (Jeune Login flow)', [
+                    'user_id' => $user->id,
+                    'url' => $socialData['avatar_url'] ?? 'none'
+                ]);
+            } else {
+                if (!empty($socialData['avatar_url'])) {
+                    $updateData['profile_photo_url'] = $socialData['avatar_url'];
+                }
+            }
+
+            $user->update($updateData);
 
             if ($user->wasChanged('is_archived')) {
                 session()->flash('success', 'Bon retour ! Votre compte a été réactivé automatiquement.');
@@ -1206,7 +1225,16 @@ class WebAuthController extends Controller
             $user->auth_provider = $migration->oauth_data['provider'] ?? $user->auth_provider;
             $user->provider_id = $migration->oauth_data['provider_id'] ?? $user->provider_id;
 
-            if (!empty($migration->oauth_data['avatar_url'])) {
+            if ($user->isMentor() && $user->profile_photo_path) {
+                $isLinkedIn = $this->avatarService->isLinkedInUrl($migration->oauth_data['avatar_url'] ?? '');
+                if (!$isLinkedIn) {
+                    Log::info('[Safety Check] skipping profile_photo_url update during migration: incoming URL is not LinkedIn', [
+                        'user_id' => $user->id
+                    ]);
+                } else {
+                    $user->profile_photo_url = $migration->oauth_data['avatar_url'];
+                }
+            } elseif (!empty($migration->oauth_data['avatar_url'])) {
                 $user->profile_photo_url = $migration->oauth_data['avatar_url'];
             }
         }
@@ -1254,6 +1282,24 @@ class WebAuthController extends Controller
         // 1. Archiver le compte actuel (Jeune) pour libérer l'accès
         $user->update([
             'is_archived' => true,
+            'archived_at' => now(),
+            'archived_reason' => 'Acceptation de la promotion au statut Mentor (Automatique).',
+        ]);
+
+        // 2. Déconnecter l'utilisateur s'il est connecté pour éviter les conflits de session
+        if (Auth::check() && Auth::id() === $user->id) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
+        // 3. Rediriger directement vers la connexion Mentor via LinkedIn
+        return redirect()->route('auth.mentor.login')
+            ->with('success', 'Félicitations ! Votre compte Jeune a été archivé. Vous pouvez maintenant vous connecter via LinkedIn pour activer votre profil Mentor.');
+    }
+
+}
+
             'archived_at' => now(),
             'archived_reason' => 'Acceptation de la promotion au statut Mentor (Automatique).',
         ]);
