@@ -46,7 +46,7 @@ class DocumentController extends Controller
      */
     public function download(AcademicDocument $document)
     {
-        if (!Storage::disk('local')->exists($document->file_path)) {
+        if (! Storage::disk('local')->exists($document->file_path)) {
             return back()->with('error', 'Fichier introuvable');
         }
 

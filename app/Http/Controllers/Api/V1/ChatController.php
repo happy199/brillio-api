@@ -20,9 +20,6 @@ class ChatController extends Controller
 
     /**
      * Liste les conversations de l'utilisateur
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function conversations(Request $request): JsonResponse
     {
@@ -48,9 +45,6 @@ class ChatController extends Controller
 
     /**
      * Crée une nouvelle conversation
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function createConversation(Request $request): JsonResponse
     {
@@ -70,10 +64,6 @@ class ChatController extends Controller
 
     /**
      * Récupère les messages d'une conversation
-     *
-     * @param Request $request
-     * @param int $conversationId
-     * @return JsonResponse
      */
     public function messages(Request $request, int $conversationId): JsonResponse
     {
@@ -82,7 +72,7 @@ class ChatController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             return $this->notFound('Conversation non trouvée');
         }
 
@@ -109,9 +99,6 @@ class ChatController extends Controller
 
     /**
      * Envoie un message et reçoit la réponse de l'IA
-     *
-     * @param SendMessageRequest $request
-     * @return JsonResponse
      */
     public function send(SendMessageRequest $request): JsonResponse
     {
@@ -126,7 +113,7 @@ class ChatController extends Controller
                 ->where('user_id', $user->id)
                 ->first();
 
-            if (!$conversation) {
+            if (! $conversation) {
                 return $this->notFound('Conversation non trouvée');
             }
         } else {
@@ -181,10 +168,6 @@ class ChatController extends Controller
 
     /**
      * Supprime une conversation
-     *
-     * @param Request $request
-     * @param int $conversationId
-     * @return JsonResponse
      */
     public function deleteConversation(Request $request, int $conversationId): JsonResponse
     {
@@ -193,7 +176,7 @@ class ChatController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             return $this->notFound('Conversation non trouvée');
         }
 
@@ -204,10 +187,6 @@ class ChatController extends Controller
 
     /**
      * Demande un support humain pour une conversation
-     *
-     * @param Request $request
-     * @param int $conversationId
-     * @return JsonResponse
      */
     public function requestHumanSupport(Request $request, int $conversationId): JsonResponse
     {
@@ -216,7 +195,7 @@ class ChatController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             return $this->notFound('Conversation non trouvée');
         }
 
@@ -256,10 +235,6 @@ class ChatController extends Controller
 
     /**
      * Annule une demande de support humain
-     *
-     * @param Request $request
-     * @param int $conversationId
-     * @return JsonResponse
      */
     public function cancelHumanSupport(Request $request, int $conversationId): JsonResponse
     {
@@ -268,7 +243,7 @@ class ChatController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             return $this->notFound('Conversation non trouvée');
         }
 

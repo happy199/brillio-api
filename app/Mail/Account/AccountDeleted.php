@@ -14,6 +14,7 @@ class AccountDeleted extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+
     public $reason;
 
     /**
@@ -31,7 +32,7 @@ class AccountDeleted extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Suppression de votre compte Brillio",
+            subject: 'Suppression de votre compte Brillio',
         );
     }
 

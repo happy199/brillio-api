@@ -14,6 +14,7 @@ class ContactConfirmation extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+
     public $data;
 
     /**
@@ -31,7 +32,7 @@ class ContactConfirmation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Confirmation de réception de votre message",
+            subject: 'Confirmation de réception de votre message',
         );
     }
 

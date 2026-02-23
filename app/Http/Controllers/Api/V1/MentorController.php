@@ -8,7 +8,6 @@ use App\Http\Requests\Mentor\CreateRoadmapStepRequest;
 use App\Http\Requests\Mentor\UpdateRoadmapStepRequest;
 use App\Models\MentorProfile;
 use App\Models\RoadmapStep;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,9 +18,6 @@ class MentorController extends Controller
 {
     /**
      * Liste des mentors publiés (pour les jeunes)
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -51,7 +47,7 @@ class MentorController extends Controller
         $mentors = $query->paginate($perPage);
 
         return $this->success([
-            'mentors' => $mentors->map(fn($mentor) => $this->formatMentorForList($mentor)),
+            'mentors' => $mentors->map(fn ($mentor) => $this->formatMentorForList($mentor)),
             'pagination' => [
                 'current_page' => $mentors->currentPage(),
                 'last_page' => $mentors->lastPage(),
@@ -63,9 +59,6 @@ class MentorController extends Controller
 
     /**
      * Détail d'un mentor avec sa roadmap complète
-     *
-     * @param int $id
-     * @return JsonResponse
      */
     public function show(int $id): JsonResponse
     {
@@ -74,7 +67,7 @@ class MentorController extends Controller
             ->where('is_published', true)
             ->first();
 
-        if (!$mentor) {
+        if (! $mentor) {
             return $this->notFound('Mentor non trouvé');
         }
 
@@ -85,16 +78,13 @@ class MentorController extends Controller
 
     /**
      * Crée ou met à jour le profil mentor de l'utilisateur connecté
-     *
-     * @param CreateProfileRequest $request
-     * @return JsonResponse
      */
     public function createOrUpdateProfile(CreateProfileRequest $request): JsonResponse
     {
         $user = $request->user();
 
         // Vérifier que l'utilisateur est bien un mentor
-        if (!$user->isMentor()) {
+        if (! $user->isMentor()) {
             return $this->forbidden('Seuls les mentors peuvent créer un profil mentor');
         }
 
@@ -118,21 +108,18 @@ class MentorController extends Controller
 
     /**
      * Récupère le profil mentor de l'utilisateur connecté
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function myProfile(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        if (!$user->isMentor()) {
+        if (! $user->isMentor()) {
             return $this->forbidden('Seuls les mentors ont un profil mentor');
         }
 
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return $this->notFound('Profil mentor non créé');
         }
 
@@ -145,16 +132,13 @@ class MentorController extends Controller
 
     /**
      * Ajoute une étape au parcours
-     *
-     * @param CreateRoadmapStepRequest $request
-     * @return JsonResponse
      */
     public function addRoadmapStep(CreateRoadmapStepRequest $request): JsonResponse
     {
         $user = $request->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return $this->notFound('Créez d\'abord votre profil mentor');
         }
 
@@ -182,23 +166,19 @@ class MentorController extends Controller
 
     /**
      * Met à jour une étape du parcours
-     *
-     * @param UpdateRoadmapStepRequest $request
-     * @param int $stepId
-     * @return JsonResponse
      */
     public function updateRoadmapStep(UpdateRoadmapStepRequest $request, int $stepId): JsonResponse
     {
         $user = $request->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return $this->notFound('Profil mentor non trouvé');
         }
 
         $step = $profile->roadmapSteps()->where('id', $stepId)->first();
 
-        if (!$step) {
+        if (! $step) {
             return $this->notFound('Étape non trouvée');
         }
 
@@ -211,23 +191,19 @@ class MentorController extends Controller
 
     /**
      * Supprime une étape du parcours
-     *
-     * @param Request $request
-     * @param int $stepId
-     * @return JsonResponse
      */
     public function deleteRoadmapStep(Request $request, int $stepId): JsonResponse
     {
         $user = $request->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return $this->notFound('Profil mentor non trouvé');
         }
 
         $step = $profile->roadmapSteps()->where('id', $stepId)->first();
 
-        if (!$step) {
+        if (! $step) {
             return $this->notFound('Étape non trouvée');
         }
 
@@ -238,9 +214,6 @@ class MentorController extends Controller
 
     /**
      * Réorganise les étapes du parcours
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function reorderSteps(Request $request): JsonResponse
     {
@@ -253,7 +226,7 @@ class MentorController extends Controller
         $user = $request->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return $this->notFound('Profil mentor non trouvé');
         }
 
@@ -268,23 +241,20 @@ class MentorController extends Controller
 
     /**
      * Publie ou dépublie le profil mentor
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function publish(Request $request): JsonResponse
     {
         $user = $request->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return $this->notFound('Créez d\'abord votre profil mentor');
         }
 
         // Vérifier que le profil est complet avant publication
         $publish = $request->boolean('publish', true);
 
-        if ($publish && !$profile->isComplete()) {
+        if ($publish && ! $profile->isComplete()) {
             return $this->error(
                 'Votre profil n\'est pas complet. Ajoutez une bio, un poste actuel, une spécialisation et au moins une étape de parcours.',
                 422
@@ -303,8 +273,6 @@ class MentorController extends Controller
 
     /**
      * Liste des spécialisations disponibles
-     *
-     * @return JsonResponse
      */
     public function specializations(): JsonResponse
     {
@@ -362,7 +330,7 @@ class MentorController extends Controller
             'years_of_experience' => $mentor->years_of_experience,
             'is_published' => $mentor->is_published,
             'is_complete' => $mentor->isComplete(),
-            'roadmap' => $mentor->roadmapSteps->map(fn($step) => $this->formatRoadmapStep($step)),
+            'roadmap' => $mentor->roadmapSteps->map(fn ($step) => $this->formatRoadmapStep($step)),
             'created_at' => $mentor->created_at->toISOString(),
             'updated_at' => $mentor->updated_at->toISOString(),
         ];

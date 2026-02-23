@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
-use App\Models\Resource;
-use Illuminate\Http\Request;
-
 use App\Models\Purchase;
+use App\Models\Resource;
 use App\Services\WalletService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ResourceController extends Controller
 {
     protected $walletService;
+
     protected $notificationService;
 
     // MBTI Groups configuration
@@ -21,26 +21,26 @@ class ResourceController extends Controller
             'INTJ' => 'INTJ - Architecte',
             'INTP' => 'INTP - Logicien',
             'ENTJ' => 'ENTJ - Commandant',
-            'ENTP' => 'ENTP - Innovateur'
+            'ENTP' => 'ENTP - Innovateur',
         ],
         'Diplomates' => [
             'INFJ' => 'INFJ - Avocat',
             'INFP' => 'INFP - Médiateur',
             'ENFJ' => 'ENFJ - Protagoniste',
-            'ENFP' => 'ENFP - Inspirateur'
+            'ENFP' => 'ENFP - Inspirateur',
         ],
         'Sentinelles' => [
             'ISTJ' => 'ISTJ - Logisticien',
             'ISFJ' => 'ISFJ - Défenseur',
             'ESTJ' => 'ESTJ - Directeur',
-            'ESFJ' => 'ESFJ - Consul'
+            'ESFJ' => 'ESFJ - Consul',
         ],
         'Explorateurs' => [
             'ISTP' => 'ISTP - Virtuose',
             'ISFP' => 'ISFP - Aventurier',
             'ESTP' => 'ESTP - Entrepreneur',
-            'ESFP' => 'ESFP - Amuseur'
-        ]
+            'ESFP' => 'ESFP - Amuseur',
+        ],
     ];
 
     public function __construct(WalletService $walletService, \App\Services\MentorshipNotificationService $notificationService)
@@ -48,6 +48,7 @@ class ResourceController extends Controller
         $this->walletService = $walletService;
         $this->notificationService = $notificationService;
     }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -160,8 +161,8 @@ class ResourceController extends Controller
 
                 // Vérification spécifique MBTI (Si la ressource est taguée MBTI)
                 // Assumons mbti_types dans le modèle Resource (qui est cast en array)
-                if (!empty($resource->mbti_types) && $userMbti) {
-                    if (!in_array($userMbti, $resource->mbti_types)) {
+                if (! empty($resource->mbti_types) && $userMbti) {
+                    if (! in_array($userMbti, $resource->mbti_types)) {
                         return false;
                     }
                 }
@@ -175,7 +176,7 @@ class ResourceController extends Controller
 
                 // 1. Éducation
                 $targetEducations = $targeting['education_levels'] ?? [];
-                if (!empty($targetEducations)) {
+                if (! empty($targetEducations)) {
                     $criteriaCount++;
                     if ($userEducation && in_array($userEducation, $targetEducations)) {
                         $matches++;
@@ -184,7 +185,7 @@ class ResourceController extends Controller
 
                 // 2. Situation
                 $targetSituations = $targeting['situations'] ?? [];
-                if (!empty($targetSituations)) {
+                if (! empty($targetSituations)) {
                     $criteriaCount++;
                     if ($userSituation && in_array($userSituation, $targetSituations)) {
                         $matches++;
@@ -193,7 +194,7 @@ class ResourceController extends Controller
 
                 // 3. Pays (Matching souple)
                 $targetCountries = $targeting['countries'] ?? [];
-                if (!empty($targetCountries)) {
+                if (! empty($targetCountries)) {
                     $criteriaCount++;
                     if ($userCountry) {
                         foreach ($targetCountries as $country) {
@@ -207,11 +208,11 @@ class ResourceController extends Controller
 
                 // 4. Intérêts (Au moins un commun)
                 $targetInterests = $targeting['interests'] ?? [];
-                if (!empty($targetInterests)) {
+                if (! empty($targetInterests)) {
                     $criteriaCount++;
-                    if (!empty($userInterests)) {
+                    if (! empty($userInterests)) {
                         $commonInterests = array_intersect($targetInterests, $userInterests);
-                        if (!empty($commonInterests)) {
+                        if (! empty($commonInterests)) {
                             $matches++;
                         }
                     }
@@ -221,21 +222,21 @@ class ResourceController extends Controller
                 // Si la ressource a des critères de ciblage, on l'affiche si l'utilisateur matche au moins UN critère fort (Education/Situation)
                 // OU s'il n'y a pas de critère spécifié, c'est pour tout le monde.
 
-                // Ici, on est strict comme avant : si un critère est défini mais ne matche pas, on exclut ? 
+                // Ici, on est strict comme avant : si un critère est défini mais ne matche pas, on exclut ?
                 // La demande : "afficher ou pas dans les suggestion...".
                 // L'ancienne logique excluait si Education ne matchait pas alors que demandé.
                 // Gardons une logique "Si ciblé, doit matcher".
 
                 // Vérification Niveau d'études
-                if (!empty($targetEducations) && $userEducation && !in_array($userEducation, $targetEducations)) {
+                if (! empty($targetEducations) && $userEducation && ! in_array($userEducation, $targetEducations)) {
                     return false;
                 }
                 // Vérification Situation
-                if (!empty($targetSituations) && $userSituation && !in_array($userSituation, $targetSituations)) {
+                if (! empty($targetSituations) && $userSituation && ! in_array($userSituation, $targetSituations)) {
                     return false;
                 }
                 // Vérification Pays
-                if (!empty($targetCountries) && $userCountry) {
+                if (! empty($targetCountries) && $userCountry) {
                     $match = false;
                     foreach ($targetCountries as $country) {
                         if (str_contains(strtolower($userCountry), strtolower($country))) {
@@ -243,12 +244,13 @@ class ResourceController extends Controller
                             break;
                         }
                     }
-                    if (!$match)
+                    if (! $match) {
                         return false;
+                    }
                 }
 
                 // Vérification Intérêts
-                if (!empty($targetInterests) && !empty($userInterests)) {
+                if (! empty($targetInterests) && ! empty($userInterests)) {
                     $commonInterests = array_intersect($targetInterests, $userInterests);
                     if (empty($commonInterests)) {
                         return false;
@@ -277,14 +279,14 @@ class ResourceController extends Controller
             'resources' => $paginatedResources,
             'user' => $user,
             'currentFilter' => $filterMode,
-            'mbtiGroups' => $this->mbtiGroups
+            'mbtiGroups' => $this->mbtiGroups,
         ]);
     }
 
     public function show(Resource $resource)
     {
         // Vérification basique
-        if (!$resource->is_published || !$resource->is_validated) {
+        if (! $resource->is_published || ! $resource->is_validated) {
             abort(404);
         }
 
@@ -296,10 +298,10 @@ class ResourceController extends Controller
         // Enregistrer la vue unique (si nécessaire pour la logique "déjà vu")
         // Pour les payantes, on peut aussi enregistrer mais "l'acquisition" est définie par l'achat.
         // La demande : "consultée car gratuite".
-        if (!$resource->is_premium) {
+        if (! $resource->is_premium) {
             \App\Models\ResourceView::firstOrCreate([
                 'user_id' => $user->id,
-                'resource_id' => $resource->id
+                'resource_id' => $resource->id,
             ]);
         }
 
@@ -314,7 +316,7 @@ class ResourceController extends Controller
                 ->where('item_id', $resource->id)
                 ->exists();
 
-            if (!$hasPurchased) {
+            if (! $hasPurchased) {
                 $isLocked = true;
                 // Calcul du coût en crédits
                 // Prix Ressource (FCFA) / Prix Crédit Jeune (FCFA)
@@ -338,11 +340,11 @@ class ResourceController extends Controller
     public function unlock(Request $request, Resource $resource)
     {
         // Sécurité : Vérifier que la ressource est toujours valide et publiée
-        if (!$resource->is_published || !$resource->is_validated) {
+        if (! $resource->is_published || ! $resource->is_validated) {
             return redirect()->route('jeune.resources.index')->with('error', 'Cette ressource n\'est plus disponible.');
         }
 
-        if (!$resource->is_premium) {
+        if (! $resource->is_premium) {
             return back();
         }
 
@@ -364,7 +366,7 @@ class ResourceController extends Controller
 
         if ($user->credits_balance < $unlockCost) {
             // Rediriger vers le portefeuille si pas assez de crédits
-            return redirect()->route('jeune.wallet.index')->withErrors(['credits' => 'Solde insuffisant pour débloquer cette ressource (' . $unlockCost . ' crédits nécessaires).']);
+            return redirect()->route('jeune.wallet.index')->withErrors(['credits' => 'Solde insuffisant pour débloquer cette ressource ('.$unlockCost.' crédits nécessaires).']);
         }
 
         try {
@@ -418,7 +420,7 @@ class ResourceController extends Controller
             return back()->with('success', 'Ressource débloquée avec succès !');
 
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => "Erreur lors du déblocage : " . $e->getMessage()]);
+            return back()->withErrors(['error' => 'Erreur lors du déblocage : '.$e->getMessage()]);
         }
     }
 }

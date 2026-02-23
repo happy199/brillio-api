@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class AccountController extends Controller
 {
@@ -33,7 +32,7 @@ class AccountController extends Controller
     {
         $request->validate([
             'confirmation_code' => 'required|string',
-            'reason' => 'nullable|string|max:500'
+            'reason' => 'nullable|string|max:500',
         ]);
 
         $user = Auth::user();

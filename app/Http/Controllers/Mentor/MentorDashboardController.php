@@ -97,7 +97,7 @@ class MentorDashboardController extends Controller
         \Log::info('🛡️ Photo safety check - Before updateProfile', [
             'user_id' => $user->id,
             'photo_path' => $user->profile_photo_path,
-            'photo_url' => $user->profile_photo_url
+            'photo_url' => $user->profile_photo_url,
         ]);
 
         // Validation pour la publication
@@ -106,7 +106,7 @@ class MentorDashboardController extends Controller
             $hasPhoto = $user->profile_photo_path || $user->profile_photo_url;
             $isUploading = $request->hasFile('profile_photo');
 
-            if (!$hasPhoto && !$isUploading) {
+            if (! $hasPhoto && ! $isUploading) {
                 return back()->withErrors(['is_published' => 'Vous devez ajouter une photo de profil pour rendre votre profil visible aux jeunes.'])->withInput();
             }
         }
@@ -125,7 +125,7 @@ class MentorDashboardController extends Controller
         }
 
         // Gérer la spécialisation
-        if ($validated['specialization_id'] === 'new' && !empty($validated['new_specialization_name'])) {
+        if ($validated['specialization_id'] === 'new' && ! empty($validated['new_specialization_name'])) {
             // Vérifier si une spécialisation avec ce nom existe déjà
             $existingSpec = \App\Models\Specialization::where('name', $validated['new_specialization_name'])
                 ->orWhere('slug', Str::slug($validated['new_specialization_name']))
@@ -138,7 +138,7 @@ class MentorDashboardController extends Controller
                 if ($existingSpec->status === 'pending') {
                     $message = 'Votre profil a été mis à jour. Ce domaine est déjà en attente de validation par un administrateur.';
                 } elseif ($existingSpec->status === 'active') {
-                    $message = 'Votre profil a été mis à jour. Le domaine "' . $existingSpec->name . '" a été sélectionné.';
+                    $message = 'Votre profil a été mis à jour. Le domaine "'.$existingSpec->name.'" a été sélectionné.';
                 } else {
                     $message = 'Votre profil a été mis à jour.';
                 }
@@ -184,7 +184,7 @@ class MentorDashboardController extends Controller
         \Log::info('🛡️ Photo safety check - After updateProfile', [
             'user_id' => $user->id,
             'photo_path' => $user->profile_photo_path,
-            'photo_url' => $user->profile_photo_url
+            'photo_url' => $user->profile_photo_url,
         ]);
 
         return back()->with('success', $message);
@@ -198,7 +198,7 @@ class MentorDashboardController extends Controller
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             $profile = MentorProfile::create(['user_id' => $user->id]);
         }
 
@@ -250,7 +250,7 @@ class MentorDashboardController extends Controller
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return response()->json(['error' => 'Profile not found'], 404);
         }
 
@@ -277,7 +277,7 @@ class MentorDashboardController extends Controller
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             $profile = MentorProfile::create(['user_id' => $user->id]);
         }
 
@@ -288,8 +288,8 @@ class MentorDashboardController extends Controller
             'step_type' => 'work',
             'title' => $validated['title'],
             'institution_company' => $validated['organization'] ?? null,
-            'start_date' => !empty($validated['year_start']) ? $validated['year_start'] . '-01-01' : null,
-            'end_date' => !empty($validated['year_end']) ? $validated['year_end'] . '-12-31' : null,
+            'start_date' => ! empty($validated['year_start']) ? $validated['year_start'].'-01-01' : null,
+            'end_date' => ! empty($validated['year_end']) ? $validated['year_end'].'-12-31' : null,
             'description' => $validated['description'] ?? null,
             'position' => $maxPosition + 1,
         ]);
@@ -315,7 +315,7 @@ class MentorDashboardController extends Controller
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return response()->json(['error' => 'Profile not found'], 404);
         }
 
@@ -323,8 +323,8 @@ class MentorDashboardController extends Controller
         $roadmapStep->update([
             'title' => $validated['title'],
             'institution_company' => $validated['organization'] ?? null,
-            'start_date' => !empty($validated['year_start']) ? $validated['year_start'] . '-01-01' : null,
-            'end_date' => !empty($validated['year_end']) ? $validated['year_end'] . '-12-31' : null,
+            'start_date' => ! empty($validated['year_start']) ? $validated['year_start'].'-01-01' : null,
+            'end_date' => ! empty($validated['year_end']) ? $validated['year_end'].'-12-31' : null,
             'description' => $validated['description'] ?? null,
         ]);
 
@@ -339,7 +339,7 @@ class MentorDashboardController extends Controller
         $user = auth()->user();
         $profile = $user->mentorProfile;
 
-        if (!$profile) {
+        if (! $profile) {
             return response()->json(['error' => 'Profile not found'], 404);
         }
 
@@ -361,10 +361,10 @@ class MentorDashboardController extends Controller
         \Log::info('🛡️ Photo safety check - Before LinkedIn Import', [
             'user_id' => $user->id,
             'photo_path' => $user->profile_photo_path,
-            'photo_url' => $user->profile_photo_url
+            'photo_url' => $user->profile_photo_url,
         ]);
 
-        if (!$profile) {
+        if (! $profile) {
             $profile = MentorProfile::create(['user_id' => $user->id]);
         }
 
@@ -375,7 +375,7 @@ class MentorDashboardController extends Controller
 
             // Stocker temporairement le PDF
             $pdfPath = $request->file('pdf')->store('temp-linkedin-pdfs', 'local');
-            $fullPath = storage_path('app/' . $pdfPath);
+            $fullPath = storage_path('app/'.$pdfPath);
 
             // Parser le PDF
             $profileData = $parserService->parsePdf($fullPath);
@@ -387,7 +387,7 @@ class MentorDashboardController extends Controller
             $mismatchContext = [];
 
             // 1. Vérification par Email
-            if (!empty($profileData['contact']['email'])) {
+            if (! empty($profileData['contact']['email'])) {
                 $pdfEmail = strtolower(trim($profileData['contact']['email']));
                 $userEmail = strtolower(trim($user->email));
 
@@ -400,7 +400,7 @@ class MentorDashboardController extends Controller
             }
 
             // 2. Vérification par Nom (si email ne correspond pas ou est absent)
-            if (!$isOwner && !empty($profileData['name'])) {
+            if (! $isOwner && ! empty($profileData['name'])) {
                 $pdfName = strtolower(trim($profileData['name']));
                 $userName = strtolower(trim($user->name));
 
@@ -414,23 +414,23 @@ class MentorDashboardController extends Controller
             }
 
             // Si aucune vérification n'a fonctionné
-            if (!$isOwner) {
+            if (! $isOwner) {
                 // Supprimer le fichier temporaire
                 Storage::disk('local')->delete($pdfPath);
 
                 \Log::warning('LinkedIn import ownership mismatch', [
                     'user_id' => $user->id,
-                    'context' => $mismatchContext
+                    'context' => $mismatchContext,
                 ]);
 
                 $errorMessage = 'Ce profil LinkedIn ne semble pas vous appartenir.';
                 if (isset($mismatchContext['name'])) {
-                    $errorMessage .= ' Le nom dans le PDF (' . $profileData['name'] . ') ne correspond pas à votre nom (' . $user->name . ').';
+                    $errorMessage .= ' Le nom dans le PDF ('.$profileData['name'].') ne correspond pas à votre nom ('.$user->name.').';
                 }
 
                 return response()->json([
                     'success' => false,
-                    'error' => $errorMessage
+                    'error' => $errorMessage,
                 ], 422);
             }
 
@@ -446,13 +446,11 @@ class MentorDashboardController extends Controller
                 $profile->roadmapSteps()->delete();
             }
 
-
-
             // Calculer les années d'expérience
             $yearsOfExperience = $this->calculateYearsOfExperience($profileData['experience']);
 
             // Récupérer la dernière expérience (la plus récente)
-            $latestExperience = !empty($profileData['experience']) ? $profileData['experience'][0] : null;
+            $latestExperience = ! empty($profileData['experience']) ? $profileData['experience'][0] : null;
 
             // Sauvegarder les données
             // NOTE: On ne touche JAMAIS aux champs de photo de l'utilisateur ici (profile_photo_path, profile_photo_url)
@@ -473,7 +471,7 @@ class MentorDashboardController extends Controller
                 // Bio = headline (on préserve si vide)
                 'bio' => ($profileData['headline'] ?? null) ?: $profile->bio,
 
-                'skills' => (!empty($profileData['skills'])) ? $profileData['skills'] : $profile->skills,
+                'skills' => (! empty($profileData['skills'])) ? $profileData['skills'] : $profile->skills,
 
                 // Nouveaux mappings - formatage robuste des URLs
                 'linkedin_url' => $this->formatUrl(($profileData['contact']['linkedin'] ?? null) ?: $profile->linkedin_url),
@@ -484,21 +482,21 @@ class MentorDashboardController extends Controller
             // Importer les expériences comme étapes
             $stepPosition = 0;
 
-            if (!empty($profileData['experience'])) {
+            if (! empty($profileData['experience'])) {
                 foreach ($profileData['experience'] as $exp) {
                     $startDate = null;
                     $endDate = null;
 
                     // 1. Utiliser les dates fournies par le parser si valides
-                    if (!empty($exp['start_date'])) {
+                    if (! empty($exp['start_date'])) {
                         // S'assurer que le format est YYYY-MM-DD
-                        $startDate = strlen($exp['start_date']) === 4 ? $exp['start_date'] . '-01-01' : $exp['start_date'];
+                        $startDate = strlen($exp['start_date']) === 4 ? $exp['start_date'].'-01-01' : $exp['start_date'];
                     }
 
                     if (array_key_exists('end_date', $exp)) {
-                        if (!empty($exp['end_date'])) {
+                        if (! empty($exp['end_date'])) {
                             // S'assurer que le format est YYYY-MM-DD
-                            $endDate = strlen($exp['end_date']) === 4 ? $exp['end_date'] . '-12-31' : $exp['end_date'];
+                            $endDate = strlen($exp['end_date']) === 4 ? $exp['end_date'].'-12-31' : $exp['end_date'];
                         } else {
                             // end_date est explictement vide ou null (Present)
                             $endDate = null;
@@ -509,8 +507,8 @@ class MentorDashboardController extends Controller
                         $durationYears = $exp['duration_years'] ?? 0;
 
                         if ($durationYears > 0) {
-                            $endDate = $currentYear . '-12-31';
-                            $startDate = ($currentYear - $durationYears) . '-01-01';
+                            $endDate = $currentYear.'-12-31';
+                            $startDate = ($currentYear - $durationYears).'-01-01';
                         }
                     }
 
@@ -527,15 +525,15 @@ class MentorDashboardController extends Controller
             }
 
             // Importer les formations comme étapes
-            if (!empty($profileData['education'])) {
+            if (! empty($profileData['education'])) {
                 foreach ($profileData['education'] as $edu) {
                     $profile->roadmapSteps()->create([
                         'step_type' => 'education',
                         'title' => $edu['degree'] ?? 'Formation',
                         'institution_company' => $edu['school'] ?? null,
                         'description' => 'Formation académique',
-                        'start_date' => !empty($edu['year_start']) ? $edu['year_start'] . '-01-01' : null,
-                        'end_date' => !empty($edu['year_end']) ? $edu['year_end'] . '-12-31' : null,
+                        'start_date' => ! empty($edu['year_start']) ? $edu['year_start'].'-01-01' : null,
+                        'end_date' => ! empty($edu['year_end']) ? $edu['year_end'].'-12-31' : null,
                         'position' => $stepPosition++,
                     ]);
                 }
@@ -577,21 +575,21 @@ class MentorDashboardController extends Controller
                     'experience_count' => count($profileData['experience'] ?? []),
                     'skills_count' => count($profileData['skills'] ?? []),
                     'import_count' => $profile->linkedin_import_count,
-                    'years_of_experience' => $yearsOfExperience
+                    'years_of_experience' => $yearsOfExperience,
                 ],
                 'warnings' => $warnings,
                 'missing_fields' => $missingFields,
-                'suggestions' => !empty($suggestions) ? [
+                'suggestions' => ! empty($suggestions) ? [
                     'message' => 'Certaines données sont manquantes. Complétez votre profil :',
-                    'actions' => $suggestions
-                ] : null
+                    'actions' => $suggestions,
+                ] : null,
             ]);
 
             // 📸 LOG DE SÉCURITÉ : On trace l'état des photos après l'import
             \Log::info('🛡️ Photo safety check - After LinkedIn Import (Success)', [
                 'user_id' => $user->id,
                 'photo_path' => $user->profile_photo_path,
-                'photo_url' => $user->profile_photo_url
+                'photo_url' => $user->profile_photo_url,
             ]);
 
             return $response;
@@ -599,19 +597,19 @@ class MentorDashboardController extends Controller
         } catch (\Throwable $e) {
             \Log::error('LinkedIn PDF import error', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // 📸 LOG DE SÉCURITÉ : On trace même en cas d'erreur
             \Log::warning('🛡️ Photo safety check - After LinkedIn Import (Failed)', [
                 'user_id' => $user->id,
                 'photo_path' => $user->profile_photo_path,
-                'photo_url' => $user->profile_photo_url
+                'photo_url' => $user->profile_photo_url,
             ]);
 
             return response()->json([
                 'success' => false,
-                'error' => 'Erreur critique lors du parsing : ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()
+                'error' => 'Erreur critique lors du parsing : '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine(),
             ], 500);
         }
     }
@@ -628,9 +626,9 @@ class MentorDashboardController extends Controller
         $url = trim($url);
 
         // Si l'URL ne commence pas par http:// ou https://
-        if (!preg_match('/^https?:\/\//i', $url)) {
+        if (! preg_match('/^https?:\/\//i', $url)) {
             // Si elle commence par www., ou juste par un nom de domaine
-            return 'https://' . ltrim($url, '/');
+            return 'https://'.ltrim($url, '/');
         }
 
         return $url;

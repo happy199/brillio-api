@@ -17,8 +17,11 @@ class RoadmapStep extends Model
      * Types d'étapes disponibles
      */
     public const TYPE_EDUCATION = 'education';
+
     public const TYPE_WORK = 'work';
+
     public const TYPE_CERTIFICATION = 'certification';
+
     public const TYPE_ACHIEVEMENT = 'achievement';
 
     public const STEP_TYPES = [

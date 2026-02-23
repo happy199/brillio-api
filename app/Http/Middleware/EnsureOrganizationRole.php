@@ -17,7 +17,7 @@ class EnsureOrganizationRole
     {
         $user = auth()->user();
 
-        if (!$user || $user->user_type !== 'organization') {
+        if (! $user || $user->user_type !== 'organization') {
             abort(403, 'Accès non autorisé.');
         }
 
@@ -28,7 +28,7 @@ class EnsureOrganizationRole
             return $next($request);
         }
 
-        if (!in_array($userRole, $roles)) {
+        if (! in_array($userRole, $roles)) {
             abort(403, 'Vous n\'avez pas les permissions nécessaires pour accéder à cette section.');
         }
 

@@ -70,11 +70,10 @@ class WalletController extends Controller
             'purchased' => $totalCreditsPurchased, // Cumulé
             'earned' => $totalCreditsEarned,     // Cumulé
             'spent' => $totalExpenses,           // Cumulé
-            'withdrawn' => $totalWithdrawn       // Cumulé
+            'withdrawn' => $totalWithdrawn,       // Cumulé
         ];
 
         // Breakdown des crédits restants par source
-
 
         // Valeur en FCFA des revenus (Basé sur le prix de rachat/vente actuel ou une valeur fixe)
         // Ici on estime la valeur basée sur le prix d'achat mentor, ou un taux de reversement spécifique
@@ -137,9 +136,9 @@ class WalletController extends Controller
                 'credits_amount' => $credits,
                 'metadata' => [
                     'user_type' => 'mentor',
-                    'user_name' => $user->prenom . ' ' . $user->nom,
+                    'user_name' => $user->prenom.' '.$user->nom,
                     'pack_id' => $pack->id,
-                    'pack_name' => $pack->name
+                    'pack_name' => $pack->name,
                 ],
             ]);
 
@@ -161,7 +160,7 @@ class WalletController extends Controller
                     'user_id' => $user->id,
                     'user_type' => 'mentor',
                     'credits' => $credits,
-                    'pack_id' => $pack->id
+                    'pack_id' => $pack->id,
                 ],
                 returnUrl: route('payments.callback')
             );
@@ -200,10 +199,11 @@ class WalletController extends Controller
         $user = Auth::user();
 
         // Check if coupon exists and is valid for this user
-        if (!$coupon || !$coupon->isValid($user)) {
+        if (! $coupon || ! $coupon->isValid($user)) {
             if ($coupon && $coupon->hasBeenUsedBy($user)) {
                 return back()->withErrors(['code' => 'Vous avez déjà utilisé ce coupon.']);
             }
+
             return back()->withErrors(['code' => 'Ce coupon est invalide ou expiré.']);
         }
 
@@ -234,6 +234,7 @@ class WalletController extends Controller
                 'coupon_code' => $code,
                 'error' => $e->getMessage(),
             ]);
+
             return back()->withErrors(['error' => "Erreur lors de l'ajout des crédits."]);
         }
     }

@@ -46,7 +46,7 @@ class Coupon extends Model
      */
     public function isValid(?User $user = null): bool
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
 

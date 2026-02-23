@@ -14,6 +14,7 @@ class ReportReminder extends Mailable
     use Queueable, SerializesModels;
 
     public $session;
+
     public $mentor;
 
     /**
@@ -31,7 +32,7 @@ class ReportReminder extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "⏳ Rappel : Votre compte rendu est attendu pour libérer vos revenus",
+            subject: '⏳ Rappel : Votre compte rendu est attendu pour libérer vos revenus',
         );
     }
 

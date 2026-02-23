@@ -36,9 +36,10 @@ class PersonalityController extends Controller
     public function getQuestions()
     {
         $questions = PersonalityQuestion::getAllFormatted('fr');
+
         return response()->json([
             'success' => true,
-            'questions' => $questions
+            'questions' => $questions,
         ]);
     }
 
@@ -65,7 +66,7 @@ class PersonalityController extends Controller
                 'save' => false,
             ]);
 
-            if (!$mbtiResponse->successful()) {
+            if (! $mbtiResponse->successful()) {
                 // Fallback local
                 $result = $personalityService->calculatePersonalityType($responses);
                 $mbtiType = $result['type'];
@@ -74,7 +75,7 @@ class PersonalityController extends Controller
                 $mbtiData = $mbtiResponse->json();
                 $result = $mbtiData['result'] ?? null;
 
-                if (!$result) {
+                if (! $result) {
                     $localResult = $personalityService->calculatePersonalityType($responses);
                     $mbtiType = $localResult['type'];
                     $percentages = $localResult['traits_scores'];
@@ -88,7 +89,7 @@ class PersonalityController extends Controller
             // 2. Info du type
             $typeInfo = $personalityService::TYPE_DESCRIPTIONS[$mbtiType] ?? [
                 'label' => $mbtiType,
-                'description' => 'Type de personnalité ' . $mbtiType,
+                'description' => 'Type de personnalité '.$mbtiType,
             ];
 
             // 3. Métiers/Secteurs (Optionnel pour Mentor, mais on garde pour info)
@@ -111,17 +112,19 @@ class PersonalityController extends Controller
             return response()->json([
                 'success' => true,
                 'personality_type' => $mbtiType,
-                'redirect_url' => route('mentor.personality')
+                'redirect_url' => route('mentor.personality'),
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Erreur soumission test mentor: ' . $e->getMessage());
+            Log::error('Erreur soumission test mentor: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors du calcul des résultats.'
+                'message' => 'Une erreur est survenue lors du calcul des résultats.',
             ], 500);
         }
     }
+
     /**
      * Récupère les détails d'un test historique
      */
@@ -133,7 +136,7 @@ class PersonalityController extends Controller
             ->where('id', $testId)
             ->first();
 
-        if (!$test) {
+        if (! $test) {
             return response()->json([
                 'success' => false,
                 'message' => 'Test non trouvé.',
@@ -143,7 +146,7 @@ class PersonalityController extends Controller
         // Récupérer les infos du type
         $typeInfo = PersonalityService::TYPE_DESCRIPTIONS[$test->personality_type] ?? [
             'label' => $test->personality_type,
-            'description' => 'Type de personnalité ' . $test->personality_type,
+            'description' => 'Type de personnalité '.$test->personality_type,
         ];
 
         // Récupérer les métiers (depuis les données sauvegardées ou générer)

@@ -7,13 +7,12 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use App\Services\MentorshipNotificationService;
 
 /**
  * Controller pour l'authentification API
@@ -28,9 +27,6 @@ class AuthController extends Controller
 
     /**
      * Inscription d'un nouvel utilisateur
-     *
-     * @param RegisterRequest $request
-     * @return JsonResponse
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -51,7 +47,7 @@ class AuthController extends Controller
         try {
             $this->notificationService->sendWelcomeEmail($user);
         } catch (\Exception $e) {
-            \Log::error('Erreur envoi email bienvenue API: ' . $e->getMessage());
+            \Log::error('Erreur envoi email bienvenue API: '.$e->getMessage());
         }
 
         // Créer le token d'accès
@@ -66,16 +62,13 @@ class AuthController extends Controller
 
     /**
      * Connexion d'un utilisateur existant
-     *
-     * @param LoginRequest $request
-     * @return JsonResponse
      */
     public function login(LoginRequest $request): JsonResponse
     {
         $validated = $request->validated();
 
         // Vérifier les credentials
-        if (!Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
+        if (! Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
             return $this->unauthorized('Email ou mot de passe incorrect');
         }
 
@@ -97,9 +90,6 @@ class AuthController extends Controller
 
     /**
      * Déconnexion de l'utilisateur
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
@@ -111,9 +101,6 @@ class AuthController extends Controller
 
     /**
      * Récupère le profil de l'utilisateur connecté
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function user(Request $request): JsonResponse
     {
@@ -127,9 +114,6 @@ class AuthController extends Controller
 
     /**
      * Met à jour le profil de l'utilisateur
-     *
-     * @param UpdateProfileRequest $request
-     * @return JsonResponse
      */
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
@@ -140,7 +124,7 @@ class AuthController extends Controller
         $user->fill($validated);
 
         // Mise à jour du mot de passe si fourni
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
 
@@ -153,9 +137,6 @@ class AuthController extends Controller
 
     /**
      * Upload de la photo de profil
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function uploadPhoto(Request $request): JsonResponse
     {
@@ -183,9 +164,6 @@ class AuthController extends Controller
 
     /**
      * Supprime la photo de profil
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function deletePhoto(Request $request): JsonResponse
     {

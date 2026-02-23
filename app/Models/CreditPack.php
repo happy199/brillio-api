@@ -22,7 +22,7 @@ class CreditPack extends Model
         'features', // json
         'is_active',
         'is_popular',
-        'display_order'
+        'display_order',
     ];
 
     protected $casts = [

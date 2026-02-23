@@ -39,7 +39,7 @@ class PersonalityQuestion extends Model
     {
         return self::orderBy('openmbti_id')
             ->get()
-            ->map(fn($q) => $q->getFormattedQuestion($locale))
+            ->map(fn ($q) => $q->getFormattedQuestion($locale))
             ->toArray();
     }
 }

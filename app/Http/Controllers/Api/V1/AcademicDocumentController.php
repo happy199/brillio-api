@@ -33,9 +33,6 @@ class AcademicDocumentController extends Controller
 
     /**
      * Liste les documents de l'utilisateur
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -46,16 +43,13 @@ class AcademicDocumentController extends Controller
             ->get();
 
         return $this->success([
-            'documents' => $documents->map(fn($doc) => $this->formatDocument($doc)),
+            'documents' => $documents->map(fn ($doc) => $this->formatDocument($doc)),
             'total_count' => $documents->count(),
         ]);
     }
 
     /**
      * Upload un nouveau document
-     *
-     * @param UploadDocumentRequest $request
-     * @return JsonResponse
      */
     public function upload(UploadDocumentRequest $request): JsonResponse
     {
@@ -70,7 +64,7 @@ class AcademicDocumentController extends Controller
 
         // Validation du type MIME
         $mimeType = $file->getMimeType();
-        if (!in_array($mimeType, self::ALLOWED_MIMES)) {
+        if (! in_array($mimeType, self::ALLOWED_MIMES)) {
             return $this->error('Type de fichier non autorisé', 422);
         }
 
@@ -96,10 +90,6 @@ class AcademicDocumentController extends Controller
 
     /**
      * Récupère les détails d'un document
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
      */
     public function show(Request $request, int $id): JsonResponse
     {
@@ -107,7 +97,7 @@ class AcademicDocumentController extends Controller
 
         $document = $user->academicDocuments()->find($id);
 
-        if (!$document) {
+        if (! $document) {
             return $this->notFound('Document non trouvé');
         }
 
@@ -119,8 +109,6 @@ class AcademicDocumentController extends Controller
     /**
      * Télécharge un document
      *
-     * @param Request $request
-     * @param int $id
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|JsonResponse
      */
     public function download(Request $request, int $id)
@@ -134,11 +122,11 @@ class AcademicDocumentController extends Controller
             $document = $user->academicDocuments()->find($id);
         }
 
-        if (!$document) {
+        if (! $document) {
             return $this->notFound('Document non trouvé');
         }
 
-        if (!Storage::disk('local')->exists($document->file_path)) {
+        if (! Storage::disk('local')->exists($document->file_path)) {
             return $this->error('Fichier introuvable sur le serveur', 500);
         }
 
@@ -150,10 +138,6 @@ class AcademicDocumentController extends Controller
 
     /**
      * Supprime un document
-     *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
@@ -161,7 +145,7 @@ class AcademicDocumentController extends Controller
 
         $document = $user->academicDocuments()->find($id);
 
-        if (!$document) {
+        if (! $document) {
             return $this->notFound('Document non trouvé');
         }
 
@@ -173,8 +157,6 @@ class AcademicDocumentController extends Controller
 
     /**
      * Liste les types de documents disponibles
-     *
-     * @return JsonResponse
      */
     public function types(): JsonResponse
     {

@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Models\User;
-use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,7 +30,7 @@ class SendProfileCompletionReminders implements ShouldQueue
         foreach ($users as $user) {
             $missingSections = $this->getMissingSections($user);
 
-            if (!empty($missingSections)) {
+            if (! empty($missingSections)) {
                 Mail::to($user->email)->queue(new ProfileCompletionReminder($user, $missingSections));
             }
         }
@@ -44,30 +43,29 @@ class SendProfileCompletionReminders implements ShouldQueue
     {
         $missing = [];
 
-        if (!$user->profile_photo_path) {
-            $missing[] = "Ajouter une photo de profil";
+        if (! $user->profile_photo_path) {
+            $missing[] = 'Ajouter une photo de profil';
         }
 
         if ($user->isJeune()) {
-            if (!$user->personalityTest) {
-                $missing[] = "Passer le test de personnalité (MBTI)";
+            if (! $user->personalityTest) {
+                $missing[] = 'Passer le test de personnalité (MBTI)';
             }
-            if ($user->jeuneProfile && !$user->jeuneProfile->bio) {
-                $missing[] = "Rédiger votre biographie";
+            if ($user->jeuneProfile && ! $user->jeuneProfile->bio) {
+                $missing[] = 'Rédiger votre biographie';
             }
         }
 
         if ($user->isMentor()) {
             if ($user->mentorProfile) {
-                if (!$user->mentorProfile->bio) {
-                    $missing[] = "Rédiger votre présentation bio";
+                if (! $user->mentorProfile->bio) {
+                    $missing[] = 'Rédiger votre présentation bio';
                 }
-                if (!$user->mentorProfile->specialization) {
+                if (! $user->mentorProfile->specialization) {
                     $missing[] = "Définir vos domaines d'expertise";
                 }
-            }
-            else {
-                $missing[] = "Configurer votre profil mentor";
+            } else {
+                $missing[] = 'Configurer votre profil mentor';
             }
         }
 

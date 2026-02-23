@@ -1,23 +1,23 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\MentorController;
 use App\Http\Controllers\Admin\AnalyticsController;
-use App\Http\Controllers\Admin\ChatController;
-use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\ChatController;
+use App\Http\Controllers\Admin\ContactMessageController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\MentorController;
+use App\Http\Controllers\Admin\MonetizationController;
+use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\WebAuthController;
 use App\Http\Controllers\Jeune\JeuneDashboardController;
 use App\Http\Controllers\Jeune\OnboardingController;
 use App\Http\Controllers\Mentor\MentorDashboardController;
-use App\Http\Controllers\Public\PageController;
-use App\Http\Controllers\Public\NewsletterController as PublicNewsletterController;
-use App\Http\Controllers\Public\ContactController as PublicContactController;
-use App\Http\Controllers\Admin\NewsletterController;
-use App\Http\Controllers\Admin\ContactMessageController;
-use App\Http\Controllers\Admin\MonetizationController;
 use App\Http\Controllers\Mentor\WalletController;
+use App\Http\Controllers\Public\ContactController as PublicContactController;
+use App\Http\Controllers\Public\NewsletterController as PublicNewsletterController;
+use App\Http\Controllers\Public\PageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,10 +37,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Page d'accueil
-Route::get('/', function() {
+Route::get('/', function () {
     if (app()->bound('current_organization')) {
         return redirect()->route('organization.login');
     }
+
     return app(PageController::class)->home();
 })->name('home');
 
@@ -111,7 +112,7 @@ Route::prefix('jeune')->name('auth.jeune.')->group(function () {
     });
 
     // Route process sans middleware guest (car appelée en AJAX après callback)
-    Route::post('/oauth/{provider}/process', [WebAuthController::class , 'jeuneOAuthProcess'])->name('oauth.process');
+    Route::post('/oauth/{provider}/process', [WebAuthController::class, 'jeuneOAuthProcess'])->name('oauth.process');
 });
 
 // Email Verification (Authenticated but not necessarily verified)
@@ -221,7 +222,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class, 'unlock'])->name('resources.unlock');
     Route::post('/mentorship/request', [\App\Http\Controllers\Jeune\MentorshipController::class, 'store'])->name('mentorship.request');
     Route::post('/mentorship/{mentorship}/cancel', [\App\Http\Controllers\Jeune\MentorshipController::class, 'cancel'])->name('mentorship.cancel');
-    
+
     // Page de garde pour le mentorat
     Route::get('/mentorat/verrouille', [\App\Http\Controllers\Jeune\MentorshipController::class, 'lockedIndex'])->name('mentorship.locked');
 
@@ -257,6 +258,7 @@ Route::post('/accept-cookies', function (Illuminate\Http\Request $request) {
         'ip_address' => $request->ip(),
         'user_agent' => $request->userAgent(),
     ]);
+
     return response()->json(['success' => true]);
 })->name('accept-cookies');
 
@@ -417,7 +419,6 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Payouts Mentors
         Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
         Route::get('payouts/{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name('payouts.show');
-
 
         // Analytiques
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');

@@ -16,8 +16,11 @@ class SessionConfirmed extends Mailable
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
+
     public User $recipient;
+
     public Collection $participants;
+
     public string $calendarUrl;
 
     /**
@@ -41,6 +44,7 @@ class SessionConfirmed extends Mailable
     public function envelope(): Envelope
     {
         $date = $this->session->scheduled_at->translatedFormat('j F Y');
+
         return new Envelope(
             subject: "Session confirmée - {$date} - Brillio",
         );

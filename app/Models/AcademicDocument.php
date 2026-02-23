@@ -18,9 +18,13 @@ class AcademicDocument extends Model
      * Types de documents acceptés
      */
     public const TYPE_BULLETIN = 'bulletin';
+
     public const TYPE_RELEVE_NOTES = 'releve_notes';
+
     public const TYPE_DIPLOME = 'diplome';
+
     public const TYPE_ATTESTATION = 'attestation';
+
     public const TYPE_AUTRE = 'autre';
 
     public const DOCUMENT_TYPES = [
@@ -75,10 +79,10 @@ class AcademicDocument extends Model
         $bytes = $this->file_size;
 
         if ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' Mo';
+            return number_format($bytes / 1048576, 2).' Mo';
         }
 
-        return number_format($bytes / 1024, 2) . ' Ko';
+        return number_format($bytes / 1024, 2).' Ko';
     }
 
     /**

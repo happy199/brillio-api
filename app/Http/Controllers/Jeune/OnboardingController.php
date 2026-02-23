@@ -58,11 +58,11 @@ class OnboardingController extends Controller
         ];
 
         // Ajouter les champs personnalisés si présents
-        if ($validated['current_situation'] === 'autre' && !empty($validated['current_situation_other'])) {
+        if ($validated['current_situation'] === 'autre' && ! empty($validated['current_situation_other'])) {
             $onboardingData['current_situation_other'] = $validated['current_situation_other'];
         }
 
-        if ($validated['how_found_us'] === 'other' && !empty($validated['how_found_us_other'])) {
+        if ($validated['how_found_us'] === 'other' && ! empty($validated['how_found_us_other'])) {
             $onboardingData['how_found_us_other'] = $validated['how_found_us_other'];
         }
 

@@ -12,10 +12,10 @@ class NewsletterController extends Controller
     public function subscribe(Request $request)
     {
         // Rate limiting - 3 tentatives par heure
-        $key = 'newsletter-subscribe:' . $request->ip();
+        $key = 'newsletter-subscribe:'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 3)) {
-            return redirect()->to(url()->previous() . '#newsletter')
+            return redirect()->to(url()->previous().'#newsletter')
                 ->with('error', 'Trop de tentatives. Réessaye dans 1 heure.');
         }
 
@@ -28,7 +28,7 @@ class NewsletterController extends Controller
 
         if ($existing) {
             if ($existing->status === 'active') {
-                return redirect()->to(url()->previous() . '#newsletter')
+                return redirect()->to(url()->previous().'#newsletter')
                     ->with('info', 'Tu es déjà inscrit à notre newsletter !');
             } else {
                 // Réactiver l'abonnement
@@ -37,7 +37,8 @@ class NewsletterController extends Controller
                     'subscribed_at' => now(),
                     'unsubscribed_at' => null,
                 ]);
-                return redirect()->to(url()->previous() . '#newsletter')
+
+                return redirect()->to(url()->previous().'#newsletter')
                     ->with('success', 'Ton abonnement a été réactivé !');
             }
         }
@@ -51,7 +52,7 @@ class NewsletterController extends Controller
 
         RateLimiter::hit($key, 3600); // 1 heure
 
-        return redirect()->to(url()->previous() . '#newsletter')
+        return redirect()->to(url()->previous().'#newsletter')
             ->with('success', 'Merci ! Tu es maintenant inscrit à notre newsletter.');
     }
 

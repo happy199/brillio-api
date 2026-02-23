@@ -36,6 +36,7 @@ class DowngradeExpiredSubscriptions extends Command
 
         if ($expiredOrganizations->isEmpty()) {
             $this->info('No expired subscriptions found.');
+
             return 0;
         }
 
@@ -50,7 +51,7 @@ class DowngradeExpiredSubscriptions extends Command
                 'auto_renew' => false,
             ]);
 
-            Log::info("Organization subscription downgraded automatically", [
+            Log::info('Organization subscription downgraded automatically', [
                 'organization_id' => $organization->id,
                 'organization_name' => $organization->name,
                 'previous_plan' => $oldPlan,
@@ -59,6 +60,7 @@ class DowngradeExpiredSubscriptions extends Command
         }
 
         $this->info('Downgrade process completed.');
+
         return 0;
     }
 }

@@ -8,19 +8,19 @@ Schedule::command('sessions:send-reminders')
     ->timezone('Africa/Abidjan');
 
 // Profil completion reminders: run every Monday at 9 AM
-Schedule::job(new \App\Jobs\SendProfileCompletionReminders())
+Schedule::job(new \App\Jobs\SendProfileCompletionReminders)
     ->mondays()
     ->at('09:00')
     ->timezone('Africa/Abidjan');
 
 // Weekly new mentors digest: run every Friday at 4 PM
-Schedule::job(new \App\Jobs\SendNewMentorsDigest())
+Schedule::job(new \App\Jobs\SendNewMentorsDigest)
     ->fridays()
     ->at('16:00')
     ->timezone('Africa/Abidjan');
 
 // Mentor report reminders (escrow release): daily at 10 AM
-Schedule::job(new \App\Jobs\SendMentorReportReminders())
+Schedule::job(new \App\Jobs\SendMentorReportReminders)
     ->dailyAt('10:00')
     ->timezone('Africa/Abidjan');
 

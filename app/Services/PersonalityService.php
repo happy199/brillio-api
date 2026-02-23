@@ -155,7 +155,7 @@ class PersonalityService
     /**
      * Calcule le type de personnalité via l'API OpenMBTI
      *
-     * @param array $responses Format: [question_id => score (1-5)]
+     * @param  array  $responses  Format: [question_id => score (1-5)]
      */
     public function calculatePersonalityType(array $responses): array
     {
@@ -167,7 +167,7 @@ class PersonalityService
             }
 
             // Appel à l'API OpenMBTI
-            $response = Http::timeout(30)->post(self::API_URL . '/calculate', [
+            $response = Http::timeout(30)->post(self::API_URL.'/calculate', [
                 'answers' => $formattedAnswers,
                 'locale' => 'fr', // Résultats en français
                 'save' => false,
@@ -212,6 +212,7 @@ class PersonalityService
 
         } catch (\Exception $e) {
             Log::error('OpenMBTI API exception', ['message' => $e->getMessage()]);
+
             return $this->calculateLocalFallback($responses);
         }
     }
@@ -354,6 +355,7 @@ class PersonalityService
     public function hasCompletedTest(User $user): bool
     {
         $test = $user->personalityTest;
+
         return $test && $test->isCompleted();
     }
 

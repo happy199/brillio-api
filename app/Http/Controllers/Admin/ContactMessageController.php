@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ContactMessageController extends Controller
 {
@@ -21,9 +21,9 @@ class ContactMessageController extends Controller
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('email', 'like', '%' . $request->search . '%')
-                    ->orWhere('name', 'like', '%' . $request->search . '%')
-                    ->orWhere('subject', 'like', '%' . $request->search . '%');
+                $q->where('email', 'like', '%'.$request->search.'%')
+                    ->orWhere('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('subject', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -59,12 +59,12 @@ class ContactMessageController extends Controller
             if ($request->format === 'html') {
                 Mail::html($request->reply_message, function ($mail) use ($message) {
                     $mail->to($message->email)
-                        ->subject('Re: ' . $message->subject);
+                        ->subject('Re: '.$message->subject);
                 });
             } else {
                 Mail::raw($request->reply_message, function ($mail) use ($message) {
                     $mail->to($message->email)
-                        ->subject('Re: ' . $message->subject);
+                        ->subject('Re: '.$message->subject);
                 });
             }
 
@@ -74,8 +74,9 @@ class ContactMessageController extends Controller
             return redirect()->route('admin.contact-messages.show', $message->id)
                 ->with('success', 'Réponse envoyée avec succès.');
         } catch (\Exception $e) {
-            \Log::error('Contact reply failed: ' . $e->getMessage());
-            return back()->with('error', 'Erreur lors de l\'envoi de la réponse: ' . $e->getMessage());
+            \Log::error('Contact reply failed: '.$e->getMessage());
+
+            return back()->with('error', 'Erreur lors de l\'envoi de la réponse: '.$e->getMessage());
         }
     }
 
@@ -100,6 +101,6 @@ class ContactMessageController extends Controller
 
         $pdf = Pdf::loadView('admin.contact-messages.pdf', compact('messages'));
 
-        return $pdf->download('contact_messages_' . now()->format('Y-m-d') . '.pdf');
+        return $pdf->download('contact_messages_'.now()->format('Y-m-d').'.pdf');
     }
 }

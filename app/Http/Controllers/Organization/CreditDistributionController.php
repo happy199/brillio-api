@@ -37,16 +37,15 @@ class CreditDistributionController extends Controller
         // Determine target users
         if ($request->target === 'all') {
             $targetUsers = $organization->sponsoredUsers()->get();
-        }
-        else {
+        } else {
             $targetUsers = User::whereIn('id', $request->user_ids)
                 ->where(function ($q) use ($organization) {
-                $q->where('sponsored_by_organization_id', $organization->id)
-                    ->orWhereHas('organizations', function ($sq) use ($organization) {
-                    $sq->where('organizations.id', $organization->id);
-                }
-                );
-            })
+                    $q->where('sponsored_by_organization_id', $organization->id)
+                        ->orWhereHas('organizations', function ($sq) use ($organization) {
+                            $sq->where('organizations.id', $organization->id);
+                        }
+                        );
+                })
                 ->get();
         }
 
@@ -54,7 +53,7 @@ class CreditDistributionController extends Controller
         if ($userCount === 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Aucun utilisateur cible trouvé.'
+                'message' => 'Aucun utilisateur cible trouvé.',
             ], 422);
         }
 
@@ -67,7 +66,7 @@ class CreditDistributionController extends Controller
                 'insufficient_funds' => true,
                 'current_balance' => $organization->credits_balance,
                 'required_balance' => $totalCost,
-                'message' => "Solde insuffisant. Vous avez besoin de {$totalCost} crédits pour cette distribution, mais votre solde actuel est de {$organization->credits_balance}."
+                'message' => "Solde insuffisant. Vous avez besoin de {$totalCost} crédits pour cette distribution, mais votre solde actuel est de {$organization->credits_balance}.",
             ], 422);
         }
 
@@ -95,14 +94,13 @@ class CreditDistributionController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Félicitations ! {$totalCost} crédits ont été distribués avec succès à {$userCount} jeunes."
+                'message' => "Félicitations ! {$totalCost} crédits ont été distribués avec succès à {$userCount} jeunes.",
             ]);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors de la distribution : ' . $e->getMessage()
+                'message' => 'Une erreur est survenue lors de la distribution : '.$e->getMessage(),
             ], 500);
         }
     }

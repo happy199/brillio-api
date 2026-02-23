@@ -29,11 +29,11 @@ class SessionController extends Controller
         // Past: Past dates OR Globally cancelled OR Completed OR Locally cancelled
         $pastSessions = $user->mentoringSessionsAsMentee()
             ->where(function ($query) {
-            $query->where('mentoring_sessions.scheduled_at', '<', now())
-                ->orWhere('mentoring_sessions.status', 'cancelled')
-                ->orWhere('mentoring_sessions.status', 'completed')
-                ->orWhereIn('mentoring_session_user.status', ['cancelled', 'rejected']); // INCLUDE if I cancelled locally
-        })
+                $query->where('mentoring_sessions.scheduled_at', '<', now())
+                    ->orWhere('mentoring_sessions.status', 'cancelled')
+                    ->orWhere('mentoring_sessions.status', 'completed')
+                    ->orWhereIn('mentoring_session_user.status', ['cancelled', 'rejected']); // INCLUDE if I cancelled locally
+            })
             ->orderBy('mentoring_sessions.scheduled_at', 'desc')
             ->paginate(10);
 
@@ -68,7 +68,7 @@ class SessionController extends Controller
             ->where('status', 'accepted')
             ->exists();
 
-        if (!$isMentee) {
+        if (! $isMentee) {
             return redirect()->route('jeune.mentorship.index')->with('error', 'Vous devez être accepté par ce mentor pour réserver une séance.');
         }
 
@@ -128,13 +128,12 @@ class SessionController extends Controller
         // Vérifier que la séance appartient au jeune
         // On check via la relation many-to-many ou direct si c'est le createur
         // Ici simple verification via mentees()
-        if (!$session->mentees->contains($user->id)) {
+        if (! $session->mentees->contains($user->id)) {
             abort(403);
         }
 
         return view('jeune.mentorship.sessions.show', compact('session'));
     }
-
 
     /**
      * Annuler une séance
@@ -146,7 +145,7 @@ class SessionController extends Controller
     {
         $user = auth()->user();
 
-        if (!$session->mentees->contains($user->id)) {
+        if (! $session->mentees->contains($user->id)) {
             abort(403);
         }
 
@@ -169,7 +168,7 @@ class SessionController extends Controller
         // 2. Update Pivot for THIS user
         $session->mentees()->updateExistingPivot($user->id, [
             'status' => 'cancelled',
-            'rejection_reason' => $request->cancel_reason
+            'rejection_reason' => $request->cancel_reason,
         ]);
 
         // 3. Check if ANY active mentees remain
@@ -189,7 +188,7 @@ class SessionController extends Controller
         app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, $user);
 
         return redirect()->route('jeune.sessions.index')
-            ->with('success', 'Votre participation à la séance a été annulée. ' . ($session->is_paid ? 'Votre remboursement a été traité.' : ''));
+            ->with('success', 'Votre participation à la séance a été annulée. '.($session->is_paid ? 'Votre remboursement a été traité.' : ''));
     }
 
     /**
@@ -200,7 +199,7 @@ class SessionController extends Controller
         $user = auth()->user();
 
         // 1. Vérif Participant
-        if (!$session->mentees->contains($user->id)) {
+        if (! $session->mentees->contains($user->id)) {
             abort(403);
         }
 
@@ -208,7 +207,7 @@ class SessionController extends Controller
         $userPivot = $session->mentees()->where('user_id', $user->id)->first()->pivot;
 
         // Si gratuit ou déjà payé (statut pivot = accepted) => Redirection directe
-        if (!$session->is_paid || $userPivot->status === 'accepted') {
+        if (! $session->is_paid || $userPivot->status === 'accepted') {
             return redirect()->route('meeting.show', $session->meeting_id ?? 'error');
         }
 
@@ -218,7 +217,7 @@ class SessionController extends Controller
 
         if ($balance < $price) {
             return redirect()->route('jeune.wallet.index')
-                ->with('error', "Solde insuffisant ($balance crédits dispos). Il vous manque " . ($price - $balance) . " crédits pour cette séance.");
+                ->with('error', "Solde insuffisant ($balance crédits dispos). Il vous manque ".($price - $balance).' crédits pour cette séance.');
         }
 
         try {
@@ -255,9 +254,8 @@ class SessionController extends Controller
 
             return redirect()->route('meeting.show', $session->meeting_id)
                 ->with('success', 'Paiement effectué avec succès. Les fonds sont en attente et seront libérés au mentor après la séance.');
-        }
-        catch (\Exception $e) {
-            return redirect()->back()->with('error', "Erreur lors du paiement : " . $e->getMessage());
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erreur lors du paiement : '.$e->getMessage());
         }
     }
 }

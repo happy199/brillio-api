@@ -15,7 +15,9 @@ class PaymentReceived extends Mailable
     use Queueable, SerializesModels;
 
     public $mentor;
+
     public $session;
+
     public $amount;
 
     /**
@@ -34,7 +36,7 @@ class PaymentReceived extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Nouveau paiement reçu pour votre séance - Brillio",
+            subject: 'Nouveau paiement reçu pour votre séance - Brillio',
         );
     }
 

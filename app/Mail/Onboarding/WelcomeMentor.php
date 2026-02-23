@@ -29,7 +29,7 @@ class WelcomeMentor extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Bienvenue dans la communauté des mentors Brillio ! 🌟",
+            subject: 'Bienvenue dans la communauté des mentors Brillio ! 🌟',
         );
     }
 

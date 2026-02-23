@@ -21,8 +21,7 @@ class OrganizationInvitationMail extends Mailable
         public Organization $organization,
         public OrganizationInvitation $invitation,
         public string $registrationUrl
-    ) {
-    }
+    ) {}
 
     /**
      * Get the message envelope.

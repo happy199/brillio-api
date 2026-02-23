@@ -46,8 +46,11 @@ class PayoutRequest extends Model
      * Statuts disponibles
      */
     const STATUS_PENDING = 'pending';
+
     const STATUS_PROCESSING = 'processing';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_FAILED = 'failed';
 
     /**

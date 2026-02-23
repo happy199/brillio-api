@@ -14,6 +14,7 @@ class PayoutProcessed extends Mailable
     use Queueable, SerializesModels;
 
     public $payout;
+
     public $user;
 
     /**
@@ -31,6 +32,7 @@ class PayoutProcessed extends Mailable
     public function envelope(): Envelope
     {
         $status = $this->payout->status === PayoutRequest::STATUS_COMPLETED ? 'validée' : 'échouée';
+
         return new Envelope(
             subject: "Votre demande de retrait a été {$status} - Brillio",
         );

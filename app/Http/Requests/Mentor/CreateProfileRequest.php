@@ -21,7 +21,7 @@ class CreateProfileRequest extends FormRequest
             'current_position' => ['nullable', 'string', 'max:255'],
             'current_company' => ['nullable', 'string', 'max:255'],
             'years_of_experience' => ['nullable', 'integer', 'min:0', 'max:50'],
-            'specialization' => ['nullable', 'string', 'in:' . $specializations],
+            'specialization' => ['nullable', 'string', 'in:'.$specializations],
         ];
     }
 

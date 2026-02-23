@@ -7,9 +7,8 @@ class SeoService
     /**
      * Get SEO meta tags for a specific page
      *
-     * @param string $page Page identifier (e.g., 'home', 'mentors', 'contact')
-     * @param array $customData Custom data to override defaults
-     * @return array
+     * @param  string  $page  Page identifier (e.g., 'home', 'mentors', 'contact')
+     * @param  array  $customData  Custom data to override defaults
      */
     public function getMetaTags(string $page = 'default', array $customData = []): array
     {
@@ -20,17 +19,14 @@ class SeoService
 
     /**
      * Generate title with separator
-     *
-     * @param string $title
-     * @param bool $appendSiteName
-     * @return string
      */
     public function generateTitle(string $title, bool $appendSiteName = false): string
     {
         if ($appendSiteName) {
             $separator = config('seo.default.title_separator', ' - ');
             $siteName = config('seo.site.name', 'Brillio');
-            return $title . $separator . $siteName;
+
+            return $title.$separator.$siteName;
         }
 
         return $title;
@@ -38,12 +34,8 @@ class SeoService
 
     /**
      * Get robots meta content
-     *
-     * @param bool $index
-     * @param bool $follow
-     * @return string
      */
-    public function getRobotsMeta(bool $index = null, bool $follow = null): string
+    public function getRobotsMeta(?bool $index = null, ?bool $follow = null): string
     {
         $index = $index ?? config('seo.robots.index', true);
         $follow = $follow ?? config('seo.robots.follow', true);
@@ -70,9 +62,6 @@ class SeoService
 
     /**
      * Get canonical URL
-     *
-     * @param string|null $url
-     * @return string
      */
     public function getCanonicalUrl(?string $url = null): string
     {
@@ -81,9 +70,6 @@ class SeoService
 
     /**
      * Get Open Graph meta tags
-     *
-     * @param array $data
-     * @return array
      */
     public function getOpenGraphTags(array $data): array
     {
@@ -115,9 +101,6 @@ class SeoService
 
     /**
      * Get Twitter Card meta tags
-     *
-     * @param array $data
-     * @return array
      */
     public function getTwitterCardTags(array $data): array
     {
@@ -144,9 +127,6 @@ class SeoService
 
     /**
      * Get hreflang tags for international SEO
-     *
-     * @param string $currentLocale
-     * @return array
      */
     public function getHreflangTags(string $currentLocale = 'fr'): array
     {
@@ -157,12 +137,12 @@ class SeoService
         foreach ($locales as $locale => $config) {
             $url = config('seo.site.url');
 
-            if (!empty($config['url_prefix'])) {
+            if (! empty($config['url_prefix'])) {
                 $url .= $config['url_prefix'];
             }
 
             if ($currentPath && $currentPath !== '/') {
-                $url .= '/' . $currentPath;
+                $url .= '/'.$currentPath;
             }
 
             $hreflangs[$config['hreflang']] = $url;
@@ -176,8 +156,6 @@ class SeoService
 
     /**
      * Generate JSON-LD Organization Schema
-     *
-     * @return array
      */
     public function getOrganizationSchema(): array
     {
@@ -211,8 +189,6 @@ class SeoService
 
     /**
      * Generate JSON-LD WebSite Schema with SearchAction
-     *
-     * @return array
      */
     public function getWebSiteSchema(): array
     {
@@ -225,7 +201,7 @@ class SeoService
                 '@type' => 'SearchAction',
                 'target' => [
                     '@type' => 'EntryPoint',
-                    'urlTemplate' => config('seo.site.url') . '/search?q={search_term_string}',
+                    'urlTemplate' => config('seo.site.url').'/search?q={search_term_string}',
                 ],
                 'query-input' => 'required name=search_term_string',
             ],
@@ -234,9 +210,6 @@ class SeoService
 
     /**
      * Generate JSON-LD BreadcrumbList Schema
-     *
-     * @param array $breadcrumbs
-     * @return array
      */
     public function getBreadcrumbSchema(array $breadcrumbs): array
     {
@@ -262,8 +235,7 @@ class SeoService
     /**
      * Generate JSON-LD Person Schema for mentor profiles
      *
-     * @param object $mentor
-     * @return array
+     * @param  object  $mentor
      */
     public function getPersonSchema($mentor): array
     {
@@ -274,7 +246,7 @@ class SeoService
             'jobTitle' => $mentor->title ?? '',
             'description' => $mentor->bio ?? '',
             'image' => $mentor->user->profile_photo_url ?? '',
-            'url' => url('/mentors/' . $mentor->public_slug),
+            'url' => url('/mentors/'.$mentor->public_slug),
             'worksFor' => $mentor->company ?? null,
             'knowsAbout' => $mentor->tags ?? [],
         ];
@@ -282,9 +254,6 @@ class SeoService
 
     /**
      * Generate JSON-LD FAQ Schema
-     *
-     * @param array $faqs
-     * @return array
      */
     public function getFAQSchema(array $faqs): array
     {

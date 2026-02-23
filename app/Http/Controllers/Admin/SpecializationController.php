@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Specialization;
 use App\Models\MentorProfile;
+use App\Models\Specialization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -24,7 +24,7 @@ class SpecializationController extends Controller
 
         // Recherche
         if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         $specializations = $query->orderBy('name')->paginate(20);
@@ -38,6 +38,7 @@ class SpecializationController extends Controller
     public function create()
     {
         $mbtiSectors = $this->getMbtiSectors();
+
         return view('admin.specializations.create', compact('mbtiSectors'));
     }
 
@@ -63,7 +64,7 @@ class SpecializationController extends Controller
         ]);
 
         // Lier les types MBTI
-        if (!empty($validated['mbti_types'])) {
+        if (! empty($validated['mbti_types'])) {
             $specialization->syncMbtiTypes($validated['mbti_types']);
         }
 
@@ -78,6 +79,7 @@ class SpecializationController extends Controller
     public function show(Specialization $specialization)
     {
         $specialization->load(['mentorProfiles.user', 'mbtiTypes']);
+
         return view('admin.specializations.show', compact('specialization'));
     }
 
@@ -99,7 +101,7 @@ class SpecializationController extends Controller
     public function update(Request $request, Specialization $specialization)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:specializations,name,' . $specialization->id,
+            'name' => 'required|string|max:255|unique:specializations,name,'.$specialization->id,
             'description' => 'nullable|string|max:1000',
             'status' => 'required|in:active,pending,archived',
             'mbti_types' => 'nullable|array',
@@ -135,6 +137,7 @@ class SpecializationController extends Controller
         if ($mentorCount > 0) {
             // Archiver au lieu de supprimer
             $specialization->update(['status' => 'archived']);
+
             return redirect()
                 ->route('admin.specializations.index')
                 ->with('warning', "Spécialisation archivée car {$mentorCount} mentor(s) y sont liés");

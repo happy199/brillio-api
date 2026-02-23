@@ -34,7 +34,9 @@ class Organization extends Model
      * Subscription Plans
      */
     public const PLAN_FREE = 'free';
+
     public const PLAN_PRO = 'pro';
+
     public const PLAN_ENTERPRISE = 'enterprise';
 
     /**
@@ -59,7 +61,7 @@ class Organization extends Model
 
                 // Check if slug exists and increment until we find a unique one
                 while (static::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $counter;
+                    $slug = $originalSlug.'-'.$counter;
                     $counter++;
                 }
 
@@ -89,7 +91,7 @@ class Organization extends Model
      */
     public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(User::class , 'organization_user')
+        return $this->belongsToMany(User::class, 'organization_user')
             ->withPivot('referral_code_used')
             ->withTimestamps();
     }
@@ -99,7 +101,7 @@ class Organization extends Model
      */
     public function mentors(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(User::class , 'organization_user')
+        return $this->belongsToMany(User::class, 'organization_user')
             ->where('users.user_type', 'mentor')
             ->withPivot('referral_code_used')
             ->withTimestamps();
@@ -110,7 +112,7 @@ class Organization extends Model
      */
     public function sponsoredUsers(): HasMany
     {
-        return $this->hasMany(User::class , 'sponsored_by_organization_id');
+        return $this->hasMany(User::class, 'sponsored_by_organization_id');
     }
 
     /**
@@ -134,7 +136,7 @@ class Organization extends Model
      */
     public function getLogoUrlAttribute($value): ?string
     {
-        return $value ? asset('storage/' . $value) : null;
+        return $value ? asset('storage/'.$value) : null;
     }
 
     /**
@@ -212,7 +214,7 @@ class Organization extends Model
             return 'Gratuit';
         }
 
-        if (!$this->hasActiveSubscription()) {
+        if (! $this->hasActiveSubscription()) {
             return 'Expiré';
         }
 

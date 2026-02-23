@@ -18,7 +18,7 @@ class EnsureJeuneProfilePublished
         $user = $request->user();
 
         // Si c'est un jeune et que son profil n'est pas public
-        if ($user && $user->isJeune() && (!$user->jeuneProfile || !$user->jeuneProfile->is_public)) {
+        if ($user && $user->isJeune() && (! $user->jeuneProfile || ! $user->jeuneProfile->is_public)) {
             // Si c'est une requête AJAX, on renvoie une erreur JSON
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Profil non public.'], 403);

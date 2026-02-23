@@ -18,7 +18,7 @@ class CheckOrganizationSubscription
     {
         $user = $request->user();
 
-        if (!$user || !$user->isOrganization() || !$user->organization) {
+        if (! $user || ! $user->isOrganization() || ! $user->organization) {
             return $next($request);
         }
 
@@ -28,8 +28,7 @@ class CheckOrganizationSubscription
         $requiredLevel = 0;
         if ($plan === Organization::PLAN_PRO) {
             $requiredLevel = 1;
-        }
-        elseif ($plan === Organization::PLAN_ENTERPRISE) {
+        } elseif ($plan === Organization::PLAN_ENTERPRISE) {
             $requiredLevel = 2;
         }
 
@@ -37,8 +36,7 @@ class CheckOrganizationSubscription
         $currentLevel = 0;
         if ($organization->isEnterprise()) {
             $currentLevel = 2;
-        }
-        elseif ($organization->isPro()) {
+        } elseif ($organization->isPro()) {
             $currentLevel = 1;
         }
 
@@ -48,7 +46,7 @@ class CheckOrganizationSubscription
             }
 
             return redirect()->route('organization.subscriptions.index')
-                ->with('error', 'Cette fonctionnalité nécessite un abonnement ' . ucfirst($plan) . '.');
+                ->with('error', 'Cette fonctionnalité nécessite un abonnement '.ucfirst($plan).'.');
         }
 
         return $next($request);

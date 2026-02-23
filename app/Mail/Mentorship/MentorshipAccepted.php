@@ -15,8 +15,11 @@ class MentorshipAccepted extends Mailable
     use Queueable, SerializesModels;
 
     public Mentorship $mentorship;
+
     public User $mentor;
+
     public User $mentee;
+
     public string $bookingUrl;
 
     /**

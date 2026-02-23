@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Log;
 class JitsiService
 {
     private $appId;
+
     private $keyId;
+
     private $privateKey;
 
     public function __construct()
@@ -19,16 +21,16 @@ class JitsiService
         // Read private key from PEM file instead of .env to avoid escaping issues
         $keyPath = storage_path('jaas_private.pem');
 
-        if (!file_exists($keyPath)) {
+        if (! file_exists($keyPath)) {
             Log::error("JAAS private key file not found: {$keyPath}");
-            throw new \RuntimeException("JAAS private key file not found. Please ensure storage/jaas_private.pem exists.");
+            throw new \RuntimeException('JAAS private key file not found. Please ensure storage/jaas_private.pem exists.');
         }
 
         $this->privateKey = file_get_contents($keyPath);
 
         if (empty($this->privateKey)) {
             Log::error("JAAS private key file is empty: {$keyPath}");
-            throw new \RuntimeException("JAAS private key file is empty.");
+            throw new \RuntimeException('JAAS private key file is empty.');
         }
     }
 
@@ -50,37 +52,38 @@ class JitsiService
             'room' => '*', // Allow access to any room (or restrict to specific room)
             'context' => [
                 'user' => [
-                    'id' => (string)$user->id,
+                    'id' => (string) $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'avatar' => $user->avatar_url ?? "https://ui-avatars.com/api/?name=" . urlencode($user->name),
-                    'moderator' => $isModerator ? 'true' : 'false'
+                    'avatar' => $user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name),
+                    'moderator' => $isModerator ? 'true' : 'false',
                 ],
                 'features' => [
                     'livestreaming' => 'true',
                     'recording' => 'true',
                     'transcription' => 'true',
-                    'outbound-call' => 'true'
-                ]
-            ]
+                    'outbound-call' => 'true',
+                ],
+            ],
         ];
 
         // Header with Kid is MANDATORY for JaaS
         $headers = [
             'kid' => $this->keyId,
-            'typ' => 'JWT'
+            'typ' => 'JWT',
         ];
 
         try {
-            Log::info("Jitsi JWT: Attempting to encode with key length: " . strlen($this->privateKey));
+            Log::info('Jitsi JWT: Attempting to encode with key length: '.strlen($this->privateKey));
             $token = JWT::encode($payload, $this->privateKey, 'RS256', null, $headers);
-            Log::info("Jitsi JWT: Successfully generated token of length: " . strlen($token));
+            Log::info('Jitsi JWT: Successfully generated token of length: '.strlen($token));
+
             return $token;
-        }
-        catch (\Exception $e) {
-            Log::error("Jitsi JWT Generation Error: " . $e->getMessage());
-            Log::error("Jitsi JWT Error Class: " . get_class($e));
-            Log::error("Jitsi JWT Key starts with: " . substr($this->privateKey, 0, 50));
+        } catch (\Exception $e) {
+            Log::error('Jitsi JWT Generation Error: '.$e->getMessage());
+            Log::error('Jitsi JWT Error Class: '.get_class($e));
+            Log::error('Jitsi JWT Key starts with: '.substr($this->privateKey, 0, 50));
+
             return null;
         }
     }

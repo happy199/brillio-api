@@ -35,12 +35,13 @@ class SyncPersonalityQuestions extends Command
             // 1. Récupérer les questions depuis OpenMBTI
             $response = Http::timeout(30)->get('https://openmbti.org/api/questions');
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 $this->error('Erreur lors de la récupération des questions depuis OpenMBTI');
                 Log::error('OpenMBTI API error', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
+
                 return 1;
             }
 
@@ -49,10 +50,11 @@ class SyncPersonalityQuestions extends Command
 
             if (empty($questions)) {
                 $this->error('Aucune question reçue de l\'API');
+
                 return 1;
             }
 
-            $this->info(count($questions) . ' questions récupérées');
+            $this->info(count($questions).' questions récupérées');
 
             // 2. Traduire toutes les questions en une seule fois
             $this->info('Traduction des questions avec DeepSeek...');
@@ -79,7 +81,7 @@ Questions à traduire :\n";
 
             $translations = json_decode($translatedJson, true);
 
-            if (!$translations || !is_array($translations)) {
+            if (! $translations || ! is_array($translations)) {
                 $this->warn('La traduction automatique a échoué, utilisation des traductions par défaut');
                 $translations = null;
             }
@@ -114,11 +116,12 @@ Questions à traduire :\n";
             return 0;
 
         } catch (\Exception $e) {
-            $this->error('Erreur lors de la synchronisation : ' . $e->getMessage());
+            $this->error('Erreur lors de la synchronisation : '.$e->getMessage());
             Log::error('Personality questions sync error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return 1;
         }
     }

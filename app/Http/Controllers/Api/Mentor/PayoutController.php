@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 class PayoutController extends Controller
 {
     protected MonerooService $monerooService;
+
     protected \App\Services\WalletService $walletService;
 
     public function __construct(MonerooService $monerooService, \App\Services\WalletService $walletService)
@@ -27,16 +28,16 @@ class PayoutController extends Controller
     {
         $mentorProfile = $request->user()->mentorProfile;
 
-        if (!$mentorProfile) {
+        if (! $mentorProfile) {
             return response()->json([
-                'message' => 'Profil mentor non trouvé'
+                'message' => 'Profil mentor non trouvé',
             ], 404);
         }
 
         return response()->json([
             'available_balance' => (float) $mentorProfile->available_balance,
             'total_withdrawn' => (float) $mentorProfile->total_withdrawn,
-            'currency' => 'FCFA'
+            'currency' => 'FCFA',
         ]);
     }
 
@@ -48,8 +49,8 @@ class PayoutController extends Controller
         $methods = $this->monerooService->getPayoutMethods();
 
         return response()->json([
-            'success' => !empty($methods),
-            'methods' => $methods
+            'success' => ! empty($methods),
+            'methods' => $methods,
         ]);
     }
 
@@ -78,15 +79,15 @@ class PayoutController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation échouée',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $mentorProfile = $request->user()->mentorProfile;
 
-        if (!$mentorProfile) {
+        if (! $mentorProfile) {
             return response()->json([
-                'message' => 'Profil mentor non trouvé'
+                'message' => 'Profil mentor non trouvé',
             ], 404);
         }
 
@@ -97,7 +98,7 @@ class PayoutController extends Controller
             return response()->json([
                 'message' => 'Solde insuffisant',
                 'available_balance' => (float) $mentorProfile->available_balance,
-                'requested_amount' => (float) $amount
+                'requested_amount' => (float) $amount,
             ], 422);
         }
 
@@ -115,7 +116,7 @@ class PayoutController extends Controller
             'phone_number' => $request->input('phone_number'),
             'country_code' => $request->input('country_code'),
             'dial_code' => $request->input('dial_code'),
-            'status' => PayoutRequest::STATUS_PENDING
+            'status' => PayoutRequest::STATUS_PENDING,
         ]);
 
         // Déduire du solde disponible immédiatement (FCFA)
@@ -131,7 +132,7 @@ class PayoutController extends Controller
                 $request->user(),
                 $creditsToDeduct,
                 'payout',
-                "Retrait de " . number_format($amount, 0, ',', ' ') . " FCFA",
+                'Retrait de '.number_format($amount, 0, ',', ' ').' FCFA',
                 $payout
             );
         } catch (\Exception $e) {
@@ -143,7 +144,7 @@ class PayoutController extends Controller
 
             return response()->json([
                 'message' => 'Erreur de cohérence: Solde de crédits insuffisant pour ce retrait.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 422);
         }
 
@@ -163,8 +164,8 @@ class PayoutController extends Controller
                 'payment_method' => $payout->payment_method,
                 'phone_number' => $payout->phone_number,
                 'status' => $payout->status,
-                'created_at' => $payout->created_at->toISOString()
-            ]
+                'created_at' => $payout->created_at->toISOString(),
+            ],
         ], 201);
     }
 
@@ -175,9 +176,9 @@ class PayoutController extends Controller
     {
         $mentorProfile = $request->user()->mentorProfile;
 
-        if (!$mentorProfile) {
+        if (! $mentorProfile) {
             return response()->json([
-                'message' => 'Profil mentor non trouvé'
+                'message' => 'Profil mentor non trouvé',
             ], 404);
         }
 
@@ -200,7 +201,7 @@ class PayoutController extends Controller
             });
 
         return response()->json([
-            'payouts' => $payouts
+            'payouts' => $payouts,
         ]);
     }
 }

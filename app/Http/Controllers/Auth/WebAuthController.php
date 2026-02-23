@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\MentorProfile;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
 use App\Services\SupabaseAuthService;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
-use App\Models\MentorProfile;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Str;
 
 /**
  * Controller pour l'authentification web (jeunes et mentors)
@@ -28,8 +26,7 @@ class WebAuthController extends Controller
         private SupabaseAuthService $supabase,
         private \App\Services\UserAvatarService $avatarService,
         private MentorshipNotificationService $notificationService
-    ) {
-    }
+    ) {}
 
     /**
      * Cree ou met a jour un utilisateur mentor
@@ -41,7 +38,7 @@ class WebAuthController extends Controller
         if (empty($linkedinData['email'])) {
             return [
                 'success' => false,
-                'error' => 'Impossible de recuperer votre adresse email LinkedIn.'
+                'error' => 'Impossible de recuperer votre adresse email LinkedIn.',
             ];
         }
 
@@ -52,7 +49,7 @@ class WebAuthController extends Controller
             if ($user->is_blocked) {
                 return [
                     'success' => false,
-                    'error' => 'Votre accès Mentor a été suspendu par l\'administration. Motif : ' . ($user->blocked_reason ?? 'Non spécifié')
+                    'error' => 'Votre accès Mentor a été suspendu par l\'administration. Motif : '.($user->blocked_reason ?? 'Non spécifié'),
                 ];
             }
 
@@ -78,6 +75,10 @@ class WebAuthController extends Controller
 
             // Mettre a jour le profil mentor avec les donnees LinkedIn
             if ($user->mentorProfile) {
+                Log::info('[Safety Check] Updating linkedin_profile_data for mentor', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                ]);
                 $user->mentorProfile->update([
                     'linkedin_profile_data' => $linkedinData['raw_data'],
                 ]);
@@ -99,7 +100,7 @@ class WebAuthController extends Controller
             try {
                 $this->notificationService->sendWelcomeEmail($user);
             } catch (\Exception $e) {
-                Log::error('Erreur envoi email bienvenue (OAuth Mentor): ' . $e->getMessage());
+                Log::error('Erreur envoi email bienvenue (OAuth Mentor): '.$e->getMessage());
             }
 
             // Creer le profil mentor avec les donnees LinkedIn
@@ -110,7 +111,7 @@ class WebAuthController extends Controller
         }
 
         // Télécharger et stocker l'avatar via le service
-        if (!empty($linkedinData['avatar_url'])) {
+        if (! empty($linkedinData['avatar_url'])) {
             $this->avatarService->downloadFromUrl($user, $linkedinData['avatar_url']);
         }
 
@@ -121,23 +122,23 @@ class WebAuthController extends Controller
                 ->where('status', 'pending')
                 ->whereDate('expires_at', '>=', now())
                 ->first();
-            
+
             if ($invitation) {
                 // Link mentor to organization in pivot table
                 $user->organizations()->syncWithoutDetaching([
-                    $invitation->organization_id => ['referral_code_used' => $referralCode]
+                    $invitation->organization_id => ['referral_code_used' => $referralCode],
                 ]);
-                
+
                 // Mark invitation as used
                 $invitation->markAsAccepted();
-                
+
                 // Clear referral code from session
                 session()->forget(['referral_code', 'organization_name']);
-                
+
                 Log::info('Mentor auto-linked to organization via invitation', [
                     'user_id' => $user->id,
                     'organization_id' => $invitation->organization_id,
-                    'referral_code' => $referralCode
+                    'referral_code' => $referralCode,
                 ]);
             }
         }
@@ -153,7 +154,7 @@ class WebAuthController extends Controller
 
         return [
             'success' => true,
-            'redirect' => route('mentor.dashboard')
+            'redirect' => route('mentor.dashboard'),
         ];
     }
 
@@ -165,10 +166,10 @@ class WebAuthController extends Controller
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
             $referralCode = $request->get('ref');
-            
+
             // Validate that the invitation exists
             $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
-            
+
             if ($invitation) {
                 if ($invitation->isValid()) {
                     // Store referral code in session
@@ -231,10 +232,10 @@ class WebAuthController extends Controller
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
             $referralCode = $request->get('ref');
-            
+
             // Validate that the invitation exists
             $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
-            
+
             if ($invitation) {
                 if ($invitation->isValid()) {
                     // Store referral code in session
@@ -247,7 +248,7 @@ class WebAuthController extends Controller
                 }
             }
         }
-        
+
         return view('auth.jeune.register', [
             'referralCode' => session('referral_code'),
             'organizationName' => session('organization_name'),
@@ -297,15 +298,15 @@ class WebAuthController extends Controller
         Log::info('Jeune Registration Debug', [
             'referral_code_input' => $request->input('referral_code'),
             'referral_code_session' => session('referral_code'),
-            'resolved_code' => $referralCode
+            'resolved_code' => $referralCode,
         ]);
-        
+
         if ($referralCode) {
             $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
                 ->where('status', 'pending')
                 ->whereDate('expires_at', '>=', now()) // Only if NOT expired
                 ->first();
-            
+
             if ($invitation) {
                 $organizationId = $invitation->organization_id;
                 Log::info('Invitation found and valid', ['organization_id' => $organizationId]);
@@ -325,16 +326,16 @@ class WebAuthController extends Controller
             'referral_code_used' => $referralCode,
             'last_login_at' => now(),
         ]);
-        
+
         // Mark invitation as used
         if ($referralCode && isset($invitation)) {
             // Link user to organization in pivot table
             $user->organizations()->syncWithoutDetaching([
-                $organizationId => ['referral_code_used' => $referralCode]
+                $organizationId => ['referral_code_used' => $referralCode],
             ]);
 
             $invitation->markAsAccepted();
-            
+
             // Clear referral code from session
             session()->forget(['referral_code', 'organization_name']);
         }
@@ -342,14 +343,14 @@ class WebAuthController extends Controller
         try {
             $this->notificationService->sendWelcomeEmail($user);
         } catch (\Exception $e) {
-            Log::error('Erreur envoi email bienvenue: ' . $e->getMessage());
+            Log::error('Erreur envoi email bienvenue: '.$e->getMessage());
         }
- 
+
         event(new Registered($user));
- 
+
         Auth::login($user);
 
-        if (!$user->onboarding_completed) {
+        if (! $user->onboarding_completed) {
             return redirect()->route('jeune.onboarding');
         }
 
@@ -375,7 +376,7 @@ class WebAuthController extends Controller
             ->where('user_type', 'jeune')
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors([
                 'email' => 'Aucun compte jeune trouve avec cette adresse email.',
             ])->withInput();
@@ -384,7 +385,7 @@ class WebAuthController extends Controller
         // Vérifier si l'utilisateur est bloqué
         if ($user->is_blocked) {
             return back()->withErrors([
-                'email' => 'Votre accès à Brillio a été suspendu pour non-respect des règles de la plateforme. Motif : ' . ($user->blocked_reason ?? 'Non spécifié'),
+                'email' => 'Votre accès à Brillio a été suspendu pour non-respect des règles de la plateforme. Motif : '.($user->blocked_reason ?? 'Non spécifié'),
             ])->withInput();
         }
 
@@ -400,16 +401,16 @@ class WebAuthController extends Controller
                     ->where('status', 'pending')
                     ->whereDate('expires_at', '>=', now())
                     ->first();
-                
+
                 if ($invitation) {
                     // Link existing user to organization in pivot table
                     $user->organizations()->syncWithoutDetaching([
-                        $invitation->organization_id => ['referral_code_used' => $referralCode]
+                        $invitation->organization_id => ['referral_code_used' => $referralCode],
                     ]);
-                    
+
                     // Mark invitation as used
                     $invitation->markAsAccepted();
-                    
+
                     // Clear referral code from session
                     session()->forget(['referral_code', 'organization_name']);
                 }
@@ -426,7 +427,11 @@ class WebAuthController extends Controller
             }
 
             if ($user->user_type === 'organization') {
-                 return redirect()->intended(route('organization.dashboard'));
+                return redirect()->intended(route('organization.dashboard'));
+            }
+
+            if (! $user->onboarding_completed) {
+                return redirect()->route('jeune.onboarding');
             }
 
             return redirect()->intended(route('jeune.dashboard'));
@@ -442,7 +447,7 @@ class WebAuthController extends Controller
      */
     public function jeuneOAuthRedirect(Request $request, string $provider)
     {
-        if (!in_array($provider, ['google', 'facebook'])) {
+        if (! in_array($provider, ['google', 'facebook'])) {
             abort(400, 'Provider non supporte');
         }
 
@@ -451,7 +456,7 @@ class WebAuthController extends Controller
         // Stocker le provider en session
         session([
             'oauth_provider' => $provider,
-            'oauth_type' => 'jeune'
+            'oauth_type' => 'jeune',
         ]);
 
         $oauthUrl = $this->supabase->getOAuthUrl($provider, $redirectUrl);
@@ -487,8 +492,9 @@ class WebAuthController extends Controller
     {
         $session = $this->supabase->exchangeCodeForSession($code);
 
-        if (!$session || !isset($session['access_token'])) {
+        if (! $session || ! isset($session['access_token'])) {
             Log::error('Supabase code exchange failed', ['provider' => $provider]);
+
             return redirect()->route('auth.jeune.login')
                 ->with('error', 'Erreur lors de la connexion. Veuillez reessayer.');
         }
@@ -516,11 +522,12 @@ class WebAuthController extends Controller
 
                 $userData = $this->supabase->getUser($accessToken);
 
-                if (!$userData) {
+                if (! $userData) {
                     Log::warning('Failed to get user data from Supabase');
+
                     return response()->json([
                         'success' => false,
-                        'error' => 'Impossible de recuperer vos informations.'
+                        'error' => 'Impossible de recuperer vos informations.',
                     ], 400);
                 }
 
@@ -531,13 +538,13 @@ class WebAuthController extends Controller
                 if ($result['success']) {
                     return response()->json([
                         'success' => true,
-                        'redirect' => $result['redirect']
+                        'redirect' => $result['redirect'],
                     ]);
                 }
 
                 return response()->json([
                     'success' => false,
-                    'error' => $result['error']
+                    'error' => $result['error'],
                 ], 400);
             }
 
@@ -549,20 +556,21 @@ class WebAuthController extends Controller
 
                 $session = $this->supabase->exchangeCodeForSession($code);
 
-                if (!$session || !isset($session['access_token'])) {
+                if (! $session || ! isset($session['access_token'])) {
                     Log::warning('Failed to exchange code for session');
+
                     return response()->json([
                         'success' => false,
-                        'error' => 'Erreur lors de l\'echange du code.'
+                        'error' => 'Erreur lors de l\'echange du code.',
                     ], 400);
                 }
 
                 $userData = $this->supabase->getUser($session['access_token']);
 
-                if (!$userData) {
+                if (! $userData) {
                     return response()->json([
                         'success' => false,
-                        'error' => 'Impossible de recuperer vos informations.'
+                        'error' => 'Impossible de recuperer vos informations.',
                     ], 400);
                 }
 
@@ -572,38 +580,38 @@ class WebAuthController extends Controller
                 if (isset($result['success']) && $result['success'] === 'redirect_confirm') {
                     return response()->json([
                         'success' => false,
-                        'redirect' => $result['redirect']
+                        'redirect' => $result['redirect'],
                     ]);
                 }
 
                 if (isset($result['success']) && $result['success'] === true) {
                     return response()->json([
                         'success' => true,
-                        'redirect' => $result['redirect']
+                        'redirect' => $result['redirect'],
                     ]);
                 }
 
                 return response()->json([
                     'success' => false,
-                    'error' => $result['error'] ?? 'Une erreur est survenue.'
+                    'error' => $result['error'] ?? 'Une erreur est survenue.',
                 ], 400);
             }
 
             return response()->json([
                 'success' => false,
-                'error' => 'Aucune information d\'authentification fournie.'
+                'error' => 'Aucune information d\'authentification fournie.',
             ], 400);
 
         } catch (\Exception $e) {
             Log::error('OAuth process error', [
                 'provider' => $provider,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'error' => 'Une erreur inattendue est survenue: ' . $e->getMessage()
+                'error' => 'Une erreur inattendue est survenue: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -615,14 +623,14 @@ class WebAuthController extends Controller
     {
         $userData = $this->supabase->getUser($accessToken);
 
-        if (!$userData) {
+        if (! $userData) {
             return redirect()->route('auth.jeune.login')
                 ->with('error', 'Impossible de recuperer vos informations.');
         }
 
         $result = $this->createOrUpdateJeuneUser($userData, $provider);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return redirect()->route('auth.jeune.login')
                 ->with('error', $result['error']);
         }
@@ -640,7 +648,7 @@ class WebAuthController extends Controller
         if (empty($socialData['email'])) {
             return [
                 'success' => false,
-                'error' => 'Impossible de recuperer votre adresse email.'
+                'error' => 'Impossible de recuperer votre adresse email.',
             ];
         }
 
@@ -651,7 +659,7 @@ class WebAuthController extends Controller
             if ($user->is_blocked) {
                 return [
                     'success' => false,
-                    'error' => 'Votre accès Jeune a été suspendu par l\'administration. Motif : ' . ($user->blocked_reason ?? 'Non spécifié')
+                    'error' => 'Votre accès Jeune a été suspendu par l\'administration. Motif : '.($user->blocked_reason ?? 'Non spécifié'),
                 ];
             }
 
@@ -671,7 +679,23 @@ class WebAuthController extends Controller
                 'is_archived' => false,
                 'archived_at' => null,
                 'archived_reason' => null,
-            ]);
+            ];
+
+            // Si c'est un mentor, on ne met à jour l'avatar_url QUE si c'est du LinkedIn
+            $isLinkedIn = $this->avatarService->isLinkedInUrl($socialData['avatar_url'] ?? '');
+
+            if ($user->isMentor() && ! $isLinkedIn && $user->profile_photo_path) {
+                Log::info('[Safety Check] skipping profile_photo_url update for mentor: incoming URL is not LinkedIn (Jeune Login flow)', [
+                    'user_id' => $user->id,
+                    'url' => $socialData['avatar_url'] ?? 'none',
+                ]);
+            } else {
+                if (! empty($socialData['avatar_url'])) {
+                    $updateData['profile_photo_url'] = $socialData['avatar_url'];
+                }
+            }
+
+            $user->update($updateData);
 
             if ($user->wasChanged('is_archived')) {
                 session()->flash('success', 'Bon retour ! Votre compte a été réactivé automatiquement.');
@@ -684,16 +708,16 @@ class WebAuthController extends Controller
                     ->where('status', 'pending')
                     ->whereDate('expires_at', '>=', now())
                     ->first();
-                
+
                 if ($invitation) {
                     // Link existing user to organization in pivot table
                     $user->organizations()->syncWithoutDetaching([
-                        $invitation->organization_id => ['referral_code_used' => $referralCode]
+                        $invitation->organization_id => ['referral_code_used' => $referralCode],
                     ]);
-                    
+
                     // Mark invitation as used
                     $invitation->markAsAccepted();
-                    
+
                     // Clear referral code from session
                     session()->forget(['referral_code', 'organization_name']);
                 }
@@ -708,13 +732,13 @@ class WebAuthController extends Controller
                     ->where('status', 'pending')
                     ->whereDate('expires_at', '>=', now())
                     ->first();
-                
+
                 if ($invitation) {
                     $organizationId = $invitation->organization_id;
-                    
+
                     // Mark invitation as used
                     $invitation->markAsAccepted();
-                    
+
                     // Clear referral code from session
                     session()->forget(['referral_code', 'organization_name']);
                 }
@@ -738,31 +762,31 @@ class WebAuthController extends Controller
             // Also link to organization via pivot table if registering via link
             if ($organizationId) {
                 $user->organizations()->syncWithoutDetaching([
-                    $organizationId => ['referral_code_used' => $referralCode]
+                    $organizationId => ['referral_code_used' => $referralCode],
                 ]);
             }
 
             try {
                 $this->notificationService->sendWelcomeEmail($user);
             } catch (\Exception $e) {
-                Log::error('Erreur envoi email bienvenue (OAuth Jeune): ' . $e->getMessage());
+                Log::error('Erreur envoi email bienvenue (OAuth Jeune): '.$e->getMessage());
             }
         }
 
         // Télécharger et stocker l'avatar via le service
-        if (!empty($socialData['avatar_url'])) {
+        if (! empty($socialData['avatar_url'])) {
             $this->avatarService->downloadFromUrl($user, $socialData['avatar_url']);
         }
 
         Auth::login($user, true);
 
-        $redirect = !$user->onboarding_completed
+        $redirect = ! $user->onboarding_completed
             ? route('jeune.onboarding')
             : route('jeune.dashboard');
 
         return [
             'success' => true,
-            'redirect' => $redirect
+            'redirect' => $redirect,
         ];
     }
 
@@ -774,10 +798,10 @@ class WebAuthController extends Controller
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
             $referralCode = $request->get('ref');
-            
+
             // Validate that the invitation exists
             $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
-            
+
             if ($invitation) {
                 if ($invitation->isValid()) {
                     // Store referral code in session
@@ -838,8 +862,9 @@ class WebAuthController extends Controller
     {
         $session = $this->supabase->exchangeCodeForSession($code);
 
-        if (!$session || !isset($session['access_token'])) {
+        if (! $session || ! isset($session['access_token'])) {
             Log::error('Supabase LinkedIn code exchange failed');
+
             return redirect()->route('auth.mentor.login')
                 ->with('error', 'Erreur lors de la connexion LinkedIn.');
         }
@@ -859,10 +884,10 @@ class WebAuthController extends Controller
 
                 $userData = $this->supabase->getUser($accessToken);
 
-                if (!$userData) {
+                if (! $userData) {
                     return response()->json([
                         'success' => false,
-                        'error' => 'Impossible de recuperer vos informations LinkedIn.'
+                        'error' => 'Impossible de recuperer vos informations LinkedIn.',
                     ], 400);
                 }
 
@@ -872,20 +897,20 @@ class WebAuthController extends Controller
                 if (isset($result['success']) && $result['success'] === 'redirect_confirm') {
                     return response()->json([
                         'success' => false,
-                        'redirect' => $result['redirect']
+                        'redirect' => $result['redirect'],
                     ]);
                 }
 
                 if (isset($result['success']) && $result['success'] === true) {
                     return response()->json([
                         'success' => true,
-                        'redirect' => $result['redirect']
+                        'redirect' => $result['redirect'],
                     ]);
                 }
 
                 return response()->json([
                     'success' => false,
-                    'error' => $result['error'] ?? 'Une erreur est survenue.'
+                    'error' => $result['error'] ?? 'Une erreur est survenue.',
                 ], 400);
             }
 
@@ -894,19 +919,19 @@ class WebAuthController extends Controller
                 $code = $request->input('code');
                 $session = $this->supabase->exchangeCodeForSession($code);
 
-                if (!$session || !isset($session['access_token'])) {
+                if (! $session || ! isset($session['access_token'])) {
                     return response()->json([
                         'success' => false,
-                        'error' => 'Erreur lors de l\'echange du code LinkedIn.'
+                        'error' => 'Erreur lors de l\'echange du code LinkedIn.',
                     ], 400);
                 }
 
                 $userData = $this->supabase->getUser($session['access_token']);
 
-                if (!$userData) {
+                if (! $userData) {
                     return response()->json([
                         'success' => false,
-                        'error' => 'Impossible de recuperer vos informations LinkedIn.'
+                        'error' => 'Impossible de recuperer vos informations LinkedIn.',
                     ], 400);
                 }
 
@@ -916,26 +941,26 @@ class WebAuthController extends Controller
                 if (isset($result['success']) && $result['success'] === 'redirect_confirm') {
                     return response()->json([
                         'success' => false,
-                        'redirect' => $result['redirect']
+                        'redirect' => $result['redirect'],
                     ]);
                 }
 
                 if (isset($result['success']) && $result['success'] === true) {
                     return response()->json([
                         'success' => true,
-                        'redirect' => $result['redirect']
+                        'redirect' => $result['redirect'],
                     ]);
                 }
 
                 return response()->json([
                     'success' => false,
-                    'error' => $result['error'] ?? 'Une erreur est survenue.'
+                    'error' => $result['error'] ?? 'Une erreur est survenue.',
                 ], 400);
             }
 
             return response()->json([
                 'success' => false,
-                'error' => 'Aucune information d\'authentification fournie.'
+                'error' => 'Aucune information d\'authentification fournie.',
             ], 400);
 
         } catch (\Exception $e) {
@@ -943,7 +968,7 @@ class WebAuthController extends Controller
 
             return response()->json([
                 'success' => false,
-                'error' => 'Une erreur inattendue est survenue.'
+                'error' => 'Une erreur inattendue est survenue.',
             ], 500);
         }
     }
@@ -955,24 +980,20 @@ class WebAuthController extends Controller
     {
         $userData = $this->supabase->getUser($accessToken);
 
-        if (!$userData) {
+        if (! $userData) {
             return redirect()->route('auth.mentor.login')
                 ->with('error', 'Impossible de recuperer vos informations LinkedIn.');
         }
 
         $result = $this->createOrUpdateMentorUser($userData);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return redirect()->route('auth.mentor.login')
                 ->with('error', $result['error']);
         }
 
         return redirect($result['redirect']);
     }
-
-
-
-
 
     /**
      * Deconnexion
@@ -1009,7 +1030,7 @@ class WebAuthController extends Controller
             ->where('user_type', 'jeune')
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors(['email' => 'Aucun compte jeune trouve avec cette adresse email.']);
         }
 
@@ -1021,7 +1042,7 @@ class WebAuthController extends Controller
             ['email' => $request->email],
             [
                 'token' => Hash::make($token),
-                'created_at' => now()
+                'created_at' => now(),
             ]
         );
 
@@ -1029,7 +1050,8 @@ class WebAuthController extends Controller
         try {
             Mail::to($user)->send(new \App\Mail\ResetPasswordMail($user, $token));
         } catch (\Exception $e) {
-            Log::error('Erreur envoi email reset password: ' . $e->getMessage());
+            Log::error('Erreur envoi email reset password: '.$e->getMessage());
+
             return back()->withErrors(['email' => 'Erreur lors de l\'envoi de l\'email. Veuillez reessayer.']);
         }
 
@@ -1043,7 +1065,7 @@ class WebAuthController extends Controller
     {
         return view('auth.jeune.reset-password', [
             'token' => $token,
-            'email' => $request->email
+            'email' => $request->email,
         ]);
     }
 
@@ -1066,7 +1088,7 @@ class WebAuthController extends Controller
             ->where('email', $request->email)
             ->first();
 
-        if (!$resetRecord) {
+        if (! $resetRecord) {
             return back()->withErrors(['email' => 'Lien de reinitialisation invalide.']);
         }
 
@@ -1074,11 +1096,12 @@ class WebAuthController extends Controller
         $createdAt = \Carbon\Carbon::parse($resetRecord->created_at);
         if ($createdAt->addMinutes(10)->isPast()) {
             \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
             return back()->withErrors(['email' => 'Le lien de reinitialisation a expire. Veuillez en demander un nouveau.']);
         }
 
         // Vérifier le token
-        if (!Hash::check($request->token, $resetRecord->token)) {
+        if (! Hash::check($request->token, $resetRecord->token)) {
             return back()->withErrors(['email' => 'Lien de reinitialisation invalide.']);
         }
 
@@ -1087,7 +1110,7 @@ class WebAuthController extends Controller
             ->where('user_type', 'jeune')
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors(['email' => 'Utilisateur introuvable.']);
         }
 
@@ -1111,7 +1134,7 @@ class WebAuthController extends Controller
     protected function handleCrossTypeReactivation(User $user, string $newType, array $oauthData, string $provider): array
     {
         // Si le compte est ACTIF (pas archivé), refuser la migration
-        if (!$user->is_archived) {
+        if (! $user->is_archived) {
             $errorMessage = $user->user_type === 'jeune'
                 ? "Un compte jeune actif existe déjà avec cet email. Pour devenir mentor, vous devez d'abord archiver votre compte jeune depuis la page Profil > Zone de danger. <br><br><strong>⚠️ Important :</strong> Les comptes mentors sont soumis à une vérification stricte pour garantir la qualité. Si nous détectons que votre profil ne correspond pas aux critères de mentor, vous serez rétrogradé en compte jeune."
                 : "Un compte mentor actif existe déjà avec cet email. Pour devenir jeune, vous devez d'abord archiver votre compte mentor depuis la page Statistiques > Zone de danger.";
@@ -1124,7 +1147,7 @@ class WebAuthController extends Controller
             return [
                 'success' => false,
                 'error' => $errorMessage,
-                'redirect_url' => $redirectUrl // URL de la page de login du compte existant
+                'redirect_url' => $redirectUrl, // URL de la page de login du compte existant
             ];
         }
 
@@ -1147,7 +1170,7 @@ class WebAuthController extends Controller
         // Rediriger vers la page de confirmation
         return [
             'success' => 'redirect_confirm',
-            'redirect' => route('auth.confirm-type-change', ['token' => $migration->token])
+            'redirect' => route('auth.confirm-type-change', ['token' => $migration->token]),
         ];
     }
 
@@ -1213,7 +1236,16 @@ class WebAuthController extends Controller
             $user->auth_provider = $migration->oauth_data['provider'] ?? $user->auth_provider;
             $user->provider_id = $migration->oauth_data['provider_id'] ?? $user->provider_id;
 
-            if (!empty($migration->oauth_data['avatar_url'])) {
+            if ($user->isMentor() && $user->profile_photo_path) {
+                $isLinkedIn = $this->avatarService->isLinkedInUrl($migration->oauth_data['avatar_url'] ?? '');
+                if (! $isLinkedIn) {
+                    Log::info('[Safety Check] skipping profile_photo_url update during migration: incoming URL is not LinkedIn', [
+                        'user_id' => $user->id,
+                    ]);
+                } else {
+                    $user->profile_photo_url = $migration->oauth_data['avatar_url'];
+                }
+            } elseif (! empty($migration->oauth_data['avatar_url'])) {
                 $user->profile_photo_url = $migration->oauth_data['avatar_url'];
             }
         }
@@ -1222,9 +1254,9 @@ class WebAuthController extends Controller
         $user->save();
 
         // Créer profil si nécessaire
-        if ($migration->new_type === 'mentor' && !$user->mentorProfile) {
+        if ($migration->new_type === 'mentor' && ! $user->mentorProfile) {
             $user->mentorProfile()->create([]);
-        } elseif ($migration->new_type === 'jeune' && !$user->jeuneProfile) {
+        } elseif ($migration->new_type === 'jeune' && ! $user->jeuneProfile) {
             $user->jeuneProfile()->create([]);
         }
 
@@ -1234,7 +1266,7 @@ class WebAuthController extends Controller
         // Connecter l'utilisateur
         Auth::login($user, true);
 
-        return redirect()->route($migration->new_type . '.dashboard')
+        return redirect()->route($migration->new_type.'.dashboard')
             ->with('success', "Votre compte a été réactivé en tant que {$migration->new_type} !");
     }
 
@@ -1276,5 +1308,4 @@ class WebAuthController extends Controller
         return redirect()->route('auth.mentor.login')
             ->with('success', 'Félicitations ! Votre compte Jeune a été archivé. Vous pouvez maintenant vous connecter via LinkedIn pour activer votre profil Mentor.');
     }
-
 }

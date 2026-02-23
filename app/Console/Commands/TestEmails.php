@@ -2,35 +2,35 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\Account\AccountArchivedByUser;
+use App\Mail\Account\AccountDeleted;
+use App\Mail\Engagement\NewMentorsWeekly;
+use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Mail\Mentorship\MentorshipAccepted;
-use App\Mail\Mentorship\MentorshipRequested;
 use App\Mail\Mentorship\MentorshipRefused;
+use App\Mail\Mentorship\MentorshipRequested;
 use App\Mail\Onboarding\WelcomeJeune;
 use App\Mail\Onboarding\WelcomeMentor;
-use App\Mail\Session\SessionProposed;
-use App\Mail\Session\SessionConfirmed;
-use App\Mail\Session\SessionReminder;
-use App\Mail\Session\SessionCompleted;
-use App\Mail\Session\SessionRefused;
-use App\Mail\Session\SessionCancelled;
-use App\Mail\Session\ReportReminder;
-use App\Mail\Account\AccountDeleted;
-use App\Mail\Account\AccountArchivedByUser;
-use App\Mail\Support\ContactConfirmation;
-use App\Mail\Resource\ResourceValidated;
-use App\Mail\Resource\ResourceRejected;
 use App\Mail\Resource\ResourcePurchased;
-use App\Models\Resource;
-use App\Mail\Engagement\ProfileCompletionReminder;
-use App\Mail\Engagement\NewMentorsWeekly;
+use App\Mail\Resource\ResourceRejected;
+use App\Mail\Resource\ResourceValidated;
+use App\Mail\Session\ReportReminder;
+use App\Mail\Session\SessionCancelled;
+use App\Mail\Session\SessionCompleted;
+use App\Mail\Session\SessionConfirmed;
+use App\Mail\Session\SessionProposed;
+use App\Mail\Session\SessionRefused;
+use App\Mail\Session\SessionReminder;
+use App\Mail\Support\ContactConfirmation;
 use App\Mail\Wallet\CreditRecharged;
-use App\Mail\Wallet\SessionPaid;
-use App\Mail\Wallet\PaymentReceived;
 use App\Mail\Wallet\IncomeReleased;
-use App\Mail\Wallet\PayoutRequested;
+use App\Mail\Wallet\PaymentReceived;
 use App\Mail\Wallet\PayoutProcessed;
-use App\Models\Mentorship;
+use App\Mail\Wallet\PayoutRequested;
+use App\Mail\Wallet\SessionPaid;
 use App\Models\MentoringSession;
+use App\Models\Mentorship;
+use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -60,38 +60,38 @@ class TestEmails extends Command
         $emailType = $this->argument('email');
         $recipient = $this->option('to') ?? 'test@example.com';
 
-        if (!$emailType) {
+        if (! $emailType) {
             $emailType = $this->choice(
                 'Quel email voulez-vous tester ?',
-            [
-                'mentorship-request',
-                'mentorship-accepted',
-                'mentorship-refused',
-                'session-proposed',
-                'session-confirmed',
-                'session-reminder',
-                'session-completed',
-                'session-refused',
-                'session-cancelled',
-                'profile-reminder',
-                'new-mentors-digest',
-                'credit-recharge',
-                'session-paid',
-                'payment-received',
-                'payout-requested',
-                'payout-processed',
-                'income-released',
-                'welcome-jeune',
-                'welcome-mentor',
-                'report-reminder',
-                'account-deleted',
-                'account-archived-user',
-                'contact-confirmation',
-                'resource-validated',
-                'resource-rejected',
-                'resource-purchased',
-                'all'
-            ],
+                [
+                    'mentorship-request',
+                    'mentorship-accepted',
+                    'mentorship-refused',
+                    'session-proposed',
+                    'session-confirmed',
+                    'session-reminder',
+                    'session-completed',
+                    'session-refused',
+                    'session-cancelled',
+                    'profile-reminder',
+                    'new-mentors-digest',
+                    'credit-recharge',
+                    'session-paid',
+                    'payment-received',
+                    'payout-requested',
+                    'payout-processed',
+                    'income-released',
+                    'welcome-jeune',
+                    'welcome-mentor',
+                    'report-reminder',
+                    'account-deleted',
+                    'account-archived-user',
+                    'contact-confirmation',
+                    'resource-validated',
+                    'resource-rejected',
+                    'resource-purchased',
+                    'all',
+                ],
                 26
             );
         }
@@ -204,11 +204,13 @@ class TestEmails extends Command
                 break;
             default:
                 $this->error("Email type inconnu : {$emailType}");
+
                 return 1;
         }
 
         $this->newLine();
         $this->info('✅ Emails envoyés ! Vérifiez votre boîte (Mailtrap/Brevo)');
+
         return 0;
     }
 
@@ -252,13 +254,13 @@ class TestEmails extends Command
         ]);
 
         // Load or mock mentor profile
-        if (!$mentor->mentorProfile) {
-            $mentor->setRelation('mentorProfile', (object)[
+        if (! $mentor->mentorProfile) {
+            $mentor->setRelation('mentorProfile', (object) [
                 'current_position' => 'Senior Software Engineer',
                 'current_company' => 'Google',
                 'years_of_experience' => 8,
                 'specialization' => 'tech',
-                'specializationModel' => (object)['name' => 'Technologie & IT'],
+                'specializationModel' => (object) ['name' => 'Technologie & IT'],
             ]);
         }
 
@@ -306,7 +308,7 @@ class TestEmails extends Command
 
         // Get mentee credits using SystemSetting
         $creditPrice = SystemSetting::getValue('credit_price_jeune', 50);
-        $menteeCredits = (int)floor(7500 / $creditPrice); // 7500 FCFA = 150 crédits si 1 crédit = 50 FCFA
+        $menteeCredits = (int) floor(7500 / $creditPrice); // 7500 FCFA = 150 crédits si 1 crédit = 50 FCFA
 
         $acceptUrl = route('jeune.sessions.show', ['session' => $session->id ?? 1]);
         $refuseUrl = route('jeune.sessions.show', ['session' => $session->id ?? 1]);
@@ -318,7 +320,7 @@ class TestEmails extends Command
             $menteeCredits,
             $acceptUrl,
             $refuseUrl
-            ));
+        ));
     }
 
     private function testSessionConfirmed($recipient)
@@ -354,7 +356,7 @@ class TestEmails extends Command
             $mentees->first(),
             $mentees,
             $calendarUrl
-            ));
+        ));
     }
 
     private function testSessionReminder($recipient)
@@ -379,7 +381,7 @@ class TestEmails extends Command
             'scheduled_at' => now()->addDay()->setTime(14, 0),
             'duration_minutes' => 60,
             'status' => 'confirmed',
-            'meeting_link' => route('meeting.show', ['meetingId' => 'Brillio_Test_Meeting_' . time()]),
+            'meeting_link' => route('meeting.show', ['meetingId' => 'Brillio_Test_Meeting_'.time()]),
         ]);
         $session->mentor = $mentor;
 
@@ -387,7 +389,7 @@ class TestEmails extends Command
             $session,
             $mentees->first(),
             $mentees
-            ));
+        ));
     }
 
     private function testSessionCompleted($recipient)
@@ -424,7 +426,7 @@ class TestEmails extends Command
             $mentees,
             $sessionUrl,
             $bookingUrl
-            ));
+        ));
     }
 
     private function testMentorshipRefused($recipient)
@@ -474,7 +476,7 @@ class TestEmails extends Command
         $this->line('🚀 Envoi Profile Reminder...');
 
         $user = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Kouassi', 'user_type' => 'jeune']);
-        $missing = ["Passer le test MBTI", "Ajouter une biographie", "Ajouter une photo de profil"];
+        $missing = ['Passer le test MBTI', 'Ajouter une biographie', 'Ajouter une photo de profil'];
 
         Mail::to($recipient)->send(new ProfileCompletionReminder($user, $missing));
     }
@@ -492,14 +494,14 @@ class TestEmails extends Command
                 new User(['name' => 'Moussa Traoré', 'user_type' => 'mentor']),
             ]);
             foreach ($mentors as $m) {
-                $m->setRelation('mentorProfile', (object)[
+                $m->setRelation('mentorProfile', (object) [
                     'current_position' => 'Expert',
                     'current_company' => 'Brillio Corp',
                     'years_of_experience' => 10,
                     'specialization' => 'tech',
-                    'specializationModel' => (object)['name' => 'Technologie & IT'],
+                    'specializationModel' => (object) ['name' => 'Technologie & IT'],
                     'public_slug' => 'dr-ousmane-sow-f2abccfe',
-                    'getRouteKeyName' => 'public_slug' // Mocking property for consistency if needed, though route helper usually checks method
+                    'getRouteKeyName' => 'public_slug', // Mocking property for consistency if needed, though route helper usually checks method
                 ]);
             }
         }
@@ -542,7 +544,7 @@ class TestEmails extends Command
     {
         $this->line('📩 Envoi Payout Requested...');
         $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
-        $mentorProfile = (object)[
+        $mentorProfile = (object) [
             'user' => $mentor,
         ];
         $payout = new \App\Models\PayoutRequest([
@@ -560,7 +562,7 @@ class TestEmails extends Command
     {
         $this->line('✨ Envoi Payout Processed (Success)...');
         $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marie Dupont']);
-        $mentorProfile = (object)[
+        $mentorProfile = (object) [
             'user' => $mentor,
         ];
 
@@ -621,7 +623,7 @@ class TestEmails extends Command
         $this->line('⏳ Envoi Report Reminder...');
         $session = MentoringSession::has('mentor')->has('mentees')->first();
 
-        if (!$session) {
+        if (! $session) {
             $mentor = User::where('user_type', 'mentor')->first() ?? new User(['name' => 'Marc Mentor']);
             $mentee = User::where('user_type', 'jeune')->first() ?? new User(['name' => 'Jean Jeune']);
             $session = new MentoringSession([

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\CreditPack;
 use Illuminate\Http\Request;
 
@@ -35,10 +34,10 @@ class WalletController extends Controller
         $pack = CreditPack::findOrFail($request->pack_id);
 
         $amount = $pack->price;
-        $description = "Achat Crédits: " . $pack->name;
+        $description = 'Achat Crédits: '.$pack->name;
 
         // PACK-{orgId}-{packId}-{timestamp}
-        $reference = 'PACK-' . auth()->user()->organization->id . '-' . $pack->id . '-' . time();
+        $reference = 'PACK-'.auth()->user()->organization->id.'-'.$pack->id.'-'.time();
 
         $returnUrl = route('organization.payment.callback');
 
@@ -56,7 +55,7 @@ class WalletController extends Controller
             'metadata' => [
                 'reference' => $reference,
                 'pack_id' => $pack->id,
-                'user_type' => 'organization'
+                'user_type' => 'organization',
             ],
         ]);
 
@@ -71,10 +70,10 @@ class WalletController extends Controller
             $amount,
             $description,
             $customer,
-        [
-            'reference' => $reference,
-            'transaction_id' => $localTransaction->id
-        ],
+            [
+                'reference' => $reference,
+                'transaction_id' => $localTransaction->id,
+            ],
             $returnUrl
         );
 

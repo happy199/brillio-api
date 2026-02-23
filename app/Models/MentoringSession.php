@@ -32,13 +32,13 @@ class MentoringSession extends Model
 
     public function mentor()
     {
-        return $this->belongsTo(User::class , 'mentor_id');
+        return $this->belongsTo(User::class, 'mentor_id');
     }
 
     // Participants (Mentees)
     public function mentees()
     {
-        return $this->belongsToMany(User::class , 'mentoring_session_user', 'mentoring_session_id', 'user_id')
+        return $this->belongsToMany(User::class, 'mentoring_session_user', 'mentoring_session_id', 'user_id')
             ->withPivot('status', 'rejection_reason')
             ->withTimestamps();
     }
@@ -48,8 +48,10 @@ class MentoringSession extends Model
      */
     public function getMeetingIdAttribute()
     {
-        if (!$this->meeting_link)
+        if (! $this->meeting_link) {
             return null;
+        }
+
         return basename($this->meeting_link);
     }
 
@@ -58,8 +60,9 @@ class MentoringSession extends Model
      */
     public function getCreditCostAttribute()
     {
-        if (!$this->price)
+        if (! $this->price) {
             return 0;
+        }
 
         static $jeuneCreditPrice = null;
 
@@ -68,24 +71,25 @@ class MentoringSession extends Model
         }
 
         // Avoid division by zero
-        if ($jeuneCreditPrice <= 0)
-            return (int)$this->price;
+        if ($jeuneCreditPrice <= 0) {
+            return (int) $this->price;
+        }
 
         // Session Price (FCFA) / Credit Price (FCFA/Credit) = Credits needed
         // User requested floor behavior for integer credits
-        return (int)floor($this->price / $jeuneCreditPrice);
+        return (int) floor($this->price / $jeuneCreditPrice);
     }
 
     // Translated status
     public function getTranslatedStatusAttribute()
     {
         return match ($this->status) {
-                'proposed' => 'Proposée',
-                'pending_payment' => 'En attente de paiement',
-                'confirmed' => 'Confirmée',
-                'cancelled' => 'Annulée',
-                'completed' => 'Terminée',
-                default => $this->status,
-            };
+            'proposed' => 'Proposée',
+            'pending_payment' => 'En attente de paiement',
+            'confirmed' => 'Confirmée',
+            'cancelled' => 'Annulée',
+            'completed' => 'Terminée',
+            default => $this->status,
+        };
     }
 }

@@ -15,8 +15,11 @@ class SessionRefused extends Mailable
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
+
     public User $mentor;
+
     public User $mentee;
+
     public ?string $reason;
 
     /**
@@ -36,7 +39,7 @@ class SessionRefused extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Session de mentorat refusée - Brillio",
+            subject: 'Session de mentorat refusée - Brillio',
         );
     }
 

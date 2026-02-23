@@ -20,7 +20,7 @@ class SendMentorReportReminders implements ShouldQueue
      */
     public function __construct()
     {
-    //
+        //
     }
 
     /**
@@ -45,9 +45,8 @@ class SendMentorReportReminders implements ShouldQueue
             try {
                 $notificationService->sendReportReminder($session);
                 Log::info("Rappel envoyé pour la session ID: {$session->id}");
-            }
-            catch (\Exception $e) {
-                Log::error("Erreur lors de l'envoi du rappel pour la session {$session->id}: " . $e->getMessage());
+            } catch (\Exception $e) {
+                Log::error("Erreur lors de l'envoi du rappel pour la session {$session->id}: ".$e->getMessage());
             }
         }
 

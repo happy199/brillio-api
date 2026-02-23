@@ -15,6 +15,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $organization = auth()->user()->organization;
+
         return view('organization.profile.edit', compact('organization'));
     }
 
@@ -35,19 +36,19 @@ class ProfileController extends Controller
 
         // Base domain for subdomains
         $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa';
-        $fullSubdomain = $domain . '.' . $baseDomain;
+        $fullSubdomain = $domain.'.'.$baseDomain;
 
         $exists = \App\Models\Organization::where('id', '!=', $organization->id)
             ->where(function ($query) use ($domain, $fullSubdomain) {
-            $query->where('slug', $domain)
-                ->orWhere('custom_domain', $domain)
-                ->orWhere('custom_domain', $fullSubdomain);
-        })
+                $query->where('slug', $domain)
+                    ->orWhere('custom_domain', $domain)
+                    ->orWhere('custom_domain', $fullSubdomain);
+            })
             ->exists();
 
         return response()->json([
-            'available' => !$exists,
-            'message' => $exists ? 'Ce domaine est déjà utilisé.' : 'Disponible !'
+            'available' => ! $exists,
+            'message' => $exists ? 'Ce domaine est déjà utilisé.' : 'Disponible !',
         ]);
     }
 
@@ -83,13 +84,13 @@ class ProfileController extends Controller
 
         $validated = $request->validate($rules);
 
-        if ($organization->isEnterprise() && !empty($validated['custom_domain'])) {
+        if ($organization->isEnterprise() && ! empty($validated['custom_domain'])) {
             $domain = strtolower(trim($validated['custom_domain']));
 
             // Normalize: if no dot, assume it's a subdomain of the current APP_URL host
-            if (!str_contains($domain, '.')) {
+            if (! str_contains($domain, '.')) {
                 $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa';
-                $domain = $domain . '.' . $baseDomain;
+                $domain = $domain.'.'.$baseDomain;
             }
 
             $validated['custom_domain'] = $domain;
@@ -97,25 +98,25 @@ class ProfileController extends Controller
 
         if ($request->hasFile('logo') && $organization->isEnterprise()) {
             // Delete old logo if exists and not default
-            if ($organization->logo_url && !str_contains($organization->logo_url, 'placeholder')) {
+            if ($organization->logo_url && ! str_contains($organization->logo_url, 'placeholder')) {
                 $oldPath = str_replace('/storage/', '', $organization->logo_url);
                 Storage::disk('public')->delete($oldPath);
             }
 
             $path = $request->file('logo')->store('organizations/logos', 'public');
-            $validated['logo_url'] = '/storage/' . $path;
+            $validated['logo_url'] = '/storage/'.$path;
         }
 
         $organization->update($validated);
 
-        $domainChanged = ($organization->wasChanged('custom_domain') && !empty($organization->custom_domain));
+        $domainChanged = ($organization->wasChanged('custom_domain') && ! empty($organization->custom_domain));
 
         $redirect = redirect()->route('organization.profile.edit')
             ->with('success', 'Profil mis à jour avec succès.');
 
         if ($domainChanged) {
             $redirect->with('domain_updated', true)
-                ->with('new_url', 'http://' . $organization->custom_domain . (app()->environment('local') ? ':8000' : ''));
+                ->with('new_url', 'http://'.$organization->custom_domain.(app()->environment('local') ? ':8000' : ''));
         }
 
         return $redirect;

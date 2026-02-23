@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 class OrganizationInvitation extends Model
 {
@@ -61,7 +60,7 @@ class OrganizationInvitation extends Model
      */
     public function acceptedUser(): BelongsTo
     {
-        return $this->belongsTo(User::class , 'referral_code', 'referral_code_used');
+        return $this->belongsTo(User::class, 'referral_code', 'referral_code_used');
     }
 
     /**
@@ -69,7 +68,7 @@ class OrganizationInvitation extends Model
      */
     public function users(): HasMany
     {
-        return $this->hasMany(User::class , 'referral_code_used', 'referral_code');
+        return $this->hasMany(User::class, 'referral_code_used', 'referral_code');
     }
 
     /**
@@ -105,6 +104,7 @@ class OrganizationInvitation extends Model
         if ($this->expires_at && $this->expires_at->isPast()) {
             // Auto-update status to expired
             $this->update(['status' => 'expired']);
+
             return true;
         }
 
@@ -116,7 +116,7 @@ class OrganizationInvitation extends Model
      */
     public function isValid(): bool
     {
-        return $this->status === 'pending' && !$this->isExpired();
+        return $this->status === 'pending' && ! $this->isExpired();
     }
 
     /**
@@ -131,10 +131,9 @@ class OrganizationInvitation extends Model
                 'status' => 'accepted',
                 'accepted_at' => now(),
             ]);
-        }
-        else {
+        } else {
             // Just update accepted_at for the first time it was used
-            if (!$this->accepted_at) {
+            if (! $this->accepted_at) {
                 $this->update(['accepted_at' => now()]);
             }
         }
@@ -163,9 +162,9 @@ class OrganizationInvitation extends Model
     {
         return $query->where('status', '!=', 'expired')
             ->where(function ($q) {
-            $q->whereNull('expires_at')
-                ->orWhere('expires_at', '>', now());
-        });
+                $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
     }
 
     /**

@@ -109,13 +109,13 @@ class MentorProfile extends Model
     {
         $user = $mentorProfile->user ?? \App\Models\User::find($mentorProfile->user_id);
         $baseName = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::limit($user->name, 30, ''));
-        $hash = substr(md5(uniqid() . time()), 0, 8);
-        $slug = $baseName . '-' . $hash;
+        $hash = substr(md5(uniqid().time()), 0, 8);
+        $slug = $baseName.'-'.$hash;
 
         // Vérifier l'unicité
         $count = 1;
         while (static::where('public_slug', $slug)->exists()) {
-            $slug = $baseName . '-' . $hash . '-' . $count;
+            $slug = $baseName.'-'.$hash.'-'.$count;
             $count++;
         }
 
@@ -175,9 +175,9 @@ class MentorProfile extends Model
      */
     public function isComplete(): bool
     {
-        return !empty($this->bio)
-            && !empty($this->current_position)
-            && (!empty($this->specialization) || !empty($this->specialization_id))
+        return ! empty($this->bio)
+            && ! empty($this->current_position)
+            && (! empty($this->specialization) || ! empty($this->specialization_id))
             && $this->roadmapSteps()->count() >= 1;
     }
 

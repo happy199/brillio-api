@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Log;
 class MonerooWebhookController extends Controller
 {
     protected MonerooService $monerooService;
+
     protected WalletService $walletService;
+
     protected MentorshipNotificationService $notificationService;
 
     public function __construct(MonerooService $monerooService, WalletService $walletService, MentorshipNotificationService $notificationService)
@@ -37,8 +39,9 @@ class MonerooWebhookController extends Controller
         ]);
 
         // Verify webhook signature
-        if (!$this->monerooService->verifyWebhookSignature($payload, $signature)) {
+        if (! $this->monerooService->verifyWebhookSignature($payload, $signature)) {
             Log::warning('Moneroo webhook signature verification failed');
+
             return response()->json(['error' => 'Invalid signature'], 401);
         }
 
@@ -46,8 +49,9 @@ class MonerooWebhookController extends Controller
         $event = $data['event'] ?? null;
         $paymentData = $data['data'] ?? null;
 
-        if (!$event || !$paymentData) {
+        if (! $event || ! $paymentData) {
             Log::error('Moneroo webhook missing event or data');
+
             return response()->json(['error' => 'Invalid payload'], 400);
         }
 
@@ -82,6 +86,7 @@ class MonerooWebhookController extends Controller
         }
 
         Log::info('Moneroo webhook event not handled', ['event' => $event]);
+
         return response()->json(['message' => 'Event received'], 200);
     }
 
@@ -93,13 +98,15 @@ class MonerooWebhookController extends Controller
         $monerooTransactionId = $paymentData['id'];
         $transaction = MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             Log::error('Moneroo transaction not found', ['moneroo_transaction_id' => $monerooTransactionId]);
+
             return response()->json(['error' => 'Transaction not found'], 404);
         }
 
         if ($transaction->status === 'completed') {
             Log::info('Moneroo transaction already completed', ['transaction_id' => $transaction->id]);
+
             return response()->json(['message' => 'Already processed'], 200);
         }
 
@@ -107,8 +114,9 @@ class MonerooWebhookController extends Controller
             // Get user
             $user = $transaction->user;
 
-            if (!$user) {
+            if (! $user) {
                 Log::error('User not found for transaction', ['transaction_id' => $transaction->id]);
+
                 return response()->json(['error' => 'User not found'], 404);
             }
 
@@ -155,8 +163,7 @@ class MonerooWebhookController extends Controller
 
             return response()->json(['message' => 'Payment processed'], 200);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error processing Moneroo payment', [
                 'transaction_id' => $transaction->id,
                 'error' => $e->getMessage(),
@@ -207,13 +214,15 @@ class MonerooWebhookController extends Controller
         $monerooPayoutId = $payoutData['id'];
         $payoutRequest = PayoutRequest::where('moneroo_payout_id', $monerooPayoutId)->first();
 
-        if (!$payoutRequest) {
+        if (! $payoutRequest) {
             Log::error('Moneroo payout not found', ['moneroo_payout_id' => $monerooPayoutId]);
+
             return response()->json(['error' => 'Payout not found'], 404);
         }
 
         if ($payoutRequest->status === PayoutRequest::STATUS_COMPLETED) {
             Log::info('Moneroo payout already completed', ['payout_id' => $payoutRequest->id]);
+
             return response()->json(['message' => 'Already processed'], 200);
         }
 
@@ -221,7 +230,7 @@ class MonerooWebhookController extends Controller
             // Mark payout as completed
             $payoutRequest->update([
                 'status' => PayoutRequest::STATUS_COMPLETED,
-                'completed_at' => now()
+                'completed_at' => now(),
             ]);
 
             // Update total withdrawn for mentor
@@ -230,7 +239,7 @@ class MonerooWebhookController extends Controller
             Log::info('Moneroo payout completed successfully', [
                 'payout_id' => $payoutRequest->id,
                 'moneroo_payout_id' => $monerooPayoutId,
-                'amount' => $payoutRequest->amount
+                'amount' => $payoutRequest->amount,
             ]);
 
             // Notification email
@@ -238,8 +247,7 @@ class MonerooWebhookController extends Controller
 
             return response()->json(['message' => 'Payout completed'], 200);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error processing Moneroo payout success', [
                 'payout_id' => $payoutRequest->id,
                 'error' => $e->getMessage(),
@@ -258,13 +266,15 @@ class MonerooWebhookController extends Controller
         $monerooPayoutId = $payoutData['id'];
         $payoutRequest = PayoutRequest::where('moneroo_payout_id', $monerooPayoutId)->first();
 
-        if (!$payoutRequest) {
+        if (! $payoutRequest) {
             Log::error('Moneroo payout not found for failure', ['moneroo_payout_id' => $monerooPayoutId]);
+
             return response()->json(['error' => 'Payout not found'], 404);
         }
 
         if ($payoutRequest->status === PayoutRequest::STATUS_FAILED) {
             Log::info('Moneroo payout already failed', ['payout_id' => $payoutRequest->id]);
+
             return response()->json(['message' => 'Already processed'], 200);
         }
 
@@ -273,7 +283,7 @@ class MonerooWebhookController extends Controller
             $errorMessage = $payoutData['status'] ?? 'Gateway error occurred';
             $payoutRequest->update([
                 'status' => PayoutRequest::STATUS_FAILED,
-                'error_message' => $errorMessage
+                'error_message' => $errorMessage,
             ]);
 
             // CRITICAL: Refund the balance to mentor
@@ -287,7 +297,7 @@ class MonerooWebhookController extends Controller
                 $payoutRequest->mentorProfile->user,
                 $creditsRefund,
                 'refund',
-                "Remboursement retrait échoué (Webhook)",
+                'Remboursement retrait échoué (Webhook)',
                 $payoutRequest
             );
 
@@ -295,7 +305,7 @@ class MonerooWebhookController extends Controller
                 'payout_id' => $payoutRequest->id,
                 'moneroo_payout_id' => $monerooPayoutId,
                 'amount_refunded' => $payoutRequest->amount,
-                'credits_refunded' => $creditsRefund
+                'credits_refunded' => $creditsRefund,
             ]);
 
             // Notification email
@@ -303,8 +313,7 @@ class MonerooWebhookController extends Controller
 
             return response()->json(['message' => 'Payout failure processed'], 200);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error processing Moneroo payout failure', [
                 'payout_id' => $payoutRequest->id,
                 'error' => $e->getMessage(),
@@ -320,11 +329,12 @@ class MonerooWebhookController extends Controller
      */
     protected function handleSubscriptionActivation($transaction, $entity): void
     {
-        if (!($entity instanceof \App\Models\Organization)) {
+        if (! ($entity instanceof \App\Models\Organization)) {
             Log::warning('Subscription payment received but entity is not an organization', [
                 'transaction_id' => $transaction->id,
-                'entity_type' => get_class($entity)
+                'entity_type' => get_class($entity),
             ]);
+
             return;
         }
 
@@ -332,14 +342,16 @@ class MonerooWebhookController extends Controller
         $planId = $metadata['plan_id'] ?? null;
         $billingCycle = $metadata['billing_cycle'] ?? 'monthly';
 
-        if (!$planId) {
+        if (! $planId) {
             Log::error('Subscription plan ID missing in transaction metadata', ['transaction_id' => $transaction->id]);
+
             return;
         }
 
         $plan = \App\Models\CreditPack::find($planId);
-        if (!$plan) {
+        if (! $plan) {
             Log::error('Subscription plan not found', ['plan_id' => $planId, 'transaction_id' => $transaction->id]);
+
             return;
         }
 
@@ -352,7 +364,7 @@ class MonerooWebhookController extends Controller
         Log::info('Organization subscription activated via webhook', [
             'org_id' => $entity->id,
             'plan_name' => $plan->name,
-            'plan_target' => $plan->target_plan
+            'plan_target' => $plan->target_plan,
         ]);
     }
 }

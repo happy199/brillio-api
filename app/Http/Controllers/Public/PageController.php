@@ -23,7 +23,7 @@ class PageController extends Controller
             $countriesCount = \App\Models\User::distinct('country')->whereNotNull('country')->count('country');
         } catch (\Exception $e) {
             // Fallback en cas d'erreur DB pour ne pas casser la home
-            \Illuminate\Support\Facades\Log::error('Erreur récupération stats home: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Erreur récupération stats home: '.$e->getMessage());
             $jeunesCount = 10000;
             $mentorsCount = 500;
             $countriesCount = 15;
@@ -92,7 +92,7 @@ class PageController extends Controller
     public function mentorProfile(MentorProfile $mentor)
     {
         // Vérifier que le profil est publié
-        if (!$mentor->is_published) {
+        if (! $mentor->is_published) {
             abort(404);
         }
 
@@ -135,6 +135,7 @@ class PageController extends Controller
             'publicData' => $publicData,
         ]);
     }
+
     /**
      * Profil public d'un jeune (partageable)
      */

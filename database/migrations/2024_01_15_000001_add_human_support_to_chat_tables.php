@@ -16,7 +16,7 @@ return new class extends Migration
             $table->boolean('needs_human_support')->default(false)->after('title');
             $table->boolean('human_support_active')->default(false)->after('needs_human_support');
             $table->foreignId('human_support_admin_id')->nullable()->after('human_support_active')
-                  ->constrained('users')->nullOnDelete();
+                ->constrained('users')->nullOnDelete();
             $table->timestamp('human_support_started_at')->nullable()->after('human_support_admin_id');
             $table->timestamp('human_support_ended_at')->nullable()->after('human_support_started_at');
         });
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->boolean('is_from_human')->default(false)->after('role');
             $table->boolean('is_system_message')->default(false)->after('is_from_human');
             $table->foreignId('admin_id')->nullable()->after('is_system_message')
-                  ->constrained('users')->nullOnDelete();
+                ->constrained('users')->nullOnDelete();
         });
     }
 

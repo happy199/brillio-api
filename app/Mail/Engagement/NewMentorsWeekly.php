@@ -15,6 +15,7 @@ class NewMentorsWeekly extends Mailable
     use Queueable, SerializesModels;
 
     public User $jeune;
+
     public Collection $mentors;
 
     /**
@@ -32,6 +33,7 @@ class NewMentorsWeekly extends Mailable
     public function envelope(): Envelope
     {
         $count = $this->mentors->count();
+
         return new Envelope(
             subject: "🚀 {$count} nouveaux mentors ont rejoint Brillio cette semaine !",
         );

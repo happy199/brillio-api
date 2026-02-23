@@ -16,7 +16,7 @@ class EnsureUserIsOrganization
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('organization.login')
                 ->with('error', 'Vous devez être connecté pour accéder à cette page.');
         }
@@ -27,7 +27,7 @@ class EnsureUserIsOrganization
 
         // Email Verification check for Organizations
         if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&
-        !auth()->user()->hasVerifiedEmail()) {
+        ! auth()->user()->hasVerifiedEmail()) {
             return $request->expectsJson()
                 ? abort(403, 'Votre adresse email n\'est pas vérifiée.')
                 : redirect()->route('organization.verification.notice');

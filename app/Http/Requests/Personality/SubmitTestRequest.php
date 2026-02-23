@@ -46,5 +46,4 @@ class SubmitTestRequest extends FormRequest
             'responses.*.max' => 'La valeur maximale est 5',
         ];
     }
-
 }

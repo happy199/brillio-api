@@ -23,7 +23,7 @@ class UploadDocumentRequest extends FormRequest
                 'max:5120', // 5 Mo en Ko
                 'mimes:pdf,jpeg,jpg,png,doc,docx',
             ],
-            'document_type' => ['required', 'string', 'in:' . $documentTypes],
+            'document_type' => ['required', 'string', 'in:'.$documentTypes],
             'academic_year' => ['nullable', 'string', 'max:20', 'regex:/^\d{4}-\d{4}$/'],
             'grade_level' => ['nullable', 'string', 'max:50'],
         ];

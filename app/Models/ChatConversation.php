@@ -94,7 +94,7 @@ class ChatConversation extends Model
      */
     public function needsAttention(): bool
     {
-        return $this->needs_human_support && !$this->human_support_active;
+        return $this->needs_human_support && ! $this->human_support_active;
     }
 
     /**
