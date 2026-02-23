@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -31,7 +32,7 @@ return new class extends Migration {
     {
         Schema::table('credit_packs', function (Blueprint $table) {
             $table->dropColumn(['type', 'duration_days', 'target_plan', 'features']);
-        // Reverting user_type to enum is complex without raw SQL, skipping for now
+            // Reverting user_type to enum is complex without raw SQL, skipping for now
         });
     }
 };

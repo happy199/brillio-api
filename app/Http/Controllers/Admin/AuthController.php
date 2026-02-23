@@ -31,8 +31,9 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             // Vérifier si l'utilisateur est admin
-            if (!Auth::user()->isAdmin()) {
+            if (! Auth::user()->isAdmin()) {
                 Auth::logout();
+
                 return back()->withErrors([
                     'email' => 'Accès réservé aux administrateurs.',
                 ]);

@@ -47,6 +47,7 @@ class PayoutController extends Controller
     public function show(PayoutRequest $payout)
     {
         $payout->load('mentorProfile.user');
+
         return view('admin.payouts.show', compact('payout'));
     }
 }

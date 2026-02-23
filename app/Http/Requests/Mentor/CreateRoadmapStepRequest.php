@@ -17,7 +17,7 @@ class CreateRoadmapStepRequest extends FormRequest
         $stepTypes = implode(',', array_keys(RoadmapStep::STEP_TYPES));
 
         return [
-            'step_type' => ['required', 'string', 'in:' . $stepTypes],
+            'step_type' => ['required', 'string', 'in:'.$stepTypes],
             'title' => ['required', 'string', 'max:255'],
             'institution_company' => ['nullable', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],

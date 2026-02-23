@@ -16,6 +16,7 @@ class ProcessPayoutJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
+
     public $backoff = [60, 120, 300]; // Retry après 1min, 2min, 5min
 
     protected PayoutRequest $payoutRequest;
@@ -36,13 +37,13 @@ class ProcessPayoutJob implements ShouldQueue
         try {
             Log::info('ProcessPayoutJob: Starting payout processing', [
                 'payout_id' => $this->payoutRequest->id,
-                'amount' => $this->payoutRequest->net_amount
+                'amount' => $this->payoutRequest->net_amount,
             ]);
 
             // Mettre à jour le statut en processing
             $this->payoutRequest->update([
                 'status' => PayoutRequest::STATUS_PROCESSING,
-                'processed_at' => now()
+                'processed_at' => now(),
             ]);
 
             // Créer le payout avec Moneroo
@@ -64,7 +65,7 @@ class ProcessPayoutJob implements ShouldQueue
 
                 Log::info('ProcessPayoutJob: Payout initiated, waiting for webhook confirmation', [
                     'payout_id' => $this->payoutRequest->id,
-                    'moneroo_payout_id' => $response['data']['data']['id'] ?? null
+                    'moneroo_payout_id' => $response['data']['data']['id'] ?? null,
                 ]);
 
                 // NOTE: Le statut final sera mis à jour par le webhook
@@ -78,14 +79,14 @@ class ProcessPayoutJob implements ShouldQueue
             Log::error('ProcessPayoutJob: Payout failed', [
                 'payout_id' => $this->payoutRequest->id,
                 'error' => $e->getMessage(),
-                'attempt' => $this->attempts()
+                'attempt' => $this->attempts(),
             ]);
 
             // Si c'est la dernière tentative, marquer comme failed
             if ($this->attempts() >= $this->tries) {
                 $this->payoutRequest->update([
                     'status' => PayoutRequest::STATUS_FAILED,
-                    'error_message' => $e->getMessage()
+                    'error_message' => $e->getMessage(),
                 ]);
 
                 // Rembourser le solde du mentor
@@ -101,16 +102,16 @@ class ProcessPayoutJob implements ShouldQueue
                         $this->payoutRequest->mentorProfile->user,
                         $creditsRefund,
                         'refund',
-                        "Remboursement retrait échoué",
+                        'Remboursement retrait échoué',
                         $this->payoutRequest
                     );
                 } catch (\Exception $e) {
                     Log::error('ProcessPayoutJob: Failed to refund credits', ['error' => $e->getMessage()]);
                 }
 
-                Log::error('ProcessPayoutJob: Payout failed permanently after ' . $this->attempts() . ' attempts', [
+                Log::error('ProcessPayoutJob: Payout failed permanently after '.$this->attempts().' attempts', [
                     'payout_id' => $this->payoutRequest->id,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             } else {
                 // Relancer l'exception pour permettre les retries
@@ -126,14 +127,14 @@ class ProcessPayoutJob implements ShouldQueue
     {
         Log::error('ProcessPayoutJob: Job failed permanently', [
             'payout_id' => $this->payoutRequest->id,
-            'error' => $exception->getMessage()
+            'error' => $exception->getMessage(),
         ]);
 
         // S'assurer que le statut est bien failed et le solde remboursé
         if ($this->payoutRequest->status !== PayoutRequest::STATUS_FAILED) {
             $this->payoutRequest->update([
                 'status' => PayoutRequest::STATUS_FAILED,
-                'error_message' => $exception->getMessage()
+                'error_message' => $exception->getMessage(),
             ]);
 
             $this->payoutRequest->mentorProfile->increment('available_balance', $this->payoutRequest->amount);
@@ -148,7 +149,7 @@ class ProcessPayoutJob implements ShouldQueue
                     $this->payoutRequest->mentorProfile->user,
                     $creditsRefund,
                     'refund',
-                    "Remboursement retrait échoué (Job Failed)",
+                    'Remboursement retrait échoué (Job Failed)',
                     $this->payoutRequest
                 );
             } catch (\Exception $e) {

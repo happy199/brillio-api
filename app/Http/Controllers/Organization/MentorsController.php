@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
+use App\Models\MentoringSession;
 use App\Models\Organization;
 use App\Models\User;
-use App\Models\MentoringSession;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\DB;
 
 class MentorsController extends Controller
 {
@@ -21,7 +20,7 @@ class MentorsController extends Controller
         $user = auth()->user();
         $organization = $user->organization;
 
-        if (!$organization) {
+        if (! $organization) {
             $organization = Organization::where('contact_email', $user->email)->firstOrFail();
         }
 
@@ -49,12 +48,11 @@ class MentorsController extends Controller
             // External mentors: Not linked to organization BUT have sessions with organization's sponsored youths
             $query = User::where('user_type', 'mentor')
                 ->whereDoesntHave('organizations', function ($sq) use ($organization) {
-                $sq->where('organizations.id', $organization->id);
-            })
+                    $sq->where('organizations.id', $organization->id);
+                })
                 ->whereIn('id', $activeMentorsIds)
                 ->with(['mentorProfile']);
-        }
-        else {
+        } else {
             // Internal mentors: Linked directly via organization_user
             $query = $organization->mentors()->with(['mentorProfile']);
         }
@@ -68,10 +66,9 @@ class MentorsController extends Controller
             });
         }
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             $mentors = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
-        }
-        else {
+        } else {
             $mentors = $query->latest()->paginate(12)->withQueryString();
         }
 
@@ -89,15 +86,15 @@ class MentorsController extends Controller
         $isLinked = $organization->mentors()->where('users.id', $mentor->id)->exists();
         $hasSessionsWithYouths = MentoringSession::where('mentor_id', $mentor->id)
             ->whereHas('mentees', function ($q) use ($organization) {
-            $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
-                ->where('organization_user.organization_id', $organization->id);
-        })->exists();
+                $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                    ->where('organization_user.organization_id', $organization->id);
+            })->exists();
 
-        if (!$isLinked && !$hasSessionsWithYouths) {
+        if (! $isLinked && ! $hasSessionsWithYouths) {
             abort(403, 'Accès non autorisé');
         }
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             return view('organization.mentors.show', [
                 'organization' => $organization,
                 'mentor' => $mentor,
@@ -113,13 +110,13 @@ class MentorsController extends Controller
         // Only sessions with organization's youths
         $sessions = MentoringSession::where('mentor_id', $mentor->id)
             ->whereHas('mentees', function ($q) use ($organization) {
-            $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
-                ->where('organization_user.organization_id', $organization->id);
-        })
+                $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                    ->where('organization_user.organization_id', $organization->id);
+            })
             ->with(['mentees' => function ($q) use ($organization) {
-            $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
-                ->where('organization_user.organization_id', $organization->id);
-        }])
+                $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                    ->where('organization_user.organization_id', $organization->id);
+            }])
             ->latest('scheduled_at')
             ->get();
 
@@ -135,7 +132,7 @@ class MentorsController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             abort(403, 'Plan Pro requis pour l\'export');
         }
 
@@ -153,18 +150,18 @@ class MentorsController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             abort(403, 'Plan Pro requis pour l\'export');
         }
 
         $mentor->load(['mentorProfile']);
 
         $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=profil-mentor-{$mentor->id}.csv",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=profil-mentor-{$mentor->id}.csv",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $columns = ['ID', 'Nom', 'Email', 'Position', 'Entreprise', 'Specialisation', 'Experience', 'Ville', 'Pays', 'LinkedIn'];

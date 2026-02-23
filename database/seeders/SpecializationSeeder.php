@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Specialization;
 use App\Models\MentorProfile;
+use App\Models\Specialization;
 use Illuminate\Database\Seeder;
 
 class SpecializationSeeder extends Seeder

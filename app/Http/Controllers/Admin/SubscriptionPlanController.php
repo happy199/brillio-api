@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\CreditPack;
+use Illuminate\Http\Request;
 
 class SubscriptionPlanController extends Controller
 {
@@ -30,7 +30,7 @@ class SubscriptionPlanController extends Controller
             'features' => 'nullable|array',
             'display_order' => 'integer',
             'is_popular' => 'boolean',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ]);
 
         $validated['type'] = 'subscription';
@@ -78,6 +78,7 @@ class SubscriptionPlanController extends Controller
         }
 
         $subscriptionPlan->delete();
+
         return back()->with('success', 'Plan supprimé.');
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Smalot\PdfParser\Parser;
 use Illuminate\Support\Facades\Log;
+use Smalot\PdfParser\Parser;
 
 class LinkedInPdfParserService
 {
@@ -21,7 +21,7 @@ class LinkedInPdfParserService
     {
         $text = '';
         try {
-            $parser = new Parser();
+            $parser = new Parser;
             $pdf = $parser->parseFile($pdfPath);
 
             // Extraire le texte brut
@@ -29,16 +29,15 @@ class LinkedInPdfParserService
 
             Log::info('📄 PDF Text extracted', [
                 'length' => strlen($text),
-                'first_1000_chars' => substr($text, 0, 1000)
+                'first_1000_chars' => substr($text, 0, 1000),
             ]);
 
             // Tentative de parsing via IA
             return $this->parseWithAI($text);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::warning('⚠️ AI Parsing failed, falling back to legacy regex parser', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             // Fallback sur l'ancien système si l'IA échoue
@@ -51,16 +50,16 @@ class LinkedInPdfParserService
      */
     private function parseWithAI($text)
     {
-        $systemPrompt = "Tu es un expert en extraction de données de CV (Resume Parser).\n" .
-            "Ta mission est d'analyser le texte brut d'un profil LinkedIn PDF et d'en extraire les informations structurées au format JSON STRICT.\n\n" .
-            "RÈGLES IMPORTANTES :\n" .
-            "- Ne jamais inventer d'information. Si une info est manquante, mets null ou une chaine vide.\n" .
-            "- Répont UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n" .
-            "- Le format de sortie doit respecter exactement la structure demandée.\n\n" .
-            "STRUCTURE JSON ATTENDUE :\n" .
+        $systemPrompt = "Tu es un expert en extraction de données de CV (Resume Parser).\n".
+            "Ta mission est d'analyser le texte brut d'un profil LinkedIn PDF et d'en extraire les informations structurées au format JSON STRICT.\n\n".
+            "RÈGLES IMPORTANTES :\n".
+            "- Ne jamais inventer d'information. Si une info est manquante, mets null ou une chaine vide.\n".
+            "- Répont UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n".
+            "- Le format de sortie doit respecter exactement la structure demandée.\n\n".
+            "STRUCTURE JSON ATTENDUE :\n".
             '{"name": "Nom complet", "headline": "Titre du profil ou poste actuel", "contact": {"email": "email found or empty", "phone": "phone found or empty", "linkedin": "linkedin url or empty", "website": "website url or empty"}, "summary": "Bio", "skills": ["Compétence 1"], "experience": [{"title": "Poste", "company": "Entreprise", "description": "Tâches", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD or null if currently in this role", "duration_years": 0, "duration_months": 0}], "education": [{"school": "Ecole", "degree": "Diplôme", "year_start": 0, "year_end": 0}]}';
 
-        $prompt = "Voici le contenu brut du PDF LinkedIn. Extrais les données en JSON :\n\n" . substr($text, 0, 60000);
+        $prompt = "Voici le contenu brut du PDF LinkedIn. Extrais les données en JSON :\n\n".substr($text, 0, 60000);
 
         Log::info('🤖 Sending PDF text to AI...');
         $jsonResponse = $this->deepSeekService->analyzeText($prompt, $systemPrompt);
@@ -69,12 +68,12 @@ class LinkedInPdfParserService
         $data = json_decode($cleanJson, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Erreur lors du décodage de la réponse IA: ' . json_last_error_msg());
+            throw new \Exception('Erreur lors du décodage de la réponse IA: '.json_last_error_msg());
         }
 
         // Stats
         Log::info('✅ AI Parsing Successful', [
-            'name' => $data['name'] ?? 'Unknown'
+            'name' => $data['name'] ?? 'Unknown',
         ]);
 
         return $data;
@@ -103,7 +102,7 @@ class LinkedInPdfParserService
             'experience' => $this->extractExperience($lines),
             'education' => $this->extractEducation($lines),
             'skills' => $this->extractSkills($lines),
-            'is_fallback' => true // Flag pour info
+            'is_fallback' => true, // Flag pour info
         ];
 
         return $data;
@@ -120,7 +119,7 @@ class LinkedInPdfParserService
 
         foreach ($lines as $line) {
             $line = trim($line);
-            if (!empty($line)) {
+            if (! empty($line)) {
                 $cleanLines[] = $line;
             }
         }
@@ -133,11 +132,13 @@ class LinkedInPdfParserService
         foreach ($lines as $i => $line) {
             $lineLower = strtolower(trim($line));
             if (str_contains($lineLower, 'expérience') || $lineLower === 'experience') {
-                if ($i >= 3)
+                if ($i >= 3) {
                     return trim($lines[$i - 3]);
+                }
                 break;
             }
         }
+
         return '';
     }
 
@@ -146,11 +147,13 @@ class LinkedInPdfParserService
         foreach ($lines as $i => $line) {
             $lineLower = strtolower(trim($line));
             if (str_contains($lineLower, 'expérience') || $lineLower === 'experience') {
-                if ($i >= 2)
+                if ($i >= 2) {
                     return trim($lines[$i - 2]);
+                }
                 break;
             }
         }
+
         return '';
     }
 
@@ -158,20 +161,24 @@ class LinkedInPdfParserService
     {
         $contact = ['email' => '', 'phone' => '', 'linkedin' => '', 'website' => ''];
         foreach ($lines as $i => $line) {
-            if (preg_match('/[\w\.-]+@[\w\.-]+\.\w+/', $line, $matches))
+            if (preg_match('/[\w\.-]+@[\w\.-]+\.\w+/', $line, $matches)) {
                 $contact['email'] = $matches[0];
+            }
             if (preg_match('/linkedin\.com\/in\/([\w-]+)/', $line, $matches)) {
-                $url = 'https://linkedin.com/in/' . $matches[1];
+                $url = 'https://linkedin.com/in/'.$matches[1];
                 if (isset($lines[$i + 1]) && str_contains($lines[$i + 1], '(LinkedIn)')) {
                     $url .= trim(str_replace('(LinkedIn)', '', $lines[$i + 1]));
                 }
                 $contact['linkedin'] = $url;
             }
-            if (preg_match('/([a-z0-9-]+\.[a-z]{2,})\s*\(Company\)/i', $line, $matches))
-                $contact['website'] = 'https://' . $matches[1];
-            if (preg_match('/\+?\d{10,}/', $line, $matches))
+            if (preg_match('/([a-z0-9-]+\.[a-z]{2,})\s*\(Company\)/i', $line, $matches)) {
+                $contact['website'] = 'https://'.$matches[1];
+            }
+            if (preg_match('/\+?\d{10,}/', $line, $matches)) {
                 $contact['phone'] = $matches[0];
+            }
         }
+
         return $contact;
     }
 
@@ -191,15 +198,19 @@ class LinkedInPdfParserService
         foreach ($lines as $i => $line) {
             if (stripos($line, 'Principales compétences') !== false || stripos($line, 'Skills') !== false) {
                 $inSkillsSection = true;
+
                 continue;
             }
             if ($inSkillsSection) {
-                if ($experienceIndex !== null && $i >= ($experienceIndex - 3))
+                if ($experienceIndex !== null && $i >= ($experienceIndex - 3)) {
                     break;
-                if (strlen($line) > 2 && strlen($line) < 100)
+                }
+                if (strlen($line) > 2 && strlen($line) < 100) {
                     $skills[] = $line;
+                }
             }
         }
+
         return array_unique($skills);
     }
 
@@ -212,21 +223,25 @@ class LinkedInPdfParserService
         foreach ($lines as $line) {
             if (stripos($line, 'Expérience') !== false || stripos($line, 'Experience') !== false) {
                 $inSection = true;
+
                 continue;
             }
-            if (stripos($line, 'Formation') !== false || stripos($line, 'Education') !== false)
+            if (stripos($line, 'Formation') !== false || stripos($line, 'Education') !== false) {
                 break;
+            }
 
             if ($inSection) {
                 $block[] = $line;
                 if (count($block) === 4) {
                     $exp = $this->parseExperienceBlock($block);
-                    if ($exp)
+                    if ($exp) {
                         $experiences[] = $exp;
+                    }
                     $block = [];
                 }
             }
         }
+
         return $experiences;
     }
 
@@ -242,20 +257,19 @@ class LinkedInPdfParserService
 
         if (preg_match('/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\s*-\s*(?:.*?(\d{4})|Present|Aujourd’hui|Présent)/i', $dates, $m)) {
             $startDate = $m[2];
-            $endDate = (!empty($m[3])) ? $m[3] : null;
+            $endDate = (! empty($m[3])) ? $m[3] : null;
         }
 
         if (preg_match('/\((\d+)\s+ans?\s*(?:(\d+)\s+mois)?\)/i', $dates, $m)) {
-            $years = (int)$m[1];
-            $months = (int)($m[2] ?? 0);
-        }
-        elseif (preg_match('/\((\d+)\s+mois\)/i', $dates, $m)) {
-            $months = (int)$m[1];
+            $years = (int) $m[1];
+            $months = (int) ($m[2] ?? 0);
+        } elseif (preg_match('/\((\d+)\s+mois\)/i', $dates, $m)) {
+            $months = (int) $m[1];
         }
 
         return [
             'title' => $title, 'company' => $company, 'start_date' => $startDate, 'end_date' => $endDate,
-            'description' => $location, 'duration_years' => $years, 'duration_months' => $months
+            'description' => $location, 'duration_years' => $years, 'duration_months' => $months,
         ];
     }
 
@@ -268,29 +282,31 @@ class LinkedInPdfParserService
         foreach ($lines as $line) {
             if (stripos($line, 'Formation') !== false || stripos($line, 'Education') !== false) {
                 $inSection = true;
+
                 continue;
             }
             if ($inSection) {
-                if (preg_match('/Page \d+ of \d+/', $line))
+                if (preg_match('/Page \d+ of \d+/', $line)) {
                     continue;
+                }
                 $block[] = $line;
                 if (count($block) === 2) {
                     $school = $block[0];
                     $degree = $block[1];
                     $start = $end = null;
                     if (preg_match('/\(.*?(\d{4}).*?-.*?(\d{4})\)/', $degree, $m)) {
-                        $start = (int)$m[1];
-                        $end = (int)$m[2];
-                    }
-                    elseif (preg_match('/\(.*?(\d{4})/', $degree, $m)) {
-                        $start = (int)$m[1];
-                        $end = (int)date('Y');
+                        $start = (int) $m[1];
+                        $end = (int) $m[2];
+                    } elseif (preg_match('/\(.*?(\d{4})/', $degree, $m)) {
+                        $start = (int) $m[1];
+                        $end = (int) date('Y');
                     }
                     $education[] = ['school' => $school, 'degree' => $degree, 'year_start' => $start, 'year_end' => $end];
                     $block = [];
                 }
             }
         }
+
         return $education;
     }
 }

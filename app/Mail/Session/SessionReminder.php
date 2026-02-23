@@ -16,7 +16,9 @@ class SessionReminder extends Mailable
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
+
     public User $recipient;
+
     public Collection $participants;
 
     /**
@@ -38,6 +40,7 @@ class SessionReminder extends Mailable
     public function envelope(): Envelope
     {
         $time = $this->session->scheduled_at->format('H:i');
+
         return new Envelope(
             subject: "⏰ Rappel : Session demain à {$time} - Brillio",
         );

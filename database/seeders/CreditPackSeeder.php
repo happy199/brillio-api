@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CreditPackSeeder extends Seeder
@@ -27,7 +26,7 @@ class CreditPackSeeder extends Seeder
             'description' => 'Idéal pour commencer',
             'is_active' => true,
             'is_popular' => false,
-            'display_order' => 1
+            'display_order' => 1,
         ]);
 
         // 50 Crédits (-5%) -> 2375 FCFA
@@ -40,7 +39,7 @@ class CreditPackSeeder extends Seeder
             'description' => 'Pour aller plus loin',
             'is_active' => true,
             'is_popular' => true,
-            'display_order' => 2
+            'display_order' => 2,
         ]);
 
         // 100 Crédits (-10%) -> 4500 FCFA
@@ -53,7 +52,7 @@ class CreditPackSeeder extends Seeder
             'description' => 'Le meilleur rapport qualité/prix',
             'is_active' => true,
             'is_popular' => false,
-            'display_order' => 3
+            'display_order' => 3,
         ]);
 
         // 500 Crédits (-15%) -> 21250 FCFA
@@ -66,9 +65,8 @@ class CreditPackSeeder extends Seeder
             'description' => 'Pour les utilisateurs intensifs',
             'is_active' => true,
             'is_popular' => false,
-            'display_order' => 4
+            'display_order' => 4,
         ]);
-
 
         // --- MENTOR (Base 100 FCFA) ---
 
@@ -82,7 +80,7 @@ class CreditPackSeeder extends Seeder
             'description' => 'Pour tester la plateforme',
             'is_active' => true,
             'is_popular' => false,
-            'display_order' => 1
+            'display_order' => 1,
         ]);
 
         // 50 Crédits (-5%) -> 4750 FCFA
@@ -95,7 +93,7 @@ class CreditPackSeeder extends Seeder
             'description' => 'Boostez votre visibilité',
             'is_active' => true,
             'is_popular' => true,
-            'display_order' => 2
+            'display_order' => 2,
         ]);
 
         // 100 Crédits (-10%) -> 9000 FCFA
@@ -108,7 +106,7 @@ class CreditPackSeeder extends Seeder
             'description' => 'Pour les mentors actifs',
             'is_active' => true,
             'is_popular' => false,
-            'display_order' => 3
+            'display_order' => 3,
         ]);
 
         // 500 Crédits (-15%) -> 42500 FCFA
@@ -121,7 +119,7 @@ class CreditPackSeeder extends Seeder
             'description' => 'Une visibilité maximale',
             'is_active' => true,
             'is_popular' => false,
-            'display_order' => 4
+            'display_order' => 4,
         ]);
     }
 }

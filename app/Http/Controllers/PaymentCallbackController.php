@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\MonerooTransaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PaymentCallbackController extends Controller
@@ -27,10 +26,11 @@ class PaymentCallbackController extends Controller
         // Find the transaction by Moneroo payment ID
         $transaction = MonerooTransaction::where('moneroo_transaction_id', $monerooPaymentId)->first();
 
-        if (!$transaction) {
+        if (! $transaction) {
             Log::warning('Transaction not found in callback', [
-                'moneroo_payment_id' => $monerooPaymentId
+                'moneroo_payment_id' => $monerooPaymentId,
             ]);
+
             return redirect()->route('jeune.wallet.index')
                 ->withErrors(['error' => 'Transaction introuvable.']);
         }
@@ -56,12 +56,14 @@ class PaymentCallbackController extends Controller
 
         if ($status === 'cancelled') {
             $transaction->update(['status' => 'cancelled']);
+
             return redirect()->route($redirectRoute)
                 ->with('warning', 'Paiement annulé.');
         }
 
         if ($status === 'failed') {
             $transaction->markAsFailed();
+
             return redirect()->route($redirectRoute)
                 ->withErrors(['error' => 'Le paiement a échoué. Veuillez réessayer.']);
         }

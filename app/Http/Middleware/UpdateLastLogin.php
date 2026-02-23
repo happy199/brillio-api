@@ -20,7 +20,7 @@ class UpdateLastLogin
         if ($user) {
             // Update last_login_at if it's null or more than 1 hour ago
             // to avoid hitting the DB on every single request
-            if (!$user->last_login_at || $user->last_login_at->diffInHours(now()) >= 1) {
+            if (! $user->last_login_at || $user->last_login_at->diffInHours(now()) >= 1) {
                 $user->update(['last_login_at' => now()]);
             }
 

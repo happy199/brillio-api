@@ -2,8 +2,8 @@
 
 use App\Models\CreditPack;
 
-require __DIR__ . '/vendor/autoload.php';
-$app = require_once __DIR__ . '/bootstrap/app.php';
+require __DIR__.'/vendor/autoload.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
@@ -17,12 +17,12 @@ $packs = [
 
 foreach ($packs as $data) {
     CreditPack::updateOrCreate(
-    ['user_type' => 'organization', 'credits' => $data['credits'], 'type' => 'credits'],
+        ['user_type' => 'organization', 'credits' => $data['credits'], 'type' => 'credits'],
         array_merge($data, [
-        'type' => 'credits',
-        'is_active' => true,
-        'description' => "Pack de {$data['credits']} crédits pour organisation."
-    ])
+            'type' => 'credits',
+            'is_active' => true,
+            'description' => "Pack de {$data['credits']} crédits pour organisation.",
+        ])
     );
 }
 
@@ -35,7 +35,7 @@ $plans = [
         'price' => 20000,
         'display_order' => 1,
         'is_popular' => true,
-        'description' => 'Accès complet aux statistiques et calendrier.'
+        'description' => 'Accès complet aux statistiques et calendrier.',
     ],
     [
         'name' => 'Abonnement Pro Annuel',
@@ -43,7 +43,7 @@ $plans = [
         'duration_days' => 365,
         'price' => 200000,
         'display_order' => 2,
-        'description' => 'Accès complet avec 2 mois gratuits.'
+        'description' => 'Accès complet avec 2 mois gratuits.',
     ],
     [
         'name' => 'Abonnement Entreprise',
@@ -51,17 +51,17 @@ $plans = [
         'duration_days' => 30,
         'price' => 50000,
         'display_order' => 3,
-        'description' => 'Support prioritaire et export complet de données.'
+        'description' => 'Support prioritaire et export complet de données.',
     ],
 ];
 
 foreach ($plans as $data) {
     CreditPack::updateOrCreate(
-    ['user_type' => 'organization', 'target_plan' => $data['target_plan'], 'duration_days' => $data['duration_days'], 'type' => 'subscription'],
+        ['user_type' => 'organization', 'target_plan' => $data['target_plan'], 'duration_days' => $data['duration_days'], 'type' => 'subscription'],
         array_merge($data, [
-        'type' => 'subscription',
-        'is_active' => true,
-    ])
+            'type' => 'subscription',
+            'is_active' => true,
+        ])
     );
 }
 

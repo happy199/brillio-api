@@ -2,15 +2,18 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class MonerooService
 {
     protected string $secretKey;
+
     protected bool $isSandbox;
+
     protected string $apiUrl;
+
     protected string $currency;
 
     public function __construct()
@@ -24,12 +27,13 @@ class MonerooService
     /**
      * Initialize a payment with Moneroo
      *
-     * @param float $amount Amount in XOF
-     * @param string $description Payment description
-     * @param array $customer Customer information ['first_name', 'last_name', 'email', 'phone']
-     * @param array $metadata Additional data to store
-     * @param string $returnUrl URL to redirect after payment
+     * @param  float  $amount  Amount in XOF
+     * @param  string  $description  Payment description
+     * @param  array  $customer  Customer information ['first_name', 'last_name', 'email', 'phone']
+     * @param  array  $metadata  Additional data to store
+     * @param  string  $returnUrl  URL to redirect after payment
      * @return array Payment data with checkout URL
+     *
      * @throws Exception
      */
     public function initializePayment(
@@ -67,17 +71,17 @@ class MonerooService
             ]);
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Authorization' => 'Bearer '.$this->secretKey,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ])->post($this->apiUrl . '/payments/initialize', $payload);
+            ])->post($this->apiUrl.'/payments/initialize', $payload);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('Moneroo: Payment initialization failed', [
                     'status' => $response->status(),
                     'response' => $response->json(),
                 ]);
-                throw new Exception('Failed to initialize payment: ' . $response->body());
+                throw new Exception('Failed to initialize payment: '.$response->body());
             }
 
             $data = $response->json();
@@ -99,8 +103,9 @@ class MonerooService
     /**
      * Verify a payment transaction
      *
-     * @param string $transactionId Moneroo transaction ID
+     * @param  string  $transactionId  Moneroo transaction ID
      * @return array Transaction data
+     *
      * @throws Exception
      */
     public function verifyPayment(string $transactionId): array
@@ -109,17 +114,17 @@ class MonerooService
             Log::info('Moneroo: Verifying payment', ['transaction_id' => $transactionId]);
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Authorization' => 'Bearer '.$this->secretKey,
                 'Accept' => 'application/json',
-            ])->get($this->apiUrl . '/payments/' . $transactionId);
+            ])->get($this->apiUrl.'/payments/'.$transactionId);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('Moneroo: Payment verification failed', [
                     'transaction_id' => $transactionId,
                     'status' => $response->status(),
                     'response' => $response->json(),
                 ]);
-                throw new Exception('Failed to verify payment: ' . $response->body());
+                throw new Exception('Failed to verify payment: '.$response->body());
             }
 
             $data = $response->json();
@@ -142,8 +147,8 @@ class MonerooService
     /**
      * Verify webhook signature from Moneroo
      *
-     * @param string $payload Raw webhook payload
-     * @param string $signature Signature from X-Moneroo-Signature header
+     * @param  string  $payload  Raw webhook payload
+     * @param  string  $signature  Signature from X-Moneroo-Signature header
      * @return bool True if signature is valid
      */
     public function verifyWebhookSignature(string $payload, string $signature): bool
@@ -152,13 +157,14 @@ class MonerooService
 
         if (empty($webhookSecret)) {
             Log::warning('Moneroo: Webhook secret not configured');
+
             return false;
         }
 
         $computedSignature = hash_hmac('sha256', $payload, $webhookSecret);
         $isValid = hash_equals($computedSignature, $signature);
 
-        if (!$isValid) {
+        if (! $isValid) {
             Log::warning('Moneroo: Invalid webhook signature', [
                 'expected' => $computedSignature,
                 'received' => $signature,
@@ -170,8 +176,8 @@ class MonerooService
 
     /**
      * Convert credits to XOF amount
-     * 
-     * @param int $credits Number of credits
+     *
+     * @param  int  $credits  Number of credits
      * @return float Amount in XOF
      */
     public function creditsToAmount(int $credits): float
@@ -182,8 +188,8 @@ class MonerooService
 
     /**
      * Convert XOF amount to credits
-     * 
-     * @param float $amount Amount in XOF
+     *
+     * @param  float  $amount  Amount in XOF
      * @return int Number of credits
      */
     public function amountToCredits(float $amount): int
@@ -194,8 +200,8 @@ class MonerooService
 
     /**
      * Split a full name into first and last name
-     * 
-     * @param string $fullName Full name (e.g., "Tidjani Happy")
+     *
+     * @param  string  $fullName  Full name (e.g., "Tidjani Happy")
      * @return array ['first_name' => string, 'last_name' => string]
      */
     public function splitName(string $fullName): array
@@ -210,8 +216,6 @@ class MonerooService
 
     /**
      * Récupérer les méthodes de paiement disponibles pour les payouts
-     *
-     * @return array
      */
     public function getPayoutMethods(): array
     {
@@ -220,25 +224,26 @@ class MonerooService
             $baseUrl = str_replace('/v1', '', $this->apiUrl);
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->secretKey,
-                'Accept' => 'application/json'
-            ])->get($baseUrl . '/utils/payment/methods');
+                'Authorization' => 'Bearer '.$this->secretKey,
+                'Accept' => 'application/json',
+            ])->get($baseUrl.'/utils/payment/methods');
 
             if ($response->successful()) {
                 $data = $response->json();
                 Log::info('Moneroo: Payout methods retrieved', ['data' => $data]);
+
                 return $data;
             }
 
             Log::error('Moneroo: Failed to get payout methods', [
                 'status' => $response->status(),
-                'body' => $response->body()
+                'body' => $response->body(),
             ]);
 
             return [];
         } catch (Exception $e) {
             Log::error('Moneroo: Exception during getPayoutMethods', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
 
             return [];
@@ -248,10 +253,9 @@ class MonerooService
     /**
      * Créer un payout (retrait) pour un mentor
      *
-     * @param float $amount Montant du payout en FCFA
-     * @param string $phone Numéro de téléphone du bénéficiaire
-     * @param string $method Méthode de paiement (ex: mtn_bj, moov_bj)
-     * @return array
+     * @param  float  $amount  Montant du payout en FCFA
+     * @param  string  $phone  Numéro de téléphone du bénéficiaire
+     * @param  string  $method  Méthode de paiement (ex: mtn_bj, moov_bj)
      */
     public function createPayout(float $amount, string $phone, string $method, string $country, string $dialCode, array $customer = []): array
     {
@@ -268,8 +272,8 @@ class MonerooService
             // Le dial_code est déjà fourni depuis le frontend (ex: "+229")
             // On ajoute l'indicatif s'il n'est pas déjà présent
             $dialCodeDigits = preg_replace('/[^0-9]/', '', $dialCode); // "229"
-            if (!str_starts_with($cleanPhone, $dialCodeDigits)) {
-                $cleanPhone = $dialCodeDigits . $cleanPhone;
+            if (! str_starts_with($cleanPhone, $dialCodeDigits)) {
+                $cleanPhone = $dialCodeDigits.$cleanPhone;
             }
 
             // L'API veut un entier
@@ -288,7 +292,7 @@ class MonerooService
                 ],
                 'method' => $method,
                 'recipient' => [
-                    'msisdn' => $formattedPhone
+                    'msisdn' => $formattedPhone,
                 ],
             ];
 
@@ -296,39 +300,39 @@ class MonerooService
 
             // POST /v1/payouts/initialize
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->secretKey,
+                'Authorization' => 'Bearer '.$this->secretKey,
                 'Accept' => 'application/json',
-                'Content-Type' => 'application/json'
-            ])->post($this->apiUrl . '/payouts/initialize', $payload);
+                'Content-Type' => 'application/json',
+            ])->post($this->apiUrl.'/payouts/initialize', $payload);
 
             $data = $response->json();
 
             Log::info('Moneroo: Payout response', [
                 'status' => $response->status(),
-                'data' => $data
+                'data' => $data,
             ]);
 
             if ($response->successful()) {
                 return [
                     'success' => true,
-                    'data' => $data
+                    'data' => $data,
                 ];
             }
 
             return [
                 'success' => false,
                 'message' => $data['message'] ?? 'Payout failed',
-                'errors' => $data['errors'] ?? []
+                'errors' => $data['errors'] ?? [],
             ];
         } catch (Exception $e) {
             Log::error('Moneroo: Exception during createPayout', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }
@@ -336,36 +340,35 @@ class MonerooService
     /**
      * Vérifier le statut d'un payout
      *
-     * @param string $payoutId ID du payout Moneroo
-     * @return array
+     * @param  string  $payoutId  ID du payout Moneroo
      */
     public function getPayoutStatus(string $payoutId): array
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->secretKey,
-                'Accept' => 'application/json'
-            ])->get($this->apiUrl . '/payouts/' . $payoutId);
+                'Authorization' => 'Bearer '.$this->secretKey,
+                'Accept' => 'application/json',
+            ])->get($this->apiUrl.'/payouts/'.$payoutId);
 
             if ($response->successful()) {
                 return [
                     'success' => true,
-                    'data' => $response->json()
+                    'data' => $response->json(),
                 ];
             }
 
             return [
                 'success' => false,
-                'message' => 'Failed to get payout status'
+                'message' => 'Failed to get payout status',
             ];
         } catch (Exception $e) {
             Log::error('Moneroo: Exception during getPayoutStatus', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
 
             return [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }
@@ -373,8 +376,7 @@ class MonerooService
     /**
      * Calculer les frais de retrait
      *
-     * @param float $amount Montant du retrait en FCFA
-     * @return float
+     * @param  float  $amount  Montant du retrait en FCFA
      */
     public function calculateFee(float $amount): float
     {
@@ -383,6 +385,7 @@ class MonerooService
         $minFee = \App\Models\SystemSetting::getValue('payout_min_fee', 250); // 250 FCFA minimum
 
         $fee = max($amount * $feeRate, $minFee);
+
         return round($fee, 2);
     }
 }

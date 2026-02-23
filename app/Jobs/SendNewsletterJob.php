@@ -8,8 +8,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SendNewsletterJob implements ShouldQueue
 {
@@ -54,7 +54,7 @@ class SendNewsletterJob implements ShouldQueue
                 $sent++;
             } catch (\Exception $e) {
                 $failed++;
-                Log::error('Newsletter email failed in Job: ' . $e->getMessage(), ['email' => $email]);
+                Log::error('Newsletter email failed in Job: '.$e->getMessage(), ['email' => $email]);
             }
         }
 
@@ -66,4 +66,3 @@ class SendNewsletterJob implements ShouldQueue
         ]);
     }
 }
-

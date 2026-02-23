@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
-use App\Models\Organization;
 use App\Models\MentoringSession;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class SessionController extends Controller
@@ -19,14 +19,13 @@ class SessionController extends Controller
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             $sessions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
-        }
-        else {
+        } else {
             $query = MentoringSession::query()
                 ->whereHas('mentees', function ($q) use ($organization) {
-                $q->where('sponsored_by_organization_id', $organization->id);
-            })
+                    $q->where('sponsored_by_organization_id', $organization->id);
+                })
                 ->with(['mentor', 'mentees']);
 
             // Filtre par statut
@@ -47,14 +46,13 @@ class SessionController extends Controller
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             $sessions = collect();
-        }
-        else {
+        } else {
             $sessions = MentoringSession::query()
                 ->whereHas('mentees', function ($q) use ($organization) {
-                $q->where('sponsored_by_organization_id', $organization->id);
-            })
+                    $q->where('sponsored_by_organization_id', $organization->id);
+                })
                 ->with(['mentor', 'mentees'])
                 ->get();
         }
@@ -69,27 +67,28 @@ class SessionController extends Controller
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             return response()->json([]);
         }
 
         $sessions = MentoringSession::query()
             ->whereHas('mentees', function ($q) use ($organization) {
-            $q->where('sponsored_by_organization_id', $organization->id);
-        })
+                $q->where('sponsored_by_organization_id', $organization->id);
+            })
             ->with(['mentor', 'mentees'])
             ->get()
             ->map(function ($session) {
-            $menteeNames = $session->mentees->pluck('name')->implode(', ');
-            return [
-            'id' => $session->id,
-            'title' => $session->title . " ($menteeNames)",
-            'start' => $session->scheduled_at->toIso8601String(),
-            'end' => $session->scheduled_at->addMinutes($session->duration_minutes)->toIso8601String(),
-            'url' => route('organization.sessions.show', $session),
-            'color' => $this->getStatusColor($session->status),
-            ];
-        });
+                $menteeNames = $session->mentees->pluck('name')->implode(', ');
+
+                return [
+                    'id' => $session->id,
+                    'title' => $session->title." ($menteeNames)",
+                    'start' => $session->scheduled_at->toIso8601String(),
+                    'end' => $session->scheduled_at->addMinutes($session->duration_minutes)->toIso8601String(),
+                    'url' => route('organization.sessions.show', $session),
+                    'color' => $this->getStatusColor($session->status),
+                ];
+            });
 
         return response()->json($sessions);
     }
@@ -104,7 +103,7 @@ class SessionController extends Controller
         // Vérification : au moins un menté doit être parrainé par cette organisation
         $isAuthorized = $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
 
-        if (!$isAuthorized) {
+        if (! $isAuthorized) {
             abort(403, 'Accès non autorisé');
         }
 
@@ -118,12 +117,12 @@ class SessionController extends Controller
     private function getStatusColor($status)
     {
         return match ($status) {
-                'confirmed' => '#dcfce7', // bg-green-100
-                'completed' => '#e0e7ff', // bg-indigo-100
-                'cancelled' => '#fee2e2', // bg-red-100
-                'pending_payment' => '#fef3c7', // bg-amber-100
-                'proposed' => '#f3f4f6', // bg-gray-100
-                default => '#f3f4f6',
-            };
+            'confirmed' => '#dcfce7', // bg-green-100
+            'completed' => '#e0e7ff', // bg-indigo-100
+            'cancelled' => '#fee2e2', // bg-red-100
+            'pending_payment' => '#fef3c7', // bg-amber-100
+            'proposed' => '#f3f4f6', // bg-gray-100
+            default => '#f3f4f6',
+        };
     }
 }

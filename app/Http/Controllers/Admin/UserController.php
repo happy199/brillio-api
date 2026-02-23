@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Organization;
 use App\Models\MentorProfile;
-use App\Models\JeuneProfile;
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * Controller pour la gestion des utilisateurs dans le dashboard admin
@@ -44,14 +43,13 @@ class UserController extends Controller
         // Filtre par statut d'archivage
         if ($request->has('archived')) {
             $query->where('is_archived', true);
-        }
-        else {
-        // Par défaut, on ne montre pas les archivés sauf si demandé explicitement
-        // OU on peut décider de tout montrer et utiliser un badget.
-        // Pour l'instant, faisons un filtre explicite : ?archived=1 pour voir les archives
-        // $query->where('is_archived', false); 
-        // ^ Si on décommente ça, ils sont masqués par défaut. 
-        // Mais l'utilisateur veut un onglet séparé, donc le filtre est logique.
+        } else {
+            // Par défaut, on ne montre pas les archivés sauf si demandé explicitement
+            // OU on peut décider de tout montrer et utiliser un badget.
+            // Pour l'instant, faisons un filtre explicite : ?archived=1 pour voir les archives
+            // $query->where('is_archived', false);
+            // ^ Si on décommente ça, ils sont masqués par défaut.
+            // Mais l'utilisateur veut un onglet séparé, donc le filtre est logique.
         }
 
         // Tri
@@ -116,16 +114,14 @@ class UserController extends Controller
                 'is_validated' => true,
                 'bio' => 'Compte de démonstration.',
             ]);
-        }
-        elseif ($userType === 'jeune') {
+        } elseif ($userType === 'jeune') {
             if (class_exists('App\Models\JeuneProfile')) {
                 \App\Models\JeuneProfile::create([
                     'user_id' => $user->id,
                     'bio' => 'Compte de démonstration.',
                 ]);
             }
-        }
-        elseif ($userType === 'organization') {
+        } elseif ($userType === 'organization') {
             Organization::create([
                 'name' => $user->name,
                 'contact_email' => $user->email,
@@ -140,7 +136,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')
-            ->with('success', "Utilisateur créé avec succès.")
+            ->with('success', 'Utilisateur créé avec succès.')
             ->with('generated_password', $password)
             ->with('generated_email', $user->email);
     }
@@ -208,7 +204,7 @@ class UserController extends Controller
      */
     public function reactivate(User $user)
     {
-        if (!$user->is_archived) {
+        if (! $user->is_archived) {
             return back()->with('error', 'Ce compte n\'est pas archivé');
         }
 
@@ -230,7 +226,7 @@ class UserController extends Controller
             return back()->with('error', 'Vous ne pouvez pas modifier vos propres droits admin');
         }
 
-        $user->is_admin = !$user->is_admin;
+        $user->is_admin = ! $user->is_admin;
         $user->save();
 
         $message = $user->is_admin
@@ -245,7 +241,7 @@ class UserController extends Controller
      */
     public function proposePromotion(User $user)
     {
-        if (!$user->isJeune()) {
+        if (! $user->isJeune()) {
             return back()->with('error', "Cet utilisateur n'est pas un étudiant.");
         }
 
@@ -260,10 +256,11 @@ class UserController extends Controller
 
         try {
             \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\PromotionProposalMail($user, $acceptUrl));
+
             return back()->with('success', "Le compte de {$user->name} a été archivé et la proposition de promotion a été envoyée.");
-        }
-        catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur envoi proposition promotion: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur envoi proposition promotion: '.$e->getMessage());
+
             return back()->with('error', "Le compte a été archivé mais une erreur est survenue lors de l'envoi de l'e-mail.");
         }
     }
@@ -274,7 +271,7 @@ class UserController extends Controller
     public function block(Request $request, User $user)
     {
         if ($user->id === auth()->id()) {
-            return back()->with('error', "Vous ne pouvez pas vous bloquer vous-même.");
+            return back()->with('error', 'Vous ne pouvez pas vous bloquer vous-même.');
         }
 
         $user->update([

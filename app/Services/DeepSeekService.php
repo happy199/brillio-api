@@ -21,12 +21,19 @@ use Illuminate\Support\Facades\Log;
 class DeepSeekService
 {
     private $apiKey;
+
     private $apiUrl;
+
     private $model;
+
     private $maxTokens;
+
     private $temperature;
+
     private $siteUrl;
+
     private $siteName;
+
     private $systemPrompt;
 
     /**
@@ -39,13 +46,13 @@ class DeepSeekService
         $this->apiKey = config('services.openrouter.api_key', env('OPENROUTER_API_KEY'));
         $this->apiUrl = config('services.openrouter.api_url', 'https://openrouter.ai/api/v1/chat/completions');
         $this->model = config('services.openrouter.model', 'deepseek/deepseek-r1:free');
-        $this->maxTokens = (int)config('services.openrouter.max_tokens', 2000);
-        $this->temperature = (float)config('services.openrouter.temperature', 0.7);
+        $this->maxTokens = (int) config('services.openrouter.max_tokens', 2000);
+        $this->temperature = (float) config('services.openrouter.temperature', 0.7);
         $this->siteUrl = config('services.openrouter.site_url', 'https://www.brillio.africa');
         $this->siteName = config('services.openrouter.site_name', 'Brillio');
 
         // Initialisation du prompt systeme avec l'instruction de formatage pour separer pensee et reponse
-        $this->systemPrompt = self::SYSTEM_PROMPT_TEXT . "\n\nIMPORTANT: Pour chaque reponse, tu dois D'ABORD reflechir (tu peux afficher ta reflexion), puis IMPERATIVEMENT ecrire ta reponse finale au destinataire entre les balises <answer> et </answer>. Exemple: <answer>Bonjour Tidjani...</answer>";
+        $this->systemPrompt = self::SYSTEM_PROMPT_TEXT."\n\nIMPORTANT: Pour chaque reponse, tu dois D'ABORD reflechir (tu peux afficher ta reflexion), puis IMPERATIVEMENT ecrire ta reponse finale au destinataire entre les balises <answer> et </answer>. Exemple: <answer>Bonjour Tidjani...</answer>";
     }
 
     /**
@@ -54,7 +61,7 @@ class DeepSeekService
     private function cleanResponse($content, $formatting = true)
     {
         // 1. Essayer d'extraire le contenu entre <answer>...</answer>
-        $matches = array();
+        $matches = [];
         if (preg_match('/<answer>(.*?)<\/answer>/s', $content, $matches)) {
             $content = $matches[1];
         }
@@ -88,10 +95,10 @@ class DeepSeekService
 
     public function createConversation(User $user, $title = null)
     {
-        return ChatConversation::create(array(
+        return ChatConversation::create([
             'user_id' => $user->id,
             'title' => ($title !== null) ? $title : 'Nouvelle conversation',
-        ));
+        ]);
     }
 
     /**
@@ -100,11 +107,11 @@ class DeepSeekService
     public function sendMessage(ChatConversation $conversation, $userMessage)
     {
         // 1. Enregistrer le message utilisateur
-        $userChatMessage = ChatMessage::create(array(
+        $userChatMessage = ChatMessage::create([
             'conversation_id' => $conversation->id,
             'role' => ChatMessage::ROLE_USER,
             'content' => $userMessage,
-        ));
+        ]);
 
         // 2. Construire le contexte avec l'historique (max 10 derniers messages)
         $messages = $this->buildMessagesContext($conversation);
@@ -113,11 +120,11 @@ class DeepSeekService
         $aiResponse = $this->callOpenRouterApi($messages);
 
         // 4. Enregistrer la reponse de l'IA
-        $assistantMessage = ChatMessage::create(array(
+        $assistantMessage = ChatMessage::create([
             'conversation_id' => $conversation->id,
             'role' => ChatMessage::ROLE_ASSISTANT,
             'content' => $aiResponse,
-        ));
+        ]);
 
         // 5. Mettre a jour le titre si c'est le premier message
         if ($conversation->messages()->count() <= 2) {
@@ -132,12 +139,12 @@ class DeepSeekService
      */
     private function buildMessagesContext(ChatConversation $conversation)
     {
-        $messages = array(
-                array(
+        $messages = [
+            [
                 'role' => 'system',
                 'content' => $this->systemPrompt,
-            ),
-        );
+            ],
+        ];
 
         // Ajouter le contexte utilisateur si disponible
         $user = $conversation->user;
@@ -151,20 +158,20 @@ class DeepSeekService
                     $firstName = 'ami(e)';
                 }
 
-                array_push($messages, array(
+                array_push($messages, [
                     'role' => 'system',
-                    'content' => "CONTEXTE UTILISATEUR - UTILISE CES INFORMATIONS POUR PERSONNALISER TES REPONSES:\n" . $userContext . "\n\nIMPORTANT: Tu parles a " . $firstName . ". Utilise son prenom dans tes reponses et tutoie-le/la toujours!",
-                ));
+                    'content' => "CONTEXTE UTILISATEUR - UTILISE CES INFORMATIONS POUR PERSONNALISER TES REPONSES:\n".$userContext."\n\nIMPORTANT: Tu parles a ".$firstName.'. Utilise son prenom dans tes reponses et tutoie-le/la toujours!',
+                ]);
             }
         }
 
         // Ajouter les 10 derniers messages de la conversation
         $historyMessages = $conversation->getLastMessages(10);
         foreach ($historyMessages as $message) {
-            array_push($messages, array(
+            array_push($messages, [
                 'role' => $message->role,
                 'content' => $message->content,
-            ));
+            ]);
         }
 
         return $messages;
@@ -175,29 +182,29 @@ class DeepSeekService
      */
     private function buildUserContext(User $user)
     {
-        $context = array();
+        $context = [];
 
         if (isset($user->name) && $user->name) {
-            array_push($context, "Nom : " . $user->name);
+            array_push($context, 'Nom : '.$user->name);
         }
 
         if (isset($user->country) && $user->country) {
-            array_push($context, "Pays : " . $user->country);
+            array_push($context, 'Pays : '.$user->country);
         }
 
         if (isset($user->city) && $user->city) {
-            array_push($context, "Ville : " . $user->city);
+            array_push($context, 'Ville : '.$user->city);
         }
 
         if (isset($user->date_of_birth) && $user->date_of_birth) {
             $age = $user->date_of_birth->age;
-            array_push($context, "Age : " . $age . " ans");
+            array_push($context, 'Age : '.$age.' ans');
         }
 
         // Ajouter le type de personnalite si disponible
         $personalityTest = $user->personalityTest;
         if ($personalityTest && $personalityTest->isCompleted()) {
-            array_push($context, "Type de personnalite : " . $personalityTest->personality_type . " (" . $personalityTest->personality_label . ")");
+            array_push($context, 'Type de personnalite : '.$personalityTest->personality_type.' ('.$personalityTest->personality_label.')');
         }
 
         return implode(', ', $context);
@@ -208,7 +215,7 @@ class DeepSeekService
      */
     public function isApiKeyConfigured()
     {
-        return !empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
+        return ! empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
     }
 
     /**
@@ -217,16 +224,16 @@ class DeepSeekService
      */
     public function analyzeText($prompt, $systemPrompt = null)
     {
-        $messages = array(
-                array(
+        $messages = [
+            [
                 'role' => 'system',
                 'content' => ($systemPrompt !== null) ? $systemPrompt : $this->systemPrompt,
-            ),
-                array(
+            ],
+            [
                 'role' => 'user',
                 'content' => $prompt,
-            )
-        );
+            ],
+        ];
 
         return $this->callOpenRouterApi($messages, false);
     }
@@ -240,7 +247,7 @@ class DeepSeekService
         $content = preg_replace('/```(?:json)?\s*(.*?)\s*```/s', '$1', $content);
 
         // 2. Extraire la premiere structure JSON complete (entre { et } ou [ et ])
-        $matches = array();
+        $matches = [];
         if (preg_match('/(\{.*\}|\[.*\])/s', $content, $matches)) {
             $content = $matches[0];
         }
@@ -261,52 +268,53 @@ class DeepSeekService
     private function callOpenRouterApi($messages, $formatting = true)
     {
         $apiKeyVal = isset($this->apiKey) ? $this->apiKey : '';
-        Log::info('=== APPEL API OPENROUTER ===', array(
+        Log::info('=== APPEL API OPENROUTER ===', [
             'api_url' => $this->apiUrl,
             'model' => $this->model,
             'messages_count' => count($messages),
             'api_key_configured' => $this->isApiKeyConfigured(),
-            'api_key_preview' => substr($apiKeyVal, 0, 10) . '...',
-        ));
+            'api_key_preview' => substr($apiKeyVal, 0, 10).'...',
+        ]);
 
         try {
-            if (!$this->isApiKeyConfigured()) {
-                Log::warning('OpenRouter API key not configured', array(
+            if (! $this->isApiKeyConfigured()) {
+                Log::warning('OpenRouter API key not configured', [
                     'api_key_value' => $this->apiKey,
-                ));
-                return "";
+                ]);
+
+                return '';
             }
 
-            Log::info('Envoi requete OpenRouter', array(
+            Log::info('Envoi requete OpenRouter', [
                 'url' => $this->apiUrl,
                 'model' => $this->model,
-            ));
+            ]);
 
-            $response = Http::withHeaders(array(
-                'Authorization' => 'Bearer ' . $this->apiKey,
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer '.$this->apiKey,
                 'HTTP-Referer' => $this->siteUrl,
                 'X-Title' => $this->siteName,
                 'Content-Type' => 'application/json',
-            ))->timeout(300)->post($this->apiUrl, array(
+            ])->timeout(300)->post($this->apiUrl, [
                 'model' => $this->model,
                 'messages' => $messages,
                 'max_tokens' => $this->maxTokens,
                 'temperature' => $this->temperature,
-            ));
+            ]);
 
-            Log::info('Reponse OpenRouter recue', array(
+            Log::info('Reponse OpenRouter recue', [
                 'status' => $response->status(),
                 'successful' => $response->successful(),
                 'body_length' => strlen($response->body()),
-            ));
+            ]);
 
             if ($response->successful()) {
                 $data = $response->json();
 
                 // DEBUG: Loguer la reponse brute pour comprendre la structure
-                Log::info('DEBUG OPENROUTER RESPONSE', array('data' => $data));
+                Log::info('DEBUG OPENROUTER RESPONSE', ['data' => $data]);
 
-                $choices = array();
+                $choices = [];
                 if (isset($data['choices'])) {
                     $choices = $data['choices'];
                 }
@@ -326,26 +334,27 @@ class DeepSeekService
                     $content = $messageData['content'];
                 }
 
-                $hasContent = !empty($content);
+                $hasContent = ! empty($content);
                 $contentLength = 0;
                 if ($content) {
                     $contentLength = strlen($content);
                 }
 
-                Log::info('Contenu extrait de la reponse', array(
+                Log::info('Contenu extrait de la reponse', [
                     'has_content' => $hasContent,
                     'content_length' => $contentLength,
-                ));
+                ]);
 
                 if ($content) {
                     $content = $this->cleanResponse($content, $formatting);
                     Log::info('=== REPONSE OPENROUTER OK ===');
+
                     return $content;
                 }
 
                 $errorMsg = 'Pas de contenu dans la reponse OpenRouter';
                 if (isset($data['error']['message'])) {
-                    $errorMsg .= ': ' . $data['error']['message'];
+                    $errorMsg .= ': '.$data['error']['message'];
                 }
                 throw new \Exception($errorMsg);
             }
@@ -357,20 +366,19 @@ class DeepSeekService
                 $errorMessage = $decodedError['error']['message'];
             }
 
-            Log::error('OpenRouter API error', array(
+            Log::error('OpenRouter API error', [
                 'status' => $response->status(),
                 'message' => $errorMessage,
                 'body' => $errorBody,
-            ));
+            ]);
 
-            throw new \Exception("OpenRouter Error (" . $response->status() . "): " . $errorMessage);
-        }
-        catch (\Exception $e) {
-            Log::error('OpenRouter API exception', array(
+            throw new \Exception('OpenRouter Error ('.$response->status().'): '.$errorMessage);
+        } catch (\Exception $e) {
+            Log::error('OpenRouter API exception', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-            ));
+            ]);
 
             throw $e;
         }
@@ -440,12 +448,12 @@ class DeepSeekService
      */
     public function translate($prompt)
     {
-        $messages = array(
-                array(
+        $messages = [
+            [
                 'role' => 'user',
                 'content' => $prompt,
-            ),
-        );
+            ],
+        ];
 
         return $this->callOpenRouterApi($messages);
     }

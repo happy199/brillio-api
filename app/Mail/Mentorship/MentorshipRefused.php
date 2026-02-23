@@ -15,8 +15,11 @@ class MentorshipRefused extends Mailable
     use Queueable, SerializesModels;
 
     public Mentorship $mentorship;
+
     public User $mentor;
+
     public User $mentee;
+
     public ?string $reason;
 
     /**
@@ -36,7 +39,7 @@ class MentorshipRefused extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Mise à jour concernant votre demande de mentorat - Brillio",
+            subject: 'Mise à jour concernant votre demande de mentorat - Brillio',
         );
     }
 

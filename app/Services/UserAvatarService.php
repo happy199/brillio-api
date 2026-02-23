@@ -7,7 +7,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class UserAvatarService
 {
@@ -28,23 +27,23 @@ class UserAvatarService
             // Si l'utilisateur a déjà une photo locale (path)
             if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
 
-                // Si c'est un mentor, on est très conservateur : 
+                // Si c'est un mentor, on est très conservateur :
                 // on ne remplace la photo que si la nouvelle URL est LinkedIn ET différente de l'actuelle
                 if ($user->isMentor()) {
-                    if (!$this->isLinkedInUrl($url)) {
+                    if (! $this->isLinkedInUrl($url)) {
                         Log::info('[Safety Check] skipping avatar download for mentor: incoming URL is not LinkedIn', [
                             'user_id' => $user->id,
-                            'url' => $url
+                            'url' => $url,
                         ]);
+
                         return $user->profile_photo_path;
                     }
 
                     if ($user->profile_photo_url === $url) {
                         return $user->profile_photo_path;
                     }
-                }
-                else {
-                    // Pour les autres types de comptes, comportement standard : 
+                } else {
+                    // Pour les autres types de comptes, comportement standard :
                     // on ne télécharge que si l'URL a changé
                     if ($user->profile_photo_url === $url) {
                         return $user->profile_photo_path;
@@ -60,7 +59,7 @@ class UserAvatarService
                 $this->deleteCurrentAvatar($user);
 
                 // Générer un nom de fichier unique
-                $filename = 'profile-photos/' . $user->id . '_' . time() . '.jpg';
+                $filename = 'profile-photos/'.$user->id.'_'.time().'.jpg';
 
                 // Stocker la nouvelle image
                 Storage::disk('public')->put($filename, $response->body());
@@ -75,8 +74,7 @@ class UserAvatarService
 
                 return $filename;
             }
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Failed to download avatar via Service', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
 

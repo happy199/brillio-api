@@ -24,7 +24,7 @@ class RegisterController extends Controller
                 ->whereIn('role', ['admin', 'viewer'])
                 ->first();
 
-            if (!$invitation || !$invitation->isValid()) {
+            if (! $invitation || ! $invitation->isValid()) {
                 return redirect()->route('organization.login')
                     ->with('error', 'Le lien d\'invitation est invalide ou expiré.');
             }
@@ -59,7 +59,7 @@ class RegisterController extends Controller
         ];
 
         // Only require organization details if NOT joining an existing one
-        if (!$isJoining) {
+        if (! $isJoining) {
             $rules['organization_name'] = ['required', 'string', 'max:255'];
             $rules['sector'] = ['nullable', 'string', 'max:100'];
             $rules['phone'] = ['nullable', 'string', 'max:20'];
@@ -85,8 +85,7 @@ class RegisterController extends Controller
 
             // Mark invitation as used
             $invitation->markAsAccepted();
-        }
-        else {
+        } else {
             // Create new organization
             $organization = Organization::create([
                 'name' => $validated['organization_name'],
@@ -118,7 +117,7 @@ class RegisterController extends Controller
         Auth::login($user);
 
         return redirect()->route('organization.dashboard')
-            ->with('success', $isJoining ? "Bienvenue ! Vous avez rejoint l'équipe avec succès." : "Bienvenue ! Votre compte organisation a été créé avec succès.");
+            ->with('success', $isJoining ? "Bienvenue ! Vous avez rejoint l'équipe avec succès." : 'Bienvenue ! Votre compte organisation a été créé avec succès.');
     }
 
     /**
@@ -145,8 +144,8 @@ class RegisterController extends Controller
 
         // Attempt login
         if (Auth::attempt([
-        ...$credentials,
-        'user_type' => 'organization'
+            ...$credentials,
+            'user_type' => 'organization',
         ], $request->filled('remember'))) {
             $request->session()->regenerate();
 

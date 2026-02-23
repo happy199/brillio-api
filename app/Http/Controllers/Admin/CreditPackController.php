@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Models\CreditPack;
+use Illuminate\Http\Request;
 
 class CreditPackController extends Controller
 {
@@ -41,7 +40,7 @@ class CreditPackController extends Controller
             'name' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'display_order' => 'integer',
-            'is_popular' => 'boolean'
+            'is_popular' => 'boolean',
         ]);
 
         $validated['type'] = 'credits';
@@ -78,6 +77,7 @@ class CreditPackController extends Controller
     public function destroy(CreditPack $creditPack)
     {
         $creditPack->delete();
+
         return back()->with('success', 'Pack supprimé.');
     }
 }

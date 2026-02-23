@@ -25,7 +25,7 @@ class JeuneDashboardController extends Controller
         $user = auth()->user();
 
         // Verifier si l'onboarding est complete
-        if (!$user->onboarding_completed) {
+        if (! $user->onboarding_completed) {
             return redirect()->route('jeune.onboarding');
         }
 
@@ -137,7 +137,7 @@ class JeuneDashboardController extends Controller
                 'body_length' => strlen($mbtiResponse->body()),
             ]);
 
-            if (!$mbtiResponse->successful()) {
+            if (! $mbtiResponse->successful()) {
                 Log::error('OpenMBTI API error', [
                     'status' => $mbtiResponse->status(),
                     'body' => $mbtiResponse->body(),
@@ -157,7 +157,7 @@ class JeuneDashboardController extends Controller
 
                 $result = $mbtiData['result'] ?? null;
 
-                if (!$result) {
+                if (! $result) {
                     Log::warning('Resultat OpenMBTI invalide, utilisation fallback');
                     $localResult = $personalityService->calculatePersonalityType($responses);
                     $mbtiType = $localResult['type'];
@@ -185,7 +185,7 @@ class JeuneDashboardController extends Controller
             // 2. Récupérer les informations du type depuis notre service local
             $typeInfo = $personalityService::TYPE_DESCRIPTIONS[$mbtiType] ?? [
                 'label' => $mbtiType,
-                'description' => 'Type de personnalité ' . $mbtiType,
+                'description' => 'Type de personnalité '.$mbtiType,
             ];
 
             // 3. Récupérer les métiers depuis MbtiCareersService (données statiques, pas d'API)
@@ -275,7 +275,7 @@ class JeuneDashboardController extends Controller
             ->where('id', $testId)
             ->first();
 
-        if (!$test) {
+        if (! $test) {
             return response()->json([
                 'success' => false,
                 'message' => 'Test non trouvé.',
@@ -285,7 +285,7 @@ class JeuneDashboardController extends Controller
         // Récupérer les infos du type
         $typeInfo = PersonalityService::TYPE_DESCRIPTIONS[$test->personality_type] ?? [
             'label' => $test->personality_type,
-            'description' => 'Type de personnalité ' . $test->personality_type,
+            'description' => 'Type de personnalité '.$test->personality_type,
         ];
 
         // Récupérer les métiers (depuis les données sauvegardées ou générer)
@@ -351,7 +351,7 @@ class JeuneDashboardController extends Controller
             return "au {$user->country}";
         }
 
-        return "au Sénégal";
+        return 'au Sénégal';
     }
 
     /**
@@ -392,7 +392,7 @@ class JeuneDashboardController extends Controller
         // Filtre par pays
         if ($request->filled('country')) {
             $query->whereHas('user', function ($q) use ($request) {
-                $q->where('country', 'like', '%' . $request->country . '%');
+                $q->where('country', 'like', '%'.$request->country.'%');
             });
         }
 
@@ -400,11 +400,11 @@ class JeuneDashboardController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('bio', 'like', '%' . $search . '%')
-                    ->orWhere('current_position', 'like', '%' . $search . '%')
-                    ->orWhere('current_company', 'like', '%' . $search . '%')
+                $q->where('bio', 'like', '%'.$search.'%')
+                    ->orWhere('current_position', 'like', '%'.$search.'%')
+                    ->orWhere('current_company', 'like', '%'.$search.'%')
                     ->orWhereHas('user', function ($q2) use ($search) {
-                        $q2->where('name', 'like', '%' . $search . '%');
+                        $q2->where('name', 'like', '%'.$search.'%');
                     });
             });
         }
@@ -518,7 +518,7 @@ class JeuneDashboardController extends Controller
         ]);
 
         $file = $request->file('document');
-        $path = $file->store('documents/' . auth()->id(), 'public');
+        $path = $file->store('documents/'.auth()->id(), 'public');
 
         auth()->user()->academicDocuments()->create([
             'file_name' => $file->getClientOriginalName(),
@@ -540,7 +540,7 @@ class JeuneDashboardController extends Controller
     {
         $doc = auth()->user()->academicDocuments()->findOrFail($document);
 
-        return response()->download(storage_path('app/public/' . $doc->file_path), $doc->file_name);
+        return response()->download(storage_path('app/public/'.$doc->file_path), $doc->file_name);
     }
 
     /**
@@ -549,9 +549,9 @@ class JeuneDashboardController extends Controller
     public function viewDocument($document)
     {
         $doc = auth()->user()->academicDocuments()->findOrFail($document);
-        $path = storage_path('app/public/' . $doc->file_path);
+        $path = storage_path('app/public/'.$doc->file_path);
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             abort(404);
         }
 
@@ -596,8 +596,9 @@ class JeuneDashboardController extends Controller
                 ->where('user_id', $user->id)
                 ->first();
 
-            if (!$conversation) {
+            if (! $conversation) {
                 Log::warning('Conversation non trouvee', ['conversation_id' => $conversationId]);
+
                 return response()->json([
                     'success' => false,
                     'error' => 'Conversation non trouvee',
@@ -610,6 +611,7 @@ class JeuneDashboardController extends Controller
 
             if ($conversationCount >= 2) {
                 Log::warning('Limite de conversations atteinte', ['user_id' => $user->id]);
+
                 return response()->json([
                     'success' => false,
                     'error' => 'Tu as atteint la limite de 2 conversations. Supprime une conversation existante pour en créer une nouvelle.',
@@ -677,7 +679,7 @@ class JeuneDashboardController extends Controller
         $messages = $conversation->messages()
             ->orderBy('created_at', 'asc')
             ->get()
-            ->map(fn($m) => ['role' => $m->role, 'content' => $m->content]);
+            ->map(fn ($m) => ['role' => $m->role, 'content' => $m->content]);
 
         return response()->json([
             'success' => true,

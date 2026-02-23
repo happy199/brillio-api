@@ -7,7 +7,6 @@ use App\Models\Coupon;
 use App\Models\SystemSetting;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class MonetizationController extends Controller
 {
@@ -22,7 +21,7 @@ class MonetizationController extends Controller
             'credit_price_organization',
             'feature_cost_advanced_targeting',
             'payout_fee_percentage',
-            'mentorship_commission_percent'
+            'mentorship_commission_percent',
         ])->get()->keyBy('key');
 
         $creditPriceJeune = $settings['credit_price_jeune']->value ?? 50;
@@ -72,8 +71,8 @@ class MonetizationController extends Controller
         $orgRevenue = \App\Models\MonerooTransaction::where('status', 'completed')
             ->where('user_type', 'App\Models\User')
             ->whereHas('user', function ($q) {
-            $q->where('user_type', 'organization');
-        })
+                $q->where('user_type', 'organization');
+            })
             ->sum('amount');
 
         // 50 dernières transactions (Include organization relationship)
@@ -121,8 +120,8 @@ class MonetizationController extends Controller
 
         foreach ($validated as $key => $value) {
             SystemSetting::updateOrCreate(
-            ['key' => $key],
-            ['value' => $value, 'type' => 'integer']
+                ['key' => $key],
+                ['value' => $value, 'type' => 'integer']
             );
         }
 
@@ -135,6 +134,7 @@ class MonetizationController extends Controller
     public function coupons()
     {
         $coupons = Coupon::latest()->paginate(20);
+
         return view('admin.monetization.coupons', compact('coupons'));
     }
 
@@ -167,6 +167,7 @@ class MonetizationController extends Controller
     public function destroyCoupon(Coupon $coupon)
     {
         $coupon->delete();
+
         return back()->with('success', 'Coupon supprimé.');
     }
 }

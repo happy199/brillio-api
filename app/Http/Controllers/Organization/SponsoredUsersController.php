@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
+use App\Models\MentoringSession;
+use App\Models\MentorProfile;
 use App\Models\Organization;
 use App\Models\User;
-use App\Models\MentorProfile;
-use App\Models\MentoringSession;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class SponsoredUsersController extends Controller
@@ -19,26 +19,26 @@ class SponsoredUsersController extends Controller
     public function index(Request $request)
     {
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
-        
+
         $query = $organization->users()->with(['personalityTest', 'jeuneProfile']);
 
         // Recherche textuelle
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
         // Filtre par Test de Personnalité
         if ($request->filled('test_status')) {
             if ($request->test_status === 'completed') {
-                $query->whereHas('personalityTest', function($q) {
+                $query->whereHas('personalityTest', function ($q) {
                     $q->whereNotNull('completed_at');
                 });
             } elseif ($request->test_status === 'pending') {
-                $query->whereDoesntHave('personalityTest', function($q) {
+                $query->whereDoesntHave('personalityTest', function ($q) {
                     $q->whereNotNull('completed_at');
                 });
             }
@@ -50,14 +50,14 @@ class SponsoredUsersController extends Controller
                 $query->where('last_login_at', '>=', now()->subDays(30));
             } elseif ($request->status === 'inactive') {
                 // Inactif = jamais connecté OU connecté il y a plus de 30 jours
-                $query->where(function($q) {
+                $query->where(function ($q) {
                     $q->where('last_login_at', '<', now()->subDays(30))
-                      ->orWhereNull('last_login_at');
+                        ->orWhereNull('last_login_at');
                 });
             }
         }
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             $users = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
         } else {
             $users = $query->latest()->paginate(12)->withQueryString();
@@ -73,17 +73,17 @@ class SponsoredUsersController extends Controller
     {
         $organization = auth()->user()->organization;
 
-        if (!$organization) {
+        if (! $organization) {
             $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
         }
 
         // Vérification de sécurité : l'utilisateur doit être lié à cette organisation
-        if (!$organization->users()->where('users.id', $user->id)->exists()) {
+        if (! $organization->users()->where('users.id', $user->id)->exists()) {
             abort(403, 'Accès non autorisé');
         }
 
-        if (!$organization->isPro()) {
-             // Return view without loading sensitive data, view will handle blur
+        if (! $organization->isPro()) {
+            // Return view without loading sensitive data, view will handle blur
             return view('organization.users.show', [
                 'organization' => $organization,
                 'user' => $user,
@@ -119,9 +119,9 @@ class SponsoredUsersController extends Controller
         $consultedMentors = $user->mentorProfileViews()->with('mentor.mentorProfile')->latest()->get()->pluck('mentor')->unique();
 
         return view('organization.users.show', compact(
-            'organization', 
-            'user', 
-            'aiConversationsCount', 
+            'organization',
+            'user',
+            'aiConversationsCount',
             'lastAiActivity',
             'mentorships',
             'viewedResources',
@@ -148,7 +148,7 @@ class SponsoredUsersController extends Controller
         return view('jeune.mentor-show', [
             'mentor' => $mentor,
             'similarMentors' => $similarMentors,
-            'existingMentorship' => null, 
+            'existingMentorship' => null,
             'layout' => 'layouts.organization',
         ]);
     }
@@ -161,13 +161,13 @@ class SponsoredUsersController extends Controller
         $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
 
         // Sécurité
-        if (!$organization->users()->where('users.id', $user->id)->exists()) {
+        if (! $organization->users()->where('users.id', $user->id)->exists()) {
             abort(403);
         }
 
         $format = $request->query('format', 'pdf');
         $user->load(['personalityTest', 'jeuneProfile', 'academicDocuments', 'mentorshipsAsMentee.mentor']);
-        
+
         // Mentorship sessions
         $sessions = MentoringSession::whereHas('mentees', function ($q) use ($user) {
             $q->where('users.id', $user->id);
@@ -177,7 +177,7 @@ class SponsoredUsersController extends Controller
         // 1. AI Stats
         $aiStats = [
             'count' => $user->chatConversations()->count(),
-            'last_activity' => $user->chatConversations()->max('updated_at')
+            'last_activity' => $user->chatConversations()->max('updated_at'),
         ];
 
         // 2. Mentors
@@ -205,10 +205,10 @@ class SponsoredUsersController extends Controller
             'challenges' => isset($onboarding['challenges']) ? (is_array($onboarding['challenges']) ? implode(', ', $onboarding['challenges']) : $onboarding['challenges']) : 'Non renseigné',
         ];
 
-        $fileName = "rapport_" . str_replace(' ', '_', strtolower($user->name)) . "_" . now()->format('Ymd');
+        $fileName = 'rapport_'.str_replace(' ', '_', strtolower($user->name)).'_'.now()->format('Ymd');
 
         if ($format === 'pdf') {
-            $title = "Rapport Individuel - " . $user->name;
+            $title = 'Rapport Individuel - '.$user->name;
             $pdf = Pdf::loadView('reports.mentee_individual', compact(
                 'organization',
                 'user',
@@ -221,21 +221,22 @@ class SponsoredUsersController extends Controller
                 'resourcesViewedCount',
                 'profileData'
             ));
-            return $pdf->download($fileName . ".pdf");
+
+            return $pdf->download($fileName.'.pdf');
         }
 
         // CSV Export
         $headers = [
-            "Content-type" => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=" . $fileName . ".csv",
-            "Pragma" => "no-cache"
+            'Content-type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename='.$fileName.'.csv',
+            'Pragma' => 'no-cache',
         ];
 
         $callback = function () use ($user, $sessions, $aiStats, $viewedMentors, $activeMentorships, $personalityTest, $resourcesViewedCount, $profileData) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            fputcsv($file, ['RAPPORT INDIVIDUEL - ' . strtoupper($user->name)]);
+            fputcsv($file, ['RAPPORT INDIVIDUEL - '.strtoupper($user->name)]);
             fputcsv($file, []);
 
             // SECTION 1: PROFIL
@@ -245,7 +246,7 @@ class SponsoredUsersController extends Controller
             fputcsv($file, ['Date de naissance', $user->date_of_birth ? $user->date_of_birth->format('d/m/Y') : 'N/A']);
             fputcsv($file, ['Téléphone', $user->phone ?? 'N/A']);
             fputcsv($file, ['Date Inscription', $user->created_at->format('d/m/Y')]);
-            fputcsv($file, ['Complétion Profil', $user->profile_completion_percentage . '%']);
+            fputcsv($file, ['Complétion Profil', $user->profile_completion_percentage.'%']);
             fputcsv($file, []);
 
             fputcsv($file, ['PARCOURS & OBJECTIFS']);
@@ -266,7 +267,7 @@ class SponsoredUsersController extends Controller
             // SECTION 3: PERSONNALITÉ
             fputcsv($file, ['PERSONNALITÉ (MBTI)']);
             if ($personalityTest) {
-                fputcsv($file, ['Type', $personalityTest->personality_type . ' - ' . $personalityTest->personality_label]);
+                fputcsv($file, ['Type', $personalityTest->personality_type.' - '.$personalityTest->personality_label]);
                 fputcsv($file, ['Description', strip_tags($personalityTest->personality_description)]); // Basic strip tags suitable for CSV
             } else {
                 fputcsv($file, ['Type', 'Test non réalisé']);
@@ -274,7 +275,7 @@ class SponsoredUsersController extends Controller
             fputcsv($file, []);
 
             // SECTION 4: MENTORS
-            fputcsv($file, ['MENTORS CONSULTÉS ('. $viewedMentors->count() .')']);
+            fputcsv($file, ['MENTORS CONSULTÉS ('.$viewedMentors->count().')']);
             if ($viewedMentors->count() > 0) {
                 fputcsv($file, ['Nom', 'Vue le']);
                 foreach ($viewedMentors as $view) {
@@ -285,7 +286,7 @@ class SponsoredUsersController extends Controller
             }
             fputcsv($file, []);
 
-            fputcsv($file, ['MENTORATS ('. $activeMentorships->count() .')']);
+            fputcsv($file, ['MENTORATS ('.$activeMentorships->count().')']);
             if ($activeMentorships->count() > 0) {
                 fputcsv($file, ['Mentor', 'Statut', 'Débuté le']);
                 foreach ($activeMentorships as $mentorship) {
@@ -296,7 +297,7 @@ class SponsoredUsersController extends Controller
             }
             fputcsv($file, []);
 
-            fputcsv($file, ['HISTORIQUE DES SÉANCES (' . $sessions->count() . ')']);
+            fputcsv($file, ['HISTORIQUE DES SÉANCES ('.$sessions->count().')']);
             fputcsv($file, ['Date', 'Mentor', 'Statut', 'Progrès', 'Obstacles', 'Objectifs SMART']);
 
             foreach ($sessions as $session) {
@@ -306,7 +307,7 @@ class SponsoredUsersController extends Controller
                     $session->translated_status,
                     $session->report_content['progress'] ?? '-',
                     $session->report_content['obstacles'] ?? '-',
-                    $session->report_content['smart_goals'] ?? '-'
+                    $session->report_content['smart_goals'] ?? '-',
                 ]);
             }
 

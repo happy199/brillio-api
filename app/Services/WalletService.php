@@ -15,14 +15,14 @@ class WalletService
     public function addCredits($entity, int $amount, string $type, ?string $description = null, $related = null)
     {
         if ($amount <= 0) {
-            throw new \Exception("Le montant doit être positif.");
+            throw new \Exception('Le montant doit être positif.');
         }
 
         return DB::transaction(function () use ($entity, $amount, $type, $description, $related) {
             $isUser = $entity instanceof User;
             $isOrg = $entity instanceof \App\Models\Organization;
 
-            if (!$isUser && !$isOrg) {
+            if (! $isUser && ! $isOrg) {
                 throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
             }
 
@@ -35,8 +35,7 @@ class WalletService
 
             if ($isUser) {
                 $transactionData['user_id'] = $entity->id;
-            }
-            else {
+            } else {
                 $transactionData['organization_id'] = $entity->id;
             }
 
@@ -71,27 +70,26 @@ class WalletService
     public function deductCredits($entity, int $cost, string $type, ?string $description = null, $related = null)
     {
         if ($cost <= 0) {
-            throw new \Exception("Le coût doit être positif.");
+            throw new \Exception('Le coût doit être positif.');
         }
 
         return DB::transaction(function () use ($entity, $cost, $type, $description, $related) {
             $isUser = $entity instanceof User;
             $isOrg = $entity instanceof \App\Models\Organization;
 
-            if (!$isUser && !$isOrg) {
+            if (! $isUser && ! $isOrg) {
                 throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
             }
 
             // Pessimistic locking to prevent race conditions during balance check
             if ($isUser) {
                 $entity = User::where('id', $entity->id)->lockForUpdate()->first();
-            }
-            else {
+            } else {
                 $entity = \App\Models\Organization::where('id', $entity->id)->lockForUpdate()->first();
             }
 
             if ($entity->credits_balance < $cost) {
-                throw new \Exception("Solde insuffisant.");
+                throw new \Exception('Solde insuffisant.');
             }
 
             // Mentor Spending Logic: Consuming earned credits reduces withdrawable balance
@@ -112,8 +110,7 @@ class WalletService
                     // Reduce available balance (clamping to 0 just in case)
                     if ($entity->mentorProfile->available_balance >= $amoutFcfaToRemove) {
                         $entity->mentorProfile->decrement('available_balance', $amoutFcfaToRemove);
-                    }
-                    else {
+                    } else {
                         // Edge case: Inconsistent state, reset to 0
                         $entity->mentorProfile->update(['available_balance' => 0]);
                     }
@@ -129,8 +126,7 @@ class WalletService
 
             if ($isUser) {
                 $transactionData['user_id'] = $entity->id;
-            }
-            else {
+            } else {
                 $transactionData['organization_id'] = $entity->id;
             }
 
@@ -155,13 +151,14 @@ class WalletService
      */
     public function getCreditBreakdown(User $user): array
     {
-        if ($user->user_type !== 'mentor' || !$user->mentorProfile) {
+        if ($user->user_type !== 'mentor' || ! $user->mentorProfile) {
             return ['purchased' => $user->credits_balance, 'earned' => 0];
         }
 
         $creditPrice = $this->getCreditPrice('mentor');
-        if ($creditPrice <= 0)
-            $creditPrice = 100; // Safety
+        if ($creditPrice <= 0) {
+            $creditPrice = 100;
+        } // Safety
 
         // Calculate earned credits based on FCFA balance
         // We floor it because credits are integers
@@ -174,7 +171,7 @@ class WalletService
 
         return [
             'purchased' => max(0, $purchasedCredits),
-            'earned' => max(0, $earnedCredits)
+            'earned' => max(0, $earnedCredits),
         ];
     }
 
@@ -200,14 +197,15 @@ class WalletService
     public function getFeatureCost(string $featureKey, int $default = 0): int
     {
         // Exemple keys: feature_cost_advanced_targeting
-        return SystemSetting::getValue('feature_cost_' . $featureKey, $default);
+        return SystemSetting::getValue('feature_cost_'.$featureKey, $default);
     }
+
     /**
      * Effectue le paiement différé au mentor après la séance (Une fois le compte rendu soumis)
      */
     public function payoutMentor(\App\Models\MentoringSession $session)
     {
-        if (!$session->is_paid || $session->status !== 'completed') {
+        if (! $session->is_paid || $session->status !== 'completed') {
             return;
         }
 
@@ -252,11 +250,12 @@ class WalletService
 
     /**
      * Rembourse un jeune suite à une annulation
-     * @param float $ratio Facteur de remboursement (0.75 ou 1.0)
+     *
+     * @param  float  $ratio  Facteur de remboursement (0.75 ou 1.0)
      */
     public function refundJeune(\App\Models\MentoringSession $session, User $user, float $ratio = 1.0)
     {
-        if (!$session->is_paid) {
+        if (! $session->is_paid) {
             return;
         }
 
@@ -267,7 +266,7 @@ class WalletService
             ->where('amount', '<', 0)
             ->first();
 
-        if (!$debitTransaction) {
+        if (! $debitTransaction) {
             return;
         }
 

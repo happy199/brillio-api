@@ -15,7 +15,9 @@ class ResourcePurchased extends Mailable
     use Queueable, SerializesModels;
 
     public $resource;
+
     public $buyer;
+
     public $creditsEarned;
 
     /**
@@ -34,7 +36,7 @@ class ResourcePurchased extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "💰 Nouvelle vente ! Votre ressource a été achetée",
+            subject: '💰 Nouvelle vente ! Votre ressource a été achetée',
         );
     }
 

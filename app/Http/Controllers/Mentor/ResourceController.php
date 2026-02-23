@@ -7,9 +7,9 @@ use App\Models\Resource;
 use App\Models\User;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 
 class ResourceController extends Controller
 {
@@ -45,6 +45,7 @@ class ResourceController extends Controller
 
         $targetingOptions = $this->getDynamicTargetingOptions();
         $targetingCost = $this->walletService->getFeatureCost('advanced_targeting', 10);
+
         return view('mentor.resources.create', compact('targetingOptions', 'targetingCost'));
     }
 
@@ -86,12 +87,12 @@ class ResourceController extends Controller
         ], $messages);
 
         // Vérification des crédits pour le ciblage
-        $hasTargeting = !empty($validated['targeting']) && (
-            !empty($validated['targeting']['education_levels']) ||
-            !empty($validated['targeting']['situations']) ||
-            !empty($validated['targeting']['countries']) ||
-            !empty($validated['targeting']['interests'])
-            );
+        $hasTargeting = ! empty($validated['targeting']) && (
+            ! empty($validated['targeting']['education_levels']) ||
+            ! empty($validated['targeting']['situations']) ||
+            ! empty($validated['targeting']['countries']) ||
+            ! empty($validated['targeting']['interests'])
+        );
 
         // Validation conditionnelle pour le prix
         if ($request->is_premium == '1') {
@@ -110,10 +111,9 @@ class ResourceController extends Controller
                 // Note: On ne sauvegarde pas encore la transaction car si le create échoue plus bas, on a débité pour rien.
                 // On utilisera une transaction DB globale ou on checke juste le solde ici.
                 if (auth()->user()->credits_balance < $cost) {
-                    return back()->withInput()->withErrors(['targeting' => "Crédits insuffisants. Le ciblage avancé coûte {$cost} crédits. Votre solde: " . auth()->user()->credits_balance]);
+                    return back()->withInput()->withErrors(['targeting' => "Crédits insuffisants. Le ciblage avancé coûte {$cost} crédits. Votre solde: ".auth()->user()->credits_balance]);
                 }
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 return back()->withInput()->withErrors(['targeting' => $e->getMessage()]);
             }
         }
@@ -130,7 +130,7 @@ class ResourceController extends Controller
         }
 
         // Traitement des tags (string vers array)
-        $tags = !empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
+        $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
         // Création Transactionnelle
         try {
@@ -139,7 +139,7 @@ class ResourceController extends Controller
             $resource = Resource::create([
                 'user_id' => auth()->id(),
                 'title' => $validated['title'],
-                'slug' => Str::slug($validated['title']) . '-' . uniqid(),
+                'slug' => Str::slug($validated['title']).'-'.uniqid(),
                 'description' => $validated['description'],
                 'content' => $validated['content'],
 
@@ -170,11 +170,11 @@ class ResourceController extends Controller
 
             DB::commit();
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
+
             // Nettoyage fichiers si erreur (optionnel mais propre)
-            return back()->withInput()->with('error', "Erreur lors de la création : " . $e->getMessage());
+            return back()->withInput()->with('error', 'Erreur lors de la création : '.$e->getMessage());
         }
 
         return redirect()->route('mentor.resources.index')->with('success', 'Ressource créée ! Elle sera visible après validation par un administrateur.');
@@ -189,6 +189,7 @@ class ResourceController extends Controller
         $resource = auth()->user()->resources()->where('slug', $id)->firstOrFail();
 
         $targetingOptions = $this->getDynamicTargetingOptions();
+
         return view('mentor.resources.edit', compact('resource', 'targetingOptions'));
     }
 
@@ -233,25 +234,25 @@ class ResourceController extends Controller
         ], $messages);
 
         // Vérification des crédits pour le ciblage (Loophole fix)
-        $hasTargeting = !empty($validated['targeting']) && (
-            !empty($validated['targeting']['education_levels']) ||
-            !empty($validated['targeting']['situations']) ||
-            !empty($validated['targeting']['countries']) ||
-            !empty($validated['targeting']['interests'])
-            );
+        $hasTargeting = ! empty($validated['targeting']) && (
+            ! empty($validated['targeting']['education_levels']) ||
+            ! empty($validated['targeting']['situations']) ||
+            ! empty($validated['targeting']['countries']) ||
+            ! empty($validated['targeting']['interests'])
+        );
 
         $alreadyPaid = \App\Models\WalletTransaction::where('related_type', Resource::class)
             ->where('related_id', $resource->id)
             ->where('type', 'service_fee')
             ->exists();
 
-        $needsPayment = $hasTargeting && !$alreadyPaid;
+        $needsPayment = $hasTargeting && ! $alreadyPaid;
         $cost = 0;
 
         if ($needsPayment) {
             $cost = $this->walletService->getFeatureCost('advanced_targeting', 10);
             if (auth()->user()->credits_balance < $cost) {
-                return back()->withInput()->withErrors(['targeting' => "Crédits insuffisants. Le ciblage avancé coûte {$cost} crédits. Votre solde: " . auth()->user()->credits_balance]);
+                return back()->withInput()->withErrors(['targeting' => "Crédits insuffisants. Le ciblage avancé coûte {$cost} crédits. Votre solde: ".auth()->user()->credits_balance]);
             }
         }
 
@@ -280,7 +281,7 @@ class ResourceController extends Controller
             $resource->file_path = $request->file('file')->store('resources/files', 'public');
         }
 
-        $tags = !empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
+        $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
         // Si la ressource était validée, elle doit être revalidée
         // On vérifie si elle est actuellement validée (is_validated = true)
@@ -322,10 +323,10 @@ class ResourceController extends Controller
             }
 
             DB::commit();
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', "Erreur lors de la mise à jour : " . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Erreur lors de la mise à jour : '.$e->getMessage());
         }
 
         $message = $wasValidated
@@ -366,7 +367,7 @@ class ResourceController extends Controller
             'bac' => 'Baccalauréat',
             'licence' => 'Licence / Bachelor',
             'master' => 'Master',
-            'doctorat' => 'Doctorat'
+            'doctorat' => 'Doctorat',
         ];
 
         $situationLabels = [
@@ -374,7 +375,7 @@ class ResourceController extends Controller
             'recherche_emploi' => 'En recherche d\'emploi',
             'emploi' => 'En emploi',
             'entrepreneur' => 'Entrepreneur',
-            'autre' => 'Autre'
+            'autre' => 'Autre',
         ];
 
         // Récupérer tous les jeunes ayant complété l'onboarding
@@ -402,8 +403,7 @@ class ResourceController extends Controller
                 $level = $data['education_level'];
                 if (isset($educationLabels[$level])) {
                     $educationLevels[$level] = $educationLabels[$level];
-                }
-                else {
+                } else {
                     $educationLevels[$level] = ucfirst($level);
                 }
             }
@@ -413,8 +413,7 @@ class ResourceController extends Controller
                 $sit = $data['current_situation'];
                 if (isset($situationLabels[$sit])) {
                     $situations[$sit] = $situationLabels[$sit];
-                }
-                else {
+                } else {
                     $situations[$sit] = ucfirst($sit);
                 }
             }
@@ -436,7 +435,7 @@ class ResourceController extends Controller
             }
         }
         foreach ($educationLevels as $key => $label) {
-            if (!isset($orderedEducation[$key])) {
+            if (! isset($orderedEducation[$key])) {
                 $orderedEducation[$key] = $label;
             }
         }

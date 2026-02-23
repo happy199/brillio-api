@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
-use App\Models\PersonalityTest;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PersonalityPdfController extends Controller
@@ -16,7 +15,7 @@ class PersonalityPdfController extends Controller
         $user = auth()->user();
         $test = $user->personalityTest;
 
-        if (!$test) {
+        if (! $test) {
             return back()->with('error', 'Aucun test de personnalité trouvé.');
         }
 
@@ -25,7 +24,7 @@ class PersonalityPdfController extends Controller
             'user' => $user,
         ]);
 
-        return $pdf->download('test-personnalite-' . $test->type . '.pdf');
+        return $pdf->download('test-personnalite-'.$test->type.'.pdf');
     }
 
     /**

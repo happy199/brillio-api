@@ -19,7 +19,7 @@ class RegisterRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
-            'user_type' => ['required', 'string', 'in:' . User::TYPE_JEUNE . ',' . User::TYPE_MENTOR],
+            'user_type' => ['required', 'string', 'in:'.User::TYPE_JEUNE.','.User::TYPE_MENTOR],
             'phone' => ['nullable', 'string', 'max:20'],
             'date_of_birth' => ['nullable', 'date', 'before:today'],
             'country' => ['nullable', 'string', 'max:100'],

@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
-use App\Models\MentorAvailability;
-use App\Models\Mentorship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -32,10 +30,10 @@ class SessionController extends Controller
         // Récupérer historique (passé, annulé ou terminé)
         $pastSessions = $mentor->mentoringSessionsAsMentor()
             ->where(function ($query) {
-            $query->where('scheduled_at', '<', now())
-                ->orWhere('status', 'cancelled')
-                ->orWhere('status', 'completed');
-        })
+                $query->where('scheduled_at', '<', now())
+                    ->orWhere('status', 'cancelled')
+                    ->orWhere('status', 'completed');
+            })
             ->orderByDesc('scheduled_at')
             ->take(10)
             ->get();
@@ -74,7 +72,7 @@ class SessionController extends Controller
                     'mentor_id' => $mentor->id,
                     'is_recurring' => $slot['is_recurring'],
                     'day_of_week' => $slot['is_recurring'] ? $slot['day_of_week'] : null,
-                    'specific_date' => !$slot['is_recurring'] ? $slot['specific_date'] : null,
+                    'specific_date' => ! $slot['is_recurring'] ? $slot['specific_date'] : null,
                     'start_time' => $slot['start_time'],
                     'end_time' => $slot['end_time'],
                 ]);
@@ -120,8 +118,8 @@ class SessionController extends Controller
 
         // Génération lien Jitsi sécurisé (nom de room complexe)
         // meet.jit.si/Brillio_{MentorID}_{Random}_{Timestamp}
-        $roomName = 'Brillio_' . $mentor->id . '_' . Str::random(10) . '_' . time();
-        $meetingLink = 'https://meet.jit.si/' . $roomName;
+        $roomName = 'Brillio_'.$mentor->id.'_'.Str::random(10).'_'.time();
+        $meetingLink = 'https://meet.jit.si/'.$roomName;
 
         $session = MentoringSession::create([
             'mentor_id' => $mentor->id,
@@ -204,7 +202,7 @@ class SessionController extends Controller
         ]);
 
         // Sécurité : Ne pas autoriser le changement de prix si la séance est déjà confirmée ou terminée
-        $canChangePrice = !in_array($session->status, ['confirmed', 'completed']);
+        $canChangePrice = ! in_array($session->status, ['confirmed', 'completed']);
         $newPrice = ($session->is_paid && $canChangePrice) ? $request->price : $session->price;
 
         $session->update([
@@ -307,8 +305,9 @@ class SessionController extends Controller
         app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, Auth::user());
 
         return redirect()->route('mentor.mentorship.calendar')
-            ->with('success', 'Séance annulée. ' . ($session->is_paid ? 'Les participants ont été intégralement remboursés.' : ''));
+            ->with('success', 'Séance annulée. '.($session->is_paid ? 'Les participants ont été intégralement remboursés.' : ''));
     }
+
     /**
      * Accepter une demande de séance
      */
@@ -325,8 +324,8 @@ class SessionController extends Controller
 
         // Génération lien Jitsi
         $mentor = Auth::user();
-        $roomName = 'Brillio_' . $mentor->id . '_' . Str::random(10) . '_' . time();
-        $meetingLink = 'https://meet.jit.si/' . $roomName;
+        $roomName = 'Brillio_'.$mentor->id.'_'.Str::random(10).'_'.time();
+        $meetingLink = 'https://meet.jit.si/'.$roomName;
 
         $isPaid = $request->boolean('is_paid');
 
@@ -350,7 +349,7 @@ class SessionController extends Controller
             : 'Séance acceptée et confirmée.';
 
         // Si gratuit (confirmé direct), notifier
-        if (!$isPaid) {
+        if (! $isPaid) {
             app(\App\Services\MentorshipNotificationService::class)->sendSessionConfirmed($session);
         }
 

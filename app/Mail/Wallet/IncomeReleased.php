@@ -15,7 +15,9 @@ class IncomeReleased extends Mailable
     use Queueable, SerializesModels;
 
     public $mentor;
+
     public $session;
+
     public $amount;
 
     /**
@@ -34,7 +36,7 @@ class IncomeReleased extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Vos revenus pour la séance sont disponibles - Brillio",
+            subject: 'Vos revenus pour la séance sont disponibles - Brillio',
         );
     }
 

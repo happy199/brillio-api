@@ -17,6 +17,7 @@ class ChatMessage extends Model
      * Rôles possibles pour les messages
      */
     public const ROLE_USER = 'user';
+
     public const ROLE_ASSISTANT = 'assistant';
 
     protected $fillable = [

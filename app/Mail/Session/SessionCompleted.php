@@ -16,9 +16,13 @@ class SessionCompleted extends Mailable
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
+
     public User $recipient;
+
     public Collection $participants;
+
     public string $sessionUrl;
+
     public string $bookingUrl;
 
     /**
@@ -44,7 +48,7 @@ class SessionCompleted extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Session terminée - Merci ! - Brillio",
+            subject: 'Session terminée - Merci ! - Brillio',
         );
     }
 

@@ -16,8 +16,11 @@ class SessionCancelled extends Mailable
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
+
     public User $recipient;
+
     public User $cancelledBy;
+
     public Collection $participants;
 
     /**
@@ -41,7 +44,7 @@ class SessionCancelled extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Session de mentorat annulée - Brillio",
+            subject: 'Session de mentorat annulée - Brillio',
         );
     }
 

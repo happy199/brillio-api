@@ -2,10 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -28,7 +29,7 @@ return new class extends Migration {
                 'type' => 'integer',
                 'description' => 'Prix d\'un crédit en FCFA',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ],
             [
                 'key' => 'feature_cost_advanced_targeting',
@@ -36,8 +37,8 @@ return new class extends Migration {
                 'type' => 'integer',
                 'description' => 'Coût en crédits pour utiliser le ciblage avancé',
                 'created_at' => now(),
-                'updated_at' => now()
-            ]
+                'updated_at' => now(),
+            ],
         ]);
     }
 

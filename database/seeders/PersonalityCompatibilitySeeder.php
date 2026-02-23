@@ -60,7 +60,7 @@ class PersonalityCompatibilitySeeder extends Seeder
                 'type_a' => $sorted[0],
                 'type_b' => $sorted[1],
             ], [
-                'description' => 'Compatibilité naturelle basée sur la complémentarité des fonctions cognitives.'
+                'description' => 'Compatibilité naturelle basée sur la complémentarité des fonctions cognitives.',
             ]);
         }
     }

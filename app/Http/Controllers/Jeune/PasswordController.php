@@ -12,8 +12,8 @@ class PasswordController extends Controller
     public function showChangePasswordForm()
     {
         $user = auth()->user();
-        $hasPassword = !empty($user->password);
-        $isOAuthUser = !empty($user->auth_provider);
+        $hasPassword = ! empty($user->password);
+        $isOAuthUser = ! empty($user->auth_provider);
 
         return view('jeune.change-password', compact('hasPassword', 'isOAuthUser'));
     }
@@ -21,7 +21,7 @@ class PasswordController extends Controller
     public function updatePassword(Request $request)
     {
         $user = auth()->user();
-        $hasPassword = !empty($user->password);
+        $hasPassword = ! empty($user->password);
 
         $rules = [
             'new_password' => ['required', 'confirmed', Password::min(8)],

@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\NewsletterSubscriber;
 use App\Models\EmailCampaign;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
+use App\Models\NewsletterSubscriber;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 
 class NewsletterController extends Controller
 {
@@ -21,7 +20,7 @@ class NewsletterController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('email', 'like', '%' . $request->search . '%');
+            $query->where('email', 'like', '%'.$request->search.'%');
         }
 
         $subscribers = $query->latest()->paginate(50);
@@ -38,6 +37,7 @@ class NewsletterController extends Controller
     public function campaigns()
     {
         $campaigns = EmailCampaign::latest()->paginate(20);
+
         return view('admin.newsletter.campaigns', compact('campaigns'));
     }
 
@@ -51,11 +51,11 @@ class NewsletterController extends Controller
 
         $subscribers = $query->get();
 
-        $filename = 'newsletter_subscribers_' . now()->format('Y-m-d') . '.csv';
+        $filename = 'newsletter_subscribers_'.now()->format('Y-m-d').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
         $callback = function () use ($subscribers) {
@@ -94,7 +94,7 @@ class NewsletterController extends Controller
 
         $pdf = Pdf::loadView('admin.newsletter.pdf', compact('subscribers', 'stats'));
 
-        return $pdf->download('newsletter_subscribers_' . now()->format('Y-m-d') . '.pdf');
+        return $pdf->download('newsletter_subscribers_'.now()->format('Y-m-d').'.pdf');
     }
 
     public function sendEmail(Request $request)
@@ -102,7 +102,7 @@ class NewsletterController extends Controller
         // Fix pour le JS qui envoie du JSON stringifié au lieu d'un array
         if ($request->has('recipients') && is_string($request->input('recipients'))) {
             $request->merge([
-                'recipients' => json_decode($request->input('recipients'), true)
+                'recipients' => json_decode($request->input('recipients'), true),
             ]);
         }
 
@@ -170,7 +170,7 @@ class NewsletterController extends Controller
         $subscriber = NewsletterSubscriber::findOrFail($id);
 
         $request->validate([
-            'email' => 'required|email|unique:newsletter_subscribers,email,' . $subscriber->id,
+            'email' => 'required|email|unique:newsletter_subscribers,email,'.$subscriber->id,
             'status' => 'required|in:active,unsubscribed',
         ]);
 

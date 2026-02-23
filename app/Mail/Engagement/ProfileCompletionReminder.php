@@ -14,6 +14,7 @@ class ProfileCompletionReminder extends Mailable
     use Queueable, SerializesModels;
 
     public User $user;
+
     public array $missingSections;
 
     /**
@@ -31,7 +32,7 @@ class ProfileCompletionReminder extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "🚀 Boostez votre visibilité sur Brillio en complétant votre profil",
+            subject: '🚀 Boostez votre visibilité sur Brillio en complétant votre profil',
         );
     }
 

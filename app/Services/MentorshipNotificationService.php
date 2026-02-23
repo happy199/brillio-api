@@ -2,29 +2,29 @@
 
 namespace App\Services;
 
+use App\Mail\Account\AccountArchivedByUser;
+use App\Mail\Account\AccountDeleted;
 use App\Mail\Mentorship\MentorshipAccepted;
-use App\Mail\Mentorship\MentorshipRequested;
 use App\Mail\Mentorship\MentorshipRefused;
+use App\Mail\Mentorship\MentorshipRequested;
+use App\Mail\Onboarding\WelcomeJeune;
+use App\Mail\Onboarding\WelcomeMentor;
+use App\Mail\Resource\ResourcePurchased;
+use App\Mail\Resource\ResourceRejected;
+use App\Mail\Resource\ResourceValidated;
+use App\Mail\Session\ReportReminder;
+use App\Mail\Session\SessionCancelled;
 use App\Mail\Session\SessionCompleted;
 use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionRefused;
-use App\Mail\Session\SessionCancelled;
-use App\Mail\Session\ReportReminder;
-use App\Mail\Account\AccountDeleted;
-use App\Mail\Account\AccountArchivedByUser;
 use App\Mail\Support\ContactConfirmation;
-use App\Mail\Onboarding\WelcomeJeune;
-use App\Mail\Onboarding\WelcomeMentor;
 use App\Mail\Wallet\CreditRecharged;
-use App\Mail\Wallet\SessionPaid;
-use App\Mail\Wallet\PaymentReceived;
 use App\Mail\Wallet\IncomeReleased;
-use App\Mail\Wallet\PayoutRequested;
+use App\Mail\Wallet\PaymentReceived;
 use App\Mail\Wallet\PayoutProcessed;
-use App\Mail\Resource\ResourceValidated;
-use App\Mail\Resource\ResourceRejected;
-use App\Mail\Resource\ResourcePurchased;
+use App\Mail\Wallet\PayoutRequested;
+use App\Mail\Wallet\SessionPaid;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\Resource;
@@ -69,7 +69,7 @@ class MentorshipNotificationService
         // Pour une proposition, on assume un seul jeune (V1) ou on envoie à tous les participants
         foreach ($session->mentees as $mentee) {
             $creditPrice = SystemSetting::getValue('credit_price_jeune', 50);
-            $menteeCredits = (int)floor($session->price / $creditPrice);
+            $menteeCredits = (int) floor($session->price / $creditPrice);
 
             // Pour une séance proposée, on redirige vers le détail de la séance dans l'espace jeune
             $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
@@ -81,7 +81,7 @@ class MentorshipNotificationService
                 $menteeCredits,
                 $sessionUrl, // acceptUrl (le jeune pourra agir sur la page)
                 $sessionUrl // refuseUrl
-                ));
+            ));
         }
     }
 
@@ -121,7 +121,7 @@ class MentorshipNotificationService
             $mentees,
             route('mentor.mentorship.sessions.show', ['session' => $session->id]),
             ''
-            ));
+        ));
 
         // Envoyer à chaque jeune
         foreach ($mentees as $mentee) {
@@ -131,7 +131,7 @@ class MentorshipNotificationService
                 $mentees,
                 $sessionUrl,
                 $bookingUrl
-                ));
+            ));
         }
     }
 
@@ -233,8 +233,7 @@ class MentorshipNotificationService
     {
         if ($user->isMentor()) {
             Mail::to($user->email)->send(new WelcomeMentor($user));
-        }
-        else {
+        } else {
             Mail::to($user->email)->send(new WelcomeJeune($user));
         }
     }

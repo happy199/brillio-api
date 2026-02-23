@@ -14,7 +14,9 @@ class CreditRecharged extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
+
     public $amount;
+
     public $newBalance;
 
     /**
@@ -33,7 +35,7 @@ class CreditRecharged extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Confirmation de votre recharge de crédits - Brillio",
+            subject: 'Confirmation de votre recharge de crédits - Brillio',
         );
     }
 

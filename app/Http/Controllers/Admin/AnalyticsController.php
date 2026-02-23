@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicDocument;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
-use App\Models\PersonalityTest;
 use App\Models\MentorProfile;
+use App\Models\PersonalityTest;
 use App\Models\RoadmapStep;
-use App\Models\AcademicDocument;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * Controller pour les analytics dans le dashboard admin
@@ -389,7 +389,7 @@ class AnalyticsController extends Controller
                     'total' => $data['users']->count(),
                     'jeunes' => $data['users']->where('user_type', 'jeune')->count(),
                     'mentors' => $data['users']->where('user_type', 'mentor')->count(),
-                    'with_test' => $data['users']->filter(fn($u) => $u->personalityTest && $u->personalityTest->completed_at)->count(),
+                    'with_test' => $data['users']->filter(fn ($u) => $u->personalityTest && $u->personalityTest->completed_at)->count(),
                 ];
                 $view = 'admin.exports.analytics-users';
                 $filename = 'brillio-analytics-utilisateurs';
@@ -404,7 +404,7 @@ class AnalyticsController extends Controller
                     'total' => $data['mentors']->count(),
                     'published' => $data['mentors']->where('is_published', true)->count(),
                     'pending' => $data['mentors']->where('is_published', false)->count(),
-                    'with_roadmap' => $data['mentors']->filter(fn($m) => $m->roadmapSteps->count() > 0)->count(),
+                    'with_roadmap' => $data['mentors']->filter(fn ($m) => $m->roadmapSteps->count() > 0)->count(),
                 ];
                 $view = 'admin.exports.analytics-mentors';
                 $filename = 'brillio-analytics-mentors';
@@ -414,7 +414,7 @@ class AnalyticsController extends Controller
                 return back()->with('error', 'Type d\'export non reconnu');
         }
 
-        $filename .= '-' . $start->format('Y-m-d') . '-' . $end->format('Y-m-d') . '.pdf';
+        $filename .= '-'.$start->format('Y-m-d').'-'.$end->format('Y-m-d').'.pdf';
 
         $pdf = Pdf::loadView($view, $data);
         $pdf->setPaper('a4', 'portrait');

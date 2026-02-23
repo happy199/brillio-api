@@ -147,7 +147,7 @@ Tu es au lycée actuellement ? Quelles sont tes matières fortes ?'],
         $jeunes = User::where('user_type', 'jeune')->take(3)->get();
 
         foreach ($conversations as $index => $convData) {
-            if (!isset($jeunes[$index])) {
+            if (! isset($jeunes[$index])) {
                 break;
             }
 

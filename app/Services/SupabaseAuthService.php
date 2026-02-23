@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Log;
 class SupabaseAuthService
 {
     protected string $supabaseUrl;
+
     protected string $anonKey;
+
     protected string $serviceRoleKey;
 
     public function __construct()
@@ -32,11 +34,11 @@ class SupabaseAuthService
             'redirect_to' => $redirectTo,
         ];
 
-        if (!empty($scopes)) {
+        if (! empty($scopes)) {
             $params['scopes'] = implode(' ', $scopes);
         }
 
-        return "{$this->supabaseUrl}/auth/v1/authorize?" . http_build_query($params);
+        return "{$this->supabaseUrl}/auth/v1/authorize?".http_build_query($params);
     }
 
     /**
@@ -64,6 +66,7 @@ class SupabaseAuthService
             return null;
         } catch (\Exception $e) {
             Log::error('Supabase OAuth exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -91,6 +94,7 @@ class SupabaseAuthService
             return null;
         } catch (\Exception $e) {
             Log::error('Supabase getUserById exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -120,6 +124,7 @@ class SupabaseAuthService
             return null;
         } catch (\Exception $e) {
             Log::error('Supabase getUserByEmail exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -151,6 +156,7 @@ class SupabaseAuthService
             return null;
         } catch (\Exception $e) {
             Log::error('Supabase signup exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -176,6 +182,7 @@ class SupabaseAuthService
             return null;
         } catch (\Exception $e) {
             Log::error('Supabase signin exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -203,6 +210,7 @@ class SupabaseAuthService
             return null;
         } catch (\Exception $e) {
             Log::error('Supabase getUser exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -221,6 +229,7 @@ class SupabaseAuthService
             return $response->successful();
         } catch (\Exception $e) {
             Log::error('Supabase signOut exception', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -245,6 +254,7 @@ class SupabaseAuthService
             return null;
         } catch (\Exception $e) {
             Log::error('Supabase refresh exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -266,6 +276,7 @@ class SupabaseAuthService
             return $response->successful();
         } catch (\Exception $e) {
             Log::error('Supabase password reset exception', ['error' => $e->getMessage()]);
+
             return false;
         }
     }

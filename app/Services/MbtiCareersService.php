@@ -1081,7 +1081,7 @@ class MbtiCareersService
 
         foreach ($careers as $career) {
             foreach ($career['sectors'] ?? [] as $sectorCode) {
-                if (!isset($sectors[$sectorCode])) {
+                if (! isset($sectors[$sectorCode])) {
                     $sectors[$sectorCode] = self::SECTORS[$sectorCode] ?? ['name' => $sectorCode];
                 }
             }
@@ -1108,7 +1108,7 @@ class MbtiCareersService
         foreach (self::CAREERS_BY_TYPE as $type => $careers) {
             foreach ($careers as $career) {
                 if (in_array($sectorCode, $career['sectors'] ?? [])) {
-                    if (!in_array($type, $types)) {
+                    if (! in_array($type, $types)) {
                         $types[] = $type;
                     }
                     break;
@@ -1125,6 +1125,7 @@ class MbtiCareersService
     public static function getCareersInSectorForType(string $type, string $sectorCode): array
     {
         $careers = self::getCareersForType($type);
+
         return array_filter($careers, function ($career) use ($sectorCode) {
             return in_array($sectorCode, $career['sectors'] ?? []);
         });

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 
 class ChatController extends Controller
 {
@@ -24,12 +24,12 @@ class ChatController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->whereHas('user', function ($userQuery) use ($search) {
                     $userQuery->where('name', 'like', "%{$search}%")
-                              ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%");
                 })
-                ->orWhere('title', 'like', "%{$search}%")
-                ->orWhereHas('messages', function ($msgQuery) use ($search) {
-                    $msgQuery->where('content', 'like', "%{$search}%");
-                });
+                    ->orWhere('title', 'like', "%{$search}%")
+                    ->orWhereHas('messages', function ($msgQuery) use ($search) {
+                        $msgQuery->where('content', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -37,20 +37,20 @@ class ChatController extends Controller
         if ($request->filled('status')) {
             if ($request->status === 'needs_support') {
                 $query->where('needs_human_support', true)
-                      ->where('human_support_active', false);
+                    ->where('human_support_active', false);
             } elseif ($request->status === 'in_support') {
                 $query->where('human_support_active', true);
             } elseif ($request->status === 'normal') {
                 $query->where('needs_human_support', false)
-                      ->where('human_support_active', false);
+                    ->where('human_support_active', false);
             }
         }
 
         // Priorité aux demandes de support
         $conversations = $query->orderByDesc('needs_human_support')
-                              ->orderByDesc('human_support_active')
-                              ->latest('updated_at')
-                              ->paginate(20);
+            ->orderByDesc('human_support_active')
+            ->latest('updated_at')
+            ->paginate(20);
 
         // Statistiques
         $stats = [
@@ -59,8 +59,8 @@ class ChatController extends Controller
             'user_messages' => ChatMessage::where('role', 'user')->count(),
             'assistant_messages' => ChatMessage::where('role', 'assistant')->count(),
             'pending_support' => ChatConversation::where('needs_human_support', true)
-                                                 ->where('human_support_active', false)
-                                                 ->count(),
+                ->where('human_support_active', false)
+                ->count(),
             'active_support' => ChatConversation::where('human_support_active', true)->count(),
         ];
 
@@ -157,7 +157,7 @@ class ChatController extends Controller
             'generatedAt' => now(),
         ]);
 
-        $filename = 'conversation-' . $conversation->id . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'conversation-'.$conversation->id.'-'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }

@@ -15,7 +15,9 @@ class SessionPaid extends Mailable
     use Queueable, SerializesModels;
 
     public $jeune;
+
     public $session;
+
     public $amount;
 
     /**
@@ -34,7 +36,7 @@ class SessionPaid extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Confirmation de paiement de votre séance - Brillio",
+            subject: 'Confirmation de paiement de votre séance - Brillio',
         );
     }
 

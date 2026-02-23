@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -25,7 +25,9 @@ class User extends Authenticatable implements MustVerifyEmail
      * Types d'utilisateurs disponibles
      */
     public const TYPE_JEUNE = 'jeune';
+
     public const TYPE_MENTOR = 'mentor';
+
     public const TYPE_ORGANIZATION = 'organization';
 
     /**
@@ -117,9 +119,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification(): void
     {
         if ($this->isOrganization()) {
-            $this->notify(new \App\Notifications\VerifyOrganizationEmail());
+            $this->notify(new \App\Notifications\VerifyOrganizationEmail);
         } else {
-            $this->notify(new \App\Notifications\VerifyEmail());
+            $this->notify(new \App\Notifications\VerifyEmail);
         }
     }
 
@@ -200,7 +202,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function mentorProfileViews(): HasMany
     {
-        return $this->hasMany(MentorProfileView::class , 'user_id');
+        return $this->hasMany(MentorProfileView::class, 'user_id');
     }
 
     /**
@@ -234,7 +236,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function mentorshipsAsMentor(): HasMany
     {
-        return $this->hasMany(Mentorship::class , 'mentor_id');
+        return $this->hasMany(Mentorship::class, 'mentor_id');
     }
 
     /**
@@ -242,7 +244,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function mentorshipsAsMentee(): HasMany
     {
-        return $this->hasMany(Mentorship::class , 'mentee_id');
+        return $this->hasMany(Mentorship::class, 'mentee_id');
     }
 
     /**
@@ -250,7 +252,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function mentorAvailabilities(): HasMany
     {
-        return $this->hasMany(MentorAvailability::class , 'mentor_id');
+        return $this->hasMany(MentorAvailability::class, 'mentor_id');
     }
 
     /**
@@ -258,7 +260,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function mentoringSessionsAsMentor(): HasMany
     {
-        return $this->hasMany(MentoringSession::class , 'mentor_id');
+        return $this->hasMany(MentoringSession::class, 'mentor_id');
     }
 
     /**
@@ -266,7 +268,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function mentoringSessionsAsMentee(): BelongsToMany
     {
-        return $this->belongsToMany(MentoringSession::class , 'mentoring_session_user', 'user_id', 'mentoring_session_id')
+        return $this->belongsToMany(MentoringSession::class, 'mentoring_session_user', 'user_id', 'mentoring_session_id')
             ->withPivot('status', 'rejection_reason')
             ->withTimestamps();
     }
@@ -278,7 +280,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // Priorite: photo locale (téléchargée/uploadée) > photo OAuth
         if ($this->profile_photo_path) {
-            return asset('storage/' . $this->profile_photo_path);
+            return asset('storage/'.$this->profile_photo_path);
         }
 
         if ($this->attributes['profile_photo_url'] ?? null) {
@@ -286,7 +288,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         // Fallback: Initiales
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF';
     }
 
     /**
@@ -303,24 +305,25 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getProfileCompletionPercentageAttribute(): int
     {
-        if (!$this->isJeune()) {
+        if (! $this->isJeune()) {
             return 0;
         }
 
         $criteria = [
-            'name' => !empty($this->name),
-            'photo' => !empty($this->profile_photo_path) || !empty($this->profile_photo_url),
-            'phone' => !empty($this->phone),
-            'dob' => !empty($this->date_of_birth),
-            'location' => !empty($this->city) || !empty($this->country),
-            'linkedin' => !empty($this->linkedin_url),
-            'bio' => !empty($this->jeuneProfile?->bio),
-            'cv' => !empty($this->jeuneProfile?->cv_path),
-            'portfolio' => !empty($this->jeuneProfile?->portfolio_url),
+            'name' => ! empty($this->name),
+            'photo' => ! empty($this->profile_photo_path) || ! empty($this->profile_photo_url),
+            'phone' => ! empty($this->phone),
+            'dob' => ! empty($this->date_of_birth),
+            'location' => ! empty($this->city) || ! empty($this->country),
+            'linkedin' => ! empty($this->linkedin_url),
+            'bio' => ! empty($this->jeuneProfile?->bio),
+            'cv' => ! empty($this->jeuneProfile?->cv_path),
+            'portfolio' => ! empty($this->jeuneProfile?->portfolio_url),
             'personality' => $this->personalityTest()->exists(),
         ];
 
         $completedCount = count(array_filter($criteria));
+
         return $completedCount * 10;
     }
 
@@ -329,7 +332,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getMissingProfileFieldsAttribute(): array
     {
-        if (!$this->isJeune()) {
+        if (! $this->isJeune()) {
             return [];
         }
 
@@ -347,21 +350,21 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
 
         $criteria = [
-            'name' => !empty($this->name),
-            'photo' => !empty($this->profile_photo_path) || !empty($this->profile_photo_url),
-            'phone' => !empty($this->phone),
-            'dob' => !empty($this->date_of_birth),
-            'location' => !empty($this->city) || !empty($this->country),
-            'linkedin' => !empty($this->linkedin_url),
-            'bio' => !empty($this->jeuneProfile?->bio),
-            'cv' => !empty($this->jeuneProfile?->cv_path),
-            'portfolio' => !empty($this->jeuneProfile?->portfolio_url),
+            'name' => ! empty($this->name),
+            'photo' => ! empty($this->profile_photo_path) || ! empty($this->profile_photo_url),
+            'phone' => ! empty($this->phone),
+            'dob' => ! empty($this->date_of_birth),
+            'location' => ! empty($this->city) || ! empty($this->country),
+            'linkedin' => ! empty($this->linkedin_url),
+            'bio' => ! empty($this->jeuneProfile?->bio),
+            'cv' => ! empty($this->jeuneProfile?->cv_path),
+            'portfolio' => ! empty($this->jeuneProfile?->portfolio_url),
             'personality' => $this->personalityTest()->exists(),
         ];
 
         $missing = [];
         foreach ($criteria as $field => $isCompleted) {
-            if (!$isCompleted) {
+            if (! $isCompleted) {
                 $missing[] = $fields[$field];
             }
         }
@@ -374,7 +377,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sponsoringOrganization(): BelongsTo
     {
-        return $this->belongsTo(Organization::class , 'sponsored_by_organization_id');
+        return $this->belongsTo(Organization::class, 'sponsored_by_organization_id');
     }
 
     /**
@@ -390,7 +393,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isSponsoredByOrganization(): bool
     {
-        return !is_null($this->sponsored_by_organization_id);
+        return ! is_null($this->sponsored_by_organization_id);
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\MentoringSession;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -24,29 +23,28 @@ class MeetingController extends Controller
      */
     public function show($meetingId)
     {
-        Log::info("MeetingController: Request for meeting ID: " . $meetingId);
+        Log::info('MeetingController: Request for meeting ID: '.$meetingId);
 
         try {
             $user = Auth::user();
-            Log::info("MeetingController: User ID: " . ($user ? $user->id : 'NULL'));
+            Log::info('MeetingController: User ID: '.($user ? $user->id : 'NULL'));
 
-            if (!$user) {
-                Log::error("MeetingController: Unexpected NULL user in auth protected route");
+            if (! $user) {
+                Log::error('MeetingController: Unexpected NULL user in auth protected route');
                 abort(403, 'User not authenticated');
             }
-
 
             // 3. Reconstituer le lien ou chercher via room name
             // On suppose que meeting_link = https://meet.jit.si/$meetingId
             // Recherche de la session correspondante
             // Note: LIKE est plus sûr si jamais le préfixe change un jour, mais ici exact match sur fin de chaine
-            $session = MentoringSession::where('meeting_link', 'LIKE', '%' . $meetingId)->firstOrFail();
+            $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$meetingId)->firstOrFail();
 
             // 1. Vérifier si l'utilisateur est participant (Mentor ou Menté)
             $isMentor = $session->mentor_id === $user->id;
             $isMentee = $session->mentees()->where('user_id', $user->id)->exists();
 
-            if (!$isMentor && !$isMentee) {
+            if (! $isMentor && ! $isMentee) {
                 abort(403, 'Accès refusé. Vous ne faites pas partie de cette séance.');
             }
 
@@ -67,10 +65,9 @@ class MeetingController extends Controller
             $meetingLink = "https://8x8.vc/{$appId}/{$roomName}";
 
             return view('common.meeting.show', compact('session', 'meetingLink', 'jwt', 'isMentor', 'appId', 'roomName'));
-        }
-        catch (\Throwable $e) {
-            Log::error("MeetingController Error: " . $e->getMessage());
-            Log::error("Stack trace: " . $e->getTraceAsString());
+        } catch (\Throwable $e) {
+            Log::error('MeetingController Error: '.$e->getMessage());
+            Log::error('Stack trace: '.$e->getTraceAsString());
             throw $e;
         }
     }

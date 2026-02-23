@@ -16,6 +16,7 @@ class OrganizationController extends Controller
     public function index()
     {
         $organizations = Organization::withCount('sponsoredUsers')->latest()->paginate(10);
+
         return view('admin.organizations.index', compact('organizations'));
     }
 
@@ -62,6 +63,7 @@ class OrganizationController extends Controller
     public function show(Organization $organization)
     {
         $organization->load(['sponsoredUsers']);
+
         return view('admin.organizations.show', compact('organization'));
     }
 
@@ -93,7 +95,7 @@ class OrganizationController extends Controller
 
         if ($request->hasFile('logo')) {
             // Delete old logo if exists and not default
-            if ($organization->logo_url && !str_contains($organization->logo_url, 'placeholder')) {
+            if ($organization->logo_url && ! str_contains($organization->logo_url, 'placeholder')) {
                 $oldPath = str_replace('/storage/', '', $organization->logo_url);
                 Storage::disk('public')->delete($oldPath);
             }

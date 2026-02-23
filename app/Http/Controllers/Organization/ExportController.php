@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
-use App\Models\Mentorship;
 use App\Models\MentoringSession;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 
 class ExportController extends Controller
 {
@@ -19,6 +18,7 @@ class ExportController extends Controller
     public function index()
     {
         $organization = $this->getCurrentOrganization();
+
         return view('organization.exports.index', compact('organization'));
     }
 
@@ -28,6 +28,7 @@ class ExportController extends Controller
     private function getCurrentOrganization()
     {
         $user = auth()->user();
+
         return \App\Models\Organization::where('contact_email', $user->email)->firstOrFail();
     }
 
@@ -49,12 +50,12 @@ class ExportController extends Controller
         $format = $request->format;
 
         // Use filled() to ensure we only get a value if it's not empty
-        $startDate = $request->filled('start_date') ? $request->start_date . ' 00:00:00' : null;
-        $endDate = $request->filled('end_date') ? $request->end_date . ' 23:59:59' : null;
+        $startDate = $request->filled('start_date') ? $request->start_date.' 00:00:00' : null;
+        $endDate = $request->filled('end_date') ? $request->end_date.' 23:59:59' : null;
 
-        $fileName = "export_{$type}_" . now()->format('Y-m-d_His');
+        $fileName = "export_{$type}_".now()->format('Y-m-d_His');
         $extension = $format === 'csv' ? '.csv' : '.pdf';
-        $fullFileName = $fileName . $extension;
+        $fullFileName = $fileName.$extension;
 
         if ($format === 'csv') {
             switch ($type) {
@@ -67,8 +68,7 @@ class ExportController extends Controller
                 case 'mentors':
                     return $this->exportMentorsCsv($organization, $fullFileName);
             }
-        }
-        else {
+        } else {
             switch ($type) {
                 case 'general':
                     return $this->exportGeneralPdf($organization, $startDate, $endDate, $fullFileName);
@@ -87,31 +87,31 @@ class ExportController extends Controller
     private function exportGeneralCsv($organizationId, $startDate, $endDate, $fileName)
     {
         $headers = [
-            "Content-type" => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=$fileName",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $callback = function () use ($organizationId, $startDate, $endDate) {
             $file = fopen('php://output', 'w');
 
             // UTF-8 BOM for Excel
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             fputcsv($file, ['Métrique', 'Valeur', 'Description']);
 
             $query = User::where('sponsored_by_organization_id', $organizationId);
 
             $totalInvited = \App\Models\OrganizationInvitation::where('organization_id', $organizationId)
-                ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-                ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+                ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+                ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
                 ->count();
 
             $totalRegistered = (clone $query)
-                ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-                ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+                ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+                ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
                 ->count();
 
             $activeUsers = (clone $query)
@@ -119,42 +119,42 @@ class ExportController extends Controller
                 ->count();
 
             $sessionsCount = MentoringSession::whereHas('mentees', function ($q) use ($organizationId) {
-                    $q->where('sponsored_by_organization_id', $organizationId);
-                }
-                )
-                    ->where('status', 'completed')
-                    ->when($startDate, fn($q) => $q->where('scheduled_at', '>=', $startDate))
-                    ->when($endDate, fn($q) => $q->where('scheduled_at', '<=', $endDate))
-                    ->count();
+                $q->where('sponsored_by_organization_id', $organizationId);
+            }
+            )
+                ->where('status', 'completed')
+                ->when($startDate, fn ($q) => $q->where('scheduled_at', '>=', $startDate))
+                ->when($endDate, fn ($q) => $q->where('scheduled_at', '<=', $endDate))
+                ->count();
 
-                fputcsv($file, ['Invitations envoyées', $totalInvited, 'Nombre total d\'invitations créées']);
-                fputcsv($file, ['Jeunes inscrits', $totalRegistered, 'Nombre de jeunes ayant rejoint la plateforme']);
-                fputcsv($file, ['Utilisateurs actifs', $activeUsers, 'Utilisateurs connectés au cours des 30 derniers jours']);
-                fputcsv($file, ['Sessions réalisées', $sessionsCount, 'Nombre total de sessions de mentorat terminées']);
+            fputcsv($file, ['Invitations envoyées', $totalInvited, 'Nombre total d\'invitations créées']);
+            fputcsv($file, ['Jeunes inscrits', $totalRegistered, 'Nombre de jeunes ayant rejoint la plateforme']);
+            fputcsv($file, ['Utilisateurs actifs', $activeUsers, 'Utilisateurs connectés au cours des 30 derniers jours']);
+            fputcsv($file, ['Sessions réalisées', $sessionsCount, 'Nombre total de sessions de mentorat terminées']);
 
-                // Mentor Metrics
-                $organization = \App\Models\Organization::find($organizationId);
-                $internalMentorsIds = $organization->mentors()->pluck('users.id');
-                
-                $activeMentorsIds = MentoringSession::whereHas('mentees', function ($q) use ($organizationId) {
-                    $q->where('sponsored_by_organization_id', $organizationId);
-                })
-                    ->pluck('mentor_id')
-                    ->unique();
+            // Mentor Metrics
+            $organization = \App\Models\Organization::find($organizationId);
+            $internalMentorsIds = $organization->mentors()->pluck('users.id');
 
-                $externalMentorsCount = User::where('user_type', 'mentor')
-                    ->whereNotIn('id', $internalMentorsIds)
-                    ->whereIn('id', $activeMentorsIds)
-                    ->count();
+            $activeMentorsIds = MentoringSession::whereHas('mentees', function ($q) use ($organizationId) {
+                $q->where('sponsored_by_organization_id', $organizationId);
+            })
+                ->pluck('mentor_id')
+                ->unique();
 
-                $totalMentorsCount = $internalMentorsIds->count() + $externalMentorsCount;
+            $externalMentorsCount = User::where('user_type', 'mentor')
+                ->whereNotIn('id', $internalMentorsIds)
+                ->whereIn('id', $activeMentorsIds)
+                ->count();
 
-                fputcsv($file, ['Total Mentors', $totalMentorsCount, 'Nombre total de mentors (internes et externes)']);
-                fputcsv($file, ['Mentors Internes', $internalMentorsIds->count(), 'Mentors liés directement à votre organisation']);
-                fputcsv($file, ['Mentors Externes', $externalMentorsCount, 'Mentors externes accompagnant vos bénéficiaires']);
+            $totalMentorsCount = $internalMentorsIds->count() + $externalMentorsCount;
 
-                fclose($file);
-            };
+            fputcsv($file, ['Total Mentors', $totalMentorsCount, 'Nombre total de mentors (internes et externes)']);
+            fputcsv($file, ['Mentors Internes', $internalMentorsIds->count(), 'Mentors liés directement à votre organisation']);
+            fputcsv($file, ['Mentors Externes', $externalMentorsCount, 'Mentors externes accompagnant vos bénéficiaires']);
+
+            fclose($file);
+        };
 
         return Response::stream($callback, 200, $headers);
     }
@@ -162,16 +162,16 @@ class ExportController extends Controller
     private function exportJeunesCsv($organizationId, $fileName)
     {
         $headers = [
-            "Content-type" => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=$fileName",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $callback = function () use ($organizationId) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             fputcsv($file, ['ID', 'Nom', 'Email', 'Date d\'inscription', 'Ville', 'Complétion Profil (%)', 'Mentor Assigné', 'Statut Mentorat']);
 
@@ -192,7 +192,7 @@ class ExportController extends Controller
                     $user->city ?? '-',
                     $user->profile_completion_percentage,
                     $mentorName,
-                    $mentorshipStatus
+                    $mentorshipStatus,
                 ]);
             }
 
@@ -205,45 +205,45 @@ class ExportController extends Controller
     private function exportSessionsCsv($organizationId, $startDate, $endDate, $fileName)
     {
         $headers = [
-            "Content-type" => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=$fileName",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $callback = function () use ($organizationId, $startDate, $endDate) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             fputcsv($file, ['ID Séance', 'Date & Heure', 'Jeune', 'Mentor', 'Statut', 'Progrès', 'Obstacles', 'Objectifs SMART']);
 
             $sessions = MentoringSession::whereHas('mentees', function ($q) use ($organizationId) {
-                    $q->where('sponsored_by_organization_id', $organizationId);
-                }
-                )
-                    ->with(['mentees', 'mentor'])
-                    ->when($startDate, fn($q) => $q->where('scheduled_at', '>=', $startDate))
-                    ->when($endDate, fn($q) => $q->where('scheduled_at', '<=', $endDate))
-                    ->orderBy('scheduled_at', 'desc')
-                    ->get();
+                $q->where('sponsored_by_organization_id', $organizationId);
+            }
+            )
+                ->with(['mentees', 'mentor'])
+                ->when($startDate, fn ($q) => $q->where('scheduled_at', '>=', $startDate))
+                ->when($endDate, fn ($q) => $q->where('scheduled_at', '<=', $endDate))
+                ->orderBy('scheduled_at', 'desc')
+                ->get();
 
-                foreach ($sessions as $session) {
-                    $menteeName = $session->mentees->first()?->name ?? 'N/A';
-                    fputcsv($file, [
-                        $session->id,
-                        $session->scheduled_at->format('d/m/Y H:i'),
-                        $menteeName,
-                        $session->mentor->name,
-                        $session->translated_status,
-                        $session->report_content['progress'] ?? '-',
-                        $session->report_content['obstacles'] ?? '-',
-                        $session->report_content['smart_goals'] ?? '-'
-                    ]);
-                }
+            foreach ($sessions as $session) {
+                $menteeName = $session->mentees->first()?->name ?? 'N/A';
+                fputcsv($file, [
+                    $session->id,
+                    $session->scheduled_at->format('d/m/Y H:i'),
+                    $menteeName,
+                    $session->mentor->name,
+                    $session->translated_status,
+                    $session->report_content['progress'] ?? '-',
+                    $session->report_content['obstacles'] ?? '-',
+                    $session->report_content['smart_goals'] ?? '-',
+                ]);
+            }
 
-                fclose($file);
-            };
+            fclose($file);
+        };
 
         return Response::stream($callback, 200, $headers);
     }
@@ -252,13 +252,13 @@ class ExportController extends Controller
     {
         $organizationId = $organization->id;
         $totalInvited = \App\Models\OrganizationInvitation::where('organization_id', $organizationId)
-            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
             ->count();
 
         $totalRegistered = User::where('sponsored_by_organization_id', $organizationId)
-            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
             ->count();
 
         $activeUsers = User::where('sponsored_by_organization_id', $organizationId)
@@ -270,8 +270,8 @@ class ExportController extends Controller
         }
         )
             ->where('status', 'completed')
-            ->when($startDate, fn($q) => $q->where('scheduled_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('scheduled_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('scheduled_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('scheduled_at', '<=', $endDate))
             ->count();
 
         // Mentor Metrics
@@ -303,12 +303,13 @@ class ExportController extends Controller
         $ageStats = ['18-24' => 0, '25-30' => 0, '30+' => 0];
         foreach ($usersForAge as $user) {
             $age = \Carbon\Carbon::parse($user->date_of_birth)->age;
-            if ($age >= 18 && $age <= 24)
+            if ($age >= 18 && $age <= 24) {
                 $ageStats['18-24']++;
-            elseif ($age >= 25 && $age <= 30)
+            } elseif ($age >= 25 && $age <= 30) {
                 $ageStats['25-30']++;
-            elseif ($age > 30)
+            } elseif ($age > 30) {
                 $ageStats['30+']++;
+            }
         }
 
         // Document Types
@@ -337,7 +338,7 @@ class ExportController extends Controller
             'title' => 'Statistiques Générales',
             'data' => $data,
             'startDate' => $startDate,
-            'endDate' => $endDate
+            'endDate' => $endDate,
         ]);
 
         return $pdf->download($fileName);
@@ -352,7 +353,7 @@ class ExportController extends Controller
         $pdf = Pdf::loadView('reports.mentees', [
             'organization' => $organization,
             'title' => 'Liste des Jeunes Parrainés',
-            'users' => $users
+            'users' => $users,
         ]);
 
         return $pdf->download($fileName);
@@ -366,8 +367,8 @@ class ExportController extends Controller
         }
         )
             ->with(['mentees', 'mentor'])
-            ->when($startDate, fn($q) => $q->where('scheduled_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('scheduled_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('scheduled_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('scheduled_at', '<=', $endDate))
             ->orderBy('scheduled_at', 'desc')
             ->get();
 
@@ -376,7 +377,7 @@ class ExportController extends Controller
             'title' => 'Historique des Séances',
             'sessions' => $sessions,
             'startDate' => $startDate,
-            'endDate' => $endDate
+            'endDate' => $endDate,
         ]);
 
         return $pdf->download($fileName);
@@ -385,16 +386,16 @@ class ExportController extends Controller
     private function exportMentorsCsv($organization, $fileName)
     {
         $headers = [
-            "Content-type" => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=$fileName",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $callback = function () use ($organization) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             fputcsv($file, ['Nom', 'Email', 'Type', 'Ville', 'Entreprise', 'Titre']);
 
@@ -419,7 +420,7 @@ class ExportController extends Controller
                     $type,
                     $mentor->city ?? '-',
                     $mentor->mentorProfile->company ?? '-',
-                    $mentor->mentorProfile->job_title ?? '-'
+                    $mentor->mentorProfile->job_title ?? '-',
                 ]);
             }
 
@@ -451,7 +452,7 @@ class ExportController extends Controller
         $pdf = Pdf::loadView('reports.mentors', [
             'organization' => $organization,
             'title' => 'Liste des Mentors',
-            'mentors' => $mentors
+            'mentors' => $mentors,
         ]);
 
         return $pdf->download($fileName);

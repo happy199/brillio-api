@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class MentorshipController extends Controller
 {
@@ -69,11 +68,11 @@ class MentorshipController extends Controller
         $jeuneProfile = $user->jeuneProfile;
 
         // Si le profil n'est pas public, le publier de manière transparente
-        if ($jeuneProfile && !$jeuneProfile->is_public) {
+        if ($jeuneProfile && ! $jeuneProfile->is_public) {
             $jeuneProfile->update([
                 'is_public' => true,
                 'published_at' => now(),
-                'public_slug' => $jeuneProfile->public_slug ?? \Str::slug($user->name) . '-' . \Str::random(6)
+                'public_slug' => $jeuneProfile->public_slug ?? \Str::slug($user->name).'-'.\Str::random(6),
             ]);
         }
 

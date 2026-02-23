@@ -15,10 +15,15 @@ class SessionProposed extends Mailable
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
+
     public User $mentor;
+
     public User $mentee;
+
     public int $menteeCredits;
+
     public string $acceptUrl;
+
     public string $refuseUrl;
 
     /**

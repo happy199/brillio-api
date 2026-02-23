@@ -14,6 +14,7 @@ class PayoutRequested extends Mailable
     use Queueable, SerializesModels;
 
     public $payout;
+
     public $user;
 
     /**
@@ -31,7 +32,7 @@ class PayoutRequested extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Votre demande de retrait a été enregistrée - Brillio",
+            subject: 'Votre demande de retrait a été enregistrée - Brillio',
         );
     }
 

@@ -18,7 +18,7 @@ class EnsureMentorProfilePublished
         $user = $request->user();
 
         // Si pas de profil mentor ou pas publié
-        if (!$user || !$user->mentorProfile || !$user->mentorProfile->is_published) {
+        if (! $user || ! $user->mentorProfile || ! $user->mentorProfile->is_published) {
             // Si c'est une requête AJAX, on renvoie une erreur JSON
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Profil mentor non publié.'], 403);

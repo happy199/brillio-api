@@ -9,7 +9,6 @@ use App\Models\ChatMessage;
 use App\Models\MentorProfile;
 use App\Models\PersonalityTest;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Controller pour le dashboard principal admin

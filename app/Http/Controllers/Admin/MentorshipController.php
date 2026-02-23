@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class MentorshipController extends Controller
 {
-
     /**
      * Liste des demandes de mentorat (Relations)
      */
@@ -67,6 +66,7 @@ class MentorshipController extends Controller
     public function showRequest(Mentorship $mentorship)
     {
         $mentorship->load(['mentor', 'mentee']);
+
         return view('admin.mentorship.requests.show', compact('mentorship'));
     }
 
@@ -132,6 +132,7 @@ class MentorshipController extends Controller
     public function showSession(MentoringSession $session)
     {
         $session->load(['mentor', 'mentees', 'transaction']);
+
         return view('admin.mentorship.sessions.show', compact('session'));
     }
 }

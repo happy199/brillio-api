@@ -19,7 +19,7 @@ class SystemSetting extends Model
     public static function getValue(string $key, $default = null)
     {
         $setting = self::where('key', $key)->first();
-        if (!$setting) {
+        if (! $setting) {
             return $default;
         }
 

@@ -70,9 +70,9 @@ class WalletController extends Controller
                 'credits_amount' => $credits,
                 'metadata' => [
                     'user_type' => 'jeune',
-                    'user_name' => $user->prenom . ' ' . $user->nom,
+                    'user_name' => $user->prenom.' '.$user->nom,
                     'pack_id' => $pack->id,
-                    'pack_name' => $pack->name
+                    'pack_name' => $pack->name,
                 ],
             ]);
 
@@ -94,7 +94,7 @@ class WalletController extends Controller
                     'user_id' => $user->id,
                     'user_type' => 'jeune',
                     'credits' => $credits,
-                    'pack_id' => $pack->id
+                    'pack_id' => $pack->id,
                 ],
                 returnUrl: route('payments.callback')
             );
@@ -133,10 +133,11 @@ class WalletController extends Controller
         $user = Auth::user();
 
         // Check if coupon exists and is valid for this user
-        if (!$coupon || !$coupon->isValid($user)) {
+        if (! $coupon || ! $coupon->isValid($user)) {
             if ($coupon && $coupon->hasBeenUsedBy($user)) {
                 return back()->withErrors(['code' => 'Vous avez déjà utilisé ce coupon.']);
             }
+
             return back()->withErrors(['code' => 'Ce coupon est invalide ou expiré.']);
         }
 
@@ -167,6 +168,7 @@ class WalletController extends Controller
                 'coupon_code' => $code,
                 'error' => $e->getMessage(),
             ]);
+
             return back()->withErrors(['error' => "Erreur lors de l'ajout des crédits."]);
         }
     }

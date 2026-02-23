@@ -29,7 +29,7 @@ class ResourceValidated extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "🎉 Félicitations ! Votre ressource a été validée",
+            subject: '🎉 Félicitations ! Votre ressource a été validée',
         );
     }
 

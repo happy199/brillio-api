@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Log;
 class MonecoService
 {
     protected $baseUrl;
+
     protected $apiKey;
+
     protected $apiSecret;
 
     public function __construct()
@@ -21,12 +23,12 @@ class MonecoService
     /**
      * Initiate a payment request.
      *
-     * @param float $amount
-     * @param string $currency
-     * @param string $description
-     * @param string $reference
-     * @param string $callbackUrl
-     * @param string $returnUrl
+     * @param  float  $amount
+     * @param  string  $currency
+     * @param  string  $description
+     * @param  string  $reference
+     * @param  string  $callbackUrl
+     * @param  string  $returnUrl
      * @return array|null
      */
     public function initiatePayment($amount, $currency, $description, $reference, $callbackUrl, $returnUrl)
@@ -35,9 +37,9 @@ class MonecoService
             // This is a hypothetical implementation based on typical payment gateway patterns.
             // Replace with actual Moneco API endpoint and payload structure.
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->post($this->baseUrl . '/payments/initialize', [
+            ])->post($this->baseUrl.'/payments/initialize', [
                 'amount' => $amount,
                 'currency' => $currency ?? env('MONEROO_CURRENCY', 'XOF'),
                 'description' => $description,
@@ -52,12 +54,13 @@ class MonecoService
                 return $response->json();
             }
 
-            Log::error('Moneco Payment Initiation Failed: ' . $response->body());
+            Log::error('Moneco Payment Initiation Failed: '.$response->body());
+
             return null;
 
-        }
-        catch (\Exception $e) {
-            Log::error('Moneco Service Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Moneco Service Error: '.$e->getMessage());
+
             return null;
         }
     }
@@ -65,26 +68,27 @@ class MonecoService
     /**
      * Verify a payment transaction.
      *
-     * @param string $transactionId
+     * @param  string  $transactionId
      * @return array|null
      */
     public function verifyPayment($transactionId)
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-            ])->get($this->baseUrl . '/payments/' . $transactionId . '/verify');
+                'Authorization' => 'Bearer '.$this->apiKey,
+            ])->get($this->baseUrl.'/payments/'.$transactionId.'/verify');
 
             if ($response->successful()) {
                 return $response->json();
             }
 
-            Log::error('Moneco Payment Verification Failed: ' . $response->body());
+            Log::error('Moneco Payment Verification Failed: '.$response->body());
+
             return null;
 
-        }
-        catch (\Exception $e) {
-            Log::error('Moneco Verification Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Moneco Verification Error: '.$e->getMessage());
+
             return null;
         }
     }

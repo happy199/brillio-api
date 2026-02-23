@@ -23,9 +23,9 @@ class SendNewMentorsDigest implements ShouldQueue
         // 1. Récupérer les nouveaux mentors de la semaine (validés et publiés)
         $newMentors = User::where('user_type', 'mentor')
             ->whereHas('mentorProfile', function ($query) {
-            $query->where('is_published', true)
-                ->where('created_at', '>=', now()->subWeek());
-        })
+                $query->where('is_published', true)
+                    ->where('created_at', '>=', now()->subWeek());
+            })
             ->with(['mentorProfile.specializationModel'])
             ->get();
 

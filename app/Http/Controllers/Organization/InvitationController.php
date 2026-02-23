@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrganizationInvitationMail;
 use App\Models\Organization;
 use App\Models\OrganizationInvitation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use App\Mail\OrganizationInvitationMail;
+use Illuminate\Support\Facades\Mail;
 
 class InvitationController extends Controller
 {
@@ -18,6 +18,7 @@ class InvitationController extends Controller
     private function getCurrentOrganization()
     {
         $user = auth()->user();
+
         return Organization::where('contact_email', $user->email)->firstOrFail();
     }
 
@@ -62,7 +63,7 @@ class InvitationController extends Controller
         $emailsString = $validated['invited_emails'] ?? '';
         $emails = [];
 
-        if (!empty($emailsString)) {
+        if (! empty($emailsString)) {
             // Split by newlines and commas
             $rawEmails = preg_split('/[\n,]+/', $emailsString, -1, PREG_SPLIT_NO_EMPTY);
 
@@ -75,18 +76,18 @@ class InvitationController extends Controller
             }
         }
 
-        $expiresDays = (int)($validated['expires_days'] ?? 30);
+        $expiresDays = (int) ($validated['expires_days'] ?? 30);
         $role = $validated['role'] ?? 'jeune';
 
         // Security check: Only Enterprise organizations can invite staff (Admins/Viewers)
-        if (in_array($role, ['admin', 'viewer']) && !$organization->isEnterprise()) {
+        if (in_array($role, ['admin', 'viewer']) && ! $organization->isEnterprise()) {
             $role = 'jeune';
         }
 
         $createdInvitations = [];
 
         // If emails provided, create one invitation per email
-        if (!empty($emails)) {
+        if (! empty($emails)) {
             foreach ($emails as $email) {
                 $invitation = $organization->invitations()->create([
                     'invited_email' => $email,
@@ -102,9 +103,8 @@ class InvitationController extends Controller
                     $registrationUrl = route('auth.choice', ['ref' => $invitation->referral_code]);
 
                     Mail::to($email)->send(new OrganizationInvitationMail($organization, $invitation, $registrationUrl));
-                }
-                catch (\Exception $e) {
-                    Log::error('Erreur envoi email invitation: ' . $e->getMessage(), [
+                } catch (\Exception $e) {
+                    Log::error('Erreur envoi email invitation: '.$e->getMessage(), [
                         'email' => $email,
                         'invitation_id' => $invitation->id,
                     ]);
@@ -112,10 +112,10 @@ class InvitationController extends Controller
             }
 
             $count = count($createdInvitations);
+
             return redirect()->route('organization.invitations.index')
                 ->with('success', "{$count} invitation(s) créée(s) avec succès ! Les emails ont été envoyés.");
-        }
-        else {
+        } else {
             // No emails, create a single shareable invitation
             $invitation = $organization->invitations()->create([
                 'invited_email' => null,

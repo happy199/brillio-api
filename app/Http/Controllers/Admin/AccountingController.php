@@ -7,9 +7,9 @@ use App\Models\MonerooTransaction;
 use App\Models\PayoutRequest;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class AccountingController extends Controller
 {
@@ -26,16 +26,13 @@ class AccountingController extends Controller
         if ($period === 'today') {
             $startDate = Carbon::today();
             $endDate = Carbon::today()->endOfDay();
-        }
-        elseif ($period === 'week') {
+        } elseif ($period === 'week') {
             $startDate = Carbon::now()->startOfWeek();
             $endDate = Carbon::now()->endOfWeek();
-        }
-        elseif ($period === 'year') {
+        } elseif ($period === 'year') {
             $startDate = Carbon::now()->startOfYear();
             $endDate = Carbon::now()->endOfYear();
-        }
-        elseif ($period === 'custom' && $customStart && $customEnd) {
+        } elseif ($period === 'custom' && $customStart && $customEnd) {
             $startDate = Carbon::parse($customStart)->startOfDay();
             $endDate = Carbon::parse($customEnd)->endOfDay();
         }
@@ -65,8 +62,8 @@ class AccountingController extends Controller
         $orgRevenue = MonerooTransaction::where('status', 'completed')
             ->where('user_type', 'App\Models\User')
             ->whereHas('user', function ($q) {
-            $q->where('user_type', 'organization');
-        })
+                $q->where('user_type', 'organization');
+            })
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->sum('amount');
 
@@ -98,29 +95,29 @@ class AccountingController extends Controller
             ->orderBy('completed_at', 'desc')
             ->get()
             ->map(function ($t) {
-            return [
-            'date' => $t->completed_at,
-            'type' => 'in', // Entrée
-            'label' => 'Achat Crédits',
-            'amount' => $t->amount,
-            'user' => $t->user,
-            'reference' => 'MON-' . $t->id
-            ];
-        });
+                return [
+                    'date' => $t->completed_at,
+                    'type' => 'in', // Entrée
+                    'label' => 'Achat Crédits',
+                    'amount' => $t->amount,
+                    'user' => $t->user,
+                    'reference' => 'MON-'.$t->id,
+                ];
+            });
 
         $payoutTransactions = PayoutRequest::with(['mentorProfile.user', 'mentorProfile.user.organization'])->where('status', PayoutRequest::STATUS_COMPLETED)
             ->orderBy('completed_at', 'desc')
             ->get()
             ->map(function ($p) {
-            return [
-            'date' => $p->completed_at,
-            'type' => 'out', // Sortie
-            'label' => 'Retrait Mentor',
-            'amount' => $p->amount,
-            'user' => $p->mentorProfile->user,
-            'reference' => 'PAY-' . $p->id
-            ];
-        });
+                return [
+                    'date' => $p->completed_at,
+                    'type' => 'out', // Sortie
+                    'label' => 'Retrait Mentor',
+                    'amount' => $p->amount,
+                    'user' => $p->mentorProfile->user,
+                    'reference' => 'PAY-'.$p->id,
+                ];
+            });
 
         // Fusionner et trier
         $allTransactions = $revenueTransactions->concat($payoutTransactions)->sortByDesc('date');
@@ -137,8 +134,8 @@ class AccountingController extends Controller
             $allTransactions->count(),
             $perPage,
             $page,
-        ['path' => $request->url(), 'query' => $request->query()]
-            );
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return view('admin.accounting.history', compact('transactions'));
     }
@@ -176,7 +173,7 @@ class AccountingController extends Controller
         return [
             'labels' => $dates,
             'revenue' => $revenueSeries,
-            'payouts' => $payoutsSeries
+            'payouts' => $payoutsSeries,
         ];
     }
 
@@ -189,15 +186,15 @@ class AccountingController extends Controller
             ->limit(20)
             ->get()
             ->map(function ($t) {
-            return [
-            'date' => $t->completed_at,
-            'type' => 'in', // Entrée
-            'label' => 'Achat Crédits',
-            'amount' => $t->amount,
-            'user' => $t->user,
-            'reference' => 'MON-' . $t->id
-            ];
-        });
+                return [
+                    'date' => $t->completed_at,
+                    'type' => 'in', // Entrée
+                    'label' => 'Achat Crédits',
+                    'amount' => $t->amount,
+                    'user' => $t->user,
+                    'reference' => 'MON-'.$t->id,
+                ];
+            });
 
         $latestPayouts = PayoutRequest::with(['mentorProfile.user', 'mentorProfile.user.organization'])->where('status', PayoutRequest::STATUS_COMPLETED)
             ->whereBetween('completed_at', [$startDate, $endDate])
@@ -205,15 +202,15 @@ class AccountingController extends Controller
             ->limit(20)
             ->get()
             ->map(function ($p) {
-            return [
-            'date' => $p->completed_at,
-            'type' => 'out', // Sortie
-            'label' => 'Retrait Mentor',
-            'amount' => $p->amount,
-            'user' => $p->mentorProfile->user,
-            'reference' => 'PAY-' . $p->id
-            ];
-        });
+                return [
+                    'date' => $p->completed_at,
+                    'type' => 'out', // Sortie
+                    'label' => 'Retrait Mentor',
+                    'amount' => $p->amount,
+                    'user' => $p->mentorProfile->user,
+                    'reference' => 'PAY-'.$p->id,
+                ];
+            });
 
         $merged = $latestRevenue->concat($latestPayouts)
             ->sortByDesc('date')

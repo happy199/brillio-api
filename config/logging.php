@@ -70,7 +70,7 @@ return [
 
         'null' => [
             'driver' => 'monolog',
-            'handler' => Monolog\Handler\NullHandler::class ,
+            'handler' => Monolog\Handler\NullHandler::class,
         ],
 
         'emergency' => [

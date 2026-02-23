@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\MentorProfile;
-use App\Models\User;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 
 class SitemapController extends Controller
@@ -81,9 +79,9 @@ class SitemapController extends Controller
                 ->with('user')
                 ->get()
                 ->filter(function ($mentor) {
-                return $mentor->user && !$mentor->user->is_archived;
-            }
-            );
+                    return $mentor->user && ! $mentor->user->is_archived;
+                }
+                );
 
             foreach ($verifiedMentors as $mentor) {
                 $images = [];
@@ -92,13 +90,13 @@ class SitemapController extends Controller
                 if ($mentor->user && $mentor->user->profile_photo_url) {
                     $images[] = [
                         'loc' => $mentor->user->profile_photo_url,
-                        'caption' => $mentor->user->name . ' - Mentor Brillio',
+                        'caption' => $mentor->user->name.' - Mentor Brillio',
                         'title' => $mentor->title ?? 'Mentor professionnel',
                     ];
                 }
 
                 $sitemap .= $this->addUrl(
-                    url('/mentors/' . $mentor->public_slug),
+                    url('/mentors/'.$mentor->public_slug),
                     '0.7',
                     'weekly',
                     $mentor->updated_at->toAtomString(),
@@ -120,26 +118,26 @@ class SitemapController extends Controller
     private function addUrl($loc, $priority = '0.5', $changefreq = 'monthly', $lastmod = null, $images = [])
     {
         $url = '<url>';
-        $url .= '<loc>' . htmlspecialchars($loc) . '</loc>';
+        $url .= '<loc>'.htmlspecialchars($loc).'</loc>';
 
         if ($lastmod) {
-            $url .= '<lastmod>' . $lastmod . '</lastmod>';
+            $url .= '<lastmod>'.$lastmod.'</lastmod>';
         }
 
-        $url .= '<changefreq>' . $changefreq . '</changefreq>';
-        $url .= '<priority>' . $priority . '</priority>';
+        $url .= '<changefreq>'.$changefreq.'</changefreq>';
+        $url .= '<priority>'.$priority.'</priority>';
 
         // Add image tags if provided
         foreach ($images as $image) {
             $url .= '<image:image>';
-            $url .= '<image:loc>' . htmlspecialchars($image['loc']) . '</image:loc>';
+            $url .= '<image:loc>'.htmlspecialchars($image['loc']).'</image:loc>';
 
             if (isset($image['caption'])) {
-                $url .= '<image:caption>' . htmlspecialchars($image['caption']) . '</image:caption>';
+                $url .= '<image:caption>'.htmlspecialchars($image['caption']).'</image:caption>';
             }
 
             if (isset($image['title'])) {
-                $url .= '<image:title>' . htmlspecialchars($image['title']) . '</image:title>';
+                $url .= '<image:title>'.htmlspecialchars($image['title']).'</image:title>';
             }
 
             $url .= '</image:image>';
@@ -156,6 +154,7 @@ class SitemapController extends Controller
     public function clearCache()
     {
         Cache::forget('sitemap');
+
         return response()->json(['message' => 'Sitemap cache cleared']);
     }
 }

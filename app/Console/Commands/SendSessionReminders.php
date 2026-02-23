@@ -51,7 +51,7 @@ class SendSessionReminders extends Command
 
             // Send to each mentee
             foreach ($session->mentees as $mentee) {
-                $otherParticipants = $session->mentees->reject(fn($m) => $m->id === $mentee->id);
+                $otherParticipants = $session->mentees->reject(fn ($m) => $m->id === $mentee->id);
                 Mail::to($mentee->email)->send(
                     new SessionReminder($session, $mentee, $otherParticipants)
                 );
@@ -60,6 +60,7 @@ class SendSessionReminders extends Command
         }
 
         $this->info("✅ {$emailsSent} reminder emails sent for {$sessions->count()} sessions");
+
         return 0;
     }
 }
