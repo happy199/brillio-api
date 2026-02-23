@@ -257,6 +257,74 @@
     </div>
     @endif
 
+    @endif
+
+    <!-- Organisations -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border-l-4 border-indigo-500">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Appartenance aux Organisations</h3>
+            <span class="text-xs text-gray-400 font-medium">Lier l'utilisateur à une entité parente</span>
+        </div>
+
+        @if($user->organizations->count() > 0)
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            @foreach($user->organizations as $org)
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl group">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center mr-3">
+                        @if($org->logo_url)
+                        <img src="{{ $org->logo_url }}" class="w-10 h-10 rounded-lg object-cover">
+                        @else
+                        <span class="font-bold text-indigo-600 uppercase">{{ substr($org->name, 0, 1) }}</span>
+                        @endif
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-900 text-sm">{{ $org->name }}</p>
+                        <p class="text-xs text-gray-500">{{ $org->sector ?? 'Secteur non défini' }}</p>
+                    </div>
+                </div>
+                <form
+                    action="{{ route('admin.users.unlink-organization', ['user' => $user->id, 'organization' => $org->id]) }}"
+                    method="POST" onsubmit="return confirm('Détacher l\'utilisateur de cette organisation ?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors">
+                        <i class="fas fa-unlink"></i>
+                    </button>
+                </form>
+            </div>
+            @endforeach
+        </div>
+        @else
+        <div class="bg-gray-50 rounded-xl p-8 text-center mb-6">
+            <p class="text-gray-500 italic">Cet utilisateur n'est lié à aucune organisation actuellement.</p>
+        </div>
+        @endif
+
+        <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+            <form action="{{ route('admin.users.link-organization', $user) }}" method="POST"
+                class="flex items-end gap-4">
+                @csrf
+                <div class="flex-1">
+                    <label class="block text-xs font-bold text-indigo-800 mb-2 uppercase tracking-tight">Ajouter une
+                        organisation</label>
+                    <select name="organization_id"
+                        class="w-full p-3 bg-white border-0 rounded-xl text-sm shadow-sm focus:ring-2 focus:ring-indigo-500"
+                        required>
+                        <option value="">-- Sélectionner une organisation --</option>
+                        @foreach($organizations as $org)
+                        <option value="{{ $org->id }}">{{ $org->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all text-sm">
+                    Lier
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Actions -->
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>

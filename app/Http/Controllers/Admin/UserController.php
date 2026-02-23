@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Organization;
+use App\Models\MentorProfile;
+use App\Models\JeuneProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * Controller pour la gestion des utilisateurs dans le dashboard admin
@@ -66,6 +71,66 @@ class UserController extends Controller
     }
 
     /**
+     * Show form for creating a new user (demo account)
+     */
+    public function create()
+    {
+        return view('admin.users.create');
+    }
+
+    /**
+     * Store a new user (demo account)
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'user_type' => 'required|in:jeune,mentor,admin',
+        ]);
+
+        $password = Str::random(12);
+
+        $userType = $request->user_type;
+        $isAdmin = false;
+
+        if ($userType === 'admin') {
+            $isAdmin = true;
+            $userType = 'mentor'; // Admins are technically mentors in roles but with is_admin flag
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($password),
+            'user_type' => $userType,
+            'is_admin' => $isAdmin,
+            'email_verified_at' => now(),
+            'onboarding_completed' => true,
+        ]);
+
+        // Create basic profile
+        if ($userType === 'mentor') {
+            MentorProfile::create([
+                'user_id' => $user->id,
+                'is_validated' => true,
+                'bio' => 'Compte de démonstration.',
+            ]);
+        }
+        elseif ($userType === 'jeune') {
+            JeuneProfile::create([
+                'user_id' => $user->id,
+                'bio' => 'Compte de démonstration.',
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "Utilisateur créé avec succès.")
+            ->with('generated_password', $password)
+            ->with('generated_email', $user->email);
+    }
+
+    /**
      * Affiche le détail d'un utilisateur
      */
     public function show(User $user)
@@ -75,9 +140,36 @@ class UserController extends Controller
             'mentorProfile.roadmapSteps',
             'chatConversations.messages',
             'academicDocuments',
+            'organizations',
         ]);
 
-        return view('admin.users.show', compact('user'));
+        $organizations = Organization::orderBy('name')->get();
+
+        return view('admin.users.show', compact('user', 'organizations'));
+    }
+
+    /**
+     * Link user to an organization
+     */
+    public function linkOrganization(Request $request, User $user)
+    {
+        $request->validate([
+            'organization_id' => 'required|exists:organizations,id',
+        ]);
+
+        $user->organizations()->syncWithoutDetaching([$request->organization_id]);
+
+        return back()->with('success', "L'utilisateur a été lié à l'organisation.");
+    }
+
+    /**
+     * Unlink user from an organization
+     */
+    public function unlinkOrganization(User $user, Organization $organization)
+    {
+        $user->organizations()->detach($organization->id);
+
+        return back()->with('success', "L'utilisateur a été détaché de l'organisation.");
     }
 
     /**
