@@ -88,7 +88,7 @@
                         <div class="text-sm text-gray-500">{{ $mentor->current_company ?? '' }}</div>
                     </td>
                     <td class="px-6 py-4">
-                        @if($mentor->specializationModel && $mentor->specializationModel->status === 'active')
+                        @if($mentor->specializationModel && $mentor->specializationModel->status === 'approved')
                         <span
                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                             {{ $mentor->specializationModel->name }}

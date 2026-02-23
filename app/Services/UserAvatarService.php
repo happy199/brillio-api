@@ -12,44 +12,14 @@ use Illuminate\Support\Str;
 class UserAvatarService
 {
     /**
-     * Vérifie si une URL provient de LinkedIn
-     */
-    public function isLinkedInUrl(string $url): bool
-    {
-        return str_starts_with($url, 'https://media.licdn.com/dms/image/');
-    }
-
-    /**
      * Télécharge un avatar depuis une URL et le stocke localement
      */
     public function downloadFromUrl(User $user, string $url): ?string
     {
         try {
-            // Si l'utilisateur a déjà une photo locale (path)
-            if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
-
-                // Si c'est un mentor, on est très conservateur : 
-                // on ne remplace la photo que si la nouvelle URL est LinkedIn ET différente de l'actuelle
-                if ($user->isMentor()) {
-                    if (!$this->isLinkedInUrl($url)) {
-                        Log::info('[Safety Check] skipping avatar download for mentor: incoming URL is not LinkedIn', [
-                            'user_id' => $user->id,
-                            'url' => $url
-                        ]);
-                        return $user->profile_photo_path;
-                    }
-
-                    if ($user->profile_photo_url === $url) {
-                        return $user->profile_photo_path;
-                    }
-                }
-                else {
-                    // Pour les autres types de comptes, comportement standard : 
-                    // on ne télécharge que si l'URL a changé
-                    if ($user->profile_photo_url === $url) {
-                        return $user->profile_photo_path;
-                    }
-                }
+            // Si l'URL n'a pas changé et qu'on a déjà un fichier, on ne fait rien
+            if ($user->profile_photo_url === $url && $user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+                return $user->profile_photo_path;
             }
 
             // Télécharger l'image
