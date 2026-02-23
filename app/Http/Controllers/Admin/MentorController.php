@@ -212,12 +212,203 @@ class MentorController extends Controller
      * Met à jour le profil du mentor
      */
     public function __construct(
-        private \App\Services\UserAvatarService $avatarService
+        private \App\Services\UserAvatarService $avatarService,
+        private \App\Services\LinkedInPdfParserService $parserService
         )
     {
     }
 
-    // ... (keep protected $specializations)
+    /**
+     * Recharge les données LinkedIn à partir du PDF existant
+     */
+    public function reloadLinkedInProfile(MentorProfile $mentor)
+    {
+        // 1. Vérification de l'existence du chemin en base
+        if (!$mentor->linkedin_pdf_path) {
+            return response()->json([
+                'success' => false,
+                'needs_upload' => true,
+                'error' => 'Aucun PDF LinkedIn n’est associé à ce profil.'
+            ], 404);
+        }
+
+        // 2. Vérification physique du fichier sur le disque
+        if (!Storage::disk('local')->exists($mentor->linkedin_pdf_path)) {
+            Log::warning('LinkedIn PDF missing during admin reload', [
+                'mentor_id' => $mentor->id,
+                'path' => $mentor->linkedin_pdf_path
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'needs_upload' => true,
+                'error' => 'Le fichier PDF est introuvable sur le serveur. Un nouvel upload est nécessaire.'
+            ], 404);
+        }
+
+        try {
+            $fullPath = storage_path('app/' . $mentor->linkedin_pdf_path);
+            $profileData = $this->parserService->parsePdf($fullPath);
+
+            $this->processLinkedInImport($mentor, $profileData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil rechargé avec succès depuis le PDF existant.'
+            ]);
+        }
+        catch (\Exception $e) {
+            Log::error('Admin LinkedIn reload error', [
+                'mentor_id' => $mentor->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de l’analyse du PDF : ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Upload un nouveau PDF LinkedIn et met à jour le profil
+     */
+    public function uploadLinkedInProfile(Request $request, MentorProfile $mentor)
+    {
+        $request->validate([
+            'pdf' => 'required|file|mimes:pdf|max:10240', // 10MB
+        ]);
+
+        try {
+            // Stocker le PDF
+            $finalPdfPath = $request->file('pdf')->store('linkedin-pdfs', 'local');
+            $originalName = $request->file('pdf')->getClientOriginalName();
+
+            // Parser le PDF
+            $fullPath = storage_path('app/' . $finalPdfPath);
+            $profileData = $this->parserService->parsePdf($fullPath);
+
+            // Mettre à jour les métadonnées de fichier
+            $mentor->update([
+                'linkedin_pdf_path' => $finalPdfPath,
+                'linkedin_pdf_original_name' => $originalName,
+            ]);
+
+            $this->processLinkedInImport($mentor, $profileData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nouveau PDF uploadé et profil mis à jour avec succès.'
+            ]);
+        }
+        catch (\Exception $e) {
+            Log::error('Admin LinkedIn upload error', [
+                'mentor_id' => $mentor->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de l\'upload ou de l\'analyse : ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Logique partagée pour traiter les données importées
+     */
+    private function processLinkedInImport(MentorProfile $mentor, array $profileData)
+    {
+        // Supprimer les anciennes étapes
+        $mentor->roadmapSteps()->delete();
+
+        // Calculer l'expérience
+        $totalMonths = 0;
+        if (!empty($profileData['experience'])) {
+            foreach ($profileData['experience'] as $exp) {
+                if (isset($exp['duration_years']))
+                    $totalMonths += ($exp['duration_years'] * 12);
+                if (isset($exp['duration_months']))
+                    $totalMonths += $exp['duration_months'];
+            }
+        }
+        $yearsOfExperience = round($totalMonths / 12);
+
+        // Récupérer la dernière expérience
+        $latestExperience = !empty($profileData['experience']) ? $profileData['experience'][0] : null;
+
+        // Mise à jour du profil (on préserve bio/advice si déjà remplis)
+        $mentor->update([
+            'linkedin_raw_data' => $profileData,
+            'linkedin_imported_at' => now(),
+            'linkedin_import_count' => $mentor->linkedin_import_count + 1,
+            'current_position' => $mentor->current_position ?: ($latestExperience['title'] ?? null),
+            'current_company' => $mentor->current_company ?: ($latestExperience['company'] ?? null),
+            'bio' => $mentor->bio ?: ($profileData['headline'] ?? null),
+            'skills' => !empty($profileData['skills']) ? $profileData['skills'] : $mentor->skills,
+            'years_of_experience' => $yearsOfExperience > 0 ? $yearsOfExperience : $mentor->years_of_experience,
+            // On ne touche pas aux URLs de contact ici pour éviter d'écraser des modifs manuelles de l'admin
+            // sauf si elles étaient vides
+            'linkedin_url' => $mentor->linkedin_url ?: $this->formatUrl($profileData['contact']['linkedin'] ?? null),
+            'website_url' => $mentor->website_url ?: $this->formatUrl($profileData['contact']['website'] ?? null),
+        ]);
+
+        // Importer les expériences
+        $stepPosition = 0;
+        if (!empty($profileData['experience'])) {
+            foreach ($profileData['experience'] as $exp) {
+                $startDate = !empty($exp['start_date'])
+                    ? (strlen($exp['start_date']) === 4 ? $exp['start_date'] . '-01-01' : $exp['start_date'])
+                    : null;
+
+                $endDate = null;
+                if (array_key_exists('end_date', $exp)) {
+                    $endDate = !empty($exp['end_date'])
+                        ? (strlen($exp['end_date']) === 4 ? $exp['end_date'] . '-12-31' : $exp['end_date'])
+                        : null;
+                }
+
+                $mentor->roadmapSteps()->create([
+                    'step_type' => 'work',
+                    'title' => $exp['title'] ?? 'Sans titre',
+                    'institution_company' => $exp['company'] ?? null,
+                    'description' => trim($exp['description'] ?? ''),
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'position' => $stepPosition++,
+                ]);
+            }
+        }
+
+        // Importer les formations
+        if (!empty($profileData['education'])) {
+            foreach ($profileData['education'] as $edu) {
+                $mentor->roadmapSteps()->create([
+                    'step_type' => 'education',
+                    'title' => $edu['degree'] ?? 'Formation',
+                    'institution_company' => $edu['school'] ?? null,
+                    'description' => 'Formation académique',
+                    'start_date' => !empty($edu['year_start']) ? $edu['year_start'] . '-01-01' : null,
+                    'end_date' => !empty($edu['year_end']) ? $edu['year_end'] . '-12-31' : null,
+                    'position' => $stepPosition++,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Helper pour formater les URLs
+     */
+    private function formatUrl(?string $url): ?string
+    {
+        if (empty($url))
+            return $url;
+        $url = trim($url);
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            return 'https://' . ltrim($url, '/');
+        }
+        return $url;
+    }
 
     /**
      * Met à jour le profil du mentor

@@ -390,6 +390,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::put('mentors/{mentor}/reject', [MentorController::class, 'reject'])->name('mentors.reject');
         Route::put('mentors/{mentor}/demote', [MentorController::class, 'demote'])->name('mentors.demote');
         Route::get('mentors/{mentor}/download-linkedin', [MentorController::class, 'downloadLinkeInProfile'])->name('mentors.download-linkedin');
+        Route::post('mentors/{mentor}/linkedin-reload', [MentorController::class, 'reloadLinkedInProfile'])->name('mentors.linkedin-reload');
+        Route::post('mentors/{mentor}/linkedin-upload', [MentorController::class, 'uploadLinkedInProfile'])->name('mentors.linkedin-upload');
 
         // Gestion des ressources
         Route::resource('resources', \App\Http\Controllers\Admin\ResourceController::class);
