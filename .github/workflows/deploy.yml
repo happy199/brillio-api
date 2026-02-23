@@ -248,6 +248,22 @@ jobs:
             echo "MAIL_FROM_NAME=\"Brillio\"" >> .env
             
             echo "✅ SMTP production keys configured"
+            
+            # Configure Sentry Configuration
+            echo "🔐 Configuring Sentry Monitoring..."
+            sed -i '/^SENTRY_/d' .env
+            echo "SENTRY_LARAVEL_DSN=${{ secrets.SENTRY_LARAVEL_DSN }}" >> .env
+            echo "SENTRY_TRACES_SAMPLE_RATE=1.0" >> .env
+            echo "SENTRY_PROFILES_SAMPLE_RATE=1.0" >> .env
+            echo "SENTRY_ENABLE_LOGS=true" >> .env
+            
+            # Configure Log Stack to include Sentry
+            sed -i '/^LOG_CHANNEL=/d' .env
+            echo "LOG_CHANNEL=stack" >> .env
+            sed -i '/^LOG_STACK=/d' .env
+            echo "LOG_STACK=single,sentry_logs" >> .env
+            
+            echo "✅ Sentry & Logging configured"
 
             # Deploy JAAS private key as separate PEM file
             echo "🔐 Deploying JAAS private key file..."
