@@ -23,10 +23,15 @@ class CheckUserType
             // Rediriger vers le bon espace
             if ($user->user_type === 'jeune') {
                 return redirect()->route('jeune.dashboard');
-            } elseif ($user->user_type === 'mentor') {
+            }
+            elseif ($user->user_type === 'mentor') {
                 return redirect()->route('mentor.dashboard');
-            } elseif ($user->is_admin) {
+            }
+            elseif ($user->is_admin) {
                 return redirect()->route('admin.dashboard');
+            }
+            elseif ($user->user_type === 'organization') {
+                return redirect()->route('organization.dashboard');
             }
 
             abort(403, 'Acces non autorise.');

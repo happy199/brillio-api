@@ -257,7 +257,6 @@
     </div>
     @endif
 
-    @endif
 
     <!-- Organisations -->
     <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border-l-4 border-indigo-500">
