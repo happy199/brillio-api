@@ -1,0 +1,937 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Brillio API",
+        "description": "API Backend for Brillio Orientation System",
+        "contact": {
+            "email": "contact@brillio.africa"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Brillio API Server"
+        }
+    ],
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Inscription d'un nouvel utilisateur",
+                "operationId": "d6f5d00c40f9de2e9272088aebe648c8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "user_type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jean Dupont"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123"
+                                    },
+                                    "user_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "jeune",
+                                            "mentor"
+                                        ],
+                                        "example": "jeune"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+2250102030405"
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2000-01-01"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "Côte d'Ivoire"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Abidjan"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Utilisateur créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Inscription réussie"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Connexion d'un utilisateur existant",
+                "operationId": "0f5784f47a3fcac35f86ec4e82d967d7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123"
+                                    },
+                                    "logout_other_devices": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Connexion réussie"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Email ou mot de passe incorrect"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Déconnexion de l'utilisateur",
+                "description": "Déconnexion de l'utilisateur",
+                "operationId": "d07352aa1a19c3f27d2df5ced5f833cf",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Récupère le profil de l'utilisateur connecté",
+                "operationId": "cc245c2f4ba7dbc9598135af923978bd",
+                "responses": {
+                    "200": {
+                        "description": "Profil utilisateur récupéré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user/profile": {
+            "post": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Met à jour le profil de l'utilisateur",
+                "description": "Met à jour le profil de l'utilisateur",
+                "operationId": "5f07852e06c78316855e05ddce7955d1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jean Dupont"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+2250102030405"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user/photo": {
+            "post": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Upload de la photo de profil",
+                "description": "Upload de la photo de profil",
+                "operationId": "43b477f1e32038f4b3262a7c0021a8bf",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "photo": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Photo mise à jour"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Supprime la photo de profil",
+                "operationId": "e7d479cdde61c09f4cc504e7d92a855f",
+                "responses": {
+                    "200": {
+                        "description": "Photo supprimée"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/mentorships": {
+            "get": {
+                "tags": [
+                    "Mentorat"
+                ],
+                "summary": "Liste les relations de mentorat de l'utilisateur",
+                "description": "Liste les mentorats de l'utilisateur (Jeune)",
+                "operationId": "90f67f3ed0ba318157b27706cedfaf78",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "accepted",
+                                "rejected",
+                                "canceled",
+                                "completed"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des mentorats"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Mentorat"
+                ],
+                "summary": "Demander un mentorat",
+                "description": "Envoyer une demande de mentorat",
+                "operationId": "b02bea004b3172bbb7ba2e64aebafde9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mentor_id"
+                                ],
+                                "properties": {
+                                    "mentor_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Bonjour, j'aimerais que vous soyez mon mentor."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Demande envoyée"
+                    },
+                    "400": {
+                        "description": "Demande déjà existante"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/mentorships/{id}/cancel": {
+            "delete": {
+                "tags": [
+                    "Mentorat"
+                ],
+                "summary": "Annuler une demande de mentorat",
+                "description": "Annuler une demande de mentorat",
+                "operationId": "19c7f0beb18a0fab070ded69f2bca522",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cancellation_reason"
+                                ],
+                                "properties": {
+                                    "cancellation_reason": {
+                                        "type": "string",
+                                        "example": "Je n'ai plus besoin de mentorat."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Demande annulée"
+                    },
+                    "400": {
+                        "description": "Impossible d'annuler la demande"
+                    },
+                    "404": {
+                        "description": "Demande non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/resources": {
+            "get": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Liste les ressources pédagogiques",
+                "description": "Liste les ressources pédagogiques avec filtrage",
+                "operationId": "4c92c0d663d242a3627dac9352423210",
+                "parameters": [
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "suggestions",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "price",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "free",
+                                "premium"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "mbti",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "source",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "mentor",
+                                "brillio"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "ownership",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "mine",
+                                "all"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des ressources"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/resources/{id}": {
+            "get": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Détails d'une ressource pédagogique",
+                "description": "Détails d'une ressource",
+                "operationId": "d2021c7416586849b6e82d0a752ebbe2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de la ressource"
+                    },
+                    "404": {
+                        "description": "Ressource non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/resources/{id}/unlock": {
+            "post": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Débloquer une ressource premium",
+                "description": "Débloque une ressource premium",
+                "operationId": "2435eb1ab84cf704d1b230629a82df01",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ressource débloquée"
+                    },
+                    "400": {
+                        "description": "Crédits insuffisants"
+                    },
+                    "404": {
+                        "description": "Ressource non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/sessions": {
+            "get": {
+                "tags": [
+                    "Séances"
+                ],
+                "summary": "Liste les séances de mentorat",
+                "description": "Liste les séances de l'utilisateur",
+                "operationId": "19c9217adc8bc543a89b2b721a4576d4",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "upcoming",
+                                "past"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des séances"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Séances"
+                ],
+                "summary": "Réserver une séance de mentorat",
+                "description": "Réserver une nouvelle séance",
+                "operationId": "9cc41a4a8e734c44c83827632537a2c8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mentor_id",
+                                    "scheduled_at",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "mentor_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "scheduled_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Session d'orientation"
+                                    },
+                                    "duration_minutes": {
+                                        "type": "integer",
+                                        "example": 60
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Séance réservée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/wallet": {
+            "get": {
+                "tags": [
+                    "Portefeuille"
+                ],
+                "summary": "Récupère le solde et les transactions du portefeuille",
+                "description": "Récupère le solde et l'historique des transactions",
+                "operationId": "ebc7f1bada3c7e13d41a18c0a3240dd0",
+                "responses": {
+                    "200": {
+                        "description": "Détails du portefeuille"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/wallet/packs": {
+            "get": {
+                "tags": [
+                    "Portefeuille"
+                ],
+                "summary": "Liste les packs de crédits disponibles",
+                "description": "Liste les packs de crédits disponibles",
+                "operationId": "369c29ab3341ca5b9814f3ee90497d7d",
+                "responses": {
+                    "200": {
+                        "description": "Liste des packs"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/wallet/redeem-coupon": {
+            "post": {
+                "tags": [
+                    "Portefeuille"
+                ],
+                "summary": "Utiliser un coupon pour obtenir des crédits",
+                "description": "Utiliser un coupon",
+                "operationId": "ceb997728c79c6fb614e52269848c68f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "example": "MONCOUPON"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Coupon validé avec succès"
+                    },
+                    "400": {
+                        "description": "Coupon invalide ou déjà utilisé"
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "title": "User",
+                "description": "User model schema",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Jean Dupont"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "jean@example.com"
+                    },
+                    "user_type": {
+                        "type": "string",
+                        "example": "jeune"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "country": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "city": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "profile_photo_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentification",
+            "description": "Authentification"
+        },
+        {
+            "name": "Profil",
+            "description": "Profil"
+        },
+        {
+            "name": "Mentorat",
+            "description": "Mentorat"
+        },
+        {
+            "name": "Ressources",
+            "description": "Ressources"
+        },
+        {
+            "name": "Séances",
+            "description": "Séances"
+        },
+        {
+            "name": "Portefeuille",
+            "description": "Portefeuille"
+        }
+    ]
+}

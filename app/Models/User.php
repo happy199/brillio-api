@@ -11,12 +11,25 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use OpenApi\Attributes as OA;
 
-/**
- * Modèle User - Utilisateur principal de la plateforme Brillio
- *
- * Gère les deux types d'utilisateurs : jeunes et mentors
- */
+#[OA\Schema(
+    schema: "User",
+    title: "User",
+    description: "User model schema",
+    properties: [
+        new OA\Property(property: "id", type: "integer", example: 1),
+        new OA\Property(property: "name", type: "string", example: "Jean Dupont"),
+        new OA\Property(property: "email", type: "string", example: "jean@example.com"),
+        new OA\Property(property: "user_type", type: "string", example: "jeune"),
+        new OA\Property(property: "phone", type: "string", nullable: true),
+        new OA\Property(property: "date_of_birth", type: "string", format: "date", nullable: true),
+        new OA\Property(property: "country", type: "string", nullable: true),
+        new OA\Property(property: "city", type: "string", nullable: true),
+        new OA\Property(property: "profile_photo_url", type: "string", nullable: true),
+        new OA\Property(property: "created_at", type: "string", format: "date-time")
+    ]
+)]
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -410,7 +423,8 @@ class User extends Authenticatable implements MustVerifyEmail
     public function organizations(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Organization::class, 'organization_user')
-            ->withPivot('referral_code_used')
+            ->withPivot('role')
             ->withTimestamps();
     }
 }
+ 
