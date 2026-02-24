@@ -167,7 +167,10 @@ class Controller extends BaseController
         // 4. Fallback to first linked organization
         $firstOrg = $user->organizations()->first();
         if ($firstOrg) {
-            $user->update(['organization_id' => $firstOrg->id]);
+            $user->update([
+                'organization_id' => $firstOrg->id,
+                'organization_role' => $firstOrg->pivot->role ?? 'jeune',
+            ]);
 
             return $firstOrg;
         }
