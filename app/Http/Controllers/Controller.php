@@ -8,20 +8,20 @@ use Illuminate\Routing\Controller as BaseController;
 use OpenApi\Attributes as OA;
 
 #[OA\Info(
-    title: "Brillio API",
-    version: "1.0.0",
-    description: "API Backend for Brillio Orientation System",
-    contact: new OA\Contact(email: "contact@brillio.africa")
+    title: 'Brillio API',
+    version: '1.0.0',
+    description: 'API Backend for Brillio Orientation System',
+    contact: new OA\Contact(email: 'contact@brillio.africa')
 )]
 #[OA\Server(
     url: L5_SWAGGER_CONST_HOST,
-    description: "Brillio API Server"
+    description: 'Brillio API Server'
 )]
 #[OA\SecurityScheme(
-    securityScheme: "bearerAuth",
-    type: "http",
-    scheme: "bearer",
-    bearerFormat: "JWT"
+    securityScheme: 'bearerAuth',
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT'
 )]
 /**
  * Controller de base avec méthodes utilitaires pour les réponses API
@@ -35,10 +35,13 @@ class Controller extends BaseController
      *     path="/api/health",
      *     summary="Porte de santé de l'API",
      *     tags={"Système"},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="L'API est opérationnelle",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="status", type="string", example="ok"),
      *             @OA\Property(property="timestamp", type="string", format="date-time")
      *         )

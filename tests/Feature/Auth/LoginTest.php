@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +15,7 @@ class LoginTest extends TestCase
     {
         $user = User::factory()->create([
             'user_type' => User::TYPE_JEUNE,
-            'onboarding_completed' => true
+            'onboarding_completed' => true,
         ]);
 
         $response = $this->actingAs($user)->get(route('jeune.dashboard'));
@@ -25,7 +25,7 @@ class LoginTest extends TestCase
     public function test_mentor_is_redirected_to_mentor_dashboard()
     {
         $user = User::factory()->mentor()->create([
-            'onboarding_completed' => true
+            'onboarding_completed' => true,
         ]);
 
         $response = $this->actingAs($user)->get(route('mentor.dashboard'));
@@ -38,7 +38,7 @@ class LoginTest extends TestCase
         $org = Organization::factory()->create([
             'status' => 'active',
             'slug' => 'test-org',
-            'contact_email' => $user->email
+            'contact_email' => $user->email,
         ]);
 
         $user->update(['organization_id' => $org->id]);

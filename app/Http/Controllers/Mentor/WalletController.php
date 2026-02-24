@@ -210,7 +210,7 @@ class WalletController extends Controller
         try {
             $this->walletService->redeemCoupon($user, $code);
 
-            return back()->with('success', "Coupon validé !");
+            return back()->with('success', 'Coupon validé !');
 
         } catch (\Exception $e) {
             Log::error('Coupon redemption failed', [

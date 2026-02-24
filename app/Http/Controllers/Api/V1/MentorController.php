@@ -20,17 +20,17 @@ class MentorController extends Controller
      * Liste des mentors publiés (pour les jeunes)
      */
     #[OA\Get(
-        path: "/api/v1/mentors",
-        summary: "Liste des mentors publiés",
-        tags: ["Mentors"],
+        path: '/api/v1/mentors',
+        summary: 'Liste des mentors publiés',
+        tags: ['Mentors'],
         parameters: [
-            new OA\Parameter(name: "specialization", in: "query", schema: new OA\Schema(type: "string")),
-            new OA\Parameter(name: "country", in: "query", schema: new OA\Schema(type: "string")),
-            new OA\Parameter(name: "search", in: "query", schema: new OA\Schema(type: "string")),
-            new OA\Parameter(name: "per_page", in: "query", schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'specialization', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'country', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'search', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'per_page', in: 'query', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Liste des mentors")
+            new OA\Response(response: 200, description: 'Liste des mentors'),
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -75,15 +75,15 @@ class MentorController extends Controller
      * Détail d'un mentor avec sa roadmap complète
      */
     #[OA\Get(
-        path: "/api/v1/mentors/{id}",
+        path: '/api/v1/mentors/{id}',
         summary: "Détail d'un mentor",
-        tags: ["Mentors"],
+        tags: ['Mentors'],
         parameters: [
-            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Détail du mentor"),
-            new OA\Response(response: 404, description: "Mentor non trouvé")
+            new OA\Response(response: 200, description: 'Détail du mentor'),
+            new OA\Response(response: 404, description: 'Mentor non trouvé'),
         ]
     )]
     public function show(int $id): JsonResponse
@@ -106,12 +106,12 @@ class MentorController extends Controller
      * Crée ou met à jour le profil mentor de l'utilisateur connecté
      */
     #[OA\Post(
-        path: "/api/v1/mentor/profile",
-        summary: "Crée ou met à jour le profil mentor",
-        tags: ["Mentors"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/mentor/profile',
+        summary: 'Crée ou met à jour le profil mentor',
+        tags: ['Mentors'],
+        security: [['bearerAuth' => []]],
         responses: [
-            new OA\Response(response: 200, description: "Profil mis à jour")
+            new OA\Response(response: 200, description: 'Profil mis à jour'),
         ]
     )]
     public function createOrUpdateProfile(CreateProfileRequest $request): JsonResponse
@@ -310,11 +310,11 @@ class MentorController extends Controller
      * Liste des spécialisations disponibles
      */
     #[OA\Get(
-        path: "/api/v1/specializations",
-        summary: "Liste des spécialisations disponibles",
-        tags: ["Mentors"],
+        path: '/api/v1/specializations',
+        summary: 'Liste des spécialisations disponibles',
+        tags: ['Mentors'],
         responses: [
-            new OA\Response(response: 200, description: "Liste des spécialisations")
+            new OA\Response(response: 200, description: 'Liste des spécialisations'),
         ]
     )]
     public function specializations(): JsonResponse

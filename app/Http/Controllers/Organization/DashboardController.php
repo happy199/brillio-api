@@ -57,47 +57,47 @@ class DashboardController extends Controller
             'pending_invitations' => $organization->invitations()->where('status', 'pending')->count(),
             'active_users' => $organization->users()->where('last_login_at', '>=', now()->subDays(30))->count(),
             'personality_tests_completed' => $organization->users()->whereHas('personalityTest', function ($q) {
-            $q->whereNotNull('completed_at');
-        })->count(),
+                $q->whereNotNull('completed_at');
+            })->count(),
             'users_with_mentors' => $organization->users()
-            ->whereHas('mentorshipsAsMentee', function ($query) {
-            $query->where('status', 'accepted');
-        })->count(),
+                ->whereHas('mentorshipsAsMentee', function ($query) {
+                    $query->where('status', 'accepted');
+                })->count(),
             'mentoring_sessions_count' => $organization->users()
-            ->join('mentoring_session_user', 'users.id', '=', 'mentoring_session_user.user_id')
-            ->join('mentoring_sessions', 'mentoring_session_user.mentoring_session_id', '=', 'mentoring_sessions.id')
-            ->where('mentoring_sessions.status', 'completed')
-            ->count(),
+                ->join('mentoring_session_user', 'users.id', '=', 'mentoring_session_user.user_id')
+                ->join('mentoring_sessions', 'mentoring_session_user.mentoring_session_id', '=', 'mentoring_sessions.id')
+                ->where('mentoring_sessions.status', 'completed')
+                ->count(),
             'documents_count' => $organization->users()->withCount('academicDocuments')->get()->sum('academic_documents_count'),
             'total_mentors' => $organization->mentors()->count(),
             'active_mentors' => $organization->mentors()->where('last_login_at', '>=', now()->subDays(30))->count(),
             'mentor_sessions_count' => DB::table('mentoring_sessions')
-            ->join('mentoring_session_user', 'mentoring_sessions.id', '=', 'mentoring_session_user.mentoring_session_id')
-            ->join('organization_user', 'mentoring_session_user.user_id', '=', 'organization_user.user_id')
-            ->where('organization_user.organization_id', $organization->id)
-            ->where('mentoring_sessions.status', 'completed')
-            ->distinct('mentoring_sessions.id')
-            ->count(),
+                ->join('mentoring_session_user', 'mentoring_sessions.id', '=', 'mentoring_session_user.mentoring_session_id')
+                ->join('organization_user', 'mentoring_session_user.user_id', '=', 'organization_user.user_id')
+                ->where('organization_user.organization_id', $organization->id)
+                ->where('mentoring_sessions.status', 'completed')
+                ->distinct('mentoring_sessions.id')
+                ->count(),
             'jeune_credits_distributed' => DB::table('wallet_transactions')
-            ->where('type', 'gift')
-            ->where('related_type', \App\Models\Organization::class)
-            ->where('related_id', $organization->id)
-            ->whereIn('user_id', function ($query) {
-            $query->select('id')
-                ->from('users')
-                ->where('user_type', 'jeune');
-        })
-            ->sum('amount'),
+                ->where('type', 'gift')
+                ->where('related_type', \App\Models\Organization::class)
+                ->where('related_id', $organization->id)
+                ->whereIn('user_id', function ($query) {
+                    $query->select('id')
+                        ->from('users')
+                        ->where('user_type', 'jeune');
+                })
+                ->sum('amount'),
             'mentor_credits_distributed' => DB::table('wallet_transactions')
-            ->where('type', 'gift')
-            ->where('related_type', \App\Models\Organization::class)
-            ->where('related_id', $organization->id)
-            ->whereIn('user_id', function ($query) {
-            $query->select('id')
-                ->from('users')
-                ->where('user_type', 'mentor');
-        })
-            ->sum('amount'),
+                ->where('type', 'gift')
+                ->where('related_type', \App\Models\Organization::class)
+                ->where('related_id', $organization->id)
+                ->whereIn('user_id', function ($query) {
+                    $query->select('id')
+                        ->from('users')
+                        ->where('user_type', 'mentor');
+                })
+                ->sum('amount'),
         ];
 
         // Onboarding completion (Global)
@@ -123,7 +123,7 @@ class DashboardController extends Controller
         $registrationData = DB::table('users')
             ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
             ->where('organization_user.organization_id', $organization->id)
-            ->selectRaw($dateFormat . ' as month, count(*) as count')
+            ->selectRaw($dateFormat.' as month, count(*) as count')
             ->where('users.created_at', '>=', now()->subMonths(6))
             ->groupBy('month')
             ->orderBy('month')
@@ -221,11 +221,9 @@ class DashboardController extends Controller
                 $age = \Carbon\Carbon::parse($user->date_of_birth)->age;
                 if ($age >= 18 && $age <= 24) {
                     $ageStats['18-24']++;
-                }
-                elseif ($age >= 25 && $age <= 30) {
+                } elseif ($age >= 25 && $age <= 30) {
                     $ageStats['25-30']++;
-                }
-                elseif ($age > 30) {
+                } elseif ($age > 30) {
                     $ageStats['30+']++;
                 }
             }

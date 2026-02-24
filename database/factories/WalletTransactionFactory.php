@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\WalletTransaction;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class WalletTransactionFactory extends Factory

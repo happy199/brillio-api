@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
-use App\Models\Mentorship;
-use App\Models\User;
 use App\Models\MentorProfile;
+use App\Models\Mentorship;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,24 +22,22 @@ class SessionController extends Controller
     public function __construct(
         private WalletService $walletService,
         private \App\Services\MentorshipNotificationService $notificationService
-        )
-    {
-    }
+    ) {}
 
     /**
      * Liste les séances de l'utilisateur
      */
     #[OA\Get(
-        path: "/api/v1/sessions",
-        summary: "Liste les séances de mentorat",
-        tags: ["Séances"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/sessions',
+        summary: 'Liste les séances de mentorat',
+        tags: ['Séances'],
+        security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: "type", in: "query", schema: new OA\Schema(type: "string", enum: ["upcoming", "past"])),
-            new OA\Parameter(name: "status", in: "query", schema: new OA\Schema(type: "string"))
+            new OA\Parameter(name: 'type', in: 'query', schema: new OA\Schema(type: 'string', enum: ['upcoming', 'past'])),
+            new OA\Parameter(name: 'status', in: 'query', schema: new OA\Schema(type: 'string')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Liste des séances")
+            new OA\Response(response: 200, description: 'Liste des séances'),
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -80,30 +77,30 @@ class SessionController extends Controller
      * Réserver une nouvelle séance
      */
     #[OA\Post(
-        path: "/api/v1/sessions",
-        summary: "Réserver une séance de mentorat",
-        tags: ["Séances"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/sessions',
+        summary: 'Réserver une séance de mentorat',
+        tags: ['Séances'],
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["mentor_id", "scheduled_at", "title"],
+                required: ['mentor_id', 'scheduled_at', 'title'],
                 properties: [
-                    new OA\Property(property: "mentor_id", type: "integer", example: 1),
-                    new OA\Property(property: "scheduled_at", type: "string", format: "date-time"),
-                    new OA\Property(property: "title", type: "string", example: "Session d'orientation"),
-                    new OA\Property(property: "duration_minutes", type: "integer", example: 60)
+                    new OA\Property(property: 'mentor_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'scheduled_at', type: 'string', format: 'date-time'),
+                    new OA\Property(property: 'title', type: 'string', example: "Session d'orientation"),
+                    new OA\Property(property: 'duration_minutes', type: 'integer', example: 60),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: "Séance réservée")
+            new OA\Response(response: 201, description: 'Séance réservée'),
         ]
     )]
     public function store(Request $request): JsonResponse
     {
         $user = Auth::user();
-        
+
         $request->validate([
             'mentor_id' => 'required|exists:mentor_profiles,id',
             'scheduled_at' => 'required|date|after:now',
@@ -113,15 +110,15 @@ class SessionController extends Controller
         ]);
 
         $mentorProfile = MentorProfile::find($request->mentor_id);
-        
+
         // Vérifier si un mentorat actif existe
         $mentorship = Mentorship::where('mentee_id', $user->id)
             ->where('mentor_id', $mentorProfile->user_id)
             ->where('status', 'accepted')
             ->first();
 
-        if (!$mentorship) {
-            return $this->forbidden("Vous devez avoir un mentorat accepté avec ce mentor pour réserver une séance.");
+        if (! $mentorship) {
+            return $this->forbidden('Vous devez avoir un mentorat accepté avec ce mentor pour réserver une séance.');
         }
 
         $session = MentoringSession::create([
@@ -140,7 +137,7 @@ class SessionController extends Controller
         try {
             $this->notificationService->sendSessionProposed($session);
         } catch (\Exception $e) {
-            Log::error("Erreur notification session proposée: ".$e->getMessage());
+            Log::error('Erreur notification session proposée: '.$e->getMessage());
         }
 
         return $this->created([
@@ -156,7 +153,7 @@ class SessionController extends Controller
         $user = Auth::user();
         $session = $user->mentoringSessionsAsMentee()->where('mentoring_sessions.id', $id)->first();
 
-        if (!$session) {
+        if (! $session) {
             return $this->notFound('Session non trouvée');
         }
 
@@ -188,7 +185,7 @@ class SessionController extends Controller
         try {
             $this->notificationService->sendSessionCancelled($session, $user);
         } catch (\Exception $e) {
-            Log::error("Erreur notification session annulée: ".$e->getMessage());
+            Log::error('Erreur notification session annulée: '.$e->getMessage());
         }
 
         return $this->success(null, 'Session annulée avec succès.');
@@ -202,12 +199,12 @@ class SessionController extends Controller
         $user = Auth::user();
         $session = $user->mentoringSessionsAsMentee()->where('mentoring_sessions.id', $id)->first();
 
-        if (!$session) {
+        if (! $session) {
             return $this->notFound('Session non trouvée');
         }
 
         $userPivot = $session->pivot;
-        if (!$session->is_paid || $userPivot->status === 'accepted') {
+        if (! $session->is_paid || $userPivot->status === 'accepted') {
             return $this->success(['meeting_id' => $session->meeting_id], 'Déjà payé ou gratuit.');
         }
 
@@ -230,9 +227,8 @@ class SessionController extends Controller
             });
 
             return $this->success(['meeting_id' => $session->meeting_id], 'Paiement effectué avec succès.');
-        }
-        catch (\Exception $e) {
-            return $this->error('Erreur lors du paiement : ' . $e->getMessage(), 500);
+        } catch (\Exception $e) {
+            return $this->error('Erreur lors du paiement : '.$e->getMessage(), 500);
         }
     }
 
