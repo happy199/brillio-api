@@ -14,15 +14,16 @@ class MentorshipController extends Controller
      */
     public function index(Request $request)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
-        if (! $organization->isPro()) {
+        if (!$organization->isPro()) {
             $mentorships = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
-        } else {
+        }
+        else {
             $query = Mentorship::query()
                 ->whereIn('mentee_id', function ($q) use ($organization) {
-                    $q->select('id')->from('users')->where('sponsored_by_organization_id', $organization->id);
-                })
+                $q->select('id')->from('users')->where('sponsored_by_organization_id', $organization->id);
+            })
                 ->with(['mentor', 'mentee']);
 
             // Filtre par statut
@@ -41,14 +42,14 @@ class MentorshipController extends Controller
      */
     public function show(Mentorship $mentorship)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         // Vérification : le menté doit être parrainé par cette organisation
         if ($mentorship->mentee->sponsored_by_organization_id !== $organization->id) {
             abort(403, 'Accès non autorisé');
         }
 
-        if (! $organization->isPro()) {
+        if (!$organization->isPro()) {
             return view('organization.mentorships.show', [
                 'organization' => $organization,
                 'mentorship' => $mentorship,

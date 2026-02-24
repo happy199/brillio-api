@@ -24,6 +24,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
+    @php
+    $org = $current_organization ?? null;
+    $isBranded = $org && $org->isEnterprise();
+    $primaryColor = $isBranded && $org->primary_color ? $org->primary_color : '#6366f1';
+    $secondaryColor = $isBranded && $org->accent_color ? $org->accent_color : '#d946ef';
+    @endphp
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -40,7 +47,7 @@
                             200: '#c7d6fe',
                             300: '#a4b8fc',
                             400: '#8093f8',
-                            500: '#6366f1',
+                            500: '{{ $primaryColor }}',
                             600: '#5145e5',
                             700: '#4536ca',
                             800: '#3a2fa3',
@@ -52,11 +59,23 @@
                             200: '#f5d0fe',
                             300: '#f0abfc',
                             400: '#e879f9',
-                            500: '#d946ef',
+                            500: '{{ $secondaryColor }}',
                             600: '#c026d3',
                             700: '#a21caf',
                             800: '#86198f',
                             900: '#701a75',
+                        },
+                        branding: {
+                            success: {
+                                bg: '{{ $isBranded ? $primaryColor . "10" : "#f0fdf4" }}',
+                                border: '{{ $isBranded ? $primaryColor . "30" : "#bbf7d0" }}',
+                                text: '{{ $isBranded ? $primaryColor : "#166534" }}',
+                            },
+                            error: {
+                                bg: '{{ $isBranded ? "#fef2f2" : "#fef2f2" }}',
+                                border: '{{ $isBranded ? "#fecaca" : "#fecaca" }}',
+                                text: '{{ $isBranded ? "#991b1b" : "#991b1b" }}',
+                            }
                         }
                     }
                 }
@@ -176,14 +195,14 @@
         <div class="mt-8 sm:mx-auto sm:w-full @yield('card_width', 'sm:max-w-md')">
             <div class="glass-card py-8 px-6 shadow-2xl rounded-2xl sm:px-10">
                 @if(session('error'))
-                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <p class="text-sm text-red-600">{{ session('error') }}</p>
+                <div class="mb-4 p-4 rounded-xl bg-branding-error-bg border border-branding-error-border">
+                    <p class="text-sm font-medium text-branding-error-text">{{ session('error') }}</p>
                 </div>
                 @endif
 
                 @if(session('success'))
-                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl">
-                    <p class="text-sm text-green-600">{{ session('success') }}</p>
+                <div class="mb-4 p-4 rounded-xl bg-branding-success-bg border border-branding-success-border">
+                    <p class="text-sm font-medium text-branding-success-text">{{ session('success') }}</p>
                 </div>
                 @endif
 

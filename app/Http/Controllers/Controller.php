@@ -115,4 +115,49 @@ class Controller extends BaseController
     {
         return $this->error($message, 403);
     }
+
+    /**
+     * Get current organization for authenticated user
+     */
+    protected function getCurrentOrganization(): \App\Models\Organization
+    {
+        $user = auth()->user();
+
+        if (! $user || ! $user->isOrganization()) {
+            abort(403, 'Accès réservé aux organisations.');
+        }
+
+        // 1. Direct link (Primary organization)
+        if ($user->organization_id) {
+            $organization = $user->organization;
+            if ($organization) {
+                return $organization;
+            }
+        }
+
+        // 2. Legacy / Owner check (Matching contact email)
+        $organization = \App\Models\Organization::where('contact_email', $user->email)->first();
+        if ($organization) {
+            // Auto-fix: set organization_id for future requests
+            $user->update(['organization_id' => $organization->id]);
+
+            return $organization;
+        }
+
+        // 3. Check domain resolution (from ResolveOrganizationByDomain middleware)
+        $resolvedOrg = app('current_organization');
+        if ($resolvedOrg && $user->organizations()->where('organizations.id', $resolvedOrg->id)->exists()) {
+            return $resolvedOrg;
+        }
+
+        // 4. Fallback to first linked organization
+        $firstOrg = $user->organizations()->first();
+        if ($firstOrg) {
+            $user->update(['organization_id' => $firstOrg->id]);
+
+            return $firstOrg;
+        }
+
+        abort(404, 'Organisation non trouvée.');
+    }
 }

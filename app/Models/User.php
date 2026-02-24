@@ -424,7 +424,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function organizations(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Organization::class, 'organization_user')
-            ->withPivot('role')
+            ->withPivot(['role', 'referral_code_used'])
             ->withTimestamps();
     }
 }

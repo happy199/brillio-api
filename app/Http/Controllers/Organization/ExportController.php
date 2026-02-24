@@ -22,15 +22,6 @@ class ExportController extends Controller
         return view('organization.exports.index', compact('organization'));
     }
 
-    /**
-     * Get current organization for authenticated user
-     */
-    private function getCurrentOrganization()
-    {
-        $user = auth()->user();
-
-        return \App\Models\Organization::where('contact_email', $user->email)->firstOrFail();
-    }
 
     /**
      * Generate and download the requested CSV report.

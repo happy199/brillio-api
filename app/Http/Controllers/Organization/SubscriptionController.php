@@ -33,7 +33,7 @@ class SubscriptionController extends Controller
      */
     public function subscribe(Request $request, CreditPack $plan)
     {
-        $organization = auth()->user()->organization;
+        $organization = $this->getCurrentOrganization();
 
         // 1. Determine Billing Cycle and Amount
         $billingCycle = $request->input('billing_cycle', 'monthly'); // 'monthly' or 'yearly'
@@ -49,22 +49,23 @@ class SubscriptionController extends Controller
                 ->where('target_plan', $targetPlanName)
                 ->where('duration_days', 365)
                 ->first();
-        } else {
+        }
+        else {
             $actualPlan = CreditPack::subscriptions()
                 ->where('target_plan', $targetPlanName)
                 ->where('duration_days', 30)
                 ->first();
         }
 
-        if (! $actualPlan) {
+        if (!$actualPlan) {
             return redirect()->back()->with('error', 'Plan non trouvé pour la période choisie.');
         }
 
         $amount = $actualPlan->price;
-        $description = 'Abonnement '.ucfirst($actualPlan->name).' ('.($billingCycle === 'yearly' ? 'Annuel' : 'Mensuel').')';
+        $description = 'Abonnement ' . ucfirst($actualPlan->name) . ' (' . ($billingCycle === 'yearly' ? 'Annuel' : 'Mensuel') . ')';
 
         // Detailed reference for callback parsing: SUB-{orgId}-{planId}-{billingCycle}-{timestamp}
-        $reference = 'SUB-'.$organization->id.'-'.time();
+        $reference = 'SUB-' . $organization->id . '-' . time();
 
         $callbackUrl = route('organization.payment.callback');
         $returnUrl = route('organization.dashboard');
@@ -100,7 +101,7 @@ class SubscriptionController extends Controller
             $amount,
             $description,
             $customer,
-            ['reference' => $reference, 'transaction_id' => $localTransaction->id],
+        ['reference' => $reference, 'transaction_id' => $localTransaction->id],
             $returnUrl
         );
 
@@ -119,9 +120,9 @@ class SubscriptionController extends Controller
      */
     public function downgrade(Request $request)
     {
-        $organization = auth()->user()->organization;
+        $organization = $this->getCurrentOrganization();
 
-        if (! $organization->isPro() && ! $organization->isEnterprise()) {
+        if (!$organization->isPro() && !$organization->isEnterprise()) {
             return redirect()->back()->with('error', 'Vous êtes déjà sur le plan Standard.');
         }
 
@@ -129,6 +130,6 @@ class SubscriptionController extends Controller
             'auto_renew' => false,
         ]);
 
-        return redirect()->route('organization.subscriptions.index')->with('success', 'Votre demande de rétrogradation a été enregistrée. Votre plan actuel restera actif jusqu\'au '.$organization->subscription_expires_at->format('d/m/Y').'.');
+        return redirect()->route('organization.subscriptions.index')->with('success', 'Votre demande de rétrogradation a été enregistrée. Votre plan actuel restera actif jusqu\'au ' . $organization->subscription_expires_at->format('d/m/Y') . '.');
     }
 }

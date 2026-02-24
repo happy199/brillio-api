@@ -3,11 +3,11 @@
 
 <head>
     @php
-    $org = auth()->check() ? auth()->user()->organization : null;
+    $org = $current_organization ?? (auth()->check() ? auth()->user()->organization : null);
+    $isEnterprise = $org && $org->isEnterprise();
     $primary = $org?->primary_color ?? '#f43f5e';
 
-    // Si pas de couleur secondaire, on assombrit légèrement la primaire (simulation basique)
-    // Pour faire propre sans librairie, on utilise soit la secondaire en DB, soit une fallback hardcodée par défaut
+    // Fallback logic for secondary and accent
     $secondary = $org?->secondary_color ?? '#e11d48';
     $accent = $org?->accent_color ?? '#fb7185';
     @endphp
@@ -40,16 +40,16 @@
                     },
                     colors: {
                         organization: {
-                            50: '#fff1f2',
-                            100: '#ffe4e6',
-                            200: '#fecdd3',
+                            50: '{{ $isEnterprise ? $primary . "10" : "#fff1f2" }}',
+                            100: '{{ $isEnterprise ? $primary . "20" : "#ffe4e6" }}',
+                            200: '{{ $isEnterprise ? $primary . "30" : "#fecdd3" }}',
                             300: '{{ $accent }}',
                             400: '{{ $accent }}',
                             500: '{{ $primary }}',
                             600: '{{ $secondary }}',
                             700: '{{ $secondary }}',
-                            800: '#9f1239',
-                            900: '#881337',
+                            800: '{{ $isEnterprise ? $primary : "#9f1239" }}',
+                            900: '{{ $isEnterprise ? $primary : "#881337" }}',
                         }
                     }
                 }
@@ -154,10 +154,18 @@
                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5"
                             style="display: none;">
 
+                            @if(auth()->user()->organization_role !== 'viewer')
                             <a href="{{ route('organization.profile.edit') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Profil
                             </a>
+
+                            @if($org && $org->isEnterprise())
+                            <a href="{{ route('organization.team.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Équipe
+                            </a>
+                            @endif
 
                             <a href="{{ route('organization.subscriptions.index') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -168,6 +176,7 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Portefeuille
                             </a>
+                            @endif
 
                             <div class="border-t border-gray-100"></div>
 
@@ -272,7 +281,7 @@
                     detail: { message: 'Lien d\'invitation copié !', type: 'success' }
                 }));
             }, function (err) {
-                window.dispatchEvent(new CustomEvent('copy-notification', {
+                wispatchEvent(new CustomEvent('copy-notification', {
                     detail: { message: 'Erreur lors de la copie.', type: 'error' }
                 }));
             });
