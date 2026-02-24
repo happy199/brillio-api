@@ -253,7 +253,7 @@ class ResourceController extends Controller
 
                 // Notification au mentor
                 try {
-                    $this->notificationService->sendResourceSold($resource, $user);
+                    $this->notificationService->sendResourcePurchased($resource, $user, (int) $mentorEarnings);
                 } catch (\Exception $e) {
                     Log::error("Erreur notification vente ressource: ".$e->getMessage());
                 }

@@ -134,4 +134,20 @@ class WalletController extends Controller
             return $this->error($e->getMessage(), 400);
         }
     }
+
+    /**
+     * Formate une transaction pour l'API
+     */
+    private function formatTransaction($transaction): array
+    {
+        return [
+            'id' => $transaction->id,
+            'amount' => $transaction->amount,
+            'type' => $transaction->type,
+            'description' => $transaction->description,
+            'created_at' => $transaction->created_at->toISOString(),
+            'related_id' => $transaction->related_id,
+            'related_type' => $transaction->related_type ? class_basename($transaction->related_type) : null,
+        ];
+    }
 }
