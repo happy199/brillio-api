@@ -34,6 +34,15 @@ class AcademicDocumentController extends Controller
     /**
      * Liste les documents de l'utilisateur
      */
+    #[OA\Get(
+        path: "/api/v1/documents",
+        summary: "Liste les documents de l'utilisateur",
+        tags: ["Documents"],
+        security: [["bearerAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Liste des documents")
+        ]
+    )]
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -51,6 +60,30 @@ class AcademicDocumentController extends Controller
     /**
      * Upload un nouveau document
      */
+    #[OA\Post(
+        path: "/api/v1/documents",
+        summary: "Upload un nouveau document",
+        tags: ["Documents"],
+        security: [["bearerAuth" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: "multipart/form-data",
+                schema: new OA\Schema(
+                    required: ["file", "document_type"],
+                    properties: [
+                        new OA\Property(property: "file", type: "string", format: "binary"),
+                        new OA\Property(property: "document_type", type: "string", example: "bulletin"),
+                        new OA\Property(property: "academic_year", type: "string", example: "2023-2024"),
+                        new OA\Property(property: "grade_level", type: "string", example: "Terminale")
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Document uploadé")
+        ]
+    )]
     public function upload(UploadDocumentRequest $request): JsonResponse
     {
         $user = $request->user();

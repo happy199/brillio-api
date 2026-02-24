@@ -186,7 +186,7 @@ class MentorProfile extends Model
      */
     public function getSpecializationLabelAttribute(): string
     {
-        return $this->specialization?->name ?? 'Non définie';
+        return $this->specializationModel?->name ?? 'Non définie';
     }
 
     /**
@@ -194,7 +194,7 @@ class MentorProfile extends Model
      */
     public function getMbtiSectorsAttribute(): array
     {
-        return $this->specialization?->mbtiTypes->pluck('mbti_type_code')->toArray() ?? [];
+        return $this->specializationModel?->mbtiTypes->pluck('mbti_type_code')->toArray() ?? [];
     }
 
     /**

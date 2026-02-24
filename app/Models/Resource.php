@@ -65,7 +65,7 @@ class Resource extends Model
 
     public function purchases()
     {
-        return $this->morphMany(Purchase::class, 'item');
+        return $this->morphMany(Purchase::class , 'item');
     }
 
     public function getRouteKeyName()
@@ -80,5 +80,24 @@ class Resource extends Model
                 $resource->slug = \Illuminate\Support\Str::slug($resource->title);
             }
         });
+    }
+
+    /**
+     * Accessor pour l'URL de la miniature
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if ($this->preview_image_path) {
+            return asset('storage/' . $this->preview_image_path);
+        }
+        return null;
+    }
+
+    /**
+     * Accessor pour les tags sous forme de tableau (alias pour 'tags')
+     */
+    public function getTagsArrayAttribute(): array
+    {
+        return $this->tags ?? [];
     }
 }
