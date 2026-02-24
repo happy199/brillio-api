@@ -23,7 +23,7 @@ class UserResource extends JsonResource
             'date_of_birth' => $this->date_of_birth?->format('Y-m-d'),
             'country' => $this->country,
             'city' => $this->city,
-            'profile_photo_url' => $this->profile_photo_url,
+            'profile_photo_url' => $this->avatar_url,
             'linkedin_url' => $this->linkedin_url,
             'email_verified_at' => $this->email_verified_at?->toISOString(),
             'created_at' => $this->created_at->toISOString(),

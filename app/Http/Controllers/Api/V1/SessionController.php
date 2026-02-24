@@ -251,7 +251,7 @@ class SessionController extends Controller
             'mentor' => [
                 'id' => $session->mentor->id,
                 'name' => $session->mentor->name,
-                'avatar' => $session->mentor->profile_photo_url,
+                'avatar' => $session->mentor->avatar_url,
             ],
         ];
     }

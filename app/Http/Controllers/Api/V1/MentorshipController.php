@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use App\Models\User;
+use App\Models\MentorProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -91,11 +92,12 @@ class MentorshipController extends Controller
             'message' => 'nullable|string|max:1000',
         ]);
 
-        $mentorId = $request->mentor_id;
+        $mentorProfile = MentorProfile::find($request->mentor_id);
+        $mentorUserId = $mentorProfile->user_id;
 
         // Vérifier si une demande existe déjà
         $existing = Mentorship::where('mentee_id', $user->id)
-            ->where('mentor_id', $mentorId)
+            ->where('mentor_id', $mentorUserId)
             ->whereIn('status', ['pending', 'accepted'])
             ->first();
 
@@ -106,7 +108,7 @@ class MentorshipController extends Controller
         // Créer la demande
         $mentorship = Mentorship::create([
             'mentee_id' => $user->id,
-            'mentor_id' => $mentorId,
+            'mentor_id' => $mentorUserId,
             'status' => 'pending',
             'request_message' => $request->message,
         ]);
@@ -188,7 +190,7 @@ class MentorshipController extends Controller
             'mentor' => [
                 'id' => $mentorship->mentor->id,
                 'name' => $mentorship->mentor->name,
-                'avatar' => $mentorship->mentor->profile_photo_url,
+                'avatar' => $mentorship->mentor->avatar_url,
                 'specialization' => $mentorship->mentor->mentorProfile?->specialization,
             ],
             'created_at' => $mentorship->created_at->toISOString(),

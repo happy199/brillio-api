@@ -334,7 +334,7 @@ class MentorController extends Controller
             'user' => [
                 'id' => $mentor->user->id,
                 'name' => $mentor->user->name,
-                'profile_photo_url' => $mentor->user->profile_photo_url,
+                'profile_photo_url' => $mentor->user->avatar_url,
                 'country' => $mentor->user->country,
                 'city' => $mentor->user->city,
             ],
@@ -360,7 +360,7 @@ class MentorController extends Controller
                 'id' => $mentor->user->id,
                 'name' => $mentor->user->name,
                 'email' => $mentor->user->email,
-                'profile_photo_url' => $mentor->user->profile_photo_url,
+                'profile_photo_url' => $mentor->user->avatar_url,
                 'linkedin_url' => $mentor->user->linkedin_url,
                 'country' => $mentor->user->country,
                 'city' => $mentor->user->city,
