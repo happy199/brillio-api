@@ -27,6 +27,8 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'country', type: 'string', nullable: true),
         new OA\Property(property: 'city', type: 'string', nullable: true),
         new OA\Property(property: 'profile_photo_url', type: 'string', nullable: true),
+        new OA\Property(property: 'organization_id', type: 'integer', nullable: true, example: 1),
+        new OA\Property(property: 'organization_role', type: 'string', nullable: true, example: 'admin'),
         new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
     ]
 )]

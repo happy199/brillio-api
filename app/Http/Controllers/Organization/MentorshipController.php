@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
-use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class MentorshipController extends Controller
@@ -16,14 +15,13 @@ class MentorshipController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             $mentorships = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
-        }
-        else {
+        } else {
             $query = Mentorship::query()
                 ->whereIn('mentee_id', function ($q) use ($organization) {
-                $q->select('id')->from('users')->where('sponsored_by_organization_id', $organization->id);
-            })
+                    $q->select('id')->from('users')->where('sponsored_by_organization_id', $organization->id);
+                })
                 ->with(['mentor', 'mentee']);
 
             // Filtre par statut
@@ -49,7 +47,7 @@ class MentorshipController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
-        if (!$organization->isPro()) {
+        if (! $organization->isPro()) {
             return view('organization.mentorships.show', [
                 'organization' => $organization,
                 'mentorship' => $mentorship,

@@ -130,7 +130,7 @@ class WebAuthController extends Controller
                 $user->organizations()->syncWithoutDetaching([
                     $invitation->organization_id => [
                         'referral_code_used' => $referralCode,
-                        'role' => $invitation->role ?? 'jeune'
+                        'role' => $invitation->role ?? 'jeune',
                     ],
                 ]);
 
@@ -138,7 +138,7 @@ class WebAuthController extends Controller
                 if (in_array($invitation->role, ['admin', 'viewer'])) {
                     $user->update([
                         'organization_id' => $invitation->organization_id,
-                        'organization_role' => $invitation->role
+                        'organization_role' => $invitation->role,
                     ]);
                 }
 
@@ -348,7 +348,7 @@ class WebAuthController extends Controller
             $user->organizations()->syncWithoutDetaching([
                 $organizationId => [
                     'referral_code_used' => $referralCode,
-                    'role' => $invitation->role ?? 'jeune'
+                    'role' => $invitation->role ?? 'jeune',
                 ],
             ]);
 
@@ -784,7 +784,7 @@ class WebAuthController extends Controller
                 $user->organizations()->syncWithoutDetaching([
                     $organizationId => [
                         'referral_code_used' => $referralCode,
-                        'role' => $invitationRole ?? 'jeune'
+                        'role' => $invitationRole ?? 'jeune',
                     ],
                 ]);
             }

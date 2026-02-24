@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Models\MentorProfile;
-use App\Models\Organization;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -49,7 +48,9 @@ class SponsoredUsersController extends Controller
         // Filtre par Activité
         if ($request->filled('status')) {
             if ($request->status === 'active') {
-                $query->where('last_login_at', '>=', now()->subDays(30));
+                $query->where(function ($q) {
+                    $q->where('last_login_at', '>=', now()->subDays(30));
+                });
             } elseif ($request->status === 'inactive') {
                 // Inactif = jamais connecté OU connecté il y a plus de 30 jours
                 $query->where(function ($q) {

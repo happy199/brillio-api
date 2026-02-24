@@ -34,11 +34,11 @@ class WalletController extends Controller
         $pack = CreditPack::findOrFail($request->pack_id);
 
         $amount = $pack->price;
-        $description = 'Achat Crédits: ' . $pack->name;
+        $description = 'Achat Crédits: '.$pack->name;
 
         // PACK-{orgId}-{packId}-{timestamp}
         $organization = $this->getCurrentOrganization();
-        $reference = 'PACK-' . $organization->id . '-' . $pack->id . '-' . time();
+        $reference = 'PACK-'.$organization->id.'-'.$pack->id.'-'.time();
 
         $returnUrl = route('organization.payment.callback');
 
@@ -71,10 +71,10 @@ class WalletController extends Controller
             $amount,
             $description,
             $customer,
-        [
-            'reference' => $reference,
-            'transaction_id' => $localTransaction->id,
-        ],
+            [
+                'reference' => $reference,
+                'transaction_id' => $localTransaction->id,
+            ],
             $returnUrl
         );
 

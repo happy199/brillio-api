@@ -11,7 +11,6 @@ use Illuminate\Support\Str;
 
 class TeamController extends Controller
 {
-
     public function index()
     {
         $organization = $this->getCurrentOrganization();
@@ -62,11 +61,11 @@ class TeamController extends Controller
         return redirect()->route('organization.team.index')
             ->with('success', 'Membre de l\'équipe ajouté avec succès.')
             ->with('new_user_data', [
-            'name' => $user->name,
-            'email' => $user->email,
-            'password' => $password,
-            'role' => $validated['role'] === 'admin' ? 'Administrateur' : 'Observateur',
-        ]);
+                'name' => $user->name,
+                'email' => $user->email,
+                'password' => $password,
+                'role' => $validated['role'] === 'admin' ? 'Administrateur' : 'Observateur',
+            ]);
     }
 
     public function destroy(User $user)
@@ -74,7 +73,7 @@ class TeamController extends Controller
         $organization = $this->getCurrentOrganization();
 
         // Security: ensure the user belongs to the organization
-        if (!$organization->users()->where('users.id', $user->id)->exists()) {
+        if (! $organization->users()->where('users.id', $user->id)->exists()) {
             abort(403);
         }
 

@@ -22,7 +22,6 @@ class ExportController extends Controller
         return view('organization.exports.index', compact('organization'));
     }
 
-
     /**
      * Generate and download the requested CSV report.
      */
