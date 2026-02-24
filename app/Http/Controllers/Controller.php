@@ -140,8 +140,16 @@ class Controller extends BaseController
         // 2. Legacy / Owner check (Matching contact email)
         $organization = \App\Models\Organization::where('contact_email', $user->email)->first();
         if ($organization) {
-            // Auto-fix: set organization_id for future requests
-            $user->update(['organization_id' => $organization->id]);
+            // Auto-fix: link user to organization with admin role
+            $user->organizations()->syncWithoutDetaching([
+                $organization->id => ['role' => 'admin'],
+            ]);
+
+            // Update user model for future requests
+            $user->update([
+                'organization_id' => $organization->id,
+                'organization_role' => 'admin',
+            ]);
 
             return $organization;
         }
