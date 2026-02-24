@@ -241,11 +241,15 @@ class ResourceController extends Controller
             if ($resource->mentor_id) {
                 // Commission Brillio : 20% par défaut
                 $commission = 0.20;
-                $mentorEarnings = $resource->price * (1 - $commission);
+                $mentorEarningsFcfa = $resource->price * (1 - $commission);
+                
+                // Conversion en crédits (selon le prix du crédit mentor)
+                $mentorCreditPrice = $this->walletService->getCreditPrice('mentor');
+                $mentorCredits = (int) floor($mentorEarningsFcfa / $mentorCreditPrice);
                 
                 $this->walletService->addCredits(
                     $resource->user,
-                    $mentorEarnings,
+                    $mentorCredits,
                     'income',
                     "Vente ressource : {$resource->title}",
                     $resource
@@ -253,7 +257,7 @@ class ResourceController extends Controller
 
                 // Notification au mentor
                 try {
-                    $this->notificationService->sendResourcePurchased($resource, $user, (int) $mentorEarnings);
+                    $this->notificationService->sendResourcePurchased($resource, $user, $mentorCredits);
                 } catch (\Exception $e) {
                     Log::error("Erreur notification vente ressource: ".$e->getMessage());
                 }
