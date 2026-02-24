@@ -423,8 +423,19 @@ class WebAuthController extends Controller
                 if ($invitation) {
                     // Link existing user to organization in pivot table
                     $user->organizations()->syncWithoutDetaching([
-                        $invitation->organization_id => ['referral_code_used' => $referralCode],
+                        $invitation->organization_id => [
+                            'referral_code_used' => $referralCode,
+                            'role' => $invitation->role ?? 'jeune',
+                        ],
                     ]);
+
+                    // Also update the user model's primary organization_id and role if it's an admin/viewer
+                    if (in_array($invitation->role, ['admin', 'viewer'])) {
+                        $user->update([
+                            'organization_id' => $invitation->organization_id,
+                            'organization_role' => $invitation->role,
+                        ]);
+                    }
 
                     // Mark invitation as used
                     $invitation->markAsAccepted();
