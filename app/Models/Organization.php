@@ -27,6 +27,7 @@ class Organization extends Model
         'sector',
         'description',
         'status',
+        'custom_domain',
         'credits_balance',
         'subscription_plan',
         'subscription_expires_at',

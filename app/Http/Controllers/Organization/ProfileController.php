@@ -12,9 +12,15 @@ class ProfileController extends Controller
     /**
      * Show the form for editing the organization profile.
      */
-    public function edit()
+    public function edit(Request $request)
     {
         $organization = auth()->user()->organization;
+
+        // Fallback for session data lost during cross-domain redirect
+        if ($request->has('domain_updated') && ! session()->has('domain_updated')) {
+            session()->flash('domain_updated', true);
+            session()->flash('success', 'Votre espace est désormais accessible via votre propre lien personnalisé.');
+        }
 
         return view('organization.profile.edit', compact('organization'));
     }
@@ -108,17 +114,17 @@ class ProfileController extends Controller
         }
 
         $organization->update($validated);
+        $organization->refresh();
 
         $domainChanged = ($organization->wasChanged('custom_domain') && ! empty($organization->custom_domain));
 
-        $redirect = redirect()->route('organization.profile.edit')
-            ->with('success', 'Profil mis à jour avec succès.');
-
         if ($domainChanged) {
-            $redirect->with('domain_updated', true)
-                ->with('new_url', 'http://'.$organization->custom_domain.(app()->environment('local') ? ':8000' : ''));
+            $newUrl = (request()->secure() ? 'https://' : 'http://').$organization->custom_domain.(app()->environment('local') ? ':8000' : '');
+
+            return redirect()->away($newUrl.'/organization/profile?success=1&domain_updated=1');
         }
 
-        return $redirect;
+        return redirect()->route('organization.profile.edit')
+            ->with('success', 'Profil mis à jour avec succès.');
     }
 }
