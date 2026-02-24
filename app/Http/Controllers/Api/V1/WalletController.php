@@ -124,6 +124,7 @@ class WalletController extends Controller
 
         try {
             $coupon = $this->walletService->redeemCoupon($user, $code);
+            $user->refresh();
 
             return $this->success([
                 'credits_received' => $coupon->credits_amount,
