@@ -208,25 +208,9 @@ class WalletController extends Controller
         }
 
         try {
-            // Add credits to user
-            $this->walletService->addCredits(
-                $user,
-                $coupon->credits_amount,
-                'coupon',
-                "Coupon : {$code}",
-                $coupon
-            );
+            $this->walletService->redeemCoupon($user, $code);
 
-            // Record this redemption in pivot table
-            $coupon->users()->attach($user->id, [
-                'credits_received' => $coupon->credits_amount,
-                'redeemed_at' => now(),
-            ]);
-
-            // Increment global usage count
-            $coupon->increment('uses_count');
-
-            return back()->with('success', "Coupon validé ! +{$coupon->credits_amount} crédits.");
+            return back()->with('success', "Coupon validé !");
 
         } catch (\Exception $e) {
             Log::error('Coupon redemption failed', [
@@ -235,7 +219,7 @@ class WalletController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->withErrors(['error' => "Erreur lors de l'ajout des crédits."]);
+            return back()->withErrors(['code' => $e->getMessage()]);
         }
     }
 }

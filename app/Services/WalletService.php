@@ -22,7 +22,7 @@ class WalletService
             $isUser = $entity instanceof User;
             $isOrg = $entity instanceof \App\Models\Organization;
 
-            if (! $isUser && ! $isOrg) {
+            if (!$isUser && !$isOrg) {
                 throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
             }
 
@@ -35,7 +35,8 @@ class WalletService
 
             if ($isUser) {
                 $transactionData['user_id'] = $entity->id;
-            } else {
+            }
+            else {
                 $transactionData['organization_id'] = $entity->id;
             }
 
@@ -77,14 +78,15 @@ class WalletService
             $isUser = $entity instanceof User;
             $isOrg = $entity instanceof \App\Models\Organization;
 
-            if (! $isUser && ! $isOrg) {
+            if (!$isUser && !$isOrg) {
                 throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
             }
 
             // Pessimistic locking to prevent race conditions during balance check
             if ($isUser) {
                 $entity = User::where('id', $entity->id)->lockForUpdate()->first();
-            } else {
+            }
+            else {
                 $entity = \App\Models\Organization::where('id', $entity->id)->lockForUpdate()->first();
             }
 
@@ -110,7 +112,8 @@ class WalletService
                     // Reduce available balance (clamping to 0 just in case)
                     if ($entity->mentorProfile->available_balance >= $amoutFcfaToRemove) {
                         $entity->mentorProfile->decrement('available_balance', $amoutFcfaToRemove);
-                    } else {
+                    }
+                    else {
                         // Edge case: Inconsistent state, reset to 0
                         $entity->mentorProfile->update(['available_balance' => 0]);
                     }
@@ -126,7 +129,8 @@ class WalletService
 
             if ($isUser) {
                 $transactionData['user_id'] = $entity->id;
-            } else {
+            }
+            else {
                 $transactionData['organization_id'] = $entity->id;
             }
 
@@ -151,7 +155,7 @@ class WalletService
      */
     public function getCreditBreakdown(User $user): array
     {
-        if ($user->user_type !== 'mentor' || ! $user->mentorProfile) {
+        if ($user->user_type !== 'mentor' || !$user->mentorProfile) {
             return ['purchased' => $user->credits_balance, 'earned' => 0];
         }
 
@@ -197,7 +201,7 @@ class WalletService
     public function getFeatureCost(string $featureKey, int $default = 0): int
     {
         // Exemple keys: feature_cost_advanced_targeting
-        return SystemSetting::getValue('feature_cost_'.$featureKey, $default);
+        return SystemSetting::getValue('feature_cost_' . $featureKey, $default);
     }
 
     /**
@@ -205,7 +209,7 @@ class WalletService
      */
     public function payoutMentor(\App\Models\MentoringSession $session)
     {
-        if (! $session->is_paid || $session->status !== 'completed') {
+        if (!$session->is_paid || $session->status !== 'completed') {
             return;
         }
 
@@ -255,7 +259,7 @@ class WalletService
      */
     public function refundJeune(\App\Models\MentoringSession $session, User $user, float $ratio = 1.0)
     {
-        if (! $session->is_paid) {
+        if (!$session->is_paid) {
             return;
         }
 
@@ -266,7 +270,7 @@ class WalletService
             ->where('amount', '<', 0)
             ->first();
 
-        if (! $debitTransaction) {
+        if (!$debitTransaction) {
             return;
         }
 
@@ -288,5 +292,43 @@ class WalletService
             $description,
             $session
         );
+    }
+
+    /**
+     * Utilise un coupon de manière atomique
+     */
+    public function redeemCoupon(User $user, string $code): \App\Models\Coupon
+    {
+        $code = strtoupper($code);
+
+        return DB::transaction(function () use ($user, $code) {
+            // Verrouillage pessimiste du coupon pour éviter les double rechargements concurrents
+            $coupon = \App\Models\Coupon::where('code', $code)->lockForUpdate()->first();
+
+            if (!$coupon) {
+                throw new \Exception("Ce coupon n'existe pas.");
+            }
+
+            if (!$coupon->isValid($user)) {
+                if ($coupon->hasBeenUsedBy($user)) {
+                    throw new \Exception("Vous avez déjà utilisé ce coupon.");
+                }
+                throw new \Exception("Ce coupon est invalide ou expiré.");
+            }
+
+            // 1. Ajouter les crédits
+            $this->addCredits($user, $coupon->credits_amount, 'coupon', "Coupon : {$code}", $coupon);
+
+            // 2. Enregistrer l'utilisation par l'utilisateur
+            $coupon->users()->attach($user->id, [
+                'credits_received' => $coupon->credits_amount,
+                'redeemed_at' => now(),
+            ]);
+
+            // 3. Incrémenter le compteur global d'utilisations
+            $coupon->increment('uses_count');
+
+            return $coupon;
+        });
     }
 }

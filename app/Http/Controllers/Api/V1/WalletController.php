@@ -123,9 +123,7 @@ class WalletController extends Controller
         }
 
         try {
-            $this->walletService->addCredits($user, $coupon->credits_amount, 'coupon', "Coupon : {$code}", $coupon);
-            $coupon->users()->attach($user->id, ['credits_received' => $coupon->credits_amount, 'redeemed_at' => now()]);
-            $coupon->increment('uses_count');
+            $coupon = $this->walletService->redeemCoupon($user, $code);
 
             return $this->success([
                 'credits_received' => $coupon->credits_amount,
@@ -133,7 +131,7 @@ class WalletController extends Controller
             ], "Coupon validé ! +{$coupon->credits_amount} crédits.");
         }
         catch (\Exception $e) {
-            return $this->error("Erreur lors de l'utilisation du coupon.", 500);
+            return $this->error($e->getMessage(), 400);
         }
     }
 }
