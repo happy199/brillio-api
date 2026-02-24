@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 
 class TeamController extends Controller
 {
@@ -63,11 +63,11 @@ class TeamController extends Controller
             return redirect()->route('organization.team.index')
                 ->with('success', 'Membre de l\'équipe ajouté avec succès.')
                 ->with('new_user_data', [
-                'name' => $user->name,
-                'email' => $user->email,
-                'password' => $password,
-                'role' => $validated['role'] === 'admin' ? 'Administrateur' : 'Observateur',
-            ]);
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'password' => $password,
+                    'role' => $validated['role'] === 'admin' ? 'Administrateur' : 'Observateur',
+                ]);
         });
     }
 
@@ -76,7 +76,9 @@ class TeamController extends Controller
         $organization = $this->getCurrentOrganization();
 
         // Security: ensure the user belongs to the organization
-        if (!$organization->users()->where('users.id', $user->id)->exists()) {
+        if (! $organization->users()->where(function ($q) use ($user) {
+            $q->where('users.id', $user->id);
+        })->exists()) {
             abort(403);
         }
 
@@ -87,6 +89,11 @@ class TeamController extends Controller
 
         // Detach from organization
         $user->organizations()->detach($organization->id);
+
+        // Clear primary organization link if it matches the one being removed
+        if ($user->organization_id === $organization->id) {
+            $user->update(['organization_id' => null]);
+        }
 
         // If the user has no other organizations and is of type organization, we could delete it,
         // but it's safer to just detach for now.

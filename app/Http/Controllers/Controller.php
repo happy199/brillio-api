@@ -130,7 +130,9 @@ class Controller extends BaseController
         // 1. Direct link (Primary organization)
         if ($user->organization_id) {
             $organization = $user->organization;
-            if ($organization) {
+            if ($organization && $user->organizations()->where(function ($q) use ($organization) {
+                $q->where('organizations.id', $organization->id);
+            })->exists()) {
                 return $organization;
             }
         }
