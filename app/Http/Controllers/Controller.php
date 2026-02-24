@@ -145,9 +145,13 @@ class Controller extends BaseController
         }
 
         // 3. Check domain resolution (from ResolveOrganizationByDomain middleware)
-        $resolvedOrg = app('current_organization');
-        if ($resolvedOrg && $user->organizations()->where('organizations.id', $resolvedOrg->id)->exists()) {
-            return $resolvedOrg;
+        if (app()->bound('current_organization')) {
+            $resolvedOrg = app('current_organization');
+            if ($resolvedOrg && $user->organizations()->where(function ($q) use ($resolvedOrg) {
+                $q->where('organizations.id', $resolvedOrg->id);
+            })->exists()) {
+                return $resolvedOrg;
+            }
         }
 
         // 4. Fallback to first linked organization

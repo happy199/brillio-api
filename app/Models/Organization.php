@@ -113,7 +113,7 @@ class Organization extends Model
     public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(User::class, 'organization_user')
-            ->withPivot('referral_code_used')
+            ->withPivot(['role', 'referral_code_used'])
             ->withTimestamps();
     }
 

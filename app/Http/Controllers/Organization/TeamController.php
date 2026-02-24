@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class TeamController extends Controller
 {
@@ -43,29 +44,31 @@ class TeamController extends Controller
 
         $password = Str::random(12);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($password),
-            'user_type' => User::TYPE_ORGANIZATION,
-            'organization_id' => $organization->id,
-            'organization_role' => $validated['role'],
-            'email_verified_at' => now(),
-        ]);
+        return DB::transaction(function () use ($organization, $validated, $password) {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($password),
+                'user_type' => User::TYPE_ORGANIZATION,
+                'organization_id' => $organization->id,
+                'organization_role' => $validated['role'],
+                'email_verified_at' => now(),
+            ]);
 
-        // Link to organization pivot
-        $user->organizations()->attach($organization->id, [
-            'role' => $validated['role'],
-        ]);
+            // Link to organization pivot
+            $user->organizations()->attach($organization->id, [
+                'role' => $validated['role'],
+            ]);
 
-        return redirect()->route('organization.team.index')
-            ->with('success', 'Membre de l\'équipe ajouté avec succès.')
-            ->with('new_user_data', [
+            return redirect()->route('organization.team.index')
+                ->with('success', 'Membre de l\'équipe ajouté avec succès.')
+                ->with('new_user_data', [
                 'name' => $user->name,
                 'email' => $user->email,
                 'password' => $password,
                 'role' => $validated['role'] === 'admin' ? 'Administrateur' : 'Observateur',
             ]);
+        });
     }
 
     public function destroy(User $user)
@@ -73,7 +76,7 @@ class TeamController extends Controller
         $organization = $this->getCurrentOrganization();
 
         // Security: ensure the user belongs to the organization
-        if (! $organization->users()->where('users.id', $user->id)->exists()) {
+        if (!$organization->users()->where('users.id', $user->id)->exists()) {
             abort(403);
         }
 
