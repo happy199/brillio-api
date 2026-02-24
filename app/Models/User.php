@@ -69,6 +69,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'sponsored_by_organization_id',
         'organization_id',
+        'organization_role',
         'referral_code_used',
         'is_archived',
         'archived_at',
