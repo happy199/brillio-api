@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
-use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class SessionController extends Controller
@@ -17,7 +16,7 @@ class SessionController extends Controller
      */
     public function index(Request $request)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro()) {
             $sessions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
@@ -30,7 +29,9 @@ class SessionController extends Controller
 
             // Filtre par statut
             if ($request->filled('status')) {
-                $query->where('status', $request->status);
+                $query->where(function ($q) use ($request) {
+                    $q->where('status', $request->status);
+                });
             }
 
             $sessions = $query->orderBy('scheduled_at', 'desc')->paginate(12)->withQueryString();
@@ -44,7 +45,7 @@ class SessionController extends Controller
      */
     public function calendar()
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro()) {
             $sessions = collect();
@@ -65,7 +66,7 @@ class SessionController extends Controller
      */
     public function events(Request $request)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro()) {
             return response()->json([]);
@@ -98,10 +99,12 @@ class SessionController extends Controller
      */
     public function show(MentoringSession $session)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         // Vérification : au moins un menté doit être parrainé par cette organisation
-        $isAuthorized = $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
+        $isAuthorized = $session->mentees()->where(function ($q) use ($organization) {
+            $q->where('sponsored_by_organization_id', $organization->id);
+        })->exists();
 
         if (! $isAuthorized) {
             abort(403, 'Accès non autorisé');

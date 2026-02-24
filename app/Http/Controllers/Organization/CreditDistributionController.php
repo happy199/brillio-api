@@ -30,8 +30,7 @@ class CreditDistributionController extends Controller
             'target' => 'nullable|string|in:all,selection,single',
         ]);
 
-        $user = auth()->user();
-        $organization = Organization::where('contact_email', $user->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
         $amountPerUser = $request->amount;
 
         // Determine target users

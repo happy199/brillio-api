@@ -17,6 +17,7 @@
                 Liste des {{ $mentors->total() }} mentors liés à votre organisation ou accompagnant vos jeunes.
             </p>
         </div>
+        @if (auth()->user()->organization_role !== 'viewer')
         <div class="mt-4 sm:mt-0 flex gap-3">
             <a href="{{ route('organization.invitations.create', ['role' => 'mentor']) }}"
                 class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-organization-600 hover:bg-organization-700 focus:outline-none focus:ring-offset-2 focus:ring-organization-500">
@@ -27,6 +28,7 @@
                 Inviter des mentors
             </a>
         </div>
+        @endif
     </div>
 
     @if(!$organization->isPro())
@@ -148,7 +150,7 @@
                 </div>
             </div>
             <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 space-y-3">
-                @if($type === 'internal')
+                @if($type === 'internal' && auth()->user()->organization_role !== 'viewer')
                 <button @click="openModal('single', '{{ $mentor->id }}', '{{ addslashes($mentor->name) }}')"
                     class="w-full inline-flex items-center justify-center px-4 py-2 border border-organization-600 rounded-lg text-sm font-bold text-organization-600 bg-white hover:bg-organization-50 transition-colors">
                     <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

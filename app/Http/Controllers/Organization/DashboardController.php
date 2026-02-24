@@ -14,8 +14,7 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        $user = auth()->user();
-        $organization = Organization::where('contact_email', $user->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         // --- FILTERING LOGIC ---
         $period = $request->get('period', '30_days');

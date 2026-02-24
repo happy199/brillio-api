@@ -447,7 +447,7 @@
                                         {{ substr($mentorship->mentor->name, 0, 1) }}
                                     </div>
                                     <div>
-                                        <a href="{{ route('organization.mentors.show', $mentorship->mentor->mentorProfile) }}"
+                                        <a href="{{ route('organization.mentors.show', $mentorship->mentor) }}"
                                             class="text-sm font-bold text-gray-900 hover:text-indigo-600 transition">
                                             {{ $mentorship->mentor->name }}
                                         </a>
@@ -495,7 +495,8 @@
                     <div class="space-y-6">
                         <!-- Purchased -->
                         <div>
-                            <h4 class="text-sm font-semibold text-gray-700 mb-3 border-l-4 border-organization-500 pl-2">
+                            <h4
+                                class="text-sm font-semibold text-gray-700 mb-3 border-l-4 border-organization-500 pl-2">
                                 Ressources débloquées</h4>
                             @if($purchasedResources->count() > 0)
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -552,7 +553,7 @@
                                 {{ substr($mentor->name, 0, 1) }}
                             </div>
                             <div class="min-w-0 flex-1">
-                                <a href="{{ route('organization.mentors.show', $mentor->mentorProfile) }}"
+                                <a href="{{ route('organization.mentors.show', $mentor) }}"
                                     class="text-sm font-medium text-gray-900 truncate hover:text-indigo-600 transition block">
                                     {{ $mentor->name }}
                                 </a>

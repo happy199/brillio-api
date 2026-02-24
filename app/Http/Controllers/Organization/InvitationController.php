@@ -15,12 +15,6 @@ class InvitationController extends Controller
     /**
      * Get current organization for authenticated user
      */
-    private function getCurrentOrganization()
-    {
-        $user = auth()->user();
-
-        return Organization::where('contact_email', $user->email)->firstOrFail();
-    }
 
     /**
      * Display a listing of invitations
@@ -56,7 +50,7 @@ class InvitationController extends Controller
         $validated = $request->validate([
             'invited_emails' => ['nullable', 'string'],
             'expires_days' => ['nullable', 'integer', 'min:1', 'max:365'],
-            'role' => ['nullable', 'string', 'in:jeune,mentor,admin,viewer'],
+            'role' => ['nullable', 'string', 'in:jeune,mentor'],
         ]);
 
         // Parse emails (one per line or comma-separated)
@@ -78,11 +72,6 @@ class InvitationController extends Controller
 
         $expiresDays = (int) ($validated['expires_days'] ?? 30);
         $role = $validated['role'] ?? 'jeune';
-
-        // Security check: Only Enterprise organizations can invite staff (Admins/Viewers)
-        if (in_array($role, ['admin', 'viewer']) && ! $organization->isEnterprise()) {
-            $role = 'jeune';
-        }
 
         $createdInvitations = [];
 

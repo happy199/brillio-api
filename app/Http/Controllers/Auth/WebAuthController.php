@@ -126,10 +126,21 @@ class WebAuthController extends Controller
                 ->first();
 
             if ($invitation) {
-                // Link mentor to organization in pivot table
+                // Link mentor to organization in pivot table with specific role
                 $user->organizations()->syncWithoutDetaching([
-                    $invitation->organization_id => ['referral_code_used' => $referralCode],
+                    $invitation->organization_id => [
+                        'referral_code_used' => $referralCode,
+                        'role' => $invitation->role ?? 'jeune',
+                    ],
                 ]);
+
+                // Also update the user model's primary organization_id and role if it's an admin/viewer
+                if (in_array($invitation->role, ['admin', 'viewer'])) {
+                    $user->update([
+                        'organization_id' => $invitation->organization_id,
+                        'organization_role' => $invitation->role,
+                    ]);
+                }
 
                 // Mark invitation as used
                 $invitation->markAsAccepted();
@@ -325,15 +336,20 @@ class WebAuthController extends Controller
             'auth_provider' => 'email',
             'provider_id' => $supabaseResult['user']['id'] ?? null,
             'sponsored_by_organization_id' => $organizationId,
+            'organization_id' => (isset($invitation) && in_array($invitation->role, ['admin', 'viewer'])) ? $organizationId : null,
+            'organization_role' => (isset($invitation) && in_array($invitation->role, ['admin', 'viewer'])) ? $invitation->role : null,
             'referral_code_used' => $referralCode,
             'last_login_at' => now(),
         ]);
 
         // Mark invitation as used
         if ($referralCode && isset($invitation)) {
-            // Link user to organization in pivot table
+            // Link user to organization in pivot table with role
             $user->organizations()->syncWithoutDetaching([
-                $organizationId => ['referral_code_used' => $referralCode],
+                $organizationId => [
+                    'referral_code_used' => $referralCode,
+                    'role' => $invitation->role ?? 'jeune',
+                ],
             ]);
 
             $invitation->markAsAccepted();
@@ -407,8 +423,19 @@ class WebAuthController extends Controller
                 if ($invitation) {
                     // Link existing user to organization in pivot table
                     $user->organizations()->syncWithoutDetaching([
-                        $invitation->organization_id => ['referral_code_used' => $referralCode],
+                        $invitation->organization_id => [
+                            'referral_code_used' => $referralCode,
+                            'role' => $invitation->role ?? 'jeune',
+                        ],
                     ]);
+
+                    // Also update the user model's primary organization_id and role if it's an admin/viewer
+                    if (in_array($invitation->role, ['admin', 'viewer'])) {
+                        $user->update([
+                            'organization_id' => $invitation->organization_id,
+                            'organization_role' => $invitation->role,
+                        ]);
+                    }
 
                     // Mark invitation as used
                     $invitation->markAsAccepted();
@@ -736,6 +763,7 @@ class WebAuthController extends Controller
 
                 if ($invitation) {
                     $organizationId = $invitation->organization_id;
+                    $invitationRole = $invitation->role ?? 'jeune';
 
                     // Mark invitation as used
                     $invitation->markAsAccepted();
@@ -748,6 +776,8 @@ class WebAuthController extends Controller
             // Creer un nouveau compte jeune
             $user = User::create([
                 'sponsored_by_organization_id' => $organizationId,
+                'organization_id' => (isset($invitationRole) && in_array($invitationRole, ['admin', 'viewer'])) ? $organizationId : null,
+                'organization_role' => (isset($invitationRole) && in_array($invitationRole, ['admin', 'viewer'])) ? $invitationRole : null,
                 'referral_code_used' => $referralCode,
                 'name' => $socialData['name'] ?? 'Utilisateur',
                 'email' => $socialData['email'],
@@ -763,7 +793,10 @@ class WebAuthController extends Controller
             // Also link to organization via pivot table if registering via link
             if ($organizationId) {
                 $user->organizations()->syncWithoutDetaching([
-                    $organizationId => ['referral_code_used' => $referralCode],
+                    $organizationId => [
+                        'referral_code_used' => $referralCode,
+                        'role' => $invitationRole ?? 'jeune',
+                    ],
                 ]);
             }
 

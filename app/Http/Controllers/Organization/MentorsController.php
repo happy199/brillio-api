@@ -15,17 +15,6 @@ class MentorsController extends Controller
     /**
      * Get current organization
      */
-    private function getCurrentOrganization()
-    {
-        $user = auth()->user();
-        $organization = $user->organization;
-
-        if (! $organization) {
-            $organization = Organization::where('contact_email', $user->email)->firstOrFail();
-        }
-
-        return $organization;
-    }
 
     /**
      * List mentors linked to the organization

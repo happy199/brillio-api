@@ -126,6 +126,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class, 'purchase'])
             ->middleware('organization_role:admin')
             ->name('wallet.purchase');
+
+        // Team Management (Enterprise only)
+        Route::middleware('organization_subscription:enterprise')->prefix('team')->name('team.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Organization\TeamController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Organization\TeamController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Organization\TeamController::class, 'store'])->name('store');
+            Route::delete('/{user}', [\App\Http\Controllers\Organization\TeamController::class, 'destroy'])->name('destroy');
+        }
+        );
     }
     );
 

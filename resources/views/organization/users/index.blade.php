@@ -17,6 +17,7 @@
                 Liste des {{ $users->total() }} jeunes inscrits via votre organisation.
             </p>
         </div>
+        @if(auth()->user()->organization_role !== 'viewer')
         <div class="mt-4 sm:mt-0 flex gap-3">
             <button @click="openModal('all')"
                 class="inline-flex items-center px-4 py-2 border border-organization-300 rounded-md shadow-sm text-sm font-medium text-organization-700 bg-white hover:bg-organization-50 focus:outline-none focus:ring-offset-2 focus:ring-organization-500 transition-colors">
@@ -35,6 +36,7 @@
                 Inviter des jeunes
             </a>
         </div>
+        @endif
     </div>
 
     @include('organization.users._credit_modal')
@@ -148,6 +150,7 @@
                 </div>
             </div>
             <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 space-y-3">
+                @if(auth()->user()->organization_role !== 'viewer')
                 <button @click="openModal('single', '{{ $user->id }}', '{{ addslashes($user->name) }}')"
                     class="w-full inline-flex items-center justify-center px-4 py-2 border border-organization-600 rounded-lg text-sm font-bold text-organization-600 bg-white hover:bg-organization-50 transition-colors">
                     <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,6 +159,7 @@
                     </svg>
                     Offrir des crédits
                 </button>
+                @endif
                 <a href="{{ route('organization.users.show', $user) }}"
                     class="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center justify-center transition-colors">
                     Voir le profil détaillé
@@ -173,6 +177,7 @@
             </svg>
             <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun utilisateur trouvé</h3>
             <p class="mt-1 text-sm text-gray-500">Commencez par inviter des jeunes ou ajustez vos filtres.</p>
+            @if(auth()->user()->organization_role !== 'viewer')
             <div class="mt-6">
                 <a href="{{ route('organization.invitations.create') }}"
                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-organization-600 hover:bg-organization-700 focus:outline-none focus:ring-organization-500">
@@ -183,6 +188,7 @@
                     Inviter des jeunes
                 </a>
             </div>
+            @endif
         </div>
         @endforelse
     </div>

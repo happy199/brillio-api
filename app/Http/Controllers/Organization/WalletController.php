@@ -37,7 +37,8 @@ class WalletController extends Controller
         $description = 'Achat Crédits: '.$pack->name;
 
         // PACK-{orgId}-{packId}-{timestamp}
-        $reference = 'PACK-'.auth()->user()->organization->id.'-'.$pack->id.'-'.time();
+        $organization = $this->getCurrentOrganization();
+        $reference = 'PACK-'.$organization->id.'-'.$pack->id.'-'.time();
 
         $returnUrl = route('organization.payment.callback');
 

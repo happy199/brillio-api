@@ -26,6 +26,8 @@ class UserResource extends JsonResource
             'profile_photo_url' => $this->avatar_url,
             'linkedin_url' => $this->linkedin_url,
             'email_verified_at' => $this->email_verified_at?->toISOString(),
+            'organization_id' => $this->organization_id,
+            'organization_role' => $this->organization_role,
             'created_at' => $this->created_at->toISOString(),
             'personality_test' => $this->whenLoaded('personalityTest', function () {
                 return $this->personalityTest ? [

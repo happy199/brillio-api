@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Models\MentorProfile;
-use App\Models\Organization;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -18,9 +17,11 @@ class SponsoredUsersController extends Controller
      */
     public function index(Request $request)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
-        $query = $organization->users()->with(['personalityTest', 'jeuneProfile']);
+        $query = $organization->users()
+            ->where('users.user_type', User::TYPE_JEUNE)
+            ->with(['personalityTest', 'jeuneProfile']);
 
         // Recherche textuelle
         if ($request->filled('search')) {
@@ -47,7 +48,9 @@ class SponsoredUsersController extends Controller
         // Filtre par Activité
         if ($request->filled('status')) {
             if ($request->status === 'active') {
-                $query->where('last_login_at', '>=', now()->subDays(30));
+                $query->where(function ($q) {
+                    $q->where('last_login_at', '>=', now()->subDays(30));
+                });
             } elseif ($request->status === 'inactive') {
                 // Inactif = jamais connecté OU connecté il y a plus de 30 jours
                 $query->where(function ($q) {
@@ -71,11 +74,7 @@ class SponsoredUsersController extends Controller
      */
     public function show(User $user)
     {
-        $organization = auth()->user()->organization;
-
-        if (! $organization) {
-            $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
-        }
+        $organization = $this->getCurrentOrganization();
 
         // Vérification de sécurité : l'utilisateur doit être lié à cette organisation
         if (! $organization->users()->where('users.id', $user->id)->exists()) {
@@ -158,7 +157,7 @@ class SponsoredUsersController extends Controller
      */
     public function export(Request $request, User $user)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         // Sécurité
         if (! $organization->users()->where('users.id', $user->id)->exists()) {

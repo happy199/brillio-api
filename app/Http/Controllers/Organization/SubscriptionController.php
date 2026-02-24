@@ -33,7 +33,7 @@ class SubscriptionController extends Controller
      */
     public function subscribe(Request $request, CreditPack $plan)
     {
-        $organization = auth()->user()->organization;
+        $organization = $this->getCurrentOrganization();
 
         // 1. Determine Billing Cycle and Amount
         $billingCycle = $request->input('billing_cycle', 'monthly'); // 'monthly' or 'yearly'
@@ -119,7 +119,7 @@ class SubscriptionController extends Controller
      */
     public function downgrade(Request $request)
     {
-        $organization = auth()->user()->organization;
+        $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro() && ! $organization->isEnterprise()) {
             return redirect()->back()->with('error', 'Vous êtes déjà sur le plan Standard.');

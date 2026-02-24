@@ -6,7 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'Organization',
+    title: 'Organization',
+    description: 'Organization model schema',
+    properties: [
+        new OA\Property(property: 'id', type: 'integer', example: 1),
+        new OA\Property(property: 'name', type: 'string', example: 'Brillio Org'),
+        new OA\Property(property: 'slug', type: 'string', example: 'brillio-org'),
+        new OA\Property(property: 'logo_url', type: 'string', nullable: true),
+        new OA\Property(property: 'primary_color', type: 'string', example: '#f43f5e'),
+        new OA\Property(property: 'secondary_color', type: 'string', example: '#e11d48'),
+        new OA\Property(property: 'accent_color', type: 'string', example: '#fb7185'),
+        new OA\Property(property: 'subscription_plan', type: 'string', example: 'enterprise'),
+        new OA\Property(property: 'credits_balance', type: 'integer', example: 1000),
+    ]
+)]
 class Organization extends Model
 {
     use HasFactory;
@@ -96,7 +113,7 @@ class Organization extends Model
     public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(User::class, 'organization_user')
-            ->withPivot('referral_code_used')
+            ->withPivot(['role', 'referral_code_used'])
             ->withTimestamps();
     }
 

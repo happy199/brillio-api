@@ -14,7 +14,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request)
     {
-        $organization = auth()->user()->organization;
+        $organization = $this->getCurrentOrganization();
 
         // Fallback for session data lost during cross-domain redirect
         if ($request->has('domain_updated') && ! session()->has('domain_updated')) {
@@ -31,7 +31,7 @@ class ProfileController extends Controller
     public function checkDomainAvailability(Request $request)
     {
         $domain = $request->query('domain');
-        $organization = auth()->user()->organization;
+        $organization = $this->getCurrentOrganization();
 
         if (strlen($domain) < 2) {
             return response()->json(['available' => true]);
@@ -63,7 +63,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $organization = auth()->user()->organization;
+        $organization = $this->getCurrentOrganization();
         $oldDomain = $organization->custom_domain;
 
         $rules = [

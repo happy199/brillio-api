@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
-use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class MentorshipController extends Controller
@@ -14,7 +13,7 @@ class MentorshipController extends Controller
      */
     public function index(Request $request)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro()) {
             $mentorships = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
@@ -41,7 +40,7 @@ class MentorshipController extends Controller
      */
     public function show(Mentorship $mentorship)
     {
-        $organization = Organization::where('contact_email', auth()->user()->email)->firstOrFail();
+        $organization = $this->getCurrentOrganization();
 
         // Vérification : le menté doit être parrainé par cette organisation
         if ($mentorship->mentee->sponsored_by_organization_id !== $organization->id) {

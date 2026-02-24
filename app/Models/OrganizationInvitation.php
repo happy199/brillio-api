@@ -16,6 +16,7 @@ class OrganizationInvitation extends Model
         'organization_id',
         'referral_code',
         'invited_email',
+        'role',
         'status',
         'invited_at',
         'accepted_at',
