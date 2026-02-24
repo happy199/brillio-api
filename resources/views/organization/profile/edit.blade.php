@@ -196,7 +196,11 @@
                             </div>
 
                             <!-- Success Banner for Domain Update -->
-                            @if(session('domain_updated'))
+                            @if(session('domain_updated') || request('domain_updated'))
+                            @php
+                            $isAlreadyOnCustomDomain = $organization->custom_domain &&
+                            str_contains(request()->getHost(), $organization->custom_domain);
+                            @endphp
                             <div
                                 class="mb-8 bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg shadow-sm animate-pulse-subtle">
                                 <div class="flex">
@@ -215,8 +219,11 @@
                                                 personnalisé. Vous pouvez dès à présent l'utiliser pour inviter vos
                                                 membres.</p>
                                         </div>
+
+                                        @if(!$isAlreadyOnCustomDomain)
                                         <div class="mt-4">
-                                            <a href="{{ session('new_url') }}" target="_blank"
+                                            <a href="{{ session('new_url') ?? (request()->secure() ? 'https://' : 'http://').$organization->custom_domain.(app()->environment('local') ? ':8000' : '') }}"
+                                                target="_blank"
                                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-all">
                                                 Accéder à mon nouvel espace
                                                 <svg class="ml-2 -mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24"
@@ -227,6 +234,17 @@
                                                 </svg>
                                             </a>
                                         </div>
+                                        @else
+                                        <div class="mt-4 flex items-center text-green-700 font-medium">
+                                            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Vous êtes actuellement sur votre espace personnalisé.
+                                        </div>
+                                        @endif
+
                                         <p class="mt-3 text-xs text-green-600 italic">* Vous pourriez avoir besoin de
                                             vous reconnecter sur la nouvelle URL pour des raisons de sécurité.</p>
                                     </div>
@@ -381,8 +399,7 @@
             spinner.classList.add('hidden');
             feedbackText.innerText = 'Erreur lors de la vérification.';
             feedbackText.className = 'text-red-500';
-            console.error('Domain check error:', error);
-        }
+            console.error('Domain check error:', error); }
     }
 </script>
 @endpush

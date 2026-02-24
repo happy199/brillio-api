@@ -12,9 +12,15 @@ class ProfileController extends Controller
     /**
      * Show the form for editing the organization profile.
      */
-    public function edit()
+    public function edit(Request $request)
     {
         $organization = auth()->user()->organization;
+
+        // Fallback for session data lost during cross-domain redirect
+        if ($request->has('domain_updated') && ! session()->has('domain_updated')) {
+            session()->flash('domain_updated', true);
+            session()->flash('success', 'Votre espace est désormais accessible via votre propre lien personnalisé.');
+        }
 
         return view('organization.profile.edit', compact('organization'));
     }
