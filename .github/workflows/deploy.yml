@@ -292,12 +292,13 @@ jobs:
             
             echo "✅ Sentry & Logging configured"
 
-            # Deploy JAAS private key as separate PEM file
-            echo "🔐 Deploying JAAS private key file..."
-            echo '${{ secrets.JAAS_PRIVATE_KEY }}' | base64 -d | sudo tee storage/jaas_private.pem > /dev/null
-            sudo chmod 644 storage/jaas_private.pem
-            sudo chown root:root storage/jaas_private.pem
-            echo "✅ JAAS private key file deployed: storage/jaas_private.pem"
+            # Deploy Cloudflare Origin CA Certificates
+            echo "🔐 Provisioning Cloudflare Origin CA certificates..."
+            mkdir -p docker/certbot/conf/live/brillio.africa/
+            echo "${{ secrets.CLOUDFLARE_ORIGIN_CERT }}" > docker/certbot/conf/live/brillio.africa/origin.pem
+            echo "${{ secrets.CLOUDFLARE_ORIGIN_KEY }}" > docker/certbot/conf/live/brillio.africa/origin.key
+            chmod 600 docker/certbot/conf/live/brillio.africa/origin.key
+            echo "✅ SSL certificates provisioned"
 
             # Validate .env syntax before proceeding
             echo "🔍 Validating .env syntax..."
