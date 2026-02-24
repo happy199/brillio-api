@@ -108,17 +108,17 @@ class ProfileController extends Controller
         }
 
         $organization->update($validated);
+        $organization->refresh();
 
         $domainChanged = ($organization->wasChanged('custom_domain') && ! empty($organization->custom_domain));
 
-        $redirect = redirect()->route('organization.profile.edit')
-            ->with('success', 'Profil mis à jour avec succès.');
-
         if ($domainChanged) {
-            $redirect->with('domain_updated', true)
-                ->with('new_url', 'http://'.$organization->custom_domain.(app()->environment('local') ? ':8000' : ''));
+            $newUrl = (request()->secure() ? 'https://' : 'http://').$organization->custom_domain.(app()->environment('local') ? ':8000' : '');
+
+            return redirect()->away($newUrl.'/organization/profile?success=1&domain_updated=1');
         }
 
-        return $redirect;
+        return redirect()->route('organization.profile.edit')
+            ->with('success', 'Profil mis à jour avec succès.');
     }
 }

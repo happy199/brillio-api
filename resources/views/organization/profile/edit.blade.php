@@ -55,7 +55,7 @@
                             <label for="name" class="block text-sm font-medium text-gray-700">Nom de
                                 l'organisation</label>
                             <input type="text" name="name" id="name" value="{{ old('name', $organization->name) }}"
-                                class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-3 px-4"
                                 required>
                             @error('name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -67,7 +67,7 @@
                                 (Admin)</label>
                             <input type="email" name="contact_email" id="contact_email"
                                 value="{{ old('contact_email', $organization->contact_email) }}"
-                                class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-3 px-4"
                                 required>
                             @error('contact_email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -79,7 +79,7 @@
                                 <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone</label>
                                 <input type="text" name="phone" id="phone"
                                     value="{{ old('phone', $organization->phone) }}"
-                                    class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                    class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-3 px-4">
                                 @error('phone')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -89,7 +89,7 @@
                                 <label for="website" class="block text-sm font-medium text-gray-700">Site Web</label>
                                 <input type="url" name="website" id="website"
                                     value="{{ old('website', $organization->website) }}"
-                                    class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                    class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-3 px-4"
                                     placeholder="https://exemple.com">
                                 @error('website')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -102,7 +102,7 @@
                                 d'activité</label>
                             <input type="text" name="sector" id="sector"
                                 value="{{ old('sector', $organization->sector) }}"
-                                class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-3 px-4">
                             @error('sector')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -110,8 +110,8 @@
 
                         <div>
                             <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                            <textarea name="description" id="description" rows="3"
-                                class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('description', $organization->description) }}</textarea>
+                            <textarea name="description" id="description" rows="4"
+                                class="mt-1 focus:ring-organization-500 focus:border-organization-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md py-3 px-4">{{ old('description', $organization->description) }}</textarea>
                             @error('description')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -148,7 +148,7 @@
                                             class="h-10 w-12 border-0 p-0 rounded-l-md cursor-pointer">
                                         <input type="text"
                                             value="{{ old('primary_color', $organization->primary_color ?? '#f43f5e') }}"
-                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 px-3 uppercase font-mono"
+                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 py-3 px-4 uppercase font-mono"
                                             onchange="document.getElementById('primary_color').value = this.value">
                                     </div>
                                     @error('primary_color')
@@ -167,7 +167,7 @@
                                             class="h-10 w-12 border-0 p-0 rounded-l-md cursor-pointer">
                                         <input type="text"
                                             value="{{ old('secondary_color', $organization->secondary_color ?? '#e11d48') }}"
-                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 px-3 uppercase font-mono"
+                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 py-3 px-4 uppercase font-mono"
                                             onchange="document.getElementById('secondary_color').value = this.value">
                                     </div>
                                     @error('secondary_color')
@@ -186,7 +186,7 @@
                                             class="h-10 w-12 border-0 p-0 rounded-l-md cursor-pointer">
                                         <input type="text"
                                             value="{{ old('accent_color', $organization->accent_color ?? '#fb7185') }}"
-                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 px-3 uppercase font-mono"
+                                            class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 py-3 px-4 uppercase font-mono"
                                             onchange="document.getElementById('accent_color').value = this.value">
                                     </div>
                                     @error('accent_color')
@@ -240,8 +240,8 @@
                                     'brillio.africa' }})</label>
                                 <div class="mt-1 flex rounded-md shadow-sm relative">
                                     <input type="text" name="custom_domain" id="custom_domain"
-                                        value="{{ old('custom_domain', str_replace('.' . (parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa'), '', $organization->custom_domain)) }}"
-                                        class="focus:ring-organization-500 focus:border-organization-500 flex-1 block w-full sm:text-sm border-gray-300 rounded-none rounded-l-md"
+                                        value="{{ old('custom_domain', $organization->custom_domain ? str_replace('.' . (parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa'), '', $organization->custom_domain) : '') }}"
+                                        class="focus:ring-organization-500 focus:border-organization-500 flex-1 block w-full sm:text-sm border-gray-300 rounded-none rounded-l-md py-3 px-4"
                                         placeholder="mondomaine" autocomplete="off">
                                     <span
                                         class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
