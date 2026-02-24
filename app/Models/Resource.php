@@ -65,7 +65,7 @@ class Resource extends Model
 
     public function purchases()
     {
-        return $this->morphMany(Purchase::class , 'item');
+        return $this->morphMany(Purchase::class, 'item');
     }
 
     public function getRouteKeyName()
@@ -88,8 +88,9 @@ class Resource extends Model
     public function getThumbnailUrlAttribute(): ?string
     {
         if ($this->preview_image_path) {
-            return asset('storage/' . $this->preview_image_path);
+            return asset('storage/'.$this->preview_image_path);
         }
+
         return null;
     }
 

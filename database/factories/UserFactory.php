@@ -43,8 +43,8 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
-        'email_verified_at' => null,
+        return $this->state(fn (array $attributes) => [
+            'email_verified_at' => null,
         ]);
     }
 
@@ -53,8 +53,8 @@ class UserFactory extends Factory
      */
     public function admin(): static
     {
-        return $this->state(fn(array $attributes) => [
-        'is_admin' => true,
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => true,
         ]);
     }
 
@@ -63,8 +63,8 @@ class UserFactory extends Factory
      */
     public function mentor(): static
     {
-        return $this->state(fn(array $attributes) => [
-        'user_type' => User::TYPE_MENTOR,
+        return $this->state(fn (array $attributes) => [
+            'user_type' => User::TYPE_MENTOR,
         ]);
     }
 
@@ -73,8 +73,8 @@ class UserFactory extends Factory
      */
     public function organization(): static
     {
-        return $this->state(fn(array $attributes) => [
-        'user_type' => User::TYPE_ORGANIZATION,
+        return $this->state(fn (array $attributes) => [
+            'user_type' => User::TYPE_ORGANIZATION,
         ]);
     }
 
@@ -83,10 +83,10 @@ class UserFactory extends Factory
      */
     public function archived(): static
     {
-        return $this->state(fn(array $attributes) => [
-        'is_archived' => true,
-        'archived_at' => now(),
-        'archived_reason' => 'Archivage de test',
+        return $this->state(fn (array $attributes) => [
+            'is_archived' => true,
+            'archived_at' => now(),
+            'archived_reason' => 'Archivage de test',
         ]);
     }
 }

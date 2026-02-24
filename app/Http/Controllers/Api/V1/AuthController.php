@@ -28,45 +28,45 @@ class AuthController extends Controller
     ) {}
 
     #[OA\Post(
-        path: "/api/register",
+        path: '/api/register',
         summary: "Inscription d'un nouvel utilisateur",
-        tags: ["Authentification"],
+        tags: ['Authentification'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["name", "email", "password", "password_confirmation", "user_type"],
+                required: ['name', 'email', 'password', 'password_confirmation', 'user_type'],
                 properties: [
-                    new OA\Property(property: "name", type: "string", example: "Jean Dupont"),
-                    new OA\Property(property: "email", type: "string", format: "email", example: "jean@example.com"),
-                    new OA\Property(property: "password", type: "string", format: "password", example: "Password123"),
-                    new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "Password123"),
-                    new OA\Property(property: "user_type", type: "string", enum: ["jeune", "mentor"], example: "jeune"),
-                    new OA\Property(property: "phone", type: "string", example: "+2250102030405"),
-                    new OA\Property(property: "date_of_birth", type: "string", format: "date", example: "2000-01-01"),
-                    new OA\Property(property: "country", type: "string", example: "Côte d'Ivoire"),
-                    new OA\Property(property: "city", type: "string", example: "Abidjan")
+                    new OA\Property(property: 'name', type: 'string', example: 'Jean Dupont'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'jean@example.com'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password', example: 'Password123'),
+                    new OA\Property(property: 'password_confirmation', type: 'string', format: 'password', example: 'Password123'),
+                    new OA\Property(property: 'user_type', type: 'string', enum: ['jeune', 'mentor'], example: 'jeune'),
+                    new OA\Property(property: 'phone', type: 'string', example: '+2250102030405'),
+                    new OA\Property(property: 'date_of_birth', type: 'string', format: 'date', example: '2000-01-01'),
+                    new OA\Property(property: 'country', type: 'string', example: "Côte d'Ivoire"),
+                    new OA\Property(property: 'city', type: 'string', example: 'Abidjan'),
                 ]
             )
         ),
         responses: [
             new OA\Response(
                 response: 201,
-                description: "Utilisateur créé avec succès",
+                description: 'Utilisateur créé avec succès',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "success", type: "boolean", example: true),
-                        new OA\Property(property: "message", type: "string", example: "Inscription réussie"),
-                        new OA\Property(property: "data", type: "object",
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Inscription réussie'),
+                        new OA\Property(property: 'data', type: 'object',
                             properties: [
-                                new OA\Property(property: "user", ref: "#/components/schemas/User"),
-                                new OA\Property(property: "token", type: "string"),
-                                new OA\Property(property: "token_type", type: "string", example: "Bearer")
+                                new OA\Property(property: 'user', ref: '#/components/schemas/User'),
+                                new OA\Property(property: 'token', type: 'string'),
+                                new OA\Property(property: 'token_type', type: 'string', example: 'Bearer'),
                             ]
-                        )
+                        ),
                     ]
                 )
             ),
-            new OA\Response(response: 422, description: "Erreur de validation")
+            new OA\Response(response: 422, description: 'Erreur de validation'),
         ]
     )]
     public function register(RegisterRequest $request): JsonResponse
@@ -102,39 +102,39 @@ class AuthController extends Controller
     }
 
     #[OA\Post(
-        path: "/api/login",
+        path: '/api/login',
         summary: "Connexion d'un utilisateur existant",
-        tags: ["Authentification"],
+        tags: ['Authentification'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["email", "password"],
+                required: ['email', 'password'],
                 properties: [
-                    new OA\Property(property: "email", type: "string", format: "email", example: "jean@example.com"),
-                    new OA\Property(property: "password", type: "string", format: "password", example: "Password123"),
-                    new OA\Property(property: "logout_other_devices", type: "boolean", example: false)
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'jean@example.com'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password', example: 'Password123'),
+                    new OA\Property(property: 'logout_other_devices', type: 'boolean', example: false),
                 ]
             )
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Connexion réussie",
+                description: 'Connexion réussie',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "success", type: "boolean", example: true),
-                        new OA\Property(property: "message", type: "string", example: "Connexion réussie"),
-                        new OA\Property(property: "data", type: "object",
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Connexion réussie'),
+                        new OA\Property(property: 'data', type: 'object',
                             properties: [
-                                new OA\Property(property: "user", ref: "#/components/schemas/User"),
-                                new OA\Property(property: "token", type: "string"),
-                                new OA\Property(property: "token_type", type: "string", example: "Bearer")
+                                new OA\Property(property: 'user', ref: '#/components/schemas/User'),
+                                new OA\Property(property: 'token', type: 'string'),
+                                new OA\Property(property: 'token_type', type: 'string', example: 'Bearer'),
                             ]
-                        )
+                        ),
                     ]
                 )
             ),
-            new OA\Response(response: 401, description: "Email ou mot de passe incorrect")
+            new OA\Response(response: 401, description: 'Email ou mot de passe incorrect'),
         ]
     )]
     public function login(LoginRequest $request): JsonResponse
@@ -166,13 +166,13 @@ class AuthController extends Controller
      * Déconnexion de l'utilisateur
      */
     #[OA\Post(
-        path: "/api/logout",
+        path: '/api/logout',
         summary: "Déconnexion de l'utilisateur",
-        tags: ["Authentification"],
-        security: [["bearerAuth" => []]],
+        tags: ['Authentification'],
+        security: [['bearerAuth' => []]],
         responses: [
-            new OA\Response(response: 200, description: "Déconnexion réussie"),
-            new OA\Response(response: 401, description: "Non authentifié")
+            new OA\Response(response: 200, description: 'Déconnexion réussie'),
+            new OA\Response(response: 401, description: 'Non authentifié'),
         ]
     )]
     public function logout(Request $request): JsonResponse
@@ -184,26 +184,26 @@ class AuthController extends Controller
     }
 
     #[OA\Get(
-        path: "/api/user",
+        path: '/api/user',
         summary: "Récupère le profil de l'utilisateur connecté",
-        tags: ["Profil"],
-        security: [["bearerAuth" => []]],
+        tags: ['Profil'],
+        security: [['bearerAuth' => []]],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Profil utilisateur récupéré",
+                description: 'Profil utilisateur récupéré',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "success", type: "boolean", example: true),
-                        new OA\Property(property: "data", type: "object",
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'data', type: 'object',
                             properties: [
-                                new OA\Property(property: "user", ref: "#/components/schemas/User")
+                                new OA\Property(property: 'user', ref: '#/components/schemas/User'),
                             ]
-                        )
+                        ),
                     ]
                 )
             ),
-            new OA\Response(response: 401, description: "Non authentifié")
+            new OA\Response(response: 401, description: 'Non authentifié'),
         ]
     )]
     public function user(Request $request): JsonResponse
@@ -220,24 +220,24 @@ class AuthController extends Controller
      * Met à jour le profil de l'utilisateur
      */
     #[OA\Post(
-        path: "/api/user/profile",
+        path: '/api/user/profile',
         summary: "Met à jour le profil de l'utilisateur",
-        tags: ["Profil"],
-        security: [["bearerAuth" => []]],
+        tags: ['Profil'],
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: "name", type: "string", example: "Jean Dupont"),
-                    new OA\Property(property: "phone", type: "string", example: "+2250102030405"),
-                    new OA\Property(property: "password", type: "string", format: "password")
+                    new OA\Property(property: 'name', type: 'string', example: 'Jean Dupont'),
+                    new OA\Property(property: 'phone', type: 'string', example: '+2250102030405'),
+                    new OA\Property(property: 'password', type: 'string', format: 'password'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Profil mis à jour"),
-            new OA\Response(response: 401, description: "Non authentifié"),
-            new OA\Response(response: 422, description: "Erreur de validation")
+            new OA\Response(response: 200, description: 'Profil mis à jour'),
+            new OA\Response(response: 401, description: 'Non authentifié'),
+            new OA\Response(response: 422, description: 'Erreur de validation'),
         ]
     )]
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
@@ -264,24 +264,24 @@ class AuthController extends Controller
      * Upload de la photo de profil
      */
     #[OA\Post(
-        path: "/api/user/photo",
-        summary: "Upload de la photo de profil",
-        tags: ["Profil"],
-        security: [["bearerAuth" => []]],
+        path: '/api/user/photo',
+        summary: 'Upload de la photo de profil',
+        tags: ['Profil'],
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
-                mediaType: "multipart/form-data",
+                mediaType: 'multipart/form-data',
                 schema: new OA\Schema(
                     properties: [
-                        new OA\Property(property: "photo", type: "string", format: "binary")
+                        new OA\Property(property: 'photo', type: 'string', format: 'binary'),
                     ]
                 )
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Photo mise à jour"),
-            new OA\Response(response: 401, description: "Non authentifié")
+            new OA\Response(response: 200, description: 'Photo mise à jour'),
+            new OA\Response(response: 401, description: 'Non authentifié'),
         ]
     )]
     public function uploadPhoto(Request $request): JsonResponse
@@ -309,13 +309,13 @@ class AuthController extends Controller
     }
 
     #[OA\Delete(
-        path: "/api/user/photo",
-        summary: "Supprime la photo de profil",
-        tags: ["Profil"],
-        security: [["bearerAuth" => []]],
+        path: '/api/user/photo',
+        summary: 'Supprime la photo de profil',
+        tags: ['Profil'],
+        security: [['bearerAuth' => []]],
         responses: [
-            new OA\Response(response: 200, description: "Photo supprimée"),
-            new OA\Response(response: 401, description: "Non authentifié")
+            new OA\Response(response: 200, description: 'Photo supprimée'),
+            new OA\Response(response: 401, description: 'Non authentifié'),
         ]
     )]
     public function deletePhoto(Request $request): JsonResponse

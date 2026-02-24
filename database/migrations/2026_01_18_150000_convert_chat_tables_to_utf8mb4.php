@@ -3,7 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -20,7 +21,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-    // No simple rollback for encoding conversion without potential data loss or complexity,
-    // usually we don't revert to a worse encoding.
+        // No simple rollback for encoding conversion without potential data loss or complexity,
+        // usually we don't revert to a worse encoding.
     }
 };

@@ -22,15 +22,15 @@ class ChatController extends Controller
      * Liste les conversations de l'utilisateur
      */
     #[OA\Get(
-        path: "/api/v1/chat/conversations",
+        path: '/api/v1/chat/conversations',
         summary: "Liste les conversations de l'utilisateur",
-        tags: ["Chat"],
-        security: [["bearerAuth" => []]],
+        tags: ['Chat'],
+        security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: "limit", in: "query", schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'limit', in: 'query', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Liste des conversations")
+            new OA\Response(response: 200, description: 'Liste des conversations'),
         ]
     )]
     public function conversations(Request $request): JsonResponse
@@ -113,22 +113,22 @@ class ChatController extends Controller
      * Envoie un message et reçoit la réponse de l'IA
      */
     #[OA\Post(
-        path: "/api/v1/chat/send",
+        path: '/api/v1/chat/send',
         summary: "Envoie un message à l'IA ou à un humain",
-        tags: ["Chat"],
-        security: [["bearerAuth" => []]],
+        tags: ['Chat'],
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["message"],
+                required: ['message'],
                 properties: [
-                    new OA\Property(property: "message", type: "string", example: "Bonjour, j'ai besoin d'aide pour mon orientation."),
-                    new OA\Property(property: "conversation_id", type: "integer", example: 1)
+                    new OA\Property(property: 'message', type: 'string', example: "Bonjour, j'ai besoin d'aide pour mon orientation."),
+                    new OA\Property(property: 'conversation_id', type: 'integer', example: 1),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Réponse du chatbot ou confirmation d'envoi")
+            new OA\Response(response: 200, description: "Réponse du chatbot ou confirmation d'envoi"),
         ]
     )]
     public function send(SendMessageRequest $request): JsonResponse

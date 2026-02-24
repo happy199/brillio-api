@@ -14,20 +14,20 @@ use Laravel\Sanctum\HasApiTokens;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: "User",
-    title: "User",
-    description: "User model schema",
+    schema: 'User',
+    title: 'User',
+    description: 'User model schema',
     properties: [
-        new OA\Property(property: "id", type: "integer", example: 1),
-        new OA\Property(property: "name", type: "string", example: "Jean Dupont"),
-        new OA\Property(property: "email", type: "string", example: "jean@example.com"),
-        new OA\Property(property: "user_type", type: "string", example: "jeune"),
-        new OA\Property(property: "phone", type: "string", nullable: true),
-        new OA\Property(property: "date_of_birth", type: "string", format: "date", nullable: true),
-        new OA\Property(property: "country", type: "string", nullable: true),
-        new OA\Property(property: "city", type: "string", nullable: true),
-        new OA\Property(property: "profile_photo_url", type: "string", nullable: true),
-        new OA\Property(property: "created_at", type: "string", format: "date-time")
+        new OA\Property(property: 'id', type: 'integer', example: 1),
+        new OA\Property(property: 'name', type: 'string', example: 'Jean Dupont'),
+        new OA\Property(property: 'email', type: 'string', example: 'jean@example.com'),
+        new OA\Property(property: 'user_type', type: 'string', example: 'jeune'),
+        new OA\Property(property: 'phone', type: 'string', nullable: true),
+        new OA\Property(property: 'date_of_birth', type: 'string', format: 'date', nullable: true),
+        new OA\Property(property: 'country', type: 'string', nullable: true),
+        new OA\Property(property: 'city', type: 'string', nullable: true),
+        new OA\Property(property: 'profile_photo_url', type: 'string', nullable: true),
+        new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
     ]
 )]
 class User extends Authenticatable implements MustVerifyEmail
@@ -427,4 +427,3 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
 }
- 

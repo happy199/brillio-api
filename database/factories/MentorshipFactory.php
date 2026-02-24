@@ -22,8 +22,8 @@ class MentorshipFactory extends Factory
 
     public function accepted(): self
     {
-        return $this->state(fn(array $attributes) => [
-        'status' => 'accepted',
+        return $this->state(fn (array $attributes) => [
+            'status' => 'accepted',
         ]);
     }
 }

@@ -21,29 +21,27 @@ class ResourceController extends Controller
     public function __construct(
         private WalletService $walletService,
         private \App\Services\MentorshipNotificationService $notificationService
-        )
-    {
-    }
+    ) {}
 
     /**
      * Liste les ressources pédagogiques avec filtrage
      */
     #[OA\Get(
-        path: "/api/v1/resources",
-        summary: "Liste les ressources pédagogiques",
-        tags: ["Ressources"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/resources',
+        summary: 'Liste les ressources pédagogiques',
+        tags: ['Ressources'],
+        security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: "filter", in: "query", schema: new OA\Schema(type: "string", enum: ["suggestions", "all"])),
-            new OA\Parameter(name: "search", in: "query", schema: new OA\Schema(type: "string")),
-            new OA\Parameter(name: "type", in: "query", schema: new OA\Schema(type: "string")),
-            new OA\Parameter(name: "price", in: "query", schema: new OA\Schema(type: "string", enum: ["free", "premium"])),
-            new OA\Parameter(name: "mbti", in: "query", schema: new OA\Schema(type: "string")),
-            new OA\Parameter(name: "source", in: "query", schema: new OA\Schema(type: "string", enum: ["mentor", "brillio"])),
-            new OA\Parameter(name: "ownership", in: "query", schema: new OA\Schema(type: "string", enum: ["mine", "all"]))
+            new OA\Parameter(name: 'filter', in: 'query', schema: new OA\Schema(type: 'string', enum: ['suggestions', 'all'])),
+            new OA\Parameter(name: 'search', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'type', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'price', in: 'query', schema: new OA\Schema(type: 'string', enum: ['free', 'premium'])),
+            new OA\Parameter(name: 'mbti', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'source', in: 'query', schema: new OA\Schema(type: 'string', enum: ['mentor', 'brillio'])),
+            new OA\Parameter(name: 'ownership', in: 'query', schema: new OA\Schema(type: 'string', enum: ['mine', 'all'])),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Liste des ressources")
+            new OA\Response(response: 200, description: 'Liste des ressources'),
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -61,8 +59,8 @@ class ResourceController extends Controller
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('tags', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('tags', 'like', "%{$search}%");
             });
         }
 
@@ -100,10 +98,10 @@ class ResourceController extends Controller
             $purchasedIds = Purchase::where('user_id', $user->id)
                 ->where('item_type', Resource::class)
                 ->pluck('item_id');
-            
+
             $query->where(function ($q) use ($user, $purchasedIds) {
                 $q->whereIn('id', $purchasedIds)
-                  ->orWhere('mentor_id', $user->id);
+                    ->orWhere('mentor_id', $user->id);
             });
         }
 
@@ -115,7 +113,7 @@ class ResourceController extends Controller
 
         // Logique de Suggestion / Filtrage Intelligent
         if ($filterMode === 'suggestions') {
-            $resources = $resources->filter(function ($resource) use ($userEducation, $userSituation, $userInterests, $userCountry, $userMbti) {
+            $resources = $resources->filter(function ($resource) {
                 // ... Intelligent filtering logic ...
                 return true;
             });
@@ -132,16 +130,16 @@ class ResourceController extends Controller
      * Détails d'une ressource
      */
     #[OA\Get(
-        path: "/api/v1/resources/{id}",
+        path: '/api/v1/resources/{id}',
         summary: "Détails d'une ressource pédagogique",
-        tags: ["Ressources"],
-        security: [["bearerAuth" => []]],
+        tags: ['Ressources'],
+        security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Détails de la ressource"),
-            new OA\Response(response: 404, description: "Ressource non trouvée")
+            new OA\Response(response: 200, description: 'Détails de la ressource'),
+            new OA\Response(response: 404, description: 'Ressource non trouvée'),
         ]
     )]
     public function show(int $id, Request $request): JsonResponse
@@ -151,7 +149,7 @@ class ResourceController extends Controller
             ->where('is_validated', true)
             ->first();
 
-        if (!$resource) {
+        if (! $resource) {
             return $this->notFound('Ressource non trouvée');
         }
 
@@ -159,7 +157,7 @@ class ResourceController extends Controller
 
         // Enregistrer la vue
         $resource->increment('views_count');
-        if (!$resource->is_premium) {
+        if (! $resource->is_premium) {
             \App\Models\ResourceView::firstOrCreate([
                 'user_id' => $user->id,
                 'resource_id' => $resource->id,
@@ -175,17 +173,17 @@ class ResourceController extends Controller
      * Débloque une ressource premium
      */
     #[OA\Post(
-        path: "/api/v1/resources/{id}/unlock",
-        summary: "Débloquer une ressource premium",
-        tags: ["Ressources"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/resources/{id}/unlock',
+        summary: 'Débloquer une ressource premium',
+        tags: ['Ressources'],
+        security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
-            new OA\Response(response: 200, description: "Ressource débloquée"),
-            new OA\Response(response: 400, description: "Crédits insuffisants"),
-            new OA\Response(response: 404, description: "Ressource non trouvée")
+            new OA\Response(response: 200, description: 'Ressource débloquée'),
+            new OA\Response(response: 400, description: 'Crédits insuffisants'),
+            new OA\Response(response: 404, description: 'Ressource non trouvée'),
         ]
     )]
     public function unlock(int $id): JsonResponse
@@ -242,11 +240,11 @@ class ResourceController extends Controller
                 // Commission Brillio : 20% par défaut
                 $commission = 0.20;
                 $mentorEarningsFcfa = $resource->price * (1 - $commission);
-                
+
                 // Conversion en crédits (selon le prix du crédit mentor)
                 $mentorCreditPrice = $this->walletService->getCreditPrice('mentor');
                 $mentorCredits = (int) floor($mentorEarningsFcfa / $mentorCreditPrice);
-                
+
                 $this->walletService->addCredits(
                     $resource->user,
                     $mentorCredits,
@@ -259,7 +257,7 @@ class ResourceController extends Controller
                 try {
                     $this->notificationService->sendResourcePurchased($resource, $user, $mentorCredits);
                 } catch (\Exception $e) {
-                    Log::error("Erreur notification vente ressource: ".$e->getMessage());
+                    Log::error('Erreur notification vente ressource: '.$e->getMessage());
                 }
             }
 
@@ -271,7 +269,7 @@ class ResourceController extends Controller
 
     private function formatResource(Resource $resource, $user): array
     {
-        $hasAccess = !$resource->is_premium || Purchase::where('user_id', $user->id)
+        $hasAccess = ! $resource->is_premium || Purchase::where('user_id', $user->id)
             ->where('item_type', Resource::class)
             ->where('item_id', $resource->id)
             ->exists();
@@ -292,20 +290,20 @@ class ResourceController extends Controller
 
     private function formatResourceDetail(Resource $resource, $user): array
     {
-        $hasAccess = !$resource->is_premium || Purchase::where('user_id', $user->id)
+        $hasAccess = ! $resource->is_premium || Purchase::where('user_id', $user->id)
             ->where('item_type', Resource::class)
             ->where('item_id', $resource->id)
             ->exists();
 
         $creditPrice = $this->walletService->getCreditPrice('jeune');
-        $costInCredits = (int)ceil($resource->price / $creditPrice);
+        $costInCredits = (int) ceil($resource->price / $creditPrice);
 
         return [
             'id' => $resource->id,
             'title' => $resource->title,
             'description' => $resource->description,
             'content' => $hasAccess ? $resource->content : null,
-            'file_url' => $hasAccess && $resource->file_path ? asset('storage/' . $resource->file_path) : null,
+            'file_url' => $hasAccess && $resource->file_path ? asset('storage/'.$resource->file_path) : null,
             'type' => $resource->type,
             'thumbnail_url' => $resource->thumbnail_url,
             'is_premium' => $resource->is_premium,

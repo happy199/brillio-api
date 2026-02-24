@@ -2,9 +2,8 @@
 
 namespace Tests\Feature\Organization;
 
-use App\Models\User;
 use App\Models\Organization;
-use App\Models\OrganizationInvitation;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,6 +12,7 @@ class ManagementTest extends TestCase
     use RefreshDatabase;
 
     protected $organization;
+
     protected $admin;
 
     protected function setUp(): void
@@ -24,7 +24,7 @@ class ManagementTest extends TestCase
             'status' => 'active',
             'slug' => 'test-org',
             'contact_email' => $this->admin->email,
-            'subscription_plan' => 'pro' // Enable pro features for testing
+            'subscription_plan' => 'pro', // Enable pro features for testing
         ]);
 
         $this->admin->update(['organization_id' => $this->organization->id]);
@@ -33,6 +33,7 @@ class ManagementTest extends TestCase
     protected function getOrgUrl($routeName, $params = [])
     {
         $url = route($routeName, $params);
+
         return str_replace('brillio.africa', 'test-org.brillio.africa', $url);
     }
 
@@ -54,7 +55,7 @@ class ManagementTest extends TestCase
         $this->assertDatabaseHas('organization_invitations', [
             'invited_email' => 'new-user@example.com',
             'organization_id' => $this->organization->id,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
     }
 

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Mentorship;
 
-use App\Models\User;
 use App\Models\Mentorship;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,7 +24,7 @@ class FlowTest extends TestCase
             'is_validated' => true,
             'bio' => 'Mentor bio',
             'current_position' => 'Senior Developer',
-            'specialization' => 'tech'
+            'specialization' => 'tech',
         ]);
 
         $response = $this->actingAs($jeune)->post(route('jeune.mentorship.request'), [
@@ -109,7 +109,7 @@ class FlowTest extends TestCase
             'is_validated' => true,
             'bio' => 'Mentor bio',
             'current_position' => 'Senior Developer',
-            'specialization' => 'tech'
+            'specialization' => 'tech',
         ]);
 
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);

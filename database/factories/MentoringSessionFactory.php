@@ -27,9 +27,9 @@ class MentoringSessionFactory extends Factory
 
     public function proposed(): self
     {
-        return $this->state(fn(array $attributes) => [
-        'status' => 'proposed',
-        'created_by' => 'mentee',
+        return $this->state(fn (array $attributes) => [
+            'status' => 'proposed',
+            'created_by' => 'mentee',
         ]);
     }
 }

@@ -8,7 +8,6 @@ use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
 
 /**
@@ -18,20 +17,18 @@ class WalletController extends Controller
 {
     public function __construct(
         private WalletService $walletService
-        )
-    {
-    }
+    ) {}
 
     /**
      * Récupère le solde et l'historique des transactions
      */
     #[OA\Get(
-        path: "/api/v1/wallet",
-        summary: "Récupère le solde et les transactions du portefeuille",
-        tags: ["Portefeuille"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/wallet',
+        summary: 'Récupère le solde et les transactions du portefeuille',
+        tags: ['Portefeuille'],
+        security: [['bearerAuth' => []]],
         responses: [
-            new OA\Response(response: 200, description: "Détails du portefeuille")
+            new OA\Response(response: 200, description: 'Détails du portefeuille'),
         ]
     )]
     public function index(Request $request): JsonResponse
@@ -55,12 +52,12 @@ class WalletController extends Controller
      * Liste les packs de crédits disponibles
      */
     #[OA\Get(
-        path: "/api/v1/wallet/packs",
-        summary: "Liste les packs de crédits disponibles",
-        tags: ["Portefeuille"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/wallet/packs',
+        summary: 'Liste les packs de crédits disponibles',
+        tags: ['Portefeuille'],
+        security: [['bearerAuth' => []]],
         responses: [
-            new OA\Response(response: 200, description: "Liste des packs")
+            new OA\Response(response: 200, description: 'Liste des packs'),
         ]
     )]
     public function packs(Request $request): JsonResponse
@@ -86,23 +83,23 @@ class WalletController extends Controller
      * Utiliser un coupon
      */
     #[OA\Post(
-        path: "/api/v1/wallet/redeem-coupon",
-        summary: "Utiliser un coupon pour obtenir des crédits",
-        tags: ["Portefeuille"],
-        security: [["bearerAuth" => []]],
+        path: '/api/v1/wallet/redeem-coupon',
+        summary: 'Utiliser un coupon pour obtenir des crédits',
+        tags: ['Portefeuille'],
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["code"],
+                required: ['code'],
                 properties: [
-                    new OA\Property(property: "code", type: "string", example: "MONCOUPON")
+                    new OA\Property(property: 'code', type: 'string', example: 'MONCOUPON'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Coupon validé avec succès"),
-            new OA\Response(response: 400, description: "Coupon invalide ou déjà utilisé"),
-            new OA\Response(response: 500, description: "Erreur serveur")
+            new OA\Response(response: 200, description: 'Coupon validé avec succès'),
+            new OA\Response(response: 400, description: 'Coupon invalide ou déjà utilisé'),
+            new OA\Response(response: 500, description: 'Erreur serveur'),
         ]
     )]
     public function redeemCoupon(Request $request): JsonResponse
@@ -115,10 +112,11 @@ class WalletController extends Controller
         $coupon = Coupon::where('code', $code)->first();
         $user = $request->user();
 
-        if (!$coupon || !$coupon->isValid($user)) {
+        if (! $coupon || ! $coupon->isValid($user)) {
             if ($coupon && $coupon->hasBeenUsedBy($user)) {
                 return $this->error('Vous avez déjà utilisé ce coupon.', 400);
             }
+
             return $this->error('Ce coupon est invalide ou expiré.', 400);
         }
 
@@ -130,8 +128,7 @@ class WalletController extends Controller
                 'credits_received' => $coupon->credits_amount,
                 'new_balance' => $user->credits_balance,
             ], "Coupon validé ! +{$coupon->credits_amount} crédits.");
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
         }
     }
