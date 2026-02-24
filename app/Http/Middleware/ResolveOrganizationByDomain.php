@@ -21,7 +21,7 @@ class ResolveOrganizationByDomain
 
         // Configured base domain (fallback to brillio.africa)
         $baseDomain = config('app.url') ? parse_url(config('app.url'), PHP_URL_HOST) : 'brillio.africa';
-        if (! $baseDomain) {
+        if (!$baseDomain) {
             $baseDomain = 'brillio.africa';
         }
 
@@ -31,8 +31,8 @@ class ResolveOrganizationByDomain
         $organization = null;
 
         // 1. Is it a subdomain? (e.g., orgname.brillio.africa)
-        if ($host !== $baseDomain && str_ends_with($host, '.'.$baseDomain)) {
-            $subdomain = str_replace('.'.$baseDomain, '', $host);
+        if ($host !== $baseDomain && str_ends_with($host, '.' . $baseDomain)) {
+            $subdomain = str_replace('.' . $baseDomain, '', $host);
             $organization = Organization::active()
                 ->where('slug', $subdomain)
                 ->orWhere('custom_domain', $host)

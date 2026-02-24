@@ -170,14 +170,14 @@ class MentorDashboardController extends Controller
                 if ($profile->getOriginal('specialization_id')) {
                     \App\Models\Specialization::find($profile->getOriginal('specialization_id'))?->updateMentorCount();
                 }
-                $profile->specialization?->updateMentorCount();
+                $profile->specializationModel?->updateMentorCount();
             }
         } else {
             $profile = MentorProfile::create([
                 'user_id' => $user->id,
                 ...$validated,
             ]);
-            $profile->specialization?->updateMentorCount();
+            $profile->specializationModel?->updateMentorCount();
         }
 
         // 📸 LOG DE SÉCURITÉ : On trace l'état des photos après la mise à jour

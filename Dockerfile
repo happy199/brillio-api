@@ -4,7 +4,7 @@ FROM php:8.4-fpm-alpine AS builder
 # Install extensions using the official installer script
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions pdo pdo_mysql zip gd pcntl
+    install-php-extensions pdo pdo_mysql zip gd pcntl excimer
 
 # Install runtime dependencies
 RUN apk add --no-cache \
@@ -56,7 +56,7 @@ FROM php:8.4-fpm-alpine
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions pdo pdo_mysql zip gd pcntl @composer
+    install-php-extensions pdo pdo_mysql zip gd pcntl excimer @composer
 
 # Install system dependencies required for build
 RUN apk add --no-cache \
