@@ -19,9 +19,9 @@ class SupabaseAuthService
 
     public function __construct()
     {
-        $this->supabaseUrl = config('services.supabase.url');
-        $this->anonKey = config('services.supabase.anon_key');
-        $this->serviceRoleKey = config('services.supabase.service_role_key');
+        $this->supabaseUrl = (string) config('services.supabase.url');
+        $this->anonKey = (string) config('services.supabase.anon_key');
+        $this->serviceRoleKey = (string) config('services.supabase.service_role_key');
     }
 
     /**
@@ -315,7 +315,7 @@ class SupabaseAuthService
             'email' => $userData['email'] ?? null,
             'avatar_url' => $metadata['avatar_url'] ?? $metadata['picture'] ?? null,
             'email_verified' => ($userData['email_confirmed_at'] ?? $userData['confirmed_at'] ?? null) !== null
-                              || ($metadata['email_verified'] ?? false),
+            || ($metadata['email_verified'] ?? false),
         ];
     }
 }

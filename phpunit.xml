@@ -29,5 +29,8 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="SUPABASE_URL" value="https://dummy.supabase.co"/>
+        <env name="SUPABASE_ANON_KEY" value="dummy-key"/>
+        <env name="SUPABASE_SERVICE_ROLE_KEY" value="dummy-service-key"/>
     </php>
 </phpunit>
