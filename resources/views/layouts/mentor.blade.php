@@ -216,7 +216,7 @@
         </div>
 
         <!-- Mobile Navigation -->
-        <div class="md:hidden border-t border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto">
+        <div class="md:hidden border-t border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar">
             <a href="{{ route('mentor.dashboard') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.dashboard') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Dashboard
@@ -237,6 +237,14 @@
             <a href="{{ route('mentor.resources.index') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.resources.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Ressources
+            </a>
+            <a href="{{ route('mentor.mentorship.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.mentorship.index') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Mes Mentés
+            </a>
+            <a href="{{ route('mentor.mentorship.calendar') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.mentorship.calendar') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Calendrier
             </a>
             <a href="{{ route('mentor.stats') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.stats') ? 'active' : 'text-gray-600 bg-gray-100' }}">
