@@ -42,7 +42,7 @@ class MentorshipNotificationService
         $mentor = $mentorship->mentor;
         $mentee = $mentorship->mentee;
 
-        $requestsUrl = route('mentor.mentorship.requests');
+        $requestsUrl = route('mentor.mentorship.index');
 
         Mail::to($mentor->email)->send(new MentorshipRequested($mentorship, $mentor, $mentee, $requestsUrl, $requestsUrl));
     }
@@ -69,7 +69,7 @@ class MentorshipNotificationService
         // Pour une proposition, on assume un seul jeune (V1) ou on envoie à tous les participants
         foreach ($session->mentees as $mentee) {
             $creditPrice = SystemSetting::getValue('credit_price_jeune', 50);
-            $menteeCredits = (int) floor($session->price / $creditPrice);
+            $menteeCredits = (int)floor($session->price / $creditPrice);
 
             // Pour une séance proposée, on redirige vers le détail de la séance dans l'espace jeune
             $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
@@ -81,7 +81,7 @@ class MentorshipNotificationService
                 $menteeCredits,
                 $sessionUrl, // acceptUrl (le jeune pourra agir sur la page)
                 $sessionUrl // refuseUrl
-            ));
+                ));
         }
     }
 
@@ -121,7 +121,7 @@ class MentorshipNotificationService
             $mentees,
             route('mentor.mentorship.sessions.show', ['session' => $session->id]),
             ''
-        ));
+            ));
 
         // Envoyer à chaque jeune
         foreach ($mentees as $mentee) {
@@ -131,7 +131,7 @@ class MentorshipNotificationService
                 $mentees,
                 $sessionUrl,
                 $bookingUrl
-            ));
+                ));
         }
     }
 
@@ -233,7 +233,8 @@ class MentorshipNotificationService
     {
         if ($user->isMentor()) {
             Mail::to($user->email)->send(new WelcomeMentor($user));
-        } else {
+        }
+        else {
             Mail::to($user->email)->send(new WelcomeJeune($user));
         }
     }

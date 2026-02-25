@@ -410,8 +410,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
         // Gestion des utilisateurs (Actions admin uniquement)
         Route::get('users', [UserController::class, 'index'])->name('users.index');
-        Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::resource('users', UserController::class)->only(['create', 'store', 'destroy']);
+        Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::post('users/{user}/link-organization', [UserController::class, 'linkOrganization'])->name('users.link-organization');
         Route::delete('users/{user}/unlink-organization/{organization}', [UserController::class, 'unlinkOrganization'])->name('users.unlink-organization');
         Route::put('users/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('users.toggle-admin');

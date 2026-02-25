@@ -285,8 +285,9 @@
 
 <body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden" x-data="{ mobileMenu: false }">
     <!-- Header / Navigation -->
-    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" x-data="{ scrolled: false }"
-        x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 50 })"
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        x-data="{ scrolled: {{ isset($forceScrolled) && $forceScrolled ? 'true' : 'false' }} }"
+        x-init="window.addEventListener('scroll', () => { scrolled = {{ isset($forceScrolled) && $forceScrolled ? 'true' : 'window.scrollY > 50' }} })"
         :class="scrolled ? 'bg-white shadow-lg' : 'bg-transparent'">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">

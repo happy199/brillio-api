@@ -26,7 +26,7 @@
         <div class="flex items-center space-x-4">
             <form action="{{ route('admin.coaches.index') }}" method="GET" class="flex">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher un coach..."
-                    class="rounded-l-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border">
+                    class="rounded-l-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border px-4 py-2">
                 <button type="submit"
                     class="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">
                     <i class="fas fa-search"></i>
