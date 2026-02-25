@@ -11,7 +11,8 @@
             <p class="text-gray-600">Gérez les profils des mentors</p>
         </div>
         <div class="flex gap-3">
-            <select id="filter-status" class="rounded-lg border-gray-300 text-sm">
+            <select id="filter-status"
+                class="rounded-lg border-gray-300 text-sm {{ auth()->user()->isCoach() ? 'hidden' : '' }}">
                 <option value="">Tous les statuts</option>
                 <option value="published">Publiés</option>
                 <option value="draft">Brouillons</option>
@@ -27,18 +28,22 @@
 
     <!-- Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        @if(!auth()->user()->isCoach())
         <div class="bg-white rounded-xl p-4 shadow-sm">
             <div class="text-sm text-gray-500">Total mentors</div>
             <div class="text-2xl font-bold text-gray-900">{{ $stats['total'] }}</div>
         </div>
+        @endif
         <div class="bg-white rounded-xl p-4 shadow-sm">
             <div class="text-sm text-gray-500">Profils publiés</div>
             <div class="text-2xl font-bold text-green-600">{{ $stats['published'] }}</div>
         </div>
+        @if(!auth()->user()->isCoach())
         <div class="bg-white rounded-xl p-4 shadow-sm">
             <div class="text-sm text-gray-500">Brouillons</div>
             <div class="text-2xl font-bold text-yellow-600">{{ $stats['draft'] }}</div>
         </div>
+        @endif
         <div class="bg-white rounded-xl p-4 shadow-sm">
             <div class="text-sm text-gray-500">Étapes parcours</div>
             <div class="text-2xl font-bold text-blue-600">{{ $stats['total_steps'] }}</div>
@@ -132,6 +137,7 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
+                            @if(!auth()->user()->isCoach())
                             <a href="{{ route('admin.mentors.edit', $mentor) }}"
                                 class="text-indigo-600 hover:text-indigo-800" title="Modifier">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,6 +145,7 @@
                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                             </a>
+                            @endif
                             <a href="{{ route('admin.mentors.show', $mentor) }}"
                                 class="text-blue-600 hover:text-blue-800" title="Voir le profil complet">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,6 +153,7 @@
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </a>
+                            @if(!auth()->user()->isCoach())
                             <form action="{{ route('admin.mentors.toggle-publish', $mentor) }}" method="POST"
                                 class="inline">
                                 @csrf
@@ -179,6 +187,7 @@
                                     </svg>
                                 </button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

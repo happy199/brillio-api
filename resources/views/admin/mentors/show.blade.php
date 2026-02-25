@@ -17,6 +17,7 @@
                 <p class="text-gray-600">Profil mentor</p>
             </div>
         </div>
+        @if(!auth()->user()->isCoach())
         <div class="flex gap-2" x-data="{}">
             <button @click="$dispatch('open-linkedin-reload')" type="button"
                 class="px-4 py-2 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 flex items-center gap-2">
@@ -45,6 +46,7 @@
                 </button>
             </form>
         </div>
+        @endif
     </div>
 </div>
 
@@ -146,8 +148,8 @@
         </div>
         @endif
 
-        <!-- Fichier Profil Importé -->
-        @if($mentor->linkedin_pdf_path)
+        <!-- Fichier Profil Importé (Admin Only) -->
+        @if(!auth()->user()->isCoach() && $mentor->linkedin_pdf_path)
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h3 class="font-semibold text-gray-900 mb-3">Fichier Profil Importé</h3>
 

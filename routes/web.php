@@ -346,6 +346,28 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
 
 /*
 |--------------------------------------------------------------------------
+| Espace Coach (Login dédié)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('brilliosecretcoachspace')->name('coach.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Coach\CoachAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/', [\App\Http\Controllers\Coach\CoachAuthController::class, 'login'])->name('login.post');
+    Route::post('/logout', [\App\Http\Controllers\Coach\CoachAuthController::class, 'logout'])->name('logout');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Espace Coach (protégé)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('espace-coach')->name('coach.')->middleware(['auth', 'verified', 'is_coach'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Coach\CoachDashboardController::class, 'index'])->name('dashboard');
+});
+
+/*
+|--------------------------------------------------------------------------
 | Routes Admin (protégées - URL secrète)
 |--------------------------------------------------------------------------
 |
@@ -362,14 +384,34 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('/', [AuthController::class, 'login'])->name('login.post');
     });
 
-    Route::middleware(['auth', 'is_admin'])->group(function () {
+    // === Routes Partagées (Admin & Coach) ===
+    Route::middleware(['auth', \App\Http\Middleware\EnsureAdminOrCoach::class])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
+        // Chat conversations
+        Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
+        Route::get('chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
+        Route::post('chat/{conversation}/take-over', [ChatController::class, 'takeOver'])->name('chat.take-over');
+        Route::post('chat/{conversation}/send-message', [ChatController::class, 'sendMessage'])->name('chat.send-message');
+        Route::post('chat/{conversation}/end-support', [ChatController::class, 'endSupport'])->name('chat.end-support');
+        Route::get('chat/{conversation}/export-pdf', [ChatController::class, 'exportPdf'])->name('chat.export-pdf');
+
+        // Consultation Mentors & Ressources
+        Route::get('mentors', [MentorController::class, 'index'])->name('mentors.index');
+        Route::get('mentors/{mentor}', [MentorController::class, 'show'])->name('mentors.show');
+        Route::get('resources', [\App\Http\Controllers\Admin\ResourceController::class, 'index'])->name('resources.index');
+        Route::get('resources/{resource}', [\App\Http\Controllers\Admin\ResourceController::class, 'show'])->name('resources.show');
+    });
+
+    // === Routes Réservées aux Administrateurs ===
+    Route::middleware(['auth', 'is_admin'])->group(function () {
         // Dashboard principal
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Gestion des utilisateurs
-        Route::resource('users', UserController::class)->only(['index', 'show', 'create', 'store', 'destroy']);
+        // Gestion des utilisateurs (Actions admin uniquement)
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::resource('users', UserController::class)->only(['create', 'store', 'destroy']);
         Route::post('users/{user}/link-organization', [UserController::class, 'linkOrganization'])->name('users.link-organization');
         Route::delete('users/{user}/unlink-organization/{organization}', [UserController::class, 'unlinkOrganization'])->name('users.unlink-organization');
         Route::put('users/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('users.toggle-admin');
@@ -378,9 +420,11 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('users/{user}/block', [UserController::class, 'block'])->name('users.block');
         Route::post('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
 
-        // Gestion des mentors
-        Route::get('mentors', [MentorController::class, 'index'])->name('mentors.index');
-        Route::get('mentors/{mentor}', [MentorController::class, 'show'])->name('mentors.show');
+        // Gestion des coachs
+        Route::resource('coaches', \App\Http\Controllers\Admin\CoachController::class)->only(['index', 'store', 'destroy']);
+        Route::post('coaches/{coach}/reset-password', [\App\Http\Controllers\Admin\CoachController::class, 'resetPassword'])->name('coaches.reset-password');
+
+        // Gestion des mentors (Actions admin uniquement)
         Route::get('mentors/{mentor}/edit', [MentorController::class, 'edit'])->name('mentors.edit');
         Route::put('mentors/{mentor}', [MentorController::class, 'update'])->name('mentors.update');
         Route::post('mentors/{mentor}/photo', [MentorController::class, 'updateProfilePhoto'])->name('mentors.update-photo');
@@ -397,8 +441,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('mentors/{mentor}/linkedin-reload', [MentorController::class, 'reloadLinkedInProfile'])->name('mentors.linkedin-reload');
         Route::post('mentors/{mentor}/linkedin-upload', [MentorController::class, 'uploadLinkedInProfile'])->name('mentors.linkedin-upload');
 
-        // Gestion des ressources
-        Route::resource('resources', \App\Http\Controllers\Admin\ResourceController::class);
+        // Gestion des ressources (Actions admin uniquement)
+        Route::resource('resources', \App\Http\Controllers\Admin\ResourceController::class)->except(['index', 'show']);
         Route::post('resources/approve-all', [\App\Http\Controllers\Admin\ResourceController::class, 'approveAll'])->name('resources.approve_all');
         Route::put('resources/{resource}/approve', [\App\Http\Controllers\Admin\ResourceController::class, 'approve'])->name('resources.approve');
         Route::put('resources/{resource}/reject', [\App\Http\Controllers\Admin\ResourceController::class, 'reject'])->name('resources.reject');
@@ -429,46 +473,29 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
             Route::get('export-pdf', [AnalyticsController::class, 'exportPdf'])->name('export-pdf');
         });
 
-        // Chat conversations
-        Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
-        Route::get('chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
-        Route::post('chat/{conversation}/take-over', [ChatController::class, 'takeOver'])->name('chat.take-over');
-        Route::post('chat/{conversation}/send-message', [ChatController::class, 'sendMessage'])->name('chat.send-message');
-        Route::post('chat/{conversation}/end-support', [ChatController::class, 'endSupport'])->name('chat.end-support');
-        Route::get('chat/{conversation}/export-pdf', [ChatController::class, 'exportPdf'])->name('chat.export-pdf');
-
         // Gestion des spécialisations
         Route::resource('specializations', \App\Http\Controllers\Admin\SpecializationController::class);
         Route::get('specializations-moderate', [\App\Http\Controllers\Admin\SpecializationController::class, 'moderate'])->name('specializations.moderate');
-        Route::post('specializations/{specialization}/approve', [\App\Http\Controllers\Admin\SpecializationController::class, 'approve'])->name('specializations.approve');
-        Route::post('specializations/{specialization}/reject', [\App\Http\Controllers\Admin\SpecializationController::class, 'reject'])->name('specializations.reject');
 
-        // Newsletter
-        Route::get('newsletter', [NewsletterController::class, 'index'])->name('newsletter.index');
-        Route::get('newsletter/export-csv', [NewsletterController::class, 'exportCsv'])->name('newsletter.export-csv');
-        Route::get('newsletter/export-pdf', [NewsletterController::class, 'exportPdf'])->name('newsletter.export-pdf');
-        Route::post('newsletter/send-email', [NewsletterController::class, 'sendEmail'])->name('newsletter.send-email');
-        Route::get('newsletter/campaigns', [NewsletterController::class, 'campaigns'])->name('newsletter.campaigns');
-        Route::put('newsletter/{subscriber}', [NewsletterController::class, 'update'])->name('newsletter.update');
-        Route::delete('newsletter/{subscriber}', [NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+        // Gestion de la Newsletter
+        Route::prefix('newsletter')->name('newsletter.')->group(function () {
+            Route::get('/', [NewsletterController::class, 'index'])->name('index');
+            Route::get('/subscribers', [NewsletterController::class, 'subscribers'])->name('subscribers');
+            Route::get('/campaigns/create', [NewsletterController::class, 'createCampaign'])->name('campaigns.create');
+            Route::post('/campaigns', [NewsletterController::class, 'storeCampaign'])->name('campaigns.store');
+            Route::post('/test-email', [NewsletterController::class, 'sendTestEmail'])->name('test-email');
+        });
 
-        // Messages de contact
-        Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
-        Route::get('contact-messages/{message}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
-        Route::post('contact-messages/{message}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
-        Route::delete('contact-messages/{message}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
-        Route::get('contact-messages-export-pdf', [ContactMessageController::class, 'exportPdf'])->name('contact-messages.export-pdf');
+        // Gestion des messages de contact
+        Route::resource('contact-messages', ContactMessageController::class)->only(['index', 'show', 'destroy']);
+        Route::post('contact-messages/{contact_message}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
 
-        // Documents
-        Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
-        Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
-        Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+        // Gestion des documents
+        Route::resource('documents', DocumentController::class);
 
-        // Mentorat (Nouveau Groupe)
-        Route::get('/mentorship/requests', [App\Http\Controllers\Admin\MentorshipController::class, 'requests'])->name('mentorship.requests');
-        Route::get('/mentorship/requests/{mentorship}', [App\Http\Controllers\Admin\MentorshipController::class, 'showRequest'])->name('mentorship.requests.show');
-        Route::get('/mentorship/sessions', [App\Http\Controllers\Admin\MentorshipController::class, 'sessions'])->name('mentorship.sessions');
-        Route::get('/mentorship/sessions/{session}', [App\Http\Controllers\Admin\MentorshipController::class, 'showSession'])->name('mentorship.sessions.show');
+        // Gestion du mentorat
+        Route::get('mentorship/requests', [App\Http\Controllers\Admin\MentorshipController::class, 'requests'])->name('mentorship.requests');
+        Route::get('mentorship/sessions', [App\Http\Controllers\Admin\MentorshipController::class, 'sessions'])->name('mentorship.sessions');
 
         // Gestion des organisations
         Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);

@@ -63,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_photo_url',
         'linkedin_url',
         'is_admin',
+        'is_coach',
         'auth_provider',
         'provider_id',
         'onboarding_completed',
@@ -103,6 +104,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'date_of_birth' => 'date',
             'is_admin' => 'boolean',
+            'is_coach' => 'boolean',
             'onboarding_completed' => 'boolean',
             'onboarding_data' => 'array',
             'last_login_at' => 'datetime',
@@ -139,6 +141,14 @@ class User extends Authenticatable implements MustVerifyEmail
         } else {
             $this->notify(new \App\Notifications\VerifyEmail);
         }
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un coach
+     */
+    public function isCoach(): bool
+    {
+        return (bool) $this->is_coach;
     }
 
     /**
