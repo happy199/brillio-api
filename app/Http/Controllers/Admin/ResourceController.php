@@ -161,6 +161,10 @@ class ResourceController extends Controller
      */
     public function show(Resource $resource)
     {
+        if (auth()->user()->isCoach() && (!$resource->is_validated || !$resource->is_published)) {
+            abort(403, 'Cette ressource n\'est pas accessible.');
+        }
+
         return view('admin.resources.show', compact('resource'));
     }
 

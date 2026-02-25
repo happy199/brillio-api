@@ -55,7 +55,8 @@ class CoachController extends Controller
                 $tempPassword = Str::random(12);
                 $user->update([
                     'is_coach' => true,
-                    'password' => Hash::make($tempPassword)
+                    'password' => Hash::make($tempPassword),
+                    'email_verified_at' => $user->email_verified_at ?? now(),
                 ]);
 
                 // Envoyer l'email avec les accès
@@ -78,7 +79,8 @@ class CoachController extends Controller
             $tempPassword = Str::random(12);
             $user->update([
                 'is_coach' => true,
-                'password' => Hash::make($tempPassword)
+                'password' => Hash::make($tempPassword),
+                'email_verified_at' => $user->email_verified_at ?? now(),
             ]);
 
             \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\CoachCredentialsMail($user, $tempPassword));

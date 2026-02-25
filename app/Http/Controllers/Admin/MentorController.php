@@ -97,6 +97,10 @@ class MentorController extends Controller
      */
     public function show(MentorProfile $mentor)
     {
+        if (auth()->user()->isCoach() && !$mentor->is_published) {
+            abort(403, 'Ce profil mentor n\'est pas encore publié.');
+        }
+
         $mentor->load(['user', 'roadmapSteps', 'specializationModel']);
 
         return view('admin.mentors.show', [
