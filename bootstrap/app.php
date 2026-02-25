@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'organization_subscription' => \App\Http\Middleware\CheckOrganizationSubscription::class,
             'organization_role' => \App\Http\Middleware\EnsureOrganizationRole::class,
             'jeune_published' => \App\Http\Middleware\EnsureJeuneProfilePublished::class,
+            'is_coach' => \App\Http\Middleware\IsCoach::class,
         ]);
 
         // Redirection pour les non-authentifiés

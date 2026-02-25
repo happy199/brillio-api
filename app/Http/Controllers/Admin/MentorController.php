@@ -35,11 +35,19 @@ class MentorController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $isCoach = $user->isCoach();
         $query = MentorProfile::with(['user', 'roadmapSteps', 'specializationModel']);
 
-        // Filtre par statut de publication
-        if ($request->filled('status')) {
-            $query->where('is_published', $request->status === 'published');
+        // Si c'est un coach, on ne montre que les profils publiés
+        if ($isCoach) {
+            $query->where('is_published', true);
+        }
+        else {
+            // Filtre par statut de publication (Admin uniquement)
+            if ($request->filled('status')) {
+                $query->where('is_published', $request->status === 'published');
+            }
         }
 
         // Filtre par spécialisation
@@ -58,12 +66,24 @@ class MentorController extends Controller
         $mentors = $query->orderBy('created_at', 'desc')->paginate(15);
 
         // Statistiques
-        $stats = [
-            'total' => MentorProfile::count(),
-            'published' => MentorProfile::where('is_published', true)->count(),
-            'draft' => MentorProfile::where('is_published', false)->count(),
-            'total_steps' => RoadmapStep::count(),
-        ];
+        if ($isCoach) {
+            $stats = [
+                'total' => MentorProfile::where('is_published', true)->count(),
+                'published' => MentorProfile::where('is_published', true)->count(),
+                'draft' => 0,
+                'total_steps' => RoadmapStep::whereHas('mentorProfile', function ($q) {
+                $q->where('is_published', true);
+            })->count(),
+            ];
+        }
+        else {
+            $stats = [
+                'total' => MentorProfile::count(),
+                'published' => MentorProfile::where('is_published', true)->count(),
+                'draft' => MentorProfile::where('is_published', false)->count(),
+                'total_steps' => RoadmapStep::count(),
+            ];
+        }
 
         return view('admin.mentors.index', [
             'mentors' => $mentors,
@@ -77,6 +97,10 @@ class MentorController extends Controller
      */
     public function show(MentorProfile $mentor)
     {
+        if (auth()->user()->isCoach() && !$mentor->is_published) {
+            abort(403, 'Ce profil mentor n\'est pas encore publié.');
+        }
+
         $mentor->load(['user', 'roadmapSteps', 'specializationModel']);
 
         return view('admin.mentors.show', [
@@ -91,7 +115,7 @@ class MentorController extends Controller
     public function togglePublish(MentorProfile $mentor)
     {
         $mentor->update([
-            'is_published' => ! $mentor->is_published,
+            'is_published' => !$mentor->is_published,
         ]);
 
         return back()->with(
@@ -115,8 +139,9 @@ class MentorController extends Controller
         // Notifier le mentor
         try {
             \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
-        } catch (\Exception $e) {
-            \Log::error('Erreur envoi email validation mentor (approve): '.$e->getMessage());
+        }
+        catch (\Exception $e) {
+            \Log::error('Erreur envoi email validation mentor (approve): ' . $e->getMessage());
         }
 
         return back()->with('success', "Le profil de {$mentor->user->name} a été validé et publié");
@@ -128,7 +153,7 @@ class MentorController extends Controller
     public function toggleValidation(MentorProfile $mentor)
     {
         $oldValue = $mentor->is_validated;
-        $mentor->is_validated = ! $mentor->is_validated;
+        $mentor->is_validated = !$mentor->is_validated;
 
         if ($mentor->is_validated) {
             $mentor->validated_at = now();
@@ -137,11 +162,12 @@ class MentorController extends Controller
         $mentor->save();
 
         // Si on passe de non-validé à validé, on envoie l'email
-        if (! $oldValue && $mentor->is_validated) {
+        if (!$oldValue && $mentor->is_validated) {
             try {
                 \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
-            } catch (\Exception $e) {
-                \Log::error('Erreur envoi email validation mentor (toggle): '.$e->getMessage());
+            }
+            catch (\Exception $e) {
+                \Log::error('Erreur envoi email validation mentor (toggle): ' . $e->getMessage());
             }
         }
 
@@ -169,12 +195,12 @@ class MentorController extends Controller
      */
     public function downloadLinkeInProfile(MentorProfile $mentor)
     {
-        if (! $mentor->linkedin_pdf_path) {
+        if (!$mentor->linkedin_pdf_path) {
             return back()->with('error', 'Aucun fichier profil associé.');
         }
 
         // Le fichier est stocké sur le disque 'local' (storage/app/linkedin-pdfs)
-        if (! Storage::disk('local')->exists($mentor->linkedin_pdf_path)) {
+        if (!Storage::disk('local')->exists($mentor->linkedin_pdf_path)) {
             \Log::warning('Missing LinkedIn PDF file requested for download', [
                 'mentor_id' => $mentor->id,
                 'mentor_name' => $mentor->user->name,
@@ -213,7 +239,9 @@ class MentorController extends Controller
     public function __construct(
         private \App\Services\UserAvatarService $avatarService,
         private \App\Services\LinkedInPdfParserService $parserService
-    ) {}
+        )
+    {
+    }
 
     /**
      * Recharge les données LinkedIn à partir du PDF existant
@@ -221,7 +249,7 @@ class MentorController extends Controller
     public function reloadLinkedInProfile(MentorProfile $mentor)
     {
         // 1. Vérification de l'existence du chemin en base
-        if (! $mentor->linkedin_pdf_path) {
+        if (!$mentor->linkedin_pdf_path) {
             return response()->json([
                 'success' => false,
                 'needs_upload' => true,
@@ -230,7 +258,7 @@ class MentorController extends Controller
         }
 
         // 2. Vérification physique du fichier sur le disque
-        if (! Storage::disk('local')->exists($mentor->linkedin_pdf_path)) {
+        if (!Storage::disk('local')->exists($mentor->linkedin_pdf_path)) {
             Log::warning('LinkedIn PDF missing during admin reload', [
                 'mentor_id' => $mentor->id,
                 'path' => $mentor->linkedin_pdf_path,
@@ -244,7 +272,7 @@ class MentorController extends Controller
         }
 
         try {
-            $fullPath = storage_path('app/'.$mentor->linkedin_pdf_path);
+            $fullPath = storage_path('app/' . $mentor->linkedin_pdf_path);
             $profileData = $this->parserService->parsePdf($fullPath);
 
             $this->processLinkedInImport($mentor, $profileData);
@@ -253,7 +281,8 @@ class MentorController extends Controller
                 'success' => true,
                 'message' => 'Profil rechargé avec succès depuis le PDF existant.',
             ]);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error('Admin LinkedIn reload error', [
                 'mentor_id' => $mentor->id,
                 'error' => $e->getMessage(),
@@ -261,7 +290,7 @@ class MentorController extends Controller
 
             return response()->json([
                 'success' => false,
-                'error' => 'Erreur lors de l’analyse du PDF : '.$e->getMessage(),
+                'error' => 'Erreur lors de l’analyse du PDF : ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -281,7 +310,7 @@ class MentorController extends Controller
             $originalName = $request->file('pdf')->getClientOriginalName();
 
             // Parser le PDF
-            $fullPath = storage_path('app/'.$finalPdfPath);
+            $fullPath = storage_path('app/' . $finalPdfPath);
             $profileData = $this->parserService->parsePdf($fullPath);
 
             // Mettre à jour les métadonnées de fichier
@@ -296,7 +325,8 @@ class MentorController extends Controller
                 'success' => true,
                 'message' => 'Nouveau PDF uploadé et profil mis à jour avec succès.',
             ]);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error('Admin LinkedIn upload error', [
                 'mentor_id' => $mentor->id,
                 'error' => $e->getMessage(),
@@ -304,7 +334,7 @@ class MentorController extends Controller
 
             return response()->json([
                 'success' => false,
-                'error' => 'Erreur lors de l\'upload ou de l\'analyse : '.$e->getMessage(),
+                'error' => 'Erreur lors de l\'upload ou de l\'analyse : ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -319,7 +349,7 @@ class MentorController extends Controller
 
         // Calculer l'expérience
         $totalMonths = 0;
-        if (! empty($profileData['experience'])) {
+        if (!empty($profileData['experience'])) {
             foreach ($profileData['experience'] as $exp) {
                 if (isset($exp['duration_years'])) {
                     $totalMonths += ($exp['duration_years'] * 12);
@@ -332,7 +362,7 @@ class MentorController extends Controller
         $yearsOfExperience = round($totalMonths / 12);
 
         // Récupérer la dernière expérience
-        $latestExperience = ! empty($profileData['experience']) ? $profileData['experience'][0] : null;
+        $latestExperience = !empty($profileData['experience']) ? $profileData['experience'][0] : null;
 
         // Mise à jour du profil (on préserve bio/advice si déjà remplis)
         $mentor->update([
@@ -342,7 +372,7 @@ class MentorController extends Controller
             'current_position' => $mentor->current_position ?: ($latestExperience['title'] ?? null),
             'current_company' => $mentor->current_company ?: ($latestExperience['company'] ?? null),
             'bio' => $mentor->bio ?: ($profileData['headline'] ?? null),
-            'skills' => ! empty($profileData['skills']) ? $profileData['skills'] : $mentor->skills,
+            'skills' => !empty($profileData['skills']) ? $profileData['skills'] : $mentor->skills,
             'years_of_experience' => $yearsOfExperience > 0 ? $yearsOfExperience : $mentor->years_of_experience,
             // On ne touche pas aux URLs de contact ici pour éviter d'écraser des modifs manuelles de l'admin
             // sauf si elles étaient vides
@@ -352,16 +382,16 @@ class MentorController extends Controller
 
         // Importer les expériences
         $stepPosition = 0;
-        if (! empty($profileData['experience'])) {
+        if (!empty($profileData['experience'])) {
             foreach ($profileData['experience'] as $exp) {
-                $startDate = ! empty($exp['start_date'])
-                    ? (strlen($exp['start_date']) === 4 ? $exp['start_date'].'-01-01' : $exp['start_date'])
+                $startDate = !empty($exp['start_date'])
+                    ? (strlen($exp['start_date']) === 4 ? $exp['start_date'] . '-01-01' : $exp['start_date'])
                     : null;
 
                 $endDate = null;
                 if (array_key_exists('end_date', $exp)) {
-                    $endDate = ! empty($exp['end_date'])
-                        ? (strlen($exp['end_date']) === 4 ? $exp['end_date'].'-12-31' : $exp['end_date'])
+                    $endDate = !empty($exp['end_date'])
+                        ? (strlen($exp['end_date']) === 4 ? $exp['end_date'] . '-12-31' : $exp['end_date'])
                         : null;
                 }
 
@@ -378,15 +408,15 @@ class MentorController extends Controller
         }
 
         // Importer les formations
-        if (! empty($profileData['education'])) {
+        if (!empty($profileData['education'])) {
             foreach ($profileData['education'] as $edu) {
                 $mentor->roadmapSteps()->create([
                     'step_type' => 'education',
                     'title' => $edu['degree'] ?? 'Formation',
                     'institution_company' => $edu['school'] ?? null,
                     'description' => 'Formation académique',
-                    'start_date' => ! empty($edu['year_start']) ? $edu['year_start'].'-01-01' : null,
-                    'end_date' => ! empty($edu['year_end']) ? $edu['year_end'].'-12-31' : null,
+                    'start_date' => !empty($edu['year_start']) ? $edu['year_start'] . '-01-01' : null,
+                    'end_date' => !empty($edu['year_end']) ? $edu['year_end'] . '-12-31' : null,
                     'position' => $stepPosition++,
                 ]);
             }
@@ -402,8 +432,8 @@ class MentorController extends Controller
             return $url;
         }
         $url = trim($url);
-        if (! preg_match('/^https?:\/\//i', $url)) {
-            return 'https://'.ltrim($url, '/');
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            return 'https://' . ltrim($url, '/');
         }
 
         return $url;
@@ -419,7 +449,7 @@ class MentorController extends Controller
         $validated = $request->validate([
             // Informations utilisateur
             'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:users,email,'.$mentor->user_id,
+            'email' => 'nullable|email|unique:users,email,' . $mentor->user_id,
             'phone' => 'nullable|string|max:20',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
@@ -446,10 +476,10 @@ class MentorController extends Controller
 
         // Mise à jour des informations utilisateur UNIQUEMENT si fournies
         $userUpdateData = [];
-        if (! empty($validated['name'])) {
+        if (!empty($validated['name'])) {
             $userUpdateData['name'] = $validated['name'];
         }
-        if (! empty($validated['email'])) {
+        if (!empty($validated['email'])) {
             $userUpdateData['email'] = $validated['email'];
         }
         if (array_key_exists('phone', $validated)) {
@@ -462,18 +492,18 @@ class MentorController extends Controller
             $userUpdateData['country'] = $validated['country'];
         }
 
-        if (! empty($userUpdateData)) {
+        if (!empty($userUpdateData)) {
             $mentor->user->update($userUpdateData);
         }
 
         // Si une URL de photo est fournie, on essaie de la télécharger
         // On retire la vérification !== pour permettre de forcer le re-téléchargement si nécessaire
-        if (! empty($validated['profile_photo_url'])) {
+        if (!empty($validated['profile_photo_url'])) {
             // Si l'URL est différente OU si on veut juste s'assurer qu'elle est bien là
-            if ($validated['profile_photo_url'] !== $mentor->user->profile_photo_url || ! $mentor->user->profile_photo_path) {
+            if ($validated['profile_photo_url'] !== $mentor->user->profile_photo_url || !$mentor->user->profile_photo_path) {
                 $path = $this->avatarService->downloadFromUrl($mentor->user, $validated['profile_photo_url']);
 
-                if (! $path) {
+                if (!$path) {
                     return back()->withInput()->with('error', "Impossible de télécharger l'image depuis l'URL LinkedIn fournie. L'URL est peut-être expirée ou inaccessible.");
                 }
             }
@@ -498,7 +528,7 @@ class MentorController extends Controller
         $previouslyValidated = $mentor->is_validated;
         $newValidated = $request->has('is_validated');
 
-        if ($newValidated && ! $previouslyValidated) {
+        if ($newValidated && !$previouslyValidated) {
             $profileData['validated_at'] = now();
 
             // On envoie l'email après l'update pour être sûr que tout est en base
@@ -506,10 +536,12 @@ class MentorController extends Controller
 
             try {
                 \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
-            } catch (\Exception $e) {
-                \Log::error('Erreur envoi email validation mentor (update): '.$e->getMessage());
             }
-        } else {
+            catch (\Exception $e) {
+                \Log::error('Erreur envoi email validation mentor (update): ' . $e->getMessage());
+            }
+        }
+        else {
             $mentor->update($profileData);
         }
 
@@ -552,7 +584,7 @@ class MentorController extends Controller
     public function storeRoadmapStep(Request $request, MentorProfile $mentor)
     {
         $validated = $request->validate([
-            'step_type' => 'required|in:'.implode(',', array_keys(\App\Models\RoadmapStep::STEP_TYPES)),
+            'step_type' => 'required|in:' . implode(',', array_keys(\App\Models\RoadmapStep::STEP_TYPES)),
             'title' => 'required|string|max:255',
             'institution_company' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
@@ -582,7 +614,7 @@ class MentorController extends Controller
         }
 
         $validated = $request->validate([
-            'step_type' => 'required|in:'.implode(',', array_keys(\App\Models\RoadmapStep::STEP_TYPES)),
+            'step_type' => 'required|in:' . implode(',', array_keys(\App\Models\RoadmapStep::STEP_TYPES)),
             'title' => 'required|string|max:255',
             'institution_company' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
@@ -629,8 +661,9 @@ class MentorController extends Controller
         // 2. Notifier l'utilisateur
         try {
             \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\DemotionNotificationMail($user));
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur envoi notification rétrogradation: '.$e->getMessage());
+        }
+        catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur envoi notification rétrogradation: ' . $e->getMessage());
         }
 
         return redirect()->route('admin.users.index')

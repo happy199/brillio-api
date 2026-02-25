@@ -57,8 +57,8 @@
             </div>
 
             <nav class="mt-4">
-                <a href="{{ route('admin.dashboard') }}"
-                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-800' : '' }}">
+                <a href="{{ auth()->user()->isCoach() ? route('coach.dashboard') : route('admin.dashboard') }}"
+                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.dashboard') || request()->routeIs('coach.dashboard') ? 'bg-indigo-800' : '' }}">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -69,6 +69,7 @@
                     </span>
                 </a>
 
+                @if(!auth()->user()->isCoach())
                 <a href="{{ route('admin.users.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.users.*') ? 'bg-indigo-800' : '' }}">
                     <span class="flex items-center">
@@ -78,6 +79,21 @@
                             </path>
                         </svg>
                         Utilisateurs
+                    </span>
+                </a>
+                @endif
+
+                @if(!auth()->user()->isCoach())
+
+                <a href="{{ route('admin.coaches.index') }}"
+                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.coaches.*') ? 'bg-indigo-800' : '' }}">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                            </path>
+                        </svg>
+                        Coachs
                     </span>
                 </a>
 
@@ -92,6 +108,7 @@
                         Organisations
                     </span>
                 </a>
+                @endif
 
                 <!-- Mentorat Dropdown -->
                 <div
@@ -115,8 +132,9 @@
                     <div x-show="open" x-cloak class="bg-indigo-900">
                         <a href="{{ route('admin.mentors.index') }}"
                             class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.mentors.*') ? 'text-white font-bold' : '' }}">
-                            Mentors
+                            Annuaire des Mentors
                         </a>
+                        @if(!auth()->user()->isCoach())
                         <a href="{{ route('admin.mentorship.requests') }}"
                             class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.mentorship.requests') ? 'text-white font-bold' : '' }}">
                             Activités de Mentorat
@@ -125,6 +143,7 @@
                             class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.mentorship.sessions') ? 'text-white font-bold' : '' }}">
                             Séances de Mentorat
                         </a>
+                        @endif
                     </div>
                 </div>
 
@@ -139,7 +158,7 @@
                     </span>
                 </a>
 
-                </a>
+                @if(!auth()->user()->isCoach())
 
                 <a href="{{ route('admin.accounting.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.accounting.*') ? 'bg-indigo-800' : '' }}">
@@ -207,8 +226,9 @@
                         @endif
                     </span>
                 </a>
-                <a href="{{ route('admin.analytics.index') }}" class="block px-4 py-3 hover:bg-indigo-600
-                {{ request()->routeIs('admin.analytics.*') ? 'bg-indigo-800' : '' }}">
+
+                <a href="{{ route('admin.analytics.index') }}"
+                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.analytics.*') ? 'bg-indigo-800' : '' }}">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -252,6 +272,7 @@
                         Newsletter
                     </span>
                 </a>
+                @endif
 
                 @php
                 $pendingSupportCount = \App\Models\ChatConversation::where('needs_human_support', true)
@@ -277,6 +298,8 @@
                     </span>
                 </a>
 
+                @if(!auth()->user()->isCoach())
+
                 <a href="{{ route('admin.documents.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.documents.*') ? 'bg-indigo-800' : '' }}">
                     <span class="flex items-center">
@@ -288,6 +311,7 @@
                         Documents
                     </span>
                 </a>
+                @endif
             </nav>
         </aside>
 

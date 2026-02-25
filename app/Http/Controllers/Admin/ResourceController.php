@@ -26,14 +26,22 @@ class ResourceController extends Controller
     {
         $query = Resource::with('user');
 
-        // Filtre par statut
-        if ($request->filled('status')) {
-            if ($request->status === 'pending') {
-                $query->where('is_validated', false);
-            } elseif ($request->status === 'published') {
-                $query->where('is_published', true)->where('is_validated', true);
-            } elseif ($request->status === 'draft') {
-                $query->where('is_published', false);
+        // Si c'est un coach, on ne montre que les ressources validées et publiées
+        if (auth()->user()->isCoach()) {
+            $query->where('is_validated', true)->where('is_published', true);
+        }
+        else {
+            // Filtre par statut (Admin uniquement)
+            if ($request->filled('status')) {
+                if ($request->status === 'pending') {
+                    $query->where('is_validated', false);
+                }
+                elseif ($request->status === 'published') {
+                    $query->where('is_published', true)->where('is_validated', true);
+                }
+                elseif ($request->status === 'draft') {
+                    $query->where('is_published', false);
+                }
             }
         }
 
@@ -123,12 +131,12 @@ class ResourceController extends Controller
         }
 
         // Traitement des tags (string vers array)
-        $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
+        $tags = !empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
         $resource = Resource::create([
             'user_id' => auth()->id(),
             'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']).'-'.uniqid(),
+            'slug' => Str::slug($validated['title']) . '-' . uniqid(),
             'description' => $validated['description'],
             'content' => $validated['content'],
             'type' => $validated['type'],
@@ -153,6 +161,10 @@ class ResourceController extends Controller
      */
     public function show(Resource $resource)
     {
+        if (auth()->user()->isCoach() && (!$resource->is_validated || !$resource->is_published)) {
+            abort(403, 'Cette ressource n\'est pas accessible.');
+        }
+
         return view('admin.resources.show', compact('resource'));
     }
 
@@ -226,7 +238,7 @@ class ResourceController extends Controller
             $resource->preview_image_path = $request->file('preview_image')->store('resources/previews', 'public');
         }
 
-        $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
+        $tags = !empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
         $resource->update([
             'title' => $validated['title'],
@@ -360,7 +372,8 @@ class ResourceController extends Controller
                 $level = $data['education_level'];
                 if (isset($educationLabels[$level])) {
                     $educationLevels[$level] = $educationLabels[$level];
-                } else {
+                }
+                else {
                     $educationLevels[$level] = ucfirst($level);
                 }
             }
@@ -370,7 +383,8 @@ class ResourceController extends Controller
                 $sit = $data['current_situation'];
                 if (isset($situationLabels[$sit])) {
                     $situations[$sit] = $situationLabels[$sit];
-                } else {
+                }
+                else {
                     $situations[$sit] = ucfirst($sit);
                 }
             }
@@ -393,7 +407,7 @@ class ResourceController extends Controller
             }
         }
         foreach ($educationLevels as $key => $label) {
-            if (! isset($orderedEducation[$key])) {
+            if (!isset($orderedEducation[$key])) {
                 $orderedEducation[$key] = $label;
             }
         }
