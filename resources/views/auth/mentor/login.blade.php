@@ -57,6 +57,15 @@
         Se connecter avec LinkedIn
     </a>
 
+    <div class="text-center">
+        <p class="text-sm text-gray-500">
+            Compte démo ou manuel ?
+            <a href="{{ route('auth.jeune.login') }}" class="text-primary-600 font-semibold hover:underline">
+                Connexion par email
+            </a>
+        </p>
+    </div>
+
     <!-- What you get -->
     <div class="pt-4 border-t border-gray-100">
         <h4 class="text-sm font-semibold text-gray-900 mb-3">En tant que mentor, vous pourrez :</h4>
