@@ -152,7 +152,12 @@
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ $resource->title }}</h1>
                     <div class="flex items-center gap-4 text-gray-500 text-sm">
                         <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
+                            @php
+                            $creatorProfileUrl = $resource->user->isMentor() && $resource->user->mentorProfile ?
+                            route('jeune.mentors.show', $resource->user->mentorProfile) : '#';
+                            @endphp
+                            <a href="{{ $creatorProfileUrl }}"
+                                class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden {{ $creatorProfileUrl !== '#' ? 'hover:scale-110 transition-transform' : 'cursor-default' }}">
                                 @if($resource->user->profile_photo_path)
                                 <img src="{{ Storage::url($resource->user->profile_photo_path) }}"
                                     class="w-full h-full object-cover">
@@ -162,8 +167,11 @@
                                     {{ substr($resource->user->name, 0, 1) }}
                                 </div>
                                 @endif
-                            </div>
-                            <span class="font-medium text-gray-900">{{ $resource->user->name }}</span>
+                            </a>
+                            <a href="{{ $creatorProfileUrl }}"
+                                class="font-medium text-gray-900 {{ $creatorProfileUrl !== '#' ? 'hover:text-indigo-600 transition-colors' : 'cursor-default' }}">
+                                {{ $resource->user->name }}
+                            </a>
                         </div>
                         <span>•</span>
                         <time datetime="{{ $resource->created_at->toIso8601String() }}">

@@ -84,10 +84,16 @@
                 <div
                     class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition h-full flex flex-col">
                     <div class="flex items-center gap-4 mb-6">
-                        <img src="{{ $mentorUser->avatar_url }}" alt="{{ $mentorUser->name }}"
-                            class="w-16 h-16 rounded-xl object-cover bg-gray-100 border-2 border-indigo-50">
+                        <a href="{{ route('jeune.mentors.show', $mentorProfile) }}"
+                            class="hover:opacity-80 transition-opacity">
+                            <img src="{{ $mentorUser->avatar_url }}" alt="{{ $mentorUser->name }}"
+                                class="w-16 h-16 rounded-xl object-cover bg-gray-100 border-2 border-indigo-50">
+                        </a>
                         <div>
-                            <h3 class="font-bold text-gray-900 text-lg">{{ $mentorUser->name }}</h3>
+                            <a href="{{ route('jeune.mentors.show', $mentorProfile) }}"
+                                class="hover:text-indigo-600 transition-colors">
+                                <h3 class="font-bold text-gray-900 text-lg">{{ $mentorUser->name }}</h3>
+                            </a>
                             <p class="text-gray-500 text-sm">{{ $mentorProfile->current_position ?? 'Mentor' }}</p>
                             <p class="text-xs text-green-600 font-medium mt-1 flex items-center gap-1">
                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -142,10 +148,16 @@
                 <div
                     class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition h-full flex flex-col">
                     <div class="flex items-center gap-4 mb-4">
-                        <img src="{{ $mentorUser->avatar_url }}" alt="{{ $mentorUser->name }}"
-                            class="w-14 h-14 rounded-xl object-cover bg-gray-100">
+                        <a href="{{ route('jeune.mentors.show', $mentorProfile) }}"
+                            class="hover:opacity-80 transition-opacity">
+                            <img src="{{ $mentorUser->avatar_url }}" alt="{{ $mentorUser->name }}"
+                                class="w-14 h-14 rounded-xl object-cover bg-gray-100">
+                        </a>
                         <div>
-                            <h3 class="font-bold text-gray-900">{{ $mentorUser->name }}</h3>
+                            <a href="{{ route('jeune.mentors.show', $mentorProfile) }}"
+                                class="hover:text-indigo-600 transition-colors">
+                                <h3 class="font-bold text-gray-900">{{ $mentorUser->name }}</h3>
+                            </a>
                             <p class="text-sm text-gray-500">{{ $mentorProfile->current_position ?? 'Mentor' }}</p>
                             <span
                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
@@ -215,7 +227,14 @@
                                             src="{{ $item->mentor->avatar_url }}" alt="">
                                     </div>
                                     <div class="ml-4">
+                                        @if($item->mentor->mentorProfile)
+                                        <a href="{{ route('jeune.mentors.show', $item->mentor->mentorProfile) }}"
+                                            class="text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors">
+                                            {{ $item->mentor->name }}
+                                        </a>
+                                        @else
                                         <div class="text-sm font-medium text-gray-900">{{ $item->mentor->name }}</div>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
