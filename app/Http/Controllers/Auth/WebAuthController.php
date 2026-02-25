@@ -389,14 +389,14 @@ class WebAuthController extends Controller
             'password.required' => 'Le mot de passe est obligatoire.',
         ]);
 
-        // Verifier que c'est un compte jeune
+        // Verifier que c'est un compte autorisé à se connecter par email
         $user = User::where('email', $credentials['email'])
-            ->where('user_type', 'jeune')
+            ->whereIn('user_type', ['jeune', 'mentor', 'organization'])
             ->first();
 
         if (! $user) {
             return back()->withErrors([
-                'email' => 'Aucun compte jeune trouve avec cette adresse email.',
+                'email' => 'Aucun compte trouvé avec cette adresse email.',
             ])->withInput();
         }
 
@@ -457,6 +457,10 @@ class WebAuthController extends Controller
 
             if ($user->user_type === 'organization') {
                 return redirect()->intended(route('organization.dashboard'));
+            }
+
+            if ($user->isMentor()) {
+                return redirect()->intended(route('mentor.dashboard'));
             }
 
             if (! $user->onboarding_completed) {
