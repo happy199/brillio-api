@@ -20,20 +20,20 @@ class ChatController extends Controller
             ->withCount('messages');
 
         // ==== LOGIQUE COACH SPECIFIQUE ====
-        if ($user->isCoach() && !$user->isAdmin()) {
+        if ($user->isCoach() && ! $user->isAdmin()) {
             $query->where(function ($q) use ($user) {
                 // 1. Demandes en attente (personne n'a encore pris)
                 $q->where(function ($sq) {
-                        $sq->where('needs_human_support', true)
-                            ->where('human_support_active', false);
-                    }
-                    )
-                        // 2. OU sessions DEJA prises par CE coach
-                        ->orWhere(function ($sq) use ($user) {
-                    $sq->where('human_support_active', true)
-                        ->where('human_support_admin_id', $user->id);
+                    $sq->where('needs_human_support', true)
+                        ->where('human_support_active', false);
                 }
-                );
+                )
+                        // 2. OU sessions DEJA prises par CE coach
+                    ->orWhere(function ($sq) use ($user) {
+                        $sq->where('human_support_active', true)
+                            ->where('human_support_admin_id', $user->id);
+                    }
+                    );
             });
         }
         // =================================
@@ -43,15 +43,15 @@ class ChatController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->whereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
-                    }
-                    )
-                        ->orWhere('title', 'like', "%{$search}%")
-                        ->orWhereHas('messages', function ($msgQuery) use ($search) {
-                    $msgQuery->where('content', 'like', "%{$search}%");
+                    $userQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
                 }
-                );
+                )
+                    ->orWhere('title', 'like', "%{$search}%")
+                    ->orWhereHas('messages', function ($msgQuery) use ($search) {
+                        $msgQuery->where('content', 'like', "%{$search}%");
+                    }
+                    );
             });
         }
 
@@ -60,16 +60,14 @@ class ChatController extends Controller
             if ($request->status === 'needs_support') {
                 $query->where('needs_human_support', true)
                     ->where('human_support_active', false);
-            }
-            elseif ($request->status === 'in_support') {
+            } elseif ($request->status === 'in_support') {
                 $query->where('human_support_active', true);
 
                 // Si c'est un coach, il ne voit que les siennes dans "in_support"
-                if ($user->isCoach() && !$user->isAdmin()) {
+                if ($user->isCoach() && ! $user->isAdmin()) {
                     $query->where('human_support_admin_id', $user->id);
                 }
-            }
-            elseif ($request->status === 'normal') {
+            } elseif ($request->status === 'normal') {
                 $query->where('needs_human_support', false)
                     ->where('human_support_active', false);
             }
@@ -83,15 +81,15 @@ class ChatController extends Controller
 
         // Statistiques (ajustées pour le coach)
         $stats = [
-            'total_conversations' => $user->isCoach() && !$user->isAdmin() ? $query->count() : ChatConversation::count(),
+            'total_conversations' => $user->isCoach() && ! $user->isAdmin() ? $query->count() : ChatConversation::count(),
             'total_messages' => ChatMessage::count(),
             'user_messages' => ChatMessage::where('role', 'user')->count(),
             'assistant_messages' => ChatMessage::where('role', 'assistant')->count(),
             'pending_support' => ChatConversation::where('needs_human_support', true)
-            ->where('human_support_active', false)
-            ->count(),
-            'active_support' => $user->isCoach() && !$user->isAdmin()
-            ?ChatConversation::where('human_support_active', true)->where('human_support_admin_id', $user->id)->count()
+                ->where('human_support_active', false)
+                ->count(),
+            'active_support' => $user->isCoach() && ! $user->isAdmin()
+            ? ChatConversation::where('human_support_active', true)->where('human_support_admin_id', $user->id)->count()
             : ChatConversation::where('human_support_active', true)->count(),
         ];
 
@@ -193,7 +191,7 @@ class ChatController extends Controller
             'generatedAt' => now(),
         ]);
 
-        $filename = 'conversation-' . $conversation->id . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'conversation-'.$conversation->id.'-'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }
