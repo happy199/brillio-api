@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\MentorProfile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -64,7 +64,7 @@ class CoachController extends Controller
             }
 
             $count = $users->count();
-            $message = $count > 1 ? "{$count} mentors ont été promus Coach et ont reçu leurs accès par email." : "Le mentor a été promu Coach et a reçu ses accès par email.";
+            $message = $count > 1 ? "{$count} mentors ont été promus Coach et ont reçu leurs accès par email." : 'Le mentor a été promu Coach et a reçu ses accès par email.';
 
             return back()->with('success', $message);
         }
@@ -126,7 +126,7 @@ class CoachController extends Controller
     {
         $password = Str::random(12);
         $coach->update([
-            'password' => Hash::make($password)
+            'password' => Hash::make($password),
         ]);
 
         \Illuminate\Support\Facades\Mail::to($coach->email)->send(new \App\Mail\Admin\CoachCredentialsMail($coach, $password));

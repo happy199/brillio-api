@@ -15,7 +15,7 @@ class CoachAuthController extends Controller
     {
         return view('admin.auth.login', [
             'title' => 'Espace Coach Brillio',
-            'loginRoute' => 'coach.login.post'
+            'loginRoute' => 'coach.login.post',
         ]);
     }
 
@@ -31,7 +31,7 @@ class CoachAuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             // Vérifier si l'utilisateur est un coach
-            if (!Auth::user()->isCoach()) {
+            if (! Auth::user()->isCoach()) {
                 Auth::logout();
 
                 return back()->withErrors([

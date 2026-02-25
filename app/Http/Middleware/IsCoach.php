@@ -15,7 +15,7 @@ class IsCoach
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->is_coach) {
+        if (! auth()->check() || ! auth()->user()->is_coach) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Accès réservé aux coachs.'], 403);
             }

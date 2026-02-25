@@ -13,7 +13,7 @@ class EnsureAdminOrCoach
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || (!$request->user()->isAdmin() && !$request->user()->isCoach())) {
+        if (! $request->user() || (! $request->user()->isAdmin() && ! $request->user()->isCoach())) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
