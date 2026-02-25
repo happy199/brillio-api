@@ -476,6 +476,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Gestion des spécialisations
         Route::resource('specializations', \App\Http\Controllers\Admin\SpecializationController::class);
         Route::get('specializations-moderate', [\App\Http\Controllers\Admin\SpecializationController::class, 'moderate'])->name('specializations.moderate');
+        Route::post('specializations/{specialization}/approve', [\App\Http\Controllers\Admin\SpecializationController::class, 'approve'])->name('specializations.approve');
+        Route::post('specializations/{specialization}/reject', [\App\Http\Controllers\Admin\SpecializationController::class, 'reject'])->name('specializations.reject');
 
         // Gestion de la Newsletter
         Route::prefix('newsletter')->name('newsletter.')->group(function () {
