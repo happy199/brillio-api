@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
+use App\Models\MentorProfile;
 use App\Models\Organization;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -67,13 +68,14 @@ class MentorsController extends Controller
     /**
      * Show mentor profile and sessions
      */
-    public function show(User $mentor)
+    public function show(MentorProfile $mentor)
     {
+        $mentorUser = $mentor->user;
         $organization = $this->getCurrentOrganization();
 
         // Check if mentor is linked to organization or has sessions with its youths
-        $isLinked = $organization->mentors()->where('users.id', $mentor->id)->exists();
-        $hasSessionsWithYouths = MentoringSession::where('mentor_id', $mentor->id)
+        $isLinked = $organization->mentors()->where('users.id', $mentorUser->id)->exists();
+        $hasSessionsWithYouths = MentoringSession::where('mentor_id', $mentorUser->id)
             ->whereHas('mentees', function ($q) use ($organization) {
                 $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
                     ->where('organization_user.organization_id', $organization->id);
@@ -86,18 +88,18 @@ class MentorsController extends Controller
         if (! $organization->isPro()) {
             return view('organization.mentors.show', [
                 'organization' => $organization,
-                'mentor' => $mentor,
+                'mentor' => $mentorUser,
                 'sessions' => collect(),
                 'youthsCount' => 0,
             ]);
         }
 
-        $mentor->load(['mentorProfile']);
+        $mentorUser->load(['mentorProfile']);
 
         $isInternal = $isLinked;
 
         // Only sessions with organization's youths
-        $sessions = MentoringSession::where('mentor_id', $mentor->id)
+        $sessions = MentoringSession::where('mentor_id', $mentorUser->id)
             ->whereHas('mentees', function ($q) use ($organization) {
                 $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
                     ->where('organization_user.organization_id', $organization->id);
@@ -111,43 +113,51 @@ class MentorsController extends Controller
 
         $youthsCount = $sessions->flatMap->mentees->pluck('id')->unique()->count();
 
-        return view('organization.mentors.show', compact('organization', 'mentor', 'sessions', 'youthsCount', 'isInternal'));
+        return view('organization.mentors.show', [
+            'organization' => $organization,
+            'mentor' => $mentorUser,
+            'sessions' => $sessions,
+            'youthsCount' => $youthsCount,
+            'isInternal' => $isInternal,
+        ]);
     }
 
     /**
      * Export mentor profile to PDF
      */
-    public function exportPdf(User $mentor)
+    public function exportPdf(MentorProfile $mentor)
     {
+        $mentorUser = $mentor->user;
         $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro()) {
             abort(403, 'Plan Pro requis pour l\'export');
         }
 
-        $mentor->load(['mentorProfile']);
+        $mentorUser->load(['mentorProfile']);
 
-        $pdf = Pdf::loadView('organization.mentors.export-pdf', compact('mentor', 'organization'));
+        $pdf = Pdf::loadView('organization.mentors.export-pdf', ['mentor' => $mentorUser, 'organization' => $organization]);
 
-        return $pdf->download("profil-mentor-{$mentor->id}.pdf");
+        return $pdf->download("profil-mentor-{$mentorUser->id}.pdf");
     }
 
     /**
      * Export mentor profile to CSV (General Info)
      */
-    public function exportCsv(User $mentor)
+    public function exportCsv(MentorProfile $mentor)
     {
+        $mentorUser = $mentor->user;
         $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro()) {
             abort(403, 'Plan Pro requis pour l\'export');
         }
 
-        $mentor->load(['mentorProfile']);
+        $mentorUser->load(['mentorProfile']);
 
         $headers = [
             'Content-type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=profil-mentor-{$mentor->id}.csv",
+            'Content-Disposition' => "attachment; filename=profil-mentor-{$mentorUser->id}.csv",
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',
@@ -155,21 +165,21 @@ class MentorsController extends Controller
 
         $columns = ['ID', 'Nom', 'Email', 'Position', 'Entreprise', 'Specialisation', 'Experience', 'Ville', 'Pays', 'LinkedIn'];
 
-        $callback = function () use ($mentor, $columns) {
+        $callback = function () use ($mentorUser, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
             fputcsv($file, [
-                $mentor->id,
-                $mentor->name,
-                $mentor->email,
-                $mentor->mentorProfile->current_position ?? '',
-                $mentor->mentorProfile->current_company ?? '',
-                $mentor->mentorProfile->specialization ?? '',
-                $mentor->mentorProfile->years_of_experience ?? '',
-                $mentor->city ?? '',
-                $mentor->country ?? '',
-                $mentor->mentorProfile->linkedin_url ?? '',
+                $mentorUser->id,
+                $mentorUser->name,
+                $mentorUser->email,
+                $mentorUser->mentorProfile->current_position ?? '',
+                $mentorUser->mentorProfile->current_company ?? '',
+                $mentorUser->mentorProfile->specialization ?? '',
+                $mentorUser->mentorProfile->years_of_experience ?? '',
+                $mentorUser->city ?? '',
+                $mentorUser->country ?? '',
+                $mentorUser->mentorProfile->linkedin_url ?? '',
             ]);
 
             fclose($file);

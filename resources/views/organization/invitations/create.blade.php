@@ -57,24 +57,25 @@
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
-            <!-- Role -->
-            <div>
-                <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
-                    Type d'invitation (Rôle)
-                </label>
-                <div class="mt-1">
-                    <select id="role" name="role"
-                        class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md px-4 py-3">
-                        <option value="jeune" selected>Jeune (Accès utilisateur)</option>
-                        <option value="mentor">Mentor (Accès mentor)</option>
-                    </select>
+            <!-- Role (Hidden - Mutualized) -->
+            <input type="hidden" name="role" value="standard">
+
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <strong>Note :</strong> Cette invitation est désormais <strong>mutualisée</strong>.
+                            Elle peut être utilisée indifféremment par des jeunes ou des mentors pour rejoindre votre
+                            organisation.
+                        </p>
+                    </div>
                 </div>
-                <p class="mt-2 text-sm text-gray-500">
-                    Détermine le niveau d'accès de la personne que vous invitez.
-                </p>
-                @error('role')
-                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                @enderror
             </div>
             <!-- Expiration -->
             <div>

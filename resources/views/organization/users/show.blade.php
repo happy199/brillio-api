@@ -447,7 +447,7 @@
                                         {{ substr($mentorship->mentor->name, 0, 1) }}
                                     </div>
                                     <div>
-                                        <a href="{{ route('organization.mentors.show', $mentorship->mentor) }}"
+                                        <a href="{{ route('organization.mentors.show', $mentorship->mentor->mentorProfile) }}"
                                             class="text-sm font-bold text-gray-900 hover:text-indigo-600 transition">
                                             {{ $mentorship->mentor->name }}
                                         </a>
@@ -553,7 +553,7 @@
                                 {{ substr($mentor->name, 0, 1) }}
                             </div>
                             <div class="min-w-0 flex-1">
-                                <a href="{{ route('organization.mentors.show', $mentor) }}"
+                                <a href="{{ route('organization.mentors.show', $mentor->mentorProfile) }}"
                                     class="text-sm font-medium text-gray-900 truncate hover:text-indigo-600 transition block">
                                     {{ $mentor->name }}
                                 </a>

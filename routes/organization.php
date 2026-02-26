@@ -83,9 +83,9 @@ Route::middleware('auth')->group(function () {
 
             // Mentors
             Route::get('/mentors', [\App\Http\Controllers\Organization\MentorsController::class, 'index'])->name('mentors.index');
-            Route::get('/mentors/{mentor}/export-pdf', [\App\Http\Controllers\Organization\MentorsController::class, 'exportPdf'])->name('mentors.export-pdf');
-            Route::get('/mentors/{mentor}/export-csv', [\App\Http\Controllers\Organization\MentorsController::class, 'exportCsv'])->name('mentors.export-csv');
-            Route::get('/mentors/{mentor}', [\App\Http\Controllers\Organization\MentorsController::class, 'show'])->name('mentors.show');
+            Route::get('/mentors/{mentor:public_slug}/export-pdf', [\App\Http\Controllers\Organization\MentorsController::class, 'exportPdf'])->name('mentors.export-pdf');
+            Route::get('/mentors/{mentor:public_slug}/export-csv', [\App\Http\Controllers\Organization\MentorsController::class, 'exportCsv'])->name('mentors.export-csv');
+            Route::get('/mentors/{mentor:public_slug}', [\App\Http\Controllers\Organization\MentorsController::class, 'show'])->name('mentors.show');
 
             // Mentorships
             Route::get('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'index'])->name('mentorships.index');

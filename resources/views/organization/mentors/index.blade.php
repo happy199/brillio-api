@@ -160,7 +160,7 @@
                     Offrir des crédits
                 </button>
                 @endif
-                <a href="{{ route('organization.mentors.show', $mentor) }}"
+                <a href="{{ route('organization.mentors.show', $mentor->mentorProfile) }}"
                     class="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center justify-center transition-colors">
                     Détails & Séances
                     <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
