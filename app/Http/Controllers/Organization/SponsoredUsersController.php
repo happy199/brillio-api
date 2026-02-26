@@ -111,8 +111,8 @@ class SponsoredUsersController extends Controller
         }
 
         // Ressources (Vues & Achetées)
-        $viewedResources = $user->resourceViews()->with('resource')->latest()->get()->pluck('resource')->unique();
-        $purchasedResources = $user->purchases()->where('item_type', \App\Models\Resource::class)->with('item')->latest()->get()->pluck('item');
+        $viewedResources = $user->resourceViews()->with('resource')->latest()->get()->unique('resource_id');
+        $purchasedResources = $user->purchases()->where('item_type', \App\Models\Resource::class)->with('item')->latest()->get();
 
         // Mentors consultés
         $consultedMentors = $user->mentorProfileViews()->with('mentor.mentorProfile')->latest()->get()->pluck('mentor')->unique();

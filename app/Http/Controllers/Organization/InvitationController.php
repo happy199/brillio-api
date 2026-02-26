@@ -50,7 +50,7 @@ class InvitationController extends Controller
         $validated = $request->validate([
             'invited_emails' => ['nullable', 'string'],
             'expires_days' => ['nullable', 'integer', 'min:1', 'max:365'],
-            'role' => ['nullable', 'string', 'in:jeune,mentor'],
+            'role' => ['nullable', 'string', 'in:jeune,mentor,standard'],
         ]);
 
         // Parse emails (one per line or comma-separated)
@@ -71,7 +71,7 @@ class InvitationController extends Controller
         }
 
         $expiresDays = (int) ($validated['expires_days'] ?? 30);
-        $role = $validated['role'] ?? 'jeune';
+        $role = $validated['role'] ?? 'standard';
 
         $createdInvitations = [];
 
