@@ -20,7 +20,7 @@
             @if($organization->isPro())
             <!-- Export Options -->
             <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm">
-                <a href="{{ route('organization.mentors.export-pdf', $mentor) }}"
+                <a href="{{ route('organization.mentors.export-pdf', $mentor->mentorProfile) }}"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-l-lg border-r border-gray-200"
                     title="Télécharger en PDF">
                     <svg class="mr-2 h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
@@ -28,7 +28,7 @@
                     </svg>
                     PDF
                 </a>
-                <a href="{{ route('organization.mentors.export-csv', $mentor) }}"
+                <a href="{{ route('organization.mentors.export-csv', $mentor->mentorProfile) }}"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-r-lg"
                     title="Télécharger en CSV">
                     <svg class="mr-2 h-4 w-4 text-organization-500" fill="currentColor" viewBox="0 0 20 20">
@@ -226,7 +226,7 @@
                                         <div>
                                             <span
                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $session->status_color }}">
-                                                {{ $session->credits_cost }} crédits
+                                                {{ $session->credit_cost }} crédits
                                             </span>
                                         </div>
                                     </div>
