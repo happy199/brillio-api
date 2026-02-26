@@ -447,7 +447,7 @@
                                         {{ substr($mentorship->mentor->name, 0, 1) }}
                                     </div>
                                     <div>
-                                        <a href="{{ route('organization.mentors.show', $mentorship->mentor->mentorProfile) }}"
+                                        <a href="{{ in_array($mentorship->status, ['active', 'accepted']) ? route('organization.mentors.show', $mentorship->mentor->mentorProfile) : route('public.mentor.profile', $mentorship->mentor->mentorProfile) }}"
                                             class="text-sm font-bold text-gray-900 hover:text-indigo-600 transition">
                                             {{ $mentorship->mentor->name }}
                                         </a>
@@ -500,13 +500,12 @@
                                 Ressources débloquées</h4>
                             @if($purchasedResources->count() > 0)
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                @foreach($purchasedResources as $resource)
+                                @foreach($purchasedResources as $purchase)
                                 <div class="bg-gray-50 border rounded-md p-3">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $resource->title }}</p>
+                                    <p class="text-sm font-medium text-gray-900">{{ $purchase->item?->title }}</p>
                                     <p class="text-xs text-organization-600 font-medium">Débloquée le {{
-                                        $resource->pivot?->purchased_at ?
-                                        \Carbon\Carbon::parse($resource->pivot->purchased_at)->format('d/m/Y') : '' }}
-                                    </p>
+                                        \Carbon\Carbon::parse($purchase->purchased_at ??
+                                        $purchase->created_at)->format('d/m/Y') }}</p>
                                 </div>
                                 @endforeach
                             </div>
@@ -522,11 +521,13 @@
                                 Ressources consultées</h4>
                             @if($viewedResources->count() > 0)
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                @foreach($viewedResources as $resource)
+                                @foreach($viewedResources as $resourceView)
                                 <div class="bg-gray-50 border rounded-md p-3">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $resource->title }}</p>
-                                    <p class="text-xs text-gray-500">Vue le {{ $resource->pivot?->viewed_at ?
-                                        \Carbon\Carbon::parse($resource->pivot->viewed_at)->format('d/m/Y') : '' }}</p>
+                                    <p class="text-sm font-medium text-gray-900">{{ $resourceView->resource?->title }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">Consultée le {{
+                                        \Carbon\Carbon::parse($resourceView->viewed_at ??
+                                        $resourceView->created_at)->format('d/m/Y') }}</p>
                                 </div>
                                 @endforeach
                             </div>
@@ -553,7 +554,7 @@
                                 {{ substr($mentor->name, 0, 1) }}
                             </div>
                             <div class="min-w-0 flex-1">
-                                <a href="{{ route('organization.mentors.show', $mentor->mentorProfile) }}"
+                                <a href="{{ route('public.mentor.profile', $mentor->mentorProfile) }}"
                                     class="text-sm font-medium text-gray-900 truncate hover:text-indigo-600 transition block">
                                     {{ $mentor->name }}
                                 </a>
