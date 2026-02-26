@@ -1260,23 +1260,26 @@
         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0">
 
-        <div @click.stop class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+        <div @click.stop
+            class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
             x-transition:enter="transition ease-out duration-300 transform"
             x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-200 transform"
             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
 
-            <!-- Close Button -->
-            <button @click="showAppModal = false"
-                class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-lg transition-all duration-200 hover:scale-110">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+
 
             <!-- Header with Gradient -->
             <div
-                class="relative bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 px-8 pt-12 pb-8 text-white overflow-hidden">
+                class="relative bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 px-8 pt-8 pb-8 text-white overflow-hidden flex-shrink-0">
+                <!-- Close Button (sticky in header) -->
+                <button @click="showAppModal = false"
+                    class="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center bg-white/20 hover:bg-white/40 rounded-full transition-all duration-200">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
                 <!-- Animated Background Circles -->
                 <div
                     class="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2 animate-pulse">
@@ -1303,7 +1306,7 @@
             </div>
 
             <!-- Content -->
-            <div class="p-8">
+            <div class="p-8 overflow-y-auto">
                 <!-- Progress Section -->
                 @php
                 $totalUsers = $jeunesCount + $mentorsCount;
