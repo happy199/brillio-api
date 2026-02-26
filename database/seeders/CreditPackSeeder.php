@@ -121,5 +121,63 @@ class CreditPackSeeder extends Seeder
             'is_popular' => false,
             'display_order' => 4,
         ]);
+
+        // --- ORGANIZATION ---
+
+        // Pack Initiation - 50 Crédits - 5000F
+        \App\Models\CreditPack::create([
+            'user_type' => 'organization',
+            'type' => 'credits',
+            'credits' => 50,
+            'price' => 5000,
+            'promo_percent' => 0,
+            'name' => 'Pack Initiation',
+            'description' => 'Pack de 50 crédits pour organisation.',
+            'is_active' => true,
+            'is_popular' => false,
+            'display_order' => 1,
+        ]);
+
+        // Pack Découverte - 100 Crédits - 9500F
+        \App\Models\CreditPack::create([
+            'user_type' => 'organization',
+            'type' => 'credits',
+            'credits' => 100,
+            'price' => 9500,
+            'promo_percent' => 5,
+            'name' => 'Pack Découverte',
+            'description' => 'Pack de 100 crédits pour organisation.',
+            'is_active' => true,
+            'is_popular' => true,
+            'display_order' => 2,
+        ]);
+
+        // Pack Croissance - 250 Crédits - 22500F
+        \App\Models\CreditPack::create([
+            'user_type' => 'organization',
+            'type' => 'credits',
+            'credits' => 250,
+            'price' => 22500,
+            'promo_percent' => 10,
+            'name' => 'Pack Croissance',
+            'description' => 'Pack de 250 crédits pour organisation.',
+            'is_active' => true,
+            'is_popular' => false,
+            'display_order' => 3,
+        ]);
+
+        // Pack Expansion - 500 Crédits - 42500F
+        \App\Models\CreditPack::create([
+            'user_type' => 'organization',
+            'type' => 'credits',
+            'credits' => 500,
+            'price' => 42500,
+            'promo_percent' => 15,
+            'name' => 'Pack Expansion',
+            'description' => 'Pack de 500 crédits pour organisation.',
+            'is_active' => true,
+            'is_popular' => false,
+            'display_order' => 4,
+        ]);
     }
 }
