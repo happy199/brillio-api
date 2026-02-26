@@ -224,23 +224,21 @@
                     </div>
                     @endif
                     @else
-                    <form action="{{ route('jeune.mentorship.request') }}" method="POST"
-                        x-data="{ showMessage: false }">
+                    <form action="{{ route('jeune.mentorship.request') }}" method="POST">
                         @csrf
                         <input type="hidden" name="mentor_id" value="{{ $mentor->user_id }}">
 
-                        <div x-show="showMessage" class="mb-3" x-transition>
-                            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message
-                                (optionnel)</label>
-                            <textarea name="message" id="message" rows="3"
+                        <div class="mb-3">
+                            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">
+                                Pourquoi souhaites-tu être mentoré ? <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="message" id="message" rows="4" required
                                 class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3"
-                                placeholder="Bonjour, j'aimerais être mentoré par vous car..."></textarea>
+                                placeholder="Bonjour, je souhaite être mentoré par vous car...">{{ old('message') }}</textarea>
+                            @error('message')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
-
-                        <button type="button" @click="showMessage = !showMessage" x-show="!showMessage"
-                            class="w-full mb-2 text-sm text-indigo-600 hover:text-indigo-800 underline text-center">
-                            Ajouter un message
-                        </button>
 
                         <button type="submit"
                             class="flex items-center justify-center gap-2 w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
