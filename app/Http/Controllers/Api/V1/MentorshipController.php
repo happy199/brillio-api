@@ -70,7 +70,7 @@ class MentorshipController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['mentor_id'],
+                required: ['mentor_id', 'message'],
                 properties: [
                     new OA\Property(property: 'mentor_id', type: 'integer', example: 1),
                     new OA\Property(property: 'message', type: 'string', example: "Bonjour, j'aimerais que vous soyez mon mentor."),
@@ -88,7 +88,7 @@ class MentorshipController extends Controller
 
         $request->validate([
             'mentor_id' => 'required|exists:mentor_profiles,id',
-            'message' => 'nullable|string|max:1000',
+            'message' => 'required|string|min:10|max:1000',
         ]);
 
         $mentorProfile = MentorProfile::find($request->mentor_id);
