@@ -28,6 +28,11 @@ class Mentorship extends Model
         return $this->belongsTo(User::class, 'mentee_id');
     }
 
+    public function messages()
+    {
+        return $this->hasMany(Message::class)->orderBy('created_at');
+    }
+
     public function getTranslatedStatusAttribute()
     {
         return match ($this->status) {
