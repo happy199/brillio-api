@@ -12,7 +12,7 @@ class ContactController extends Controller
     public function submit(Request $request)
     {
         // Rate limiting
-        $key = 'contact-submit:' . $request->ip();
+        $key = 'contact-submit:'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 3)) {
             return back()->with('error', 'Trop de messages envoyés. Réessaye dans 1 heure.');
