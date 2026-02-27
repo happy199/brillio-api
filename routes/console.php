@@ -2,11 +2,6 @@
 
 use Illuminate\Support\Facades\Schedule;
 
-// Rappel messages non lus : toutes les 4h
-Schedule::command('messages:send-unread-reminders')
-    ->everyFourHours()
-    ->timezone('Africa/Abidjan');
-
 // Session reminders: run every day at 8 AM to send 24h reminders
 Schedule::command('sessions:send-reminders')
     ->dailyAt('08:00')
