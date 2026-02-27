@@ -7,8 +7,8 @@ use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\MentorController;
-use App\Http\Controllers\Admin\MonetizationController;
 use App\Http\Controllers\Admin\MentorshipController;
+use App\Http\Controllers\Admin\MonetizationController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\WebAuthController;
@@ -47,13 +47,13 @@ Route::get('/', function () {
 })->name('home');
 
 // Pages informatives
-Route::get('/a-propos', [PageController::class , 'about'])->name('about');
-Route::get('/contact', [PageController::class , 'contact'])->name('contact');
-Route::post('/contact', [WebsiteContactController::class , 'submit'])->name('contact.submit');
+Route::get('/a-propos', [PageController::class, 'about'])->name('about');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::post('/contact', [WebsiteContactController::class, 'submit'])->name('contact.submit');
 
 // Newsletter
-Route::post('/newsletter/subscribe', [WebsiteNewsletterController::class , 'subscribe'])->name('newsletter.subscribe');
-Route::get('/newsletter/unsubscribe/{token}', [WebsiteNewsletterController::class , 'unsubscribe'])->name('newsletter.unsubscribe');
+Route::post('/newsletter/subscribe', [WebsiteNewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/newsletter/unsubscribe/{token}', [WebsiteNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 /*
  |--------------------------------------------------------------------------
@@ -62,24 +62,24 @@ Route::get('/newsletter/unsubscribe/{token}', [WebsiteNewsletterController::clas
  */
 
 // Payment callback (user returns from Moneroo checkout)
-Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class , 'handle'])
+Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'handle'])
     ->name('payments.callback');
 
 // Webhook (Moneroo sends payment notifications here - NO CSRF protection)
-Route::post('/webhooks/moneroo', [\App\Http\Controllers\MonerooWebhookController::class , 'handle'])
+Route::post('/webhooks/moneroo', [\App\Http\Controllers\MonerooWebhookController::class, 'handle'])
     ->name('webhooks.moneroo')
     ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 // Pages légales
-Route::get('/politique-de-confidentialite', [PageController::class , 'privacy'])->name('privacy');
+Route::get('/politique-de-confidentialite', [PageController::class, 'privacy'])->name('privacy');
 
 // SEO
-Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class , 'index'])->name('sitemap');
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
-Route::get('/conditions-utilisation', [PageController::class , 'terms'])->name('terms');
+Route::get('/conditions-utilisation', [PageController::class, 'terms'])->name('terms');
 
 // Profil public mentor (partageable)
-Route::get('/profil-mentor/{mentor}', [PageController::class , 'mentorProfile'])->name('public.mentor.profile');
+Route::get('/profil-mentor/{mentor}', [PageController::class, 'mentorProfile'])->name('public.mentor.profile');
 
 /*
  |--------------------------------------------------------------------------
@@ -88,77 +88,77 @@ Route::get('/profil-mentor/{mentor}', [PageController::class , 'mentorProfile'])
  */
 
 // Choix du type de compte (inscription)
-Route::get('/rejoindre', [WebAuthController::class , 'showChoice'])->name('auth.choice');
+Route::get('/rejoindre', [WebAuthController::class, 'showChoice'])->name('auth.choice');
 
 // Choix du type de compte (connexion)
-Route::get('/connexion', [WebAuthController::class , 'showLoginChoice'])->name('auth.login');
+Route::get('/connexion', [WebAuthController::class, 'showLoginChoice'])->name('auth.login');
 
 // Authentification Jeunes
 Route::prefix('jeune')->name('auth.jeune.')->group(function () {
     Route::middleware('guest')->group(function () {
-            Route::get('/inscription', [WebAuthController::class , 'showJeuneRegister'])->name('register');
-            Route::post('/inscription', [WebAuthController::class , 'jeuneRegister'])->name('register.submit');
-            Route::get('/connexion', [WebAuthController::class , 'showJeuneLogin'])->name('login');
-            Route::post('/connexion', [WebAuthController::class , 'jeuneLogin'])->name('login.submit');
+        Route::get('/inscription', [WebAuthController::class, 'showJeuneRegister'])->name('register');
+        Route::post('/inscription', [WebAuthController::class, 'jeuneRegister'])->name('register.submit');
+        Route::get('/connexion', [WebAuthController::class, 'showJeuneLogin'])->name('login');
+        Route::post('/connexion', [WebAuthController::class, 'jeuneLogin'])->name('login.submit');
 
-            // OAuth (Google, Facebook)
-            Route::get('/oauth/{provider}', [WebAuthController::class , 'jeuneOAuthRedirect'])->name('oauth');
-            Route::get('/oauth/{provider}/callback', [WebAuthController::class , 'jeuneOAuthCallback'])->name('oauth.callback');
+        // OAuth (Google, Facebook)
+        Route::get('/oauth/{provider}', [WebAuthController::class, 'jeuneOAuthRedirect'])->name('oauth');
+        Route::get('/oauth/{provider}/callback', [WebAuthController::class, 'jeuneOAuthCallback'])->name('oauth.callback');
 
-            // Password Reset
-            Route::get('/mot-de-passe-oublie', [WebAuthController::class , 'showForgotPasswordForm'])->name('password.request');
-            Route::post('/mot-de-passe-oublie', [WebAuthController::class , 'sendResetLink'])->name('password.email');
-            Route::get('/reinitialiser-mot-de-passe/{token}', [WebAuthController::class , 'showResetForm'])->name('password.reset');
-            Route::post('/reinitialiser-mot-de-passe', [WebAuthController::class , 'resetPassword'])->name('password.update');
-        }
-        );
+        // Password Reset
+        Route::get('/mot-de-passe-oublie', [WebAuthController::class, 'showForgotPasswordForm'])->name('password.request');
+        Route::post('/mot-de-passe-oublie', [WebAuthController::class, 'sendResetLink'])->name('password.email');
+        Route::get('/reinitialiser-mot-de-passe/{token}', [WebAuthController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/reinitialiser-mot-de-passe', [WebAuthController::class, 'resetPassword'])->name('password.update');
+    }
+    );
 
-        // Route process sans middleware guest (car appelée en AJAX après callback)
-        Route::post('/oauth/{provider}/process', [WebAuthController::class , 'jeuneOAuthProcess'])->name('oauth.process');
-    });
+    // Route process sans middleware guest (car appelée en AJAX après callback)
+    Route::post('/oauth/{provider}/process', [WebAuthController::class, 'jeuneOAuthProcess'])->name('oauth.process');
+});
 
 // Email Verification (Authenticated but not necessarily verified)
 Route::middleware('auth')->name('verification.')->group(function () {
-    Route::get('/verify-email', [\App\Http\Controllers\Auth\VerifyEmailController::class , 'notice'])
+    Route::get('/verify-email', [\App\Http\Controllers\Auth\VerifyEmailController::class, 'notice'])
         ->name('notice');
 
-    Route::get('/verify-email/{id}/{hash}', [\App\Http\Controllers\Auth\VerifyEmailController::class , 'verify'])
+    Route::get('/verify-email/{id}/{hash}', [\App\Http\Controllers\Auth\VerifyEmailController::class, 'verify'])
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verify');
 
-    Route::post('/email/verification-notification', [\App\Http\Controllers\Auth\VerifyEmailController::class , 'resend'])
+    Route::post('/email/verification-notification', [\App\Http\Controllers\Auth\VerifyEmailController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('resend');
 });
 
 // Routes de confirmation de changement de type (accessible sans authentification)
-Route::get('/auth/confirm-type-change', [WebAuthController::class , 'showConfirmTypeChange'])->name('auth.confirm-type-change');
-Route::post('/auth/confirm-type-change', [WebAuthController::class , 'confirmTypeChange'])->name('auth.confirm-type-change.post');
+Route::get('/auth/confirm-type-change', [WebAuthController::class, 'showConfirmTypeChange'])->name('auth.confirm-type-change');
+Route::post('/auth/confirm-type-change', [WebAuthController::class, 'confirmTypeChange'])->name('auth.confirm-type-change.post');
 
 // Route d'acceptation de promotion (automatique sur clic)
-Route::get('/auth/accept-promotion/{user}', [WebAuthController::class , 'acceptPromotion'])->name('auth.accept-promotion')->middleware('signed');
+Route::get('/auth/accept-promotion/{user}', [WebAuthController::class, 'acceptPromotion'])->name('auth.accept-promotion')->middleware('signed');
 
 // Authentification Mentors (LinkedIn uniquement)
 Route::prefix('mentor')->name('auth.mentor.')->group(function () {
     Route::middleware('guest')->group(function () {
-            Route::get('/connexion', [WebAuthController::class , 'showMentorLogin'])->name('login');
-            Route::get('/linkedin', [WebAuthController::class , 'mentorLinkedInRedirect'])->name('linkedin');
-            Route::get('/linkedin/callback', [WebAuthController::class , 'mentorLinkedInCallback'])->name('linkedin.callback');
-        }
-        );
+        Route::get('/connexion', [WebAuthController::class, 'showMentorLogin'])->name('login');
+        Route::get('/linkedin', [WebAuthController::class, 'mentorLinkedInRedirect'])->name('linkedin');
+        Route::get('/linkedin/callback', [WebAuthController::class, 'mentorLinkedInCallback'])->name('linkedin.callback');
+    }
+    );
 
-        // Route process sans middleware guest (car appelée en AJAX après callback)
-        Route::post('/linkedin/process', [WebAuthController::class , 'mentorLinkedInProcess'])->name('linkedin.process');
-    });
+    // Route process sans middleware guest (car appelée en AJAX après callback)
+    Route::post('/linkedin/process', [WebAuthController::class, 'mentorLinkedInProcess'])->name('linkedin.process');
+});
 
 // Alias pour la landing page
-Route::get('/devenir-mentor', [WebAuthController::class , 'showMentorLogin'])->name('mentor.login');
+Route::get('/devenir-mentor', [WebAuthController::class, 'showMentorLogin'])->name('mentor.login');
 
 // Deconnexion commune
-Route::post('/deconnexion', [WebAuthController::class , 'logout'])->name('logout')->middleware('auth');
+Route::post('/deconnexion', [WebAuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Profil public Jeune
-Route::get('/p/{slug}', [PageController::class , 'jeuneProfile'])->name('jeune.public.show');
+Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.public.show');
 
 /*
  |--------------------------------------------------------------------------
@@ -166,7 +166,7 @@ Route::get('/p/{slug}', [PageController::class , 'jeuneProfile'])->name('jeune.p
  |--------------------------------------------------------------------------
  */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/meeting/{meetingId}', [App\Http\Controllers\MeetingController::class , 'show'])->name('meeting.show');
+    Route::get('/meeting/{meetingId}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meeting.show');
 });
 
 /*
@@ -183,38 +183,38 @@ Route::middleware(['auth'])->group(function () {
 
 Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', 'user_type:jeune'])->group(function () {
     // Onboarding
-    Route::get('/bienvenue', [OnboardingController::class , 'index'])->name('onboarding');
-    Route::post('/bienvenue', [OnboardingController::class , 'complete'])->name('onboarding.complete');
+    Route::get('/bienvenue', [OnboardingController::class, 'index'])->name('onboarding');
+    Route::post('/bienvenue', [OnboardingController::class, 'complete'])->name('onboarding.complete');
 
     // Dashboard et fonctionnalites
-    Route::get('/', [JeuneDashboardController::class , 'index'])->name('dashboard');
-    Route::get('/test-personnalite', [JeuneDashboardController::class , 'personalityTest'])->name('personality');
-    Route::get('/test-personnalite/questions', [JeuneDashboardController::class , 'getPersonalityQuestions'])->name('personality.questions');
-    Route::post('/test-personnalite/submit', [JeuneDashboardController::class , 'submitPersonalityTest'])->name('personality.submit');
-    Route::get('/test-personnalite/history/{testId}', [JeuneDashboardController::class , 'getHistoryTestDetails'])->name('personality.history');
-    Route::get('/test-personnalite/export-pdf', [\App\Http\Controllers\Jeune\PersonalityPdfController::class , 'exportCurrent'])->name('personality.export-pdf');
-    Route::get('/test-personnalite/export-history-pdf', [\App\Http\Controllers\Jeune\PersonalityPdfController::class , 'exportHistory'])->name('personality.export-history-pdf');
-    Route::get('/chat', [JeuneDashboardController::class , 'chat'])->name('chat');
-    Route::post('/chat/send', [JeuneDashboardController::class , 'sendChatMessage'])->name('chat.send');
-    Route::get('/chat/{conversation}', [JeuneDashboardController::class , 'getConversation'])->name('chat.get');
-    Route::delete('/chat/{conversation}', [JeuneDashboardController::class , 'deleteConversation'])->name('chat.delete');
-    Route::post('/chat/{conversation}/request-human', [JeuneDashboardController::class , 'requestHumanSupport'])->name('chat.request-human');
-    Route::get('/documents', [JeuneDashboardController::class , 'documents'])->name('documents');
-    Route::post('/documents', [JeuneDashboardController::class , 'storeDocument'])->name('documents.store');
-    Route::get('/documents/{document}/download', [JeuneDashboardController::class , 'downloadDocument'])->name('documents.download');
-    Route::get('/documents/{document}/view', [JeuneDashboardController::class , 'viewDocument'])->name('documents.view');
-    Route::delete('/documents/{document}', [JeuneDashboardController::class , 'deleteDocument'])->name('documents.destroy');
-    Route::get('/mentors', [JeuneDashboardController::class , 'mentors'])->name('mentors');
-    Route::get('/mentors/{mentor}', [JeuneDashboardController::class , 'mentorShow'])->name('mentors.show');
-    Route::get('/profil', [App\Http\Controllers\Jeune\ProfileController::class , 'index'])->name('profile');
-    Route::post('/profil', [App\Http\Controllers\Jeune\ProfileController::class , 'update'])->name('profile.update');
-    Route::post('/profil/publier', [App\Http\Controllers\Jeune\ProfileController::class , 'publishProfile'])->name('profile.publish');
+    Route::get('/', [JeuneDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/test-personnalite', [JeuneDashboardController::class, 'personalityTest'])->name('personality');
+    Route::get('/test-personnalite/questions', [JeuneDashboardController::class, 'getPersonalityQuestions'])->name('personality.questions');
+    Route::post('/test-personnalite/submit', [JeuneDashboardController::class, 'submitPersonalityTest'])->name('personality.submit');
+    Route::get('/test-personnalite/history/{testId}', [JeuneDashboardController::class, 'getHistoryTestDetails'])->name('personality.history');
+    Route::get('/test-personnalite/export-pdf', [\App\Http\Controllers\Jeune\PersonalityPdfController::class, 'exportCurrent'])->name('personality.export-pdf');
+    Route::get('/test-personnalite/export-history-pdf', [\App\Http\Controllers\Jeune\PersonalityPdfController::class, 'exportHistory'])->name('personality.export-history-pdf');
+    Route::get('/chat', [JeuneDashboardController::class, 'chat'])->name('chat');
+    Route::post('/chat/send', [JeuneDashboardController::class, 'sendChatMessage'])->name('chat.send');
+    Route::get('/chat/{conversation}', [JeuneDashboardController::class, 'getConversation'])->name('chat.get');
+    Route::delete('/chat/{conversation}', [JeuneDashboardController::class, 'deleteConversation'])->name('chat.delete');
+    Route::post('/chat/{conversation}/request-human', [JeuneDashboardController::class, 'requestHumanSupport'])->name('chat.request-human');
+    Route::get('/documents', [JeuneDashboardController::class, 'documents'])->name('documents');
+    Route::post('/documents', [JeuneDashboardController::class, 'storeDocument'])->name('documents.store');
+    Route::get('/documents/{document}/download', [JeuneDashboardController::class, 'downloadDocument'])->name('documents.download');
+    Route::get('/documents/{document}/view', [JeuneDashboardController::class, 'viewDocument'])->name('documents.view');
+    Route::delete('/documents/{document}', [JeuneDashboardController::class, 'deleteDocument'])->name('documents.destroy');
+    Route::get('/mentors', [JeuneDashboardController::class, 'mentors'])->name('mentors');
+    Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
+    Route::get('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'index'])->name('profile');
+    Route::post('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profil/publier', [App\Http\Controllers\Jeune\ProfileController::class, 'publishProfile'])->name('profile.publish');
 
     // Account archiving
-    Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class , 'generateConfirmationCode'])->name('account.confirmation-code');
-    Route::post('/account/archive', [App\Http\Controllers\AccountController::class , 'archiveAccount'])->name('account.archive');
-    Route::get('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class , 'showChangePasswordForm'])->name('password.change');
-    Route::put('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class , 'updatePassword'])->name('password.update');
+    Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
+    Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');
+    Route::get('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::put('/changer-mot-de-passe', [\App\Http\Controllers\Jeune\PasswordController::class, 'updatePassword'])->name('password.update');
 
     // Ressources pédagogiques
     Route::resource('ressources', \App\Http\Controllers\Jeune\ResourceController::class)
@@ -222,33 +222,33 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
         ->names('resources')
         ->parameters(['ressources' => 'resource']);
 
-    Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class , 'unlock'])->name('resources.unlock');
-    Route::post('/mentorship/request', [\App\Http\Controllers\Jeune\MentorshipController::class , 'store'])->name('mentorship.request');
-    Route::post('/mentorship/{mentorship}/cancel', [\App\Http\Controllers\Jeune\MentorshipController::class , 'cancel'])->name('mentorship.cancel');
+    Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class, 'unlock'])->name('resources.unlock');
+    Route::post('/mentorship/request', [\App\Http\Controllers\Jeune\MentorshipController::class, 'store'])->name('mentorship.request');
+    Route::post('/mentorship/{mentorship}/cancel', [\App\Http\Controllers\Jeune\MentorshipController::class, 'cancel'])->name('mentorship.cancel');
 
     // Page de garde pour le mentorat
-    Route::get('/mentorat/verrouille', [\App\Http\Controllers\Jeune\MentorshipController::class , 'lockedIndex'])->name('mentorship.locked');
+    Route::get('/mentorat/verrouille', [\App\Http\Controllers\Jeune\MentorshipController::class, 'lockedIndex'])->name('mentorship.locked');
 
     // --- ROUTES MENTORAT (Nécessitent profil public) ---
     Route::middleware(['jeune_published'])->group(function () {
-            Route::get('/mentorat', [\App\Http\Controllers\Jeune\MentorshipController::class , 'index'])->name('mentorship.index');
+        Route::get('/mentorat', [\App\Http\Controllers\Jeune\MentorshipController::class, 'index'])->name('mentorship.index');
 
-            // Séances (Jeune)
-            Route::get('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class , 'index'])->name('sessions.index');
-            Route::get('/mentorat/calendrier', [\App\Http\Controllers\Jeune\SessionController::class , 'calendar'])->name('sessions.calendar');
-            Route::post('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class , 'store'])->name('sessions.store');
-            Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class , 'create'])->name('sessions.create');
-            Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class , 'show'])->name('sessions.show');
-            Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class , 'cancel'])->name('sessions.cancel');
-            Route::post('/mentorat/seances/{session}/pay-join', [\App\Http\Controllers\Jeune\SessionController::class , 'payAndJoin'])->name('sessions.pay-join');
-        }
-        );
+        // Séances (Jeune)
+        Route::get('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'index'])->name('sessions.index');
+        Route::get('/mentorat/calendrier', [\App\Http\Controllers\Jeune\SessionController::class, 'calendar'])->name('sessions.calendar');
+        Route::post('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'store'])->name('sessions.store');
+        Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class, 'create'])->name('sessions.create');
+        Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class, 'show'])->name('sessions.show');
+        Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class, 'cancel'])->name('sessions.cancel');
+        Route::post('/mentorat/seances/{session}/pay-join', [\App\Http\Controllers\Jeune\SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
+    }
+    );
 
-        // Portefeuille & Crédits
-        Route::get('/portefeuille', [\App\Http\Controllers\Jeune\WalletController::class , 'index'])->name('wallet.index');
-        Route::post('/portefeuille/achat', [\App\Http\Controllers\Jeune\WalletController::class , 'purchase'])->name('wallet.purchase');
-        Route::post('/portefeuille/coupon', [\App\Http\Controllers\Jeune\WalletController::class , 'redeemCoupon'])->name('wallet.redeem');
-    });
+    // Portefeuille & Crédits
+    Route::get('/portefeuille', [\App\Http\Controllers\Jeune\WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/portefeuille/achat', [\App\Http\Controllers\Jeune\WalletController::class, 'purchase'])->name('wallet.purchase');
+    Route::post('/portefeuille/coupon', [\App\Http\Controllers\Jeune\WalletController::class, 'redeemCoupon'])->name('wallet.redeem');
+});
 
 // Routes publiques
 Route::get('/politique-de-confidentialite', function () {
@@ -273,83 +273,83 @@ Route::post('/accept-cookies', function (Illuminate\Http\Request $request) {
  */
 
 Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:mentor'])->group(function () {
-    Route::get('/', [MentorDashboardController::class , 'index'])->name('dashboard');
-    Route::get('/profil', [MentorDashboardController::class , 'profile'])->name('profile');
-    Route::put('/profil', [MentorDashboardController::class , 'updateProfile'])->name('profile.update');
-    Route::post('/profil/publier', [MentorDashboardController::class , 'publishProfile'])->name('profile.publish');
-    Route::get('/parcours', [MentorDashboardController::class , 'roadmap'])->name('roadmap');
-    Route::get('/parcours/{step}', [MentorDashboardController::class , 'getStep'])->name('roadmap.show');
-    Route::post('/parcours', [MentorDashboardController::class , 'storeStep'])->name('roadmap.store');
-    Route::put('/parcours/{step}', [MentorDashboardController::class , 'updateStep'])->name('roadmap.update');
-    Route::delete('/parcours/{step}', [MentorDashboardController::class , 'deleteStep'])->name('roadmap.destroy');
-    Route::get('/statistiques', [MentorDashboardController::class , 'stats'])->name('stats');
-    Route::post('/profil/linkedin-import', [MentorDashboardController::class , 'importLinkedInData'])->name('profile.linkedin-import');
-    Route::get('/explorer', [App\Http\Controllers\Mentor\ExploreController::class , 'index'])->name('explore');
+    Route::get('/', [MentorDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profil', [MentorDashboardController::class, 'profile'])->name('profile');
+    Route::put('/profil', [MentorDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profil/publier', [MentorDashboardController::class, 'publishProfile'])->name('profile.publish');
+    Route::get('/parcours', [MentorDashboardController::class, 'roadmap'])->name('roadmap');
+    Route::get('/parcours/{step}', [MentorDashboardController::class, 'getStep'])->name('roadmap.show');
+    Route::post('/parcours', [MentorDashboardController::class, 'storeStep'])->name('roadmap.store');
+    Route::put('/parcours/{step}', [MentorDashboardController::class, 'updateStep'])->name('roadmap.update');
+    Route::delete('/parcours/{step}', [MentorDashboardController::class, 'deleteStep'])->name('roadmap.destroy');
+    Route::get('/statistiques', [MentorDashboardController::class, 'stats'])->name('stats');
+    Route::post('/profil/linkedin-import', [MentorDashboardController::class, 'importLinkedInData'])->name('profile.linkedin-import');
+    Route::get('/explorer', [App\Http\Controllers\Mentor\ExploreController::class, 'index'])->name('explore');
 
     // Portefeuille & Crédits
-    Route::get('/portefeuille', [WalletController::class , 'index'])->name('wallet.index');
-    Route::post('/portefeuille/achat', [WalletController::class , 'purchase'])->name('wallet.purchase');
-    Route::post('/portefeuille/coupon', [WalletController::class , 'redeemCoupon'])->name('wallet.redeem');
+    Route::get('/portefeuille', [WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/portefeuille/achat', [WalletController::class, 'purchase'])->name('wallet.purchase');
+    Route::post('/portefeuille/coupon', [WalletController::class, 'redeemCoupon'])->name('wallet.redeem');
 
     // Test Personnalité Mentor
-    Route::get('/test-personnalite', [App\Http\Controllers\Mentor\PersonalityController::class , 'index'])->name('personality');
-    Route::get('/test-personnalite/questions', [App\Http\Controllers\Mentor\PersonalityController::class , 'getQuestions'])->name('personality.questions');
-    Route::post('/test-personnalite/submit', [App\Http\Controllers\Mentor\PersonalityController::class , 'submit'])->name('personality.submit');
-    Route::get('/test-personnalite/export-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class , 'exportCurrent'])->name('personality.export-pdf');
-    Route::get('/test-personnalite/export-history-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class , 'exportHistory'])->name('personality.export-history-pdf');
-    Route::get('/test-personnalite/history/{testId}', [App\Http\Controllers\Mentor\PersonalityController::class , 'getHistoryTestDetails'])->name('personality.history');
+    Route::get('/test-personnalite', [App\Http\Controllers\Mentor\PersonalityController::class, 'index'])->name('personality');
+    Route::get('/test-personnalite/questions', [App\Http\Controllers\Mentor\PersonalityController::class, 'getQuestions'])->name('personality.questions');
+    Route::post('/test-personnalite/submit', [App\Http\Controllers\Mentor\PersonalityController::class, 'submit'])->name('personality.submit');
+    Route::get('/test-personnalite/export-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class, 'exportCurrent'])->name('personality.export-pdf');
+    Route::get('/test-personnalite/export-history-pdf', [App\Http\Controllers\Mentor\PersonalityPdfController::class, 'exportHistory'])->name('personality.export-history-pdf');
+    Route::get('/test-personnalite/history/{testId}', [App\Http\Controllers\Mentor\PersonalityController::class, 'getHistoryTestDetails'])->name('personality.history');
 
     // Account archiving
-    Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class , 'generateConfirmationCode'])->name('account.confirmation-code');
-    Route::post('/account/archive', [App\Http\Controllers\AccountController::class , 'archiveAccount'])->name('account.archive');
+    Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
+    Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');
 
     // --- ROUTES MENTORAT (Nécessitent profil publié) ---
     Route::middleware(['mentor_published'])->group(function () {
-            // Dashboard Mentorat (Roadmap)
-            Route::get('/mentorship/roadmap', [App\Http\Controllers\Mentor\MentorshipController::class , 'roadmap'])->name('mentor.roadmap');
+        // Dashboard Mentorat (Roadmap)
+        Route::get('/mentorship/roadmap', [App\Http\Controllers\Mentor\MentorshipController::class, 'roadmap'])->name('mentor.roadmap');
 
-            // Gestion des ressources mentor (URL: /ressources)
-            // Le prefixe 'mentor.' est déjà appliqué par le groupe parent, donc ->names('resources') donnera 'mentor.resources.*'
-            Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
+        // Gestion des ressources mentor (URL: /ressources)
+        // Le prefixe 'mentor.' est déjà appliqué par le groupe parent, donc ->names('resources') donnera 'mentor.resources.*'
+        Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
 
-            // Gestion des mentés
-            // Le prefixe 'mentor.' est déjà appliqué. On ajoute 'mentorship.' -> 'mentor.mentorship.*'
-            Route::name('mentorship.')->group(function () {
-                    // URL: /mentes
-                    Route::get('/mentes', [App\Http\Controllers\Mentor\MentorshipController::class , 'index'])->name('index'); // Liste mentés
-                    Route::get('/requests', [App\Http\Controllers\Mentor\MentorshipController::class , 'requests'])->name('requests'); // Demandes
-                    Route::post('/{mentorship}/accepter', [App\Http\Controllers\Mentor\MentorshipController::class , 'accept'])->name('accept');
-                    Route::post('/{mentorship}/refuser', [App\Http\Controllers\Mentor\MentorshipController::class , 'refuse'])->name('refuse');
-                    Route::post('/{mentorship}/deconnecter', [App\Http\Controllers\Mentor\MentorshipController::class , 'disconnect'])->name('disconnect');
+        // Gestion des mentés
+        // Le prefixe 'mentor.' est déjà appliqué. On ajoute 'mentorship.' -> 'mentor.mentorship.*'
+        Route::name('mentorship.')->group(function () {
+            // URL: /mentes
+            Route::get('/mentes', [App\Http\Controllers\Mentor\MentorshipController::class, 'index'])->name('index'); // Liste mentés
+            Route::get('/requests', [App\Http\Controllers\Mentor\MentorshipController::class, 'requests'])->name('requests'); // Demandes
+            Route::post('/{mentorship}/accepter', [App\Http\Controllers\Mentor\MentorshipController::class, 'accept'])->name('accept');
+            Route::post('/{mentorship}/refuser', [App\Http\Controllers\Mentor\MentorshipController::class, 'refuse'])->name('refuse');
+            Route::post('/{mentorship}/deconnecter', [App\Http\Controllers\Mentor\MentorshipController::class, 'disconnect'])->name('disconnect');
 
-                    // Calendrier & Dispos (URL: /calendrier)
-                    Route::get('/calendrier', [\App\Http\Controllers\Mentor\SessionController::class , 'index'])->name('calendar');
-                    Route::post('/availability', [\App\Http\Controllers\Mentor\SessionController::class , 'storeAvailability'])->name('availability.store');
+            // Calendrier & Dispos (URL: /calendrier)
+            Route::get('/calendrier', [\App\Http\Controllers\Mentor\SessionController::class, 'index'])->name('calendar');
+            Route::post('/availability', [\App\Http\Controllers\Mentor\SessionController::class, 'storeAvailability'])->name('availability.store');
 
-                    // Séances
-                    // URL: /sessions/... (On garde /sessions pour éviter les conflits d'URL racine trop génériques)
-                    Route::get('/sessions/create', [\App\Http\Controllers\Mentor\SessionController::class , 'create'])->name('sessions.create');
-                    Route::post('/sessions', [\App\Http\Controllers\Mentor\SessionController::class , 'store'])->name('sessions.store');
-                    // Edit & Update routes
-                    Route::get('/sessions/{session}/edit', [\App\Http\Controllers\Mentor\SessionController::class , 'edit'])->name('sessions.edit');
-                    Route::put('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class , 'update'])->name('sessions.update');
+            // Séances
+            // URL: /sessions/... (On garde /sessions pour éviter les conflits d'URL racine trop génériques)
+            Route::get('/sessions/create', [\App\Http\Controllers\Mentor\SessionController::class, 'create'])->name('sessions.create');
+            Route::post('/sessions', [\App\Http\Controllers\Mentor\SessionController::class, 'store'])->name('sessions.store');
+            // Edit & Update routes
+            Route::get('/sessions/{session}/edit', [\App\Http\Controllers\Mentor\SessionController::class, 'edit'])->name('sessions.edit');
+            Route::put('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'update'])->name('sessions.update');
 
-                    Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class , 'show'])->name('sessions.show');
-                    Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class , 'updateReport'])->name('sessions.report.update');
-                    Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class , 'accept'])->name('sessions.accept');
-                    Route::post('/sessions/{session}/refuse', [\App\Http\Controllers\Mentor\SessionController::class , 'refuse'])->name('sessions.refuse');
-                    Route::post('/sessions/{session}/cancel', [\App\Http\Controllers\Mentor\SessionController::class , 'cancel'])->name('sessions.cancel');
-                }
-                );
-            }
-            );
-
-            // Page de blocage (Accessible sans middleware mentor_published)
-            Route::get('/mentorship/locked', function () {
-            return view('mentor.mentorship.locked');
+            Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
+            Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
+            Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');
+            Route::post('/sessions/{session}/refuse', [\App\Http\Controllers\Mentor\SessionController::class, 'refuse'])->name('sessions.refuse');
+            Route::post('/sessions/{session}/cancel', [\App\Http\Controllers\Mentor\SessionController::class, 'cancel'])->name('sessions.cancel');
         }
-        )->name('mentorship.locked');
-    });
+        );
+    }
+    );
+
+    // Page de blocage (Accessible sans middleware mentor_published)
+    Route::get('/mentorship/locked', function () {
+        return view('mentor.mentorship.locked');
+    }
+    )->name('mentorship.locked');
+});
 
 /*
  |--------------------------------------------------------------------------
@@ -358,9 +358,9 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
  */
 
 Route::prefix('brilliosecretcoachspace')->name('coach.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Coach\CoachAuthController::class , 'showLoginForm'])->name('login');
-    Route::post('/', [\App\Http\Controllers\Coach\CoachAuthController::class , 'login'])->name('login.post');
-    Route::post('/logout', [\App\Http\Controllers\Coach\CoachAuthController::class , 'logout'])->name('logout');
+    Route::get('/', [\App\Http\Controllers\Coach\CoachAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/', [\App\Http\Controllers\Coach\CoachAuthController::class, 'login'])->name('login.post');
+    Route::post('/logout', [\App\Http\Controllers\Coach\CoachAuthController::class, 'logout'])->name('logout');
 });
 
 /*
@@ -370,7 +370,7 @@ Route::prefix('brilliosecretcoachspace')->name('coach.')->group(function () {
  */
 
 Route::prefix('espace-coach')->name('coach.')->middleware(['auth', 'verified', 'is_coach'])->group(function () {
-    Route::get('/', [\App\Http\Controllers\Coach\CoachDashboardController::class , 'index'])->name('dashboard');
+    Route::get('/', [\App\Http\Controllers\Coach\CoachDashboardController::class, 'index'])->name('dashboard');
 });
 
 /*
@@ -387,133 +387,133 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
     // === Authentification Admin ===
     Route::middleware('guest')->group(function () {
-            Route::get('/', [AuthController::class , 'showLoginForm'])->name('login');
-            Route::post('/', [AuthController::class , 'login'])->name('login.post');
+        Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/', [AuthController::class, 'login'])->name('login.post');
+    }
+    );
+
+    // === Routes Partagées (Admin & Coach) ===
+    Route::middleware(['auth', \App\Http\Middleware\EnsureAdminOrCoach::class])->group(function () {
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+        // Chat conversations
+        Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
+        Route::get('chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
+        Route::post('chat/{conversation}/take-over', [ChatController::class, 'takeOver'])->name('chat.take-over');
+        Route::post('chat/{conversation}/send-message', [ChatController::class, 'sendMessage'])->name('chat.send-message');
+        Route::post('chat/{conversation}/end-support', [ChatController::class, 'endSupport'])->name('chat.end-support');
+        Route::get('chat/{conversation}/export-pdf', [ChatController::class, 'exportPdf'])->name('chat.export-pdf');
+
+        // Consultation Mentors & Ressources
+        Route::get('mentors', [MentorController::class, 'index'])->name('mentors.index');
+        Route::get('mentors/{mentor}', [MentorController::class, 'show'])->name('mentors.show');
+        Route::get('resources', [\App\Http\Controllers\Admin\ResourceController::class, 'index'])->name('resources.index');
+        Route::get('resources/{resource}', [\App\Http\Controllers\Admin\ResourceController::class, 'show'])->name('resources.show');
+    }
+    );
+
+    // === Routes Réservées aux Administrateurs ===
+    Route::middleware(['auth', 'is_admin'])->group(function () {
+        // Dashboard principal
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Gestion des utilisateurs (Actions admin uniquement)
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::resource('users', UserController::class)->only(['create', 'store', 'destroy']);
+        Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::post('users/{user}/link-organization', [UserController::class, 'linkOrganization'])->name('users.link-organization');
+        Route::delete('users/{user}/unlink-organization/{organization}', [UserController::class, 'unlinkOrganization'])->name('users.unlink-organization');
+        Route::put('users/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('users.toggle-admin');
+        Route::put('users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
+        Route::post('users/{user}/propose-promotion', [UserController::class, 'proposePromotion'])->name('users.propose-promotion');
+        Route::post('users/{user}/block', [UserController::class, 'block'])->name('users.block');
+        Route::post('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
+
+        // Gestion des coachs
+        Route::resource('coaches', \App\Http\Controllers\Admin\CoachController::class)->only(['index', 'store', 'destroy']);
+        Route::post('coaches/{coach}/reset-password', [\App\Http\Controllers\Admin\CoachController::class, 'resetPassword'])->name('coaches.reset-password');
+
+        // Gestion des mentors (Actions admin uniquement)
+        Route::get('mentors/{mentor}/edit', [MentorController::class, 'edit'])->name('mentors.edit');
+        Route::put('mentors/{mentor}', [MentorController::class, 'update'])->name('mentors.update');
+        Route::post('mentors/{mentor}/photo', [MentorController::class, 'updateProfilePhoto'])->name('mentors.update-photo');
+        Route::delete('mentors/{mentor}/photo', [MentorController::class, 'deleteProfilePhoto'])->name('mentors.delete-photo');
+        Route::post('mentors/{mentor}/roadmap', [MentorController::class, 'storeRoadmapStep'])->name('mentors.roadmap.store');
+        Route::put('mentors/{mentor}/roadmap/{step}', [MentorController::class, 'updateRoadmapStep'])->name('mentors.roadmap.update');
+        Route::delete('mentors/{mentor}/roadmap/{step}', [MentorController::class, 'deleteRoadmapStep'])->name('mentors.roadmap.delete');
+        Route::patch('mentors/{mentor}/toggle-publish', [MentorController::class, 'togglePublish'])->name('mentors.toggle-publish');
+        Route::patch('mentors/{mentor}/toggle-validation', [MentorController::class, 'toggleValidation'])->name('mentors.toggle-validation');
+        Route::put('mentors/{mentor}/approve', [MentorController::class, 'approve'])->name('mentors.approve');
+        Route::put('mentors/{mentor}/reject', [MentorController::class, 'reject'])->name('mentors.reject');
+        Route::put('mentors/{mentor}/demote', [MentorController::class, 'demote'])->name('mentors.demote');
+        Route::get('mentors/{mentor}/download-linkedin', [MentorController::class, 'downloadLinkeInProfile'])->name('mentors.download-linkedin');
+        Route::post('mentors/{mentor}/linkedin-reload', [MentorController::class, 'reloadLinkedInProfile'])->name('mentors.linkedin-reload');
+        Route::post('mentors/{mentor}/linkedin-upload', [MentorController::class, 'uploadLinkedInProfile'])->name('mentors.linkedin-upload');
+
+        // Gestion des ressources (Actions admin uniquement)
+        Route::resource('resources', \App\Http\Controllers\Admin\ResourceController::class)->except(['index', 'show']);
+        Route::post('resources/approve-all', [\App\Http\Controllers\Admin\ResourceController::class, 'approveAll'])->name('resources.approve_all');
+        Route::put('resources/{resource}/approve', [\App\Http\Controllers\Admin\ResourceController::class, 'approve'])->name('resources.approve');
+        Route::put('resources/{resource}/reject', [\App\Http\Controllers\Admin\ResourceController::class, 'reject'])->name('resources.reject');
+
+        // Monétisation
+        Route::get('comptabilite/historique', [\App\Http\Controllers\Admin\AccountingController::class, 'history'])->name('accounting.history');
+        Route::get('comptabilite', [\App\Http\Controllers\Admin\AccountingController::class, 'index'])->name('accounting.index');
+        Route::get('monetisation', [MonetizationController::class, 'index'])->name('monetization.index');
+        Route::post('monetisation/settings', [MonetizationController::class, 'updateSettings'])->name('monetization.settings.update');
+        Route::get('monetisation/coupons', [MonetizationController::class, 'coupons'])->name('monetization.coupons');
+        Route::post('monetisation/coupons', [MonetizationController::class, 'storeCoupon'])->name('monetization.coupons.store');
+        Route::delete('monetisation/coupons/{coupon}', [MonetizationController::class, 'destroyCoupon'])->name('monetization.coupons.destroy');
+
+        // Gestion des Packs de Crédits et Abonnements
+        Route::resource('credit-packs', \App\Http\Controllers\Admin\CreditPackController::class);
+        Route::resource('subscription-plans', \App\Http\Controllers\Admin\SubscriptionPlanController::class);
+
+        // Payouts Mentors
+        Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
+        Route::get('payouts/{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name('payouts.show');
+
+        // Analytiques
+        Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+        Route::prefix('analytics')->name('analytics.')->group(function () {
+            Route::get('personality', [AnalyticsController::class, 'personality'])->name('personality');
+            Route::get('chat', [AnalyticsController::class, 'chat'])->name('chat');
+            Route::get('export', [AnalyticsController::class, 'export'])->name('export');
+            Route::get('export-pdf', [AnalyticsController::class, 'exportPdf'])->name('export-pdf');
         }
         );
 
-        // === Routes Partagées (Admin & Coach) ===
-        Route::middleware(['auth', \App\Http\Middleware\EnsureAdminOrCoach::class])->group(function () {
-            Route::post('logout', [AuthController::class , 'logout'])->name('logout');
+        // Gestion des spécialisations
+        Route::resource('specializations', \App\Http\Controllers\Admin\SpecializationController::class);
+        Route::get('specializations-moderate', [\App\Http\Controllers\Admin\SpecializationController::class, 'moderate'])->name('specializations.moderate');
+        Route::post('specializations/{specialization}/approve', [\App\Http\Controllers\Admin\SpecializationController::class, 'approve'])->name('specializations.approve');
+        Route::post('specializations/{specialization}/reject', [\App\Http\Controllers\Admin\SpecializationController::class, 'reject'])->name('specializations.reject');
 
-            // Chat conversations
-            Route::get('chat', [ChatController::class , 'index'])->name('chat.index');
-            Route::get('chat/{conversation}', [ChatController::class , 'show'])->name('chat.show');
-            Route::post('chat/{conversation}/take-over', [ChatController::class , 'takeOver'])->name('chat.take-over');
-            Route::post('chat/{conversation}/send-message', [ChatController::class , 'sendMessage'])->name('chat.send-message');
-            Route::post('chat/{conversation}/end-support', [ChatController::class , 'endSupport'])->name('chat.end-support');
-            Route::get('chat/{conversation}/export-pdf', [ChatController::class , 'exportPdf'])->name('chat.export-pdf');
-
-            // Consultation Mentors & Ressources
-            Route::get('mentors', [MentorController::class , 'index'])->name('mentors.index');
-            Route::get('mentors/{mentor}', [MentorController::class , 'show'])->name('mentors.show');
-            Route::get('resources', [\App\Http\Controllers\Admin\ResourceController::class , 'index'])->name('resources.index');
-            Route::get('resources/{resource}', [\App\Http\Controllers\Admin\ResourceController::class , 'show'])->name('resources.show');
+        // Gestion de la Newsletter
+        Route::prefix('newsletter')->name('newsletter.')->group(function () {
+            Route::get('/', [NewsletterController::class, 'index'])->name('index');
+            Route::get('/subscribers', [NewsletterController::class, 'subscribers'])->name('subscribers');
+            Route::get('/campaigns/create', [NewsletterController::class, 'createCampaign'])->name('campaigns.create');
+            Route::post('/campaigns', [NewsletterController::class, 'storeCampaign'])->name('campaigns.store');
+            Route::post('/test-email', [NewsletterController::class, 'sendTestEmail'])->name('test-email');
         }
         );
 
-        // === Routes Réservées aux Administrateurs ===
-        Route::middleware(['auth', 'is_admin'])->group(function () {
-            // Dashboard principal
-            Route::get('dashboard', [DashboardController::class , 'index'])->name('dashboard');
+        // Gestion des messages de contact
+        Route::resource('contact-messages', ContactMessageController::class)->only(['index', 'show', 'destroy']);
+        Route::post('contact-messages/{contact_message}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
 
-            // Gestion des utilisateurs (Actions admin uniquement)
-            Route::get('users', [UserController::class , 'index'])->name('users.index');
-            Route::resource('users', UserController::class)->only(['create', 'store', 'destroy']);
-            Route::get('users/{user}', [UserController::class , 'show'])->name('users.show');
-            Route::post('users/{user}/link-organization', [UserController::class , 'linkOrganization'])->name('users.link-organization');
-            Route::delete('users/{user}/unlink-organization/{organization}', [UserController::class , 'unlinkOrganization'])->name('users.unlink-organization');
-            Route::put('users/{user}/toggle-admin', [UserController::class , 'toggleAdmin'])->name('users.toggle-admin');
-            Route::put('users/{user}/reactivate', [UserController::class , 'reactivate'])->name('users.reactivate');
-            Route::post('users/{user}/propose-promotion', [UserController::class , 'proposePromotion'])->name('users.propose-promotion');
-            Route::post('users/{user}/block', [UserController::class , 'block'])->name('users.block');
-            Route::post('users/{user}/unblock', [UserController::class , 'unblock'])->name('users.unblock');
+        // Gestion des documents
+        Route::resource('documents', DocumentController::class);
 
-            // Gestion des coachs
-            Route::resource('coaches', \App\Http\Controllers\Admin\CoachController::class)->only(['index', 'store', 'destroy']);
-            Route::post('coaches/{coach}/reset-password', [\App\Http\Controllers\Admin\CoachController::class , 'resetPassword'])->name('coaches.reset-password');
+        // Gestion du mentorat
+        Route::get('mentorship/requests', [MentorshipController::class, 'requests'])->name('mentorship.requests');
+        Route::get('mentorship/requests/{mentorship}', [MentorshipController::class, 'showRequest'])->name('mentorship.requests.show');
+        Route::get('mentorship/sessions', [MentorshipController::class, 'sessions'])->name('mentorship.sessions');
+        Route::get('mentorship/sessions/{session}', [MentorshipController::class, 'showSession'])->name('mentorship.sessions.show');
 
-            // Gestion des mentors (Actions admin uniquement)
-            Route::get('mentors/{mentor}/edit', [MentorController::class , 'edit'])->name('mentors.edit');
-            Route::put('mentors/{mentor}', [MentorController::class , 'update'])->name('mentors.update');
-            Route::post('mentors/{mentor}/photo', [MentorController::class , 'updateProfilePhoto'])->name('mentors.update-photo');
-            Route::delete('mentors/{mentor}/photo', [MentorController::class , 'deleteProfilePhoto'])->name('mentors.delete-photo');
-            Route::post('mentors/{mentor}/roadmap', [MentorController::class , 'storeRoadmapStep'])->name('mentors.roadmap.store');
-            Route::put('mentors/{mentor}/roadmap/{step}', [MentorController::class , 'updateRoadmapStep'])->name('mentors.roadmap.update');
-            Route::delete('mentors/{mentor}/roadmap/{step}', [MentorController::class , 'deleteRoadmapStep'])->name('mentors.roadmap.delete');
-            Route::patch('mentors/{mentor}/toggle-publish', [MentorController::class , 'togglePublish'])->name('mentors.toggle-publish');
-            Route::patch('mentors/{mentor}/toggle-validation', [MentorController::class , 'toggleValidation'])->name('mentors.toggle-validation');
-            Route::put('mentors/{mentor}/approve', [MentorController::class , 'approve'])->name('mentors.approve');
-            Route::put('mentors/{mentor}/reject', [MentorController::class , 'reject'])->name('mentors.reject');
-            Route::put('mentors/{mentor}/demote', [MentorController::class , 'demote'])->name('mentors.demote');
-            Route::get('mentors/{mentor}/download-linkedin', [MentorController::class , 'downloadLinkeInProfile'])->name('mentors.download-linkedin');
-            Route::post('mentors/{mentor}/linkedin-reload', [MentorController::class , 'reloadLinkedInProfile'])->name('mentors.linkedin-reload');
-            Route::post('mentors/{mentor}/linkedin-upload', [MentorController::class , 'uploadLinkedInProfile'])->name('mentors.linkedin-upload');
-
-            // Gestion des ressources (Actions admin uniquement)
-            Route::resource('resources', \App\Http\Controllers\Admin\ResourceController::class)->except(['index', 'show']);
-            Route::post('resources/approve-all', [\App\Http\Controllers\Admin\ResourceController::class , 'approveAll'])->name('resources.approve_all');
-            Route::put('resources/{resource}/approve', [\App\Http\Controllers\Admin\ResourceController::class , 'approve'])->name('resources.approve');
-            Route::put('resources/{resource}/reject', [\App\Http\Controllers\Admin\ResourceController::class , 'reject'])->name('resources.reject');
-
-            // Monétisation
-            Route::get('comptabilite/historique', [\App\Http\Controllers\Admin\AccountingController::class , 'history'])->name('accounting.history');
-            Route::get('comptabilite', [\App\Http\Controllers\Admin\AccountingController::class , 'index'])->name('accounting.index');
-            Route::get('monetisation', [MonetizationController::class , 'index'])->name('monetization.index');
-            Route::post('monetisation/settings', [MonetizationController::class , 'updateSettings'])->name('monetization.settings.update');
-            Route::get('monetisation/coupons', [MonetizationController::class , 'coupons'])->name('monetization.coupons');
-            Route::post('monetisation/coupons', [MonetizationController::class , 'storeCoupon'])->name('monetization.coupons.store');
-            Route::delete('monetisation/coupons/{coupon}', [MonetizationController::class , 'destroyCoupon'])->name('monetization.coupons.destroy');
-
-            // Gestion des Packs de Crédits et Abonnements
-            Route::resource('credit-packs', \App\Http\Controllers\Admin\CreditPackController::class);
-            Route::resource('subscription-plans', \App\Http\Controllers\Admin\SubscriptionPlanController::class);
-
-            // Payouts Mentors
-            Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class , 'index'])->name('payouts.index');
-            Route::get('payouts/{payout}', [App\Http\Controllers\Admin\PayoutController::class , 'show'])->name('payouts.show');
-
-            // Analytiques
-            Route::get('analytics', [AnalyticsController::class , 'index'])->name('analytics.index');
-            Route::prefix('analytics')->name('analytics.')->group(function () {
-                    Route::get('personality', [AnalyticsController::class , 'personality'])->name('personality');
-                    Route::get('chat', [AnalyticsController::class , 'chat'])->name('chat');
-                    Route::get('export', [AnalyticsController::class , 'export'])->name('export');
-                    Route::get('export-pdf', [AnalyticsController::class , 'exportPdf'])->name('export-pdf');
-                }
-                );
-
-                // Gestion des spécialisations
-                Route::resource('specializations', \App\Http\Controllers\Admin\SpecializationController::class);
-                Route::get('specializations-moderate', [\App\Http\Controllers\Admin\SpecializationController::class , 'moderate'])->name('specializations.moderate');
-                Route::post('specializations/{specialization}/approve', [\App\Http\Controllers\Admin\SpecializationController::class , 'approve'])->name('specializations.approve');
-                Route::post('specializations/{specialization}/reject', [\App\Http\Controllers\Admin\SpecializationController::class , 'reject'])->name('specializations.reject');
-
-                // Gestion de la Newsletter
-                Route::prefix('newsletter')->name('newsletter.')->group(function () {
-                    Route::get('/', [NewsletterController::class , 'index'])->name('index');
-                    Route::get('/subscribers', [NewsletterController::class , 'subscribers'])->name('subscribers');
-                    Route::get('/campaigns/create', [NewsletterController::class , 'createCampaign'])->name('campaigns.create');
-                    Route::post('/campaigns', [NewsletterController::class , 'storeCampaign'])->name('campaigns.store');
-                    Route::post('/test-email', [NewsletterController::class , 'sendTestEmail'])->name('test-email');
-                }
-                );
-
-                // Gestion des messages de contact
-                Route::resource('contact-messages', ContactMessageController::class)->only(['index', 'show', 'destroy']);
-                Route::post('contact-messages/{contact_message}/reply', [ContactMessageController::class , 'reply'])->name('contact-messages.reply');
-
-                // Gestion des documents
-                Route::resource('documents', DocumentController::class);
-
-                // Gestion du mentorat
-                Route::get('mentorship/requests', [MentorshipController::class , 'requests'])->name('mentorship.requests');
-                Route::get('mentorship/requests/{mentorship}', [MentorshipController::class , 'showRequest'])->name('mentorship.requests.show');
-                Route::get('mentorship/sessions', [MentorshipController::class , 'sessions'])->name('mentorship.sessions');
-                Route::get('mentorship/sessions/{session}', [MentorshipController::class , 'showSession'])->name('mentorship.sessions.show');
-
-                // Gestion des organisations
-                Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);
-            }
-            );
-        });
+        // Gestion des organisations
+        Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);
+    }
+    );
+});
