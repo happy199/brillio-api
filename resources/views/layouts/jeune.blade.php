@@ -156,20 +156,6 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Mes Mentors
                             </a>
-                            <a href="{{ route('jeune.messages.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
-                                Messagerie
-                                @php
-                                $navUnread = \App\Models\Message::whereHas('mentorship', fn($q) =>
-                                $q->where('mentee_id', auth()->id())->where('status','accepted'))
-                                ->where('sender_id', '!=', auth()->id())->whereNull('read_at')->count();
-                                @endphp
-                                @if($navUnread > 0)
-                                <span
-                                    class="bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{
-                                    $navUnread }}</span>
-                                @endif
-                            </a>
                             <a href="{{ route('jeune.sessions.index') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Mes Séances
@@ -264,10 +250,6 @@
             <a href="{{ route('jeune.mentorship.index') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentorship.index') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Mes Mentors
-            </a>
-            <a href="{{ route('jeune.messages.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.messages.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Messages
             </a>
             <a href="{{ route('jeune.sessions.index') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->is('espace-jeune/mentorat/seances*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
