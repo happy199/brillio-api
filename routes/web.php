@@ -241,6 +241,15 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
         Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class, 'show'])->name('sessions.show');
         Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class, 'cancel'])->name('sessions.cancel');
         Route::post('/mentorat/seances/{session}/pay-join', [\App\Http\Controllers\Jeune\SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
+
+        // Messagerie (Jeune)
+        Route::prefix('messagerie')->name('messages.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Jeune\MessagesController::class, 'index'])->name('index');
+            Route::get('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'show'])->name('show');
+            Route::post('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'store'])->name('store');
+            Route::get('/fichier/{message}/download', [\App\Http\Controllers\Jeune\MessagesController::class, 'download'])->name('download');
+        }
+        );
     }
     );
 
@@ -339,6 +348,15 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
             Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');
             Route::post('/sessions/{session}/refuse', [\App\Http\Controllers\Mentor\SessionController::class, 'refuse'])->name('sessions.refuse');
             Route::post('/sessions/{session}/cancel', [\App\Http\Controllers\Mentor\SessionController::class, 'cancel'])->name('sessions.cancel');
+        }
+        );
+
+        // Messagerie (Mentor)
+        Route::prefix('messagerie')->name('messages.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Mentor\MessagesController::class, 'index'])->name('index');
+            Route::get('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'show'])->name('show');
+            Route::post('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'store'])->name('store');
+            Route::get('/fichier/{message}/download', [\App\Http\Controllers\Mentor\MessagesController::class, 'download'])->name('download');
         }
         );
     }

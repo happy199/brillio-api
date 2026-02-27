@@ -154,6 +154,20 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
                                 Mes Mentés
                             </a>
+                            <a href="{{ route('mentor.messages.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 flex items-center justify-between">
+                                Messagerie
+                                @php
+                                $navUnread = \App\Models\Message::whereHas('mentorship', fn($q) =>
+                                $q->where('mentor_id', auth()->id())->where('status','accepted'))
+                                ->where('sender_id', '!=', auth()->id())->whereNull('read_at')->count();
+                                @endphp
+                                @if($navUnread > 0)
+                                <span
+                                    class="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{
+                                    $navUnread }}</span>
+                                @endif
+                            </a>
                             <a href="{{ route('mentor.mentorship.calendar') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
                                 Calendrier & Séances
@@ -241,6 +255,10 @@
             <a href="{{ route('mentor.mentorship.index') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.mentorship.index') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Mes Mentés
+            </a>
+            <a href="{{ route('mentor.messages.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.messages.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Messages
             </a>
             <a href="{{ route('mentor.mentorship.calendar') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.mentorship.calendar') ? 'active' : 'text-gray-600 bg-gray-100' }}">
