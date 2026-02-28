@@ -13,13 +13,22 @@ class WalletController extends Controller
      */
     public function index()
     {
+        $organization = $this->getCurrentOrganization();
+
         $creditPacks = CreditPack::credits()
             ->where('user_type', 'organization')
             ->where('is_active', true)
             ->orderBy('price')
             ->get();
 
-        return view('organization.wallet.index', compact('creditPacks'));
+        $recentTransactions = \App\Models\WalletTransaction::where('organization_id', $organization->id)
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+
+        $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
+
+        return view('organization.wallet.index', compact('creditPacks', 'recentTransactions', 'creditPrice', 'organization'));
     }
 
     /**
@@ -88,5 +97,113 @@ class WalletController extends Controller
         }
 
         return redirect()->back()->with('error', 'Erreur lors de l\'initialisation du paiement.');
+    }
+
+    /**
+     * Display the organization's expense history.
+     */
+    public function history(Request $request)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        $query = \App\Models\WalletTransaction::where('organization_id', $organization->id)
+            ->orderByDesc('created_at');
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $transactions = $query->paginate(15)->withQueryString();
+
+        $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
+
+        return view('organization.wallet.history', compact('transactions', 'creditPrice', 'organization'));
+    }
+
+    /**
+     * Export expenses to PDF.
+     */
+    public function exportPdf(Request $request)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        $query = \App\Models\WalletTransaction::where('organization_id', $organization->id)
+            ->orderByDesc('created_at');
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $transactions = $query->get();
+        $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('organization.wallet.export-pdf', [
+            'transactions' => $transactions,
+            'creditPrice' => $creditPrice,
+            'organization' => $organization,
+            'date_from' => $request->date_from,
+            'date_to' => $request->date_to,
+        ]);
+
+        return $pdf->download('historique-transactions-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    /**
+     * Export expenses to CSV.
+     */
+    public function exportCsv(Request $request)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        $query = \App\Models\WalletTransaction::where('organization_id', $organization->id)
+            ->orderByDesc('created_at');
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $transactions = $query->get();
+        $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
+
+        $filename = 'transactions-brillio-'.now()->format('Y-m-d').'.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function () use ($transactions, $creditPrice) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Date', 'Type', 'Description', 'Crédits', 'Valeur (FCFA)']);
+
+            foreach ($transactions as $t) {
+                fputcsv($file, [
+                    $t->created_at->format('d/m/Y H:i'),
+                    match (strtolower($t->type)) {
+                        'purchase', 'recharge' => 'Achat',
+                        'subscription' => 'Abonnement',
+                        'expense' => 'Ressource',
+                        'distribution' => 'Distribution',
+                        'payment' => 'Paiement',
+                        default => ucfirst($t->type)
+                    },
+                    $t->description,
+                    $t->amount,
+                    $t->amount * $creditPrice,
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

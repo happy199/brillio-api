@@ -52,15 +52,22 @@ $periods = [
         <div
             class="relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-lg transition-shadow">
             <div class="mb-4 text-center">
-                <h3 class="text-lg font-semibold leading-6 text-gray-900">Standard</h3>
-                <p class="mt-4 text-sm leading-6 text-gray-500">Pour démarrer et parrainer sans limite.</p>
+                <h3 class="text-lg font-semibold leading-6 text-gray-900">{{ $freePlan?->name ?? 'Standard' }}</h3>
+                <p class="mt-4 text-sm leading-6 text-gray-500">{{ $freePlan?->description ?? 'Pour démarrer et
+                    parrainer sans limite.' }}</p>
                 <p class="mt-8 flex flex-wrap items-baseline justify-center gap-x-2">
                     <span class="text-4xl font-bold tracking-tight text-gray-900">Gratuit</span>
                 </p>
             </div>
             <ul role="list" class="mb-8 space-y-3 text-sm leading-6 text-gray-600 flex-1 text-center">
+                @if($freePlan && $freePlan->features)
+                @foreach($freePlan->features as $feature)
+                <li>{{ $feature }}</li>
+                @endforeach
+                @else
                 <li>Parrainage illimité de jeunes</li>
                 <li>Tableau de bord standard</li>
+                @endif
             </ul>
             @if($isFree)
             <div

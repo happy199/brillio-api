@@ -17,13 +17,14 @@ class SubscriptionController extends Controller
         $allPlans = CreditPack::subscriptions()
             ->where('user_type', 'organization')
             ->where('is_active', true)
-            ->orderBy('duration_days')
+            ->orderBy('display_order')
             ->get();
 
+        $freePlan = $allPlans->where('target_plan', \App\Models\Organization::PLAN_FREE)->first();
         $proPlans = $allPlans->where('target_plan', 'pro')->keyBy('duration_days');
         $enterprisePlans = $allPlans->where('target_plan', 'enterprise')->keyBy('duration_days');
 
-        return view('organization.subscriptions.index', compact('proPlans', 'enterprisePlans'));
+        return view('organization.subscriptions.index', compact('freePlan', 'proPlans', 'enterprisePlans'));
     }
 
     /**

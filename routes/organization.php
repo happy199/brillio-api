@@ -122,10 +122,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/payment/callback', [\App\Http\Controllers\Organization\PaymentController::class, 'callback'])->name('payment.callback');
 
         // Wallet
-        Route::get('/wallet', [\App\Http\Controllers\Organization\WalletController::class, 'index'])->name('wallet.index');
-        Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class, 'purchase'])
-            ->middleware('organization_role:admin')
-            ->name('wallet.purchase');
+        Route::middleware('organization_role:admin')->group(function () {
+            Route::get('/wallet', [\App\Http\Controllers\Organization\WalletController::class, 'index'])->name('wallet.index');
+            Route::get('/wallet/history', [\App\Http\Controllers\Organization\WalletController::class, 'history'])->name('wallet.history');
+            Route::get('/wallet/export-pdf', [\App\Http\Controllers\Organization\WalletController::class, 'exportPdf'])->name('wallet.export-pdf');
+            Route::get('/wallet/export-csv', [\App\Http\Controllers\Organization\WalletController::class, 'exportCsv'])->name('wallet.export-csv');
+            Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class, 'purchase'])->name('wallet.purchase');
+        }
+        );
+
+        // Resources Library
+        Route::prefix('resources')->name('resources.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Organization\ResourceController::class, 'index'])->name('index');
+            Route::get('/{resource:slug}', [\App\Http\Controllers\Organization\ResourceController::class, 'show'])->name('show');
+            Route::post('/{resource:slug}/gift', [\App\Http\Controllers\Organization\ResourceController::class, 'gift'])->name('gift');
+        }
+        );
 
         // Team Management (Enterprise only)
         Route::middleware('organization_subscription:enterprise')->prefix('team')->name('team.')->group(function () {

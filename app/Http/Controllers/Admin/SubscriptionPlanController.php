@@ -22,8 +22,8 @@ class SubscriptionPlanController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'target_plan' => 'required|in:pro,enterprise',
-            'duration_days' => 'required|integer|min:1',
+            'target_plan' => 'required|in:free,pro,enterprise',
+            'duration_days' => 'required|integer|min:0',
             'price' => 'required|integer|min:0',
             'promo_percent' => 'nullable|integer|min:0|max:100',
             'description' => 'nullable|string',
@@ -52,8 +52,8 @@ class SubscriptionPlanController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'target_plan' => 'required|in:pro,enterprise',
-            'duration_days' => 'required|integer|min:1',
+            'target_plan' => 'required|in:free,pro,enterprise',
+            'duration_days' => 'required|integer|min:0',
             'price' => 'required|integer|min:0',
             'promo_percent' => 'nullable|integer|min:0|max:100',
             'description' => 'nullable|string',

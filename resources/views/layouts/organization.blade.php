@@ -27,6 +27,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -96,18 +97,40 @@
                             Tableau de bord
                         </a>
 
-                        <a href="{{ route('organization.users.index') }}"
-                            class="{{ request()->routeIs('organization.users.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Jeunes
-                        </a>
-                        <a href="{{ route('organization.mentors.index') }}"
-                            class="{{ request()->routeIs('organization.mentors.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Mentors
-                        </a>
-                        <a href="{{ route('organization.mentorships.index') }}"
-                            class="{{ request()->routeIs('organization.mentorships.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                            Mentorat
-                        </a>
+                        <!-- Mentorship Dropdown -->
+                        <div class="relative inline-flex items-center" x-data="{ open: false }">
+                            <button @click="open = !open" @click.away="open = false"
+                                class="{{ (request()->routeIs('organization.users.*') || request()->routeIs('organization.mentors.*') || request()->routeIs('organization.mentorships.*')) ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium h-full focus:outline-none">
+                                <span>Mentorat</span>
+                                <svg class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="transform opacity-0 scale-95"
+                                class="absolute left-0 mt-48 w-48 bg-white rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5"
+                                x-cloak>
+                                <a href="{{ route('organization.users.index') }}"
+                                    class="{{ request()->routeIs('organization.users.*') ? 'bg-gray-100 text-organization-600' : 'text-gray-700 hover:bg-gray-50' }} block px-4 py-2 text-sm font-medium">
+                                    Jeunes
+                                </a>
+                                <a href="{{ route('organization.mentors.index') }}"
+                                    class="{{ request()->routeIs('organization.mentors.*') ? 'bg-gray-100 text-organization-600' : 'text-gray-700 hover:bg-gray-50' }} block px-4 py-2 text-sm font-medium">
+                                    Mentors
+                                </a>
+                                <a href="{{ route('organization.mentorships.index') }}"
+                                    class="{{ request()->routeIs('organization.mentorships.*') ? 'bg-gray-100 text-organization-600' : 'text-gray-700 hover:bg-gray-50' }} block px-4 py-2 text-sm font-medium">
+                                    Relations
+                                </a>
+                            </div>
+                        </div>
+
                         <a href="{{ route('organization.sessions.index') }}"
                             class="{{ request()->routeIs('organization.sessions.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Calendrier
@@ -116,6 +139,11 @@
                         <a href="{{ route('organization.invitations.index') }}"
                             class="{{ request()->routeIs('organization.invitations.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Invitations
+                        </a>
+
+                        <a href="{{ route('organization.resources.index') }}"
+                            class="{{ request()->routeIs('organization.resources.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Ressources
                         </a>
 
                         <a href="{{ url('organization/exports') }}"
@@ -159,7 +187,7 @@
                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5"
                             style="display: none;">
 
-                            @if(auth()->user()->organization_role !== 'viewer')
+                            @if(auth()->user()->organization_role === 'admin')
                             <a href="{{ route('organization.profile.edit') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Profil
@@ -289,8 +317,7 @@
                 wispatchEvent(new CustomEvent('copy-notification', {
                     detail: { message: 'Erreur lors de la copie.', type: 'error' }
                 }));
-            });
-        }
+     }
     </script>
 </body>
 
