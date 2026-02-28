@@ -26,6 +26,24 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
+
+    function toggleExpiryField() {
+        var plan = document.getElementById('subscription_plan').value;
+        var container = document.getElementById('subscription_expiry_container');
+        if (plan === 'pro' || plan === 'enterprise') {
+            container.classList.remove('hidden');
+        } else {
+            container.classList.add('hidden');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var select = document.getElementById('subscription_plan');
+        if (select) {
+            select.addEventListener('change', toggleExpiryField);
+            toggleExpiryField(); // Run on load to handle pre-filled values
+        }
+    });
 </script>
 @endpush
 

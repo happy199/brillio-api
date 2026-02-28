@@ -117,6 +117,11 @@
                             class="{{ request()->routeIs('organization.invitations.*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Invitations
                         </a>
+
+                        <a href="{{ url('organization/exports') }}"
+                            class="{{ request()->is('organization/exports*') ? 'border-organization-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Rapports
+                        </a>
                     </div>
                 </div>
 

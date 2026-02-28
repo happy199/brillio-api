@@ -34,3 +34,8 @@ Schedule::command('personality:sync-questions')
 Schedule::command('organizations:downgrade-expired')
     ->dailyAt('01:00')
     ->timezone('Africa/Abidjan');
+
+// Enterprise monthly credits: distribute 50 free credits on the 1st of each month
+Schedule::command('organizations:grant-enterprise-credits')
+    ->monthlyOn(1, '00:01')
+    ->timezone('Africa/Abidjan');
