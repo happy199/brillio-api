@@ -359,7 +359,17 @@ class MentorshipNotificationService
             $org = $mentee->sponsoringOrganization;
             if ($org && $org->contact_email) {
                 $orgSessionUrl = route('organization.sessions.show', ['session' => $session->id]);
-                Mail::to($org->contact_email)->send(new ReportAvailableMail($org->users()->wherePivot('role', 'admin')->first() ?? $mentee, $session, $orgSessionUrl));
+
+                // Fallback de personalisation : Admin > Organisation (nom) > Jeune (mentee)
+                $recipient = $org->users()->wherePivot('role', 'admin')->first();
+                if (! $recipient) {
+                    $recipient = (object) [
+                        'name' => $org->name,
+                        'email' => $org->contact_email,
+                    ];
+                }
+
+                Mail::to($org->contact_email)->send(new ReportAvailableMail($recipient, $session, $orgSessionUrl));
             }
         }
     }

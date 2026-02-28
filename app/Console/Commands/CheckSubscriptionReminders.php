@@ -37,15 +37,15 @@ class CheckSubscriptionReminders extends Command
     {
         $this->info('Checking subscription expirations...');
 
-        // 1. Check for Downgrades (Expired since yesterday - only run once per day ideally, but we check if still not free)
-        $expiredOrgs = Organization::where('subscription_plan', '!=', 'Standard')
+        // 1. Check for Downgrades (Expired since yesterday)
+        $expiredOrgs = Organization::where('subscription_plan', '!=', Organization::PLAN_FREE)
             ->where('subscription_expires_at', '<', now())
             ->get();
 
         foreach ($expiredOrgs as $org) {
             $this->info("Downgrading Organization: {$org->name}");
             $org->update([
-                'subscription_plan' => 'Standard',
+                'subscription_plan' => Organization::PLAN_FREE,
                 'subscription_expires_at' => null,
                 'auto_renew' => false,
             ]);
@@ -61,7 +61,7 @@ class CheckSubscriptionReminders extends Command
             ['diff' => 1 * 60, 'label' => '1 heure', 'tolerance' => 10], // 1 hour
         ];
 
-        $runningOrgs = Organization::where('subscription_plan', '!=', 'Standard')
+        $runningOrgs = Organization::where('subscription_plan', '!=', Organization::PLAN_FREE)
             ->where('subscription_expires_at', '>', now())
             ->get();
 
