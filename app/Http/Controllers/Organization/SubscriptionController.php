@@ -13,23 +13,22 @@ class SubscriptionController extends Controller
      */
     public function index()
     {
-        $monthlyPlans = CreditPack::subscriptions()
-            ->where('duration_days', 30)
+        // Load all active subscription plans grouped by target_plan and indexed by duration_days
+        $allPlans = CreditPack::subscriptions()
+            ->where('user_type', 'organization')
             ->where('is_active', true)
-            ->orderBy('price')
+            ->orderBy('duration_days')
             ->get();
 
-        $yearlyPlans = CreditPack::subscriptions()
-            ->where('duration_days', 365)
-            ->where('is_active', true)
-            ->orderBy('price')
-            ->get();
+        $proPlans = $allPlans->where('target_plan', 'pro')->keyBy('duration_days');
+        $enterprisePlans = $allPlans->where('target_plan', 'enterprise')->keyBy('duration_days');
 
-        return view('organization.subscriptions.index', compact('monthlyPlans', 'yearlyPlans'));
+        return view('organization.subscriptions.index', compact('proPlans', 'enterprisePlans'));
     }
 
     /**
      * Handle subscription upgrade/downgrade.
+     * The form now sends the exact plan ID — no need for billing_cycle lookup.
      */
     public function subscribe(Request $request, CreditPack $plan)
     {

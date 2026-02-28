@@ -11,37 +11,44 @@
         </h1>
         <p class="text-xl text-gray-500">
             Des solutions flexibles pour toutes les organisations, du démarrage à l'expansion.
-            Changez ou annulez à tout moment.
         </p>
 
-        <!-- Toggle Monthly/Yearly (UI Logic via Alpine) -->
-        <div x-data="{ annual: false, showDowngradeModal: false }" class="mt-8">
-            <div class="flex items-center justify-center space-x-4">
-                <span :class="!annual ? 'text-gray-900 font-medium' : 'text-gray-500'">Mensuel</span>
-                <button type="button"
-                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
-                    :class="annual ? 'bg-pink-600' : 'bg-gray-200'" @click="annual = !annual">
-                    <span class="sr-only">Use setting</span>
-                    <span aria-hidden="true"
-                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                        :class="annual ? 'translate-x-5' : 'translate-x-0'">
-                    </span>
+        @php
+        $isFree = auth()->user()->organization->subscription_plan === \App\Models\Organization::PLAN_FREE;
+        $isPro = auth()->user()->organization->isPro();
+        $isEnterprise = auth()->user()->organization->isEnterprise();
+
+        // Periods available: duration_days => label
+        $periods = [
+        30 => '1 mois',
+        90 => '3 mois',
+        180 => '6 mois',
+        270 => '9 mois',
+        365 => '1 an',
+        ];
+        @endphp
+
+        <!-- Period Selector (Alpine) -->
+        <div x-data="{ period: 30, showDowngradeModal: false }" class="mt-8">
+
+            <div class="flex items-center justify-center gap-2 flex-wrap">
+                @foreach($periods as $days => $label)
+                <button type="button" @click="period = {{ $days }}" :class="period === {{ $days }}
+                            ? 'bg-pink-600 text-white shadow-sm'
+                            : 'bg-white text-gray-600 border border-gray-300 hover:border-pink-400'"
+                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none">
+                    {{ $label }}
+                    @if($days === 365)
+                    <span class="ml-1 text-xs font-bold text-yellow-300 bg-transparent">★ 2 mois offerts</span>
+                    @endif
                 </button>
-                <span :class="annual ? 'text-gray-900 font-medium' : 'text-gray-500'">
-                    Annuel <span class="text-pink-600 text-xs font-bold bg-pink-100 px-2 py-0.5 rounded-full">-2 mois
-                        offerts</span>
-                </span>
+                @endforeach
             </div>
 
             <!-- Pricing Cards -->
             <div class="mt-12 grid gap-8 lg:grid-cols-3 lg:gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 <!-- Free Plan -->
-                @php
-                $isFree = auth()->user()->organization->subscription_plan === \App\Models\Organization::PLAN_FREE;
-                $isPro = auth()->user()->organization->isPro();
-                $isEnterprise = auth()->user()->organization->isEnterprise();
-                @endphp
                 <div
                     class="relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-lg transition-shadow">
                     <div class="mb-4">
@@ -60,10 +67,6 @@
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Tableau de bord standard
                         </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Gestion de liste des jeunes
-                        </li>
                     </ul>
                     @if($isFree)
                     <div
@@ -79,9 +82,6 @@
                 </div>
 
                 <!-- Pro Plan -->
-                @php
-                $proPlan = $monthlyPlans->where('target_plan', 'pro')->first();
-                @endphp
                 <div
                     class="relative flex flex-col rounded-2xl border-2 {{ $isPro ? 'border-pink-600 ring-2 ring-pink-600 ring-opacity-50' : 'border-pink-600' }} bg-white p-8 shadow-xl transition-all duration-300">
                     <div
@@ -91,27 +91,27 @@
                     <div class="mb-4">
                         <h3 class="text-lg font-semibold leading-6 text-pink-600">Professionnel</h3>
                         <p class="mt-4 text-sm leading-6 text-gray-500">Suivez l'impact et boostez l'engagement.</p>
-                        <p class="mt-8 flex flex-wrap items-baseline gap-x-2">
-                            <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900"
-                                x-text="annual ? '{{ number_format(200000) }}' : '{{ number_format(20000) }}'"></span>
+                        @foreach($periods as $days => $label)
+                        @php $proPlan = $proPlans->get($days); @endphp
+                        <p class="mt-8 flex flex-wrap items-baseline gap-x-2" x-show="period === {{ $days }}" {{
+                            $days===30 ? '' : 'style=display:none' }}>
+                            <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+                                {{ $proPlan ? number_format($proPlan->price) : '—' }}
+                            </span>
                             <span class="text-sm font-semibold leading-6 text-gray-600">FCFA</span>
-                            <span class="text-sm text-gray-500">/ <span x-text="annual ? 'an' : 'mois'"></span></span>
+                            <span class="text-sm text-gray-500">/ {{ $label }}</span>
                         </p>
+                        @endforeach
                     </div>
-                    @if($proPlan)
                     <ul role="list" class="mb-8 space-y-4 text-sm leading-6 text-gray-600 flex-1">
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-pink-600 h-6 w-5 flex-none"></i>
                             <strong>Tout du plan Standard</strong>
                         </li>
-                        @if($proPlan->features && is_array($proPlan->features))
-                        @foreach($proPlan->features as $feature)
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            {{ $feature }}
+                            Gestion de liste des jeunes et mentors
                         </li>
-                        @endforeach
-                        @else
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Statistiques détaillées (Engagement)
@@ -124,7 +124,10 @@
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
                             Suivi des statuts de séances
                         </li>
-                        @endif
+                        <li class="flex gap-x-3">
+                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
+                            Exports PDF &amp; CSV
+                        </li>
                     </ul>
 
                     @if($isPro)
@@ -133,55 +136,48 @@
                         Votre plan actuel
                     </div>
                     @else
-                    <form action="{{ route('organization.subscriptions.subscribe', $proPlan->id) }}" method="POST">
+                    @foreach($periods as $days => $label)
+                    @php $proPlan = $proPlans->get($days); @endphp
+                    @if($proPlan)
+                    <form action="{{ route('organization.subscriptions.subscribe', $proPlan->id) }}" method="POST"
+                        x-show="period === {{ $days }}" {{ $days===30 ? '' : 'style=display:none' }}>
                         @csrf
-                        <input type="hidden" name="billing_cycle" :value="annual ? 'yearly' : 'monthly'">
                         <button type="submit"
-                            class="mt-8 block w-full rounded-md bg-pink-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-pink-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600">
-                            Passer au plan Pro
+                            class="mt-8 block w-full rounded-md bg-pink-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-pink-500 transition-colors">
+                            Souscrire — {{ $label }}
                         </button>
                     </form>
                     @endif
-                    @else
-                    <button disabled
-                        class="mt-8 block w-full rounded-md bg-gray-300 px-3 py-2 text-center text-sm font-semibold text-white cursor-not-allowed">
-                        Non disponible
-                    </button>
+                    @endforeach
                     @endif
                 </div>
 
-                @php
-                $entPlan = $monthlyPlans->where('target_plan', 'enterprise')->first();
-                @endphp
+                <!-- Enterprise Plan -->
                 <div
-                    class="relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-lg transition-shadow">
+                    class="relative flex flex-col rounded-2xl border {{ $isEnterprise ? 'border-2 border-organization-500 ring-2 ring-organization-500 ring-opacity-50' : 'border-gray-200' }} bg-white p-8 shadow-sm hover:shadow-lg transition-shadow">
                     <div class="mb-4">
                         <h3 class="text-lg font-semibold leading-6 text-gray-900">Entreprise</h3>
-                        <p class="mt-4 text-sm leading-6 text-gray-500">{{ $entPlan->description ?? "Accompagnement
-                            complet et impact max." }}</p>
-                        <p class="mt-8 flex flex-wrap items-baseline gap-x-2">
-                            <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900"
-                                x-text="annual ? '{{ number_format(($yearlyPlans->where('target_plan', 'enterprise')->first()->price ?? 500000)) }}' : '{{ number_format(($entPlan->price ?? 50000)) }}'"></span>
+                        <p class="mt-4 text-sm leading-6 text-gray-500">Accompagnement complet et impact max.</p>
+                        @foreach($periods as $days => $label)
+                        @php $entPlan = $enterprisePlans->get($days); @endphp
+                        <p class="mt-8 flex flex-wrap items-baseline gap-x-2" x-show="period === {{ $days }}" {{
+                            $days===30 ? '' : 'style=display:none' }}>
+                            <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+                                {{ $entPlan ? number_format($entPlan->price) : '—' }}
+                            </span>
                             <span class="text-sm font-semibold leading-6 text-gray-600">FCFA</span>
-                            <span class="text-sm text-gray-500">/ <span x-text="annual ? 'an' : 'mois'"></span></span>
+                            <span class="text-sm text-gray-500">/ {{ $label }}</span>
                         </p>
+                        @endforeach
                     </div>
                     <ul role="list" class="mb-8 space-y-4 text-sm leading-6 text-gray-600 flex-1">
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-pink-600 h-6 w-5 flex-none"></i>
                             <strong>Tout du plan Pro</strong>
                         </li>
-                        @if($entPlan && $entPlan->features && is_array($entPlan->features))
-                        @foreach($entPlan->features as $feature)
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            {{ $feature }}
-                        </li>
-                        @endforeach
-                        @else
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Marque Blanche (Logo & Couleurs)
+                            Marque Blanche (Logo &amp; Couleurs)
                         </li>
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
@@ -193,42 +189,41 @@
                         </li>
                         <li class="flex gap-x-3">
                             <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Support dédié
+                            Support dédié prioritaire
                         </li>
                         <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            50 Crédits/mois offerts
+                            <i class="fas fa-star text-yellow-400 h-6 w-5 flex-none"></i>
+                            <strong>50 Crédits/mois offerts automatiquement</strong>
                         </li>
-                        @endif
                     </ul>
+
                     @if($isEnterprise)
                     <div
                         class="mt-8 block w-full rounded-md bg-organization-50 px-3 py-2 text-center text-sm font-semibold text-organization-600 border border-organization-200">
                         Votre plan actuel
                     </div>
-                    @elseif($entPlan)
-                    <form action="{{ route('organization.subscriptions.subscribe', $entPlan->id) }}" method="POST">
+                    @else
+                    @foreach($periods as $days => $label)
+                    @php $entPlan = $enterprisePlans->get($days); @endphp
+                    @if($entPlan)
+                    <form action="{{ route('organization.subscriptions.subscribe', $entPlan->id) }}" method="POST"
+                        x-show="period === {{ $days }}" {{ $days===30 ? '' : 'style=display:none' }}>
                         @csrf
-                        <input type="hidden" name="billing_cycle" :value="annual ? 'yearly' : 'monthly'">
                         <button type="submit"
-                            class="mt-8 block w-full rounded-md bg-gray-900 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
-                            Passer au plan Entreprise
+                            class="mt-8 block w-full rounded-md bg-gray-900 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-gray-800 transition-colors">
+                            Souscrire — {{ $label }}
                         </button>
                     </form>
-                    @else
-                    <button disabled
-                        class="mt-8 block w-full rounded-md bg-gray-300 px-3 py-2 text-center text-sm font-semibold text-white cursor-not-allowed">
-                        Non disponible
-                    </button>
+                    @endif
+                    @endforeach
                     @endif
                 </div>
             </div>
 
-            <!-- Custom Downgrade Modal -->
+            <!-- Downgrade Modal -->
             <div x-show="showDowngradeModal" class="fixed inset-0 z-[100] overflow-y-auto" style="display: none;"
                 x-cloak>
                 <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                    <!-- Backdrop -->
                     <div x-show="showDowngradeModal" x-transition:enter="ease-out duration-300"
                         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                         x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
@@ -236,7 +231,6 @@
                         class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
                         @click="showDowngradeModal = false"></div>
 
-                    <!-- Modal panel -->
                     <div x-show="showDowngradeModal" x-transition:enter="ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -262,7 +256,7 @@
                                             Êtes-vous sûr de vouloir repasser au plan <span
                                                 class="font-bold">Standard</span> ?
                                             Votre accès aux fonctionnalités <span
-                                                class="text-pink-600 font-bold">Pro</span>
+                                                class="text-pink-600 font-bold">Pro/Entreprise</span>
                                             restera actif jusqu'à la fin de la période de facturation en cours.
                                         </p>
                                     </div>
@@ -287,7 +281,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

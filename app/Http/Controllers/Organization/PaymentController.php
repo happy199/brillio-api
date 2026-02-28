@@ -120,7 +120,7 @@ class PaymentController extends Controller
         if ($organization && $plan) {
             $organization->update([
                 'subscription_plan' => $plan->target_plan,
-                'subscription_expires_at' => ($billingCycle === 'yearly') ? now()->addYear() : now()->addMonth(),
+                'subscription_expires_at' => now()->addDays($plan->duration_days),
                 'auto_renew' => true,
             ]);
 
