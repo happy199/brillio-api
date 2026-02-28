@@ -493,6 +493,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::prefix('newsletter')->name('newsletter.')->group(function () {
             Route::get('/', [NewsletterController::class, 'index'])->name('index');
             Route::get('/subscribers', [NewsletterController::class, 'subscribers'])->name('subscribers');
+            Route::get('/export-csv', [NewsletterController::class, 'exportCsv'])->name('export-csv');
+            Route::get('/export-pdf', [NewsletterController::class, 'exportPdf'])->name('export-pdf');
             Route::get('/campaigns/create', [NewsletterController::class, 'createCampaign'])->name('campaigns.create');
             Route::post('/campaigns', [NewsletterController::class, 'storeCampaign'])->name('campaigns.store');
             Route::post('/test-email', [NewsletterController::class, 'sendTestEmail'])->name('test-email');
@@ -500,6 +502,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         );
 
         // Gestion des messages de contact
+        Route::get('contact-messages/export-pdf', [ContactMessageController::class, 'exportPdf'])->name('contact-messages.export-pdf');
         Route::resource('contact-messages', ContactMessageController::class)->only(['index', 'show', 'destroy']);
         Route::post('contact-messages/{contact_message}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
 
