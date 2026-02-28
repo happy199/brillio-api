@@ -36,12 +36,14 @@
                 <button type="button" @click="period = {{ $days }}" :class="period === {{ $days }}
                             ? 'bg-pink-600 text-white shadow-sm'
                             : 'bg-white text-gray-600 border border-gray-300 hover:border-pink-400'"
-                    class="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none">
-                    {{ $label }}
+                    class="flex flex-col items-center px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none leading-tight">
+                    <span class="whitespace-nowrap">{{ $label }}</span>
                     @if($days === 365)
-                    <span class="ml-1 text-xs font-semibold opacity-80">★ 2 mois offerts</span>
+                    <span class="text-[10px] font-medium opacity-75 whitespace-nowrap">★ 2 mois offerts</span>
                     @elseif($days === 180)
-                    <span class="ml-1 text-xs font-semibold opacity-80">★ 1 mois offert</span>
+                    <span class="text-[10px] font-medium opacity-75 whitespace-nowrap">★ 1 mois offert</span>
+                    @else
+                    <span class="text-[10px] opacity-0">&nbsp;</span>
                     @endif
                 </button>
                 @endforeach
