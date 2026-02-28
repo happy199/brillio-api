@@ -127,6 +127,14 @@ Route::middleware('auth')->group(function () {
             ->middleware('organization_role:admin')
             ->name('wallet.purchase');
 
+        // Resources Library
+        Route::prefix('resources')->name('resources.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Organization\ResourceController::class, 'index'])->name('index');
+            Route::get('/{resource:slug}', [\App\Http\Controllers\Organization\ResourceController::class, 'show'])->name('show');
+            Route::post('/{resource:slug}/gift', [\App\Http\Controllers\Organization\ResourceController::class, 'gift'])->name('gift');
+        }
+        );
+
         // Team Management (Enterprise only)
         Route::middleware('organization_subscription:enterprise')->prefix('team')->name('team.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Organization\TeamController::class, 'index'])->name('index');

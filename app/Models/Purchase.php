@@ -15,6 +15,7 @@ class Purchase extends Model
         'item_id',
         'cost_credits',
         'original_price_fcfa',
+        'gifted_by_organization_id',
         'purchased_at',
     ];
 
