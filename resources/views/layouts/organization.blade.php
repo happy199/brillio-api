@@ -27,6 +27,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -186,7 +187,7 @@
                             class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 ring-1 ring-black ring-opacity-5"
                             style="display: none;">
 
-                            @if(auth()->user()->organization_role !== 'viewer')
+                            @if(auth()->user()->organization_role === 'admin')
                             <a href="{{ route('organization.profile.edit') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Profil
@@ -316,7 +317,7 @@
                 wispatchEvent(new CustomEvent('copy-notification', {
                     detail: { message: 'Erreur lors de la copie.', type: 'error' }
                 }));
-             }
+     }
     </script>
 </body>
 

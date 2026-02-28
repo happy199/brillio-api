@@ -195,6 +195,7 @@
         </div>
 
         <!-- Sidebar: Gifting -->
+        @if(auth()->user()->organization_role === 'admin')
         <div class="space-y-6">
             <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm sticky top-24">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Offrir cette ressource</h3>
@@ -303,6 +304,7 @@
                 </svg>
             </div>
         </div>
+        @endif
     </div>
 </div>
 @endsection

@@ -50,19 +50,19 @@
         </div>
     </div>
 
-    <!-- Recent Expenses -->
+    <!-- Recent Transactions -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                <h3 class="text-lg font-bold text-gray-900">Dernières Dépenses (Dons & Distributions)</h3>
+                <h3 class="text-lg font-bold text-gray-900">Dernières Opérations</h3>
                 <div class="flex gap-2">
                     <a href="{{ route('organization.wallet.export-pdf') }}"
-                        class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
-                        <i class="fas fa-file-pdf mr-1"></i> PDF
+                        class="inline-flex items-center justify-center text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
+                        <i class="fas fa-file-pdf mr-1.5"></i> PDF
                     </a>
                     <a href="{{ route('organization.wallet.history') }}"
-                        class="text-xs font-bold text-pink-600 hover:text-pink-700 bg-pink-50 px-3 py-1.5 rounded-lg transition-colors">
-                        Tout voir <i class="fas fa-arrow-right ml-1"></i>
+                        class="inline-flex items-center justify-center text-xs font-bold text-pink-600 hover:text-pink-700 bg-pink-50 px-3 py-1.5 rounded-lg transition-colors">
+                        Tout voir <i class="fas fa-arrow-right ml-1.5"></i>
                     </a>
                 </div>
             </div>
@@ -87,18 +87,31 @@
                                 {{ $transaction->created_at->format('d/m/Y') }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                                @php
+                                $typeLabel = match(strtolower($transaction->type)) {
+                                'purchase', 'recharge' => 'Achat',
+                                'subscription' => 'Abonnement',
+                                'expense' => 'Ressource',
+                                'distribution' => 'Distribution',
+                                default => ucfirst($transaction->type)
+                                };
+                                @endphp
+                                <span
+                                    class="text-gray-400 text-[10px] font-bold uppercase mr-2 border border-gray-200 px-1.5 py-0.5 rounded">{{
+                                    $typeLabel }}</span>
                                 {{ $transaction->description }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-red-600">
-                                -{{ number_format(abs($transaction->amount)) }}
+                            <td
+                                class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold {{ $transaction->amount > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ $transaction->amount > 0 ? '+' : '' }}{{ number_format($transaction->amount) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 font-black">
-                                {{ number_format(abs($transaction->amount) * $creditPrice) }}
+                                {{ number_format($transaction->amount * $creditPrice) }}
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-gray-400 italic">Aucune dépense récente.
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-400 italic">Aucune opération récente.
                             </td>
                         </tr>
                         @endforelse

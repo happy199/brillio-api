@@ -1,22 +1,23 @@
 @extends('layouts.organization')
 
-@section('title', 'Historique des Dépenses')
+@section('title', 'Historique des Transactions')
 
 @section('content')
 <div class="space-y-8">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Historique des <span class="text-pink-600">Dépenses</span></h1>
-            <p class="text-gray-500">Consultez et exportez le détail de vos investissements.</p>
+            <h1 class="text-2xl font-bold text-gray-900">Historique des <span class="text-pink-600">Transactions</span>
+            </h1>
+            <p class="text-gray-500">Consultez et exportez l'ensemble de vos mouvements de crédits.</p>
         </div>
         <div class="flex gap-3">
             <a href="{{ route('organization.wallet.export-csv', request()->all()) }}"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                class="inline-flex items-center justify-center min-w-[80px] px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                 <i class="fas fa-file-csv mr-2 text-green-600"></i> CSV
             </a>
             <a href="{{ route('organization.wallet.export-pdf', request()->all()) }}"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                class="inline-flex items-center justify-center min-w-[80px] px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                 <i class="fas fa-file-pdf mr-2 text-red-600"></i> PDF
             </a>
         </div>
@@ -62,7 +63,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Description</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Montant</th>
+                            Crédits</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Valeur (FCFA)</th>
                     </tr>
@@ -74,19 +75,35 @@
                             {{ $t->created_at->format('d/m/Y H:i') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
+                            @php
+                            $badgeClass = match(strtolower($t->type)) {
+                            'recharge', 'purchase', 'subscription' => 'bg-green-100 text-green-800',
+                            'expense' => 'bg-orange-100 text-orange-800',
+                            'distribution' => 'bg-blue-100 text-blue-800',
+                            default => $t->amount > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            };
+                            $typeLabel = match(strtolower($t->type)) {
+                            'recharge', 'purchase' => 'Achat',
+                            'expense' => 'Ressource',
+                            'distribution' => 'Distribution',
+                            'subscription' => 'Abonnement',
+                            default => ucfirst($t->type)
+                            };
+                            @endphp
                             <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $t->type === 'expense' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800' }}">
-                                {{ $t->type === 'expense' ? 'Ressource' : 'Crédits' }}
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">
+                                {{ $typeLabel }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-900">
                             {{ $t->description }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-red-600">
-                            {{ number_format(abs($t->amount)) }}
+                        <td
+                            class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium {{ $t->amount > 0 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $t->amount > 0 ? '+' : '' }}{{ number_format($t->amount) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 font-bold">
-                            {{ number_format(abs($t->amount) * $creditPrice) }}
+                            {{ number_format($t->amount * $creditPrice) }}
                         </td>
                     </tr>
                     @empty
@@ -94,7 +111,7 @@
                         <td colspan="5" class="px-6 py-10 text-center text-gray-500">
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-receipt text-gray-200 text-4xl mb-4"></i>
-                                <p>Aucune dépense trouvée.</p>
+                                <p>Aucune transaction trouvée.</p>
                             </div>
                         </td>
                     </tr>
@@ -115,8 +132,8 @@
         <div class="text-sm text-blue-800">
             <p class="font-bold mb-1">Calcul de la valeur financière</p>
             <p>La valeur en FCFA est calculée sur la base du prix actuel du crédit pour organisation : <strong>{{
-                    number_format($creditPrice) }} FCFA / crédit</strong>. Cela vous permet de valoriser vos dons et
-                dépenses dans vos rapports comptables.</p>
+                    number_format($creditPrice) }} FCFA / crédit</strong>. Cela vous permet de justifier aussi bien vos
+                achats de crédits que vos redistributions.</p>
         </div>
     </div>
 </div>
