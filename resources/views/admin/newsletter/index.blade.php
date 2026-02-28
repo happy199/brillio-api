@@ -485,7 +485,9 @@
     function editSubscriber(id, email, status) {
         document.getElementById('editEmail').value = email;
         document.getElementById('editStatus').value = status;
-        document.getElementById('editForm').action = `/admin/newsletter/${id}`;
+        // Use the route name and replace the ID placeholder
+        let url = "{{ route('admin.newsletter.update', ':id') }}";
+        document.getElementById('editForm').action = url.replace(':id', id);
         document.getElementById('editModal').classList.remove('hidden');
     }
 </script>
