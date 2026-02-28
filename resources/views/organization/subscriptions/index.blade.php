@@ -106,9 +106,18 @@ $periods = [
                 <li>Exports PDF &amp; CSV</li>
             </ul>
             @if($isPro)
-            <div
-                class="mt-8 block w-full rounded-md bg-pink-50 px-3 py-2 text-center text-sm font-semibold text-pink-600 border border-pink-200">
-                Votre plan actuel
+            <div class="mt-8 text-center">
+                <div
+                    class="block w-full rounded-md bg-pink-50 px-3 py-2 text-sm font-semibold text-pink-600 border border-pink-200">
+                    Votre plan actuel
+                </div>
+                @php $org = auth()->user()->organization; @endphp
+                @if($org->subscription_expires_at)
+                <p class="mt-2 text-xs text-gray-500">
+                    Expire le <span class="font-semibold text-gray-700">{{
+                        $org->subscription_expires_at->translatedFormat('d F Y') }}</span>
+                </p>
+                @endif
             </div>
             @else
             @foreach($periods as $days => $label)
@@ -155,9 +164,18 @@ $periods = [
                 <li class="font-semibold text-gray-800">★ 50 Crédits/mois offerts automatiquement</li>
             </ul>
             @if($isEnterprise)
-            <div
-                class="mt-8 block w-full rounded-md bg-organization-50 px-3 py-2 text-center text-sm font-semibold text-organization-600 border border-organization-200">
-                Votre plan actuel
+            <div class="mt-8 text-center">
+                <div
+                    class="block w-full rounded-md bg-organization-50 px-3 py-2 text-sm font-semibold text-organization-600 border border-organization-200">
+                    Votre plan actuel
+                </div>
+                @php $org = auth()->user()->organization; @endphp
+                @if($org->subscription_expires_at)
+                <p class="mt-2 text-xs text-gray-500">
+                    Expire le <span class="font-semibold text-gray-700">{{
+                        $org->subscription_expires_at->translatedFormat('d F Y') }}</span>
+                </p>
+                @endif
             </div>
             @else
             @foreach($periods as $days => $label)
