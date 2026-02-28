@@ -161,7 +161,7 @@
                 @if(!auth()->user()->isCoach())
 
                 <a href="{{ route('admin.accounting.index') }}"
-                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.accounting.*') ? 'bg-indigo-800' : '' }}">
+                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.accounting.*') && !request()->routeIs('admin.payouts.*') ? 'bg-indigo-800' : '' }}">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -171,6 +171,19 @@
                         Comptabilité
                     </span>
                 </a>
+
+                @if(request()->routeIs('admin.accounting.*') || request()->routeIs('admin.payouts.*'))
+                <div class="bg-indigo-900 pb-2">
+                    <a href="{{ route('admin.payouts.index') }}"
+                        class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.payouts.*') ? 'text-white font-bold' : '' }}">
+                        Retraits Mentors
+                    </a>
+                    <a href="{{ route('admin.accounting.history') }}"
+                        class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.accounting.history') ? 'text-white font-bold' : '' }}">
+                        Historique des flux
+                    </a>
+                </div>
+                @endif
 
                 <a href="{{ route('admin.monetization.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.monetization.*') ? 'bg-indigo-800' : '' }}">

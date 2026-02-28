@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Organization;
 use App\Services\MentorshipNotificationService;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class CheckSubscriptionReminders extends Command
@@ -76,7 +75,7 @@ class CheckSubscriptionReminders extends Command
                     // Logic to avoid double sending: could use a cache or a 'last_reminder_sent' metadata field
                     $cacheKey = "sub_reminder_{$org->id}_{$interval['label']}_{$expiresAt->timestamp}";
 
-                    if (!cache()->has($cacheKey)) {
+                    if (! cache()->has($cacheKey)) {
                         $this->info("Sending {$interval['label']} reminder to: {$org->name}");
                         $this->notificationService->sendSubscriptionExpiringNotification($org, $interval['label']);
                         cache()->put($cacheKey, true, now()->addDays(2));

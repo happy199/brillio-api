@@ -6,12 +6,13 @@ use App\Models\Organization;
 use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ResourceGiftedMail extends Mailable
+class ResourceGiftedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

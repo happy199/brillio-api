@@ -5,12 +5,13 @@ namespace App\Mail\Wallet;
 use App\Models\CreditPack;
 use App\Models\Organization;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class CreditPackPurchasedMail extends Mailable
+class CreditPackPurchasedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -29,7 +30,7 @@ class CreditPackPurchasedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Confirmation de votre achat de crédits - Brillio",
+            subject: 'Confirmation de votre achat de crédits - Brillio',
         );
     }
 

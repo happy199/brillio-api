@@ -27,7 +27,7 @@ class SubscriptionDowngradedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Votre abonnement a expiré - Rétrogradation au plan Gratuit - Brillio",
+            subject: 'Votre abonnement a expiré - Rétrogradation au plan Gratuit - Brillio',
         );
     }
 

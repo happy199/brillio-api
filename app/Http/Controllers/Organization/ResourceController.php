@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class ResourceController extends Controller
 {
-    public function __construct(protected WalletService $walletService)
-    {
-    }
+    public function __construct(protected WalletService $walletService) {}
 
     /**
      * List all published resources (visible for the organization).
@@ -26,9 +24,9 @@ class ResourceController extends Controller
         $query = Resource::where('is_published', true)
             ->where('is_validated', true)
             ->whereHas('user', function ($q) {
-            $q->where('is_admin', true)
-                ->orWhereHas('mentorProfile', fn($mp) => $mp->where('is_published', true));
-        })
+                $q->where('is_admin', true)
+                    ->orWhereHas('mentorProfile', fn ($mp) => $mp->where('is_published', true));
+            })
             ->with('user')
             ->orderByDesc('created_at');
 
@@ -65,7 +63,7 @@ class ResourceController extends Controller
      */
     public function show(Resource $resource)
     {
-        if (!$resource->is_published || !$resource->is_validated) {
+        if (! $resource->is_published || ! $resource->is_validated) {
             abort(404);
         }
 
@@ -77,7 +75,7 @@ class ResourceController extends Controller
         if ($resource->is_premium) {
             $isLocked = true;
             $creditPrice = $this->walletService->getCreditPrice('jeune');
-            $creditCost = $creditPrice > 0 ? (int)ceil($resource->price / $creditPrice) : 0;
+            $creditCost = $creditPrice > 0 ? (int) ceil($resource->price / $creditPrice) : 0;
 
             // Security: don't show content or file for premium resources to organizations
             $resource->content = null;
@@ -87,12 +85,12 @@ class ResourceController extends Controller
         // Jeunes of this organization who DON'T already own the resource
         $jeunes = $organization->users()
             ->where(function ($query) {
-            $query->where('users.user_type', User::TYPE_JEUNE);
-        })
+                $query->where('users.user_type', User::TYPE_JEUNE);
+            })
             ->whereDoesntHave('purchases', function ($query) use ($resource) {
-            $query->where('item_type', Resource::class)
-                ->where('item_id', $resource->id);
-        })
+                $query->where('item_type', Resource::class)
+                    ->where('item_id', $resource->id);
+            })
             ->select('users.id', 'users.name', 'users.email')
             ->orderBy('users.name')
             ->get();
@@ -105,7 +103,7 @@ class ResourceController extends Controller
             ->toArray();
 
         // Track free resource view
-        if (!$isLocked) {
+        if (! $isLocked) {
             $resource->increment('views_count');
         }
 
@@ -124,7 +122,7 @@ class ResourceController extends Controller
      */
     public function gift(Request $request, Resource $resource)
     {
-        if (!$resource->is_published || !$resource->is_validated || !$resource->is_premium) {
+        if (! $resource->is_published || ! $resource->is_validated || ! $resource->is_premium) {
             return back()->with('error', 'Cette ressource n\'est pas disponible.');
         }
 
@@ -140,7 +138,7 @@ class ResourceController extends Controller
         $organization = $this->getCurrentOrganization();
 
         $creditPrice = $this->walletService->getCreditPrice('jeune');
-        $costPerJeune = $creditPrice > 0 ? (int)ceil($resource->price / $creditPrice) : 0;
+        $costPerJeune = $creditPrice > 0 ? (int) ceil($resource->price / $creditPrice) : 0;
 
         if ($costPerJeune === 0) {
             return back()->with('error', 'Impossible de calculer le coût en crédits.');
@@ -166,8 +164,8 @@ class ResourceController extends Controller
         $validJeunesQuery = $organization->users()
             ->whereIn('users.id', $jeuneIds->toArray())
             ->where(function ($query) {
-            $query->where('users.user_type', User::TYPE_JEUNE);
-        });
+                $query->where('users.user_type', User::TYPE_JEUNE);
+            });
 
         $validJeunes = $validJeunesQuery->get();
 
@@ -177,10 +175,10 @@ class ResourceController extends Controller
 
         // Secondary check: exclude those who already own the resource
         $validJeunes = $validJeunes->filter(function ($jeune) use ($resource) {
-            return !Purchase::where('user_id', $jeune->id)
-            ->where('item_type', Resource::class)
-            ->where('item_id', $resource->id)
-            ->exists();
+            return ! Purchase::where('user_id', $jeune->id)
+                ->where('item_type', Resource::class)
+                ->where('item_id', $resource->id)
+                ->exists();
         });
 
         if ($validJeunes->count() === 0) {
@@ -189,7 +187,7 @@ class ResourceController extends Controller
 
         if ($validJeunes->count() !== $jeuneIds->count()) {
             // Some were filtered out, but at least some remain
-            session()->flash('warning', ($jeuneIds->count() - $validJeunes->count()) . ' jeunes ont été ignorés car ils possèdent déjà la ressource.');
+            session()->flash('warning', ($jeuneIds->count() - $validJeunes->count()).' jeunes ont été ignorés car ils possèdent déjà la ressource.');
         }
 
         $totalCost = $costPerJeune * $validJeunes->count();
@@ -213,14 +211,14 @@ class ResourceController extends Controller
                 $mentorCreditsPerSale = 0;
                 if ($mentor && $resource->is_premium) {
                     $mentorCreditPrice = $this->walletService->getCreditPrice('mentor');
-                    $mentorCreditsPerSale = $mentorCreditPrice > 0 ? (int)ceil($resource->price / $mentorCreditPrice) : 0;
+                    $mentorCreditsPerSale = $mentorCreditPrice > 0 ? (int) ceil($resource->price / $mentorCreditPrice) : 0;
                 }
 
                 foreach ($validJeunes as $jeune) {
                     // Create Purchase record
                     $purchase = Purchase::create([
                         'user_id' => $jeune->id,
-                        'item_type' => Resource::class ,
+                        'item_type' => Resource::class,
                         'item_id' => $resource->id,
                         'cost_credits' => $costPerJeune,
                         'original_price_fcfa' => $resource->price,
@@ -248,9 +246,8 @@ class ResourceController extends Controller
 
             return back()->with('success', "Ressource offerte à {$validJeunes->count()} jeune(s) avec succès ! ({$totalCost} crédits débités)");
 
-        }
-        catch (\Exception $e) {
-            return back()->with('error', 'Erreur lors de l\'opération : ' . $e->getMessage());
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de l\'opération : '.$e->getMessage());
         }
     }
 }

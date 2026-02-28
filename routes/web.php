@@ -472,6 +472,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Payouts Mentors
         Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
         Route::get('payouts/{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name('payouts.show');
+        Route::post('payouts/{payout}/approve', [App\Http\Controllers\Admin\PayoutController::class, 'approve'])->name('payouts.approve');
+        Route::post('payouts/{payout}/reject', [App\Http\Controllers\Admin\PayoutController::class, 'reject'])->name('payouts.reject');
 
         // Analytiques
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');

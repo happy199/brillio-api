@@ -5,12 +5,13 @@ namespace App\Mail\Wallet;
 use App\Models\CreditPack;
 use App\Models\Organization;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SubscriptionActivatedMail extends Mailable
+class SubscriptionActivatedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
