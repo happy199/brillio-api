@@ -53,22 +53,16 @@
                 <!-- Free Plan -->
                 <div
                     class="relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="mb-4">
+                    <div class="mb-4 text-center">
                         <h3 class="text-lg font-semibold leading-6 text-gray-900">Standard</h3>
                         <p class="mt-4 text-sm leading-6 text-gray-500">Pour démarrer et parrainer sans limite.</p>
-                        <p class="mt-8 flex flex-wrap items-baseline gap-x-2">
+                        <p class="mt-8 flex flex-wrap items-baseline justify-center gap-x-2">
                             <span class="text-4xl font-bold tracking-tight text-gray-900">Gratuit</span>
                         </p>
                     </div>
-                    <ul role="list" class="mb-8 space-y-4 text-sm leading-6 text-gray-600 flex-1">
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Parrainage illimité de jeunes
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Tableau de bord standard
-                        </li>
+                    <ul role="list" class="mb-8 space-y-3 text-sm leading-6 text-gray-600 flex-1 text-center">
+                        <li>Parrainage illimité de jeunes</li>
+                        <li>Tableau de bord standard</li>
                     </ul>
                     @if($isFree)
                     <div
@@ -90,13 +84,13 @@
                         class="absolute -top-5 left-0 right-0 mx-auto w-32 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 px-3 py-1 text-center text-xs font-semibold text-white shadow-sm">
                         Populaire
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-4 text-center">
                         <h3 class="text-lg font-semibold leading-6 text-pink-600">Professionnel</h3>
                         <p class="mt-4 text-sm leading-6 text-gray-500">Suivez l'impact et boostez l'engagement.</p>
                         @foreach($periods as $days => $label)
                         @php $proPlan = $proPlans->get($days); @endphp
-                        <p class="mt-8 flex flex-wrap items-baseline gap-x-2" x-show="period === {{ $days }}" {{
-                            $days===30 ? '' : 'style=display:none' }}>
+                        <p class="mt-8 flex flex-wrap items-baseline justify-center gap-x-2"
+                            x-show="period === {{ $days }}" {{ $days===30 ? '' : 'style=display:none' }}>
                             <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
                                 {{ $proPlan ? number_format($proPlan->price) : '—' }}
                             </span>
@@ -105,31 +99,13 @@
                         </p>
                         @endforeach
                     </div>
-                    <ul role="list" class="mb-8 space-y-4 text-sm leading-6 text-gray-600 flex-1">
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-pink-600 h-6 w-5 flex-none"></i>
-                            <strong>Tout du plan Standard</strong>
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Gestion de liste des jeunes et mentors
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Statistiques détaillées (Engagement)
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Calendrier global des séances
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Suivi des statuts de séances
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Exports PDF &amp; CSV
-                        </li>
+                    <ul role="list" class="mb-8 space-y-3 text-sm leading-6 text-gray-600 flex-1 text-center">
+                        <li><strong>Tout du plan Standard</strong></li>
+                        <li>Gestion de liste des jeunes et mentors</li>
+                        <li>Statistiques détaillées (Engagement)</li>
+                        <li>Calendrier global des séances</li>
+                        <li>Suivi des statuts de séances</li>
+                        <li>Exports PDF &amp; CSV</li>
                     </ul>
 
                     @if($isPro)
@@ -157,13 +133,13 @@
                 <!-- Enterprise Plan -->
                 <div
                     class="relative flex flex-col rounded-2xl border {{ $isEnterprise ? 'border-2 border-organization-500 ring-2 ring-organization-500 ring-opacity-50' : 'border-gray-200' }} bg-white p-8 shadow-sm hover:shadow-lg transition-shadow">
-                    <div class="mb-4">
+                    <div class="mb-4 text-center">
                         <h3 class="text-lg font-semibold leading-6 text-gray-900">Entreprise</h3>
                         <p class="mt-4 text-sm leading-6 text-gray-500">Accompagnement complet et impact max.</p>
                         @foreach($periods as $days => $label)
                         @php $entPlan = $enterprisePlans->get($days); @endphp
-                        <p class="mt-8 flex flex-wrap items-baseline gap-x-2" x-show="period === {{ $days }}" {{
-                            $days===30 ? '' : 'style=display:none' }}>
+                        <p class="mt-8 flex flex-wrap items-baseline justify-center gap-x-2"
+                            x-show="period === {{ $days }}" {{ $days===30 ? '' : 'style=display:none' }}>
                             <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
                                 {{ $entPlan ? number_format($entPlan->price) : '—' }}
                             </span>
@@ -172,31 +148,13 @@
                         </p>
                         @endforeach
                     </div>
-                    <ul role="list" class="mb-8 space-y-4 text-sm leading-6 text-gray-600 flex-1">
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-pink-600 h-6 w-5 flex-none"></i>
-                            <strong>Tout du plan Pro</strong>
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Marque Blanche (Logo &amp; Couleurs)
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Sous-domaine personnalisé
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Centre d'Export (PDF, Excel, CSV)
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-check text-organization-500 h-6 w-5 flex-none"></i>
-                            Support dédié prioritaire
-                        </li>
-                        <li class="flex gap-x-3">
-                            <i class="fas fa-star text-yellow-400 h-6 w-5 flex-none"></i>
-                            <strong>50 Crédits/mois offerts automatiquement</strong>
-                        </li>
+                    <ul role="list" class="mb-8 space-y-3 text-sm leading-6 text-gray-600 flex-1 text-center">
+                        <li><strong>Tout du plan Pro</strong></li>
+                        <li>Marque Blanche (Logo &amp; Couleurs)</li>
+                        <li>Sous-domaine personnalisé</li>
+                        <li>Centre d'Export (PDF, Excel, CSV)</li>
+                        <li>Support dédié prioritaire</li>
+                        <li class="font-semibold text-gray-800">★ 50 Crédits/mois offerts automatiquement</li>
                     </ul>
 
                     @if($isEnterprise)
