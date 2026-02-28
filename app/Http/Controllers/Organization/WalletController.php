@@ -43,11 +43,11 @@ class WalletController extends Controller
         $pack = CreditPack::findOrFail($request->pack_id);
 
         $amount = $pack->price;
-        $description = 'Achat Crédits: ' . $pack->name;
+        $description = 'Achat Crédits: '.$pack->name;
 
         // PACK-{orgId}-{packId}-{timestamp}
         $organization = $this->getCurrentOrganization();
-        $reference = 'PACK-' . $organization->id . '-' . $pack->id . '-' . time();
+        $reference = 'PACK-'.$organization->id.'-'.$pack->id.'-'.time();
 
         $returnUrl = route('organization.payment.callback');
 
@@ -80,10 +80,10 @@ class WalletController extends Controller
             $amount,
             $description,
             $customer,
-        [
-            'reference' => $reference,
-            'transaction_id' => $localTransaction->id,
-        ],
+            [
+                'reference' => $reference,
+                'transaction_id' => $localTransaction->id,
+            ],
             $returnUrl
         );
 
@@ -151,7 +151,7 @@ class WalletController extends Controller
             'date_to' => $request->date_to,
         ]);
 
-        return $pdf->download('historique-transactions-' . now()->format('Y-m-d') . '.pdf');
+        return $pdf->download('historique-transactions-'.now()->format('Y-m-d').'.pdf');
     }
 
     /**
@@ -174,7 +174,7 @@ class WalletController extends Controller
         $transactions = $query->get();
         $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
 
-        $filename = 'transactions-brillio-' . now()->format('Y-m-d') . '.csv';
+        $filename = 'transactions-brillio-'.now()->format('Y-m-d').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
@@ -188,7 +188,7 @@ class WalletController extends Controller
             foreach ($transactions as $t) {
                 fputcsv($file, [
                     $t->created_at->format('d/m/Y H:i'),
-                    match(strtolower($t->type)) {
+                    match (strtolower($t->type)) {
                         'purchase', 'recharge' => 'Achat',
                         'subscription' => 'Abonnement',
                         'expense' => 'Ressource',
