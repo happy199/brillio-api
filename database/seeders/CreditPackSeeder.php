@@ -250,15 +250,15 @@ class CreditPackSeeder extends Seeder
             'display_order' => 12,
         ]);
 
-        // PRO — 9 mois (270 jours — 180 000 FCFA)
+        // PRO — 9 mois (270 jours — 160 000 FCFA, soit 1 mois offert)
         \App\Models\CreditPack::create([
             'user_type' => 'organization',
             'type' => 'subscription',
             'name' => 'Pro 9 Mois',
-            'description' => 'Plan Professionnel — 9 mois',
+            'description' => 'Plan Professionnel — 9 mois (1 mois offert)',
             'target_plan' => 'pro',
             'duration_days' => 270,
-            'price' => 180000,
+            'price' => 160000,
             'promo_percent' => 0,
             'credits' => 0,
             'features' => $proFeatures,
@@ -335,15 +335,15 @@ class CreditPackSeeder extends Seeder
             'display_order' => 22,
         ]);
 
-        // ENTERPRISE — 9 mois (270 jours — 450 000 FCFA)
+        // ENTERPRISE — 9 mois (270 jours — 400 000 FCFA, soit 1 mois offert)
         \App\Models\CreditPack::create([
             'user_type' => 'organization',
             'type' => 'subscription',
             'name' => 'Entreprise 9 Mois',
-            'description' => 'Plan Entreprise — 9 mois',
+            'description' => 'Plan Entreprise — 9 mois (1 mois offert)',
             'target_plan' => 'enterprise',
             'duration_days' => 270,
-            'price' => 450000,
+            'price' => 400000,
             'promo_percent' => 0,
             'credits' => 0,
             'features' => $enterpriseFeatures,

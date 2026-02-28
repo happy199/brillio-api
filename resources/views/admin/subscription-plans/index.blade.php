@@ -144,9 +144,7 @@
 
                 <form :action="formAction" method="POST">
                     @csrf
-                    <template x-if="editMode">
-                        @method('PUT')
-                    </template>
+                    <input type="hidden" name="_method" :value="editMode ? 'PUT' : ''">
 
                     <input type="hidden" name="target_plan" x-model="formData.target_plan">
 

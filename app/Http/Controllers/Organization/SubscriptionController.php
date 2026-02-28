@@ -28,51 +28,28 @@ class SubscriptionController extends Controller
 
     /**
      * Handle subscription upgrade/downgrade.
-     * The form now sends the exact plan ID — no need for billing_cycle lookup.
+     * The view sends the exact CreditPack ID for the chosen plan + period.
+     * No billing_cycle resolution needed — use $plan directly.
      */
     public function subscribe(Request $request, CreditPack $plan)
     {
         $organization = $this->getCurrentOrganization();
 
-        // 1. Determine Billing Cycle and Amount
-        $billingCycle = $request->input('billing_cycle', 'monthly'); // 'monthly' or 'yearly'
-
-        // Ensure the plan matches the requested cycle (or find the corresponding one)
-        // The UI sends the ID of the monthly plan by default, but if 'annual' is selected, we might need to find the yearly equivalent.
-        // Current logic in view: sends ID of monthly plan.
-
-        $targetPlanName = $plan->target_plan; // 'pro' or 'enterprise'
-
-        if ($billingCycle === 'yearly') {
-            $actualPlan = CreditPack::subscriptions()
-                ->where('target_plan', $targetPlanName)
-                ->where('duration_days', 365)
-                ->first();
-        } else {
-            $actualPlan = CreditPack::subscriptions()
-                ->where('target_plan', $targetPlanName)
-                ->where('duration_days', 30)
-                ->first();
+        // Validate that this is indeed an active organization subscription plan
+        if ($plan->type !== 'subscription' || ! $plan->is_active) {
+            return redirect()->back()->with('error', 'Plan non trouvé ou inactif.');
         }
 
-        if (! $actualPlan) {
-            return redirect()->back()->with('error', 'Plan non trouvé pour la période choisie.');
-        }
-
-        $amount = $actualPlan->price;
-        $description = 'Abonnement '.ucfirst($actualPlan->name).' ('.($billingCycle === 'yearly' ? 'Annuel' : 'Mensuel').')';
-
-        // Detailed reference for callback parsing: SUB-{orgId}-{planId}-{billingCycle}-{timestamp}
+        $amount = $plan->price;
+        $description = 'Abonnement '.$plan->name.' — '.$organization->name;
         $reference = 'SUB-'.$organization->id.'-'.time();
-
-        $callbackUrl = route('organization.payment.callback');
         $returnUrl = route('organization.dashboard');
 
-        // 2. Initiate Payment
+        // Initiate Payment
         $monerooService = app(\App\Services\MonerooService::class);
         $user = auth()->user();
 
-        // Create pending transaction record
+        // Create pending transaction record (stores plan_id for the callback)
         $localTransaction = \App\Models\MonerooTransaction::create([
             'user_id' => $user->id,
             'user_type' => get_class($user),
@@ -82,8 +59,7 @@ class SubscriptionController extends Controller
             'credits_amount' => 0,
             'metadata' => [
                 'reference' => $reference,
-                'plan_id' => $actualPlan->id,
-                'billing_cycle' => $billingCycle,
+                'plan_id' => $plan->id, // exact plan: period + price
                 'user_type' => 'organization',
             ],
         ]);
