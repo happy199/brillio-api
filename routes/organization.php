@@ -123,6 +123,9 @@ Route::middleware('auth')->group(function () {
 
         // Wallet
         Route::get('/wallet', [\App\Http\Controllers\Organization\WalletController::class, 'index'])->name('wallet.index');
+        Route::get('/wallet/history', [\App\Http\Controllers\Organization\WalletController::class, 'history'])->name('wallet.history');
+        Route::get('/wallet/export-pdf', [\App\Http\Controllers\Organization\WalletController::class, 'exportPdf'])->name('wallet.export-pdf');
+        Route::get('/wallet/export-csv', [\App\Http\Controllers\Organization\WalletController::class, 'exportCsv'])->name('wallet.export-csv');
         Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class, 'purchase'])
             ->middleware('organization_role:admin')
             ->name('wallet.purchase');
