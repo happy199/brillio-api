@@ -507,7 +507,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('contact-messages/{contact_message}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
 
         // Gestion des documents
-        Route::resource('documents', DocumentController::class);
+        Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+        Route::resource('documents', DocumentController::class)->only(['index', 'destroy']);
 
         // Gestion du mentorat
         Route::get('mentorship/requests', [MentorshipController::class, 'requests'])->name('mentorship.requests');
