@@ -39,7 +39,9 @@
                     class="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none">
                     {{ $label }}
                     @if($days === 365)
-                    <span class="ml-1 text-xs font-bold text-yellow-300 bg-transparent">★ 2 mois offerts</span>
+                    <span class="ml-1 text-xs font-semibold opacity-80">★ 2 mois offerts</span>
+                    @elseif($days === 180)
+                    <span class="ml-1 text-xs font-semibold opacity-80">★ 1 mois offert</span>
                     @endif
                 </button>
                 @endforeach
