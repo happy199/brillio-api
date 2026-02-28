@@ -36,15 +36,16 @@ class CreditDistributionController extends Controller
         // Determine target users
         if ($request->target === 'all') {
             $targetUsers = $organization->sponsoredUsers()->get();
-        } else {
+        }
+        else {
             $targetUsers = User::whereIn('id', $request->user_ids)
                 ->where(function ($q) use ($organization) {
-                    $q->where('sponsored_by_organization_id', $organization->id)
-                        ->orWhereHas('organizations', function ($sq) use ($organization) {
-                            $sq->where('organizations.id', $organization->id);
-                        }
-                        );
-                })
+                $q->where('sponsored_by_organization_id', $organization->id)
+                    ->orWhereHas('organizations', function ($sq) use ($organization) {
+                    $sq->where('organizations.id', $organization->id);
+                }
+                );
+            })
                 ->get();
         }
 
@@ -88,6 +89,9 @@ class CreditDistributionController extends Controller
                         "Crédits offerts par {$organization->name}",
                         $organization
                     );
+
+                    // Notification par email
+                    app(\App\Services\MentorshipNotificationService::class)->sendCreditGiftedNotification($targetUser, $organization, $amountPerUser);
                 }
             });
 
@@ -96,10 +100,11 @@ class CreditDistributionController extends Controller
                 'message' => "Félicitations ! {$totalCost} crédits ont été distribués avec succès à {$userCount} jeunes.",
             ]);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors de la distribution : '.$e->getMessage(),
+                'message' => 'Une erreur est survenue lors de la distribution : ' . $e->getMessage(),
             ], 500);
         }
     }

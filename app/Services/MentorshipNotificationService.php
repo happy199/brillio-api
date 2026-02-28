@@ -25,6 +25,13 @@ use App\Mail\Wallet\PaymentReceived;
 use App\Mail\Wallet\PayoutProcessed;
 use App\Mail\Wallet\PayoutRequested;
 use App\Mail\Wallet\SessionPaid;
+use App\Mail\Wallet\CreditGiftedMail;
+use App\Mail\Wallet\SubscriptionActivatedMail;
+use App\Mail\Wallet\CreditPackPurchasedMail;
+use App\Mail\Resource\ResourceGiftedMail;
+use App\Mail\Session\ReportAvailableMail;
+use App\Mail\Wallet\SubscriptionExpiringMail;
+use App\Mail\Wallet\SubscriptionDowngradedMail;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\Resource;
@@ -69,7 +76,7 @@ class MentorshipNotificationService
         // Pour une proposition, on assume un seul jeune (V1) ou on envoie à tous les participants
         foreach ($session->mentees as $mentee) {
             $creditPrice = SystemSetting::getValue('credit_price_jeune', 50);
-            $menteeCredits = (int) floor($session->price / $creditPrice);
+            $menteeCredits = (int)floor($session->price / $creditPrice);
 
             // Pour une séance proposée, on redirige vers le détail de la séance dans l'espace jeune
             $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
@@ -81,7 +88,7 @@ class MentorshipNotificationService
                 $menteeCredits,
                 $sessionUrl, // acceptUrl (le jeune pourra agir sur la page)
                 $sessionUrl // refuseUrl
-            ));
+                ));
         }
     }
 
@@ -121,7 +128,7 @@ class MentorshipNotificationService
             $mentees,
             route('mentor.mentorship.sessions.show', ['session' => $session->id]),
             ''
-        ));
+            ));
 
         // Envoyer à chaque jeune
         foreach ($mentees as $mentee) {
@@ -131,7 +138,7 @@ class MentorshipNotificationService
                 $mentees,
                 $sessionUrl,
                 $bookingUrl
-            ));
+                ));
         }
     }
 
@@ -233,7 +240,8 @@ class MentorshipNotificationService
     {
         if ($user->isMentor()) {
             Mail::to($user->email)->send(new WelcomeMentor($user));
-        } else {
+        }
+        else {
             Mail::to($user->email)->send(new WelcomeJeune($user));
         }
     }
@@ -299,6 +307,83 @@ class MentorshipNotificationService
     {
         if ($resource->user) {
             Mail::to($resource->user->email)->send(new ResourcePurchased($resource, $buyer, $creditsEarned));
+        }
+    }
+
+    /**
+     * Notifier un jeune lorsqu'il reçoit des crédits via une distribution d'organisation
+     */
+    public function sendCreditGiftedNotification(User $user, \App\Models\Organization $organization, int $amount)
+    {
+        Mail::to($user->email)->send(new CreditGiftedMail($user, $organization, $amount, $user->credits_balance));
+    }
+
+    /**
+     * Notifier une organisation de l'activation de son abonnement
+     */
+    public function sendSubscriptionActivatedNotification(\App\Models\Organization $organization, \App\Models\CreditPack $plan)
+    {
+        if ($organization->contact_email) {
+            Mail::to($organization->contact_email)->send(new SubscriptionActivatedMail($organization, $plan));
+        }
+    }
+
+    /**
+     * Notifier une organisation de l'achat d'un pack de crédits
+     */
+    public function sendCreditPackPurchasedNotification(\App\Models\Organization $organization, \App\Models\CreditPack $pack)
+    {
+        if ($organization->contact_email) {
+            Mail::to($organization->contact_email)->send(new CreditPackPurchasedMail($organization, $pack, $organization->credits_balance));
+        }
+    }
+
+    /**
+     * Notifier un jeune d'une ressource offerte par son organisation
+     */
+    public function sendResourceGiftedNotification(User $user, \App\Models\Resource $resource, \App\Models\Organization $organization)
+    {
+        Mail::to($user->email)->send(new ResourceGiftedMail($user, $resource, $organization));
+    }
+
+    /**
+     * Notifier le jeune et l'organisation (si applicable) qu'un compte rendu est disponible
+     */
+    public function sendReportAvailableNotification(MentoringSession $session)
+    {
+        // 1. Notifier chaque jeune participant
+        foreach ($session->mentees as $mentee) {
+            $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
+            Mail::to($mentee->email)->send(new ReportAvailableMail($mentee, $session, $sessionUrl));
+
+            // 2. Notifier l'organisation parrain si le jeune est sponsorisé
+            $org = $mentee->sponsoringOrganization;
+            if ($org && $org->contact_email) {
+                $orgSessionUrl = route('organization.sessions.show', ['session' => $session->id]);
+                Mail::to($org->contact_email)->send(new ReportAvailableMail($org->users()->wherePivot('role', 'admin')->first() ?? $mentee, $session, $orgSessionUrl));
+            }
+        }
+    }
+
+    /**
+     * Notifier une organisation que son abonnement expire bientôt
+     */
+    public function sendSubscriptionExpiringNotification(\App\Models\Organization $organization, string $timeLeft)
+    {
+        if ($organization->contact_email) {
+            $renewUrl = route('organization.subscriptions.index');
+            Mail::to($organization->contact_email)->send(new SubscriptionExpiringMail($organization, $timeLeft, $renewUrl));
+        }
+    }
+
+    /**
+     * Notifier une organisation qu'elle a été rétrogradée au plan gratuit
+     */
+    public function sendSubscriptionDowngradedNotification(\App\Models\Organization $organization)
+    {
+        if ($organization->contact_email) {
+            $renewUrl = route('organization.subscriptions.index');
+            Mail::to($organization->contact_email)->send(new SubscriptionDowngradedMail($organization, $renewUrl));
         }
     }
 }

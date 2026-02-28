@@ -34,7 +34,7 @@ class PaymentController extends Controller
             'query' => $request->query(),
         ]);
 
-        if (! $transactionId) {
+        if (!$transactionId) {
             return redirect()->route('organization.dashboard')->with('error', 'Référence de transaction manquante.');
         }
 
@@ -48,7 +48,8 @@ class PaymentController extends Controller
 
             if ($reference && str_starts_with($reference, 'SUB-')) {
                 return redirect()->route('organization.subscriptions.index')->with('success', 'Abonnement activé avec succès !');
-            } elseif ($reference && str_starts_with($reference, 'PACK-')) {
+            }
+            elseif ($reference && str_starts_with($reference, 'PACK-')) {
                 return redirect()->route('organization.wallet.index')->with('success', 'Pack de crédits ajouté avec succès !');
             }
 
@@ -59,11 +60,12 @@ class PaymentController extends Controller
             // Verify transaction status from API
             $paymentData = $this->monerooService->verifyPayment($transactionId);
 
-            if (! $paymentData || ! in_array($paymentData['status'] ?? '', ['completed', 'success'])) {
+            if (!$paymentData || !in_array($paymentData['status'] ?? '', ['completed', 'success'])) {
                 return redirect()->route('organization.dashboard')->with('error', 'Le paiement a échoué ou n\'a pas pu être vérifié.');
             }
-        } catch (\Exception $e) {
-            Log::error('Moneroo Verification Error in Callback: '.$e->getMessage());
+        }
+        catch (\Exception $e) {
+            Log::error('Moneroo Verification Error in Callback: ' . $e->getMessage());
 
             return redirect()->route('organization.dashboard')->with('error', 'Erreur lors de la vérification du paiement.');
         }
@@ -72,7 +74,7 @@ class PaymentController extends Controller
         $metadata = $paymentData['metadata'] ?? [];
         $reference = $metadata['reference'] ?? ($paymentData['reference'] ?? null);
 
-        if (! $reference) {
+        if (!$reference) {
             Log::error('Payment processed but missing reference', ['payment' => $paymentData]);
 
             return redirect()->route('organization.dashboard')->with('error', 'Paiement réussi mais référence interne introuvable. Contactez le support.');
@@ -87,7 +89,8 @@ class PaymentController extends Controller
 
         if (str_starts_with($reference, 'SUB-')) {
             return $this->handleSubscriptionPayment($paymentData, $reference);
-        } elseif (str_starts_with($reference, 'PACK-')) {
+        }
+        elseif (str_starts_with($reference, 'PACK-')) {
             return $this->handleCreditPackPayment($paymentData, $reference);
         }
 
@@ -100,7 +103,7 @@ class PaymentController extends Controller
         $monerooTransactionId = $paymentData['id'] ?? null;
         $localTransaction = \App\Models\MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
 
-        if (! $localTransaction) {
+        if (!$localTransaction) {
             Log::error('Subscription callback: Local transaction not found', ['moneroo_id' => $monerooTransactionId]);
 
             return redirect()->route('organization.dashboard')->with('error', 'Transaction introuvable.');
@@ -128,6 +131,9 @@ class PaymentController extends Controller
             if ($localTransaction->status !== 'completed') {
                 $localTransaction->markAsCompleted();
             }
+
+            // Notification par email
+            app(\App\Services\MentorshipNotificationService::class)->sendSubscriptionActivatedNotification($organization, $plan);
 
             return redirect()->route('organization.subscriptions.index')->with('success', 'Abonnement activé avec succès !');
         }
@@ -167,6 +173,9 @@ class PaymentController extends Controller
             if ($localTransaction && $localTransaction->status !== 'completed') {
                 $localTransaction->markAsCompleted();
             }
+
+            // Notification par email
+            app(\App\Services\MentorshipNotificationService::class)->sendCreditPackPurchasedNotification($organization, $pack);
 
             return redirect()->route('organization.wallet.index')->with('success', "Pack de {$pack->credits} crédits ajouté avec succès !");
         }
