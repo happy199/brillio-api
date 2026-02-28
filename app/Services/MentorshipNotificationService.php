@@ -413,19 +413,50 @@ class MentorshipNotificationService
     }
 
     /**
-     * Notifier le jeune et le mentor que l'organisation a mis fin à leur relation
+     * Notifier toutes les parties prenantes de la fin d'une relation (Jeune, Mentor, Organisation)
      */
-    public function sendMentorshipTerminatedByOrg(Mentorship $mentorship, string $organizationName)
+    public function sendMentorshipTerminated(Mentorship $mentorship, User $actor, string $reason)
     {
         $mentor = $mentorship->mentor;
         $mentee = $mentorship->mentee;
+        $organization = $mentee->sponsoredByOrganization;
 
-        if ($mentee) {
-            Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedByOrgToMentee($mentorship, $mentee, $mentor, $organizationName));
+        $actorType = $actor->user_type; // 'jeune', 'mentor', or 'organization' (via current org check)
+
+        // Si l'acteur n'est ni jeune ni mentor, c'est l'organisation
+        $isOrgActor = ($actorType !== User::TYPE_JEUNE && $actorType !== User::TYPE_MENTOR);
+
+        // 1. Mail à l'acteur (Confirmation)
+        $otherPartyName = '';
+        if ($actor->id === $mentee->id) {
+            $otherPartyName = $mentor->name;
+        } elseif ($actor->id === $mentor->id) {
+            $otherPartyName = $mentee->name;
+        } else {
+            $otherPartyName = "{$mentee->name} et {$mentor->name}";
         }
 
-        if ($mentor) {
-            Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedByOrgToMentor($mentorship, $mentor, $mentee, $organizationName));
+        Mail::to($actor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedConfirmation($mentorship, $actor, $otherPartyName, $reason));
+
+        // 2. Mail à l'autre partie (Notification)
+        if ($actor->id === $mentee->id) {
+            // Le jeune a rompu -> Notifier le mentor
+            Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentor, $mentee->name, $reason));
+        } elseif ($actor->id === $mentor->id) {
+            // Le mentor a rompu -> Notifier le jeune
+            Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentee, $mentor->name, $reason));
+        } else {
+            // L'organisation a rompu -> Notifier les deux
+            Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentee, "votre organisation ({$organization->name})", $reason));
+            Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentor, "l'organisation ({$organization->name})", $reason));
+        }
+
+        // 3. Mail à l'organisation (si elle n'est pas l'acteur)
+        if (! $isOrgActor && $organization) {
+            $adminEmail = $organization->admin?->email ?? $organization->email;
+            if ($adminEmail) {
+                Mail::to($adminEmail)->send(new \App\Mail\Mentorship\MentorshipTerminatedOrgNotification($mentorship, $actor->name, $reason, $mentee->name, $mentor->name));
+            }
         }
     }
 }

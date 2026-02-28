@@ -225,6 +225,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class, 'unlock'])->name('resources.unlock');
     Route::post('/mentorship/request', [\App\Http\Controllers\Jeune\MentorshipController::class, 'store'])->name('mentorship.request');
     Route::post('/mentorship/{mentorship}/cancel', [\App\Http\Controllers\Jeune\MentorshipController::class, 'cancel'])->name('mentorship.cancel');
+    Route::post('/mentorship/{mentorship}/disconnect', [\App\Http\Controllers\Jeune\MentorshipController::class, 'disconnect'])->name('mentorship.disconnect');
 
     // Page de garde pour le mentorat
     Route::get('/mentorat/verrouille', [\App\Http\Controllers\Jeune\MentorshipController::class, 'lockedIndex'])->name('mentorship.locked');

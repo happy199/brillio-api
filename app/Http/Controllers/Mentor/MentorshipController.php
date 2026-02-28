@@ -107,6 +107,9 @@ class MentorshipController extends Controller
             'updated_at' => now(),
         ]);
 
+        // Notification (Mentor, Jeune, Org)
+        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipTerminated($mentorship, Auth::user(), $request->diction_reason);
+
         return redirect()->back()->with('success', 'Mentorat terminé.');
     }
 }

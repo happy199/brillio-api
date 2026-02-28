@@ -109,18 +109,15 @@
 
                     @if($mentorship->status === 'accepted')
                     <div class="pt-4 border-t border-gray-100">
-                        <form action="{{ route('organization.mentorships.terminate', $mentorship) }}" method="POST"
-                            onsubmit="return confirm('Êtes-vous sûr de vouloir mettre fin à cette relation de mentorat ? Un email sera envoyé au jeune et au mentor.')">
-                            @csrf
-                            <button type="submit"
-                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
-                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                Terminer la relation
-                            </button>
-                        </form>
+                        <button type="button"
+                            onclick="openTerminateModal('{{ route('organization.mentorships.terminate', $mentorship) }}', '{{ $mentorship->mentee->name }}', '{{ $mentorship->mentor->name }}')"
+                            class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Terminer la relation
+                        </button>
                     </div>
                     @endif
                 </div>
@@ -148,4 +145,70 @@
         </div>
     </div>
 </div>
+
+<!-- Terminate Modal -->
+<div id="terminateModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+    aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+            onclick="closeTerminateModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div
+            class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div>
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="mt-3 text-center sm:mt-5">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Terminer la relation de
+                        mentorat</h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-500">
+                            Vous allez mettre fin à la relation entre <span id="menteeName" class="font-bold"></span> et
+                            <span id="mentorName" class="font-bold"></span>. Cette action est irréversible.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <form id="terminateForm" method="POST" class="mt-5 sm:mt-6">
+                @csrf
+                <div class="mb-4 text-left">
+                    <label for="diction_reason" class="block text-sm font-medium text-gray-700">Raison de l'arrêt
+                        (obligatoire)</label>
+                    <textarea name="diction_reason" id="diction_reason" rows="3" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                        placeholder="Précisez la raison pour l'historique et les notifications..."></textarea>
+                    <p class="mt-1 text-xs text-gray-400">Un email sera envoyé au jeune et au mentor avec cette
+                        information.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeTerminateModal()"
+                        class="flex-1 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                        class="flex-1 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                        Confirmer l'arrêt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openTerminateModal(url, mentee, mentor) {
+        document.getElementById('terminateForm').action = url;
+        document.getElementById('menteeName').textContent = mentee;
+        document.getElementById('mentorName').textContent = mentor;
+        document.getElementById('terminateModal').classList.remove('hidden');
+    }
+
+    function closeTerminateModal() {
+        document.getElementById('terminateModal').classList.add('hidden');
+    }
+</script>
 @endsection
