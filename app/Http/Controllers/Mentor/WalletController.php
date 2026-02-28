@@ -31,7 +31,7 @@ class WalletController extends Controller
         // 1. Historique RECHARGEMENT / DÉPENSES (Lié au wallet perso pour les features)
         // Types: 'purchase' (achat crédits), 'expense' (consommation features), 'coupon', 'service_fee'
         $walletTransactions = WalletTransaction::where('user_id', $user->id)
-            ->whereIn('type', ['purchase', 'expense', 'coupon', 'service_fee'])
+            ->whereIn('type', ['purchase', 'expense', 'coupon', 'service_fee', 'gift', 'refund'])
             ->latest()
             ->paginate(10, ['*'], 'wallet_page');
 
@@ -46,7 +46,7 @@ class WalletController extends Controller
 
         // Calcul des crédits achetés (Total cumulé)
         $totalCreditsPurchased = WalletTransaction::where('user_id', $user->id)
-            ->whereIn('type', ['purchase', 'coupon'])
+            ->whereIn('type', ['purchase', 'coupon', 'gift', 'refund'])
             ->where('amount', '>', 0)
             ->sum('amount');
 
