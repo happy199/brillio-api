@@ -174,9 +174,20 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $mentorship->created_at->format('d/m/Y') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                 <a href="{{ route('organization.mentorships.show', $mentorship) }}"
                                     class="text-organization-600 hover:text-organization-900">Voir détails</a>
+                                @if($mentorship->status === 'accepted')
+                                <form action="{{ route('organization.mentorships.terminate', $mentorship) }}"
+                                    method="POST" class="inline"
+                                    onsubmit="return confirm('Êtes-vous sûr de vouloir mettre fin à cette relation de mentorat ? Un email sera envoyé au jeune et au mentor.')">
+                                    @csrf
+                                    <button type="submit"
+                                        class="text-red-600 hover:text-red-900 bg-transparent border-0 p-0 cursor-pointer">
+                                        Terminer
+                                    </button>
+                                </form>
+                                @endif
                             </td>
                         </tr>
                         @empty

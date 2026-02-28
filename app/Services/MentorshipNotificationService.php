@@ -411,4 +411,21 @@ class MentorshipNotificationService
     {
         Mail::to($payout->mentorProfile->user->email)->send(new \App\Mail\Wallet\PayoutProcessed($payout));
     }
+
+    /**
+     * Notifier le jeune et le mentor que l'organisation a mis fin à leur relation
+     */
+    public function sendMentorshipTerminatedByOrg(Mentorship $mentorship, string $organizationName)
+    {
+        $mentor = $mentorship->mentor;
+        $mentee = $mentorship->mentee;
+
+        if ($mentee) {
+            Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedByOrgToMentee($mentorship, $mentee, $mentor, $organizationName));
+        }
+
+        if ($mentor) {
+            Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedByOrgToMentor($mentorship, $mentor, $mentee, $organizationName));
+        }
+    }
 }

@@ -35,6 +35,40 @@ class MentorshipController extends Controller
         return view('organization.mentorships.index', compact('organization', 'mentorships'));
     }
 
+    protected $notificationService;
+
+    public function __construct(\App\Services\MentorshipNotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
+    /**
+     * Terminer une relation de mentorat
+     */
+    public function terminate(Mentorship $mentorship)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        // Vérification : le menté doit être parrainé par cette organisation
+        if ($mentorship->mentee->sponsored_by_organization_id !== $organization->id) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        if ($mentorship->status === 'disconnected') {
+            return back()->with('error', 'Cette relation est déjà terminée.');
+        }
+
+        $mentorship->update([
+            'status' => 'disconnected',
+            'diction_reason' => 'Arrêt par l\'organisation parrainante',
+        ]);
+
+        // Notification au jeune et au mentor
+        $this->notificationService->sendMentorshipTerminatedByOrg($mentorship, $organization->name);
+
+        return back()->with('success', 'La relation de mentorat a été terminée avec succès.');
+    }
+
     /**
      * Détail d'un mentorat
      */

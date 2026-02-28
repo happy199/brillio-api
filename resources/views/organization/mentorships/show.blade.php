@@ -106,6 +106,23 @@
                         <p class="mt-1 text-sm text-red-700">{{ $mentorship->refusal_reason }}</p>
                     </div>
                     @endif
+
+                    @if($mentorship->status === 'accepted')
+                    <div class="pt-4 border-t border-gray-100">
+                        <form action="{{ route('organization.mentorships.terminate', $mentorship) }}" method="POST"
+                            onsubmit="return confirm('Êtes-vous sûr de vouloir mettre fin à cette relation de mentorat ? Un email sera envoyé au jeune et au mentor.')">
+                            @csrf
+                            <button type="submit"
+                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Terminer la relation
+                            </button>
+                        </form>
+                    </div>
+                    @endif
                 </div>
             </div>
 
