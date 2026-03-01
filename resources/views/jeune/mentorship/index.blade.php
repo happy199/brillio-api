@@ -106,15 +106,20 @@
                         </div>
                     </div>
 
-                    <div class="mt-auto pt-6 border-t border-gray-100 flex gap-3">
+                    <div class="mt-auto pt-6 border-t border-gray-100 flex flex-wrap gap-3">
                         <a href="{{ route('jeune.mentors.show', $mentorProfile) }}"
-                            class="flex-1 text-center px-4 py-2 bg-gray-50 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-100 transition">
+                            class="flex-1 text-center px-4 py-2 bg-gray-50 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-100 transition whitespace-nowrap">
                             Voir profil
                         </a>
                         <a href="{{ route('jeune.sessions.create', $mentorUser->id) }}"
-                            class="flex-1 text-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm">
+                            class="flex-1 text-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-sm whitespace-nowrap">
                             Réserver
                         </a>
+                        <button
+                            @click="$dispatch('open-disconnect-modal', { url: '{{ route('jeune.mentorship.disconnect', $mentorship) }}', name: '{{ $mentorUser->name }}' })"
+                            class="w-full text-center px-4 py-2 bg-white border border-red-200 text-red-600 text-xs font-medium rounded-lg hover:bg-red-50 transition">
+                            Mettre fin au mentorat
+                        </button>
                     </div>
                 </div>
                 @endforeach
@@ -299,6 +304,49 @@
                     <button type="submit"
                         class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition">
                         Confirmer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Disconnect Modal (Active Mentorship) -->
+    <div x-data="{ show: false, url: '', name: '' }"
+        @open-disconnect-modal.window="show = true; url = $event.detail.url; name = $event.detail.name" x-show="show"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" x-cloak x-transition>
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl" @click.away="show = false">
+            <div class="flex items-center justify-center w-14 h-14 bg-red-100 rounded-full mx-auto mb-4">
+                <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Terminer le mentorat ?</h3>
+            <p class="text-gray-600 text-center mb-6">
+                Vous êtes sur le point de mettre fin à votre relation avec <span class="font-bold"
+                    x-text="name"></span>.
+            </p>
+
+            <form :action="url" method="POST">
+                @csrf
+                <div class="mb-5">
+                    <label for="diction_reason" class="block text-sm font-medium text-gray-700 mb-1">Raison de l'arrêt
+                        (obligatoire)</label>
+                    <textarea name="diction_reason" id="diction_reason" rows="3" required
+                        class="w-full rounded-xl border-gray-300 focus:border-red-500 focus:ring-red-500 text-sm p-3"
+                        placeholder="Pourquoi souhaitez-vous arrêter ce mentorat ?"></textarea>
+                    <p class="mt-2 text-xs text-gray-400">Cette raison sera partagée avec votre mentor et
+                        l'organisation.</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" @click="show = false"
+                        class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                        class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition">
+                        Confirmer l'arrêt
                     </button>
                 </div>
             </form>

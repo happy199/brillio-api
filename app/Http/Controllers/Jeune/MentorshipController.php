@@ -131,4 +131,35 @@ class MentorshipController extends Controller
 
         return back()->with('success', 'Demande annulée avec succès.');
     }
+
+    /**
+     * Terminer une relation de mentorat active
+     */
+    public function disconnect(Request $request, Mentorship $mentorship)
+    {
+        $user = auth()->user();
+
+        if ($mentorship->mentee_id !== $user->id) {
+            abort(403);
+        }
+
+        if ($mentorship->status !== 'accepted') {
+            return back()->with('error', 'Vous ne pouvez terminer qu\'une relation active.');
+        }
+
+        $request->validate([
+            'diction_reason' => 'required|string|max:1000',
+        ]);
+
+        $mentorship->update([
+            'status' => 'disconnected',
+            'diction_reason' => $request->diction_reason,
+            'updated_at' => now(),
+        ]);
+
+        // Notification (Jeune, Mentor, Org)
+        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipTerminated($mentorship, $user, $request->diction_reason);
+
+        return back()->with('success', 'Mentorat terminé avec succès.');
+    }
 }

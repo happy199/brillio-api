@@ -90,6 +90,7 @@ Route::middleware('auth')->group(function () {
             // Mentorships
             Route::get('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'index'])->name('mentorships.index');
             Route::get('/mentorships/{mentorship}', [\App\Http\Controllers\Organization\MentorshipController::class, 'show'])->name('mentorships.show');
+            Route::post('/mentorships/{mentorship}/terminate', [\App\Http\Controllers\Organization\MentorshipController::class, 'terminate'])->name('mentorships.terminate');
 
             // Sessions & Calendar
             Route::get('/sessions', [\App\Http\Controllers\Organization\SessionController::class, 'index'])->name('sessions.index');

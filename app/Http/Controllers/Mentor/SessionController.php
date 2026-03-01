@@ -270,7 +270,9 @@ class SessionController extends Controller
         }
 
         // Notification email de fin de séance
-        app(\App\Services\MentorshipNotificationService::class)->sendSessionCompleted($session);
+        $notificationService = app(\App\Services\MentorshipNotificationService::class);
+        $notificationService->sendSessionCompleted($session);
+        $notificationService->sendReportAvailableNotification($session);
 
         return redirect()->back()->with('success', 'Compte rendu enregistré. Votre rémunération a été créditée sur votre portefeuille.');
     }

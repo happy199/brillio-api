@@ -129,6 +129,9 @@ class PaymentController extends Controller
                 $localTransaction->markAsCompleted();
             }
 
+            // Notification par email
+            app(\App\Services\MentorshipNotificationService::class)->sendSubscriptionActivatedNotification($organization, $plan);
+
             return redirect()->route('organization.subscriptions.index')->with('success', 'Abonnement activé avec succès !');
         }
 
@@ -167,6 +170,9 @@ class PaymentController extends Controller
             if ($localTransaction && $localTransaction->status !== 'completed') {
                 $localTransaction->markAsCompleted();
             }
+
+            // Notification par email
+            app(\App\Services\MentorshipNotificationService::class)->sendCreditPackPurchasedNotification($organization, $pack);
 
             return redirect()->route('organization.wallet.index')->with('success', "Pack de {$pack->credits} crédits ajouté avec succès !");
         }

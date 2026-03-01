@@ -9,9 +9,11 @@ use App\Mail\Mentorship\MentorshipRefused;
 use App\Mail\Mentorship\MentorshipRequested;
 use App\Mail\Onboarding\WelcomeJeune;
 use App\Mail\Onboarding\WelcomeMentor;
+use App\Mail\Resource\ResourceGiftedMail;
 use App\Mail\Resource\ResourcePurchased;
 use App\Mail\Resource\ResourceRejected;
 use App\Mail\Resource\ResourceValidated;
+use App\Mail\Session\ReportAvailableMail;
 use App\Mail\Session\ReportReminder;
 use App\Mail\Session\SessionCancelled;
 use App\Mail\Session\SessionCompleted;
@@ -19,12 +21,17 @@ use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionRefused;
 use App\Mail\Support\ContactConfirmation;
+use App\Mail\Wallet\CreditGiftedMail;
+use App\Mail\Wallet\CreditPackPurchasedMail;
 use App\Mail\Wallet\CreditRecharged;
 use App\Mail\Wallet\IncomeReleased;
 use App\Mail\Wallet\PaymentReceived;
 use App\Mail\Wallet\PayoutProcessed;
 use App\Mail\Wallet\PayoutRequested;
 use App\Mail\Wallet\SessionPaid;
+use App\Mail\Wallet\SubscriptionActivatedMail;
+use App\Mail\Wallet\SubscriptionDowngradedMail;
+use App\Mail\Wallet\SubscriptionExpiringMail;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\Resource;
@@ -299,6 +306,157 @@ class MentorshipNotificationService
     {
         if ($resource->user) {
             Mail::to($resource->user->email)->send(new ResourcePurchased($resource, $buyer, $creditsEarned));
+        }
+    }
+
+    /**
+     * Notifier un jeune lorsqu'il reçoit des crédits via une distribution d'organisation
+     */
+    public function sendCreditGiftedNotification(User $user, \App\Models\Organization $organization, int $amount)
+    {
+        Mail::to($user->email)->send(new CreditGiftedMail($user, $organization, $amount, $user->credits_balance));
+    }
+
+    /**
+     * Notifier une organisation de l'activation de son abonnement
+     */
+    public function sendSubscriptionActivatedNotification(\App\Models\Organization $organization, \App\Models\CreditPack $plan)
+    {
+        if ($organization->contact_email) {
+            Mail::to($organization->contact_email)->send(new SubscriptionActivatedMail($organization, $plan));
+        }
+    }
+
+    /**
+     * Notifier une organisation de l'achat d'un pack de crédits
+     */
+    public function sendCreditPackPurchasedNotification(\App\Models\Organization $organization, \App\Models\CreditPack $pack)
+    {
+        if ($organization->contact_email) {
+            Mail::to($organization->contact_email)->send(new CreditPackPurchasedMail($organization, $pack, $organization->credits_balance));
+        }
+    }
+
+    /**
+     * Notifier un jeune d'une ressource offerte par son organisation
+     */
+    public function sendResourceGiftedNotification(User $user, \App\Models\Resource $resource, \App\Models\Organization $organization)
+    {
+        Mail::to($user->email)->send(new ResourceGiftedMail($user, $resource, $organization));
+    }
+
+    /**
+     * Notifier le jeune et l'organisation (si applicable) qu'un compte rendu est disponible
+     */
+    public function sendReportAvailableNotification(MentoringSession $session)
+    {
+        // 1. Notifier chaque jeune participant
+        foreach ($session->mentees as $mentee) {
+            $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
+            Mail::to($mentee->email)->send(new ReportAvailableMail($mentee, $session, $sessionUrl));
+
+            // 2. Notifier l'organisation parrain si le jeune est sponsorisé
+            $org = $mentee->sponsoringOrganization;
+            if ($org && $org->contact_email) {
+                $orgSessionUrl = route('organization.sessions.show', ['session' => $session->id]);
+
+                // Fallback de personalisation : Admin > Organisation (nom) > Jeune (mentee)
+                $recipient = $org->users()->wherePivot('role', 'admin')->first();
+                if (! $recipient) {
+                    $recipient = (object) [
+                        'name' => $org->name,
+                        'email' => $org->contact_email,
+                    ];
+                }
+
+                Mail::to($org->contact_email)->send(new ReportAvailableMail($recipient, $session, $orgSessionUrl));
+            }
+        }
+    }
+
+    /**
+     * Notifier une organisation que son abonnement expire bientôt
+     */
+    public function sendSubscriptionExpiringNotification(\App\Models\Organization $organization, string $timeLeft)
+    {
+        if ($organization->contact_email) {
+            $renewUrl = route('organization.subscriptions.index');
+            Mail::to($organization->contact_email)->send(new SubscriptionExpiringMail($organization, $timeLeft, $renewUrl));
+        }
+    }
+
+    /**
+     * Notifier une organisation qu'elle a été rétrogradée au plan gratuit
+     */
+    public function sendSubscriptionDowngradedNotification(\App\Models\Organization $organization)
+    {
+        if ($organization->contact_email) {
+            $renewUrl = route('organization.subscriptions.index');
+            Mail::to($organization->contact_email)->send(new SubscriptionDowngradedMail($organization, $renewUrl));
+        }
+    }
+
+    /**
+     * Notifier le mentor que son retrait a été complété
+     */
+    public function sendPayoutCompleted(\App\Models\PayoutRequest $payout)
+    {
+        Mail::to($payout->mentorProfile->user->email)->send(new \App\Mail\Wallet\PayoutProcessed($payout));
+    }
+
+    /**
+     * Notifier le mentor que son retrait a été rejeté
+     */
+    public function sendPayoutFailed(\App\Models\PayoutRequest $payout)
+    {
+        Mail::to($payout->mentorProfile->user->email)->send(new \App\Mail\Wallet\PayoutProcessed($payout));
+    }
+
+    /**
+     * Notifier toutes les parties prenantes de la fin d'une relation (Jeune, Mentor, Organisation)
+     */
+    public function sendMentorshipTerminated(Mentorship $mentorship, User $actor, string $reason)
+    {
+        $mentor = $mentorship->mentor;
+        $mentee = $mentorship->mentee;
+        $organization = $mentee->sponsoringOrganization;
+
+        $actorType = $actor->user_type; // 'jeune', 'mentor', or 'organization' (via current org check)
+
+        // Si l'acteur n'est ni jeune ni mentor, c'est l'organisation
+        $isOrgActor = ($actorType !== User::TYPE_JEUNE && $actorType !== User::TYPE_MENTOR);
+
+        // 1. Mail à l'acteur (Confirmation)
+        $otherPartyName = '';
+        if ($actor->id === $mentee->id) {
+            $otherPartyName = $mentor->name;
+        } elseif ($actor->id === $mentor->id) {
+            $otherPartyName = $mentee->name;
+        } else {
+            $otherPartyName = "{$mentee->name} et {$mentor->name}";
+        }
+
+        Mail::to($actor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedConfirmation($mentorship, $actor, $otherPartyName, $reason));
+
+        // 2. Mail à l'autre partie (Notification)
+        if ($actor->id === $mentee->id) {
+            // Le jeune a rompu -> Notifier le mentor
+            Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentor, $mentee->name, $reason));
+        } elseif ($actor->id === $mentor->id) {
+            // Le mentor a rompu -> Notifier le jeune
+            Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentee, $mentor->name, $reason));
+        } else {
+            // L'organisation a rompu -> Notifier les deux
+            Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentee, "votre organisation ({$organization->name})", $reason));
+            Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentor, "l'organisation ({$organization->name})", $reason));
+        }
+
+        // 3. Mail à l'organisation (si elle n'est pas l'acteur)
+        if (! $isOrgActor && $organization) {
+            $adminEmail = $organization->users()->wherePivot('role', 'admin')->first()?->email ?? $organization->contact_email;
+            if ($adminEmail) {
+                Mail::to($adminEmail)->send(new \App\Mail\Mentorship\MentorshipTerminatedOrgNotification($mentorship, $actor->name, $reason, $mentee->name, $mentor->name));
+            }
         }
     }
 }

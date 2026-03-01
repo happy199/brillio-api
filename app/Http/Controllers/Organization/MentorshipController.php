@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MentorshipController extends Controller
 {
@@ -33,6 +34,46 @@ class MentorshipController extends Controller
         }
 
         return view('organization.mentorships.index', compact('organization', 'mentorships'));
+    }
+
+    protected $notificationService;
+
+    public function __construct(\App\Services\MentorshipNotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
+    /**
+     * Terminer une relation de mentorat
+     */
+    public function terminate(Request $request, Mentorship $mentorship)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        // Vérification : le menté doit être parrainé par cette organisation
+        if ($mentorship->mentee->sponsored_by_organization_id !== $organization->id) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        if ($mentorship->status === 'disconnected') {
+            return back()->with('error', 'Cette relation est déjà terminée.');
+        }
+
+        $request->validate([
+            'diction_reason' => 'required|string|max:1000',
+        ]);
+
+        $mentorship->update([
+            'status' => 'disconnected',
+            'diction_reason' => $request->diction_reason,
+        ]);
+
+        // Notification générale (envoie au jeune, au mentor, et confirmation à l'org)
+        // Note: l'admin de l'org est l'acteur ici
+        $actor = $organization->users()->wherePivot('role', 'admin')->first() ?? Auth::user();
+        $this->notificationService->sendMentorshipTerminated($mentorship, $actor, $request->diction_reason);
+
+        return back()->with('success', 'La relation de mentorat a été terminée avec succès.');
     }
 
     /**

@@ -24,6 +24,7 @@ class PayoutRequest extends Model
         'error_message',
         'processed_at',
         'completed_at',
+        'is_manual',
     ];
 
     protected $casts = [

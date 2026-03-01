@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Mail\Wallet;
+namespace App\Mail\Session;
 
 use App\Models\MentoringSession;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -11,25 +10,18 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class IncomeReleased extends Mailable implements ShouldQueue
+class ReportAvailableMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
-
-    public $mentor;
-
-    public $session;
-
-    public $amount;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(User $mentor, MentoringSession $session, int $amount)
-    {
-        $this->mentor = $mentor;
-        $this->session = $session;
-        $this->amount = $amount;
-    }
+    public function __construct(
+        public $recipient,
+        public MentoringSession $session,
+        public string $sessionUrl
+    ) {}
 
     /**
      * Get the message envelope.
@@ -37,7 +29,7 @@ class IncomeReleased extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Vos revenus pour la séance sont disponibles - Brillio',
+            subject: "Le compte rendu de la séance \"{$this->session->title}\" est disponible - Brillio",
         );
     }
 
@@ -47,7 +39,17 @@ class IncomeReleased extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.wallet.income-released',
+            view: 'emails.session.report-available',
         );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
     }
 }

@@ -106,6 +106,10 @@ class PayoutController extends Controller
         $fee = $this->monerooService->calculateFee($amount);
         $netAmount = $amount - $fee;
 
+        // Détecter si le retrait doit être manuel (Hors Bénin ou méthode non locale)
+        $isManual = ($request->input('country_code') !== 'BJ' ||
+                    ! in_array($request->input('payment_method'), ['mtn_bj', 'moov_bj']));
+
         // Créer la demande de payout
         $payout = PayoutRequest::create([
             'mentor_profile_id' => $mentorProfile->id,
@@ -117,6 +121,7 @@ class PayoutController extends Controller
             'country_code' => $request->input('country_code'),
             'dial_code' => $request->input('dial_code'),
             'status' => PayoutRequest::STATUS_PENDING,
+            'is_manual' => $isManual,
         ]);
 
         // Déduire du solde disponible immédiatement (FCFA)

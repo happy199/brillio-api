@@ -225,6 +225,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class, 'unlock'])->name('resources.unlock');
     Route::post('/mentorship/request', [\App\Http\Controllers\Jeune\MentorshipController::class, 'store'])->name('mentorship.request');
     Route::post('/mentorship/{mentorship}/cancel', [\App\Http\Controllers\Jeune\MentorshipController::class, 'cancel'])->name('mentorship.cancel');
+    Route::post('/mentorship/{mentorship}/disconnect', [\App\Http\Controllers\Jeune\MentorshipController::class, 'disconnect'])->name('mentorship.disconnect');
 
     // Page de garde pour le mentorat
     Route::get('/mentorat/verrouille', [\App\Http\Controllers\Jeune\MentorshipController::class, 'lockedIndex'])->name('mentorship.locked');
@@ -472,6 +473,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Payouts Mentors
         Route::get('payouts', [App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts.index');
         Route::get('payouts/{payout}', [App\Http\Controllers\Admin\PayoutController::class, 'show'])->name('payouts.show');
+        Route::post('payouts/{payout}/approve', [App\Http\Controllers\Admin\PayoutController::class, 'approve'])->name('payouts.approve');
+        Route::post('payouts/{payout}/reject', [App\Http\Controllers\Admin\PayoutController::class, 'reject'])->name('payouts.reject');
 
         // Analytiques
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');

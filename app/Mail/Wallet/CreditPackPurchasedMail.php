@@ -2,8 +2,8 @@
 
 namespace App\Mail\Wallet;
 
-use App\Models\MentoringSession;
-use App\Models\User;
+use App\Models\CreditPack;
+use App\Models\Organization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -11,25 +11,18 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class IncomeReleased extends Mailable implements ShouldQueue
+class CreditPackPurchasedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
-
-    public $mentor;
-
-    public $session;
-
-    public $amount;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(User $mentor, MentoringSession $session, int $amount)
-    {
-        $this->mentor = $mentor;
-        $this->session = $session;
-        $this->amount = $amount;
-    }
+    public function __construct(
+        public Organization $organization,
+        public CreditPack $pack,
+        public int $newBalance
+    ) {}
 
     /**
      * Get the message envelope.
@@ -37,7 +30,7 @@ class IncomeReleased extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Vos revenus pour la séance sont disponibles - Brillio',
+            subject: 'Confirmation de votre achat de crédits - Brillio',
         );
     }
 
@@ -47,7 +40,17 @@ class IncomeReleased extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.wallet.income-released',
+            view: 'emails.wallet.credit-pack-purchased',
         );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
     }
 }

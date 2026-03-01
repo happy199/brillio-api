@@ -236,6 +236,12 @@ class ResourceController extends Controller
                             $purchase
                         );
                     }
+
+                    // Notification par email au jeune
+                    DB::afterCommit(function () use ($jeune, $resource, $organization) {
+                        app(\App\Services\MentorshipNotificationService::class)->sendResourceGiftedNotification($jeune, $resource, $organization);
+                    }
+                    );
                 }
 
                 $resource->increment('sales_count', $validJeunes->count());

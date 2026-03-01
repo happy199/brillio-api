@@ -46,6 +46,15 @@ class ProcessPayoutJob implements ShouldQueue
                 'processed_at' => now(),
             ]);
 
+            // Si le retrait est manuel, on s'arrête ici
+            if ($this->payoutRequest->is_manual) {
+                Log::info('ProcessPayoutJob: Manual payout detected, skipping Moneroo API', [
+                    'payout_id' => $this->payoutRequest->id,
+                ]);
+
+                return;
+            }
+
             // Créer le payout avec Moneroo
             $response = $monerooService->createPayout(
                 (float) $this->payoutRequest->net_amount,
