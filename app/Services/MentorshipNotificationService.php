@@ -419,7 +419,7 @@ class MentorshipNotificationService
     {
         $mentor = $mentorship->mentor;
         $mentee = $mentorship->mentee;
-        $organization = $mentee->sponsoredByOrganization;
+        $organization = $mentee->sponsoringOrganization;
 
         $actorType = $actor->user_type; // 'jeune', 'mentor', or 'organization' (via current org check)
 
@@ -453,7 +453,7 @@ class MentorshipNotificationService
 
         // 3. Mail à l'organisation (si elle n'est pas l'acteur)
         if (! $isOrgActor && $organization) {
-            $adminEmail = $organization->admin?->email ?? $organization->email;
+            $adminEmail = $organization->users()->wherePivot('role', 'admin')->first()?->email ?? $organization->contact_email;
             if ($adminEmail) {
                 Mail::to($adminEmail)->send(new \App\Mail\Mentorship\MentorshipTerminatedOrgNotification($mentorship, $actor->name, $reason, $mentee->name, $mentor->name));
             }

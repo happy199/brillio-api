@@ -3,7 +3,6 @@
 namespace App\Mail\Session;
 
 use App\Models\MentoringSession;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -19,7 +18,7 @@ class ReportAvailableMail extends Mailable implements ShouldQueue
      * Create a new message instance.
      */
     public function __construct(
-        public User $recipient,
+        public $recipient,
         public MentoringSession $session,
         public string $sessionUrl
     ) {}

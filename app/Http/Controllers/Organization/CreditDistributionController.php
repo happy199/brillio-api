@@ -90,7 +90,10 @@ class CreditDistributionController extends Controller
                     );
 
                     // Notification par email
-                    app(\App\Services\MentorshipNotificationService::class)->sendCreditGiftedNotification($targetUser, $organization, $amountPerUser);
+                    DB::afterCommit(function () use ($targetUser, $organization, $amountPerUser) {
+                        app(\App\Services\MentorshipNotificationService::class)->sendCreditGiftedNotification($targetUser, $organization, $amountPerUser);
+                    }
+                    );
                 }
             });
 
