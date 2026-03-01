@@ -177,7 +177,8 @@
                                     <div
                                         class="flex items-center gap-1 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">
                                         <span x-text="skill"></span>
-                                        <input type="hidden" :name="'skills[' + index + ']'" :value="skill">
+                                        <input type="hidden" :name="'skills[' + index + ']'" :value="skill"
+                                            form="main-mentor-form">
                                         <button type="button" @click="skills.splice(index, 1)"
                                             class="text-indigo-500 hover:text-indigo-700">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

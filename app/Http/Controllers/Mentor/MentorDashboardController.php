@@ -635,7 +635,7 @@ class MentorDashboardController extends Controller
     }
 
     /**
-     * Calculer les années d'expérience totales depuis les durées
+     * Calculer les années d'expérience totales depuis les périodes (fusion d'intervalles)
      */
     private function calculateYearsOfExperience($experiences)
     {
@@ -643,18 +643,67 @@ class MentorDashboardController extends Controller
             return 0;
         }
 
-        $totalMonths = 0;
+        $intervals = [];
 
         foreach ($experiences as $exp) {
-            // Utiliser duration_years et duration_months si disponibles
-            if (isset($exp['duration_years'])) {
-                $totalMonths += ($exp['duration_years'] * 12);
+            $startStr = $exp['start_date'] ?? null;
+            $endStr = $exp['end_date'] ?? null;
+
+            if (! $startStr) {
+                continue;
             }
-            if (isset($exp['duration_months'])) {
-                $totalMonths += $exp['duration_months'];
+
+            try {
+                $start = \Carbon\Carbon::parse($startStr)->startOfDay();
+                $end = $endStr ? \Carbon\Carbon::parse($endStr)->endOfDay() : now()->endOfDay();
+
+                if ($end->isBefore($start)) {
+                    continue;
+                }
+
+                $intervals[] = ['start' => $start, 'end' => $end];
+            } catch (\Exception $e) {
+                continue;
             }
         }
 
-        return round($totalMonths / 12);
+        if (empty($intervals)) {
+            return 0;
+        }
+
+        // Tri par date de début
+        usort($intervals, function ($a, $b) {
+            return $a['start']->timestamp <=> $b['start']->timestamp;
+        });
+
+        // Fusion des intervalles
+        $merged = [];
+        $current = $intervals[0];
+
+        for ($i = 1; $i < count($intervals); $i++) {
+            if ($intervals[$i]['start']->isBefore($current['end']) || $intervals[$i]['start']->equalTo($current['end'])) {
+                // Chevauchement ou contiguïté, on étend la fin
+                if ($intervals[$i]['end']->isAfter($current['end'])) {
+                    $current['end'] = $intervals[$i]['end'];
+                }
+            } else {
+                // Pas de chevauchement, on enregistre l'intervalle actuel et on passe au suivant
+                $merged[] = $current;
+                $current = $intervals[$i];
+            }
+        }
+        $merged[] = $current;
+
+        // Calcul de la durée totale en jours
+        $totalDays = 0;
+        foreach ($merged as $interval) {
+            $totalDays += $interval['start']->diffInDays($interval['end']);
+        }
+
+        // Conversion en années (moyenne de 365.25 jours par an)
+        $years = $totalDays / 365.25;
+
+        // On arrondit au supérieur si on est proche (ex: 4.8 -> 5) ou à l'entier
+        return (int) round($years);
     }
 }
