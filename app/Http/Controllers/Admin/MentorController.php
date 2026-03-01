@@ -219,7 +219,7 @@ class MentorController extends Controller
     {
         $mentor->load(['user', 'roadmapSteps', 'specializationModel']);
 
-        $specializations = \App\Models\Specialization::where('status', 'approved')
+        $specializations = \App\Models\Specialization::where('status', 'active')
             ->orderBy('name')
             ->get();
 
@@ -515,6 +515,14 @@ class MentorController extends Controller
             'is_published' => $request->has('is_published'),
             'is_validated' => $request->has('is_validated'),
         ];
+
+        // S'assurer de synchroniser le champ specialization (string) avec le slug si possible
+        if (! empty($profileData['specialization_id'])) {
+            $specModel = \App\Models\Specialization::find($profileData['specialization_id']);
+            $profileData['specialization'] = $specModel?->slug;
+        } else {
+            $profileData['specialization'] = null;
+        }
 
         // Si validé pour la première fois, enregistrer la date et notifier
         $previouslyValidated = $mentor->is_validated;
