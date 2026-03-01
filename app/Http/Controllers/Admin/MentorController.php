@@ -219,7 +219,7 @@ class MentorController extends Controller
     {
         $mentor->load(['user', 'roadmapSteps', 'specializationModel']);
 
-        $specializations = \App\Models\Specialization::where('status', 'approved')
+        $specializations = \App\Models\Specialization::where('status', 'active')
             ->orderBy('name')
             ->get();
 
@@ -523,6 +523,11 @@ class MentorController extends Controller
         if ($newValidated && ! $previouslyValidated) {
             $profileData['validated_at'] = now();
 
+            // S'assurer de synchroniser le champ specialization (string) avec le slug si possible
+            if ($mentor->specialization_id) {
+                $mentor->specialization = $mentor->specializationModel?->slug;
+            }
+
             // On envoie l'email après l'update pour être sûr que tout est en base
             $mentor->update($profileData);
 
@@ -532,6 +537,14 @@ class MentorController extends Controller
                 \Log::error('Erreur envoi email validation mentor (update): '.$e->getMessage());
             }
         } else {
+            // S'assurer de synchroniser le champ specialization (string) avec le slug si possible
+            if (isset($profileData['specialization_id'])) {
+                $specModel = \App\Models\Specialization::find($profileData['specialization_id']);
+                $profileData['specialization'] = $specModel?->slug;
+            } else {
+                $profileData['specialization'] = null;
+            }
+
             $mentor->update($profileData);
         }
 
