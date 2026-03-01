@@ -70,7 +70,7 @@ class MentorshipController extends Controller
 
         // Notification générale (envoie au jeune, au mentor, et confirmation à l'org)
         // Note: l'admin de l'org est l'acteur ici
-        $actor = $organization->admin ?? Auth::user();
+        $actor = $organization->users()->wherePivot('role', 'admin')->first() ?? Auth::user();
         $this->notificationService->sendMentorshipTerminated($mentorship, $actor, $request->diction_reason);
 
         return back()->with('success', 'La relation de mentorat a été terminée avec succès.');
