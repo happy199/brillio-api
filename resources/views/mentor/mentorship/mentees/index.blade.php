@@ -102,6 +102,10 @@
                         class="flex-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 py-2 px-4 rounded-lg text-sm font-medium transition text-center {{ !($mentorship->mentee->jeuneProfile && $mentorship->mentee->jeuneProfile->is_public) ? 'opacity-50 cursor-not-allowed' : '' }}">
                         Voir profil
                     </a>
+                    <a href="{{ route('mentor.messages.show', $mentorship) }}"
+                        class="flex-1 bg-orange-50 text-orange-700 hover:bg-orange-100 py-2 px-4 rounded-lg text-sm font-medium transition text-center">
+                        Messages
+                    </a>
                     <button onclick="document.getElementById('disconnect-modal-{{ $mentorship->id }}').showModal()"
                         class="bg-white border border-gray-200 text-gray-600 hover:text-red-600 hover:border-red-200 py-2 px-3 rounded-lg transition"
                         title="Mettre fin au mentorat">

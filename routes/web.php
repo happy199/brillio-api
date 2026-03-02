@@ -249,6 +249,15 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::get('/portefeuille', [\App\Http\Controllers\Jeune\WalletController::class, 'index'])->name('wallet.index');
     Route::post('/portefeuille/achat', [\App\Http\Controllers\Jeune\WalletController::class, 'purchase'])->name('wallet.purchase');
     Route::post('/portefeuille/coupon', [\App\Http\Controllers\Jeune\WalletController::class, 'redeemCoupon'])->name('wallet.redeem');
+
+    // Messagerie (Jeune)
+    Route::prefix('messagerie')->name('messages.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Jeune\MessagesController::class, 'index'])->name('index');
+        Route::get('/fichier/{message}/download', [\App\Http\Controllers\Jeune\MessagesController::class, 'download'])->name('download');
+        Route::get('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'show'])->name('show')->whereNumber('mentorship');
+        Route::post('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'store'])->name('store')->whereNumber('mentorship');
+    }
+    );
 });
 
 // Routes publiques
@@ -291,6 +300,15 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::get('/portefeuille', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/portefeuille/achat', [WalletController::class, 'purchase'])->name('wallet.purchase');
     Route::post('/portefeuille/coupon', [WalletController::class, 'redeemCoupon'])->name('wallet.redeem');
+
+    // Messagerie (Mentor)
+    Route::prefix('messagerie')->name('messages.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Mentor\MessagesController::class, 'index'])->name('index');
+        Route::get('/fichier/{message}/download', [\App\Http\Controllers\Mentor\MessagesController::class, 'download'])->name('download');
+        Route::get('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'show'])->name('show')->whereNumber('mentorship');
+        Route::post('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'store'])->name('store')->whereNumber('mentorship');
+    }
+    );
 
     // Test Personnalité Mentor
     Route::get('/test-personnalite', [App\Http\Controllers\Mentor\PersonalityController::class, 'index'])->name('personality');
@@ -483,6 +501,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
             Route::get('chat', [AnalyticsController::class, 'chat'])->name('chat');
             Route::get('export', [AnalyticsController::class, 'export'])->name('export');
             Route::get('export-pdf', [AnalyticsController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('export-csv', [AnalyticsController::class, 'exportCsv'])->name('export-csv');
         }
         );
 

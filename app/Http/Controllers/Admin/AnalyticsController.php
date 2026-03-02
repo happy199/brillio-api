@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Controller pour les analytics dans le dashboard admin
@@ -380,9 +381,15 @@ class AnalyticsController extends Controller
                 break;
 
             case 'users':
-                $data['users'] = User::where('is_admin', false)
-                    ->whereBetween('created_at', [$start, $end])
-                    ->with(['personalityTest', 'mentorProfile'])
+                $userQuery = User::where('is_admin', false)
+                    ->whereBetween('created_at', [$start, $end]);
+
+                $userCount = $userQuery->count();
+                if ($userCount > 500) {
+                    return back()->with('error', "Le volume de données ({$userCount} utilisateurs) est trop important pour un export PDF. Veuillez utiliser l'export CSV (Large volume).");
+                }
+
+                $data['users'] = $userQuery->with(['personalityTest', 'mentorProfile'])
                     ->orderBy('created_at', 'desc')
                     ->get();
                 $data['stats'] = [
@@ -396,9 +403,15 @@ class AnalyticsController extends Controller
                 break;
 
             case 'mentors':
-                $data['mentors'] = MentorProfile::with(['user', 'specialization', 'roadmapSteps'])
-                    ->whereBetween('created_at', [$start, $end])
-                    ->orderBy('created_at', 'desc')
+                $mentorQuery = MentorProfile::with(['user', 'specializationModel', 'roadmapSteps'])
+                    ->whereBetween('created_at', [$start, $end]);
+
+                $mentorCount = $mentorQuery->count();
+                if ($mentorCount > 500) {
+                    return back()->with('error', "Le volume de données ({$mentorCount} mentors) est trop important pour un export PDF. Veuillez utiliser l'export CSV (Large volume).");
+                }
+
+                $data['mentors'] = $mentorQuery->orderBy('created_at', 'desc')
                     ->get();
                 $data['stats'] = [
                     'total' => $data['mentors']->count(),
@@ -420,6 +433,72 @@ class AnalyticsController extends Controller
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Export des données en CSV (Streaming pour économiser la mémoire)
+     */
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $dateRange = $this->getDateRange($request);
+        $start = $dateRange['start'];
+        $end = $dateRange['end'];
+        $type = $request->get('type', 'users');
+
+        $filename = 'brillio-export-'.$type.'-'.$start->format('Y-m-d').'.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ];
+
+        return response()->stream(function () use ($type, $start, $end) {
+            $handle = fopen('php://output', 'w');
+
+            if ($type === 'users') {
+                // Header
+                fputcsv($handle, ['Nom', 'Email', 'Type', 'Pays', 'Ville', 'MBTI', 'Inscription']);
+
+                // Cursor pour éviter de charger 1200+ objets en mémoire
+                $users = User::where('is_admin', false)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->with(['personalityTest'])
+                    ->orderBy('created_at', 'desc')
+                    ->cursor();
+
+                foreach ($users as $user) {
+                    fputcsv($handle, [
+                        $user->name,
+                        $user->email,
+                        ucfirst($user->user_type),
+                        $user->country ?? '-',
+                        $user->city ?? '-',
+                        $user->personalityTest && $user->personalityTest->completed_at ? $user->personalityTest->personality_type : '-',
+                        $user->created_at->format('d/m/Y H:i'),
+                    ]);
+                }
+            } elseif ($type === 'mentors') {
+                // Header
+                fputcsv($handle, ['Nom', 'Email', 'Spécialisation', 'Localisation', 'Inscrit le', 'Publié']);
+
+                $profiles = MentorProfile::with('user')
+                    ->whereBetween('created_at', [$start, $end])
+                    ->cursor();
+
+                foreach ($profiles as $profile) {
+                    fputcsv($handle, [
+                        $profile->user->name ?? 'N/A',
+                        $profile->user->email ?? 'N/A',
+                        $this->specializations[$profile->specialization] ?? $profile->specialization ?? '-',
+                        ($profile->user->city ?? '-').', '.($profile->user->country ?? '-'),
+                        $profile->created_at->format('d/m/Y'),
+                        $profile->is_published ? 'Oui' : 'Non',
+                    ]);
+                }
+            }
+
+            fclose($handle);
+        }, 200, $headers);
     }
 
     /**

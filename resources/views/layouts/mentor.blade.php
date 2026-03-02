@@ -126,6 +126,19 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Mon parcours
                     </a>
+                    <a href="{{ route('mentor.messages.index') }}"
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 {{ request()->routeIs('mentor.messages.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Messages
+                        @php
+                        $navUnread = \App\Models\Message::whereHas('mentorship', fn($q) =>
+                        $q->where('mentor_id', auth()->id())->where('status','accepted'))
+                        ->where('sender_id', '!=', auth()->id())->whereNull('read_at')->count();
+                        @endphp
+                        @if($navUnread > 0)
+                        <span class="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{
+                            $navUnread }}</span>
+                        @endif
+                    </a>
                     <!-- Mentorat Dropdown -->
                     <div class="relative" x-data="{ openMentorship: false }" @mouseenter="openMentorship = true"
                         @mouseleave="openMentorship = false">
@@ -233,6 +246,10 @@
             <a href="{{ route('mentor.roadmap') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.roadmap') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Parcours
+            </a>
+            <a href="{{ route('mentor.messages.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.messages.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Messages
             </a>
             <a href="{{ route('mentor.resources.index') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.resources.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">

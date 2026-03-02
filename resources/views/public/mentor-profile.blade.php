@@ -47,9 +47,9 @@
     <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-2">
+            <a href="{{ route('auth.login') }}" class="flex items-center gap-2 hover:opacity-80 transition">
                 <span class="text-2xl font-bold text-orange-600">Brillio</span>
-            </div>
+            </a>
             <a href="{{ route('home') }}"
                 class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
                 Rejoindre la communauté
