@@ -501,6 +501,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
             Route::get('chat', [AnalyticsController::class, 'chat'])->name('chat');
             Route::get('export', [AnalyticsController::class, 'export'])->name('export');
             Route::get('export-pdf', [AnalyticsController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('export-csv', [AnalyticsController::class, 'exportCsv'])->name('export-csv');
         }
         );
 
