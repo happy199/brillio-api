@@ -403,7 +403,7 @@ class AnalyticsController extends Controller
                 break;
 
             case 'mentors':
-                $mentorQuery = MentorProfile::with(['user', 'specialization', 'roadmapSteps'])
+                $mentorQuery = MentorProfile::with(['user', 'specializationModel', 'roadmapSteps'])
                     ->whereBetween('created_at', [$start, $end]);
 
                 $mentorCount = $mentorQuery->count();
