@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Mentorship extends Model
 {
@@ -18,24 +19,29 @@ class Mentorship extends Model
         'diction_reason', // reason for disconnection
     ];
 
-    public function mentor()
+    public function mentor(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'mentor_id');
+        return $this->belongsTo(User::class , 'mentor_id');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class)->orderBy('created_at');
     }
 
     public function mentee()
     {
-        return $this->belongsTo(User::class, 'mentee_id');
+        return $this->belongsTo(User::class , 'mentee_id');
     }
 
     public function getTranslatedStatusAttribute()
     {
         return match ($this->status) {
-            'pending' => 'En attente',
-            'accepted' => 'Accepté',
-            'refused' => 'Refusé',
-            'disconnected' => 'Terminé', // ou "Déconnecté" selon la terminologie préférée
-            default => $this->status,
-        };
+                'pending' => 'En attente',
+                'accepted' => 'Accepté',
+                'refused' => 'Refusé',
+                'disconnected' => 'Terminé', // ou "Déconnecté" selon la terminologie préférée
+                default => $this->status,
+            };
     }
 }

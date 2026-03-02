@@ -39,3 +39,8 @@ Schedule::command('organizations:downgrade-expired')
 Schedule::command('organizations:grant-enterprise-credits')
     ->monthlyOn(1, '00:01')
     ->timezone('Africa/Abidjan');
+
+// Rappel messages non lus : toutes les 4h
+Schedule::command('messages:send-unread-reminders')
+    ->everyFourHours()
+    ->timezone('Africa/Abidjan');
