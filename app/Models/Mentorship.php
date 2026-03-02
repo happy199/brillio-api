@@ -21,7 +21,7 @@ class Mentorship extends Model
 
     public function mentor(): BelongsTo
     {
-        return $this->belongsTo(User::class , 'mentor_id');
+        return $this->belongsTo(User::class, 'mentor_id');
     }
 
     public function messages()
@@ -31,17 +31,17 @@ class Mentorship extends Model
 
     public function mentee()
     {
-        return $this->belongsTo(User::class , 'mentee_id');
+        return $this->belongsTo(User::class, 'mentee_id');
     }
 
     public function getTranslatedStatusAttribute()
     {
         return match ($this->status) {
-                'pending' => 'En attente',
-                'accepted' => 'Accepté',
-                'refused' => 'Refusé',
-                'disconnected' => 'Terminé', // ou "Déconnecté" selon la terminologie préférée
-                default => $this->status,
-            };
+            'pending' => 'En attente',
+            'accepted' => 'Accepté',
+            'refused' => 'Refusé',
+            'disconnected' => 'Terminé', // ou "Déconnecté" selon la terminologie préférée
+            default => $this->status,
+        };
     }
 }

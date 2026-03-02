@@ -131,6 +131,11 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Assistant IA
                     </a>
+                    <a href="{{ route('jeune.documents') }}"
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Documents
+                    </a>
+
                     <a href="{{ route('jeune.messages.index') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 {{ request()->routeIs('jeune.messages.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Messages
@@ -143,10 +148,6 @@
                         <span class="bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{
                             $navUnread }}</span>
                         @endif
-                    </a>
-                    <a href="{{ route('jeune.documents') }}"
-                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Documents
                     </a>
 
                     <!-- Dropdown Mentorat -->
@@ -248,17 +249,13 @@
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Assistant
             </a>
-            <a href="{{ route('jeune.messages.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.messages.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Messages
-            </a>
-            <a href="{{ route('jeune.resources.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Ressources
-            </a>
             <a href="{{ route('jeune.documents') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Docs
+            </a>
+            <a href="{{ route('jeune.messages.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.messages.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Messages
             </a>
             <a href="{{ route('jeune.mentors') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentors') ? 'active' : 'text-gray-600 bg-gray-100' }}">

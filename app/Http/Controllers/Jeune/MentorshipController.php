@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class MentorshipController extends Controller
 {
