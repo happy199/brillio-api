@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\MentorshipNotificationService;
 use App\Services\SupabaseAuthService;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -284,7 +285,7 @@ class WebAuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email:rfc,dns|unique:users,email',
             'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)->letters()->numbers()],
         ], [
             'name.required' => 'Le nom complet est obligatoire.',
@@ -328,19 +329,27 @@ class WebAuthController extends Controller
             }
         }
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'user_type' => 'jeune',
-            'auth_provider' => 'email',
-            'provider_id' => $supabaseResult['user']['id'] ?? null,
-            'sponsored_by_organization_id' => $organizationId,
-            'organization_id' => (isset($invitation) && in_array($invitation->role, ['admin', 'viewer'])) ? $organizationId : null,
-            'organization_role' => (isset($invitation) && in_array($invitation->role, ['admin', 'viewer'])) ? $invitation->role : null,
-            'referral_code_used' => $referralCode,
-            'last_login_at' => now(),
-        ]);
+        try {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'user_type' => 'jeune',
+                'auth_provider' => 'email',
+                'provider_id' => $supabaseResult['user']['id'] ?? null,
+                'sponsored_by_organization_id' => $organizationId,
+                'organization_id' => (isset($invitation) && in_array($invitation->role, ['admin', 'viewer'])) ? $organizationId : null,
+                'organization_role' => (isset($invitation) && in_array($invitation->role, ['admin', 'viewer'])) ? $invitation->role : null,
+                'referral_code_used' => $referralCode,
+                'last_login_at' => now(),
+            ]);
+        } catch (UniqueConstraintViolationException $e) {
+            Log::warning('Duplicate registration attempt (caught by DB): '.$validated['email']);
+
+            return back()->withErrors([
+                'email' => 'Cette adresse email est déjà utilisée (conflit de session).',
+            ])->withInput();
+        }
 
         // Mark invitation as used
         if ($referralCode && isset($invitation)) {
