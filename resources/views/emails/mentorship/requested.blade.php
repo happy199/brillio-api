@@ -13,13 +13,26 @@
     <p style="margin: 0; color: #6b7280; font-style: italic;">"{{ $mentorship->request_message }}"</p>
 </div>
 
-@if($mentee->personalityTest)
+@if($mentee->personalityTest || ($mentee->onboarding_data && isset($mentee->onboarding_data['interests'])))
 <p style="margin: 20px 0; font-size: 14px;">
     <strong>Profil du jeune :</strong><br>
+    @if($mentee->personalityTest && $mentee->personalityTest->completed_at)
     📊 Personnalité MBTI : <span
         style="background-color: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{
-        $mentee->personalityTest->mbti_type }}</span><br>
-    🎓 Intérêts : {{ $mentee->personalityTest->career_sector ?? 'Non défini' }}
+        $mentee->personalityTest->personality_type }} - {{ $mentee->personalityTest->personality_label }}</span><br>
+    @endif
+
+    @if($mentee->onboarding_data && isset($mentee->onboarding_data['interests']))
+    🎓 Centres d'intérêt :
+    @php
+    $interests = $mentee->onboarding_data['interests'];
+    if (is_array($interests)) {
+    echo implode(', ', array_map('ucfirst', $interests));
+    } else {
+    echo ucfirst($interests);
+    }
+    @endphp
+    @endif
 </p>
 @endif
 
