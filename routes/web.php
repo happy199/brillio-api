@@ -253,9 +253,9 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     // Messagerie (Jeune)
     Route::prefix('messagerie')->name('messages.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Jeune\MessagesController::class, 'index'])->name('index');
-        Route::get('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'show'])->name('show');
-        Route::post('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'store'])->name('store');
         Route::get('/fichier/{message}/download', [\App\Http\Controllers\Jeune\MessagesController::class, 'download'])->name('download');
+        Route::get('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'show'])->name('show')->whereNumber('mentorship');
+        Route::post('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'store'])->name('store')->whereNumber('mentorship');
     }
     );
 });
@@ -304,9 +304,9 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     // Messagerie (Mentor)
     Route::prefix('messagerie')->name('messages.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Mentor\MessagesController::class, 'index'])->name('index');
-        Route::get('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'show'])->name('show');
-        Route::post('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'store'])->name('store');
         Route::get('/fichier/{message}/download', [\App\Http\Controllers\Mentor\MessagesController::class, 'download'])->name('download');
+        Route::get('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'show'])->name('show')->whereNumber('mentorship');
+        Route::post('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'store'])->name('store')->whereNumber('mentorship');
     }
     );
 
