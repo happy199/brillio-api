@@ -156,10 +156,11 @@
                             Situation
                         </h3>
                         <p class="text-gray-700 font-medium">
-                            {{ ucfirst($user->onboarding_data['current_situation']) }}
+                            {{ str_replace('_', ' ', ucfirst($user->onboarding_data['current_situation'])) }}
                         </p>
                         @if(isset($user->onboarding_data['education_level']))
-                        <p class="text-sm text-gray-500 mt-1">{{ ucfirst($user->onboarding_data['education_level']) }}
+                        <p class="text-sm text-gray-500 mt-1">{{ str_replace('_', ' ',
+                            ucfirst($user->onboarding_data['education_level'])) }}
                         </p>
                         @endif
                     </div>
