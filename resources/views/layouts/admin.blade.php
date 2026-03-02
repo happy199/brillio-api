@@ -288,28 +288,60 @@
                 @endif
 
                 @php
-                $pendingSupportCount = \App\Models\ChatConversation::where('needs_human_support', true)
+                $pendingOrientationCount = \App\Models\ChatConversation::where('needs_human_support', true)
                 ->where('human_support_active', false)
                 ->count();
+
+                $flaggedMentorshipCount = \App\Models\Message::where('is_flagged', true)->count();
                 @endphp
-                <a href="{{ route('admin.chat.index') }}"
-                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.chat.*') ? 'bg-indigo-800' : '' }}">
-                    <span class="flex items-center justify-between">
+
+                <div
+                    x-data="{ open: {{ request()->routeIs('admin.chat.*') || request()->routeIs('admin.mentorship-chat.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open"
+                        class="w-full flex justify-between items-center px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.chat.*') || request()->routeIs('admin.mentorship-chat.*') ? 'bg-indigo-800' : '' }}">
                         <span class="flex items-center">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
                                 </path>
                             </svg>
-                            Chat
+                            Centre de Messagerie
                         </span>
-                        @if($pendingSupportCount > 0)
-                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                            {{ $pendingSupportCount }}
-                        </span>
-                        @endif
-                    </span>
-                </a>
+                        <div class="flex items-center">
+                            @if($pendingOrientationCount > 0 || $flaggedMentorshipCount > 0)
+                            <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></span>
+                            @endif
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7">
+                                </path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div x-show="open" x-cloak class="bg-indigo-900">
+                        <a href="{{ route('admin.chat.index') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white flex justify-between items-center {{ request()->routeIs('admin.chat.*') ? 'text-white font-bold' : '' }}">
+                            <span>Chat Orientation</span>
+                            @if($pendingOrientationCount > 0)
+                            <span
+                                class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce">
+                                {{ $pendingOrientationCount }}
+                            </span>
+                            @endif
+                        </a>
+                        <a href="{{ route('admin.mentorship-chat.index') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white flex justify-between items-center {{ request()->routeIs('admin.mentorship-chat.*') ? 'text-white font-bold' : '' }}">
+                            <span>Chat Mentorat</span>
+                            @if($flaggedMentorshipCount > 0)
+                            <span
+                                class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
+                                {{ $flaggedMentorshipCount }}
+                            </span>
+                            @endif
+                        </a>
+                    </div>
+                </div>
 
                 @if(!auth()->user()->isCoach())
 
