@@ -1301,7 +1301,7 @@
                 </h3>
 
                 <p class="relative text-center text-white/90 text-lg font-medium">
-                    Aidons-nous à atteindre <span class="font-bold">500 utilisateurs</span>
+                    Aidons-nous à atteindre <span class="font-bold">5000 utilisateurs</span>
                 </p>
             </div>
 
@@ -1310,7 +1310,7 @@
                 <!-- Progress Section -->
                 @php
                 $totalUsers = $jeunesCount + $mentorsCount;
-                $targetUsers = 500;
+                $targetUsers = 5000;
                 $progressPercentage = min(($totalUsers / $targetUsers) * 100, 100);
                 @endphp
 
