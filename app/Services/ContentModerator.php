@@ -17,7 +17,7 @@ class ContentModerator
      * Moderate content: detect PII and keywords.
      * Returns an array with is_flagged, redacted, and reason.
      */
-    public function moderate(string $content): array
+    public function moderate(string $content, ?\App\Models\Mentorship $mentorship = null): array
     {
         $isFlagged = false;
         $reasons = [];
@@ -54,6 +54,18 @@ class ContentModerator
                 $isFlagged = true;
                 $reasons[] = "Mot clé sensible détecté: {$keyword}";
                 $redacted = preg_replace($pattern, 'XXXXXXXXXXX', $redacted);
+            }
+        }
+
+        // 4. Detect Custom Forbidden Keywords (Mentorship specific)
+        if ($mentorship && ! empty($mentorship->custom_forbidden_keywords)) {
+            foreach ($mentorship->custom_forbidden_keywords as $keyword) {
+                $pattern = '/\b'.preg_quote($keyword, '/').'\b/i';
+                if (preg_match($pattern, $redacted)) {
+                    $isFlagged = true;
+                    $reasons[] = "Sujet à risque détecté (IA): {$keyword}";
+                    $redacted = preg_replace($pattern, 'XXXXXXXXXXX', $redacted);
+                }
             }
         }
 

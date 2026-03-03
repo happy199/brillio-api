@@ -292,7 +292,12 @@
                 ->where('human_support_active', false)
                 ->count();
 
-                $flaggedMentorshipCount = \App\Models\Message::where('is_flagged', true)->count();
+                $flaggedMentorshipCount = \App\Models\Mentorship::where(function($q) {
+                $q->whereHas('messages', fn($sq) => $sq->where('is_flagged', true))
+                ->orWhereNotNull('reported_at');
+                })->count();
+
+                $totalChatAlerts = $pendingOrientationCount + $flaggedMentorshipCount;
                 @endphp
 
                 <div
@@ -308,8 +313,11 @@
                             Centre de Messagerie
                         </span>
                         <div class="flex items-center">
-                            @if($pendingOrientationCount > 0 || $flaggedMentorshipCount > 0)
-                            <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></span>
+                            @if($totalChatAlerts > 0)
+                            <span
+                                class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse mr-2">
+                                {{ $totalChatAlerts }}
+                            </span>
                             @endif
                             <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +333,7 @@
                             <span>Chat Orientation</span>
                             @if($pendingOrientationCount > 0)
                             <span
-                                class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce">
+                                class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
                                 {{ $pendingOrientationCount }}
                             </span>
                             @endif

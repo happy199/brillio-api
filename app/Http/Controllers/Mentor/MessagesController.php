@@ -92,7 +92,7 @@ class MessagesController extends Controller
         // Modération du contenu
         if ($request->filled('body')) {
             $moderator = new \App\Services\ContentModerator;
-            $moderationResult = $moderator->moderate($request->body);
+            $moderationResult = $moderator->moderate($request->body, $mentorship);
 
             if ($moderationResult['is_flagged']) {
                 $data['original_body'] = $request->body;

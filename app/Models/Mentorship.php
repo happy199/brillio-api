@@ -17,6 +17,15 @@ class Mentorship extends Model
         'request_message',
         'refusal_reason',
         'diction_reason', // reason for disconnection
+        'custom_forbidden_keywords',
+        'reported_at',
+        'reported_by_id',
+        'report_reason',
+    ];
+
+    protected $casts = [
+        'custom_forbidden_keywords' => 'array',
+        'reported_at' => 'datetime',
     ];
 
     public function mentor(): BelongsTo
@@ -32,6 +41,16 @@ class Mentorship extends Model
     public function mentee()
     {
         return $this->belongsTo(User::class, 'mentee_id');
+    }
+
+    public function reporter()
+    {
+        return $this->belongsTo(User::class, 'reported_by_id');
+    }
+
+    public function isReported(): bool
+    {
+        return ! empty($this->reported_at);
     }
 
     public function getTranslatedStatusAttribute()

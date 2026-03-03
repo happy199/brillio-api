@@ -13,19 +13,22 @@ class MentorshipChatController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Mentorship::with(['mentor', 'mentee'])
+        $query = Mentorship::with(['mentor', 'mentee', 'reporter'])
             ->withCount(['messages' => function ($q) {
-                $q->where('is_flagged', true);
-            }])
+            $q->where('is_flagged', true);
+        }])
             ->with(['messages' => function ($q) {
-                $q->latest()->limit(1);
-            }]);
+            $q->latest()->limit(1);
+        }]);
 
-        // Filtrer par flag
+        // Filtrer par signalement (automatique ou manuel)
         if ($request->has('flagged')) {
-            $query->whereHas('messages', function ($q) {
-                $q->where('is_flagged', true);
-            });
+            $query->where(function ($q) {
+                $q->whereHas('messages', function ($sq) {
+                        $sq->where('is_flagged', true);
+                    }
+                    )->orWhereNotNull('reported_at');
+                });
         }
 
         // Recherche par utilisateur
@@ -33,13 +36,13 @@ class MentorshipChatController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->whereHas('mentor', function ($sq) use ($search) {
-                    $sq->where('name', 'like', "%{$search}%");
-                }
-                )->orWhereHas('mentee', function ($sq) use ($search) {
-                    $sq->where('name', 'like', "%{$search}%");
-                }
-                );
-            });
+                        $sq->where('name', 'like', "%{$search}%");
+                    }
+                    )->orWhereHas('mentee', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
+                    }
+                    );
+                });
         }
 
         $mentorships = $query->latest('updated_at')->paginate(20);

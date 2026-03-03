@@ -27,11 +27,62 @@
                 {{ $mentorship->messages->where('is_flagged', true)->count() }} messages signalés
             </span>
             @endif
-            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
-                Statut: {{ ucfirst($mentorship->status) }}
+            <span
+                class="px-3 py-1 {{ $mentorship->status === 'accepted' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' }} rounded-full text-xs font-bold">
+                Statut: {{ $mentorship->status === 'accepted' ? 'Mentorat accepté' : ucfirst($mentorship->status) }}
             </span>
         </div>
     </div>
+
+    @if($mentorship->reported_at)
+    <!-- Report Details -->
+    <div class="bg-red-50 border border-red-200 p-5 rounded-2xl shadow-sm mb-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-600 flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-red-900 uppercase tracking-tight">Conversation Signalée Manuellement
+                </h3>
+                <p class="text-xs text-red-600 font-medium">Attention requise : Un utilisateur a signalé un comportement
+                    inapproprié dans cet échange.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/50 p-4 rounded-xl border border-red-100/50">
+            <div class="space-y-3">
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase font-bold text-red-400 tracking-wider">Signalé par</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-gray-900">{{ $mentorship->reporter->name ??
+                            'Utilisateur' }}</span>
+                        @if($mentorship->reporter)
+                        <span
+                            class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $mentorship->reporter->user_type === 'mentor' ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700' }}">
+                            {{ strtoupper($mentorship->reporter->user_type) }}
+                        </span>
+                        @endif
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase font-bold text-red-400 tracking-wider">Date du signalement</span>
+                    <span class="text-sm font-semibold text-gray-900">{{ $mentorship->reported_at->format('d/m/Y H:i')
+                        }}</span>
+                </div>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[10px] uppercase font-bold text-red-400 tracking-wider">Motif détaillé</span>
+                <p
+                    class="text-sm text-gray-700 leading-relaxed italic bg-red-100/30 p-3 rounded-lg border border-red-200/50 mt-1">
+                    "{{ $mentorship->report_reason ?? 'Aucun motif fourni' }}"
+                </p>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Chat Messages -->
     <div class="bg-gray-50 rounded-xl shadow-inner border border-gray-200 min-h-[500px] flex flex-col">

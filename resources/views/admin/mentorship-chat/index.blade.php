@@ -58,6 +58,15 @@
                 @forelse($mentorships as $mentorship)
                 <tr class="hover:bg-gray-50 {{ $mentorship->messages_count > 0 ? 'bg-red-50' : '' }}">
                     <td class="px-6 py-4 text-center">
+                        @if($mentorship->reported_at)
+                        <div class="mb-2">
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-600 text-white animate-pulse">
+                                SIGNALÉ
+                            </span>
+                        </div>
+                        @endif
+
                         @if($mentorship->messages_count > 0)
                         <div class="flex items-center justify-center">
                             <span class="relative flex h-4 w-4">
@@ -66,10 +75,12 @@
                                 <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
                             </span>
                             <span class="ml-2 text-xs font-bold text-red-600">{{ $mentorship->messages_count }}
-                                signalements</span>
+                                alertes PII</span>
                         </div>
                         @else
+                        @if(!$mentorship->reported_at)
                         <span class="text-green-500 text-xs">Sain</span>
+                        @endif
                         @endif
                     </td>
                     <td class="px-6 py-4">
