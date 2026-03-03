@@ -173,10 +173,6 @@
                             </a>
                         </div>
                     </div>
-                    <a href="{{ route('mentor.stats') }}"
-                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('mentor.stats') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Statistiques
-                    </a>
                 </div>
 
                 <!-- Profile Dropdown -->
@@ -207,6 +203,10 @@
                             <a href="{{ route('mentor.profile') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Mon profil
+                            </a>
+                            <a href="{{ route('mentor.stats') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Statistiques
                             </a>
                             <a href="{{ route('mentor.wallet.index') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between">
@@ -262,10 +262,6 @@
             <a href="{{ route('mentor.mentorship.calendar') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.mentorship.calendar') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Calendrier
-            </a>
-            <a href="{{ route('mentor.stats') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('mentor.stats') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Stats
             </a>
         </div>
     </nav>
