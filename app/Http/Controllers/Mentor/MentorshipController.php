@@ -60,6 +60,9 @@ class MentorshipController extends Controller
         // Notification email au jeune
         app(\App\Services\MentorshipNotificationService::class)->sendMentorshipAccepted($mentorship);
 
+        // Lancer la génération de mots-clés par IA en tâche de fond
+        \App\Jobs\GenerateMentorshipKeywords::dispatch($mentorship);
+
         return redirect()->back()->with('success', 'Demande de mentorat acceptée avec succès.');
     }
 

@@ -89,6 +89,19 @@ class MessagesController extends Controller
             $data['attachment_mime'] = $file->getMimeType();
         }
 
+        // Modération du contenu
+        if ($request->filled('body')) {
+            $moderator = new \App\Services\ContentModerator;
+            $moderationResult = $moderator->moderate($request->body, $mentorship);
+
+            if ($moderationResult['is_flagged']) {
+                $data['original_body'] = $request->body;
+                $data['body'] = $moderationResult['redacted'];
+                $data['is_flagged'] = true;
+                $data['flag_reason'] = $moderationResult['reason'];
+            }
+        }
+
         Message::create($data);
 
         return back()->with('success', 'Message envoyé.');

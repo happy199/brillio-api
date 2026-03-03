@@ -24,6 +24,9 @@ class ChatMessage extends Model
         'conversation_id',
         'role',
         'content',
+        'original_content',
+        'is_flagged',
+        'flag_reason',
         'is_from_human',
         'is_system_message',
         'admin_id',
@@ -32,6 +35,7 @@ class ChatMessage extends Model
     protected $casts = [
         'is_from_human' => 'boolean',
         'is_system_message' => 'boolean',
+        'is_flagged' => 'boolean',
     ];
 
     /**

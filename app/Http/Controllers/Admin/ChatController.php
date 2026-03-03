@@ -141,13 +141,25 @@ class ChatController extends Controller
             'content' => 'required|string|max:5000',
         ]);
 
+        // Modération du contenu
+        $moderator = new \App\Services\ContentModerator;
+        $moderationResult = $moderator->moderate($request->content);
+
         // Créer le message du conseiller
-        $message = $conversation->messages()->create([
-            'role' => 'assistant', // On garde "assistant" pour l'affichage côté mobile
-            'content' => $request->content,
-            'is_from_human' => true, // Nouveau champ pour identifier que c'est un humain
+        $messageData = [
+            'role' => 'assistant',
+            'content' => $moderationResult['is_flagged'] ? $moderationResult['redacted'] : $request->content,
+            'is_from_human' => true,
             'admin_id' => auth()->id(),
-        ]);
+        ];
+
+        if ($moderationResult['is_flagged']) {
+            $messageData['original_content'] = $request->content;
+            $messageData['is_flagged'] = true;
+            $messageData['flag_reason'] = $moderationResult['reason'];
+        }
+
+        $message = $conversation->messages()->create($messageData);
 
         // Mettre à jour la conversation
         $conversation->touch();
