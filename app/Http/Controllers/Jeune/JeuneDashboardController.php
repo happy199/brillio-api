@@ -319,7 +319,7 @@ class JeuneDashboardController extends Controller
     {
         $user = auth()->user();
         $conversations = $user->chatConversations()
-            ->with(['messages' => function($q) {
+            ->with(['messages' => function ($q) {
                 $q->with('admin');
             }])
             ->orderByDesc('updated_at')
@@ -686,7 +686,7 @@ class JeuneDashboardController extends Controller
                 'role' => $m->role,
                 'content' => $m->content,
                 'is_from_human' => $m->is_from_human,
-                'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant Brillio'
+                'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant Brillio',
             ]);
 
         return response()->json([
