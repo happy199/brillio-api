@@ -17,7 +17,7 @@ class ProfileController extends Controller
         $organization = $this->getCurrentOrganization();
 
         // Fallback for session data lost during cross-domain redirect
-        if ($request->has('domain_updated') && ! session()->has('domain_updated')) {
+        if ($request->has('domain_updated') && !session()->has('domain_updated')) {
             session()->flash('domain_updated', true);
             session()->flash('success', 'Votre espace est désormais accessible via votre propre lien personnalisé.');
         }
@@ -42,20 +42,85 @@ class ProfileController extends Controller
 
         // Base domain for subdomains
         $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa';
-        $fullSubdomain = $domain.'.'.$baseDomain;
+        $fullSubdomain = $domain . '.' . $baseDomain;
 
         $exists = \App\Models\Organization::where('id', '!=', $organization->id)
             ->where(function ($query) use ($domain, $fullSubdomain) {
-                $query->where('slug', $domain)
-                    ->orWhere('custom_domain', $domain)
-                    ->orWhere('custom_domain', $fullSubdomain);
-            })
+            $query->where('slug', $domain)
+                ->orWhere('custom_domain', $domain)
+                ->orWhere('custom_domain', $fullSubdomain);
+        })
             ->exists();
 
         return response()->json([
-            'available' => ! $exists,
+            'available' => !$exists,
             'message' => $exists ? 'Ce domaine est déjà utilisé.' : 'Disponible !',
         ]);
+    }
+
+    /**
+     * Verify the DNS configuration (CNAME) for a custom domain.
+     */
+    public function verifyDomainDNS(Request $request)
+    {
+        $domain = $request->query('domain');
+        $organization = $this->getCurrentOrganization();
+
+        if (!$organization->isEnterprise()) {
+            return response()->json(['success' => false, 'message' => 'Plan Enterprise requis.']);
+        }
+
+        if (empty($domain)) {
+            return response()->json(['success' => false, 'message' => 'Domaine non spécifié.']);
+        }
+
+        $domain = strtolower(trim($domain));
+
+        // Skip if it is a subdomain of the app URL (already handled by our DNS)
+        $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa';
+        if (str_ends_with($domain, '.' . $baseDomain)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Configuration valide (Sous-domaine Brillio détecté).',
+            ]);
+        }
+
+        try {
+            // Check CNAME record
+            $records = dns_get_record($domain, DNS_CNAME);
+
+            $target = $baseDomain;
+            $found = false;
+
+            foreach ($records as $record) {
+                if (isset($record['target']) && (
+                $record['target'] === $target ||
+                $record['target'] === 'www.' . $target ||
+                str_contains($record['target'], $target)
+                )) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if ($found) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'DNS configuré avec succès ! Votre domaine pointe vers Brillio.',
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun enregistrement CNAME trouvé pointant vers ' . $target . '. Veuillez vérifier vos configurations DNS.',
+            ]);
+        }
+        catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la vérification DNS : ' . $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -90,38 +155,42 @@ class ProfileController extends Controller
 
         $validated = $request->validate($rules);
 
-        if ($organization->isEnterprise() && ! empty($validated['custom_domain'])) {
-            $domain = strtolower(trim($validated['custom_domain']));
+        if ($organization->isEnterprise() && $request->has('custom_domain')) {
+            $domain = strtolower(trim($request->input('custom_domain')));
 
-            // Normalize: if no dot, assume it's a subdomain of the current APP_URL host
-            if (! str_contains($domain, '.')) {
-                $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa';
-                $domain = $domain.'.'.$baseDomain;
+            if (!empty($domain)) {
+                // Check if it should be treated as a subdomain or root domain
+                if (!str_contains($domain, '.')) {
+                    $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa';
+                    $domain = $domain . '.' . $baseDomain;
+                }
+                $validated['custom_domain'] = $domain;
             }
-
-            $validated['custom_domain'] = $domain;
+            else {
+                $validated['custom_domain'] = null;
+            }
         }
 
         if ($request->hasFile('logo') && $organization->isEnterprise()) {
             // Delete old logo if exists and not default
-            if ($organization->logo_url && ! str_contains($organization->logo_url, 'placeholder')) {
+            if ($organization->logo_url && !str_contains($organization->logo_url, 'placeholder')) {
                 $oldPath = str_replace('/storage/', '', $organization->logo_url);
                 Storage::disk('public')->delete($oldPath);
             }
 
             $path = $request->file('logo')->store('organizations/logos', 'public');
-            $validated['logo_url'] = '/storage/'.$path;
+            $validated['logo_url'] = '/storage/' . $path;
         }
 
         $organization->update($validated);
         $organization->refresh();
 
-        $domainChanged = ($organization->wasChanged('custom_domain') && ! empty($organization->custom_domain));
+        $domainChanged = ($organization->wasChanged('custom_domain') && !empty($organization->custom_domain));
 
         if ($domainChanged) {
-            $newUrl = (request()->secure() ? 'https://' : 'http://').$organization->custom_domain.(app()->environment('local') ? ':8000' : '');
+            $newUrl = (request()->secure() ? 'https://' : 'http://') . $organization->custom_domain . (app()->environment('local') ? ':8000' : '');
 
-            return redirect()->away($newUrl.'/organization/profile?success=1&domain_updated=1');
+            return redirect()->away($newUrl . '/organization/profile?success=1&domain_updated=1');
         }
 
         return redirect()->route('organization.profile.edit')
