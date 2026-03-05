@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Services\CloudflareService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -121,6 +122,39 @@ class ProfileController extends Controller
                 'message' => 'Erreur lors de la vérification DNS : ' . $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Activate the custom domain on Cloudflare.
+     */
+    public function activateCustomDomain(Request $request, CloudflareService $cloudflare)
+    {
+        $domain = $request->input('domain');
+        $organization = $this->getCurrentOrganization();
+
+        if (!$organization->isEnterprise()) {
+            return response()->json(['success' => false, 'message' => 'Plan Enterprise requis.']);
+        }
+
+        if (empty($domain)) {
+            return response()->json(['success' => false, 'message' => 'Domaine non spécifié.']);
+        }
+
+        $domain = strtolower(trim($domain));
+
+        // Skip Cloudflare registration for internal subdomains
+        $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa';
+        if (str_ends_with($domain, '.' . $baseDomain)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Configuration interne validée. Aucune action Cloudflare requise.',
+            ]);
+        }
+
+        // Call Cloudflare API
+        $result = $cloudflare->registerCustomHostname($domain);
+
+        return response()->json($result);
     }
 
     /**

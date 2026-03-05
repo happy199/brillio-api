@@ -64,6 +64,9 @@ Route::middleware('auth')->group(function () {
                 ->name('profile.check-domain');
             Route::get('/profile/verify-dns', [\App\Http\Controllers\Organization\ProfileController::class , 'verifyDomainDNS'])
                 ->name('profile.verify-dns');
+            Route::post('/profile/activate-domain', [\App\Http\Controllers\Organization\ProfileController::class , 'activateCustomDomain'])
+                ->middleware('organization_role:admin')
+                ->name('profile.activate-domain');
 
             // Invitations
             Route::get('/invitations', [InvitationController::class , 'index'])->name('invitations.index');
