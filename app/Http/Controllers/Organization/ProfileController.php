@@ -93,14 +93,16 @@ class ProfileController extends Controller
             $target = $baseDomain;
             $found = false;
 
-            foreach ($records as $record) {
-                if (isset($record['target']) && (
-                    $record['target'] === $target ||
-                    $record['target'] === 'www.'.$target ||
-                    str_contains($record['target'], $target)
-                )) {
-                    $found = true;
-                    break;
+            if ($records !== false) {
+                foreach ($records as $record) {
+                    if (isset($record['target']) && (
+                        $record['target'] === $target ||
+                        $record['target'] === 'www.'.$target ||
+                        str_contains($record['target'], $target)
+                    )) {
+                        $found = true;
+                        break;
+                    }
                 }
             }
 
