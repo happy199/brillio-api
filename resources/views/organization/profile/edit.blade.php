@@ -502,5 +502,106 @@
             console.error('Domain check error:', error);
         }
     }
+
+    function syncDomainInput(value, source) {
+        const domainHidden = document.getElementById('custom_domain');
+        const slugInput = document.getElementById('custom_domain_slug');
+        const rootInput = document.getElementById('custom_domain_root');
+        const baseDomain = "{{ parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa' }}";
+
+        if (source === 'slug') {
+            rootInput.value = '';
+            domainHidden.value = value ? `${value}.${baseDomain}` : '';
+        } else {
+            slugInput.value = '';
+            domainHidden.value = value;
+        }
+
+        // Reset DNS status when domain change
+        document.getElementById('btn-activate-cloudflare').classList.add('hidden');
+        document.getElementById('dns-status-icon').classList.add('hidden');
+        document.getElementById('dns-feedback').classList.add('hidden');
+    }
+
+    async function verifyDNS() {
+        const domain = document.getElementById('custom_domain').value;
+        const btn = document.getElementById('btn-verify-dns');
+        const spinner = document.getElementById('verify-spinner');
+        const feedback = document.getElementById('dns-feedback');
+        const cloudflareBtn = document.getElementById('btn-activate-cloudflare');
+
+        if (!domain) return;
+
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+        feedback.classList.remove('hidden');
+        feedback.innerText = 'Vérification en cours...';
+        feedback.className = 'mt-1.5 text-[10px] font-medium text-gray-500';
+
+        try {
+            const response = await fetch(`{{ route('organization.profile.verify-dns') }}?domain=${encodeURIComponent(domain)}`);
+            const data = await response.json();
+
+            spinner.classList.add('hidden');
+            btn.disabled = false;
+
+            if (data.success) {
+                feedback.innerText = data.message;
+                feedback.className = 'mt-1.5 text-[10px] font-medium text-green-600';
+                cloudflareBtn.classList.remove('hidden');
+            } else {
+                feedback.innerText = data.message;
+                feedback.className = 'mt-1.5 text-[10px] font-medium text-red-500';
+            }
+        } catch (error) {
+            spinner.classList.add('hidden');
+            btn.disabled = false;
+            feedback.innerText = 'Erreur lors de la vérification DNS.';
+            feedback.className = 'mt-1.5 text-[10px] font-medium text-red-500';
+        }
+    }
+
+    async function activateOnCloudflare() {
+        const domain = document.getElementById('custom_domain').value;
+        const btn = document.getElementById('btn-activate-cloudflare');
+        const spinner = document.getElementById('activate-spinner');
+        const feedback = document.getElementById('dns-feedback');
+
+        if (!domain) return;
+
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+        feedback.innerText = 'Activation sur Cloudflare...';
+
+        try {
+            const response = await fetch(`{{ route('organization.profile.activate-domain') }}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ domain: domain })
+            });
+
+            const data = await response.json();
+
+            spinner.classList.add('hidden');
+            btn.disabled = false;
+
+            if (data.success) {
+                feedback.innerText = 'Domaine activé avec succès sur Cloudflare !';
+                feedback.className = 'mt-1.5 text-[10px] font-medium text-green-600';
+                btn.classList.add('hidden');
+            } else {
+                feedback.innerText = data.message || 'Erreur lors de l\'activation.';
+                feedback.className = 'mt-1.5 text-[10px] font-medium text-red-500';
+            }
+        } catch (error) {
+            spinner.classList.add('hidden');
+            btn.disabled = false;
+            feedback.innerText = 'Erreur réseau lors de l\'activation.';
+            feedback.className = 'mt-1.5 text-[10px] font-medium text-red-500';
+        }
+    }
 </script>
 @endpush
