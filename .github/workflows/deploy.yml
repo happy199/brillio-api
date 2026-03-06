@@ -237,6 +237,20 @@ jobs:
             echo "MONEROO_API_URL=https://api.moneroo.io/v1" >> .env
             
             echo "✅ Moneroo production keys configured"
+            
+            # Configure Cloudflare API Keys
+            echo "🔐 Configuring Cloudflare API keys..."
+            
+            # Remove any existing Cloudflare config
+            sed -i '/^CLOUDFLARE_/d' .env
+            
+            # Add production Cloudflare config
+            echo "" >> .env
+            echo "# Cloudflare Custom Domains (Production)" >> .env
+            echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> .env
+            echo "CLOUDFLARE_ZONE_ID=${{ secrets.CLOUDFLARE_ZONE_ID }}" >> .env
+            
+            echo "✅ Cloudflare API keys configured"
 
             # Configure Jitsi (JAAS) Keys
             echo "🔐 Configuring Jitsi (JAAS) keys..."
