@@ -3,16 +3,16 @@
 return [
 
     /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
+     |--------------------------------------------------------------------------
+     | Third Party Services
+     |--------------------------------------------------------------------------
+     |
+     | This file is for storing the credentials for third party services such
+     | as Mailgun, Postmark, AWS and more. This file provides the de facto
+     | location for this type of information, allowing packages to have
+     | a conventional file to locate the various service credentials.
+     |
+     */
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
@@ -36,10 +36,10 @@ return [
     ],
 
     /*
-    |--------------------------------------------------------------------------
-    | Brillio Custom Services
-    |--------------------------------------------------------------------------
-    */
+     |--------------------------------------------------------------------------
+     | Brillio Custom Services
+     |--------------------------------------------------------------------------
+     */
 
     // OpenRouter API - Pour accéder à DeepSeek R1 et autres modèles IA
     'openrouter' => [
@@ -74,6 +74,12 @@ return [
         'webhook_secret' => env('MONEROO_WEBHOOK_SECRET'),
         'currency' => env('MONEROO_CURRENCY', 'XOF'), // XOF = Franc CFA
         'api_url' => env('MONEROO_API_URL', 'https://api.moneroo.io/v1'),
+    ],
+
+    // Cloudflare - Gestion des domaines personnalisés (SSL for SaaS)
+    'cloudflare' => [
+        'api_token' => env('CLOUDFLARE_API_TOKEN'),
+        'zone_id' => env('CLOUDFLARE_ZONE_ID'),
     ],
 
 ];
