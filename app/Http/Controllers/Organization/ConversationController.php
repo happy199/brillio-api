@@ -26,10 +26,6 @@ class ConversationController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (! $organization->isEnterprise()) {
-            abort(403, 'Cette fonctionnalité est réservée aux comptes Entreprise.');
-        }
-
         // Get IDs of currently sponsored jeunes
         $sponsoredJeuneIds = $organization->sponsoredUsers()
             ->where(fn ($q) => $q->where('user_type', 'jeune'))
