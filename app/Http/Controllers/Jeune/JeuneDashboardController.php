@@ -515,10 +515,11 @@ class JeuneDashboardController extends Controller
             ->first();
 
         // --- PRIVATE CIRCLE RESTRICTION ---
+        // 1. If the viewing user is in a private circle, they can only see mentors from their circle.
         if ($user->hasPrivateCircleRestriction()) {
-            $orgIds = $user->getPrivateCircleOrganizationIds();
+            $myOrgIds = $user->getPrivateCircleOrganizationIds();
             $isSameOrg = $mentor->user->organizations()
-                ->whereIn('organizations.id', $orgIds)
+                ->whereIn('organizations.id', $myOrgIds)
                 ->exists();
 
             if (! $isSameOrg) {
@@ -526,10 +527,24 @@ class JeuneDashboardController extends Controller
             }
         }
 
+        // 2. Check if the MENTOR is in a private circle (to restrict the request form)
+        $mentorPrivateOrgIds = $mentor->user->organizations()
+            ->where('private_circle_enabled', true)
+            ->pluck('organizations.id')
+            ->toArray();
+
+        $canRequestMentorship = true;
+        if (! empty($mentorPrivateOrgIds)) {
+            // The mentor is private. The user must be in at least one of these organizations.
+            $userOrgIds = $user->organizations()->pluck('organizations.id')->toArray();
+            $canRequestMentorship = ! empty(array_intersect($mentorPrivateOrgIds, $userOrgIds));
+        }
+
         return view('jeune.mentor-show', [
             'mentor' => $mentor,
             'similarMentors' => $similarMentors,
             'existingMentorship' => $existingMentorship,
+            'canRequestMentorship' => $canRequestMentorship,
         ]);
     }
 
