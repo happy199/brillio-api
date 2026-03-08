@@ -31,9 +31,22 @@
         </div>
         <div class="text-right">
             <span class="px-3 py-1 text-sm font-bold rounded-full 
-                    {{ $session->status === 'cancelled' ? 'bg-red-100 text-red-800' :
-        ($session->status === 'completed' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
-                {{ ucfirst($session->status) }}
+                    @switch($session->status)
+                        @case('cancelled') bg-red-100 text-red-800 @break
+                        @case('completed') bg-blue-100 text-blue-800 @break
+                        @case('confirmed') bg-green-100 text-green-800 @break
+                        @case('proposed') bg-yellow-100 text-yellow-800 @break
+                        @case('pending_payment') bg-orange-100 text-orange-800 @break
+                        @default bg-gray-100 text-gray-800
+                    @endswitch">
+                @switch($session->status)
+                @case('cancelled') Annulée @break
+                @case('completed') Terminée @break
+                @case('confirmed') Confirmée @break
+                @case('proposed') Proposée @break
+                @case('pending_payment') En attente de paiement @break
+                @default {{ ucfirst($session->status) }}
+                @endswitch
             </span>
             <div class="mt-2 text-sm text-gray-500">
                 Type:
