@@ -128,7 +128,7 @@
                                     class="{{ request()->routeIs('organization.mentorships.*') ? 'bg-gray-100 text-organization-600' : 'text-gray-700 hover:bg-gray-50' }} block px-4 py-2 text-sm font-medium">
                                     Relations
                                 </a>
-                                @if($org && $org->isPro())
+                                @if($org && $org->isEnterprise())
                                 <a href="{{ route('organization.conversations.index') }}"
                                     class="{{ request()->routeIs('organization.conversations.*') ? 'bg-gray-100 text-organization-600' : 'text-gray-700 hover:bg-gray-50' }} block px-4 py-2 text-sm font-medium">
                                     Conversations
@@ -320,10 +320,11 @@
                     detail: { message: 'Lien d\'invitation copié !', type: 'success' }
                 }));
             }, function (err) {
-                wispatchEvent(new CustomEvent('copy-notification', {
+                window.dispatchEvent(new CustomEvent('copy-notification', {
                     detail: { message: 'Erreur lors de la copie.', type: 'error' }
                 }));
-               }
+            });
+        }
     </script>
 </body>
 

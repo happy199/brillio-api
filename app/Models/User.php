@@ -172,7 +172,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function personalityTest(): HasOne
     {
-        return $this->hasOne(PersonalityTest::class)->where('is_current', true);
+        return $this->hasOne(PersonalityTest::class)->where(fn ($q) => $q->where('is_current', true));
     }
 
     /**
@@ -446,7 +446,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasPrivateCircleRestriction(): bool
     {
         return $this->organizations()
-            ->where('private_circle_enabled', true)
+            ->where(fn ($q) => $q->where('private_circle_enabled', true))
             ->exists();
     }
 
@@ -456,7 +456,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getPrivateCircleOrganizationIds(): array
     {
         return $this->organizations()
-            ->where('private_circle_enabled', true)
+            ->where(fn ($q) => $q->where('private_circle_enabled', true))
             ->pluck('organizations.id')
             ->toArray();
     }

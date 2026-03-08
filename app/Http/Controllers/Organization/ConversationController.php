@@ -26,13 +26,13 @@ class ConversationController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (! $organization->isPro()) {
-            abort(403, 'Cette fonctionnalité est réservée aux comptes Pro et Entreprise.');
+        if (! $organization->isEnterprise()) {
+            abort(403, 'Cette fonctionnalité est réservée aux comptes Entreprise.');
         }
 
         // Get IDs of currently sponsored jeunes
         $sponsoredJeuneIds = $organization->sponsoredUsers()
-            ->where('user_type', 'jeune')
+            ->where(fn ($q) => $q->where('user_type', 'jeune'))
             ->pluck('id');
 
         // Get IDs of currently linked mentors
@@ -58,13 +58,13 @@ class ConversationController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (! $organization->isPro()) {
-            abort(403, 'Cette fonctionnalité est réservée aux comptes Pro et Entreprise.');
+        if (! $organization->isEnterprise()) {
+            abort(403, 'Cette fonctionnalité est réservée aux comptes Entreprise.');
         }
 
         // Security: Ensure the organization is linked to BOTH participants
         $isMenteeSponsored = $mentorship->mentee->sponsored_by_organization_id === $organization->id;
-        $isMentorLinked = $organization->mentors()->where('users.id', $mentorship->mentor_id)->exists();
+        $isMentorLinked = $organization->mentors()->where(fn ($q) => $q->where('users.id', $mentorship->mentor_id))->exists();
 
         if (! $isMenteeSponsored || ! $isMentorLinked) {
             abort(403, "Vous n'avez pas accès à cette conversation car l'un des participants n'est plus lié à votre organisation.");
@@ -91,7 +91,7 @@ class ConversationController extends Controller
 
         // Security: Ensure the organization is linked to BOTH participants
         $isMenteeSponsored = $mentorship->mentee->sponsored_by_organization_id === $organization->id;
-        $isMentorLinked = $organization->mentors()->where('users.id', $mentorship->mentor_id)->exists();
+        $isMentorLinked = $organization->mentors()->where(fn ($q) => $q->where('users.id', $mentorship->mentor_id))->exists();
 
         if (! $isMenteeSponsored || ! $isMentorLinked) {
             abort(403, "Vous n'avez pas accès à ce fichier.");
