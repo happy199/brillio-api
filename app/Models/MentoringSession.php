@@ -44,6 +44,14 @@ class MentoringSession extends Model
     }
 
     /**
+     * The wallet transaction associated with this session (payment by the mentee).
+     */
+    public function transaction()
+    {
+        return $this->morphOne(WalletTransaction::class, 'related');
+    }
+
+    /**
      * Get the Jitsi room name (meeting ID) from the link
      */
     public function getMeetingIdAttribute()
