@@ -189,6 +189,16 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                 <a href="{{ route('organization.mentorships.show', $mentorship) }}"
                                     class="text-organization-600 hover:text-organization-900">Voir détails</a>
+                                @if($mentorship->status === 'pending')
+                                <form action="{{ route('organization.mentorships.validate', $mentorship) }}"
+                                    method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit"
+                                        class="text-green-600 hover:text-green-900 bg-transparent border-0 p-0 cursor-pointer font-medium">
+                                        Valider
+                                    </button>
+                                </form>
+                                @endif
                                 @if($mentorship->status === 'accepted')
                                 <button type="button"
                                     onclick="openTerminateModal('{{ route('organization.mentorships.terminate', $mentorship) }}', '{{ $mentorship->mentee->name }}', '{{ $mentorship->mentor->name }}')"

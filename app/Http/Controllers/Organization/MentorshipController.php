@@ -161,6 +161,31 @@ class MentorshipController extends Controller
     }
 
     /**
+     * Valider une demande de mentorat en attente
+     */
+    public function validateMentorship(Mentorship $mentorship)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        // Vérification : le menté doit être parrainé par cette organisation
+        if ($mentorship->mentee->sponsored_by_organization_id !== $organization->id) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        if ($mentorship->status !== 'pending') {
+            return back()->with('error', 'Cette demande ne peut pas être validée car elle n\'est pas en attente.');
+        }
+
+        $mentorship->update(['status' => 'accepted']);
+
+        // Notification (optionnel, mais recommandé si on veut informer le mentor/jeune)
+        // Pour l'instant on utilise le service existant si possible ou on envoie un mail simple
+        $this->notificationService->sendMentorshipAccepted($mentorship);
+
+        return back()->with('success', "La relation de mentorat entre {$mentorship->mentee->name} et {$mentorship->mentor->name} a été validée.");
+    }
+
+    /**
      * Détail d'un mentorat
      */
     public function show(Mentorship $mentorship)

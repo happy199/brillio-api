@@ -97,6 +97,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/mentorships/create', [\App\Http\Controllers\Organization\MentorshipController::class, 'create'])->name('mentorships.create');
             Route::post('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'store'])->name('mentorships.store');
             Route::get('/mentorships/{mentorship}', [\App\Http\Controllers\Organization\MentorshipController::class, 'show'])->name('mentorships.show');
+            Route::post('/mentorships/{mentorship}/validate', [\App\Http\Controllers\Organization\MentorshipController::class, 'validateMentorship'])->name('mentorships.validate');
             Route::post('/mentorships/{mentorship}/terminate', [\App\Http\Controllers\Organization\MentorshipController::class, 'terminate'])->name('mentorships.terminate');
 
             // Sessions & Calendar
