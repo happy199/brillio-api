@@ -6,19 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use App\Models\Message;
 use App\Models\Organization;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ConversationController extends Controller
 {
-    /**
-     * Get the current organization for the logged in user
-     */
-    protected function getCurrentOrganization(): Organization
-    {
-        return Auth::user()->organization;
-    }
-
     /**
      * List all conversations (mentorships) involving BOTH sponsored jeunes AND linked mentors.
      */
