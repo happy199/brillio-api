@@ -91,6 +91,24 @@ class MentorshipController extends Controller
             return back()->with('error', 'Vous avez déjà une demande en cours ou active avec ce mentor.');
         }
 
+        // --- PRIVATE CIRCLE RESTRICTION ---
+        // If the mentor belongs to any organization with private circle enabled,
+        // the mentee MUST belong to at least one of those organizations.
+        $mentorPrivateOrgs = $mentor->organizations()
+            ->where('private_circle_enabled', true)
+            ->pluck('organizations.id')
+            ->toArray();
+
+        if (! empty($mentorPrivateOrgs)) {
+            $isSameOrg = $user->organizations()
+                ->whereIn('organizations.id', $mentorPrivateOrgs)
+                ->exists();
+
+            if (! $isSameOrg) {
+                return back()->with('error', "Ce mentor fait partie d'un cercle privé. Vous ne pouvez pas lui envoyer de demande.");
+            }
+        }
+
         $mentorship = Mentorship::create([
             'mentee_id' => $user->id,
             'mentor_id' => $mentorId,

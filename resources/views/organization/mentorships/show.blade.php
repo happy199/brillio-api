@@ -107,6 +107,22 @@
                     </div>
                     @endif
 
+                    @if($mentorship->status === 'pending')
+                    <div class="pt-4 border-t border-gray-100">
+                        <form action="{{ route('organization.mentorships.validate', $mentorship) }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                Valider la relation
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+
                     @if($mentorship->status === 'accepted')
                     <div class="pt-4 border-t border-gray-100">
                         <button type="button"

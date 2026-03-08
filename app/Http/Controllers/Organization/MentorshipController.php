@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -74,6 +75,114 @@ class MentorshipController extends Controller
         $this->notificationService->sendMentorshipTerminated($mentorship, $actor, $request->diction_reason);
 
         return back()->with('success', 'La relation de mentorat a été terminée avec succès.');
+    }
+
+    /**
+     * Formulaire pour créer une nouvelle relation de mentorat
+     */
+    public function create()
+    {
+        $organization = $this->getCurrentOrganization();
+
+        if (! $organization->isPro()) {
+            abort(403, 'Fonctionnalité réservée aux membres Pro.');
+        }
+
+        // Liste des jeunes parrainés sans mentor actif
+        $jeunes = User::where('sponsored_by_organization_id', $organization->id)
+            ->where('user_type', User::TYPE_JEUNE)
+            ->whereDoesntHave('mentorshipsAsMentee', function ($q) {
+                $q->whereIn('status', ['pending', 'accepted']);
+            })
+            ->orderBy('name')
+            ->get();
+
+        // Liste des mentors de l'organisation
+        $mentors = $organization->mentors()
+            ->with('mentorProfile')
+            ->orderBy('name')
+            ->get();
+
+        return view('organization.mentorships.create', compact('organization', 'jeunes', 'mentors'));
+    }
+
+    /**
+     * Enregistrer une nouvelle relation de mentorat (créée par l'organisation)
+     */
+    public function store(Request $request)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        if (! $organization->isPro()) {
+            abort(403, 'Fonctionnalité réservée aux membres Pro.');
+        }
+
+        $request->validate([
+            'mentee_id' => 'required|exists:users,id',
+            'mentor_id' => 'required|exists:users,id',
+        ]);
+
+        // Vérifications de sécurité
+        $mentee = User::findOrFail($request->mentee_id);
+        $mentor = User::findOrFail($request->mentor_id);
+
+        if ($mentee->sponsored_by_organization_id !== $organization->id) {
+            abort(403, "Le jeune n'est pas parrainé par votre organisation.");
+        }
+
+        if (! $organization->mentors()->where('users.id', $mentor->id)->exists()) {
+            abort(403, "Le mentor n'est pas lié à votre organisation.");
+        }
+
+        // Vérifier si une relation existe déjà
+        $existing = Mentorship::where('mentee_id', $mentee->id)
+            ->where('mentor_id', $mentor->id)
+            ->whereIn('status', ['pending', 'accepted'])
+            ->first();
+
+        if ($existing) {
+            return back()->with('error', 'Une relation active existe déjà entre ce jeune et ce mentor.');
+        }
+
+        // Créer la relation
+        $mentorship = Mentorship::create([
+            'mentee_id' => $mentee->id,
+            'mentor_id' => $mentor->id,
+            'status' => 'accepted',
+            'request_message' => "Relation créée manuellement par l'organisation {$organization->name}.",
+        ]);
+
+        // Notification
+        $actor = Auth::user();
+        $this->notificationService->sendMentorshipCreatedByOrg($mentorship, $actor);
+
+        return redirect()->route('organization.mentorships.index')
+            ->with('success', "La relation de mentorat entre {$mentee->name} et {$mentor->name} a été créée avec succès.");
+    }
+
+    /**
+     * Valider une demande de mentorat en attente
+     */
+    public function validateMentorship(Mentorship $mentorship)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        // Vérification : le menté doit être parrainé par cette organisation
+        if ($mentorship->mentee->sponsored_by_organization_id !== $organization->id) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        if ($mentorship->status !== 'pending') {
+            return back()->with('error', 'Cette demande ne peut pas être validée car elle n\'est pas en attente.');
+        }
+
+        $mentorship->update(['status' => 'accepted']);
+
+        // Notification (optionnel, mais recommandé si on veut informer le mentor/jeune)
+        // Pour l'instant on utilise le service existant si possible ou on envoie un mail simple
+        $this->notificationService->sendMentorshipAccepted($mentorship);
+
+        return back()->with('success', "La relation de mentorat entre {$mentorship->mentee->name} et {$mentorship->mentor->name} a été validée.");
     }
 
     /**
