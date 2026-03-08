@@ -439,4 +439,25 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withPivot(['role', 'referral_code_used'])
             ->withTimestamps();
     }
+
+    /**
+     * Check if the user is restricted by an active private circle.
+     */
+    public function hasPrivateCircleRestriction(): bool
+    {
+        return $this->organizations()
+            ->where('private_circle_enabled', true)
+            ->exists();
+    }
+
+    /**
+     * Get the IDs of organizations the user belongs to that have private circle enabled.
+     */
+    public function getPrivateCircleOrganizationIds(): array
+    {
+        return $this->organizations()
+            ->where('private_circle_enabled', true)
+            ->pluck('organizations.id')
+            ->toArray();
+    }
 }

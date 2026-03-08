@@ -175,7 +175,8 @@ class ProfileController extends Controller
             'description' => 'nullable|string',
         ];
 
-        if ($organization->isEnterprise()) {
+        if ($organization->isPro()) {
+            $rules['private_circle_enabled'] = 'nullable|boolean';
             $rules['primary_color'] = 'nullable|string|max:7';
             $rules['secondary_color'] = 'nullable|string|max:7';
             $rules['accent_color'] = 'nullable|string|max:7';
@@ -189,6 +190,10 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        if ($organization->isPro()) {
+            $validated['private_circle_enabled'] = $request->has('private_circle_enabled');
+        }
 
         if ($organization->isEnterprise() && $request->has('custom_domain')) {
             $domain = strtolower(trim($request->input('custom_domain')));

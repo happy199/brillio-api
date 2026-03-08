@@ -18,6 +18,16 @@ class ExploreController extends Controller
                 $q->where('is_public', true);
             });
 
+        $mentor = auth()->user();
+
+        // --- PRIVATE CIRCLE RESTRICTION ---
+        if ($mentor->hasPrivateCircleRestriction()) {
+            $orgIds = $mentor->getPrivateCircleOrganizationIds();
+            $query->whereHas('organizations', function ($q) use ($orgIds) {
+                $q->whereIn('organizations.id', $orgIds);
+            });
+        }
+
         // Filtre MBTI
         if ($request->filled('mbti')) {
             $query->whereHas('personalityTest', function ($q) use ($request) {

@@ -39,18 +39,23 @@ class JeuneDashboardController extends Controller
             'mentor_views' => $user->jeuneProfile?->mentor_views ?? 0,
         ];
 
-        // Mentors recommandes (basé sur le type de personnalité si disponible)
+        // Mentors recommandés (basé sur le type de personnalité si disponible)
         $personalityTest = $user->personalityTest;
+        $recommendedQuery = MentorProfile::where('is_published', true)->with('user');
+
+        if ($user->hasPrivateCircleRestriction()) {
+            $orgIds = $user->getPrivateCircleOrganizationIds();
+            $recommendedQuery->whereHas('user.organizations', function ($q) use ($orgIds) {
+                $q->whereIn('organizations.id', $orgIds);
+            });
+        }
+
         if ($personalityTest && $personalityTest->personality_type) {
-            $recommendedMentors = MentorProfile::getRecommendedForMbtiType(
-                $personalityTest->personality_type,
-                4
-            );
-        } else {
-            $recommendedMentors = MentorProfile::where('is_published', true)
-                ->with('user')
+            $recommendedMentors = $recommendedQuery->byMbtiType($personalityTest->personality_type)
                 ->limit(4)
                 ->get();
+        } else {
+            $recommendedMentors = $recommendedQuery->limit(4)->get();
         }
 
         return view('jeune.dashboard', [
@@ -419,6 +424,14 @@ class JeuneDashboardController extends Controller
             }
         }
 
+        // --- PRIVATE CIRCLE RESTRICTION ---
+        if ($user->hasPrivateCircleRestriction()) {
+            $orgIds = $user->getPrivateCircleOrganizationIds();
+            $query->whereHas('user.organizations', function ($q) use ($orgIds) {
+                $q->whereIn('organizations.id', $orgIds);
+            });
+        }
+
         $mentors = $query->paginate(12);
 
         $specializations = MentorProfile::SPECIALIZATIONS;
@@ -473,6 +486,7 @@ class JeuneDashboardController extends Controller
      */
     public function mentorShow(MentorProfile $mentor)
     {
+        $user = auth()->user();
         // Incrémenter le compteur de vues (global)
         $mentor->increment('profile_views');
         // Enregistrer la vue spécifique de l'utilisateur
@@ -499,6 +513,18 @@ class JeuneDashboardController extends Controller
             ->where('mentor_id', $mentor->user_id)
             ->latest()
             ->first();
+
+        // --- PRIVATE CIRCLE RESTRICTION ---
+        if ($user->hasPrivateCircleRestriction()) {
+            $orgIds = $user->getPrivateCircleOrganizationIds();
+            $isSameOrg = $mentor->user->organizations()
+                ->whereIn('organizations.id', $orgIds)
+                ->exists();
+
+            if (! $isSameOrg) {
+                abort(403, "Ce profil n'est pas accessible dans le cadre de votre cercle privé.");
+            }
+        }
 
         return view('jeune.mentor-show', [
             'mentor' => $mentor,

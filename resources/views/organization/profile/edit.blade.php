@@ -195,6 +195,56 @@
                                 </div>
                             </div>
 
+                            <!-- Private Circle Toggle (Pro/Enterprise) -->
+                            <div
+                                class="mb-8 p-4 rounded-lg border {{ $organization->private_circle_enabled ? 'bg-indigo-50 border-indigo-200' : 'bg-gray-50 border-gray-200' }}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h4
+                                            class="text-sm font-bold {{ $organization->private_circle_enabled ? 'text-indigo-900' : 'text-gray-900' }} flex items-center">
+                                            <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                            Cercle Privé (Restriction d'échanges)
+                                        </h4>
+                                        <p
+                                            class="mt-1 text-xs {{ $organization->private_circle_enabled ? 'text-indigo-700' : 'text-gray-500' }}">
+                                            Activez ce module pour restreindre les interactions (mentors/jeunes)
+                                            uniquement entre les membres de votre organisation.
+                                        </p>
+                                    </div>
+                                    <div class="ml-4 flex-shrink-0">
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" name="private_circle_enabled" value="1"
+                                                class="sr-only peer" {{ $organization->private_circle_enabled ?
+                                            'checked' : '' }}>
+                                            <div
+                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div
+                                    class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px] {{ $organization->private_circle_enabled ? 'text-indigo-600' : 'text-gray-400' }}">
+                                    <div class="flex items-center">
+                                        <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Jeunes restreints aux mentors internes
+                                    </div>
+                                    <div class="flex items-center">
+                                        <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Mentors protégés des demandes externes
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Success Banner for Domain Update -->
                             @if(session('domain_updated') || request('domain_updated'))
                             @php
@@ -600,7 +650,7 @@
             spinner.classList.add('hidden');
             btn.disabled = false;
             feedback.innerText = 'Erreur réseau lors de l\'activation.';
-            feedback.className = 'mt-1.5 text-[10px] font-medium text-red-500';
+            feedback.className = 'mt-1.5 text-[nt-medium text-red-500';
         }
     }
 </script>
