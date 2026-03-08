@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Organization\Auth\RegisterController;
+use App\Http\Controllers\Organization\ConversationController;
 use App\Http\Controllers\Organization\DashboardController;
 use App\Http\Controllers\Organization\ExportController;
 use App\Http\Controllers\Organization\InvitationController;
@@ -98,6 +99,11 @@ Route::middleware('auth')->group(function () {
             Route::post('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'store'])->name('mentorships.store');
             Route::get('/mentorships/{mentorship}', [\App\Http\Controllers\Organization\MentorshipController::class, 'show'])->name('mentorships.show');
             Route::post('/mentorships/{mentorship}/validate', [\App\Http\Controllers\Organization\MentorshipController::class, 'validateMentorship'])->name('mentorships.validate');
+
+            // Conversation monitoring (Enterprise only)
+            Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
+            Route::get('/conversations/{mentorship}', [ConversationController::class, 'show'])->name('conversations.show');
+            Route::get('/conversations/download/{message}', [ConversationController::class, 'download'])->name('conversations.download');
             Route::post('/mentorships/{mentorship}/terminate', [\App\Http\Controllers\Organization\MentorshipController::class, 'terminate'])->name('mentorships.terminate');
 
             // Sessions & Calendar
@@ -106,7 +112,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/sessions/events', [\App\Http\Controllers\Organization\SessionController::class, 'events'])->name('sessions.events');
             Route::get('/sessions/{session}', [\App\Http\Controllers\Organization\SessionController::class, 'show'])->name('sessions.show');
 
-            // Individual User Export (moved here as it's part of user details)
+            // Individual User Export
             Route::get('/users/{user}/export', [SponsoredUsersController::class, 'export'])->name('users.export');
         }
         );
