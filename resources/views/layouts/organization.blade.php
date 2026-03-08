@@ -128,7 +128,7 @@
                                     class="{{ request()->routeIs('organization.mentorships.*') ? 'bg-gray-100 text-organization-600' : 'text-gray-700 hover:bg-gray-50' }} block px-4 py-2 text-sm font-medium">
                                     Relations
                                 </a>
-                                @if($org && $org->isEnterprise())
+                                @if($org && $org->isPro())
                                 <a href="{{ route('organization.conversations.index') }}"
                                     class="{{ request()->routeIs('organization.conversations.*') ? 'bg-gray-100 text-organization-600' : 'text-gray-700 hover:bg-gray-50' }} block px-4 py-2 text-sm font-medium">
                                     Conversations
@@ -323,7 +323,7 @@
                 wispatchEvent(new CustomEvent('copy-notification', {
                     detail: { message: 'Erreur lors de la copie.', type: 'error' }
                 }));
-            }
+               }
     </script>
 </body>
 

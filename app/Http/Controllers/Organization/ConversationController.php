@@ -26,8 +26,8 @@ class ConversationController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (! $organization->isEnterprise()) {
-            abort(403, 'Cette fonctionnalité est réservée aux comptes Entreprise.');
+        if (! $organization->isPro()) {
+            abort(403, 'Cette fonctionnalité est réservée aux comptes Pro et Entreprise.');
         }
 
         // Get IDs of currently sponsored jeunes
@@ -58,8 +58,8 @@ class ConversationController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (! $organization->isEnterprise()) {
-            abort(403, 'Cette fonctionnalité est réservée aux comptes Entreprise.');
+        if (! $organization->isPro()) {
+            abort(403, 'Cette fonctionnalité est réservée aux comptes Pro et Entreprise.');
         }
 
         // Security: Ensure the organization is linked to BOTH participants
