@@ -117,6 +117,57 @@
                             @enderror
                         </div>
 
+                        @if($organization->isPro())
+                        <!-- Private Circle Toggle (Pro/Enterprise) -->
+                        <div
+                            class="mb-8 p-4 rounded-lg border {{ $organization->private_circle_enabled ? 'bg-indigo-50 border-indigo-200' : 'bg-gray-50 border-gray-200' }}">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h4
+                                        class="text-sm font-bold {{ $organization->private_circle_enabled ? 'text-indigo-900' : 'text-gray-900' }} flex items-center">
+                                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                        Cercle Privé (Restriction d'échanges)
+                                    </h4>
+                                    <p
+                                        class="mt-1 text-xs {{ $organization->private_circle_enabled ? 'text-indigo-700' : 'text-gray-500' }}">
+                                        Activez ce module pour restreindre les interactions (mentors/jeunes) uniquement
+                                        entre les membres de votre organisation.
+                                    </p>
+                                </div>
+                                <div class="ml-4 flex-shrink-0">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="private_circle_enabled" value="1"
+                                            class="sr-only peer" {{ $organization->private_circle_enabled ? 'checked' :
+                                        '' }}>
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div
+                                class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px] {{ $organization->private_circle_enabled ? 'text-indigo-600' : 'text-gray-400' }}">
+                                <div class="flex items-center">
+                                    <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Jeunes restreints aux mentors internes
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Mentors protégés des demandes externes
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Branding & Customization Section -->
                         <div class="pt-6 border-t border-gray-200">
                             <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">
@@ -194,56 +245,7 @@
                                     @enderror
                                 </div>
                             </div>
-
-                            <!-- Private Circle Toggle (Pro/Enterprise) -->
-                            <div
-                                class="mb-8 p-4 rounded-lg border {{ $organization->private_circle_enabled ? 'bg-indigo-50 border-indigo-200' : 'bg-gray-50 border-gray-200' }}">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex-1">
-                                        <h4
-                                            class="text-sm font-bold {{ $organization->private_circle_enabled ? 'text-indigo-900' : 'text-gray-900' }} flex items-center">
-                                            <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            Cercle Privé (Restriction d'échanges)
-                                        </h4>
-                                        <p
-                                            class="mt-1 text-xs {{ $organization->private_circle_enabled ? 'text-indigo-700' : 'text-gray-500' }}">
-                                            Activez ce module pour restreindre les interactions (mentors/jeunes)
-                                            uniquement entre les membres de votre organisation.
-                                        </p>
-                                    </div>
-                                    <div class="ml-4 flex-shrink-0">
-                                        <label class="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" name="private_circle_enabled" value="1"
-                                                class="sr-only peer" {{ $organization->private_circle_enabled ?
-                                            'checked' : '' }}>
-                                            <div
-                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div
-                                    class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px] {{ $organization->private_circle_enabled ? 'text-indigo-600' : 'text-gray-400' }}">
-                                    <div class="flex items-center">
-                                        <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Jeunes restreints aux mentors internes
-                                    </div>
-                                    <div class="flex items-center">
-                                        <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Mentors protégés des demandes externes
-                                    </div>
-                                </div>
-                            </div>
+                            @endif
 
                             <!-- Success Banner for Domain Update -->
                             @if(session('domain_updated') || request('domain_updated'))
@@ -266,7 +268,7 @@
                                             Félicitations ! Votre espace est prêt</h3>
                                         <div class="mt-2 text-sm text-green-700">
                                             <p>Votre organisation est désormais accessible via votre propre lien
-                                                personnalisé. Vous pouvez dès à présent l'utiliser pour inviter vos
+                                                personnalisée. Vous pouvez dès à présent l'utiliser pour inviter vos
                                                 membres.</p>
                                         </div>
 
@@ -302,6 +304,7 @@
                             </div>
                             @endif
 
+                            @if($organization->isEnterprise())
                             <div class="space-y-6">
                                 <!-- Configuration du Domaine -->
                                 <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -438,41 +441,41 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                            @else
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                                </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">Fonctionnalité Premium "Marque
-                                    Blanche"</h3>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    Sublimez votre espace partenaire avec vos propres couleurs (primaire, secondaire) et
-                                    votre nom de domaine personnalisé. Intégration transparente pour votre équipe.<br>
-                                    Accessible uniquement avec le plan <strong>Enterprise (50.000 FCFA/mois)</strong>.
-                                </p>
-                                <div class="mt-6">
-                                    <a href="{{ route('organization.subscriptions.index') }}"
-                                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-organization-600 hover:bg-organization-700">
-                                        Mettre à niveau le plan
-                                    </a>
-                                </div>
+                        </div>
+                        @else
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Fonctionnalité Premium "Marque Blanche"
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Sublimez votre espace partenaire avec vos propres couleurs (primaire, secondaire) et
+                                votre nom de domaine personnalisé. Intégration transparente pour votre équipe.<br>
+                                Accessible uniquement avec le plan <strong>Enterprise (50.000 FCFA/mois)</strong>.
+                            </p>
+                            <div class="mt-6">
+                                <a href="{{ route('organization.subscriptions.index') }}"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-organization-600 hover:bg-organization-700">
+                                    Mettre à niveau le plan
+                                </a>
                             </div>
                             @endif
                         </div>
-                    </div>
-                </div>
 
-                <div class="flex items-center justify-end mt-6">
-                    <button type="button" onclick="window.history.back()"
-                        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500 mr-3">
-                        Annuler
-                    </button>
-                    <button type="submit"
-                        class="bg-organization-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500">
-                        Enregistrer les modifications
-                    </button>
+                        <div class="flex items-center justify-end mt-6">
+                            <button type="button" onclick="window.history.back()"
+                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500 mr-3">
+                                Annuler
+                            </button>
+                            <button type="submit"
+                                class="bg-organization-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500">
+                                Enregistrer les modifications
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
