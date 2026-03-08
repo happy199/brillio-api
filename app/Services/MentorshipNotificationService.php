@@ -459,4 +459,35 @@ class MentorshipNotificationService
             }
         }
     }
+
+    /**
+     * Notifier le jeune et le mentor qu'une relation a été créée par l'organisation
+     */
+    public function sendMentorshipCreatedByOrg(Mentorship $mentorship, User $actor)
+    {
+        $mentor = $mentorship->mentor;
+        $mentee = $mentorship->mentee;
+        $organization = $mentee->sponsoringOrganization;
+        $orgName = $organization ? $organization->name : 'votre organisation';
+
+        // 1. Mail au Jeune
+        $jeuneUrl = route('jeune.mentorship.index');
+        Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipCreatedByOrg(
+            $mentorship,
+            $mentee,
+            $mentor->name,
+            $orgName,
+            $jeuneUrl
+        ));
+
+        // 2. Mail au Mentor
+        $mentorUrl = route('mentor.mentorship.index');
+        Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipCreatedByOrg(
+            $mentorship,
+            $mentor,
+            $mentee->name,
+            $orgName,
+            $mentorUrl
+        ));
+    }
 }

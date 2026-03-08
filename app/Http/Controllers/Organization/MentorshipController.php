@@ -77,6 +77,89 @@ class MentorshipController extends Controller
     }
 
     /**
+     * Formulaire pour créer une nouvelle relation de mentorat
+     */
+    public function create()
+    {
+        $organization = $this->getCurrentOrganization();
+
+        if (! $organization->isPro()) {
+            abort(403, 'Fonctionnalité réservée aux membres Pro.');
+        }
+
+        // Liste des jeunes parrainés sans mentor actif
+        $jeunes = User::where('sponsored_by_organization_id', $organization->id)
+            ->where('user_type', User::TYPE_JEUNE)
+            ->whereDoesntHave('mentorshipsAsMentee', function ($q) {
+                $q->whereIn('status', ['pending', 'accepted']);
+            })
+            ->orderBy('name')
+            ->get();
+
+        // Liste des mentors de l'organisation
+        $mentors = $organization->mentors()
+            ->with('mentorProfile')
+            ->orderBy('name')
+            ->get();
+
+        return view('organization.mentorships.create', compact('organization', 'jeunes', 'mentors'));
+    }
+
+    /**
+     * Enregistrer une nouvelle relation de mentorat (créée par l'organisation)
+     */
+    public function store(Request $request)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        if (! $organization->isPro()) {
+            abort(403, 'Fonctionnalité réservée aux membres Pro.');
+        }
+
+        $request->validate([
+            'mentee_id' => 'required|exists:users,id',
+            'mentor_id' => 'required|exists:users,id',
+        ]);
+
+        // Vérifications de sécurité
+        $mentee = User::findOrFail($request->mentee_id);
+        $mentor = User::findOrFail($request->mentor_id);
+
+        if ($mentee->sponsored_by_organization_id !== $organization->id) {
+            abort(403, "Le jeune n'est pas parrainé par votre organisation.");
+        }
+
+        if (! $organization->mentors()->where('users.id', $mentor->id)->exists()) {
+            abort(403, "Le mentor n'est pas lié à votre organisation.");
+        }
+
+        // Vérifier si une relation existe déjà
+        $existing = Mentorship::where('mentee_id', $mentee->id)
+            ->where('mentor_id', $mentor->id)
+            ->whereIn('status', ['pending', 'accepted'])
+            ->first();
+
+        if ($existing) {
+            return back()->with('error', 'Une relation active existe déjà entre ce jeune et ce mentor.');
+        }
+
+        // Créer la relation
+        $mentorship = Mentorship::create([
+            'mentee_id' => $mentee->id,
+            'mentor_id' => $mentor->id,
+            'status' => 'accepted',
+            'request_message' => "Relation créée manuellement par l'organisation {$organization->name}.",
+        ]);
+
+        // Notification
+        $actor = Auth::user();
+        $this->notificationService->sendMentorshipCreatedByOrg($mentorship, $actor);
+
+        return redirect()->route('organization.mentorships.index')
+            ->with('success', "La relation de mentorat entre {$mentee->name} et {$mentor->name} a été créée avec succès.");
+    }
+
+    /**
      * Détail d'un mentorat
      */
     public function show(Mentorship $mentorship)
