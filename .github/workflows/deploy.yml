@@ -306,6 +306,23 @@ jobs:
             
             echo "✅ Sentry & Logging configured"
 
+            # Configure Redis Cache
+            echo "🔐 Configuring Redis..."
+            sed -i '/^REDIS_/d' .env
+            sed -i '/^SESSION_DRIVER=/d' .env
+            sed -i '/^CACHE_DRIVER=/d' .env
+            sed -i '/^QUEUE_CONNECTION=/d' .env
+            echo "" >> .env
+            echo "# Redis Cache & Sessions" >> .env
+            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+            echo "REDIS_PASSWORD=null" >> .env
+            echo "SESSION_DRIVER=${{ secrets.SESSION_DRIVER }}" >> .env
+            echo "CACHE_DRIVER=${{ secrets.CACHE_DRIVER }}" >> .env
+            echo "QUEUE_CONNECTION=${{ secrets.QUEUE_CONNECTION }}" >> .env
+            echo "✅ Redis configured"
+
+
             # Deploy Cloudflare Origin CA Certificates
             echo "🔐 Provisioning Cloudflare Origin CA certificates..."
             mkdir -p docker/certbot/conf/live/brillio.africa/
