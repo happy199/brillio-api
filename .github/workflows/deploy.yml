@@ -315,7 +315,7 @@ jobs:
             echo "" >> .env
             echo "# Redis Cache & Sessions" >> .env
             echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
-            echo "REDIS_PORT=6379" >> .env
+            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
             echo "REDIS_PASSWORD=null" >> .env
             echo "SESSION_DRIVER=${{ secrets.SESSION_DRIVER }}" >> .env
             echo "CACHE_DRIVER=${{ secrets.CACHE_DRIVER }}" >> .env
