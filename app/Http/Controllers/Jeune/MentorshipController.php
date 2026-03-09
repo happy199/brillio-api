@@ -61,7 +61,17 @@ class MentorshipController extends Controller
     {
         $validated = $request->validate([
             'mentor_id' => 'required|exists:users,id',
-            'message' => ['required', 'string', 'max:1000', 'regex:/\S(?:.*\S){29,}/s'],
+            'message' => [
+                'required',
+                'string',
+                'max:1000',
+                function ($attribute, $value, $fail) {
+                    $meaningful = strlen(preg_replace('/\s+/', '', $value));
+                    if ($meaningful < 30) {
+                        $fail('Veuillez écrire un message détaillé d\'au moins 30 caractères significatifs (hors espaces).');
+                    }
+                },
+            ],
 
         ]);
 
