@@ -39,15 +39,7 @@ COPY . .
 RUN npm ci && npm run build
 
 # Generate optimized autoload files
-RUN composer dump-autoload --optimize
-
-# Optimize Laravel
-RUN php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache
-
-# Create storage symlink (baked into image)
-RUN php artisan storage:link
+RUN composer dump-autoload --optimize --no-dev
 
 # Stage 2: Production
 FROM php:8.4-fpm-alpine
@@ -56,7 +48,7 @@ FROM php:8.4-fpm-alpine
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions pdo pdo_mysql zip gd pcntl excimer @composer
+    install-php-extensions pdo pdo_mysql zip gd pcntl excimer redis @composer
 
 # Install system dependencies required for build
 RUN apk add --no-cache \
