@@ -24,6 +24,8 @@ class Resource extends Model
         'is_published',
         'is_validated',
         'validated_at',
+        'admin_feedback',
+        'unpublished_at',
         'metadata',
         'mbti_types',
         'tags',
@@ -39,6 +41,7 @@ class Resource extends Model
         'is_published' => 'boolean',
         'is_validated' => 'boolean',
         'validated_at' => 'datetime',
+        'unpublished_at' => 'datetime',
         'price' => 'integer',
     ];
 
@@ -50,7 +53,12 @@ class Resource extends Model
     // Scopes potentiels
     public function scopePublished($query)
     {
-        return $query->where('is_published', true)->where('is_validated', true);
+        return $query->where('is_published', true);
+    }
+
+    public function isDepublished(): bool
+    {
+        return ! $this->is_published && $this->admin_feedback !== null;
     }
 
     public function scopePremium($query)

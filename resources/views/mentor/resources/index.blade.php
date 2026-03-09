@@ -165,17 +165,17 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        @if($resource->is_published && $resource->is_validated)
+                        @if($resource->is_published)
                         <span
                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>
                             En ligne
                         </span>
-                        @elseif(!$resource->is_validated)
+                        @elseif($resource->admin_feedback)
                         <span
-                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                            <span class="w-2 h-2 bg-orange-500 rounded-full mr-1.5 animate-pulse"></span>
-                            En attente validation
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <span class="w-2 h-2 bg-red-500 rounded-full mr-1.5 animate-pulse"></span>
+                            Dépubliée — Action requise
                         </span>
                         @else
                         <span
@@ -199,6 +199,27 @@
                         </button>
                     </td>
                 </tr>
+                {{-- Ligne de feedback admin si la ressource est dépubliée par l'admin --}}
+                @if($resource->admin_feedback)
+                <tr class="bg-red-50">
+                    <td colspan="6" class="px-6 py-3">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <div>
+                                <p class="text-xs font-bold text-red-700 mb-0.5">Message de l'administrateur :</p>
+                                <p class="text-xs text-red-600">{{ $resource->admin_feedback }}</p>
+                                <a href="{{ route('mentor.resources.edit', $resource) }}"
+                                    class="text-xs font-semibold text-red-700 underline mt-1 inline-block">→ Modifier et
+                                    republier</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                @endif
                 @empty
                 <tr>
                     <td colspan="6" class="px-6 py-12 text-center text-gray-500">

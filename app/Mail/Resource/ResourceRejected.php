@@ -29,7 +29,7 @@ class ResourceRejected extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Information concernant votre ressource Brillio',
+            subject: 'Votre ressource a été dépubliée — Action requise',
         );
     }
 
