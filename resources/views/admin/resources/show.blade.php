@@ -23,24 +23,20 @@
                 class="bg-white border text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
                 Modifier
             </a>
-            @if(!$resource->is_validated || !$resource->is_published)
+            @if($resource->is_published)
+            {{-- Bouton dépublier → ouvre un modal avec un message --}}
+            <button onclick="document.getElementById('unpublish-modal').classList.remove('hidden')"
+                class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition">
+                Dépublier
+            </button>
+            @else
+            {{-- Republier une ressource dépubliée par l'admin --}}
             <form action="{{ route('admin.resources.approve', $resource) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <button type="submit"
-                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Valider & Publier
-                </button>
-            </form>
-            @else
-            <form action="{{ route('admin.resources.reject', $resource) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <button type="submit" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition">
-                    Retirer de la publication
+                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    Republier
                 </button>
             </form>
             @endif
@@ -48,164 +44,197 @@
         @endif
     </div>
 
-    <!-- Contenu -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Colonne Principale -->
-        <div class="lg:col-span-2 space-y-6">
-            @if($resource->preview_image_path)
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <img src="{{ Storage::url($resource->preview_image_path) }}" alt="" class="w-full h-64 object-cover">
-            </div>
-            @endif
+    {{-- Modal Dépublier avec Feedback --}}
+    <div id="unpublish-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Dépublier la ressource</h3>
+            <p class="text-sm text-gray-500 mb-4">
+                Expliquez au mentor pourquoi vous dépubliez sa ressource. Ce message lui sera envoyé par email
+                et visible dans son espace ressources.
+            </p>
+            <form action="{{ route('admin.resources.unpublish', $resource) }}" method="POST">
+                @csrf
+                <textarea name="feedback" rows="4" required minlength="10"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-red-300 focus:border-red-400 outline-none"
+                    placeholder="Ex: Votre ressource ne respecte pas nos directives de contenu car... Merci de corriger X et Y avant de republier."></textarea>
+                @error('feedback')
+                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+                <div class="flex gap-3 mt-4 justify-end">
+                    <button type="button" onclick="document.getElementById('unpublish-modal').classList.add('hidden')"
+                        class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                        Confirmer la dépublication
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-                <div class="prose max-w-none text-gray-800">
-                    <h2 class="text-xl font-bold mb-4">Description</h2>
-                    <p class="mb-8 font-medium text-gray-600">{{ $resource->description }}</p>
+<!-- Contenu -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Colonne Principale -->
+    <div class="lg:col-span-2 space-y-6">
+        @if($resource->preview_image_path)
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <img src="{{ Storage::url($resource->preview_image_path) }}" alt="" class="w-full h-64 object-cover">
+        </div>
+        @endif
 
-                    <hr class="my-8 border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+            <div class="prose max-w-none text-gray-800">
+                <h2 class="text-xl font-bold mb-4">Description</h2>
+                <p class="mb-8 font-medium text-gray-600">{{ $resource->description }}</p>
 
-                    <h2 class="text-xl font-bold mb-4">Contenu</h2>
-                    <!-- Attention: Affichage HTML brut si confiance -->
-                    <div class="bg-gray-50 p-6 rounded-lg font-mono text-sm overflow-x-auto">
-                        {!! $resource->content !!}
-                    </div>
+                <hr class="my-8 border-gray-100">
+
+                <h2 class="text-xl font-bold mb-4">Contenu</h2>
+                <!-- Attention: Affichage HTML brut si confiance -->
+                <div class="bg-gray-50 p-6 rounded-lg font-mono text-sm overflow-x-auto">
+                    {!! $resource->content !!}
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Colonne Latérale -->
-        <div class="space-y-6">
-            <!-- Statut -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 class="font-semibold text-gray-900 mb-4">Informations</h3>
+    <!-- Colonne Latérale -->
+    <div class="space-y-6">
+        <!-- Statut -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Informations</h3>
 
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-500">Statut</span>
-                        @if($resource->is_published && $resource->is_validated)
-                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">PUBLIÉ</span>
-                        @else
-                        <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold">À VALIDER</span>
-                        @endif
-                    </div>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Statut</span>
+                    @if($resource->is_published)
+                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">PUBLIÉ</span>
+                    @elseif($resource->admin_feedback)
+                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">DÉPUBLIÉ (admin)</span>
+                    @else
+                    <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold">NON PUBLIÉ</span>
+                    @endif
+                </div>
 
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-500">Type</span>
-                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-bold uppercase">{{
-                            $resource->type }}</span>
-                    </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Type</span>
+                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-bold uppercase">{{
+                        $resource->type }}</span>
+                </div>
 
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-500">Prix</span>
-                        <span class="font-bold {{ $resource->is_premium ? 'text-yellow-600' : 'text-green-600' }}">
-                            {{ $resource->price > 0 ? $resource->price . ' FCFA' : 'Gratuit' }}
-                        </span>
-                    </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Prix</span>
+                    <span class="font-bold {{ $resource->is_premium ? 'text-yellow-600' : 'text-green-600' }}">
+                        {{ $resource->price > 0 ? $resource->price . ' FCFA' : 'Gratuit' }}
+                    </span>
+                </div>
 
-                    <div class="border-t pt-4">
-                        <span class="text-gray-500 text-sm block mb-2">Créateur</span>
-                        <div class="flex items-center gap-2">
-                            <div
-                                class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600 text-xs">
-                                {{ substr($resource->user->name, 0, 2) }}
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">{{ $resource->user->name }}</p>
-                                <p class="text-xs text-gray-500">{{ $resource->created_at->format('d/m/Y H:i') }}</p>
-                            </div>
+                <div class="border-t pt-4">
+                    <span class="text-gray-500 text-sm block mb-2">Créateur</span>
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600 text-xs">
+                            {{ substr($resource->user->name, 0, 2) }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ $resource->user->name }}</p>
+                            <p class="text-xs text-gray-500">{{ $resource->created_at->format('d/m/Y H:i') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- Statistiques -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="font-semibold text-gray-900 mb-4">Statistiques</h3>
-            <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500">Vues totales</span>
-                    <span class="flex items-center gap-1 font-bold text-gray-900">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        {{ $resource->views_count }}
-                    </span>
-                </div>
-                @if($resource->is_premium)
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500">Achats</span>
-                    <span class="flex items-center gap-1 font-bold text-purple-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        {{ $resource->sales_count }}
-                    </span>
-                </div>
-                <div class="border-t pt-2 mt-2">
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-gray-500">Volume Ventes</span>
-                        <span class="font-bold text-green-600">
-                            {{ number_format($resource->sales_count * $resource->price, 0, ',', ' ') }} FCFA
-                        </span>
-                    </div>
-                </div>
-                @endif
+    </div>
+
+    <!-- Statistiques -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Statistiques</h3>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-500">Vues totales</span>
+                <span class="flex items-center gap-1 font-bold text-gray-900">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    {{ $resource->views_count }}
+                </span>
             </div>
-        </div>
-
-        <!-- Fichier -->
-        @if($resource->file_path)
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="font-semibold text-gray-900 mb-4">Fichier joint</h3>
-            <a href="{{ Storage::url($resource->file_path) }}" target="_blank"
-                class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                    </path>
-                </svg>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 truncate">Télécharger le fichier</p>
-                    <p class="text-xs text-gray-500">Document attaché</p>
-                </div>
-            </a>
-        </div>
-        @endif
-
-        <!-- Metadata -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 class="font-semibold text-gray-900 mb-4">Ciblage</h3>
-
-            @if(!empty($resource->mbti_types))
-            <div class="mb-4">
-                <p class="text-xs text-gray-500 mb-2">Types MBTI</p>
-                <div class="flex flex-wrap gap-1">
-                    @foreach($resource->mbti_types as $type)
-                    <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">{{ $type }}</span>
-                    @endforeach
-                </div>
+            @if($resource->is_premium)
+            <div class="flex justify-between items-center">
+                <span class="text-gray-500">Achats</span>
+                <span class="flex items-center gap-1 font-bold text-purple-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    {{ $resource->sales_count }}
+                </span>
             </div>
-            @endif
-
-            @if(!empty($resource->tags))
-            <div>
-                <p class="text-xs text-gray-500 mb-2">Tags</p>
-                <div class="flex flex-wrap gap-1">
-                    @foreach($resource->tags as $tag)
-                    <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">#{{ trim($tag) }}</span>
-                    @endforeach
+            <div class="border-t pt-2 mt-2">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-gray-500">Volume Ventes</span>
+                    <span class="font-bold text-green-600">
+                        {{ number_format($resource->sales_count * $resource->price, 0, ',', ' ') }} FCFA
+                    </span>
                 </div>
             </div>
             @endif
         </div>
     </div>
+
+    <!-- Fichier -->
+    @if($resource->file_path)
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Fichier joint</h3>
+        <a href="{{ Storage::url($resource->file_path) }}" target="_blank"
+            class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+            <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                </path>
+            </svg>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">Télécharger le fichier</p>
+                <p class="text-xs text-gray-500">Document attaché</p>
+            </div>
+        </a>
+    </div>
+    @endif
+
+    <!-- Metadata -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="font-semibold text-gray-900 mb-4">Ciblage</h3>
+
+        @if(!empty($resource->mbti_types))
+        <div class="mb-4">
+            <p class="text-xs text-gray-500 mb-2">Types MBTI</p>
+            <div class="flex flex-wrap gap-1">
+                @foreach($resource->mbti_types as $type)
+                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs">{{ $type }}</span>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if(!empty($resource->tags))
+        <div>
+            <p class="text-xs text-gray-500 mb-2">Tags</p>
+            <div class="flex flex-wrap gap-1">
+                @foreach($resource->tags as $tag)
+                <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs">#{{ trim($tag) }}</span>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+</div>
 </div>
 </div>
 @endsection

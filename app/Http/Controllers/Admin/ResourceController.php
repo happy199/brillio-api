@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\Resource\ResourceRejected;
 use App\Models\Resource;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -32,12 +34,13 @@ class ResourceController extends Controller
         } else {
             // Filtre par statut (Admin uniquement)
             if ($request->filled('status')) {
-                if ($request->status === 'pending') {
-                    $query->where('is_validated', false);
-                } elseif ($request->status === 'published') {
-                    $query->where('is_published', true)->where('is_validated', true);
-                } elseif ($request->status === 'draft') {
+                if ($request->status === 'unpublished') {
                     $query->where('is_published', false);
+                } elseif ($request->status === 'published') {
+                    $query->where('is_published', true);
+                } elseif ($request->status === 'pending') {
+                    // Compatibilité : ressources validates=false et published (créées avant la migration)
+                    $query->where('is_validated', false)->where('is_published', true);
                 }
             }
         }
@@ -271,7 +274,7 @@ class ResourceController extends Controller
     }
 
     /**
-     * Valider une ressource
+     * Valider une ressource legacy (créée avant la migration auto-publish)
      */
     public function approve(Resource $resource)
     {
@@ -279,46 +282,40 @@ class ResourceController extends Controller
             'is_validated' => true,
             'is_published' => true,
             'validated_at' => now(),
+            'admin_feedback' => null,
+            'unpublished_at' => null,
         ]);
 
         $this->notificationService->sendResourceValidated($resource);
 
-        return back()->with('success', 'Ressource validée et publiée.');
+        return back()->with('success', 'Ressource publiée.');
     }
 
     /**
-     * Valider toutes les ressources en attente
+     * Dépublier une ressource avec un message de feedback pour le mentor
      */
-    public function approveAll()
+    public function unpublish(Request $request, Resource $resource)
     {
-        $resources = Resource::where('is_validated', false)->get();
-
-        Resource::where('is_validated', false)->update([
-            'is_validated' => true,
-            'is_published' => true,
-            'validated_at' => now(),
+        $request->validate([
+            'feedback' => 'required|string|min:10|max:1000',
+        ], [
+            'feedback.required' => 'Un message explicatif est obligatoire pour informer le mentor.',
+            'feedback.min' => 'Le message doit faire au moins 10 caractères.',
         ]);
 
-        foreach ($resources as $resource) {
-            $this->notificationService->sendResourceValidated($resource);
-        }
-
-        return back()->with('success', 'Toutes les ressources en attente ont été validées.');
-    }
-
-    /**
-     * Rejeter une ressource
-     */
-    public function reject(Resource $resource)
-    {
         $resource->update([
             'is_published' => false,
-            // On garde is_validated a false ou on pourrait ajouter un champ 'rejected_at'
+            'admin_feedback' => $request->feedback,
+            'unpublished_at' => now(),
         ]);
 
-        $this->notificationService->sendResourceRejected($resource);
+        // Envoyer l'email au mentor avec le feedback
+        $mentor = $resource->user;
+        if ($mentor && $mentor->email) {
+            Mail::to($mentor->email)->send(new ResourceRejected($resource));
+        }
 
-        return back()->with('warning', 'Ressource retirée de la publication.');
+        return back()->with('warning', 'Ressource dépubliée. Le mentor a été notifié par email.');
     }
 
     /**

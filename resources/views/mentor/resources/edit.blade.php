@@ -549,29 +549,11 @@
 
                     </div>
 
-                    <!-- Boutons -->
                     <div class="pt-4 border-t border-gray-100 space-y-3">
-                        @if($resource->is_validated)
-                        <div class="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-lg border border-yellow-200">
-                            <strong>Attention :</strong> Toute modification entraînera une nouvelle validation par
-                            l'administration avant d'être visible.
-                        </div>
-                        @endif
-
                         <button type="submit"
                             class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                            Mettre à jour et Soumettre
+                            Mettre à jour
                         </button>
-                        <p class="text-[10px] text-gray-500 mt-3 text-center leading-relaxed">
-                            <svg class="w-3 h-3 inline-block mr-1 -mt-0.5 text-indigo-400" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Brillio se réserve le droit de valider ou invalider toutes les ressources proposées afin
-                            d'en garantir la qualité. Cette vérification se fait généralement dans les 4H après
-                            soumission.
-                        </p>
 
                         <button type="button"
                             onclick="if(confirm('Supprimer cette ressource ?')) document.getElementById('delete-form').submit();"

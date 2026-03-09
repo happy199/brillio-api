@@ -225,24 +225,33 @@
                     @endif
                     @else
                     @if($canRequestMentorship)
-                    <form action="{{ route('jeune.mentorship.request') }}" method="POST">
+                    <form action="{{ route('jeune.mentorship.request') }}" method="POST" id="mentorship-request-form">
                         @csrf
                         <input type="hidden" name="mentor_id" value="{{ $mentor->user_id }}">
 
                         <div class="mb-3">
                             <label for="message" class="block text-sm font-medium text-gray-700 mb-1">
                                 Pourquoi souhaites-tu être mentoré ? <span class="text-red-500">*</span>
+                                <span class="text-xs text-gray-400 font-normal ml-1">(30 caractères min.)</span>
                             </label>
                             <textarea name="message" id="message" rows="4" required
                                 class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3"
-                                placeholder="Bonjour, je souhaite être mentoré par vous car...">{{ old('message') }}</textarea>
-                            @error('message')
-                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                            @enderror
+                                placeholder="Bonjour, je souhaite être mentoré par vous car..."
+                                oninput="updateMsgCounter(this)">{{ old('message') }}</textarea>
+                            <div class="flex items-center justify-between mt-1">
+                                @error('message')
+                                <p class="text-xs text-red-500">Veuillez écrire un message détaillé d'au moins 30
+                                    caractères significatifs (hors espaces).</p>
+                                @else
+                                <p class="text-xs text-gray-400" id="msg-hint">Expliquez votre motivation en détail.</p>
+                                @enderror
+                                <span id="msg-counter"
+                                    class="text-xs font-semibold text-gray-400 ml-2 whitespace-nowrap">0 / 30</span>
+                            </div>
                         </div>
 
-                        <button type="submit"
-                            class="flex items-center justify-center gap-2 w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
+                        <button type="submit" id="mentorship-submit-btn"
+                            class="flex items-center justify-center gap-2 w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -250,6 +259,45 @@
                             Demander un mentorat
                         </button>
                     </form>
+
+                    <script>
+                        function updateMsgCounter(textarea) {
+                            const meaningful = (textarea.value.match(/\S/g) || []).length;
+                            const counter = document.getElementById('msg-counter');
+                            const btn = document.getElementById('mentorship-submit-btn');
+                            const min = 30;
+
+                            counter.textContent = meaningful + ' / ' + min;
+
+                            if (meaningful < min) {
+                                counter.className = 'text-xs font-semibold ml-2 whitespace-nowrap ' +
+                                    (meaningful > 10 ? 'text-orange-500' : 'text-red-500');
+                                btn.disabled = true;
+                            } else {
+                                counter.className = 'text-xs font-semibold ml-2 whitespace-nowrap text-green-600';
+                                btn.disabled = false;
+                            }
+                        }
+
+                        // Init on page load (for old() prefill)
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const ta = document.getElementById('message');
+                            if (ta && ta.value.trim()) updateMsgCounter(ta);
+
+                            // Guard on submit
+                            document.getElementById('mentorship-request-form')?.addEventListener('submit', function (e) {
+                                const ta = document.getElementById('message');
+                                const meaningful = (ta.value.match(/\S/g) || []).length;
+                                if (meaningful < 30) {
+                                    e.preventDefault();
+                                    ta.focus();
+                                    document.getElementById('msg-counter').className =
+                                        'text-xs font-semibold ml-2 whitespace-nowrap text-red-500';
+                                }
+                            });
+                        });
+                    </script>
+
                     @else
                     <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 text-center">
                         <span class="inline-flex items-center gap-2 text-orange-700 font-medium">

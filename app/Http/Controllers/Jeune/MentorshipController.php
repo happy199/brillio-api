@@ -61,7 +61,8 @@ class MentorshipController extends Controller
     {
         $validated = $request->validate([
             'mentor_id' => 'required|exists:users,id',
-            'message' => 'required|string|min:10|max:1000',
+            'message' => ['required', 'string', 'max:1000', 'regex:/\S(?:.*\S){29,}/s'],
+
         ]);
 
         $user = auth()->user();

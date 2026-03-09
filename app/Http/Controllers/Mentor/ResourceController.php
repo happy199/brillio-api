@@ -153,8 +153,10 @@ class ResourceController extends Controller
                 'tags' => $tags,
                 'targeting' => $validated['targeting'] ?? [],
                 'is_published' => true,
-                'is_validated' => false,
-                'validated_at' => null,
+                'is_validated' => true,
+                'validated_at' => now(),
+                'admin_feedback' => null,
+                'unpublished_at' => null,
             ]);
 
             // Débit réel si ciblage
@@ -177,7 +179,7 @@ class ResourceController extends Controller
             return back()->withInput()->with('error', 'Erreur lors de la création : '.$e->getMessage());
         }
 
-        return redirect()->route('mentor.resources.index')->with('success', 'Ressource créée ! Elle sera visible après validation par un administrateur.');
+        return redirect()->route('mentor.resources.index')->with('success', 'Ressource publiée avec succès. Elle est immédiatement visible.');
     }
 
     /**
@@ -300,11 +302,12 @@ class ResourceController extends Controller
             'targeting' => $validated['targeting'] ?? [],
         ];
 
-        // Si elle était validée, on la dévalide pour forcer une nouvelle validation admin
-        if ($wasValidated) {
-            $updateData['is_validated'] = false;
-            $updateData['validated_at'] = null;
-        }
+        // Quand le mentor modifie, on remet la ressource en ligne et on efface le feedback admin
+        $updateData['is_published'] = true;
+        $updateData['is_validated'] = true;
+        $updateData['validated_at'] = $resource->validated_at ?? now();
+        $updateData['admin_feedback'] = null;
+        $updateData['unpublished_at'] = null;
 
         try {
             DB::beginTransaction();
@@ -329,11 +332,7 @@ class ResourceController extends Controller
             return back()->withInput()->with('error', 'Erreur lors de la mise à jour : '.$e->getMessage());
         }
 
-        $message = $wasValidated
-            ? 'Ressource mise à jour. Elle sera à nouveau soumise à validation admin.'
-            : 'Ressource mise à jour.';
-
-        return redirect()->route('mentor.resources.index')->with('success', $message);
+        return redirect()->route('mentor.resources.index')->with('success', 'Ressource mise à jour et republiée.');
     }
 
     /**

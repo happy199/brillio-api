@@ -465,17 +465,19 @@
                             @endif
                         </div>
 
-                        <div class="flex items-center justify-end mt-6">
-                            <button type="button" onclick="window.history.back()"
-                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500 mr-3">
-                                Annuler
-                            </button>
-                            <button type="submit"
-                                class="bg-organization-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500">
-                                Enregistrer les modifications
-                            </button>
-                        </div>
                     </div>
+                </div>
+
+                {{-- Boutons pleine largeur, alignés à droite --}}
+                <div class="flex items-center justify-end mt-6 pt-6 border-t border-gray-100">
+                    <button type="button" onclick="window.history.back()"
+                        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500 mr-3">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                        class="bg-organization-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500">
+                        Enregistrer les modifications
+                    </button>
                 </div>
             </form>
         </div>
