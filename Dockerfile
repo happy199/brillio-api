@@ -79,6 +79,9 @@ RUN mkdir -p /run/nginx && \
 
 WORKDIR /var/www/html
 
+# Create storage symlink
+RUN php artisan storage:link --no-interaction
+
 # Expose port 8080 (Cloud Run requirement)
 EXPOSE 8080
 
