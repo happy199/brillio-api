@@ -55,7 +55,8 @@ RUN apk add --no-cache \
     git \
     nginx \
     supervisor \
-    mysql-client
+    mysql-client \
+    curl
 
 # Copy application from builder
 COPY --from=builder /var/www/html /var/www/html
