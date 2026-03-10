@@ -82,4 +82,13 @@ return [
         'zone_id' => env('CLOUDFLARE_ZONE_ID'),
     ],
 
+    // Analytics Tools
+    'clarity' => [
+        'id' => env('CLARITY_ID'),
+    ],
+
+    'mixpanel' => [
+        'token' => env('MIXPANEL_TOKEN'),
+    ],
+
 ];

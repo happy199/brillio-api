@@ -322,6 +322,21 @@ jobs:
             echo "CACHE_DRIVER=${{ secrets.CACHE_DRIVER }}" >> .env
             echo "QUEUE_CONNECTION=${{ secrets.QUEUE_CONNECTION }}" >> .env
             echo "✅ Redis configured"
+            
+            # Configure Analytics Tools
+            echo "🔐 Configuring Analytics Tools (Clarity & Mixpanel)..."
+            
+            # Remove any existing Analytics config
+            sed -i '/^CLARITY_/d' .env
+            sed -i '/^MIXPANEL_/d' .env
+            
+            # Add production Analytics config
+            echo "" >> .env
+            echo "# Analytics Tools (Production)" >> .env
+            echo "CLARITY_ID=${{ secrets.CLARITY_ID }}" >> .env
+            echo "MIXPANEL_TOKEN=${{ secrets.MIXPANEL_TOKEN }}" >> .env
+            
+            echo "✅ Analytics tools configured"
 
 
             # Deploy Cloudflare Origin CA Certificates

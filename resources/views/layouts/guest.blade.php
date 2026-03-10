@@ -29,6 +29,8 @@
         }
     </script>
 
+    @include('partials.analytics')
+
     @stack('styles')
 </head>
 
