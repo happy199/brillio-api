@@ -14,8 +14,6 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-    ports:
-      - "3306:3306"
     networks:
       - brillio-network
     healthcheck:
