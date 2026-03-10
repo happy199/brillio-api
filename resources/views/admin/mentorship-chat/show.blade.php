@@ -80,6 +80,20 @@
                     "{{ $mentorship->report_reason ?? 'Aucun motif fourni' }}"
                 </p>
             </div>
+            <div class="md:col-span-2 flex justify-end pt-2">
+                <form action="{{ route('admin.mentorship-chat.clear-report', $mentorship) }}" method="POST"
+                    onsubmit="return confirm('Voulez-vous vraiment classer ce signalement ? Cela enlèvera l\'alerte sur cette conversation.')">
+                    @csrf
+                    <button type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-white border border-red-200 text-red-700 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-red-50 transition-colors shadow-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        Classer le signalement
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
     @endif
@@ -113,8 +127,17 @@
                         </div>
                         <p class="whitespace-pre-wrap font-mono bg-red-50/50 p-2 rounded">{{ $message->original_body ??
                             $message->body }}</p>
-                        <div class="mt-2 pt-2 border-t border-red-100 text-[10px] opacity-75">
-                            Version masquée pour les utilisateurs: {{ Str::limit($message->body, 50) }}
+                        <div
+                            class="mt-2 pt-2 border-t border-red-100 text-[10px] opacity-75 flex justify-between items-center">
+                            <span>Version masquée pour les utilisateurs: {{ Str::limit($message->body, 50) }}</span>
+                            <form action="{{ route('admin.mentorship-chat.unflag-message', $message) }}" method="POST"
+                                onsubmit="return confirm('Voulez-vous vraiment lever le signalement sur ce message ? Le texte original sera restauré pour le jeune et le mentor.')">
+                                @csrf
+                                <button type="submit"
+                                    class="text-red-700 hover:text-red-900 font-bold uppercase transition-colors">
+                                    Lever le signalement
+                                </button>
+                            </form>
                         </div>
                         @else
                         <p class="whitespace-pre-wrap">{{ $message->body }}</p>

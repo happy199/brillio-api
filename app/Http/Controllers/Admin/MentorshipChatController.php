@@ -15,20 +15,20 @@ class MentorshipChatController extends Controller
     {
         $query = Mentorship::with(['mentor', 'mentee', 'reporter'])
             ->withCount(['messages' => function ($q) {
-                $q->where('is_flagged', true);
-            }])
+            $q->where('is_flagged', true);
+        }])
             ->with(['messages' => function ($q) {
-                $q->latest()->limit(1);
-            }]);
+            $q->latest()->limit(1);
+        }]);
 
         // Filtrer par signalement (automatique ou manuel)
         if ($request->has('flagged')) {
             $query->where(function ($q) {
                 $q->whereHas('messages', function ($sq) {
-                    $sq->where('is_flagged', true);
-                }
-                )->orWhereNotNull('reported_at');
-            });
+                        $sq->where('is_flagged', true);
+                    }
+                    )->orWhereNotNull('reported_at');
+                });
         }
 
         // Recherche par utilisateur
@@ -36,13 +36,13 @@ class MentorshipChatController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->whereHas('mentor', function ($sq) use ($search) {
-                    $sq->where('name', 'like', "%{$search}%");
-                }
-                )->orWhereHas('mentee', function ($sq) use ($search) {
-                    $sq->where('name', 'like', "%{$search}%");
-                }
-                );
-            });
+                        $sq->where('name', 'like', "%{$search}%");
+                    }
+                    )->orWhereHas('mentee', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
+                    }
+                    );
+                });
         }
 
         $mentorships = $query->latest('updated_at')->paginate(20);
@@ -60,5 +60,35 @@ class MentorshipChatController extends Controller
         }]);
 
         return view('admin.mentorship-chat.show', compact('mentorship'));
+    }
+
+    /**
+     * Lever le signalement d'un message
+     */
+    public function unflagMessage(\App\Models\Message $message)
+    {
+        if ($message->is_flagged) {
+            $message->update([
+                'body' => $message->original_body ?? $message->body,
+                'is_flagged' => false,
+                'flag_reason' => null,
+            ]);
+        }
+
+        return back()->with('success', 'Le signalement du message a été levé.');
+    }
+
+    /**
+     * Classer le signalement global d'une conversation
+     */
+    public function clearReport(Mentorship $mentorship)
+    {
+        $mentorship->update([
+            'reported_at' => null,
+            'reported_by_id' => null,
+            'report_reason' => null,
+        ]);
+
+        return back()->with('success', 'Le signalement de la conversation a été classé.');
     }
 }
