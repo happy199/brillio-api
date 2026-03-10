@@ -26,14 +26,7 @@
     <meta property="twitter:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
-    <script>
-        taLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-PPX01GY0R9');
-    </script>
+    @include('partials.analytics')
 
     <title>@yield('title', 'Brillio - Plateforme de Mentorat en Afrique')</title>
 

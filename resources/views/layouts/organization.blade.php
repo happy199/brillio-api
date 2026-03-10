@@ -64,6 +64,8 @@
         }
     </style>
 
+    @include('partials.analytics')
+
     @stack('styles')
 </head>
 
