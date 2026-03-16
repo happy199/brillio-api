@@ -438,6 +438,10 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Dashboard principal
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+        // Audits System
+        Route::get('/audits/emails', [\App\Http\Controllers\Admin\AuditController::class, 'emails'])->name('audits.emails');
+        Route::get('/audits/crons', [\App\Http\Controllers\Admin\AuditController::class, 'crons'])->name('audits.crons');
+
         // Gestion des utilisateurs (Actions admin uniquement)
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::resource('users', UserController::class)->only(['create', 'store', 'destroy']);

@@ -441,7 +441,6 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                        </div>
                         @else
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
@@ -462,7 +461,8 @@
                                     Mettre à niveau le plan
                                 </a>
                             </div>
-                            @endif
+                        </div>
+                        @endif
                         </div>
 
                     </div>

@@ -19,6 +19,7 @@ class MentorshipController extends Controller
 
         if (! $organization->isPro()) {
             $mentorships = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+            $orgMentorIds = [];
         } else {
             $query = Mentorship::query()
                 ->whereIn('mentee_id', function ($q) use ($organization) {
@@ -32,9 +33,10 @@ class MentorshipController extends Controller
             }
 
             $mentorships = $query->latest()->paginate(12)->withQueryString();
+            $orgMentorIds = $organization->mentors()->pluck('users.id')->toArray();
         }
 
-        return view('organization.mentorships.index', compact('organization', 'mentorships'));
+        return view('organization.mentorships.index', compact('organization', 'mentorships', 'orgMentorIds'));
     }
 
     protected $notificationService;
@@ -170,6 +172,11 @@ class MentorshipController extends Controller
         // Vérification : le menté doit être parrainé par cette organisation
         if ($mentorship->mentee->sponsored_by_organization_id !== $organization->id) {
             abort(403, 'Accès non autorisé');
+        }
+
+        // Vérification : le mentor doit être lié à cette organisation
+        if (! $organization->mentors()->where('users.id', $mentorship->mentor_id)->exists()) {
+            return back()->with('error', "Vous ne pouvez pas valider cette demande car le mentor n'est pas lié à votre organisation.");
         }
 
         if ($mentorship->status !== 'pending') {

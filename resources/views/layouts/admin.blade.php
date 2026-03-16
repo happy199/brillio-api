@@ -357,6 +357,33 @@
                         Documents
                     </span>
                 </a>
+
+                <!-- Audits Dropdown -->
+                <div x-data="{ open: {{ request()->routeIs('admin.audits.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open"
+                        class="w-full flex justify-between items-center px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.audits.*') ? 'bg-indigo-800' : '' }}">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z"></path>
+                            </svg>
+                            Outils d'Audit
+                        </span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak class="bg-indigo-900 border-t border-indigo-800">
+                        <a href="{{ route('admin.audits.emails') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.audits.emails') ? 'text-white font-bold' : '' }}">
+                            Historique Emails
+                        </a>
+                        <a href="{{ route('admin.audits.crons') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.audits.crons') ? 'text-white font-bold' : '' }}">
+                            Chronologie CRONs
+                        </a>
+                    </div>
+                </div>
                 @endif
             </nav>
         </aside>
