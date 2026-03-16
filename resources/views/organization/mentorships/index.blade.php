@@ -190,14 +190,20 @@
                                 <a href="{{ route('organization.mentorships.show', $mentorship) }}"
                                     class="text-organization-600 hover:text-organization-900">Voir détails</a>
                                 @if($mentorship->status === 'pending')
-                                <form action="{{ route('organization.mentorships.validate', $mentorship) }}"
-                                    method="POST" class="inline-block">
-                                    @csrf
-                                    <button type="submit"
-                                        class="text-green-600 hover:text-green-900 bg-transparent border-0 p-0 cursor-pointer font-medium">
-                                        Valider
-                                    </button>
-                                </form>
+                                    @if(in_array($mentorship->mentor_id, $orgMentorIds))
+                                        <form action="{{ route('organization.mentorships.validate', $mentorship) }}"
+                                            method="POST" class="inline-block">
+                                            @csrf
+                                            <button type="submit"
+                                                class="text-green-600 hover:text-green-900 bg-transparent border-0 p-0 cursor-pointer font-medium">
+                                                Valider
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-gray-400 text-xs italic cursor-help border-b border-dotted border-gray-400" title="Vous ne pouvez pas valider cette demande car le mentor n'est pas membre de votre organisation. Seul le mentor peut l'accepter.">
+                                            Non validable
+                                        </span>
+                                    @endif
                                 @endif
                                 @if($mentorship->status === 'accepted')
                                 <button type="button"
