@@ -22,7 +22,7 @@ class CoachActivityController extends Controller
             ->get();
 
         $query = ChatConversation::query()
-            ->with(['user', 'humanSupportAdmin', 'messages'])
+            ->with(['user', 'supportAdmin', 'messages'])
             ->whereNotNull('human_support_admin_id');
 
         // Filtre par coach
@@ -57,7 +57,7 @@ class CoachActivityController extends Controller
 
             return (object) [
                 'id' => $chat->id,
-                'coach_name' => $chat->humanSupportAdmin ? $chat->humanSupportAdmin->name : 'N/A',
+                'coach_name' => $chat->supportAdmin ? $chat->supportAdmin->name : 'N/A',
                 'jeune_name' => $chat->user ? $chat->user->name : 'N/A',
                 'started_at' => $chat->human_support_started_at,
                 'ended_at' => $chat->human_support_ended_at,
