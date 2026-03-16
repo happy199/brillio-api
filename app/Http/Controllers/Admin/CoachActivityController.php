@@ -100,12 +100,29 @@ class CoachActivityController extends Controller
         // Calculate global statistics
         $stats = [
             'total_chats' => $activities->count(),
-            'total_support_time' => $activities->sum('support_duration_mins'),
-            'avg_support_time' => $activities->count() > 0 ? round($activities->avg('support_duration_mins')) : 0,
+            'total_support_time' => $this->formatDuration($activities->sum('support_duration_mins')),
+            'avg_support_time' => $this->formatDuration($activities->count() > 0 ? floor($activities->avg('support_duration_mins')) : 0),
             'total_messages' => $activities->sum('messages_count'),
         ];
 
         return view('admin.coaches.activity', compact('coaches', 'paginatedActivities', 'stats'));
+    }
+
+    /**
+     * Helper paramétrable pour formater les minutes en (Xh Ymin)
+     */
+    private function formatDuration($minutes)
+    {
+        if ($minutes < 60) {
+            return $minutes . ' min';
+        }
+        
+        $hours = floor($minutes / 60);
+        $remainingMinutes = $minutes % 60;
+        
+        return $remainingMinutes > 0 
+            ? "{$hours}h {$remainingMinutes}min" 
+            : "{$hours}h";
     }
 
     private function exportPdf($activities, Request $request)
@@ -121,8 +138,8 @@ class CoachActivityController extends Controller
         // Ensure stats are up to date for the PDF logic
         $pdfStats = [
             'total_chats' => $activities->count(),
-            'total_support_time' => $activities->sum('support_duration_mins'),
-            'avg_support_time' => $activities->count() > 0 ? round($activities->avg('support_duration_mins')) : 0,
+            'total_support_time' => $this->formatDuration($activities->sum('support_duration_mins')),
+            'avg_support_time' => $this->formatDuration($activities->count() > 0 ? floor($activities->avg('support_duration_mins')) : 0),
             'total_messages' => $activities->sum('messages_count'),
         ];
 

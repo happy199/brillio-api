@@ -46,11 +46,11 @@
             </td>
             <td>
                 <div class="stat-label">Temps Total Dédié</div>
-                <div class="stat-value">{{ number_format($stats['total_support_time'], 0, ',', ' ') }} min</div>
+                <div class="stat-value">{{ $stats['total_support_time'] }}</div>
             </td>
             <td>
                 <div class="stat-label">Temps Moyen / Chat</div>
-                <div class="stat-value">{{ number_format($stats['avg_support_time'], 0, ',', ' ') }} min</div>
+                <div class="stat-value">{{ $stats['avg_support_time'] }}</div>
             </td>
             <td>
                 <div class="stat-label">Messages Échangés</div>
