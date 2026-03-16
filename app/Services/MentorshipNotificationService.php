@@ -490,4 +490,27 @@ class MentorshipNotificationService
             $mentorUrl
         ));
     }
+
+    /**
+     * Notifier le destinataire d'un nouveau message
+     */
+    public function sendNewMessageNotification(\App\Models\Message $message)
+    {
+        $mentorship = $message->mentorship;
+        $sender = $message->sender;
+
+        if ($sender->id === $mentorship->mentee_id) {
+            $recipient = $mentorship->mentor;
+            $conversationUrl = route('mentor.messages.show', $mentorship);
+        } else {
+            $recipient = $mentorship->mentee;
+            $conversationUrl = route('jeune.messages.show', $mentorship);
+        }
+
+        Mail::to($recipient->email)->send(new \App\Mail\Messages\NewMessageNotification(
+            $recipient,
+            $sender->name,
+            $conversationUrl
+        ));
+    }
 }

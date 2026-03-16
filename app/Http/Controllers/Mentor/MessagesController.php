@@ -102,7 +102,10 @@ class MessagesController extends Controller
             }
         }
 
-        Message::create($data);
+        $message = Message::create($data);
+
+        // Envoyer une notification par email (immédiate)
+        app(\App\Services\MentorshipNotificationService::class)->sendNewMessageNotification($message);
 
         return back()->with('success', 'Message envoyé.');
     }
