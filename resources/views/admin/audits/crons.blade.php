@@ -23,11 +23,11 @@
                     <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>Échec</option>
                 </select>
             </div>
-            <button type="submit" class="btn bg-indigo-500 hover:bg-indigo-600 text-white flex-shrink-0">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium flex-shrink-0 transition-colors">
                 Filtrer
             </button>
             @if(request('search') || request('status'))
-                <a href="{{ route('admin.audits.crons') }}" class="btn border-slate-200 hover:border-slate-300 text-slate-600 flex-shrink-0">Effacer</a>
+                <a href="{{ route('admin.audits.crons') }}" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm font-medium flex-shrink-0 transition-colors">Effacer</a>
             @endif
         </form>
     </div>

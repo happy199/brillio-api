@@ -16,11 +16,11 @@
             <div class="flex-grow">
                 <input type="text" name="search" placeholder="Rechercher par adresse email ou sujet" value="{{ request('search') }}" class="w-full form-input bg-slate-100 border-transparent focus:bg-white focus:border-slate-300">
             </div>
-            <button type="submit" class="btn bg-indigo-500 hover:bg-indigo-600 text-white flex-shrink-0">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium flex-shrink-0 transition-colors">
                 Rechercher
             </button>
             @if(request('search'))
-                <a href="{{ route('admin.audits.emails') }}" class="btn border-slate-200 hover:border-slate-300 text-slate-600 flex-shrink-0">Effacer</a>
+                <a href="{{ route('admin.audits.emails') }}" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm font-medium flex-shrink-0 transition-colors">Effacer</a>
             @endif
         </form>
     </div>
