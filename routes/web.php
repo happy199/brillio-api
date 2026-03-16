@@ -455,6 +455,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
 
         // Gestion des coachs
+        Route::get('coaches/activity', [\App\Http\Controllers\Admin\CoachActivityController::class, 'index'])->name('coaches.activity');
         Route::resource('coaches', \App\Http\Controllers\Admin\CoachController::class)->only(['index', 'store', 'destroy']);
         Route::post('coaches/{coach}/reset-password', [\App\Http\Controllers\Admin\CoachController::class, 'resetPassword'])->name('coaches.reset-password');
 

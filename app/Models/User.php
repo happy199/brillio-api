@@ -192,11 +192,19 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Relation vers les conversations de chat
+     * Relation vers les conversations de chat en tant qu'utilisateur
      */
     public function chatConversations(): HasMany
     {
         return $this->hasMany(ChatConversation::class);
+    }
+
+    /**
+     * Relation vers les conversations de chat en tant que coach/admin (support humain)
+     */
+    public function chatConversationsAsHumanSupport(): HasMany
+    {
+        return $this->hasMany(ChatConversation::class, 'human_support_admin_id');
     }
 
     /**
