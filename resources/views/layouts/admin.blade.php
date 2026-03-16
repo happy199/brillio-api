@@ -78,17 +78,36 @@
 
                 @if(!auth()->user()->isCoach())
 
-                <a href="{{ route('admin.coaches.index') }}"
-                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.coaches.*') ? 'bg-indigo-800' : '' }}">
-                    <span class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                <!-- Coachs Dropdown -->
+                <div
+                    x-data="{ open: {{ request()->routeIs('admin.coaches.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open"
+                        class="w-full flex justify-between items-center px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.coaches.*') ? 'bg-indigo-800' : '' }}">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                                </path>
+                            </svg>
+                            Coachs
+                        </span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
                             </path>
                         </svg>
-                        Coachs
-                    </span>
-                </a>
+                    </button>
+                    <div x-show="open" x-cloak class="bg-indigo-900 border-t border-indigo-800">
+                        <a href="{{ route('admin.coaches.index') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.coaches.index') ? 'text-white font-bold' : '' }}">
+                            Annuaire des Coachs
+                        </a>
+                        <a href="{{ route('admin.coaches.activity') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.coaches.activity') ? 'text-white font-bold' : '' }}">
+                            Activité d'Orientation
+                        </a>
+                    </div>
+                </div>
 
                 <a href="{{ route('admin.organizations.index') }}"
                     class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.organizations.*') ? 'bg-indigo-800' : '' }}">
