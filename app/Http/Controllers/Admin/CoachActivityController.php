@@ -40,12 +40,12 @@ class CoachActivityController extends Controller
 
         // Prépare les données
         $activities = $query->latest('human_support_started_at')->get()->map(function ($chat) {
-            
+
             // On cherche uniquement les messages du coach qui a pris en charge
             $coachMessages = $chat->messages->filter(function ($msg) use ($chat) {
                 return $msg->admin_id === $chat->human_support_admin_id;
             });
-            
+
             $firstMessage = $coachMessages->first();
             $lastMessage = $coachMessages->last();
 
@@ -116,14 +116,14 @@ class CoachActivityController extends Controller
     private function formatDuration($minutes)
     {
         if ($minutes < 60) {
-            return $minutes . ' min';
+            return $minutes.' min';
         }
-        
+
         $hours = floor($minutes / 60);
         $remainingMinutes = $minutes % 60;
-        
-        return $remainingMinutes > 0 
-            ? "{$hours}h {$remainingMinutes}min" 
+
+        return $remainingMinutes > 0
+            ? "{$hours}h {$remainingMinutes}min"
             : "{$hours}h";
     }
 
