@@ -146,10 +146,10 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
-                            {{ $activity->chat_duration_mins }} min
+                            {{ $activity->chat_duration_formatted }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center font-semibold text-slate-800">
-                            {{ $activity->support_duration_mins }} min
+                            {{ $activity->support_duration_formatted }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center justify-center bg-slate-100 text-slate-500 rounded-full text-xs font-semibold px-2 py-0.5">

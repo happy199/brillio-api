@@ -72,6 +72,8 @@ class CoachActivityController extends Controller
                 'last_message_time' => $lastMessageTime,
                 'chat_duration_mins' => $chatDuration,
                 'support_duration_mins' => $supportDuration,
+                'chat_duration_formatted' => $this->formatDuration($chatDuration),
+                'support_duration_formatted' => $this->formatDuration($supportDuration),
                 'is_active' => $chat->human_support_active,
             ];
         });
@@ -189,8 +191,8 @@ class CoachActivityController extends Controller
                     $row->messages_count,
                     $row->first_message_time ? $row->first_message_time->format('H:i:s d/m/Y') : 'N/A',
                     $row->last_message_time ? $row->last_message_time->format('H:i:s d/m/Y') : 'N/A',
-                    $row->chat_duration_mins,
-                    $row->support_duration_mins,
+                    $row->chat_duration_formatted,
+                    $row->support_duration_formatted,
                 ], ';');
             }
 

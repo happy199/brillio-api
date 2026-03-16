@@ -85,8 +85,8 @@
                     @endif
                 </td>
                 <td class="text-center">{{ $activity->messages_count }}</td>
-                <td class="text-center">{{ $activity->chat_duration_mins }} min</td>
-                <td class="text-center"><strong>{{ $activity->support_duration_mins }} min</strong></td>
+                <td class="text-center">{{ $activity->chat_duration_formatted }}</td>
+                <td class="text-center"><strong>{{ $activity->support_duration_formatted }}</strong></td>
             </tr>
             @endforeach
         </tbody>
