@@ -14,9 +14,9 @@ class CoachActivityController extends Controller
     {
         // On ne récupère que les coachs et admins qui ont pris en charge au moins un chat
         $coaches = User::where(function ($query) {
-                $query->where('is_admin', true)
-                      ->orWhere('is_coach', true);
-            })
+            $query->where('is_admin', true)
+                ->orWhere('is_coach', true);
+        })
             ->whereHas('chatConversationsAsHumanSupport')
             ->orderBy('name')
             ->get();
@@ -104,8 +104,8 @@ class CoachActivityController extends Controller
 
     private function exportPdf($activities, Request $request)
     {
-        $fileName = 'activite-coachs-' . date('Y-m-d') . '.pdf';
-        
+        $fileName = 'activite-coachs-'.date('Y-m-d').'.pdf';
+
         $filters = [
             'coach' => $request->filled('coach_id') ? User::find($request->coach_id)->name ?? 'Tous' : 'Tous',
             'date_from' => $request->date_from ? \Carbon\Carbon::parse($request->date_from)->format('d/m/Y') : 'Début',
@@ -119,11 +119,11 @@ class CoachActivityController extends Controller
             'avg_support_time' => $activities->count() > 0 ? round($activities->avg('support_duration_mins')) : 0,
             'total_messages' => $activities->sum('messages_count'),
         ];
-        
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.coaches.pdf', [
             'activities' => $activities,
             'stats' => $pdfStats,
-            'filters' => $filters
+            'filters' => $filters,
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download($fileName);
