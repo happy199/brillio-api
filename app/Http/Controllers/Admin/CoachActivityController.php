@@ -13,7 +13,10 @@ class CoachActivityController extends Controller
     public function index(Request $request)
     {
         // On ne récupère que les coachs et admins qui ont pris en charge au moins un chat
-        $coaches = User::whereIn('type', ['admin', 'coach'])
+        $coaches = User::where(function ($query) {
+                $query->where('is_admin', true)
+                      ->orWhere('is_coach', true);
+            })
             ->whereHas('chatConversationsAsHumanSupport')
             ->orderBy('name')
             ->get();
