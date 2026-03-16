@@ -93,7 +93,10 @@
                 </a>
                 @endif
                 <button type="submit" name="export" value="csv" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm font-medium transition-colors w-full md:w-auto text-center flex items-center justify-center gap-2">
-                    <i class="fas fa-file-csv"></i> Exporter
+                    <i class="fas fa-file-csv"></i> CSV
+                </button>
+                <button type="submit" name="export" value="pdf" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition-colors w-full md:w-auto text-center flex items-center justify-center gap-2">
+                    <i class="fas fa-file-pdf"></i> PDF
                 </button>
             </div>
         </form>

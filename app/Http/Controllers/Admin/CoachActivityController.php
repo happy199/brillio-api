@@ -72,6 +72,11 @@ class CoachActivityController extends Controller
             return $this->exportCsv($activities);
         }
 
+        // Export PDF
+        if ($request->get('export') === 'pdf') {
+            return $this->exportPdf($activities, $request);
+        }
+
         // Pagination de la collection mappée (astuce Laravel pour paginer une collection simple)
         $perPage = 20;
         $page = $request->get('page', 1);
@@ -92,6 +97,33 @@ class CoachActivityController extends Controller
         ];
 
         return view('admin.coaches.activity', compact('coaches', 'paginatedActivities', 'stats'));
+    }
+
+    private function exportPdf($activities, Request $request)
+    {
+        $fileName = 'activite-coachs-' . date('Y-m-d') . '.pdf';
+        
+        $filters = [
+            'coach' => $request->filled('coach_id') ? User::find($request->coach_id)->name ?? 'Tous' : 'Tous',
+            'date_from' => $request->date_from ? \Carbon\Carbon::parse($request->date_from)->format('d/m/Y') : 'Début',
+            'date_to' => $request->date_to ? \Carbon\Carbon::parse($request->date_to)->format('d/m/Y') : 'Aujourd\'hui',
+        ];
+
+        // Ensure stats are up to date for the PDF logic
+        $pdfStats = [
+            'total_chats' => $activities->count(),
+            'total_support_time' => $activities->sum('support_duration_mins'),
+            'avg_support_time' => $activities->count() > 0 ? round($activities->avg('support_duration_mins')) : 0,
+            'total_messages' => $activities->sum('messages_count'),
+        ];
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.coaches.pdf', [
+            'activities' => $activities,
+            'stats' => $pdfStats,
+            'filters' => $filters
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($fileName);
     }
 
     private function exportCsv($activities)
