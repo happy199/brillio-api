@@ -40,20 +40,26 @@ class CoachActivityController extends Controller
 
         // Prépare les données
         $activities = $query->latest('human_support_started_at')->get()->map(function ($chat) {
-            $firstMessage = $chat->messages->first();
-            $lastMessage = $chat->messages->last();
+            
+            // On cherche uniquement les messages du coach qui a pris en charge
+            $coachMessages = $chat->messages->filter(function ($msg) use ($chat) {
+                return $msg->admin_id === $chat->human_support_admin_id;
+            });
+            
+            $firstMessage = $coachMessages->first();
+            $lastMessage = $coachMessages->last();
 
             $firstMessageTime = $firstMessage ? $firstMessage->created_at : null;
             $lastMessageTime = $lastMessage ? $lastMessage->created_at : null;
 
-            // Calculs de durée en minutes
+            // Calculs de durée en minutes (arrondis à l'inférieur)
             $chatDuration = ($firstMessageTime && $lastMessageTime)
-                ? $firstMessageTime->diffInMinutes($lastMessageTime)
+                ? (int) floor($firstMessageTime->diffInMinutes($lastMessageTime))
                 : 0;
 
             $supportDuration = ($chat->human_support_started_at && $chat->human_support_ended_at)
-                ? $chat->human_support_started_at->diffInMinutes($chat->human_support_ended_at)
-                : (($chat->human_support_started_at) ? $chat->human_support_started_at->diffInMinutes(now()) : 0);
+                ? (int) floor($chat->human_support_started_at->diffInMinutes($chat->human_support_ended_at))
+                : (($chat->human_support_started_at) ? (int) floor($chat->human_support_started_at->diffInMinutes(now())) : 0);
 
             return (object) [
                 'id' => $chat->id,
@@ -61,7 +67,7 @@ class CoachActivityController extends Controller
                 'jeune_name' => $chat->user ? $chat->user->name : 'N/A',
                 'started_at' => $chat->human_support_started_at,
                 'ended_at' => $chat->human_support_ended_at,
-                'messages_count' => $chat->messages->count(),
+                'messages_count' => $coachMessages->count(), // Optionnel: ne compter que ses propres messages ou tous les messages humains ? Le user demande sur le total du chat pour son intervention. On va compter les siens.
                 'first_message_time' => $firstMessageTime,
                 'last_message_time' => $lastMessageTime,
                 'chat_duration_mins' => $chatDuration,
