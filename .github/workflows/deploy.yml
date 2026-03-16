@@ -1,5 +1,8 @@
 name: Deploy to GCP VM (via Docker Hub)
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
