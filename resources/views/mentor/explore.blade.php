@@ -10,12 +10,10 @@
             <h1 class="text-2xl font-bold text-gray-900">Talents Brillio</h1>
             <p class="text-gray-500">Découvrez les jeunes talents à la recherche de mentorat.</p>
         </div>
-    </div>
-
-    <div class="grid lg:grid-cols-4 gap-6">
+    </div>    <div class="grid lg:grid-cols-4 gap-6 overflow-x-hidden">
         <!-- Sidebar Filtres -->
-        <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white rounded-2xl p-5 shadow-sm sticky top-6">
+        <div class="lg:col-span-1 space-y-6 max-w-full overflow-hidden">
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm sticky top-6 max-w-full overflow-hidden">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -31,15 +29,15 @@
                 @if($userTest && $userTest->completed_at)
                 <div class="mb-6 pb-6 border-b border-gray-100">
                     <a href="{{ route('mentor.explore', array_merge(request()->except('matching'), ['matching' => request('matching') ? null : '1'])) }}"
-                        class="w-full py-3 px-4 rounded-xl flex flex-wrap items-center justify-center text-center gap-2 font-bold text-sm sm:text-base transition {{ request('matching') ? 'bg-purple-600 text-white shadow-md' : 'bg-purple-50 text-purple-700 hover:bg-purple-100' }}">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="w-full py-3 px-3 sm:px-4 rounded-xl flex flex-wrap items-center justify-center text-center gap-1 font-bold text-xs sm:text-sm transition {{ request('matching') ? 'bg-purple-600 text-white shadow-md' : 'bg-purple-50 text-purple-700 hover:bg-purple-100' }}">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        <span>{{ request('matching') ? 'Mode Matching Activé' : 'Voir compatibilités' }}</span>
+                        <span class="truncate">{{ request('matching') ? 'Mode Matching Activé' : 'Voir compatibilités' }}</span>
                     </a>
                     @if(request('matching'))
-                    <p class="text-xs text-center text-gray-500 mt-2">Basé sur votre type
+                    <p class="text-[10px] text-center text-gray-500 mt-2">Basé sur votre type
                         <strong>{{ $userTest->personality_type }}</strong>
                     </p>
                     @endif
@@ -47,24 +45,24 @@
                 @else
                 <div class="mb-6 pb-6 border-b border-gray-100">
                     <div class="bg-gray-50 rounded-xl p-4 text-center">
-                        <p class="text-sm text-gray-600 mb-3">Passez le test pour voir les candidats compatibles !</p>
+                        <p class="text-xs text-gray-600 mb-3">Passez le test pour voir les candidats compatibles !</p>
                         <a href="{{ route('mentor.personality') }}"
-                            class="block w-full py-2 bg-purple-600 text-white text-sm font-bold rounded-lg hover:bg-purple-700 transition">
+                            class="block w-full py-2 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 transition">
                             Passer le test
                         </a>
                     </div>
                 </div>
                 @endif
 
-                <form action="{{ route('mentor.explore') }}" method="GET" class="space-y-4">
+                <form action="{{ route('mentor.explore') }}" method="GET" class="space-y-4 max-w-full overflow-hidden">
                     @if(request('matching'))
                     <input type="hidden" name="matching" value="1">
                     @endif
 
                     <!-- MBTI -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Type de Personnalité</label>
-                        <select name="mbti" class="w-full rounded-xl border-gray-200 text-base sm:text-sm focus:border-purple-500 focus:ring-purple-500">
+                    <div class="max-w-full overflow-hidden">
+                        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-2">Type de Personnalité</label>
+                        <select name="mbti" class="w-full max-w-full rounded-xl border-gray-200 text-base sm:text-xs focus:border-purple-500 focus:ring-purple-500">
                             <option value="">Tous les types</option>
                             @foreach(\App\Models\PersonalityTest::PERSONALITY_TYPES as $code => $label)
                             <option value="{{ $code }}" {{ request('mbti')==$code ? 'selected' : '' }}>
@@ -75,9 +73,9 @@
                     </div>
 
                     <!-- Situation -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Situation</label>
-                        <select name="current_situation" class="w-full rounded-xl border-gray-200 text-base sm:text-sm focus:border-purple-500 focus:ring-purple-500">
+                    <div class="max-w-full overflow-hidden">
+                        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-2">Situation</label>
+                        <select name="current_situation" class="w-full max-w-full rounded-xl border-gray-200 text-base sm:text-xs focus:border-purple-500 focus:ring-purple-500">
                             <option value="">Toutes situations</option>
                             <option value="etudiant" {{ request('current_situation')=='etudiant' ? 'selected' : '' }}>Étudiant</option>
                             <option value="recherche_emploi" {{ request('current_situation')=='recherche_emploi' ? 'selected' : '' }}>Recherche d'emploi</option>
@@ -87,9 +85,9 @@
                     </div>
 
                     <!-- Niveau Etude -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Niveau d'étude</label>
-                        <select name="education_level" class="w-full rounded-xl border-gray-200 text-base sm:text-sm focus:border-purple-500 focus:ring-purple-500">
+                    <div class="max-w-full overflow-hidden">
+                        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-2">Niveau d'étude</label>
+                        <select name="education_level" class="w-full max-w-full rounded-xl border-gray-200 text-base sm:text-xs focus:border-purple-500 focus:ring-purple-500">
                             <option value="">Tous niveaux</option>
                             <option value="bac" {{ request('education_level')=='bac' ? 'selected' : '' }}>Bac</option>
                             <option value="licence" {{ request('education_level')=='licence' ? 'selected' : '' }}>Licence (Bac+3)</option>
@@ -98,7 +96,7 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl text-sm hover:bg-purple-700 transition">
+                    <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl text-xs hover:bg-purple-700 transition">
                         Appliquer les filtres
                     </button>
 
