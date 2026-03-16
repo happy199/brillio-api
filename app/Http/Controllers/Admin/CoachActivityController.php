@@ -40,20 +40,26 @@ class CoachActivityController extends Controller
 
         // Prépare les données
         $activities = $query->latest('human_support_started_at')->get()->map(function ($chat) {
-            $firstMessage = $chat->messages->first();
-            $lastMessage = $chat->messages->last();
+
+            // On cherche uniquement les messages du coach qui a pris en charge
+            $coachMessages = $chat->messages->filter(function ($msg) use ($chat) {
+                return $msg->admin_id === $chat->human_support_admin_id;
+            });
+
+            $firstMessage = $coachMessages->first();
+            $lastMessage = $coachMessages->last();
 
             $firstMessageTime = $firstMessage ? $firstMessage->created_at : null;
             $lastMessageTime = $lastMessage ? $lastMessage->created_at : null;
 
-            // Calculs de durée en minutes
+            // Calculs de durée en minutes (arrondis à l'inférieur)
             $chatDuration = ($firstMessageTime && $lastMessageTime)
-                ? $firstMessageTime->diffInMinutes($lastMessageTime)
+                ? (int) floor($firstMessageTime->diffInMinutes($lastMessageTime))
                 : 0;
 
             $supportDuration = ($chat->human_support_started_at && $chat->human_support_ended_at)
-                ? $chat->human_support_started_at->diffInMinutes($chat->human_support_ended_at)
-                : (($chat->human_support_started_at) ? $chat->human_support_started_at->diffInMinutes(now()) : 0);
+                ? (int) floor($chat->human_support_started_at->diffInMinutes($chat->human_support_ended_at))
+                : (($chat->human_support_started_at) ? (int) floor($chat->human_support_started_at->diffInMinutes(now())) : 0);
 
             return (object) [
                 'id' => $chat->id,
@@ -61,11 +67,13 @@ class CoachActivityController extends Controller
                 'jeune_name' => $chat->user ? $chat->user->name : 'N/A',
                 'started_at' => $chat->human_support_started_at,
                 'ended_at' => $chat->human_support_ended_at,
-                'messages_count' => $chat->messages->count(),
+                'messages_count' => $coachMessages->count(), // Optionnel: ne compter que ses propres messages ou tous les messages humains ? Le user demande sur le total du chat pour son intervention. On va compter les siens.
                 'first_message_time' => $firstMessageTime,
                 'last_message_time' => $lastMessageTime,
                 'chat_duration_mins' => $chatDuration,
                 'support_duration_mins' => $supportDuration,
+                'chat_duration_formatted' => $this->formatDuration($chatDuration),
+                'support_duration_formatted' => $this->formatDuration($supportDuration),
                 'is_active' => $chat->human_support_active,
             ];
         });
@@ -94,12 +102,29 @@ class CoachActivityController extends Controller
         // Calculate global statistics
         $stats = [
             'total_chats' => $activities->count(),
-            'total_support_time' => $activities->sum('support_duration_mins'),
-            'avg_support_time' => $activities->count() > 0 ? round($activities->avg('support_duration_mins')) : 0,
+            'total_support_time' => $this->formatDuration($activities->sum('support_duration_mins')),
+            'avg_support_time' => $this->formatDuration($activities->count() > 0 ? floor($activities->avg('support_duration_mins')) : 0),
             'total_messages' => $activities->sum('messages_count'),
         ];
 
         return view('admin.coaches.activity', compact('coaches', 'paginatedActivities', 'stats'));
+    }
+
+    /**
+     * Helper paramétrable pour formater les minutes en (Xh Ymin)
+     */
+    private function formatDuration($minutes)
+    {
+        if ($minutes < 60) {
+            return $minutes.' min';
+        }
+
+        $hours = floor($minutes / 60);
+        $remainingMinutes = $minutes % 60;
+
+        return $remainingMinutes > 0
+            ? "{$hours}h {$remainingMinutes}min"
+            : "{$hours}h";
     }
 
     private function exportPdf($activities, Request $request)
@@ -115,8 +140,8 @@ class CoachActivityController extends Controller
         // Ensure stats are up to date for the PDF logic
         $pdfStats = [
             'total_chats' => $activities->count(),
-            'total_support_time' => $activities->sum('support_duration_mins'),
-            'avg_support_time' => $activities->count() > 0 ? round($activities->avg('support_duration_mins')) : 0,
+            'total_support_time' => $this->formatDuration($activities->sum('support_duration_mins')),
+            'avg_support_time' => $this->formatDuration($activities->count() > 0 ? floor($activities->avg('support_duration_mins')) : 0),
             'total_messages' => $activities->sum('messages_count'),
         ];
 
@@ -166,8 +191,8 @@ class CoachActivityController extends Controller
                     $row->messages_count,
                     $row->first_message_time ? $row->first_message_time->format('H:i:s d/m/Y') : 'N/A',
                     $row->last_message_time ? $row->last_message_time->format('H:i:s d/m/Y') : 'N/A',
-                    $row->chat_duration_mins,
-                    $row->support_duration_mins,
+                    $row->chat_duration_formatted,
+                    $row->support_duration_formatted,
                 ], ';');
             }
 

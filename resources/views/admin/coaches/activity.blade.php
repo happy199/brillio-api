@@ -27,9 +27,9 @@
         <!-- Card 2 -->
         <div class="flex flex-col bg-white shadow-sm rounded-xl border border-slate-200">
             <div class="p-5">
-                <div class="text-slate-500 font-semibold uppercase text-xs mb-1">Temps Total Dédié (Mins)</div>
+                <div class="text-slate-500 font-semibold uppercase text-xs mb-1">Temps Total Dédié</div>
                 <div class="flex items-start">
-                    <div class="text-3xl font-bold text-emerald-600 mr-2">{{ number_format($stats['total_support_time'], 0, ',', ' ') }} min</div>
+                    <div class="text-3xl font-bold text-emerald-600 mr-2">{{ $stats['total_support_time'] }}</div>
                 </div>
             </div>
         </div>
@@ -39,7 +39,7 @@
             <div class="p-5">
                 <div class="text-slate-500 font-semibold uppercase text-xs mb-1">Temps Moyen / Chat</div>
                 <div class="flex items-start">
-                    <div class="text-3xl font-bold text-indigo-600 mr-2">{{ $stats['avg_support_time'] }} min</div>
+                    <div class="text-3xl font-bold text-indigo-600 mr-2">{{ $stats['avg_support_time'] }}</div>
                 </div>
             </div>
         </div>
@@ -146,10 +146,10 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
-                            {{ $activity->chat_duration_mins }} min
+                            {{ $activity->chat_duration_formatted }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center font-semibold text-slate-800">
-                            {{ $activity->support_duration_mins }} min
+                            {{ $activity->support_duration_formatted }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center justify-center bg-slate-100 text-slate-500 rounded-full text-xs font-semibold px-2 py-0.5">

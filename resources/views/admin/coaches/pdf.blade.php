@@ -46,11 +46,11 @@
             </td>
             <td>
                 <div class="stat-label">Temps Total Dédié</div>
-                <div class="stat-value">{{ number_format($stats['total_support_time'], 0, ',', ' ') }} min</div>
+                <div class="stat-value">{{ $stats['total_support_time'] }}</div>
             </td>
             <td>
                 <div class="stat-label">Temps Moyen / Chat</div>
-                <div class="stat-value">{{ number_format($stats['avg_support_time'], 0, ',', ' ') }} min</div>
+                <div class="stat-value">{{ $stats['avg_support_time'] }}</div>
             </td>
             <td>
                 <div class="stat-label">Messages Échangés</div>
@@ -85,8 +85,8 @@
                     @endif
                 </td>
                 <td class="text-center">{{ $activity->messages_count }}</td>
-                <td class="text-center">{{ $activity->chat_duration_mins }} min</td>
-                <td class="text-center"><strong>{{ $activity->support_duration_mins }} min</strong></td>
+                <td class="text-center">{{ $activity->chat_duration_formatted }}</td>
+                <td class="text-center"><strong>{{ $activity->support_duration_formatted }}</strong></td>
             </tr>
             @endforeach
         </tbody>
