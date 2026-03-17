@@ -394,6 +394,9 @@ jobs:
             docker-compose exec -T app php artisan route:cache
             docker-compose exec -T app php artisan view:cache
             
+            # Fix permissions for newly created cache files
+            docker-compose exec -T app chmod -R 777 storage bootstrap/cache
+            
             # Cleanup old images
             docker image prune -f
             
