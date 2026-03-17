@@ -10,14 +10,15 @@
             <h1 class="text-2xl font-bold text-gray-900">Talents Brillio</h1>
             <p class="text-gray-500">Découvrez les jeunes talents à la recherche de mentorat.</p>
         </div>
-    </div>    <div class="grid lg:grid-cols-4 gap-6 overflow-x-hidden w-full max-w-full">
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full max-w-full overflow-hidden">
         <!-- Sidebar Filtres -->
-        <div class="lg:col-span-1 space-y-6 max-w-full overflow-hidden min-w-0">
-            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm sticky top-6 max-w-full overflow-hidden">
+        <div class="lg:col-span-1 space-y-6 w-full max-w-full min-w-0">
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm lg:sticky lg:top-6 w-full max-w-full overflow-hidden">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 11.293A1 1 0 013 10.586V4z" />
                     </svg>
                     Filtres
                 </h3>
@@ -27,9 +28,9 @@
                 @endphp
 
                 @if($userTest && $userTest->completed_at)
-                <div class="mb-6 pb-6 border-b border-gray-100">
+                <div class="mb-6 pb-6 border-b border-gray-100 w-full max-w-full">
                     <a href="{{ route('mentor.explore', array_merge(request()->except('matching'), ['matching' => request('matching') ? null : '1'])) }}"
-                        class="w-full py-3 px-3 sm:px-4 rounded-xl flex flex-wrap items-center justify-center text-center gap-1 font-bold text-xs sm:text-sm transition {{ request('matching') ? 'bg-purple-600 text-white shadow-md' : 'bg-purple-50 text-purple-700 hover:bg-purple-100' }}">
+                        class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl text-xs font-bold transition-all {{ request('matching') ? 'bg-purple-600 text-white shadow-lg shadow-purple-200' : 'bg-purple-50 text-purple-600 hover:bg-purple-100' }}">
                         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -43,7 +44,7 @@
                     @endif
                 </div>
                 @else
-                <div class="mb-6 pb-6 border-b border-gray-100">
+                <div class="mb-6 pb-6 border-b border-gray-100 w-full max-w-full">
                     <div class="bg-gray-50 rounded-xl p-4 text-center">
                         <p class="text-xs text-gray-600 mb-3">Passez le test pour voir les candidats compatibles !</p>
                         <a href="{{ route('mentor.personality') }}"
@@ -54,15 +55,15 @@
                 </div>
                 @endif
 
-                <form action="{{ route('mentor.explore') }}" method="GET" class="space-y-4 max-w-full overflow-hidden">
+                <form action="{{ route('mentor.explore') }}" method="GET" class="space-y-4 w-full max-w-full overflow-hidden">
                     @if(request('matching'))
                     <input type="hidden" name="matching" value="1">
                     @endif
 
                     <!-- MBTI -->
-                    <div class="max-w-full overflow-hidden">
+                    <div class="w-full max-w-full overflow-hidden">
                         <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-2">Type de Personnalité</label>
-                        <select name="mbti" class="w-full max-w-full rounded-xl border-gray-200 text-base sm:text-xs focus:border-purple-500 focus:ring-purple-500">
+                        <select name="mbti" class="w-full rounded-xl border-gray-200 text-sm sm:text-xs focus:border-purple-500 focus:ring-purple-500">
                             <option value="">Tous les types</option>
                             @foreach(\App\Models\PersonalityTest::PERSONALITY_TYPES as $code => $label)
                             <option value="{{ $code }}" {{ request('mbti')==$code ? 'selected' : '' }}>
@@ -73,9 +74,9 @@
                     </div>
 
                     <!-- Situation -->
-                    <div class="max-w-full overflow-hidden">
+                    <div class="w-full max-w-full overflow-hidden">
                         <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-2">Situation</label>
-                        <select name="current_situation" class="w-full max-w-full rounded-xl border-gray-200 text-base sm:text-xs focus:border-purple-500 focus:ring-purple-500">
+                        <select name="current_situation" class="w-full rounded-xl border-gray-200 text-sm sm:text-xs focus:border-purple-500 focus:ring-purple-500">
                             <option value="">Toutes situations</option>
                             <option value="etudiant" {{ request('current_situation')=='etudiant' ? 'selected' : '' }}>Étudiant</option>
                             <option value="recherche_emploi" {{ request('current_situation')=='recherche_emploi' ? 'selected' : '' }}>Recherche d'emploi</option>
@@ -85,9 +86,9 @@
                     </div>
 
                     <!-- Niveau Etude -->
-                    <div class="max-w-full overflow-hidden">
+                    <div class="w-full max-w-full overflow-hidden">
                         <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-2">Niveau d'étude</label>
-                        <select name="education_level" class="w-full max-w-full rounded-xl border-gray-200 text-base sm:text-xs focus:border-purple-500 focus:ring-purple-500">
+                        <select name="education_level" class="w-full rounded-xl border-gray-200 text-sm sm:text-xs focus:border-purple-500 focus:ring-purple-500">
                             <option value="">Tous niveaux</option>
                             <option value="bac" {{ request('education_level')=='bac' ? 'selected' : '' }}>Bac</option>
                             <option value="licence" {{ request('education_level')=='licence' ? 'selected' : '' }}>Licence (Bac+3)</option>
@@ -109,8 +110,7 @@
             </div>
         </div>
 
-        <!-- Grid Résultats -->
-        <div class="lg:col-span-3">
+        <div class="lg:col-span-3 w-full max-w-full min-w-0">
             @if($jeunes->isEmpty())
             <div class="bg-white rounded-2xl p-12 text-center">
                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
