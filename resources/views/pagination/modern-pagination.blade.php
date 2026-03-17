@@ -25,11 +25,11 @@
         @endif
 
         {{-- Pagination Elements --}}
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-[65vw] sm:max-w-none px-2">
             @foreach ($elements as $element)
             {{-- "Three Dots" Separator --}}
             @if (is_string($element))
-            <span class="px-3 py-1 text-gray-400">{{ $element }}</span>
+            <span class="px-3 py-1 text-gray-400 flex-shrink-0">{{ $element }}</span>
             @endif
 
             {{-- Array Of Links --}}
@@ -37,12 +37,12 @@
             @foreach ($element as $page => $url)
             @if ($page == $paginator->currentPage())
             <span
-                class="w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold shadow-md shadow-orange-200">
+                class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold shadow-md shadow-orange-200">
                 {{ $page }}
             </span>
             @else
             <a href="{{ $url }}"
-                class="w-10 h-10 flex items-center justify-center rounded-xl text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all">
+                class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all">
                 {{ $page }}
             </a>
             @endif
