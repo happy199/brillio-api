@@ -10,9 +10,9 @@
             <h1 class="text-2xl font-bold text-gray-900">Talents Brillio</h1>
             <p class="text-gray-500">Découvrez les jeunes talents à la recherche de mentorat.</p>
         </div>
-    </div>    <div class="grid lg:grid-cols-4 gap-6 overflow-x-hidden">
+    </div>    <div class="grid lg:grid-cols-4 gap-6 overflow-x-hidden w-full max-w-full">
         <!-- Sidebar Filtres -->
-        <div class="lg:col-span-1 space-y-6 max-w-full overflow-hidden">
+        <div class="lg:col-span-1 space-y-6 max-w-full overflow-hidden min-w-0">
             <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm sticky top-6 max-w-full overflow-hidden">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
