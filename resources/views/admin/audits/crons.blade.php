@@ -60,34 +60,54 @@
                         <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                             <div class="text-center">
                                 @if($log->status === 'success')
-                                    <div class="inline-flex font-medium bg-emerald-100 text-emerald-600 rounded-full text-center px-2.5 py-0.5">Succès</div>
+                                    <div class="inline-flex font-semibold bg-emerald-100 text-emerald-700 rounded-full text-center px-3 py-1 text-xs">Succès</div>
                                 @else
-                                    <div class="inline-flex font-medium bg-rose-100 text-rose-600 rounded-full text-center px-2.5 py-0.5">Échec</div>
+                                    <div class="inline-flex font-semibold bg-rose-100 text-rose-700 rounded-full text-center px-3 py-1 text-xs">Échec</div>
                                 @endif
                             </div>
                         </td>
                         <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                            @if($log->output)
+                            @if($log->output || $log->status === 'failed')
                             <div class="text-center">
-                                <button type="button" class="btn btn-sm bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-600" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.remove('hidden')">
-                                    Voir
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-slate-200 text-sm font-medium rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.remove('hidden')">
+                                    <svg class="w-4 h-4 mr-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Logs
                                 </button>
                             </div>
 
                             <!-- Modal -->
-                            <div id="modal-cron-{{ $log->id }}" class="fixed inset-0 z-50 bg-slate-900 bg-opacity-30 flex items-center justify-center p-4 hidden">
-                                <div class="bg-white rounded shadow-lg overflow-hidden w-full max-w-4xl max-h-[90vh] flex flex-col">
-                                    <div class="px-5 py-3 border-b border-slate-200 flex justify-between items-center">
-                                        <div class="font-semibold text-slate-800">Logs de la tâche ({{ $log->command }})</div>
-                                        <button class="text-slate-400 hover:text-slate-500" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.add('hidden')">&times;</button>
-                                    </div>
-                                    <div class="px-5 py-4 overflow-y-auto flex-1">
-                                        <div class="p-4 bg-slate-900 border border-slate-700 rounded shadow-sm overflow-x-auto text-emerald-400 font-mono text-sm whitespace-pre-wrap">
-                                            {{ $log->output }}
+                            <div id="modal-cron-{{ $log->id }}" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+                                <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-4xl max-h-[90vh] flex flex-col border border-slate-200">
+                                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-2 h-2 rounded-full {{ $log->status === 'success' ? 'bg-emerald-500' : 'bg-rose-500' }}"></div>
+                                            <div class="font-bold text-slate-800">Détails de l'exécution : {{ $log->command }}</div>
                                         </div>
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 transition-colors" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.add('hidden')">&times;</button>
                                     </div>
-                                    <div class="px-5 py-3 border-t border-slate-200 flex justify-end">
-                                        <button class="btn-sm border-slate-200 hover:border-slate-300 text-slate-600" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.add('hidden')">Fermer</button>
+                                    <div class="px-6 py-6 overflow-y-auto flex-1 bg-slate-950">
+                                        @if($log->output || $log->status === 'failed')
+                                        <div class="font-mono text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
+                                            <span class="text-slate-500 select-none">[{{ $log->run_at->format('Y-m-d H:i:s') }}]</span> <span class="text-indigo-400">STARTING</span> {{ $log->command }}...
+                                            <br>
+                                            @if($log->output)
+                                                {{ $log->output }}
+                                            @elseif($log->status === 'failed')
+                                                <span class="text-rose-500">ERROR: La tâche s'est terminée prématurément sans sortie standard.</span>
+                                            @endif
+                                            <br>
+                                            <span class="text-slate-500 select-none">[{{ now()->format('Y-m-d H:i:s') }}]</span> <span class="{{ $log->status === 'success' ? 'text-emerald-400' : 'text-rose-400' }}">FINISHED</span> ({{ number_format($log->duration, 2) }}s)
+                                        </div>
+                                        @else
+                                        <div class="text-center py-12 text-slate-500 italic">
+                                            Aucune sortie console enregistrée pour cette tâche.
+                                        </div>
+                                        @endif
+                                    </div>
+                                    <div class="px-6 py-4 border-t border-slate-100 flex justify-end bg-slate-50">
+                                        <button class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-bold transition-all shadow-sm" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.add('hidden')">Fermer</button>
                                     </div>
                                 </div>
                             </div>
