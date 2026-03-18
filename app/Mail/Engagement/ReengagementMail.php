@@ -14,12 +14,14 @@ class ReengagementMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    public $user;
+
     /**
      * Create a new message instance.
      */
-    public function __construct(public User $user)
+    public function __construct(User $user)
     {
-        //
+        $this->user = $user;
     }
 
     /**
