@@ -33,24 +33,34 @@
 
         <div class="features">
             <div class="feature-card">
-                <div class="feature-icon">🤖</div>
-                <div class="feature-title">Discuter avec l'IA</div>
-                <div class="feature-desc">Pose tes questions sur ton orientation ou ta carrière.</div>
+                <div class="feature-icon">💬</div>
+                <div class="feature-title">Accompagnement</div>
+                <div class="feature-desc">Discute avec l'IA ou nos conseillers pour tes questions d'orientation.</div>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🧠</div>
                 <div class="feature-title">Test de Personnalité</div>
-                <div class="feature-desc">Repasse ton test pour affiner tes recommandations.</div>
+                <div class="feature-desc">Repasse ton test MBTI pour affiner tes recommandations métiers.</div>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">📁</div>
-                <div class="feature-title">Tes Documents</div>
-                <div class="feature-desc">Dépose tes diplômes et CV pour les avoir partout avec toi.</div>
+                <div class="feature-icon">📚</div>
+                <div class="feature-title">Ressources</div>
+                <div class="feature-desc">Accède à des fiches métiers et guides pour booster ta carrière.</div>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">🤝</div>
                 <div class="feature-title">Mentors</div>
                 <div class="feature-desc">Entre en contact avec des experts pour booster ton parcours.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📁</div>
+                <div class="feature-title">Tes Documents</div>
+                <div class="feature-desc">Garde ton CV et tes diplômes en sécurité et accessibles partout.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-title">Opportunités</div>
+                <div class="feature-desc">Découvre les nouveaux mentors et ressources de la semaine.</div>
             </div>
         </div>
 
