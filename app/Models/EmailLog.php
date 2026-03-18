@@ -11,6 +11,8 @@ class EmailLog extends Model
 
     public $timestamps = false;
 
+    const CREATED_AT = 'sent_at';
+
     protected $fillable = [
         'to',
         'subject',
