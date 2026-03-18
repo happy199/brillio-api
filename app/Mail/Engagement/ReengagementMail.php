@@ -30,7 +30,7 @@ class ReengagementMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Tu nous manques sur Brillio ! 🌟",
+            subject: 'Tu nous manques sur Brillio ! 🌟',
         );
     }
 

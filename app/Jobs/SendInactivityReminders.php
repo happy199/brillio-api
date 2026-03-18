@@ -34,7 +34,7 @@ class SendInactivityReminders implements ShouldQueue
 
         foreach ($users as $user) {
             Mail::to($user->email)->queue(new ReengagementMail($user));
-            
+
             // Mise à jour de la date d'envoi
             $user->update([
                 'last_engagement_email_sent_at' => now(),
