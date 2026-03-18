@@ -11,6 +11,8 @@ class ScheduledTaskLog extends Model
 
     public $timestamps = false;
 
+    const CREATED_AT = 'run_at';
+
     protected $fillable = [
         'command',
         'status',
