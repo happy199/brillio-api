@@ -30,7 +30,7 @@ class ReengagementMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Tu nous manques sur Brillio ! 🌟',
+            subject: 'Tu nous manques, '.$this->user->name.' ! 👋',
         );
     }
 
@@ -42,5 +42,15 @@ class ReengagementMail extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.engagement.reengagement',
         );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
     }
 }
