@@ -40,6 +40,11 @@ Schedule::command('organizations:grant-enterprise-credits')
     ->monthlyOn(1, '00:01')
     ->timezone('Africa/Abidjan');
 
+// Rappel d'attraction : Relance hebdomadaire pour les inactifs (7 jours+)
+Schedule::job(new \App\Jobs\SendInactivityReminders)
+    ->dailyAt('07:00')
+    ->timezone('Africa/Abidjan');
+
 // Rappel messages non lus : toutes les 4h
 Schedule::command('messages:send-unread-reminders')
     ->everyFourHours()
