@@ -119,7 +119,33 @@ class LinkedInPdfParserService
         $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
         $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
 
+        // Étape 6: Forcer la validité UTF-8
+        // Les PDFs peuvent contenir des séquences d'octets illégales qui font crasher json_encode().
+        // On utilise mb_convert_encoding pour remplacer les caractères invalides par '?' (ou rien via //IGNORE).
+        $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
+        // iconv avec //IGNORE supprime tous les octets qui ne peuvent pas être représentés en UTF-8 valide
+        $text = iconv('UTF-8', 'UTF-8//IGNORE', $text) ?: $text;
+
         return trim($text);
+    }
+
+    /**
+     * Sanitise récursivement toutes les chaînes d'un tableau pour s'assurer
+     * qu'elles sont en UTF-8 valide avant d'être encodées en JSON.
+     */
+    public function sanitizeUtf8(mixed $data): mixed
+    {
+        if (is_array($data)) {
+            return array_map([$this, 'sanitizeUtf8'], $data);
+        }
+
+        if (is_string($data)) {
+            $data = mb_convert_encoding($data, 'UTF-8', 'UTF-8');
+
+            return iconv('UTF-8', 'UTF-8//IGNORE', $data) ?: '';
+        }
+
+        return $data;
     }
 
     /**
