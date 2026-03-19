@@ -25,9 +25,12 @@ class LinkedInPdfParserService
             $pdf = $parser->parseFile($pdfPath);
 
             // Extraire le texte brut
-            $text = $pdf->getText();
+            $rawText = $pdf->getText();
 
-            Log::info('📄 PDF Text extracted', [
+            // Normaliser le texte : réparer les emojis cassés et les caractères spéciaux
+            $text = $this->normalizeText($rawText);
+
+            Log::info('📄 PDF Text extracted & normalized', [
                 'length' => strlen($text),
                 'first_1000_chars' => substr($text, 0, 1000),
             ]);
@@ -46,6 +49,55 @@ class LinkedInPdfParserService
     }
 
     /**
+     * Normalise le texte brut extrait du PDF LinkedIn.
+     * Corrige les problèmes courants d'encodage des emojis et caractères spéciaux.
+     */
+    private function normalizeText(string $text): string
+    {
+        // Étape 1: Décoder les entités HTML numériques (&#x1F4BC; → 💼, &#128188; → 💼, &amp; → &, etc.)
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Étape 2: Corriger les séquences de substitution de polices PDF connues
+        // Le PDF LinkedIn utilise une police symbolique qui mappe certains glyphes
+        // Les patterns ci-dessous couvrent les remplacements les plus fréquents
+        $fontSubstitutions = [
+            // Marqueurs de liste / bullets
+            '/[●•▪▸‣⁃◆◦]/' => '•',
+
+            // Artifacts hexadécimaux PDF courants (caractères privés Unicode U+F0xx)
+            '/[\xEF\x80\x80-\xEF\x83\xBF]/' => '',  // Zone d'usage privé (PUA) Latin
+            '/[\xF0\x9F\x80\x80-\xF0\x9F\xBF\xBF]+/' => '', // Conservés tels quels (vraies emojis)
+
+            // Caractères de contrôle / remplacement parasites
+            '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\x80-\x9F]/' => '',
+
+            // Réparer les tirets em (–) qui deviennent souvent des artéfacts
+            '/\x96/' => '–',
+            '/\x97/' => '—',
+
+            // Ligatures et caractères spéciaux typiques du PDF LinkedIn
+            '/fi/' => 'fi',  // ligature fi
+            '/fl/' => 'fl',  // ligature fl
+
+            // Supprimer les espaces insécables parasites multiples
+            '/\xC2\xA0+/' => ' ',
+
+            // Supprimer des séquences parasites résiduelles (ex: glyphe manquant → carré)
+            '/[\x{FFFD}\x{25A0}\x{25A1}]/u' => '',
+        ];
+
+        foreach ($fontSubstitutions as $pattern => $replacement) {
+            $text = preg_replace($pattern, $replacement, $text) ?? $text;
+        }
+
+        // Étape 3: Normaliser les espaces multiples et sauts de ligne
+        $text = preg_replace('/[ \t]+/', ' ', $text);
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+
+        return trim($text);
+    }
+
+    /**
      * Parsing via IA (DeepSeek/Gemini)
      */
     private function parseWithAI($text)
@@ -56,6 +108,12 @@ class LinkedInPdfParserService
             "- Ne jamais inventer d'information. Si une info est manquante, mets null ou une chaine vide.\n".
             "- Répont UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n".
             "- Le format de sortie doit respecter exactement la structure demandée.\n\n".
+            "RÈGLE EMOJIS & CARACTÈRES SPÉCIAUX :\n".
+            "- Les PDFs LinkedIn encodent les emojis en caractères de substitution (ex: '⁃', '✴', '&', glyphes illisibles).\n".
+            "- Si tu rencontres des groupes de caractères étranges ou illisibles là où un emoji serait attendu (ex: début de bullet, dans un titre), remplace-les par l'emoji le plus vraisemblable dans ce contexte.\n".
+            "- Exemples : '⁃' ou '✦' en début de ligne → '•', '&' seul entre 2 espaces → '&', '™' mal encodé → '™', '®' mal encodé → '®'.\n".
+            "- L'objectif est que le texte extrait soit identique à ce qui apparaît sur le profil LinkedIn web réel du mentor.\n".
+            "- Préserve les vrais emojis Unicode déjà présents dans le texte (🚀, 💼, ✅, etc.).\n\n".
             "STRUCTURE JSON ATTENDUE :\n".
             '{"name": "Nom complet", "headline": "Titre du profil ou poste actuel", "contact": {"email": "email found or empty", "phone": "phone found or empty", "linkedin": "linkedin url or empty", "website": "website url or empty"}, "summary": "Bio", "skills": ["Compétence 1"], "experience": [{"title": "Poste", "company": "Entreprise", "description": "Tâches", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD or null if currently in this role", "duration_years": 0, "duration_months": 0}], "education": [{"school": "Ecole", "degree": "Diplôme", "year_start": 0, "year_end": 0}]}';
 
