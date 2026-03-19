@@ -649,17 +649,26 @@ class JeuneDashboardController extends Controller
             }
             Log::info('Conversation existante trouvee', ['conversation_id' => $conversation->id]);
         } else {
-            // Vérifier la limite de conversations (max 2)
+            // Check if it's the first conversation (free) or subsequent (10 credits)
             $conversationCount = ChatConversation::where('user_id', $user->id)->count();
 
-            if ($conversationCount >= 2) {
-                Log::warning('Limite de conversations atteinte', ['user_id' => $user->id]);
+            if ($conversationCount >= 1) {
+                if ($user->credits_balance < 10) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Solde insuffisant (10 crédits requis pour une nouvelle conversation).',
+                        'redirect_to_wallet' => true,
+                        'wallet_url' => route('jeune.wallet.index'),
+                    ], 402);
+                }
 
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Tu as atteint la limite de 2 conversations. Supprime une conversation existante pour en créer une nouvelle.',
-                    'limit_reached' => true,
-                ], 400);
+                // Deduct credits
+                app(\App\Services\WalletService::class)->deductCredits(
+                    $user,
+                    10,
+                    'feature_use',
+                    'Nouvelle conversation avec l\'Assistant Brillio'
+                );
             }
 
             $conversation = $deepSeekService->createConversation($user);

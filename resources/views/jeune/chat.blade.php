@@ -31,7 +31,7 @@
                                 d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                         </svg>
                         <span class="text-sm text-gray-700 hidden sm:inline">Conversations (<span
-                                x-text="conversations.length"></span>/2)</span>
+                                x-text="conversations.length"></span>)</span>
                     </button>
                     <div x-show="open" @click.outside="open = false" x-cloak
                         class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border py-2 z-10 max-h-96 overflow-y-auto">
@@ -66,11 +66,14 @@
                     </div>
                 </div>
 
-                <button @click="startNewConversation()" class="p-2 hover:bg-gray-100 rounded-lg transition"
+                <button @click="startNewConversation()" class="p-2 hover:bg-gray-100 rounded-lg transition relative"
                     title="Nouvelle conversation">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
+                    <template x-if="conversations.length >= 1">
+                        <span class="absolute -top-1 -right-1 bg-indigo-100 text-indigo-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-indigo-200">10C</span>
+                    </template>
                 </button>
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="p-2 hover:bg-gray-100 rounded-lg transition">
@@ -300,9 +303,23 @@
                             if (data.success) {
                                 this.messages.push({ role: 'assistant', content: data.message });
                                 if (data.conversation_id) {
+                                    // S'il s'agit d'une nouvelle conversation, l'ajouter à la liste
+                                    if (!this.currentConversationId) {
+                                        this.conversations.unshift({
+                                            id: data.conversation_id,
+                                            title: data.conversation_title || 'Nouvelle conversation',
+                                            updated_at: new Date().toISOString()
+                                        });
+                                    }
                                     this.currentConversationId = data.conversation_id;
                                 }
                             } else {
+                                if (data.redirect_to_wallet) {
+                                    if (confirm(data.error + "\n\nVoulez-vous être redirigé vers votre portefeuille pour recharger ?")) {
+                                        window.location.href = data.wallet_url;
+                                        return;
+                                    }
+                                }
                                 this.messages.push({ role: 'assistant', content: data.error || 'Desole, une erreur est survenue. Reessaie plus tard.' });
                             }
                         } catch (error) {
@@ -320,11 +337,6 @@
                     },
 
                     async startNewConversation() {
-                        // Vérifier la limite avant de créer
-                        if (this.conversations.length >= 2) {
-                            alert('Tu as atteint la limite de 2 conversations. Supprime une conversation existante pour en créer une nouvelle.');
-                            return;
-                        }
                         this.messages = [];
                         this.currentConversationId = null;
                     },
