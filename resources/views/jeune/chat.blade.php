@@ -284,12 +284,12 @@
                     init() {
                         // Load current conversation messages if exists
                         @if(isset($currentConversation) && $currentConversation->messages)
-                            this.messages = @json($currentConversation->messages->map(fn($m) => [
+                            this.messages = {!! json_encode($currentConversation->messages->map(fn($m) => [
                                 'role' => $m->role, 
                                 'content' => $m->content,
                                 'is_from_human' => (bool)$m->is_from_human,
                                 'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Coach Partner') : 'Assistant Brillio'
-                            ]));
+                            ])->toArray()) !!};
                         @endif
 
                                                             // Check for prefilled message from URL params
