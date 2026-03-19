@@ -452,9 +452,27 @@ class MentorDashboardController extends Controller
             // Récupérer la dernière expérience (la plus récente)
             $latestExperience = ! empty($profileData['experience']) ? $profileData['experience'][0] : null;
 
+            // === EXTRACTION DE LA VILLE ET DU PAYS (depuis la localisation LinkedIn) ===
+            // Le PDF LinkedIn contient la localisation dans la forme "Ville, Pays" ou "Ville, Région, Pays"
+            $extractedCity = null;
+            $extractedCountry = null;
+            $locationString = $profileData['location'] ?? $profileData['contact']['location'] ?? null;
+
+            if (! empty($locationString)) {
+                $locationParts = array_map('trim', explode(',', $locationString));
+                if (count($locationParts) >= 2) {
+                    // Format: "Lille, Île-de-France, France" ou "Ville, Pays"
+                    $extractedCity = $locationParts[0];
+                    $extractedCountry = trim(end($locationParts));
+                } elseif (count($locationParts) === 1) {
+                    $extractedCity = $locationParts[0];
+                }
+            }
+
             // Sauvegarder les données
-            // NOTE: On ne touche JAMAIS aux champs de photo de l'utilisateur ici (profile_photo_path, profile_photo_url)
-            // car le PDF LinkedIn ne contient pas de photo. On préserve les données existantes si le PDF est incomplet.
+            // RÈGLE NON-DESTRUCTIVE : On ne remplace jamais des données déjà renseignées.
+            // Chaque champ n'est mis à jour depuis le PDF QUE si le champ existant est vide/null.
+            // NOTE: On ne touche JAMAIS aux champs photo (profile_photo_path, profile_photo_url).
             $profile->update([
                 'linkedin_raw_data' => $profileData,
                 'linkedin_imported_at' => now(),
@@ -462,22 +480,52 @@ class MentorDashboardController extends Controller
                 'linkedin_pdf_original_name' => $originalName,
                 'linkedin_import_count' => $profile->linkedin_import_count + 1,
 
-                // Poste actuel = titre de la dernière expérience (on préserve si vide)
-                'current_position' => ($latestExperience['title'] ?? null) ?: $profile->current_position,
+                // Poste actuel : ne remplace que si le champ est vide
+                'current_position' => empty($profile->current_position)
+                    ? ($latestExperience['title'] ?? null)
+                    : $profile->current_position,
 
-                // Entreprise actuelle = company de la dernière expérience (on préserve si vide)
-                'current_company' => ($latestExperience['company'] ?? null) ?: $profile->current_company,
+                // Entreprise actuelle : ne remplace que si le champ est vide
+                'current_company' => empty($profile->current_company)
+                    ? ($latestExperience['company'] ?? null)
+                    : $profile->current_company,
 
-                // Bio = headline (on préserve si vide)
-                'bio' => ($profileData['headline'] ?? null) ?: $profile->bio,
+                // Bio : NE PAS ÉCRASER si déjà renseignée. Utilise le résumé PDF si dispo, sinon le headline.
+                'bio' => empty($profile->bio)
+                    ? ((! empty($profileData['summary']) ? $profileData['summary'] : null) ?? $profileData['headline'] ?? null)
+                    : $profile->bio,
 
-                'skills' => (! empty($profileData['skills'])) ? $profileData['skills'] : $profile->skills,
+                // Compétences : si déjà renseignées, ne pas écraser
+                'skills' => (empty($profile->skills) && ! empty($profileData['skills']))
+                    ? $profileData['skills']
+                    : $profile->skills,
 
-                // Nouveaux mappings - formatage robuste des URLs
-                'linkedin_url' => $this->formatUrl(($profileData['contact']['linkedin'] ?? null) ?: $profile->linkedin_url),
-                'website_url' => $this->formatUrl(($profileData['contact']['website'] ?? null) ?: $profile->website_url),
-                'years_of_experience' => $yearsOfExperience > 0 ? $yearsOfExperience : $profile->years_of_experience,
+                // URLs : ne remplace que si vide
+                'linkedin_url' => empty($profile->linkedin_url)
+                    ? $this->formatUrl($profileData['contact']['linkedin'] ?? null)
+                    : $profile->linkedin_url,
+                'website_url' => empty($profile->website_url)
+                    ? $this->formatUrl($profileData['contact']['website'] ?? null)
+                    : $profile->website_url,
+
+                // Années d'expérience : ne remplace que si vide ou 0
+                'years_of_experience' => ($profile->years_of_experience > 0)
+                    ? $profile->years_of_experience
+                    : ($yearsOfExperience > 0 ? $yearsOfExperience : $profile->years_of_experience),
             ]);
+
+            // Remplir la ville et le pays sur le User si les champs sont vides
+            $userUpdates = [];
+            if (! empty($extractedCity) && empty($user->city)) {
+                $userUpdates['city'] = $extractedCity;
+            }
+            if (! empty($extractedCountry) && empty($user->country)) {
+                $userUpdates['country'] = $extractedCountry;
+            }
+            if (! empty($userUpdates)) {
+                $user->update($userUpdates);
+                \Log::info('🌍 City/Country populated from LinkedIn PDF', $userUpdates);
+            }
 
             // Importer les expériences comme étapes
             $stepPosition = 0;
