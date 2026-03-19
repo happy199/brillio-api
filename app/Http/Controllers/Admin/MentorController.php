@@ -545,8 +545,7 @@ class MentorController extends Controller
         // S'assurer de synchroniser le champ specialization (string) avec le slug si possible
         if (! empty($profileData['specialization_id'])) {
             $specModel = \App\Models\Specialization::find($profileData['specialization_id']);
-            // truncate à 50 chars car le champ varchar est limité à 50
-            $profileData['specialization'] = \Illuminate\Support\Str::limit($specModel?->slug ?? '', 50, '');
+            $profileData['specialization'] = $specModel?->slug;
         } else {
             $profileData['specialization'] = null;
         }
