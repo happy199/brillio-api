@@ -79,13 +79,8 @@ class LinkedInPdfParserService
             // Supprimer un ? isolé entre espaces (placeholder d'emoji inconnu)
             '/\s\?\s/' => ' ',
 
-            // Caractères de zone d'usage privé (PUA) — glyphes de polices symboliques PDF
-            '/[\xEF\x80\x80-\xEF\x83\xBF]+/' => '',
-            '/[\xEF\xBF\xB0-\xEF\xBF\xBF]+/' => '',
-
-            // Caractères de contrôle parasites (hors \t, \n, \r)
-            '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/' => '',
-            '/[\x80-\x9F]+/' => '',
+            // Supprimer un ? isolé entre espaces (placeholder d'emoji inconnu)
+            '/\s\?\s/' => ' ',
 
             // Tirets spéciaux mal encodés
             '/\x96/' => '–',
@@ -166,6 +161,9 @@ class LinkedInPdfParserService
             "- '#' ou '##' en début de KPI (ex: '# -70% du temps') → c'était un emoji (✅, 📊). Les métriques elles-mêmes sont correctes, conserver les chiffres.\n".
             "- Préserve à 100% les vrais emojis Unicode déjà présents (🚀, 💼, ✅, 📈, etc.).\n".
             "- L'objectif est que le texte final soit identique à ce qui apparaît sur le profil LinkedIn web réel.\n\n".
+            "RÈGLE DE RECONSTITUTION DU TEXTE (ORTHOGRAPHE & GRAMMAIRE) :\n".
+            "Les PDFs LinkedIn génèrent parfois des erreurs d'extraction qui font disparaître des lettres accentuées ou des apostrophes (ex: 'systmes' au lieu de 'systèmes', 'dassurance' au lieu de 'd\\'assurance', 'quipes' au lieu d\\'équipes').\n".
+            "→ Tu DOIS OBLIGATOIREMENT corriger ces mots. Le texte final dans le JSON doit être dans un français parfait, fluide, cohérent, sans fautes d'orthographe ou de grammaire. Si une lettre manque à cause du parsing PDF, déduis le mot correct et répare-le.\n\n".
             "RÈGLES DE MAPPING DES CHAMPS :\n".
             "- 'headline' → Titre/accroche sous le nom (ex: 'Data Product Manager | J'aligne vision produit...'). Ne JAMAIS mettre ici le contenu de la section Résumé.\n".
             "- 'summary' → Contenu COMPLET de la section 'Résumé' du profil LinkedIn PDF. Si cette section est absente ou vide, mettre une chaîne vide ''. NE PAS substituer par le headline.\n".
