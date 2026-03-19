@@ -59,7 +59,7 @@
 
         <!-- Tableau -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="min-w-full table-fixed divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
@@ -73,12 +73,12 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($specializations as $spec)
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="font-medium text-gray-900">{{ $spec->name }}</div>
-                                <div class="text-sm text-gray-500">{{ $spec->slug }}</div>
+                            <td class="px-6 py-4 max-w-xs">
+                                <div class="font-medium text-gray-900 break-words">{{ $spec->name }}</div>
+                                <div class="text-sm text-gray-500 break-all">{{ $spec->slug }}</div>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900 max-w-xs truncate">{{ $spec->description ?? '-' }}</div>
+                            <td class="px-6 py-4 max-w-xs">
+                                <div class="text-sm text-gray-900 break-words">{{ $spec->description ?? '-' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($spec->status === 'active')
