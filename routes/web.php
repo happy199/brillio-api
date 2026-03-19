@@ -236,10 +236,13 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
 
         // Séances (Jeune)
         Route::get('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'index'])->name('sessions.index');
+        Route::post('/mentorat/seances/unlock-history', [\App\Http\Controllers\Jeune\SessionController::class, 'unlockHistory'])->name('sessions.unlock-history');
+        Route::post('/mentorat/seances/compiled-reports', [\App\Http\Controllers\Jeune\SessionController::class, 'downloadCompiledReports'])->name('sessions.download-compiled-reports');
+        Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class, 'create'])->name('sessions.create');
         Route::get('/mentorat/calendrier', [\App\Http\Controllers\Jeune\SessionController::class, 'calendar'])->name('sessions.calendar');
         Route::post('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'store'])->name('sessions.store');
-        Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class, 'create'])->name('sessions.create');
         Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class, 'show'])->name('sessions.show');
+        Route::get('/mentorat/seances/{session}/report', [\App\Http\Controllers\Jeune\SessionController::class, 'downloadReport'])->name('sessions.download-report');
         Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class, 'cancel'])->name('sessions.cancel');
         Route::post('/mentorat/seances/{session}/pay-join', [\App\Http\Controllers\Jeune\SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
     }
