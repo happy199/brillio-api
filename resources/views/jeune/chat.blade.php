@@ -176,22 +176,46 @@
             <!-- Messages -->
             <template x-for="(message, index) in messages" :key="index">
                 <div :class="message.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
-                    <div :class="message.role === 'user' ? 'bg-primary-500 text-white rounded-2xl rounded-br-md' : 'bg-white border rounded-2xl rounded-bl-md'"
-                        class="max-w-[80%] p-4 shadow-sm">
+                    <div :class="message.role === 'user' 
+                            ? 'bg-primary-500 text-white rounded-2xl rounded-br-md shadow-md' 
+                            : (message.is_from_human 
+                                ? 'bg-amber-50 border-amber-200 border rounded-2xl rounded-bl-md shadow-sm' 
+                                : 'bg-white border rounded-2xl rounded-bl-md shadow-sm')"
+                        class="max-w-[85%] sm:max-w-[80%] p-4 transition-all duration-300">
+                        
                         <template x-if="message.role === 'assistant'">
                             <div class="flex items-start gap-3">
-                                <div
-                                    class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
+                                <div :class="message.is_from_human ? 'bg-amber-500' : 'bg-primary-600'"
+                                    class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <template x-if="!message.is_from_human">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                    </template>
+                                    <template x-if="message.is_from_human">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </template>
                                 </div>
-                                <div class="prose prose-sm" x-html="formatMessage(message.content)"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1.5">
+                                        <span class="text-[10px] font-bold uppercase tracking-wider" 
+                                            :class="message.is_from_human ? 'text-amber-700' : 'text-primary-700'" 
+                                            x-text="message.is_from_human ? (message.sender_name || 'Coach Partner') : 'Assistant Brillio'"></span>
+                                        <template x-if="message.is_from_human">
+                                            <span class="bg-amber-100 text-amber-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-amber-200">HUMAIN</span>
+                                        </template>
+                                    </div>
+                                    <div class="prose prose-sm prose-slate max-w-none text-gray-800 leading-relaxed" x-html="formatMessage(message.content)"></div>
+                                </div>
                             </div>
                         </template>
+                        
                         <template x-if="message.role === 'user'">
-                            <p x-text="message.content"></p>
+                            <p class="text-[15px] leading-relaxed" x-text="message.content"></p>
                         </template>
                     </div>
                 </div>
@@ -260,7 +284,12 @@
                     init() {
                         // Load current conversation messages if exists
                         @if(isset($currentConversation) && $currentConversation->messages)
-                            this.messages = @json($currentConversation->messages->map(fn($m) => ['role' => $m->role, 'content' => $m->content]));
+                            this.messages = @json($currentConversation->messages->map(fn($m) => [
+                                'role' => $m->role, 
+                                'content' => $m->content,
+                                'is_from_human' => (bool)$m->is_from_human,
+                                'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Coach Partner') : 'Assistant Brillio'
+                            ]));
                         @endif
 
                                                             // Check for prefilled message from URL params
@@ -300,8 +329,13 @@
 
                             const data = await response.json();
 
-                            if (data.success) {
-                                this.messages.push({ role: 'assistant', content: data.message });
+                             if (data.success) {
+                                 this.messages.push({ 
+                                     role: 'assistant', 
+                                     content: data.message,
+                                     is_from_human: data.is_from_human || false,
+                                     sender_name: data.sender_name || 'Assistant Brillio'
+                                 });
                                 if (data.conversation_id) {
                                     // S'il s'agit d'une nouvelle conversation, l'ajouter à la liste
                                     if (!this.currentConversationId) {

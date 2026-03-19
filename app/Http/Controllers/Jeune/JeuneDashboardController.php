@@ -697,6 +697,8 @@ class JeuneDashboardController extends Controller
                 'conversation_id' => $conversation->id,
                 'conversation_title' => $conversation->title,
                 'message' => $assistantMessage->content,
+                'is_from_human' => false,
+                'sender_name' => 'Assistant Brillio',
                 'api_used' => $deepSeekService->isApiKeyConfigured(),
             ]);
         } catch (\Exception $e) {
