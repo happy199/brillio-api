@@ -380,6 +380,11 @@ class MentorDashboardController extends Controller
             // Parser le PDF
             $profileData = $parserService->parsePdf($fullPath);
 
+            // 🧹 Sanitiser toutes les chaînes du tableau pour garantir un UTF-8 valide
+            // Sans cela, les caractères spéciaux résiduels du PDF font planter json_encode()
+            // lors de la sauvegarde de linkedin_raw_data en base.
+            $profileData = $parserService->sanitizeUtf8($profileData);
+
             \Log::info('LinkedIn PDF parsed', ['data' => $profileData]);
 
             // 🔒 SÉCURITÉ : Vérifier que l'email ou le nom correspond
