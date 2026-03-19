@@ -356,20 +356,46 @@ class MentorController extends Controller
         // Récupérer la dernière expérience
         $latestExperience = ! empty($profileData['experience']) ? $profileData['experience'][0] : null;
 
+        // === EXTRACTION DE LA VILLE ET DU PAYS ===
+        $extractedCity = null;
+        $extractedCountry = null;
+        $locationString = $profileData['location'] ?? $profileData['contact']['location'] ?? null;
+
+        if (! empty($locationString)) {
+            $locationParts = array_map('trim', explode(',', $locationString));
+            if (count($locationParts) >= 2) {
+                $extractedCity = $locationParts[0];
+                $extractedCountry = trim(end($locationParts));
+            } elseif (count($locationParts) === 1) {
+                $extractedCity = $locationParts[0];
+            }
+        }
+
+        $userUpdates = [];
+        if (! empty($extractedCity) && empty($mentor->user->city)) {
+            $userUpdates['city'] = $extractedCity;
+        }
+        if (! empty($extractedCountry) && empty($mentor->user->country)) {
+            $userUpdates['country'] = $extractedCountry;
+        }
+        if (! empty($userUpdates)) {
+            $mentor->user->update($userUpdates);
+        }
+
         // Mise à jour du profil (on préserve bio/advice si déjà remplis)
         $mentor->update([
             'linkedin_raw_data' => $profileData,
             'linkedin_imported_at' => now(),
             'linkedin_import_count' => $mentor->linkedin_import_count + 1,
-            'current_position' => $mentor->current_position ?: ($latestExperience['title'] ?? null),
-            'current_company' => $mentor->current_company ?: ($latestExperience['company'] ?? null),
-            'bio' => $mentor->bio ?: ($profileData['headline'] ?? null),
-            'skills' => ! empty($profileData['skills']) ? $profileData['skills'] : $mentor->skills,
-            'years_of_experience' => $yearsOfExperience > 0 ? $yearsOfExperience : $mentor->years_of_experience,
+            'current_position' => empty($mentor->current_position) ? ($latestExperience['title'] ?? null) : $mentor->current_position,
+            'current_company' => empty($mentor->current_company) ? ($latestExperience['company'] ?? null) : $mentor->current_company,
+            'bio' => empty($mentor->bio) ? ((! empty($profileData['summary']) ? $profileData['summary'] : null) ?? $profileData['headline'] ?? null) : $mentor->bio,
+            'skills' => (empty($mentor->skills) && ! empty($profileData['skills'])) ? $profileData['skills'] : $mentor->skills,
+            'years_of_experience' => ($mentor->years_of_experience > 0) ? $mentor->years_of_experience : ($yearsOfExperience > 0 ? $yearsOfExperience : $mentor->years_of_experience),
             // On ne touche pas aux URLs de contact ici pour éviter d'écraser des modifs manuelles de l'admin
             // sauf si elles étaient vides
-            'linkedin_url' => $mentor->linkedin_url ?: $this->formatUrl($profileData['contact']['linkedin'] ?? null),
-            'website_url' => $mentor->website_url ?: $this->formatUrl($profileData['contact']['website'] ?? null),
+            'linkedin_url' => empty($mentor->linkedin_url) ? $this->formatUrl($profileData['contact']['linkedin'] ?? null) : $mentor->linkedin_url,
+            'website_url' => empty($mentor->website_url) ? $this->formatUrl($profileData['contact']['website'] ?? null) : $mentor->website_url,
         ]);
 
         // Importer les expériences

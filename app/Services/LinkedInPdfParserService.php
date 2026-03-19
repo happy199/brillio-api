@@ -79,9 +79,6 @@ class LinkedInPdfParserService
             // Supprimer un ? isolé entre espaces (placeholder d'emoji inconnu)
             '/\s\?\s/' => ' ',
 
-            // Supprimer un ? isolé entre espaces (placeholder d'emoji inconnu)
-            '/\s\?\s/' => ' ',
-
             // Tirets spéciaux mal encodés
             '/\x96/' => '–',
             '/\x97/' => '—',
