@@ -28,17 +28,24 @@ class SessionController extends Controller
         $availabilities = $mentor->mentorAvailabilities()->get();
 
         // Récupérer historique (passé, annulé ou terminé)
-        $pastSessions = $mentor->mentoringSessionsAsMentor()
+        $pastSessionsQuery = $mentor->mentoringSessionsAsMentor()
             ->where(function ($query) {
                 $query->where('scheduled_at', '<', now())
                     ->orWhere('status', 'cancelled')
                     ->orWhere('status', 'completed');
             })
-            ->orderByDesc('scheduled_at')
-            ->take(10)
-            ->get();
+            ->orderByDesc('scheduled_at');
 
-        return view('mentor.mentorship.calendar', compact('upcomingSessions', 'availabilities', 'pastSessions'));
+        $profile = $mentor->mentorProfile;
+        $hasUnlockedHistory = $profile && $profile->has_unlocked_session_history;
+
+        if ($hasUnlockedHistory) {
+            $pastSessions = $pastSessionsQuery->paginate(10);
+        } else {
+            $pastSessions = $pastSessionsQuery->take(10)->get();
+        }
+
+        return view('mentor.mentorship.calendar', compact('upcomingSessions', 'availabilities', 'pastSessions', 'hasUnlockedHistory'));
     }
 
     /**
@@ -380,5 +387,93 @@ class SessionController extends Controller
         app(\App\Services\MentorshipNotificationService::class)->sendSessionRefused($session, $request->refusal_reason);
 
         return redirect()->back()->with('success', 'Demande de séance refusée.');
+    }
+
+    /**
+     * Débloquer l'historique complet des séances contre 5 crédits
+     */
+    public function unlockHistory(Request $request)
+    {
+        $mentor = Auth::user();
+        $profile = $mentor->mentorProfile;
+
+        if (! $profile) {
+            return redirect()->back()->with('error', 'Profil introuvable.');
+        }
+
+        if ($profile->has_unlocked_session_history) {
+            return redirect()->back()->with('info', 'Historique déjà débloqué.');
+        }
+
+        if ($mentor->credits_balance < 5) {
+            return redirect()->back()->with('error', "Vous n'avez pas assez de crédits (5 requis).");
+        }
+
+        app(\App\Services\WalletService::class)->deductCredits(
+            $mentor,
+            5,
+            'feature_unlock',
+            "Déblocage de l'historique complet des séances"
+        );
+        $profile->update(['has_unlocked_session_history' => true]);
+
+        return redirect()->back()->with('success', 'Historique complet débloqué avec succès !');
+    }
+
+    /**
+     * Télécharger un compte rendu individuel en PDF
+     */
+    public function downloadReport(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($session->status !== 'completed' || empty($session->report_content)) {
+            return redirect()->back()->with('error', "Ce compte rendu n'est pas encore disponible.");
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.session_pdf', compact('session'));
+
+        return $pdf->download('compte_rendu_seance_'.$session->id.'.pdf');
+    }
+
+    /**
+     * Générer un rapport compilé de plusieurs comptes rendus (coûte 5 crédits)
+     */
+    public function downloadCompiledReports(Request $request)
+    {
+        $request->validate([
+            'session_ids' => 'required|string',
+        ]);
+
+        $mentor = Auth::user();
+
+        if ($mentor->credits_balance < 5) {
+            return redirect()->back()->with('error', "Vous n'avez pas assez de crédits (5 requis) pour générer un rapport compilé.");
+        }
+
+        $ids = explode(',', $request->session_ids);
+
+        $sessions = MentoringSession::where('mentor_id', $mentor->id)
+            ->whereIn('id', $ids)
+            ->where('status', 'completed')
+            ->orderBy('scheduled_at') // Chronological order is usually better for combined reports
+            ->get();
+
+        if ($sessions->isEmpty()) {
+            return redirect()->back()->with('error', 'Aucun compte rendu valide sélectionné.');
+        }
+
+        app(\App\Services\WalletService::class)->deductCredits(
+            $mentor,
+            5,
+            'feature_use',
+            "Génération d'un rapport compilé (".$sessions->count().' séances)'
+        );
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.compiled_sessions_pdf', compact('sessions'));
+
+        return $pdf->download('rapport_compile_seances_'.date('Ymd_His').'.pdf');
     }
 }

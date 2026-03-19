@@ -349,6 +349,8 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
 
             // Séances
             // URL: /sessions/... (On garde /sessions pour éviter les conflits d'URL racine trop génériques)
+            Route::post('/sessions/unlock-history', [\App\Http\Controllers\Mentor\SessionController::class, 'unlockHistory'])->name('sessions.unlock-history');
+            Route::post('/sessions/download-compiled-reports', [\App\Http\Controllers\Mentor\SessionController::class, 'downloadCompiledReports'])->name('sessions.download-compiled-reports');
             Route::get('/sessions/create', [\App\Http\Controllers\Mentor\SessionController::class, 'create'])->name('sessions.create');
             Route::post('/sessions', [\App\Http\Controllers\Mentor\SessionController::class, 'store'])->name('sessions.store');
             // Edit & Update routes
@@ -356,6 +358,7 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
             Route::put('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'update'])->name('sessions.update');
 
             Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
+            Route::get('/sessions/{session}/download-report', [\App\Http\Controllers\Mentor\SessionController::class, 'downloadReport'])->name('sessions.download-report');
             Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
             Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');
             Route::post('/sessions/{session}/refuse', [\App\Http\Controllers\Mentor\SessionController::class, 'refuse'])->name('sessions.refuse');
