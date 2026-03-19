@@ -61,12 +61,9 @@ class LinkedInPdfParserService
         // Étape 1: Décoder les entités HTML numériques (&#x1F4BC; → 💼, &amp; → &, etc.)
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        // Étape 2: Supprimer les marques combinantes isolées (U+0301 accent aigu = ́)
-        // Ces caractères sont des résidus fantômes laissés par les glyphes d'emojis non mappés.
-        // Ils apparaissent comme ́ seul, entre espaces, en début/fin de segment.
-        $text = preg_replace('/(?<!\p{L})\x{0301}(?!\p{L})/u', '', $text) ?? $text;
-        // Supprimer toutes les marques d'accent combinantes isolées résiduelles
-        $text = preg_replace('/[\x{0300}-\x{036F}]{1,3}(?=\s|$)/u', '', $text) ?? $text;
+        // Note : On ne supprime PAS les marques combinantes (U+0301) car les PDFs encodent
+        // souvent les 'é', 'à', etc. en utilisant une lettre de base + un accent combinant (NFD).
+        // Supprimer U+0301 détruit les lettres accentuées.
 
         // Étape 3: Remplacer les marqueurs PDF courants par leurs équivalents propres
         $fontSubstitutions = [
