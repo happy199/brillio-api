@@ -168,9 +168,12 @@
             <form x-show="selectedSessions.length >= 2" action="{{ route('jeune.sessions.download-compiled-reports') }}" method="POST" style="display: none;">
                 @csrf
                 <input type="hidden" name="session_ids" x-bind:value="selectedSessions.join(',')">
-                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 shadow-sm flex items-center gap-2 transition" onclick="return confirm('La génération de ce rapport compilé vous coûtera 5 crédits. Confirmer ?')">
+                <button type="submit"
+                    class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 shadow-sm flex items-center gap-2 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
                     </svg>
                     Générer rapport compilé (5 crédits)
                 </button>
@@ -262,60 +265,19 @@
                 {{ $pastSessions->links() }}
             @else
                 @if(count($pastSessions) >= 10)
-                <div x-data="{ openUnlockModal: false }" class="w-full sm:w-auto">
-                    <button @click="openUnlockModal = true" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-xl hover:from-purple-700 hover:to-indigo-700 shadow-sm flex items-center justify-center gap-2 transition transform hover:scale-105">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                        Débloquer l'historique complet (5 crédits)
-                    </button>
-
-                    <!-- Modal Unlock -->
-                    <div x-show="openUnlockModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                            <!-- Background overlay -->
-                            <div x-show="openUnlockModal" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="openUnlockModal = false" aria-hidden="true"></div>
-
-                            <!-- Modal panel -->
-                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                            <div x-show="openUnlockModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full">
-                                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
-                                    <div class="sm:flex sm:items-start">
-                                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 sm:mx-0 sm:h-10 sm:w-10">
-                                            <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                        </div>
-                                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                            <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">
-                                                Débloquer l'historique complet
-                                            </h3>
-                                            <div class="mt-2">
-                                                <p class="text-sm text-gray-500">
-                                                    Pour accéder à l'intégralité de vos séances passées, vous devez utiliser <strong class="text-gray-900">5 crédits</strong>. Cette action est instantanée et permanente !
-                                                </p>
-                                                <p class="mt-2 text-sm text-gray-500">
-                                                    Votre solde actuel : <strong class="text-purple-600">{{ auth()->user()->credits_balance }} crédits</strong>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-                                    <form action="{{ route('jeune.sessions.unlock-history') }}" method="POST" class="w-full sm:w-auto">
-                                        @csrf
-                                        <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:w-auto sm:text-sm shadow-sm">
-                                            Confirmer (5 crédits)
-                                        </button>
-                                    </form>
-                                    <button @click="openUnlockModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
-                                        Annuler
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="w-full sm:w-auto">
+                    <form action="{{ route('jeune.sessions.unlock-history') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-xl hover:from-purple-700 hover:to-indigo-700 shadow-sm flex items-center justify-center gap-2 transition transform hover:scale-105">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            Débloquer l'historique complet (5 crédits)
+                        </button>
+                    </form>
                 </div>
+                @endif
+            @endif
                 @endif
             @endif
         </div>

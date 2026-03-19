@@ -406,7 +406,7 @@ class SessionController extends Controller
         }
 
         if ($mentor->credits_balance < 5) {
-            return redirect()->back()->with('error', "Vous n'avez pas assez de crédits (5 requis).");
+            return redirect()->route('mentor.wallet.index')->with('warning', 'Votre solde de crédits est insuffisant (5 crédits requis). Veuillez recharger votre compte pour continuer.');
         }
 
         app(\App\Services\WalletService::class)->deductCredits(
@@ -450,7 +450,7 @@ class SessionController extends Controller
         $mentor = Auth::user();
 
         if ($mentor->credits_balance < 5) {
-            return redirect()->back()->with('error', "Vous n'avez pas assez de crédits (5 requis) pour générer un rapport compilé.");
+            return redirect()->route('mentor.wallet.index')->with('warning', 'Votre solde de crédits est insuffisant (5 crédits requis). Veuillez recharger votre compte pour continuer.');
         }
 
         $ids = explode(',', $request->session_ids);

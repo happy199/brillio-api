@@ -284,7 +284,7 @@ class SessionController extends Controller
         }
 
         if ($user->credits_balance < 5) {
-            return redirect()->back()->with('error', "Vous n'avez pas assez de crédits (5 requis).");
+            return redirect()->route('jeune.wallet.index')->with('warning', 'Votre solde de crédits est insuffisant (5 crédits requis). Veuillez recharger votre compte pour continuer.');
         }
 
         app(\App\Services\WalletService::class)->deductCredits(
@@ -347,6 +347,10 @@ class SessionController extends Controller
 
         if ($sessions->isEmpty()) {
             return redirect()->back()->with('error', 'Aucun compte rendu valide sélectionné.');
+        }
+
+        if ($user->credits_balance < 5) {
+            return redirect()->route('jeune.wallet.index')->with('warning', 'Votre solde de crédits est insuffisant (5 crédits requis). Veuillez recharger votre compte pour continuer.');
         }
 
         app(\App\Services\WalletService::class)->deductCredits(

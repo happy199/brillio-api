@@ -421,27 +421,14 @@
                                 </div>
                             @else
                                 @if($pastSessions->count() >= 10)
-                                    <div class="text-center" x-data="{ openUnlockModal: false }">
-                                        <button @click="openUnlockModal = true" type="button" class="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex justify-center items-center gap-1 w-full p-2 rounded hover:bg-indigo-50 transition">
-                                            <span>Voir tout l'historique</span>
-                                            <span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded-full font-bold">5 Crédits</span>
-                                        </button>
-
-                                        <!-- Modal Unlock -->
-                                        <dialog class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50" :open="openUnlockModal">
-                                            <div class="p-6 text-left">
-                                                <h3 class="font-bold text-lg mb-2 text-gray-900">Débloquer l'historique complet</h3>
-                                                <p class="text-gray-600 text-sm mb-4">L'accès à l'historique complet, au téléchargement groupé et à la pagination de vos anciennes séances nécessite un déblocage unique coûtant <strong>5 crédits</strong>.</p>
-                                                
-                                                <form action="{{ route('mentor.mentorship.sessions.unlock-history') }}" method="POST">
-                                                    @csrf
-                                                    <div class="flex justify-end gap-3 mt-6">
-                                                        <button type="button" @click="openUnlockModal = false" class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2 bg-gray-100 rounded-lg">Annuler</button>
-                                                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Débloquer</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </dialog>
+                                    <div class="text-center">
+                                        <form action="{{ route('mentor.mentorship.sessions.unlock-history') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex justify-center items-center gap-1 w-full p-2 rounded hover:bg-indigo-50 transition">
+                                                <span>Débloquer tout l'historique</span>
+                                                <span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded-full font-bold">5 Crédits</span>
+                                            </button>
+                                        </form>
                                     </div>
                                 @endif
                             @endif
