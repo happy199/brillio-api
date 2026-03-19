@@ -165,7 +165,7 @@
             </h2>
 
             <!-- Bouton Rapport Compilé -->
-            <form x-show="selectedSessions.length >= 2" action="{{ route('sessions.download-compiled-reports') }}" method="POST" style="display: none;">
+            <form x-show="selectedSessions.length >= 2" action="{{ route('jeune.sessions.download-compiled-reports') }}" method="POST" style="display: none;">
                 @csrf
                 <input type="hidden" name="session_ids" x-bind:value="selectedSessions.join(',')">
                 <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 shadow-sm flex items-center gap-2 transition" onclick="return confirm('La génération de ce rapport compilé vous coûtera 5 crédits. Confirmer ?')">
@@ -213,7 +213,7 @@
                                 {{ \Carbon\Carbon::parse($session->scheduled_at)->format('d/m/Y H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 truncate max-w-[200px]" title="{{ $session->title }}">
-                                {{ Str::limit($session->title, 40) }}
+                                {{ \Illuminate\Support\Str::limit($session->title, 40) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-500">
                                 <div class="flex items-center gap-2">
@@ -237,7 +237,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right font-medium">
                                 <div class="flex items-center justify-end gap-3">
                                     @if($session->status === 'completed' && !empty($session->report_content))
-                                    <a href="{{ route('sessions.download-report', $session) }}" class="text-green-600 hover:text-green-900" title="Télécharger le compte rendu (PDF)">
+                                    <a href="{{ route('jeune.sessions.download-report', $session) }}" class="text-green-600 hover:text-green-900" title="Télécharger le compte rendu (PDF)">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                         </svg>
@@ -302,7 +302,7 @@
                                     </div>
                                 </div>
                                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-                                    <form action="{{ route('sessions.unlock-history') }}" method="POST" class="w-full sm:w-auto">
+                                    <form action="{{ route('jeune.sessions.unlock-history') }}" method="POST" class="w-full sm:w-auto">
                                         @csrf
                                         <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:w-auto sm:text-sm shadow-sm">
                                             Confirmer (5 crédits)

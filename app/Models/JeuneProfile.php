@@ -15,12 +15,14 @@ class JeuneProfile extends Model
         'public_slug',
         'profile_views',
         'mentor_views',
+        'has_unlocked_session_history',
     ];
 
     protected $casts = [
         'is_public' => 'boolean',
         'profile_views' => 'integer',
         'mentor_views' => 'integer',
+        'has_unlocked_session_history' => 'boolean',
     ];
 
     public function user()

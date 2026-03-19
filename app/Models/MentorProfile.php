@@ -71,6 +71,7 @@ class MentorProfile extends Model
         'is_validated',
         'validated_at',
         'profile_views',
+        'has_unlocked_session_history',
     ];
 
     protected function casts(): array
@@ -85,6 +86,7 @@ class MentorProfile extends Model
             'linkedin_import_count' => 'integer',
             'linkedin_imported_at' => 'datetime',
             'validated_at' => 'datetime',
+            'has_unlocked_session_history' => 'boolean',
         ];
     }
 
