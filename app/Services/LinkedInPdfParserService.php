@@ -51,48 +51,73 @@ class LinkedInPdfParserService
     /**
      * Normalise le texte brut extrait du PDF LinkedIn.
      * Corrige les problèmes courants d'encodage des emojis et caractères spéciaux.
+     * Patterns identifiés sur un vrai échantillon de CV LinkedIn exporté en PDF.
      */
     private function normalizeText(string $text): string
     {
-        // Étape 1: Décoder les entités HTML numériques (&#x1F4BC; → 💼, &#128188; → 💼, &amp; → &, etc.)
+        // Étape 0: Supprimer les artefacts de pagination PDF (ex: "Page 1 of 6")
+        $text = preg_replace('/Page\s+\d+\s+of\s+\d+/i', '', $text) ?? $text;
+
+        // Étape 1: Décoder les entités HTML numériques (&#x1F4BC; → 💼, &amp; → &, etc.)
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        // Étape 2: Corriger les séquences de substitution de polices PDF connues
-        // Le PDF LinkedIn utilise une police symbolique qui mappe certains glyphes
-        // Les patterns ci-dessous couvrent les remplacements les plus fréquents
+        // Étape 2: Supprimer les marques combinantes isolées (U+0301 accent aigu = ́)
+        // Ces caractères sont des résidus fantômes laissés par les glyphes d'emojis non mappés.
+        // Ils apparaissent comme ́ seul, entre espaces, en début/fin de segment.
+        $text = preg_replace('/(?<!\p{L})\x{0301}(?!\p{L})/u', '', $text) ?? $text;
+        // Supprimer toutes les marques d'accent combinantes isolées résiduelles
+        $text = preg_replace('/[\x{0300}-\x{036F}]{1,3}(?=\s|$)/u', '', $text) ?? $text;
+
+        // Étape 3: Remplacer les marqueurs PDF courants par leurs équivalents propres
         $fontSubstitutions = [
-            // Marqueurs de liste / bullets
-            '/[●•▪▸‣⁃◆◦]/' => '•',
+            // Bullet points et marqueurs de liste
+            '/[●▪▸‣⁃◆◦]/u' => '•',
+            '/◈\s*/u' => '• ',   // Diamond bullet LinkedIn (correct, normaliser en bullet)
 
-            // Artifacts hexadécimaux PDF courants (caractères privés Unicode U+F0xx)
-            '/[\xEF\x80\x80-\xEF\x83\xBF]/' => '',  // Zone d'usage privé (PUA) Latin
-            '/[\xF0\x9F\x80\x80-\xF0\x9F\xBF\xBF]+/' => '', // Conservés tels quels (vraies emojis)
+            // Marqueurs KPI / impact en début de ligne (ex: "# -70%" ou "## +30%")
+            // Ces # et ## sont des emojis de médaille/checkmark encodés en substitution
+            '/^##\s+/mu' => '✅ ',
+            '/^#\s+/mu' => '🔹 ',
 
-            // Caractères de contrôle / remplacement parasites
-            '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\x80-\x9F]/' => '',
+            // Supprimer un ? isolé entre espaces (placeholder d'emoji inconnu)
+            '/\s\?\s/' => ' ',
 
-            // Réparer les tirets em (–) qui deviennent souvent des artéfacts
+            // Caractères de zone d'usage privé (PUA) — glyphes de polices symboliques PDF
+            '/[\xEF\x80\x80-\xEF\x83\xBF]+/' => '',
+            '/[\xEF\xBF\xB0-\xEF\xBF\xBF]+/' => '',
+
+            // Caractères de contrôle parasites (hors \t, \n, \r)
+            '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/' => '',
+            '/[\x80-\x9F]+/' => '',
+
+            // Tirets spéciaux mal encodés
             '/\x96/' => '–',
             '/\x97/' => '—',
 
-            // Ligatures et caractères spéciaux typiques du PDF LinkedIn
-            '/fi/' => 'fi',  // ligature fi
-            '/fl/' => 'fl',  // ligature fl
-
-            // Supprimer les espaces insécables parasites multiples
+            // Espaces insécables (U+00A0) → espace normal
             '/\xC2\xA0+/' => ' ',
 
-            // Supprimer des séquences parasites résiduelles (ex: glyphe manquant → carré)
+            // Glyphes remplacés (U+FFFD, carrés pleins/vides)
             '/[\x{FFFD}\x{25A0}\x{25A1}]/u' => '',
+
+            // Ligatures PDF (fi, fl encodées comme glyphes séparés)
+            '/\x{FB01}/u' => 'fi',
+            '/\x{FB02}/u' => 'fl',
         ];
 
         foreach ($fontSubstitutions as $pattern => $replacement) {
             $text = preg_replace($pattern, $replacement, $text) ?? $text;
         }
 
-        // Étape 3: Normaliser les espaces multiples et sauts de ligne
-        $text = preg_replace('/[ \t]+/', ' ', $text);
-        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+        // Étape 4: Supprimer les séquences parasites résiduelles typiques LinkedIn
+        // Ex: séquences de ́ , | restées après nettoyage des emojis de section
+        $text = preg_replace('/(\s*[|,]\s*){2,}/', ' ', $text) ?? $text;
+        // Supprimer des tirets isolés en début de chaîne ou entre symboles
+        $text = preg_replace('/^–\s+/mu', '', $text) ?? $text;
+
+        // Étape 5: Normaliser les espaces multiples et sauts de ligne
+        $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
+        $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
 
         return trim($text);
     }
@@ -108,12 +133,19 @@ class LinkedInPdfParserService
             "- Ne jamais inventer d'information. Si une info est manquante, mets null ou une chaine vide.\n".
             "- Répont UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n".
             "- Le format de sortie doit respecter exactement la structure demandée.\n\n".
-            "RÈGLE EMOJIS & CARACTÈRES SPÉCIAUX :\n".
-            "- Les PDFs LinkedIn encodent les emojis en caractères de substitution (ex: '⁃', '✴', '&', glyphes illisibles).\n".
-            "- Si tu rencontres des groupes de caractères étranges ou illisibles là où un emoji serait attendu (ex: début de bullet, dans un titre), remplace-les par l'emoji le plus vraisemblable dans ce contexte.\n".
-            "- Exemples : '⁃' ou '✦' en début de ligne → '•', '&' seul entre 2 espaces → '&', '™' mal encodé → '™', '®' mal encodé → '®'.\n".
-            "- L'objectif est que le texte extrait soit identique à ce qui apparaît sur le profil LinkedIn web réel du mentor.\n".
-            "- Préserve les vrais emojis Unicode déjà présents dans le texte (🚀, 💼, ✅, etc.).\n\n".
+            "RÈGLE EMOJIS & CARACTÈRES SPÉCIAUX (PDF LinkedIn) :\n".
+            "Les PDFs LinkedIn exportés encodent mal les emojis en raison des limitations des polices PDF.\n".
+            "Voici les patterns les plus courants que tu devras interpréter :\n".
+            "- '| ́ &amp; | ́ -' → chaîne d'icônes emojis (ex : 🌐 & 🎯 - ou similaire). Substitue par des emojis contextuellement cohérents ou supprime si le sens est incertain.\n".
+            "- '́' seul (accent aigu isolé) → résidu fantôme d'un emoji supprimé. IGNORER/SUPPRIMER.\n".
+            "- '◈' en début de ligne → bullet point LinkedIn. Restaurer en '•'.\n".
+            "- '✅ ' ou '🔹 ' en début de ligne → marqueur de résultat/KPI. CONSERVER.\n".
+            "- '® 6, , , ®,' → emojis indicateurs (ex: 🏆, 🎯). Interpréter ou supprimer le bruit.\n".
+            "- Un '?' isolé entre deux espaces → placeholder d'emoji inconnu. Supprimer.\n".
+            "- '&amp;' → '&' (entité HTML). Toujours décoder.\n".
+            "- '#' ou '##' en début de KPI (ex: '# -70% du temps') → c'était un emoji (✅, 📊). Les métriques elles-mêmes sont correctes, conserver les chiffres.\n".
+            "- Préserve à 100% les vrais emojis Unicode déjà présents (🚀, 💼, ✅, 📈, etc.).\n".
+            "- L'objectif est que le texte final soit identique à ce qui apparaît sur le profil LinkedIn web réel.\n\n".
             "STRUCTURE JSON ATTENDUE :\n".
             '{"name": "Nom complet", "headline": "Titre du profil ou poste actuel", "contact": {"email": "email found or empty", "phone": "phone found or empty", "linkedin": "linkedin url or empty", "website": "website url or empty"}, "summary": "Bio", "skills": ["Compétence 1"], "experience": [{"title": "Poste", "company": "Entreprise", "description": "Tâches", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD or null if currently in this role", "duration_years": 0, "duration_months": 0}], "education": [{"school": "Ecole", "degree": "Diplôme", "year_start": 0, "year_end": 0}]}';
 
