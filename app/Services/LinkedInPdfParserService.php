@@ -120,11 +120,9 @@ class LinkedInPdfParserService
         $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
 
         // Étape 6: Forcer la validité UTF-8
-        // Les PDFs peuvent contenir des séquences d'octets illégales qui font crasher json_encode().
-        // On utilise mb_convert_encoding pour remplacer les caractères invalides par '?' (ou rien via //IGNORE).
-        $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
-        // iconv avec //IGNORE supprime tous les octets qui ne peuvent pas être représentés en UTF-8 valide
-        $text = iconv('UTF-8', 'UTF-8//IGNORE', $text) ?: $text;
+        // Utiliser mb_scrub() qui est natif PHP 8+ et remplace proprement
+        // les séquences d'octets invalides sans détruire le reste du texte (contrairement à iconv).
+        $text = mb_scrub($text, 'UTF-8');
 
         return trim($text);
     }
@@ -140,9 +138,8 @@ class LinkedInPdfParserService
         }
 
         if (is_string($data)) {
-            $data = mb_convert_encoding($data, 'UTF-8', 'UTF-8');
-
-            return iconv('UTF-8', 'UTF-8//IGNORE', $data) ?: '';
+            // mb_scrub() la méthode la plus sûre et native en PHP 8 pour nettoyer l'UTF-8 invalide
+            return mb_scrub($data, 'UTF-8');
         }
 
         return $data;
