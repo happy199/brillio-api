@@ -144,12 +144,20 @@
                     <div class="flex items-center gap-2">
                         @if(!$resource->is_premium)
                             <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">Gratuit</span>
+                        @elseif(in_array($resource->id, $purchasedIds))
+                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M2.166 4.9L10 1.554L17.834 4.9c.11.047.166.173.166.3v10.512c0 .127-.056.253-.166.3L10 19.446l-7.834-3.435a.332.332 0 01-.166-.3V5.2c0-.127.056-.253.166-.3zM10 3.172L4 5.738v8.524l6 2.566l6-2.566V5.738l-6-2.566z" clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" d="M14.707 7.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L8 12.586l5.293-5.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                Débloqué
+                            </span>
                         @else
-                            <span class="text-xs font-bold text-gray-900">{{ number_format($resource->price, 0, ',', ' ') }} F</span>
+                            <span class="text-xs font-bold text-gray-900">{{ ceil($resource->price / $mentorCreditPrice) }} Crédits</span>
                         @endif
                     </div>
                     
-                    <a href="{{ route('jeune.resources.show', $resource) }}" target="_blank"
+                    <a href="{{ route('mentor.resources.show', $resource) }}" 
                         class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
                         Consulter
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

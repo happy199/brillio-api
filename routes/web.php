@@ -337,7 +337,9 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
         // Le prefixe 'mentor.' est déjà appliqué par le groupe parent, donc ->names('resources') donnera 'mentor.resources.*'
         Route::get('/ressources/marketplace', [\App\Http\Controllers\Mentor\ResourceController::class, 'marketplace'])->name('resources.marketplace');
         Route::get('/ressources/demande-stats', [\App\Http\Controllers\Mentor\ResourceController::class, 'getDemandStats'])->name('resources.stats');
-        Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
+        Route::get('/ressources/{resource}/show', [\App\Http\Controllers\Mentor\ResourceController::class, 'show'])->name('resources.show');
+        Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Mentor\ResourceController::class, 'unlock'])->name('resources.unlock');
+        Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources')->except(['show']);
 
         // Gestion des mentés
         // Le prefixe 'mentor.' est déjà appliqué. On ajoute 'mentorship.' -> 'mentor.mentorship.*'

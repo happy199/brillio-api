@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
+use App\Models\Purchase;
 use App\Models\Resource;
+use App\Models\ResourceView;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,9 +18,12 @@ class ResourceController extends Controller
 {
     protected $walletService;
 
-    public function __construct(WalletService $walletService)
+    protected $notificationService;
+
+    public function __construct(WalletService $walletService, MentorshipNotificationService $notificationService)
     {
         $this->walletService = $walletService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -74,7 +80,14 @@ class ResourceController extends Controller
         $resources = $query->with('user')->latest()->paginate(12);
         $totalCount = $query->count();
 
-        return view('mentor.resources.marketplace', compact('resources', 'totalCount'));
+        $purchasedIds = Purchase::where('user_id', auth()->id())
+            ->where('item_type', Resource::class)
+            ->pluck('item_id')
+            ->toArray();
+
+        $mentorCreditPrice = $this->walletService->getCreditPrice('mentor');
+
+        return view('mentor.resources.marketplace', compact('resources', 'totalCount', 'purchasedIds', 'mentorCreditPrice'));
     }
 
     /**
@@ -114,8 +127,8 @@ class ResourceController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-        // Calcul des statistiques
-        $jeunes = User::where('user_type', 'jeune')->where('onboarding_completed', true)->get();
+        // Calcul des statistiques - On inclut TOUS les jeunes (pas seulement ceux qui ont fini l'onboarding)
+        $jeunes = User::where('user_type', 'jeune')->get();
 
         $stats = [
             'total' => $jeunes->count(),
@@ -158,11 +171,10 @@ class ResourceController extends Controller
             }
         }
 
-        // Personality Types (MBTI) - Alignement sur onboarding_completed
+        // Personality Types (MBTI) - Alignement sur TOUS les jeunes
         $mbtiStats = \App\Models\PersonalityTest::query()
             ->join('users', 'personality_tests.user_id', '=', 'users.id')
             ->where('users.user_type', 'jeune')
-            ->where('users.onboarding_completed', true)
             ->where('personality_tests.is_current', true)
             ->select('personality_tests.personality_type', DB::raw('count(*) as total'))
             ->groupBy('personality_tests.personality_type')
@@ -176,6 +188,135 @@ class ResourceController extends Controller
             'stats' => $stats,
             'balance' => $user->refresh()->credits_balance,
         ]);
+    }
+
+    /**
+     * Affichage d'une ressource de la boutique (Marketplace)
+     */
+    public function show(Resource $resource)
+    {
+        // Sécurité : Ne pas permettre de voir sa propre ressource via ce flux ou ressource non validée
+        if ($resource->user_id === auth()->id() || ! $resource->is_published || ! $resource->is_validated) {
+            if ($resource->user_id === auth()->id()) {
+                return redirect()->route('mentor.resources.edit', $resource);
+            }
+            abort(404);
+        }
+
+        $user = auth()->user();
+
+        // Enregistrer la vue (Compteur global)
+        $resource->increment('views_count');
+
+        // Enregistrer la vue unique pour les gratuites
+        if ($resource->price <= 0) {
+            ResourceView::firstOrCreate([
+                'user_id' => $user->id,
+                'resource_id' => $resource->id,
+            ]);
+        }
+
+        $isLocked = false;
+        $unlockCost = 0;
+
+        // Logique de verrouillage pour contenu Payant
+        if ($resource->price > 0) {
+            $hasPurchased = Purchase::where('user_id', $user->id)
+                ->where('item_type', Resource::class)
+                ->where('item_id', $resource->id)
+                ->exists();
+
+            if (! $hasPurchased) {
+                $isLocked = true;
+                // Calcul du coût : 100 FCFA = 1 Crédit Mentor
+                $creditPrice = $this->walletService->getCreditPrice('mentor');
+                $unlockCost = (int) ceil($resource->price / $creditPrice);
+
+                // Sécurité : Ne pas envoyer le contenu
+                $resource->content = null;
+                $resource->file_path = null;
+            }
+        }
+
+        return view('mentor.resources.show', compact('resource', 'isLocked', 'unlockCost'));
+    }
+
+    /**
+     * Déblocage d'une ressource payante
+     */
+    public function unlock(Resource $resource)
+    {
+        if ($resource->price <= 0 || $resource->user_id === auth()->id()) {
+            return back();
+        }
+
+        $user = auth()->user();
+
+        // Vérifier si déjà acheté
+        $exists = Purchase::where('user_id', $user->id)
+            ->where('item_type', Resource::class)
+            ->where('item_id', $resource->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->with('info', 'Vous avez déjà débloqué cette ressource.');
+        }
+
+        // Calcul du coût
+        $creditPrice = $this->walletService->getCreditPrice('mentor');
+        $unlockCost = (int) ceil($resource->price / $creditPrice);
+
+        if ($user->credits_balance < $unlockCost) {
+            return redirect()->route('mentor.wallet.index')->withErrors(['credits' => "Solde insuffisant ($unlockCost crédits nécessaires)."]);
+        }
+
+        try {
+            DB::transaction(function () use ($user, $resource, $unlockCost) {
+                // 1. Transaction d'achat
+                $purchase = Purchase::create([
+                    'user_id' => $user->id,
+                    'item_type' => Resource::class,
+                    'item_id' => $resource->id,
+                    'cost_credits' => $unlockCost,
+                    'original_price_fcfa' => $resource->price,
+                    'purchased_at' => now(),
+                ]);
+
+                // 2. Débiter l'acheteur (Mentor)
+                $this->walletService->deductCredits(
+                    $user,
+                    $unlockCost,
+                    'expense',
+                    "Achat ressource : {$resource->title}",
+                    $purchase
+                );
+
+                // 3. Créditer l'auteur (si c'est un autre mentor)
+                $author = $resource->user;
+                if ($author && $author->id != 1) { // Pas Brillio
+                    $mentorCreditPrice = $this->walletService->getCreditPrice('mentor');
+                    $authorCredits = (int) ceil($resource->price / $mentorCreditPrice);
+
+                    $this->walletService->addCredits(
+                        $author,
+                        $authorCredits,
+                        'income',
+                        "Vente de ressource : {$resource->title} à {$user->name}",
+                        $purchase
+                    );
+
+                    // 4. Notification
+                    $this->notificationService->sendResourcePurchased($resource, $user, $authorCredits);
+                }
+
+                // 5. Compteur
+                $resource->increment('sales_count');
+            });
+
+            return back()->with('success', 'Ressource débloquée avec succès !');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Erreur lors du déblocage : '.$e->getMessage()]);
+        }
     }
 
     /**
