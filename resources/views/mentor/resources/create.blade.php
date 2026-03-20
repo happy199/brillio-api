@@ -358,14 +358,15 @@
                                                         <span class="w-1.5 h-4 bg-amber-500 rounded-full"></span>
                                                         Types Psychométriques (MBTI)
                                                     </h4>
-                                                    <div class="grid grid-cols-4 gap-2">
-                                                        <template x-for="(count, type) in stats.personality_types" :key="type">
-                                                            <div class="bg-amber-50 p-2 rounded-lg border border-amber-100 text-center">
-                                                                <div class="text-[10px] font-bold text-amber-700 mb-1" x-text="type"></div>
-                                                                <div class="text-sm font-black text-amber-900" x-text="count"></div>
-                                                            </div>
-                                                        </template>
-                                                    </div>
+                                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                         <template x-for="(count, type) in stats.personality_types" :key="type">
+                                                             <div class="bg-amber-50 p-2 rounded-lg border border-amber-100 text-center flex flex-col justify-center min-h-[60px]">
+                                                                 <div class="text-[10px] font-bold text-amber-700 leading-tight mb-1" x-text="formatLabel(type)"></div>
+                                                                 <div class="text-[8px] text-amber-500 font-medium uppercase mb-1" x-text="type"></div>
+                                                                 <div class="text-sm font-black text-amber-900" x-text="count"></div>
+                                                             </div>
+                                                         </template>
+                                                     </div>
                                                     <p x-show="!Object.keys(stats.personality_types).length" class="text-xs text-gray-400 italic mt-4 text-center">Pas encore de tests complétés.</p>
                                                 </div>
 
@@ -850,7 +851,11 @@
             stats: null,
             labels: {
                 'college': 'Collège', 'lycee': 'Lycée', 'bac': 'Baccalauréat', 'licence': 'Licence', 'master': 'Master', 'doctorat': 'Doctorat',
-                'etudiant': 'Étudiant', 'recherche_emploi': 'En recherche d\'emploi', 'emploi': 'En emploi', 'entrepreneur': 'Entrepreneur', 'autre': 'Autre'
+                'etudiant': 'Étudiant', 'recherche_emploi': 'En recherche d\'emploi', 'emploi': 'En emploi', 'entrepreneur': 'Entrepreneur', 'autre': 'Autre',
+                'INTJ': 'L’Architecte', 'INTP': 'Le Logicien', 'ENTJ': 'Le Commandant', 'ENTP': 'L’Innovateur',
+                'INFJ': 'L’Avocat', 'INFP': 'Le Médiateur', 'ENFJ': 'Le Protagoniste', 'ENFP': 'Le Campaigner',
+                'ISTJ': 'Le Logisticien', 'ISFJ': 'Le Défenseur', 'ESTJ': 'Le Directeur', 'ESFJ': 'Le Consul',
+                'ISTP': 'Le Virtuose', 'ISFP': 'L’Aventurier', 'ESTP': 'L’Entrepreneur', 'ESFP': 'L’Amuseur'
             },
             async fetchStats() {
                 this.loading = true;
