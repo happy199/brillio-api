@@ -158,7 +158,7 @@
             </div>
 
             <div class="mt-8">
-                {{ $jeunes->links('pagination.modern-pagination') }}
+                {{ $jeunes->links() }}
             </div>
             @endif
         </div>

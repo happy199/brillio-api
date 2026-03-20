@@ -293,6 +293,10 @@
             </article>
             @endforeach
         </div>
+        
+        <div class="mt-8">
+            {{ $resources->withQueryString()->links() }}
+        </div>
         @endif
     </div>
     @endsection

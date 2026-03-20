@@ -7,6 +7,7 @@ use App\Models\ScheduledTaskLog;
 use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Configurer la pagination par défaut
+        Paginator::defaultView('pagination.modern-pagination');
+
         // === AUDIT LOGS EVENTS ===
 
         // 1. Emails
