@@ -102,11 +102,11 @@ class MentorshipNotificationService
         $calendarUrl = route('jeune.sessions.calendar'); // URL générique ou specifique
 
         // Envoyer au mentor
-        Mail::to($mentor->email)->send(new SessionConfirmed($session, $mentor, $mentees, route('mentor.mentorship.calendar')));
+        Mail::to($mentor->email)->send(new SessionConfirmed($session, $mentor, $mentees));
 
         // Envoyer à chaque jeune
         foreach ($mentees as $mentee) {
-            Mail::to($mentee->email)->send(new SessionConfirmed($session, $mentee, $mentees, $calendarUrl));
+            Mail::to($mentee->email)->send(new SessionConfirmed($session, $mentee, $mentees));
         }
     }
 

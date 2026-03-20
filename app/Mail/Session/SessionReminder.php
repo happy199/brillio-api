@@ -4,7 +4,9 @@ namespace App\Mail\Session;
 
 use App\Models\MentoringSession;
 use App\Models\User;
+use App\Traits\GeneratesCalendarLinks;
 use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -13,7 +15,7 @@ use Illuminate\Support\Collection;
 
 class SessionReminder extends Mailable
 {
-    use Queueable, SerializesModels;
+    use GeneratesCalendarLinks, Queueable, SerializesModels;
 
     public MentoringSession $session;
 
@@ -22,6 +24,8 @@ class SessionReminder extends Mailable
     public Collection $participants;
 
     public string $type; // '24h' or '1h'
+
+    public string $calendarUrl;
 
     /**
      * Create a new message instance.
@@ -36,6 +40,7 @@ class SessionReminder extends Mailable
         $this->recipient = $recipient;
         $this->participants = $participants;
         $this->type = $type;
+        $this->calendarUrl = $this->generateGoogleCalendarUrl($session);
     }
 
     /**
@@ -65,6 +70,7 @@ class SessionReminder extends Mailable
                 'recipient' => $this->recipient,
                 'participants' => $this->participants,
                 'type' => $this->type,
+                'calendarUrl' => $this->calendarUrl,
             ],
         );
     }
@@ -76,6 +82,9 @@ class SessionReminder extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [
+            Attachment::fromData(fn () => $this->generateIcsContent($this->session), 'invitation.ics')
+                ->withMime('text/calendar'),
+        ];
     }
 }

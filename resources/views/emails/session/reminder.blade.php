@@ -36,8 +36,13 @@
     <tr>
         <td align="center">
             <a href="{{ $session->meeting_link }}"
-                style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+                style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
                 🎥 Rejoindre la session
+            </a>
+            <br>
+            <a href="{{ $calendarUrl }}"
+                style="display: inline-block; background: #ffffff; color: #4285f4; padding: 10px 20px; text-decoration: none; border-radius: 6px; border: 1px solid #4285f4; font-weight: 600; font-size: 14px;">
+                📅 Ajouter à mon agenda
             </a>
         </td>
     </tr>
