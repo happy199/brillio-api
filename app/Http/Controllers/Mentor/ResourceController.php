@@ -25,6 +25,9 @@ class ResourceController extends Controller
      */
     public function index()
     {
+        // On réinitialise le déblocage des stats quand on revient à la liste
+        session()->forget('resource_stats_unlocked');
+
         $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
 
         return view('mentor.resources.index', compact('resources'));
@@ -59,23 +62,33 @@ class ResourceController extends Controller
     public function getDemandStats()
     {
         $user = auth()->user();
-        $cost = 10;
+        $cost = 5;
+
+        // Si déjà débloqué pour cette session de création, on ne prélève pas
+        if (session('resource_stats_unlocked')) {
+            $cost = 0;
+        }
 
         try {
-            if ($user->credits_balance < $cost) {
-                return response()->json([
-                    'error' => "Crédits insuffisants. Cette analyse coûte {$cost} crédits.",
-                    'balance' => $user->credits_balance,
-                ], 402);
-            }
+            if ($cost > 0) {
+                if ($user->credits_balance < $cost) {
+                    return response()->json([
+                        'error' => "Crédits insuffisants. Cette analyse coûte {$cost} crédits.",
+                        'balance' => $user->credits_balance,
+                    ], 402);
+                }
 
-            $this->walletService->deductCredits(
-                $user,
-                $cost,
-                'service_fee',
-                'Analyse des statistiques de la demande',
-                null
-            );
+                $this->walletService->deductCredits(
+                    $user,
+                    $cost,
+                    'service_fee',
+                    'Analyse des statistiques de la demande',
+                    null
+                );
+
+                // On marque comme débloqué pour les rechargements de page
+                session(['resource_stats_unlocked' => true]);
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
