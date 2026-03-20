@@ -250,7 +250,7 @@
 
                 <form action="{{ route('mentor.resources.unlock', $resource) }}" method="POST" id="unlockForm">
                     @csrf
-                    <button type="button" @click="confirmUnlock()"
+                    <button type="button" onclick="confirmUnlock()"
                         class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl hover:shadow-lg hover:scale-105 transition transform duration-200 w-full sm:w-auto">
                         Débloquer le contenu
                     </button>
