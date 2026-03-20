@@ -346,6 +346,7 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
         Route::name('mentorship.')->group(function () {
             // URL: /mentes
             Route::get('/mentes', [App\Http\Controllers\Mentor\MentorshipController::class, 'index'])->name('index'); // Liste mentés
+            Route::post('/toggle-availability', [App\Http\Controllers\Mentor\MentorshipController::class, 'toggleAvailability'])->name('toggle-availability');
             Route::get('/requests', [App\Http\Controllers\Mentor\MentorshipController::class, 'requests'])->name('requests'); // Demandes
             Route::post('/{mentorship}/accepter', [App\Http\Controllers\Mentor\MentorshipController::class, 'accept'])->name('accept');
             Route::post('/{mentorship}/refuser', [App\Http\Controllers\Mentor\MentorshipController::class, 'refuse'])->name('refuse');
