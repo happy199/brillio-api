@@ -335,6 +335,8 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
 
         // Gestion des ressources mentor (URL: /ressources)
         // Le prefixe 'mentor.' est déjà appliqué par le groupe parent, donc ->names('resources') donnera 'mentor.resources.*'
+        Route::get('/ressources/marketplace', [\App\Http\Controllers\Mentor\ResourceController::class, 'marketplace'])->name('resources.marketplace');
+        Route::get('/ressources/demande-stats', [\App\Http\Controllers\Mentor\ResourceController::class, 'getDemandStats'])->name('resources.stats');
         Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources');
 
         // Gestion des mentés

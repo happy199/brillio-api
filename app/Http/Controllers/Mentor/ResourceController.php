@@ -25,13 +25,122 @@ class ResourceController extends Controller
      */
     public function index()
     {
-        $mentorProfile = auth()->user()->mentorProfile;
-
-        // On récupère toujours les ressources pour savoir si le mentor en a déjà créé
         $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
 
-        // Check middleware handles redirection now
         return view('mentor.resources.index', compact('resources'));
+    }
+
+    /**
+     * Boutique de ressources (Marketplace)
+     */
+    public function marketplace(Request $request)
+    {
+        $query = Resource::query()
+            ->where('user_id', '!=', auth()->id())
+            ->where('is_published', true)
+            ->where('is_validated', true);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('tags', 'like', "%{$search}%");
+            });
+        }
+
+        $resources = $query->with('user')->latest()->paginate(12);
+
+        return view('mentor.resources.marketplace', compact('resources'));
+    }
+
+    /**
+     * Récupère les statistiques de la demande (Données Jeunes) - Payant 10 Crédits
+     */
+    public function getDemandStats()
+    {
+        $user = auth()->user();
+        $cost = 10;
+
+        try {
+            if ($user->credits_balance < $cost) {
+                return response()->json([
+                    'error' => "Crédits insuffisants. Cette analyse coûte {$cost} crédits.",
+                    'balance' => $user->credits_balance,
+                ], 402);
+            }
+
+            $this->walletService->deductCredits(
+                $user,
+                $cost,
+                'service_fee',
+                'Analyse des statistiques de la demande',
+                null
+            );
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+
+        // Calcul des statistiques
+        $jeunes = User::where('user_type', 'jeune')->where('onboarding_completed', true)->get();
+
+        $stats = [
+            'total' => $jeunes->count(),
+            'education' => [
+                'college' => 0,
+                'lycee' => 0,
+                'bac' => 0,
+                'licence' => 0,
+                'master' => 0,
+                'doctorat' => 0,
+            ],
+            'situation' => [
+                'etudiant' => 0,
+                'recherche_emploi' => 0,
+                'emploi' => 0,
+                'entrepreneur' => 0,
+                'autre' => 0,
+            ],
+            'countries' => [],
+            'personality_types' => [],
+        ];
+
+        foreach ($jeunes as $jeune) {
+            $data = $jeune->onboarding_data ?? [];
+
+            // Education
+            if (isset($data['education_level']) && isset($stats['education'][$data['education_level']])) {
+                $stats['education'][$data['education_level']]++;
+            }
+
+            // Situation
+            if (isset($data['current_situation']) && isset($stats['situation'][$data['current_situation']])) {
+                $stats['situation'][$data['current_situation']]++;
+            }
+
+            // Pays
+            if ($jeune->country) {
+                $country = ucfirst(strtolower($jeune->country));
+                $stats['countries'][$country] = ($stats['countries'][$country] ?? 0) + 1;
+            }
+        }
+
+        // Personality Types (MBTI)
+        $mbtiStats = \App\Models\PersonalityTest::query()
+            ->join('users', 'personality_tests.user_id', '=', 'users.id')
+            ->where('users.user_type', 'jeune')
+            ->where('personality_tests.is_current', true)
+            ->select('personality_tests.personality_type', DB::raw('count(*) as total'))
+            ->groupBy('personality_tests.personality_type')
+            ->pluck('total', 'personality_type')
+            ->toArray();
+
+        $stats['personality_types'] = $mbtiStats;
+
+        return response()->json([
+            'success' => true,
+            'stats' => $stats,
+            'balance' => $user->refresh()->credits_balance,
+        ]);
     }
 
     /**
