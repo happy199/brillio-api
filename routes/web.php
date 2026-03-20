@@ -199,6 +199,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::get('/chat/{conversation}', [JeuneDashboardController::class, 'getConversation'])->name('chat.get');
     Route::delete('/chat/{conversation}', [JeuneDashboardController::class, 'deleteConversation'])->name('chat.delete');
     Route::post('/chat/{conversation}/request-human', [JeuneDashboardController::class, 'requestHumanSupport'])->name('chat.request-human');
+    Route::post('/chat/{conversation}/cancel-human', [JeuneDashboardController::class, 'cancelHumanSupport'])->name('chat.cancel-human');
     Route::get('/documents', [JeuneDashboardController::class, 'documents'])->name('documents');
     Route::post('/documents', [JeuneDashboardController::class, 'storeDocument'])->name('documents.store');
     Route::get('/documents/{document}/download', [JeuneDashboardController::class, 'downloadDocument'])->name('documents.download');
@@ -236,10 +237,13 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
 
         // Séances (Jeune)
         Route::get('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'index'])->name('sessions.index');
+        Route::post('/mentorat/seances/unlock-history', [\App\Http\Controllers\Jeune\SessionController::class, 'unlockHistory'])->name('sessions.unlock-history');
+        Route::post('/mentorat/seances/compiled-reports', [\App\Http\Controllers\Jeune\SessionController::class, 'downloadCompiledReports'])->name('sessions.download-compiled-reports');
+        Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class, 'create'])->name('sessions.create');
         Route::get('/mentorat/calendrier', [\App\Http\Controllers\Jeune\SessionController::class, 'calendar'])->name('sessions.calendar');
         Route::post('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'store'])->name('sessions.store');
-        Route::get('/mentorat/seances/reserver/{mentor}', [\App\Http\Controllers\Jeune\SessionController::class, 'create'])->name('sessions.create');
         Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class, 'show'])->name('sessions.show');
+        Route::get('/mentorat/seances/{session}/report', [\App\Http\Controllers\Jeune\SessionController::class, 'downloadReport'])->name('sessions.download-report');
         Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class, 'cancel'])->name('sessions.cancel');
         Route::post('/mentorat/seances/{session}/pay-join', [\App\Http\Controllers\Jeune\SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
     }
@@ -349,6 +353,8 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
 
             // Séances
             // URL: /sessions/... (On garde /sessions pour éviter les conflits d'URL racine trop génériques)
+            Route::post('/sessions/unlock-history', [\App\Http\Controllers\Mentor\SessionController::class, 'unlockHistory'])->name('sessions.unlock-history');
+            Route::post('/sessions/download-compiled-reports', [\App\Http\Controllers\Mentor\SessionController::class, 'downloadCompiledReports'])->name('sessions.download-compiled-reports');
             Route::get('/sessions/create', [\App\Http\Controllers\Mentor\SessionController::class, 'create'])->name('sessions.create');
             Route::post('/sessions', [\App\Http\Controllers\Mentor\SessionController::class, 'store'])->name('sessions.store');
             // Edit & Update routes
@@ -356,6 +362,7 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
             Route::put('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'update'])->name('sessions.update');
 
             Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
+            Route::get('/sessions/{session}/download-report', [\App\Http\Controllers\Mentor\SessionController::class, 'downloadReport'])->name('sessions.download-report');
             Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
             Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');
             Route::post('/sessions/{session}/refuse', [\App\Http\Controllers\Mentor\SessionController::class, 'refuse'])->name('sessions.refuse');

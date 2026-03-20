@@ -143,85 +143,141 @@
     </div>
 
     <!-- Past Sessions -->
-    <div>
-        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Passées
-        </h2>
+    <div x-data="{
+        selectedSessions: [],
+        toggleAll(event) {
+            if (event.target.checked) {
+                this.selectedSessions = Array.from(document.querySelectorAll('.session-checkbox'))
+                    .filter(cb => !cb.disabled)
+                    .map(cb => cb.value);
+            } else {
+                this.selectedSessions = [];
+            }
+        }
+    }" x-cloak>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Passées
+            </h2>
+
+            <!-- Bouton Rapport Compilé -->
+            <form x-show="selectedSessions.length >= 2" action="{{ route('jeune.sessions.download-compiled-reports') }}" method="POST" style="display: none;">
+                @csrf
+                <input type="hidden" name="session_ids" x-bind:value="selectedSessions.join(',')">
+                <button type="submit"
+                    class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 shadow-sm flex items-center gap-2 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Générer rapport compilé (5 crédits)
+                </button>
+            </form>
+        </div>
 
         @if($pastSessions->isEmpty())
         <p class="text-gray-500 text-sm italic">Aucune séance terminée.</p>
         @else
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sujet
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Mentor</th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Statut</th>
-                        <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($pastSessions as $session)
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ \Carbon\Carbon::parse($session->scheduled_at)->format('d/m/Y H:i') }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {{ $session->title }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $session->mentor->name }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($session->pivot->status === 'cancelled')
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Annulée</span>
-                            @elseif($session->pivot->status === 'rejected')
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Refusée</span>
-                            @elseif($session->status === 'cancelled')
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Annulée</span>
-                            @elseif($session->status === 'completed')
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Terminée</span>
-                            @elseif($session->scheduled_at < now()) <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                Passée</span>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden text-sm">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 w-10">
+                                <input type="checkbox" @change="toggleAll" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sujet
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Mentor</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Statut</th>
+                            <th scope="col" class="relative px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($pastSessions as $session)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" value="{{ $session->id }}" x-model="selectedSessions" class="session-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" @if($session->status !== 'completed' || empty($session->report_content)) disabled @endif>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                                {{ \Carbon\Carbon::parse($session->scheduled_at)->format('d/m/Y H:i') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 truncate max-w-[200px]" title="{{ $session->title }}">
+                                {{ \Illuminate\Support\Str::limit($session->title, 40) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                                <div class="flex items-center gap-2">
+                                    <img src="{{ $session->mentor->avatar_url }}" alt="" class="w-6 h-6 rounded-full bg-gray-200 object-cover">
+                                    {{ $session->mentor->name }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($session->pivot->status === 'cancelled' || $session->status === 'cancelled')
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Annulée</span>
+                                @elseif($session->pivot->status === 'rejected')
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Refusée</span>
+                                @elseif($session->status === 'completed')
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Terminée</span>
+                                @elseif($session->scheduled_at < now()) 
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Passée</span>
                                 @else
-                                <span
-                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{
-                                    $session->status }}</span>
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{ $session->status }}</span>
                                 @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('jeune.sessions.show', $session) }}"
-                                class="text-indigo-600 hover:text-indigo-900">
-                                Voir détails
-                            </a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right font-medium">
+                                <div class="flex items-center justify-end gap-3">
+                                    @if($session->status === 'completed' && !empty($session->report_content))
+                                    <a href="{{ route('jeune.sessions.download-report', $session) }}" class="text-green-600 hover:text-green-900" title="Télécharger le compte rendu (PDF)">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                        </svg>
+                                    </a>
+                                    @endif
+                                    <a href="{{ route('jeune.sessions.show', $session) }}"
+                                        class="text-indigo-600 hover:text-indigo-900 flex items-center gap-1" title="Voir détails">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <!-- Pagination for past sessions -->
-        <div class="mt-4">
-            {{ $pastSessions->links() }}
+
+        <!-- Pagination or Unlock -->
+        <div class="mt-6 flex justify-center">
+            @if($hasUnlockedHistory)
+                {{ $pastSessions->links() }}
+            @else
+                @if(count($pastSessions) >= 10)
+                <div class="w-full sm:w-auto">
+                    <form action="{{ route('jeune.sessions.unlock-history') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-xl hover:from-purple-700 hover:to-indigo-700 shadow-sm flex items-center justify-center gap-2 transition transform hover:scale-105">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            Débloquer l'historique complet (5 crédits)
+                        </button>
+                    </form>
+                </div>
+                @endif
+            @endif
         </div>
         @endif
     </div>

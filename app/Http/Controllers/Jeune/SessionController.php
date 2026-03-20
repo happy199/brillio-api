@@ -26,18 +26,26 @@ class SessionController extends Controller
             ->orderBy('mentoring_sessions.scheduled_at', 'asc')
             ->get();
 
-        // Past: Past dates OR Globally cancelled OR Completed OR Locally cancelled
-        $pastSessions = $user->mentoringSessionsAsMentee()
+        $hasUnlockedHistory = $user->jeuneProfile->has_unlocked_session_history ?? false;
+
+        $pastSessionsQuery = $user->mentoringSessionsAsMentee()
             ->where(function ($query) {
                 $query->where('mentoring_sessions.scheduled_at', '<', now())
                     ->orWhere('mentoring_sessions.status', 'cancelled')
                     ->orWhere('mentoring_sessions.status', 'completed')
                     ->orWhereIn('mentoring_session_user.status', ['cancelled', 'rejected']); // INCLUDE if I cancelled locally
             })
-            ->orderBy('mentoring_sessions.scheduled_at', 'desc')
-            ->paginate(10);
+            ->orderBy('mentoring_sessions.scheduled_at', 'desc');
 
-        return view('jeune.mentorship.sessions.index', compact('upcomingSessions', 'pastSessions'));
+        if ($hasUnlockedHistory) {
+            $pastSessions = $pastSessionsQuery->paginate(10);
+        } else {
+            $pastSessions = $pastSessionsQuery->take(10)->get();
+            // To maintain compatibility with `$pastSessions->links()` in the view if it gets called,
+            // though we will hide the pagination link in Blade anyway.
+        }
+
+        return view('jeune.mentorship.sessions.index', compact('upcomingSessions', 'pastSessions', 'hasUnlockedHistory'));
     }
 
     /**
@@ -257,5 +265,103 @@ class SessionController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Erreur lors du paiement : '.$e->getMessage());
         }
+    }
+
+    /**
+     * Débloquer l'historique complet (5 crédits)
+     */
+    public function unlockHistory(Request $request)
+    {
+        $user = auth()->user();
+        $profile = $user->jeuneProfile;
+
+        if (! $profile) {
+            return redirect()->back()->with('error', 'Profil introuvable.');
+        }
+
+        if ($profile->has_unlocked_session_history) {
+            return redirect()->back()->with('info', "Vous avez déjà débloqué l'historique complet.");
+        }
+
+        if ($user->credits_balance < 5) {
+            return redirect()->route('jeune.wallet.index')->with('warning', 'Votre solde de crédits est insuffisant (5 crédits requis). Veuillez recharger votre compte pour continuer.');
+        }
+
+        app(\App\Services\WalletService::class)->deductCredits(
+            $user,
+            5,
+            'feature_unlock',
+            "Déblocage de l'historique complet des séances"
+        );
+        $profile->update(['has_unlocked_session_history' => true]);
+
+        return redirect()->back()->with('success', 'Historique complet débloqué avec succès !');
+    }
+
+    /**
+     * Télécharger un compte rendu individuel (PDF)
+     */
+    public function downloadReport(MentoringSession $session)
+    {
+        $user = auth()->user();
+
+        // 1. Check participation
+        if (! $session->mentees->contains($user->id)) {
+            abort(403);
+        }
+
+        // 2. Check completed and has report
+        if ($session->status !== 'completed' || empty($session->report_content)) {
+            return redirect()->back()->with('error', "Le compte rendu n'est pas encore disponible.");
+        }
+
+        // Initialize PDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.session_pdf', compact('session'));
+
+        // Define filename
+        $filename = 'Compte_Rendu_Seance_'.\Carbon\Carbon::parse($session->scheduled_at)->format('Ymd').'.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Générer et télécharger un rapport compilé de plusieurs séances (5 crédits)
+     */
+    public function downloadCompiledReports(Request $request)
+    {
+        $request->validate([
+            'session_ids' => 'required|string',
+        ]);
+
+        $ids = explode(',', $request->session_ids);
+
+        $user = auth()->user();
+
+        // Fetch valid completed sessions that belong to the mentee
+        $sessions = $user->mentoringSessionsAsMentee()
+            ->whereIn('mentoring_sessions.id', $ids)
+            ->where('mentoring_sessions.status', 'completed')
+            ->whereNotNull('mentoring_sessions.report_content')
+            ->orderBy('mentoring_sessions.scheduled_at', 'asc')
+            ->get();
+
+        if ($sessions->isEmpty()) {
+            return redirect()->back()->with('error', 'Aucun compte rendu valide sélectionné.');
+        }
+
+        if ($user->credits_balance < 5) {
+            return redirect()->route('jeune.wallet.index')->with('warning', 'Votre solde de crédits est insuffisant (5 crédits requis). Veuillez recharger votre compte pour continuer.');
+        }
+
+        app(\App\Services\WalletService::class)->deductCredits(
+            $user,
+            5,
+            'feature_use',
+            "Génération d'un rapport compilé (".$sessions->count().' séances)'
+        );
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.compiled_sessions_pdf', compact('sessions'));
+
+        return $pdf->download('Rapports_Compiles_'.now()->format('Ymd').'.pdf');
     }
 }

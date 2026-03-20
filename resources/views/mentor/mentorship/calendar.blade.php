@@ -344,8 +344,20 @@
                 </div>
 
                 <!-- Past Sessions List (History) -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="font-bold text-gray-900 mb-4">Historique des séances</h3>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6" x-data="{ selectedSessions: [] }">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-900">Historique des séances</h3>
+                        
+                        <!-- Compiled Report Button -->
+                        <form x-show="selectedSessions.length >= 2" action="{{ route('mentor.mentorship.sessions.download-compiled-reports') }}" method="POST" class="inline" style="display: none;" x-transition>
+                            @csrf
+                            <input type="hidden" name="session_ids" :value="selectedSessions.join(',')">
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1 transition shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Rapport compilé (5 crédits)
+                            </button>
+                        </form>
+                    </div>
                     
                     @if($pastSessions->isEmpty())
                         <p class="text-gray-500 text-sm">Aucun historique disponible.</p>
@@ -353,9 +365,16 @@
                         <div class="space-y-3">
                             @foreach($pastSessions as $session)
                                 <div class="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg transition border border-transparent hover:border-gray-100 opacity-75 hover:opacity-100">
+                                    <!-- Checkbox for completed sessions -->
+                                    @if($session->status === 'completed' && !empty($session->report_content))
+                                        <input type="checkbox" value="{{ $session->id }}" x-model="selectedSessions" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 mt-1 cursor-pointer">
+                                    @else
+                                        <div class="w-4 h-4 ml-1"></div>
+                                    @endif
+
                                     <div class="bg-gray-100 text-gray-600 rounded-lg p-2.5 flex flex-col items-center min-w-[60px]">
-                                        <span class="text-xs font-bold uppercase">{{ $session->scheduled_at->format('M') }}</span>
-                                        <span class="text-xl font-bold">{{ $session->scheduled_at->format('d') }}</span>
+                                        <span class="text-xs font-bold uppercase">{{ \Carbon\Carbon::parse($session->scheduled_at)->format('M') }}</span>
+                                        <span class="text-xl font-bold">{{ \Carbon\Carbon::parse($session->scheduled_at)->format('d') }}</span>
                                     </div>
                                     <div class="flex-1">
                                         <div class="flex justify-between items-start">
@@ -364,27 +383,55 @@
                                                 <span class="px-2 py-0.5 text-[10px] font-bold bg-red-100 text-red-800 rounded-full">ANNULÉE</span>
                                             @elseif($session->status === 'completed')
                                                 <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-800 rounded-full">TERMINÉE</span>
-                                            @elseif($session->scheduled_at < now())
+                                            @elseif(\Carbon\Carbon::parse($session->scheduled_at) < now())
                                                   <!-- Should be completed but if not yet marked -->
                                                 <span class="px-2 py-0.5 text-[10px] font-bold bg-gray-100 text-gray-800 rounded-full">PASSÉE</span>
                                             @else
                                                 <span class="px-2 py-0.5 text-[10px] font-bold bg-gray-100 text-gray-800 rounded-full">{{ strtoupper($session->status) }}</span>
                                             @endif
                                         </div>
-                                        <p class="text-sm text-gray-500">{{ $session->scheduled_at->format('H:i') }} -
-                                            {{ $session->scheduled_at->addMinutes($session->duration_minutes)->format('H:i') }} •
+                                        <p class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($session->scheduled_at)->format('H:i') }} -
+                                            {{ \Carbon\Carbon::parse($session->scheduled_at)->addMinutes($session->duration_minutes)->format('H:i') }} •
                                             Avec {{ $session->mentees->pluck('name')->join(', ') }}
                                         </p>
                                     </div>
-                                    <a href="{{ route('mentor.mentorship.sessions.show', $session) }}"
-                                        class="text-gray-400 hover:text-indigo-600">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                    </a>
+                                    <div class="flex items-center gap-2">
+                                        @if($session->status === 'completed' && !empty($session->report_content))
+                                            <a href="{{ route('mentor.mentorship.sessions.download-report', $session) }}"
+                                                class="text-gray-400 hover:text-indigo-600 transition" title="Télécharger le compte rendu (PDF)">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                            </a>
+                                        @endif
+                                        <a href="{{ route('mentor.mentorship.sessions.show', $session) }}"
+                                            class="text-gray-400 hover:text-indigo-600 transition" title="Voir les détails">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </div>
                             @endforeach
+                        </div>
+                        
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            @if($hasUnlockedHistory)
+                                <div class="mt-4">
+                                    {{ $pastSessions->links() }}
+                                </div>
+                            @else
+                                @if($pastSessions->count() >= 10)
+                                    <div class="text-center">
+                                        <form action="{{ route('mentor.mentorship.sessions.unlock-history') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex justify-center items-center gap-1 w-full p-2 rounded hover:bg-indigo-50 transition">
+                                                <span>Débloquer tout l'historique</span>
+                                                <span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded-full font-bold">5 Crédits</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
+                            @endif
                         </div>
                     @endif
                 </div>

@@ -31,7 +31,7 @@
                                 d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                         </svg>
                         <span class="text-sm text-gray-700 hidden sm:inline">Conversations (<span
-                                x-text="conversations.length"></span>/2)</span>
+                                x-text="conversations.length"></span>)</span>
                     </button>
                     <div x-show="open" @click.outside="open = false" x-cloak
                         class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border py-2 z-10 max-h-96 overflow-y-auto">
@@ -66,12 +66,57 @@
                     </div>
                 </div>
 
-                <button @click="startNewConversation()" class="p-2 hover:bg-gray-100 rounded-lg transition"
+                <!-- Advisor Support Button -->
+                <template x-if="currentConversationId">
+                    <div class="flex items-center gap-2">
+                        <!-- Request Button (Inactive) -->
+                        <template x-if="!needsHumanSupport && !isHumanSupportActive">
+                            <button @click="requestHumanSupport()"
+                                class="hidden md:flex items-center gap-2 px-3 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-[11px] font-bold hover:bg-indigo-100 transition-all duration-300">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <span>Parler à un conseiller d'orientation expert de mon pays</span>
+                                <span class="bg-indigo-600 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold">10C</span>
+                            </button>
+                        </template>
+
+                        <!-- Cancel Button (Pending) -->
+                        <template x-if="needsHumanSupport && !isHumanSupportActive">
+                            <button @click="cancelHumanSupport()"
+                                class="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl text-[11px] font-bold hover:bg-red-100 transition-all duration-300">
+                                <div class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                </div>
+                                <span>Annuler la demande de conseil</span>
+                            </button>
+                        </template>
+
+                        <!-- Active Support Indicator -->
+                        <template x-if="isHumanSupportActive">
+                            <div class="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-[11px] font-bold italic">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                </span>
+                                Conseiller pédagogique en ligne
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <button @click="startNewConversation()" class="p-2 hover:bg-gray-100 rounded-lg transition relative"
                     title="Nouvelle conversation">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
+                    <template x-if="conversations.length >= 1">
+                        <span class="absolute -top-1 -right-1 bg-indigo-100 text-indigo-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-indigo-200">10C</span>
+                    </template>
                 </button>
+
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="p-2 hover:bg-gray-100 rounded-lg transition">
                         <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,13 +126,27 @@
                     </button>
                     <div x-show="open" @click.outside="open = false" x-cloak
                         class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border py-2 z-10">
-                        <button @click="requestHumanSupport(); open = false"
-                            class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <template x-if="!needsHumanSupport && !isHumanSupportActive">
+                            <button @click="requestHumanSupport(); open = false"
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center justify-between gap-2 md:hidden">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    <span>Demander un conseiller</span>
+                                </div>
+                                <span class="bg-indigo-600 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold">10C</span>
+                            </button>
+                        </template>
+                        <button @click="deleteConversation(currentConversationId); open = false"
+                            class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            Demander un humain
+                            Supprimer la conversation
                         </button>
                     </div>
                 </div>
@@ -172,25 +231,63 @@
 
             <!-- Messages -->
             <template x-for="(message, index) in messages" :key="index">
-                <div :class="message.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
-                    <div :class="message.role === 'user' ? 'bg-primary-500 text-white rounded-2xl rounded-br-md' : 'bg-white border rounded-2xl rounded-bl-md'"
-                        class="max-w-[80%] p-4 shadow-sm">
-                        <template x-if="message.role === 'assistant'">
-                            <div class="flex items-start gap-3">
-                                <div
-                                    class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <div class="prose prose-sm" x-html="formatMessage(message.content)"></div>
+                <div class="w-full">
+                    <!-- System Message / Divider -->
+                    <template x-if="message.is_system_message">
+                        <div class="flex items-center gap-4 my-8">
+                            <div class="flex-1 h-px bg-gray-100"></div>
+                            <div class="max-w-[80%] px-4 py-2 bg-slate-50 rounded-lg border border-slate-100 shadow-sm text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center leading-relaxed" x-text="message.content"></div>
+                            <div class="flex-1 h-px bg-gray-100"></div>
+                        </div>
+                    </template>
+
+                    <!-- Standard Message -->
+                    <template x-if="!message.is_system_message">
+                        <div :class="message.role === 'user' ? 'flex justify-end' : 'flex justify-start'" class="mb-4">
+                            <div :class="message.role === 'user' 
+                                    ? 'bg-primary-500 text-white rounded-2xl rounded-br-md shadow-md' 
+                                    : (message.is_from_human 
+                                        ? 'bg-amber-50 border-amber-200 border rounded-2xl rounded-bl-md shadow-sm' 
+                                        : 'bg-white border rounded-2xl rounded-bl-md shadow-sm')"
+                                class="max-w-[85%] sm:max-w-[80%] p-4 transition-all duration-300">
+                                
+                                <template x-if="message.role === 'assistant'">
+                                    <div class="flex items-start gap-3">
+                                        <div :class="message.is_from_human ? 'bg-amber-500' : 'bg-primary-600'"
+                                            class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+                                            <template x-if="!message.is_from_human">
+                                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                            </template>
+                                            <template x-if="message.is_from_human">
+                                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </template>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1.5">
+                                                <span class="text-[10px] font-bold uppercase tracking-wider" 
+                                                    :class="message.is_from_human ? 'text-amber-700' : 'text-primary-700'" 
+                                                    x-text="message.is_from_human ? (message.sender_name || 'Coach Partner') : 'Assistant Brillio'"></span>
+                                                <template x-if="message.is_from_human">
+                                                    <span class="bg-amber-100 text-amber-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-amber-200">CONSEILLER PÉDAGOGIQUE</span>
+                                                </template>
+                                            </div>
+                                            <div class="prose prose-sm prose-slate max-w-none text-gray-800 leading-relaxed" x-html="formatMessage(message.content)"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <template x-if="message.role === 'user'">
+                                    <p class="text-[15px] leading-relaxed" x-text="message.content"></p>
+                                </template>
                             </div>
-                        </template>
-                        <template x-if="message.role === 'user'">
-                            <p x-text="message.content"></p>
-                        </template>
-                    </div>
+                        </div>
+                    </template>
                 </div>
             </template>
 
@@ -250,6 +347,8 @@
                     messages: [],
                     conversations: @json($conversations ?? []),
                     currentConversationId: {{ $currentConversation->id ?? 'null' }},
+                    needsHumanSupport: {{ ($currentConversation && $currentConversation->needs_human_support) ? 'true' : 'false' }},
+                    isHumanSupportActive: {{ ($currentConversation && $currentConversation->human_support_active) ? 'true' : 'false' }},
                     newMessage: '',
                     isTyping: false,
                     showHistory: false,
@@ -257,7 +356,13 @@
                     init() {
                         // Load current conversation messages if exists
                         @if(isset($currentConversation) && $currentConversation->messages)
-                            this.messages = @json($currentConversation->messages->map(fn($m) => ['role' => $m->role, 'content' => $m->content]));
+                            this.messages = {!! json_encode($currentConversation->messages->map(fn($m) => [
+                                'role' => $m->role, 
+                                'content' => $m->content,
+                                'is_from_human' => (bool)$m->is_from_human,
+                                'is_system_message' => (bool)$m->is_system_message,
+                                'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant Brillio'
+                            ])->toArray()) !!};
                         @endif
 
                                                             // Check for prefilled message from URL params
@@ -297,12 +402,41 @@
 
                             const data = await response.json();
 
-                            if (data.success) {
-                                this.messages.push({ role: 'assistant', content: data.message });
+                             if (data.success) {
+                                 if (data.message) {
+                                     this.messages.push({ 
+                                         role: 'assistant', 
+                                         content: data.message,
+                                         is_from_human: data.is_from_human || false,
+                                         sender_name: data.sender_name || 'Assistant Brillio'
+                                     });
+                                 }
                                 if (data.conversation_id) {
+                                    // S'il s'agit d'une nouvelle conversation, l'ajouter à la liste
+                                    if (!this.currentConversationId) {
+                                        this.conversations.unshift({
+                                            id: data.conversation_id,
+                                            title: data.conversation_title || 'Nouvelle conversation',
+                                            updated_at: new Date().toISOString()
+                                        });
+                                    }
                                     this.currentConversationId = data.conversation_id;
                                 }
+                                
+                                // Update support status if provided
+                                if (data.needs_human_support !== undefined) {
+                                    this.needsHumanSupport = data.needs_human_support;
+                                }
+                                if (data.is_human_support_active !== undefined) {
+                                    this.isHumanSupportActive = data.is_human_support_active;
+                                }
                             } else {
+                                if (data.redirect_to_wallet) {
+                                    if (confirm(data.error + "\n\nVoulez-vous être redirigé vers votre portefeuille pour recharger ?")) {
+                                        window.location.href = data.wallet_url;
+                                        return;
+                                    }
+                                }
                                 this.messages.push({ role: 'assistant', content: data.error || 'Desole, une erreur est survenue. Reessaie plus tard.' });
                             }
                         } catch (error) {
@@ -320,11 +454,6 @@
                     },
 
                     async startNewConversation() {
-                        // Vérifier la limite avant de créer
-                        if (this.conversations.length >= 2) {
-                            alert('Tu as atteint la limite de 2 conversations. Supprime une conversation existante pour en créer une nouvelle.');
-                            return;
-                        }
                         this.messages = [];
                         this.currentConversationId = null;
                     },
@@ -336,6 +465,15 @@
                             if (data.success && data.messages) {
                                 this.messages = data.messages;
                                 this.currentConversationId = id;
+                                
+                                // Sync support flags
+                                if (data.needs_human_support !== undefined) {
+                                    this.needsHumanSupport = data.needs_human_support;
+                                }
+                                if (data.is_human_support_active !== undefined) {
+                                    this.isHumanSupportActive = data.is_human_support_active;
+                                }
+                                
                                 this.scrollToBottom();
                             }
                         } catch (error) {
@@ -367,30 +505,60 @@
                                 if (this.currentConversationId === id) {
                                     this.messages = [];
                                     this.currentConversationId = null;
+                                    this.needsHumanSupport = false;
+                                    this.isHumanSupportActive = false;
                                 }
                             }
                         } catch (error) {
                             console.error('Error deleting conversation:', error);
-                            alert('Erreur lors de la suppression de la conversation.');
                         }
                     },
 
                     async requestHumanSupport() {
-                        if (!this.currentConversationId) {
-                            alert('Envoie d\'abord un message pour demarrer une conversation.');
-                            return;
-                        }
+                        if (!this.currentConversationId) return;
+
                         try {
-                            await fetch(`/espace-jeune/chat/${this.currentConversationId}/request-human`, {
+                            const response = await fetch(`/espace-jeune/chat/${this.currentConversationId}/request-human`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                                 }
                             });
-                            alert('Ta demande d\'assistance humaine a ete envoyee. Un conseiller te repondra bientot.');
+
+                             const data = await response.json();
+                             if (data.success) {
+                                 this.needsHumanSupport = true;
+                                 await this.loadConversation(this.currentConversationId);
+                             } else if (data.redirect_to_wallet) {
+                                 window.location.href = data.wallet_url;
+                             } else {
+                                 alert(data.error || 'Une erreur est survenue.');
+                             }
                         } catch (error) {
-                            console.error('Error:', error);
+                            console.error('Error requesting human support:', error);
+                        }
+                    },
+
+                    async cancelHumanSupport() {
+                        if (!this.currentConversationId) return;
+
+                        try {
+                            const response = await fetch(`/espace-jeune/chat/${this.currentConversationId}/cancel-human`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+
+                            const data = await response.json();
+                            if (data.success) {
+                                this.needsHumanSupport = false;
+                                await this.loadConversation(this.currentConversationId);
+                            }
+                        } catch (error) {
+                            console.error('Error cancelling human support:', error);
                         }
                     },
 
