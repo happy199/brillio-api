@@ -149,7 +149,12 @@
                                     @elseif($resource->type === 'video') bg-red-50 text-red-700 border-red-100
                                     @elseif($resource->type === 'tool') bg-amber-50 text-amber-700 border-amber-100
                                     @else bg-gray-50 text-gray-700 border-gray-100 @endif">
-                            {{ ucfirst($resource->type) }}
+                        @if($resource->type === 'article') Article
+                        @elseif($resource->type === 'video') Vidéo
+                        @elseif($resource->type === 'tool') Outil
+                        @elseif($resource->type === 'exercise') Exercice
+                        @elseif($resource->type === 'template') Modèle
+                        @else {{ ucfirst($resource->type) }} @endif
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

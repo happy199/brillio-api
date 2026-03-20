@@ -116,12 +116,14 @@
                     </div>
                 @endif
                 <div class="absolute top-2 right-2">
-                    <span class="px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-md bg-white/80 shadow-sm border border-white/20
-                        @if($resource->type === 'article') text-blue-700
-                        @elseif($resource->type === 'video') text-red-700
-                        @elseif($resource->type === 'tool') text-amber-700
-                        @else text-gray-700 @endif">
-                        {{ ucfirst($resource->type) }}
+                    <span class="bg-gray-900/80 text-white text-[10px] font-bold px-2 py-1 rounded-full backdrop-blur-sm uppercase">
+                        @if($resource->type === 'article') Article
+                        @elseif($resource->type === 'video') Vidéo
+                        @elseif($resource->type === 'pdf') PDF / Document
+                        @elseif($resource->type === 'podcast') Podcast
+                        @elseif($resource->type === 'tool') Outil
+                        @else {{ ucfirst($resource->type) }}
+                        @endif
                     </span>
                 </div>
             </div>
