@@ -29,23 +29,34 @@ class SendSessionReminders extends Command
      */
     public function handle()
     {
-        // Get sessions scheduled for tomorrow (24h from now ± 1 hour window)
-        $tomorrow = Carbon::now()->addDay();
-        $startWindow = $tomorrow->copy()->subHour();
-        $endWindow = $tomorrow->copy()->addHour();
+        $this->sendReminders('24h', now()->addHours(23), now()->addHours(25));
+        $this->sendReminders('1h', now(), now()->addMinutes(90));
+
+        return 0;
+    }
+
+    /**
+     * Send reminders for a specific type and time window
+     */
+    protected function sendReminders(string $type, Carbon $start, Carbon $end)
+    {
+        $sentColumn = "reminder_{$type}_sent";
 
         $sessions = MentoringSession::where('status', 'confirmed')
-            ->whereBetween('scheduled_at', [$startWindow, $endWindow])
+            ->where($sentColumn, false)
+            ->whereBetween('scheduled_at', [$start, $end])
             ->with(['mentor', 'mentees'])
             ->get();
 
-        $emailsSent = 0;
+        if ($sessions->isEmpty()) {
+            return;
+        }
 
+        $emailsSent = 0;
         foreach ($sessions as $session) {
             // Send to mentor
-            $participants = $session->mentees;
             Mail::to($session->mentor->email)->send(
-                new SessionReminder($session, $session->mentor, $participants)
+                new SessionReminder($session, $session->mentor, $session->mentees, $type)
             );
             $emailsSent++;
 
@@ -53,14 +64,15 @@ class SendSessionReminders extends Command
             foreach ($session->mentees as $mentee) {
                 $otherParticipants = $session->mentees->reject(fn ($m) => $m->id === $mentee->id);
                 Mail::to($mentee->email)->send(
-                    new SessionReminder($session, $mentee, $otherParticipants)
+                    new SessionReminder($session, $mentee, $otherParticipants, $type)
                 );
                 $emailsSent++;
             }
+
+            // Mark as sent
+            $session->update([$sentColumn => true]);
         }
 
-        $this->info("✅ {$emailsSent} reminder emails sent for {$sessions->count()} sessions");
-
-        return 0;
+        $this->info("✅ Sent {$emailsSent} ({$type}) reminders for {$sessions->count()} sessions.");
     }
 }

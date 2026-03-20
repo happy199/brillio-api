@@ -4,7 +4,11 @@
 <p style="margin: 0 0 20px;">Bonjour <strong>{{ $recipient->name }}</strong>,</p>
 
 <p style="margin: 0 0 30px; font-size: 18px;">
+    @if($type === '1h')
+    ⏰ Votre session de mentorat commence dans <strong>1 heure</strong> !
+    @else
     ⏰ Votre session de mentorat a lieu <strong>demain</strong> !
+    @endif
 </p>
 
 <div

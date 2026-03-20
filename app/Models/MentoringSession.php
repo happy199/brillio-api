@@ -18,6 +18,8 @@ class MentoringSession extends Model
         'is_paid',
         'price',
         'status', // proposed, pending_payment, confirmed, cancelled, completed
+        'reminder_24h_sent',
+        'reminder_1h_sent',
         'cancel_reason',
         'meeting_link',
         'report_content', // JSON: { progress, obstacles, smart_goals }
@@ -27,6 +29,8 @@ class MentoringSession extends Model
     protected $casts = [
         'scheduled_at' => 'datetime',
         'is_paid' => 'boolean',
+        'reminder_24h_sent' => 'boolean',
+        'reminder_1h_sent' => 'boolean',
         'report_content' => 'array',
     ];
 

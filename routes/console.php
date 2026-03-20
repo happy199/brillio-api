@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Schedule;
 
-// Session reminders: run every day at 8 AM to send 24h reminders
+// Session reminders: run every hour to send 24h and 1h reminders
 Schedule::command('sessions:send-reminders')
-    ->dailyAt('08:00')
+    ->hourly()
     ->timezone('Africa/Abidjan');
 
 // Profil completion reminders: run every Monday at 9 AM

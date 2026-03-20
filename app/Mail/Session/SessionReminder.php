@@ -21,17 +21,21 @@ class SessionReminder extends Mailable
 
     public Collection $participants;
 
+    public string $type; // '24h' or '1h'
+
     /**
      * Create a new message instance.
      */
     public function __construct(
         MentoringSession $session,
         User $recipient,
-        Collection $participants
+        Collection $participants,
+        string $type = '24h'
     ) {
         $this->session = $session;
         $this->recipient = $recipient;
         $this->participants = $participants;
+        $this->type = $type;
     }
 
     /**
@@ -40,9 +44,12 @@ class SessionReminder extends Mailable
     public function envelope(): Envelope
     {
         $time = $this->session->scheduled_at->format('H:i');
+        $subject = $this->type === '1h'
+            ? "⚡ Rappel : Votre session commence dans 1 heure ! ({$time})"
+            : "⏰ Rappel : Session demain à {$time} - Brillio";
 
         return new Envelope(
-            subject: "⏰ Rappel : Session demain à {$time} - Brillio",
+            subject: $subject,
         );
     }
 
@@ -57,6 +64,7 @@ class SessionReminder extends Mailable
                 'session' => $this->session,
                 'recipient' => $this->recipient,
                 'participants' => $this->participants,
+                'type' => $this->type,
             ],
         );
     }
