@@ -849,8 +849,6 @@
                 'etudiant': 'Étudiant', 'recherche_emploi': 'En recherche d\'emploi', 'emploi': 'En emploi', 'entrepreneur': 'Entrepreneur', 'autre': 'Autre'
             },
             async fetchStats() {
-                if (!confirm('Cette analyse coûte 10 crédits. Votre solde sera débité dès l\'ouverture de l\'outil. Continuer ?')) return;
-                
                 this.loading = true;
                 this.isOpen = true;
                 
