@@ -811,6 +811,24 @@ class JeuneDashboardController extends Controller
             ], 404);
         }
 
+        // Vérifier le solde de crédits (10 crédits requis)
+        if ($user->credits_balance < 10) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Solde insuffisant (10 crédits requis pour parler à un conseiller).',
+                'redirect_to_wallet' => true,
+                'wallet_url' => route('jeune.wallet.index'),
+            ], 402);
+        }
+
+        // Déduire les crédits
+        app(\App\Services\WalletService::class)->deductCredits(
+            $user,
+            10,
+            'feature_use',
+            'Demande de conseiller d\'orientation expert'
+        );
+
         // Marquer la conversation comme nécessitant une assistance humaine
         $conversation->update(['needs_human_support' => true]);
 
@@ -822,11 +840,9 @@ class JeuneDashboardController extends Controller
             'is_system_message' => true,
         ]);
 
-        // TODO: Envoyer une notification aux conseillers
-
         return response()->json([
             'success' => true,
-            'message' => 'Demande d\'assistance envoyée',
+            'message' => 'Demande d\'assistance envoyée (10 crédits déduits)',
         ]);
     }
 

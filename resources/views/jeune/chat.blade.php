@@ -78,6 +78,7 @@
                                         d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                                 </svg>
                                 <span>Parler à un conseiller d'orientation expert de mon pays</span>
+                                <span class="bg-indigo-600 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold">10C</span>
                             </button>
                         </template>
 
@@ -127,12 +128,16 @@
                         class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border py-2 z-10">
                         <template x-if="!needsHumanSupport && !isHumanSupportActive">
                             <button @click="requestHumanSupport(); open = false"
-                                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 md:hidden">
-                                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                Demander un conseiller
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center justify-between gap-2 md:hidden">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    <span>Demander un conseiller</span>
+                                </div>
+                                <span class="bg-indigo-600 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold">10C</span>
                             </button>
                         </template>
                         <button @click="deleteConversation(currentConversationId); open = false"
@@ -521,11 +526,15 @@
                                 }
                             });
 
-                            const data = await response.json();
-                            if (data.success) {
-                                this.needsHumanSupport = true;
-                                await this.loadConversation(this.currentConversationId);
-                            }
+                             const data = await response.json();
+                             if (data.success) {
+                                 this.needsHumanSupport = true;
+                                 await this.loadConversation(this.currentConversationId);
+                             } else if (data.redirect_to_wallet) {
+                                 window.location.href = data.wallet_url;
+                             } else {
+                                 alert(data.error || 'Une erreur est survenue.');
+                             }
                         } catch (error) {
                             console.error('Error requesting human support:', error);
                         }
