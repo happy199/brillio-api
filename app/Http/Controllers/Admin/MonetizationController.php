@@ -33,11 +33,11 @@ class MonetizationController extends Controller
         $creditPriceMentor = $settings['credit_price_mentor']->value ?? 100;
         $creditPriceOrganization = $settings['credit_price_organization']->value ?? 150;
         $targetingCost = $settings['feature_cost_advanced_targeting']->value ?? 10;
-        $analysisToolCost = $settings['feature_cost_analysis_tool']->value ?? 10;
-        $contactAdvisorCost = $settings['feature_cost_contact_advisor']->value ?? 50;
-        $newChatCost = $settings['feature_cost_new_chat']->value ?? 20;
-        $unlockHistoryCost = $settings['feature_cost_unlock_history']->value ?? 100;
-        $compiledReportCost = $settings['feature_cost_compiled_report']->value ?? 150;
+        $analysisToolCost = $settings['feature_cost_analysis_tool']->value ?? 5;
+        $contactAdvisorCost = $settings['feature_cost_contact_advisor']->value ?? 10;
+        $newChatCost = $settings['feature_cost_new_chat']->value ?? 10;
+        $unlockHistoryCost = $settings['feature_cost_unlock_history']->value ?? 5;
+        $compiledReportCost = $settings['feature_cost_compiled_report']->value ?? 5;
         $payoutFeePercentage = $settings['payout_fee_percentage']->value ?? 5;
         $commissionPercent = $settings['mentorship_commission_percent']->value ?? 10;
 
