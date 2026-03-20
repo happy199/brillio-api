@@ -96,7 +96,7 @@ class ResourceController extends Controller
     public function getDemandStats()
     {
         $user = auth()->user();
-        $cost = $this->walletService->getFeatureCost('analysis_tool', 10);
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('unlock_history', 5);
 
         // Si déjà débloqué pour cette session de création, on ne prélève pas
         if (session('resource_stats_unlocked')) {
