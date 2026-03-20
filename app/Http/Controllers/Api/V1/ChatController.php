@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Chat\SendMessageRequest;
 use App\Models\ChatConversation;
 use App\Services\DeepSeekService;
+use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,8 @@ use Illuminate\Http\Request;
 class ChatController extends Controller
 {
     public function __construct(
-        private DeepSeekService $deepSeekService
+        private DeepSeekService $deepSeekService,
+        private WalletService $walletService
     ) {}
 
     /**
@@ -63,7 +65,21 @@ class ChatController extends Controller
         $user = $request->user();
         $title = $request->input('title');
 
-        $conversation = $this->deepSeekService->createConversation($user, $title);
+        $cost = $this->walletService->getFeatureCost('new_chat', 10);
+        if ($user->credits_balance < $cost) {
+            return $this->error("Solde insuffisant pour créer une nouvelle conversation ($cost crédits requis).", 402);
+        }
+
+        $conversation = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $title, $cost) {
+            $this->walletService->deductCredits(
+                $user,
+                $cost,
+                'feature_use',
+                'Création d\'une nouvelle conversation IA'
+            );
+
+            return $this->deepSeekService->createConversation($user, $title);
+        });
 
         return $this->created([
             'conversation' => [
@@ -149,7 +165,21 @@ class ChatController extends Controller
             }
         } else {
             // Créer une nouvelle conversation
-            $conversation = $this->deepSeekService->createConversation($user);
+            $cost = $this->walletService->getFeatureCost('new_chat', 10);
+            if ($user->credits_balance < $cost) {
+                return $this->error("Solde insuffisant pour créer une nouvelle conversation ($cost crédits requis).", 402);
+            }
+
+            $conversation = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $cost) {
+                $this->walletService->deductCredits(
+                    $user,
+                    $cost,
+                    'feature_use',
+                    'Création d\'une nouvelle conversation IA (via message)'
+                );
+
+                return $this->deepSeekService->createConversation($user);
+            });
         }
 
         // Si le support humain est actif, on enregistre juste le message utilisateur sans appeler l'IA
@@ -239,8 +269,22 @@ class ChatController extends Controller
             ], 'Un conseiller est déjà en train de vous aider.');
         }
 
+        $cost = $this->walletService->getFeatureCost('contact_advisor', 10);
+        if ($user->credits_balance < $cost) {
+            return $this->error("Solde insuffisant pour contacter un conseiller ($cost crédits requis).", 402);
+        }
+
         // Demander le support humain
-        $conversation->requestHumanSupport();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $conversation, $cost) {
+            $this->walletService->deductCredits(
+                $user,
+                $cost,
+                'feature_use',
+                'Demande de support humain (Conseiller)'
+            );
+
+            $conversation->requestHumanSupport();
+        });
 
         // Ajouter un message système pour informer l'utilisateur
         $systemMessage = $conversation->messages()->create([

@@ -237,7 +237,7 @@
 
     <!-- Pagination -->
     <div class="mt-8">
-        {{ $mentors->links('pagination.modern-pagination') }}
+        {{ $mentors->links() }}
     </div>
     @else
     <!-- Empty State -->

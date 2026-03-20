@@ -213,7 +213,67 @@
                                 class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                 %</div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Pourcentage prélevé sur le solde lors d'un retrait.</p>
+                        <p class="text-xs text-gray-500 mt-1">Pourcentage prélevée sur le solde lors d'un retrait.</p>
+                    </div>
+
+                    <div class="pt-4 mt-6 border-t border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-900 mb-4 tracking-tight uppercase">Coûts des
+                            Fonctionnalités</h3>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Outils d'Analyse (Crédits)</label>
+                                <div class="relative">
+                                    <input type="number" name="feature_cost_analysis_tool" value="{{ $analysisToolCost }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Utilisé par les mentors pour analyser la demande.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Conseiller (Crédits)</label>
+                                <div class="relative">
+                                    <input type="number" name="feature_cost_contact_advisor" value="{{ $contactAdvisorCost }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nouveau Chat AI (Crédits)</label>
+                                <div class="relative">
+                                    <input type="number" name="feature_cost_new_chat" value="{{ $newChatCost }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Déblocage Historique (Crédits)</label>
+                                <div class="relative">
+                                    <input type="number" name="feature_cost_unlock_history" value="{{ $unlockHistoryCost }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Commun mentor et jeune pour l'historique complet.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Rapport Compilé (Crédits)</label>
+                                <div class="relative">
+                                    <input type="number" name="feature_cost_compiled_report" value="{{ $compiledReportCost }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Générer un rapport global mentor/jeune.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <button type="submit"

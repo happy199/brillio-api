@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             CreditPackSeeder::class,
             PersonalityCompatibilitySeeder::class,
             OrganizationSubscriptionSeeder::class,
+            SystemSettingSeeder::class,
         ]);
     }
 }
