@@ -39,9 +39,9 @@ class ResourceController extends Controller
     public function marketplace(Request $request)
     {
         $query = Resource::query()
-            ->where('user_id', '!=', auth()->id())
-            ->where('is_published', true)
-            ->where('is_validated', true);
+            ->where(fn ($q) => $q->where('user_id', '!=', auth()->id()))
+            ->where(fn ($q) => $q->where('is_published', true))
+            ->where(fn ($q) => $q->where('is_validated', true));
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -51,9 +51,30 @@ class ResourceController extends Controller
             });
         }
 
-        $resources = $query->with('user')->latest()->paginate(12);
+        if ($request->filled('type')) {
+            $query->where(fn ($q) => $q->where('type', $request->type));
+        }
 
-        return view('mentor.resources.marketplace', compact('resources'));
+        if ($request->filled('author')) {
+            if ($request->author === 'brillio') {
+                $query->where(fn ($q) => $q->where('user_id', 1));
+            } elseif ($request->author === 'mentors') {
+                $query->where(fn ($q) => $q->where('user_id', '!=', 1));
+            }
+        }
+
+        if ($request->filled('price')) {
+            if ($request->price === 'free') {
+                $query->where(fn ($q) => $q->where('price', 0));
+            } elseif ($request->price === 'paid') {
+                $query->where(fn ($q) => $q->where('price', '>', 0));
+            }
+        }
+
+        $resources = $query->with('user')->latest()->paginate(12);
+        $totalCount = $query->count();
+
+        return view('mentor.resources.marketplace', compact('resources', 'totalCount'));
     }
 
     /**
@@ -137,10 +158,11 @@ class ResourceController extends Controller
             }
         }
 
-        // Personality Types (MBTI)
+        // Personality Types (MBTI) - Alignement sur onboarding_completed
         $mbtiStats = \App\Models\PersonalityTest::query()
             ->join('users', 'personality_tests.user_id', '=', 'users.id')
             ->where('users.user_type', 'jeune')
+            ->where('users.onboarding_completed', true)
             ->where('personality_tests.is_current', true)
             ->select('personality_tests.personality_type', DB::raw('count(*) as total'))
             ->groupBy('personality_tests.personality_type')

@@ -27,29 +27,64 @@
     </div>
 
     <!-- Header & Search -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Boutique de Ressources</h1>
-            <p class="text-gray-600">Explorez les contenus partagés par la communauté pour vous inspirer</p>
+    <div class="space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Boutique de Ressources</h1>
+                <p class="text-gray-600">Explorez les contenus partagés par la communauté pour vous inspirer</p>
+            </div>
+            
+            <div class="text-right">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                    {{ $totalCount }} {{ Str::plural('ressource', $totalCount) }} {{ Str::plural('disponible', $totalCount) }}
+                </span>
+            </div>
         </div>
-        
-        <form action="{{ route('mentor.resources.marketplace') }}" method="GET" class="w-full md:w-96">
-            <div class="relative">
-                <input type="text" name="search" value="{{ request('search') }}" 
-                    placeholder="Rechercher par titre ou tag..."
-                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                @if(request('search'))
-                    <a href="{{ route('mentor.resources.marketplace') }}" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+
+        <form action="{{ route('mentor.resources.marketplace') }}" method="GET" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Search -->
+                <div class="relative md:col-span-1">
+                    <input type="text" name="search" value="{{ request('search') }}" 
+                        placeholder="Titre ou tag..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm text-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                    </a>
-                @endif
+                    </div>
+                    @if(request('search') || request('type') || request('author') || request('price'))
+                        <a href="{{ route('mentor.resources.marketplace') }}" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
+
+                <!-- Type -->
+                <select name="type" onchange="this.form.submit()" class="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg shadow-sm">
+                    <option value="">Tous les types</option>
+                    <option value="article" {{ request('type') == 'article' ? 'selected' : '' }}>Articles</option>
+                    <option value="video" {{ request('type') == 'video' ? 'selected' : '' }}>Vidéos</option>
+                    <option value="pdf" {{ request('type') == 'pdf' ? 'selected' : '' }}>PDF / Documents</option>
+                    <option value="podcast" {{ request('type') == 'podcast' ? 'selected' : '' }}>Podcasts</option>
+                    <option value="tool" {{ request('type') == 'tool' ? 'selected' : '' }}>Outils</option>
+                </select>
+
+                <!-- Author -->
+                <select name="author" onchange="this.form.submit()" class="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg shadow-sm">
+                    <option value="">Tous les auteurs</option>
+                    <option value="brillio" {{ request('author') == 'brillio' ? 'selected' : '' }}>Brillio Team</option>
+                    <option value="mentors" {{ request('author') == 'mentors' ? 'selected' : '' }}>Mes Confrères</option>
+                </select>
+
+                <!-- Price -->
+                <select name="price" onchange="this.form.submit()" class="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg shadow-sm">
+                    <option value="">Tous les tarifs</option>
+                    <option value="free" {{ request('price') == 'free' ? 'selected' : '' }}>Gratuit</option>
+                    <option value="paid" {{ request('price') == 'paid' ? 'selected' : '' }}>Payant</option>
+                </select>
             </div>
         </form>
     </div>
