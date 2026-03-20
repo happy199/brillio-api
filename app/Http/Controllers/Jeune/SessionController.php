@@ -283,13 +283,15 @@ class SessionController extends Controller
             return redirect()->back()->with('info', "Vous avez déjà débloqué l'historique complet.");
         }
 
-        if ($user->credits_balance < 5) {
-            return redirect()->route('jeune.wallet.index')->with('warning', 'Votre solde de crédits est insuffisant (5 crédits requis). Veuillez recharger votre compte pour continuer.');
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('unlock_history', 100);
+
+        if ($user->credits_balance < $cost) {
+            return redirect()->route('jeune.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Veuillez recharger votre compte pour continuer.");
         }
 
         app(\App\Services\WalletService::class)->deductCredits(
             $user,
-            5,
+            $cost,
             'feature_unlock',
             "Déblocage de l'historique complet des séances"
         );
@@ -349,13 +351,15 @@ class SessionController extends Controller
             return redirect()->back()->with('error', 'Aucun compte rendu valide sélectionné.');
         }
 
-        if ($user->credits_balance < 5) {
-            return redirect()->route('jeune.wallet.index')->with('warning', 'Votre solde de crédits est insuffisant (5 crédits requis). Veuillez recharger votre compte pour continuer.');
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('compiled_report', 150);
+
+        if ($user->credits_balance < $cost) {
+            return redirect()->route('jeune.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Veuillez recharger votre compte pour continuer.");
         }
 
         app(\App\Services\WalletService::class)->deductCredits(
             $user,
-            5,
+            $cost,
             'feature_use',
             "Génération d'un rapport compilé (".$sessions->count().' séances)'
         );

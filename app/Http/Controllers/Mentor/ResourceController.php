@@ -96,7 +96,7 @@ class ResourceController extends Controller
     public function getDemandStats()
     {
         $user = auth()->user();
-        $cost = 5;
+        $cost = $this->walletService->getFeatureCost('analysis_tool', 10);
 
         // Si déjà débloqué pour cette session de création, on ne prélève pas
         if (session('resource_stats_unlocked')) {
@@ -263,8 +263,7 @@ class ResourceController extends Controller
         }
 
         // Calcul du coût
-        $creditPrice = $this->walletService->getCreditPrice('mentor');
-        $unlockCost = (int) ceil($resource->price / $creditPrice);
+        $unlockCost = $this->walletService->getFeatureCost('resource_purchase', $resource->price);
 
         if ($user->credits_balance < $unlockCost) {
             return redirect()->route('mentor.wallet.index')->withErrors(['credits' => "Solde insuffisant ($unlockCost crédits nécessaires)."]);
