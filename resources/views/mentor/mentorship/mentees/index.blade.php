@@ -4,10 +4,33 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8" x-data="{ activeTab: 'active' }">
-    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Gestion de mes mentorats</h1>
             <p class="text-gray-500 mt-1">Gérez vos demandes et suivez vos mentés.</p>
+        </div>
+
+        @php
+            $acceptsRequests = auth()->user()->mentorProfile?->accepts_mentorship_requests ?? true;
+        @endphp
+        <div class="bg-white border {{ $acceptsRequests ? 'border-green-100 bg-green-50/30' : 'border-gray-200 bg-gray-50/30' }} rounded-xl p-3 px-4 flex items-center justify-between gap-6 shadow-sm min-w-[280px]">
+            <div class="flex flex-col">
+                <span class="text-xs font-bold uppercase tracking-wider {{ $acceptsRequests ? 'text-green-600' : 'text-gray-500' }}">Statut des demandes</span>
+                <span class="text-sm font-medium {{ $acceptsRequests ? 'text-green-700' : 'text-gray-600' }}">
+                    {{ $acceptsRequests ? 'Ouvertes aux jeunes' : 'Fermées (Cercle privé)' }}
+                </span>
+            </div>
+            
+            <form action="{{ route('mentor.mentorship.toggle-availability') }}" method="POST">
+                @csrf
+                <button type="submit" 
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $acceptsRequests ? 'bg-green-500' : 'bg-gray-300' }}">
+                    <span class="sr-only">Modifier la disponibilité</span>
+                    <span aria-hidden="true" 
+                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $acceptsRequests ? 'translate-x-5' : 'translate-x-0' }}">
+                    </span>
+                </button>
+            </form>
         </div>
     </div>
 

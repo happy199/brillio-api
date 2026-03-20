@@ -307,8 +307,13 @@
                             </svg>
                             Accès Restreint
                         </span>
-                        <p class="text-xs text-orange-600 mt-2">Ce mentor n'est actuellement pas en mesure de recevoir
-                            des demandes de mentorat (Cercle Privé).</p>
+                        <p class="text-xs text-orange-600 mt-2">
+                            @if($isClosedByMentor)
+                            Désolé, ce mentor n'accepte plus de nouvelles demandes de mentorat pour le moment.
+                            @else
+                            Ce mentor n'est actuellement pas en mesure de recevoir des demandes de mentorat (Cercle Privé).
+                            @endif
+                        </p>
                     </div>
                     @endif
                     @endif

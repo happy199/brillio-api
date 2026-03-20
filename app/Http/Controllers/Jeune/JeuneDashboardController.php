@@ -533,8 +533,10 @@ class JeuneDashboardController extends Controller
             ->pluck('organizations.id')
             ->toArray();
 
-        $canRequestMentorship = true;
-        if (! empty($mentorPrivateOrgIds)) {
+        $canRequestMentorship = $mentor->accepts_mentorship_requests ?? true;
+        $isClosedByMentor = ! ($mentor->accepts_mentorship_requests ?? true);
+
+        if ($canRequestMentorship && ! empty($mentorPrivateOrgIds)) {
             // The mentor is private. The user must be in at least one of these organizations.
             $userOrgIds = $user->organizations()->pluck('organizations.id')->toArray();
             $canRequestMentorship = ! empty(array_intersect($mentorPrivateOrgIds, $userOrgIds));
@@ -545,6 +547,7 @@ class JeuneDashboardController extends Controller
             'similarMentors' => $similarMentors,
             'existingMentorship' => $existingMentorship,
             'canRequestMentorship' => $canRequestMentorship,
+            'isClosedByMentor' => $isClosedByMentor,
         ]);
     }
 

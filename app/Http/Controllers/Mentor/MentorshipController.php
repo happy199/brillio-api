@@ -115,4 +115,25 @@ class MentorshipController extends Controller
 
         return redirect()->back()->with('success', 'Mentorat terminé.');
     }
+
+    /**
+     * Basculer la disponibilité pour de nouvelles demandes
+     */
+    public function toggleAvailability()
+    {
+        $mentor = Auth::user();
+        $profile = $mentor->mentorProfile;
+
+        if (! $profile) {
+            return redirect()->back()->with('error', 'Profil mentor non trouvé.');
+        }
+
+        $profile->update([
+            'accepts_mentorship_requests' => ! $profile->accepts_mentorship_requests,
+        ]);
+
+        $status = $profile->accepts_mentorship_requests ? 'ouvertes' : 'fermées';
+
+        return redirect()->back()->with('success', "Les demandes de mentorat sont désormais {$status}.");
+    }
 }

@@ -90,7 +90,15 @@ class MentorshipController extends Controller
         $mentorId = $validated['mentor_id'];
 
         // Vérifier si le mentor existe et est bien un mentor
-        $mentor = User::where('id', $mentorId)->where('user_type', User::TYPE_MENTOR)->firstOrFail();
+        $mentor = User::where('id', $mentorId)
+            ->where('user_type', User::TYPE_MENTOR)
+            ->with('mentorProfile')
+            ->firstOrFail();
+
+        // Vérifier la disponibilité du mentor
+        if (! ($mentor->mentorProfile?->accepts_mentorship_requests ?? true)) {
+            return back()->with('error', 'Désolé, ce mentor n\'accepte plus de nouvelles demandes de mentorat pour le moment.');
+        }
 
         // Vérifier si une demande existe déjà
         $existing = Mentorship::where('mentee_id', $user->id)
