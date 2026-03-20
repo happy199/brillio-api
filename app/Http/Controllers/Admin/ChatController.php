@@ -129,6 +129,14 @@ class ChatController extends Controller
             'human_support_started_at' => now(),
         ]);
 
+        // Créer un message système pour informer l'utilisateur
+        $conversation->messages()->create([
+            'role' => 'assistant',
+            'content' => 'Le conseiller '.auth()->user()->name.' a intégré la conversation.',
+            'is_from_human' => false,
+            'is_system_message' => true,
+        ]);
+
         return back()->with('success', 'Vous avez pris en charge cette conversation. Les messages de l\'utilisateur vous seront maintenant adressés.');
     }
 
@@ -181,7 +189,7 @@ class ChatController extends Controller
         // Envoyer un message système pour informer l'utilisateur
         $conversation->messages()->create([
             'role' => 'assistant',
-            'content' => "La session avec le conseiller est terminée. N'hésitez pas à continuer à poser vos questions, je suis là pour vous aider ! Si vous avez besoin de parler à nouveau à un conseiller humain, utilisez le bouton \"Parler à un conseiller\".",
+            'content' => "La session de chat a été clôturée par le conseiller, vous pouvez continuer à échanger avec l'assistant IA.",
             'is_from_human' => false,
             'is_system_message' => true,
         ]);

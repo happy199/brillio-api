@@ -198,6 +198,10 @@ class WalletController extends Controller
 
         $user = Auth::user();
 
+        if (! $user instanceof \App\Models\User) {
+            return back()->withErrors(['code' => 'Session expirée ou utilisateur invalide.']);
+        }
+
         // Check if coupon exists and is valid for this user
         if (! $coupon || ! $coupon->isValid($user)) {
             if ($coupon && $coupon->hasBeenUsedBy($user)) {

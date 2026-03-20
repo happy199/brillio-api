@@ -199,6 +199,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::get('/chat/{conversation}', [JeuneDashboardController::class, 'getConversation'])->name('chat.get');
     Route::delete('/chat/{conversation}', [JeuneDashboardController::class, 'deleteConversation'])->name('chat.delete');
     Route::post('/chat/{conversation}/request-human', [JeuneDashboardController::class, 'requestHumanSupport'])->name('chat.request-human');
+    Route::post('/chat/{conversation}/cancel-human', [JeuneDashboardController::class, 'cancelHumanSupport'])->name('chat.cancel-human');
     Route::get('/documents', [JeuneDashboardController::class, 'documents'])->name('documents');
     Route::post('/documents', [JeuneDashboardController::class, 'storeDocument'])->name('documents.store');
     Route::get('/documents/{document}/download', [JeuneDashboardController::class, 'downloadDocument'])->name('documents.download');

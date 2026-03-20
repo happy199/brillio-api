@@ -676,6 +676,27 @@ class JeuneDashboardController extends Controller
         }
 
         try {
+            // Si le support humain est actif, on n'envoie pas à l'IA
+            if ($conversation->human_support_active) {
+                // On enregistre juste le message de l'utilisateur
+                $conversation->messages()->create([
+                    'role' => \App\Models\ChatMessage::ROLE_USER,
+                    'content' => $validated['message'],
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'conversation_id' => $conversation->id,
+                    'conversation_title' => $conversation->title,
+                    'message' => null, // Pas de réponse de l'IA
+                    'is_from_human' => false,
+                    'sender_name' => 'Assistant Brillio',
+                    'needs_human_support' => (bool) $conversation->needs_human_support,
+                    'is_human_support_active' => (bool) $conversation->human_support_active,
+                    'api_used' => false,
+                ]);
+            }
+
             // Envoyer le message et obtenir la reponse
             Log::info('Appel DeepSeekService->sendMessage');
             $assistantMessage = $deepSeekService->sendMessage($conversation, $validated['message']);
@@ -699,6 +720,8 @@ class JeuneDashboardController extends Controller
                 'message' => $assistantMessage->content,
                 'is_from_human' => false,
                 'sender_name' => 'Assistant Brillio',
+                'needs_human_support' => (bool) $conversation->needs_human_support,
+                'is_human_support_active' => (bool) $conversation->human_support_active,
                 'api_used' => $deepSeekService->isApiKeyConfigured(),
             ]);
         } catch (\Exception $e) {
@@ -737,13 +760,16 @@ class JeuneDashboardController extends Controller
             ->map(fn ($m) => [
                 'role' => $m->role,
                 'content' => $m->content,
-                'is_from_human' => $m->is_from_human,
+                'is_from_human' => (bool) $m->is_from_human,
+                'is_system_message' => (bool) $m->is_system_message,
                 'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant Brillio',
             ]);
 
         return response()->json([
             'success' => true,
             'messages' => $messages,
+            'needs_human_support' => (bool) $conversation->needs_human_support,
+            'is_human_support_active' => (bool) $conversation->human_support_active,
         ]);
     }
 
@@ -788,11 +814,51 @@ class JeuneDashboardController extends Controller
         // Marquer la conversation comme nécessitant une assistance humaine
         $conversation->update(['needs_human_support' => true]);
 
+        // Créer un message système pour informer l'utilisateur
+        $conversation->messages()->create([
+            'role' => 'assistant',
+            'content' => 'Votre demande de discussion avec un conseiller a été envoyée, un conseiller prendra la conversation en charge dans les meilleurs délais.',
+            'is_from_human' => false,
+            'is_system_message' => true,
+        ]);
+
         // TODO: Envoyer une notification aux conseillers
 
         return response()->json([
             'success' => true,
             'message' => 'Demande d\'assistance envoyée',
+        ]);
+    }
+
+    /**
+     * Annuler une demande d'assistance humaine
+     */
+    public function cancelHumanSupport(ChatConversation $conversation)
+    {
+        $user = auth()->user();
+
+        // Vérifier que la conversation appartient à l'utilisateur
+        if ($conversation->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Conversation non trouvée',
+            ], 404);
+        }
+
+        // Annuler la demande
+        $conversation->update(['needs_human_support' => false]);
+
+        // Créer un message système pour informer l'utilisateur
+        $conversation->messages()->create([
+            'role' => 'assistant',
+            'content' => 'Fin de la demande de discussion avec conseiller d\'orientation, vous pouvez continuer à discuter avec l\'assistant IA.',
+            'is_from_human' => false,
+            'is_system_message' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Demande d\'assistance annulée',
         ]);
     }
 }
