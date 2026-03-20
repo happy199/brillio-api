@@ -105,9 +105,9 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @forelse($resources as $resource)
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-            <div class="relative aspect-video bg-gray-100">
+            <a href="{{ route('mentor.resources.show', $resource) }}" class="block relative aspect-video bg-gray-100 group overflow-hidden">
                 @if($resource->preview_image_path)
-                    <img src="{{ Storage::url($resource->preview_image_path) }}" alt="" class="w-full h-full object-cover">
+                    <img src="{{ Storage::url($resource->preview_image_path) }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                 @else
                     <div class="w-full h-full flex items-center justify-center text-gray-300">
                         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,7 @@
                         @endif
                     </span>
                 </div>
-            </div>
+            </a>
             
             <div class="p-4 space-y-3">
                 <div class="flex items-center gap-2 mb-1">
@@ -134,8 +134,10 @@
                     <span class="text-xs text-gray-500 font-medium truncate">Par {{ $resource->user->name }}</span>
                 </div>
                 
-                <h3 class="font-bold text-gray-900 leading-tight line-clamp-2 min-h-[3rem]" title="{{ $resource->title }}">
-                    {{ $resource->title }}
+                <h3 class="font-bold text-gray-900 leading-tight" title="{{ $resource->title }}">
+                    <a href="{{ route('mentor.resources.show', $resource) }}" class="hover:text-indigo-600 transition">
+                        {{ $resource->title }}
+                    </a>
                 </h3>
                 
                 <p class="text-xs text-gray-500 line-clamp-2">
@@ -159,7 +161,7 @@
                         @endif
                     </div>
                     
-                    <a href="{{ route('mentor.resources.show', $resource) }}" 
+                    <a href="{{ route('mentor.resources.show', $resource) }}"
                         class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
                         Consulter
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
