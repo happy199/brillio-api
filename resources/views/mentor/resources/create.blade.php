@@ -284,7 +284,7 @@
 
                                         <div x-show="!loading && stats" class="space-y-8 animate-fadeIn">
                                             <!-- Summary Cards -->
-                                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                                                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
                                                     <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Total Jeunes</p>
                                                     <p class="text-2xl font-black text-gray-900" x-text="stats.total"></p>
@@ -295,7 +295,11 @@
                                                 </div>
                                                 <div class="bg-green-50 p-4 rounded-xl border border-green-100">
                                                     <p class="text-[10px] text-green-600 uppercase font-bold tracking-wider mb-1">Bac & +</p>
-                                                    <p class="text-2xl font-black text-green-900" x-text="(stats.education.bac || 0) + (stats.education.licence || 0) + (stats.education.master || 0)"></p>
+                                                    <p class="text-2xl font-black text-green-900" x-text="(stats.education.bac || 0) + (stats.education.licence || 0) + (stats.education.master || 0) + (stats.education.doctorat || 0)"></p>
+                                                </div>
+                                                <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                                    <p class="text-[10px] text-purple-600 uppercase font-bold tracking-wider mb-1">En emploi</p>
+                                                    <p class="text-2xl font-black text-purple-900" x-text="(stats.situation.emploi || 0) + (stats.situation.entrepreneur || 0)"></p>
                                                 </div>
                                                 <div class="bg-red-50 p-4 rounded-xl border border-red-100">
                                                     <p class="text-[10px] text-red-600 uppercase font-bold tracking-wider mb-1">En recherche</p>
