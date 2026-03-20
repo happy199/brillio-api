@@ -34,12 +34,15 @@ trait GeneratesCalendarLinks
         $summary = 'Session de mentorat : '.$session->title;
         $description = str_replace(["\r", "\n"], '\\n', $session->description."\n\nLien : ".$session->meeting_link);
         $location = $session->meeting_link;
+        $organizer = $session->mentor->email;
+        $organizerName = $session->mentor->name;
 
         return <<<EOT
 BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Brillio//Mentoring//FR
 CALSCALE:GREGORIAN
+METHOD:REQUEST
 BEGIN:VEVENT
 DTSTAMP:{$stamp}
 DTSTART:{$startAt}
@@ -49,6 +52,8 @@ SUMMARY:{$summary}
 DESCRIPTION:{$description}
 LOCATION:{$location}
 STATUS:CONFIRMED
+ORGANIZER;CN="{$organizerName}":mailto:{$organizer}
+SEQUENCE:0
 END:VEVENT
 END:VCALENDAR
 EOT;

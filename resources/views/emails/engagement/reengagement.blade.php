@@ -16,7 +16,7 @@
         .feature-title { font-weight: bold; margin-bottom: 8px; color: #111827; }
         .feature-desc { font-size: 14px; color: #6b7280; }
         .cta-container { text-align: center; }
-        .btn { display: inline-block; background: #7c3aed; color: white; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; transition: background 0.2s; }
+        .btn { display: inline-block; background: #7c3aed; color: #ffffff !important; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; transition: background 0.2s; }
         .footer { text-align: center; margin-top: 40px; color: #9ca3af; font-size: 14px; }
     </style>
 </head>

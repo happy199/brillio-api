@@ -4,7 +4,9 @@ namespace App\Mail\Session;
 
 use App\Models\MentoringSession;
 use App\Models\User;
+use App\Traits\GeneratesCalendarLinks;
 use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -12,7 +14,7 @@ use Illuminate\Queue\SerializesModels;
 
 class SessionProposed extends Mailable
 {
-    use Queueable, SerializesModels;
+    use GeneratesCalendarLinks, Queueable, SerializesModels;
 
     public MentoringSession $session;
 
@@ -80,6 +82,9 @@ class SessionProposed extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [
+            Attachment::fromData(fn () => $this->generateIcsContent($this->session), 'invitation.ics')
+                ->withMime('text/calendar'),
+        ];
     }
 }

@@ -72,6 +72,10 @@ class MentorshipNotificationService
      */
     public function sendSessionProposed(MentoringSession $session)
     {
+        if ($session->status === 'confirmed') {
+            return $this->sendSessionConfirmed($session);
+        }
+
         $mentor = $session->mentor;
         // Pour une proposition, on assume un seul jeune (V1) ou on envoie à tous les participants
         foreach ($session->mentees as $mentee) {
