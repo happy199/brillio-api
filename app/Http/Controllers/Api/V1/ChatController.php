@@ -65,7 +65,7 @@ class ChatController extends Controller
         $user = $request->user();
         $title = $request->input('title');
 
-        $cost = $this->walletService->getFeatureCost('new_chat', 20);
+        $cost = $this->walletService->getFeatureCost('new_chat', 10);
         if ($user->credits_balance < $cost) {
             return $this->error("Solde insuffisant pour créer une nouvelle conversation ($cost crédits requis).", 402);
         }
@@ -165,7 +165,7 @@ class ChatController extends Controller
             }
         } else {
             // Créer une nouvelle conversation
-            $cost = $this->walletService->getFeatureCost('new_chat', 20);
+            $cost = $this->walletService->getFeatureCost('new_chat', 10);
             if ($user->credits_balance < $cost) {
                 return $this->error("Solde insuffisant pour créer une nouvelle conversation ($cost crédits requis).", 402);
             }
@@ -269,7 +269,7 @@ class ChatController extends Controller
             ], 'Un conseiller est déjà en train de vous aider.');
         }
 
-        $cost = $this->walletService->getFeatureCost('contact_advisor', 50);
+        $cost = $this->walletService->getFeatureCost('contact_advisor', 10);
         if ($user->credits_balance < $cost) {
             return $this->error("Solde insuffisant pour contacter un conseiller ($cost crédits requis).", 402);
         }

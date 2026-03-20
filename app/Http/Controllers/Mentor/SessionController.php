@@ -405,7 +405,7 @@ class SessionController extends Controller
             return redirect()->back()->with('info', 'Historique déjà débloqué.');
         }
 
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('unlock_history', 100);
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('unlock_history', 5);
 
         if ($mentor->credits_balance < $cost) {
             return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Veuillez recharger votre compte pour continuer.");
@@ -451,7 +451,7 @@ class SessionController extends Controller
 
         $mentor = Auth::user();
 
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('compiled_report', 150);
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('compiled_report', 5);
 
         if ($mentor->credits_balance < $cost) {
             return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Veuillez recharger votre compte pour continuer.");
