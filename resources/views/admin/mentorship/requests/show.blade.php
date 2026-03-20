@@ -64,7 +64,7 @@
             <div class="p-6 bg-gray-50 border-t border-gray-200">
                 <h3 class="font-bold text-gray-900 mb-2">Message de motivation</h3>
                 <div class="bg-white p-4 rounded border border-gray-200 text-gray-700 italic">
-                    "{{ $mentorship->message }}"
+                    "{{ $mentorship->request_message }}"
                 </div>
             </div>
 
