@@ -223,6 +223,183 @@
                     </div>
                 </div>
 
+                <!-- Analyse de la demande (Payant) -->
+                <div x-data="demandStats()" class="mb-6">
+                    <button type="button" @click="fetchStats()"
+                        class="w-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-4 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-bold">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Outil d'Analyse : Voir les tendances de la demande (5 Crédits)
+                    </button>
+
+                    <!-- Modal des statistiques -->
+                    <template x-if="isOpen">
+                        <div class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+                            aria-modal="true">
+                            <div
+                                class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div @click="isOpen = false"
+                                    class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                    aria-hidden="true"></div>
+                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen"
+                                    aria-hidden="true">&#8203;</span>
+                                <div
+                                    class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                        <div class="flex justify-between items-center mb-6">
+                                            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                                </svg>
+                                                Analyse de la Demande Jeunes Brillio
+                                            </h3>
+                                            <button @click="isOpen = false" class="text-gray-400 hover:text-gray-500">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div x-show="loading" class="py-12 flex flex-col items-center justify-center">
+                                            <svg class="animate-spin h-10 w-10 text-purple-600 mb-4"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                    stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                </path>
+                                            </svg>
+                                            <p class="text-gray-600 font-medium">Analyse en cours...</p>
+                                        </div>
+
+                                        <div x-show="!loading && stats" class="space-y-8 animate-fadeIn">
+                                            <!-- Summary Cards -->
+                                            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                                                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                    <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Total Jeunes</p>
+                                                    <p class="text-2xl font-black text-gray-900" x-text="stats.total"></p>
+                                                </div>
+                                                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                                    <p class="text-[10px] text-blue-600 uppercase font-bold tracking-wider mb-1">Lycéens</p>
+                                                    <p class="text-2xl font-black text-blue-900" x-text="stats.education.lycee || 0"></p>
+                                                </div>
+                                                <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                                                    <p class="text-[10px] text-green-600 uppercase font-bold tracking-wider mb-1">Bac & +</p>
+                                                    <p class="text-2xl font-black text-green-900" x-text="(stats.education.bac || 0) + (stats.education.licence || 0) + (stats.education.master || 0) + (stats.education.doctorat || 0)"></p>
+                                                </div>
+                                                <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                                    <p class="text-[10px] text-purple-600 uppercase font-bold tracking-wider mb-1">En emploi</p>
+                                                    <p class="text-2xl font-black text-purple-900" x-text="(stats.situation.emploi || 0) + (stats.situation.entrepreneur || 0)"></p>
+                                                </div>
+                                                <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                                                    <p class="text-[10px] text-red-600 uppercase font-bold tracking-wider mb-1">En recherche</p>
+                                                    <p class="text-2xl font-black text-red-900" x-text="stats.situation.recherche_emploi || 0"></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <!-- Education Chart -->
+                                                <div class="bg-white p-4 rounded-xl border border-gray-100">
+                                                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                        <span class="w-1.5 h-4 bg-indigo-500 rounded-full"></span>
+                                                        Niveaux d'études
+                                                    </h4>
+                                                    <div class="space-y-4">
+                                                        <template x-for="(count, level) in stats.education" :key="level">
+                                                            <div x-show="count > 0">
+                                                                <div class="flex justify-between text-xs mb-1.5 text-gray-600">
+                                                                    <span class="font-semibold" x-text="formatLabel(level)"></span>
+                                                                    <span class="font-bold text-gray-900" x-text="`${count} (${Math.round((count/stats.total)*100)}%)`"></span>
+                                                                </div>
+                                                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                                                    <div class="bg-indigo-500 h-2 rounded-full transition-all duration-700" :style="`width: ${Math.round((count/stats.total)*100)}%`"></div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Situation Chart -->
+                                                <div class="bg-white p-4 rounded-xl border border-gray-100">
+                                                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                        <span class="w-1.5 h-4 bg-purple-500 rounded-full"></span>
+                                                        Situations actuelles
+                                                    </h4>
+                                                    <div class="space-y-4">
+                                                        <template x-for="(count, sit) in stats.situation" :key="sit">
+                                                            <div x-show="count > 0">
+                                                                <div class="flex justify-between text-xs mb-1.5 text-gray-600">
+                                                                    <span class="font-semibold" x-text="formatLabel(sit)"></span>
+                                                                    <span class="font-bold text-gray-900" x-text="`${count} (${Math.round((count/stats.total)*100)}%)`"></span>
+                                                                </div>
+                                                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                                                    <div class="bg-purple-500 h-2 rounded-full transition-all duration-700" :style="`width: ${Math.round((count/stats.total)*100)}%`"></div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <!-- Personality -->
+                                                <div class="bg-white p-4 rounded-xl border border-gray-100">
+                                                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                        <span class="w-1.5 h-4 bg-amber-500 rounded-full"></span>
+                                                        Types Psychométriques (MBTI)
+                                                    </h4>
+                                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                         <template x-for="(count, type) in stats.personality_types" :key="type">
+                                                             <div class="bg-amber-50 p-2 rounded-lg border border-amber-100 text-center flex flex-col justify-center min-h-[60px]">
+                                                                 <div class="text-[10px] font-bold text-amber-700 leading-tight mb-1" x-text="formatLabel(type)"></div>
+                                                                 <div class="text-[8px] text-amber-500 font-medium uppercase mb-1" x-text="type"></div>
+                                                                 <div class="text-sm font-black text-amber-900" x-text="count"></div>
+                                                             </div>
+                                                         </template>
+                                                     </div>
+                                                    <p x-show="!Object.keys(stats.personality_types).length" class="text-xs text-gray-400 italic mt-4 text-center">Pas encore de tests complétés.</p>
+                                                </div>
+
+                                                <!-- Location -->
+                                                <div class="bg-white p-4 rounded-xl border border-gray-100">
+                                                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                        <span class="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
+                                                        Répartition par Pays
+                                                    </h4>
+                                                    <div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                                                        <template x-for="(count, country) in stats.countries" :key="country">
+                                                            <div class="flex justify-between items-center text-xs py-1.5 border-b border-gray-50 last:border-0">
+                                                                <span class="text-gray-700 font-medium" x-text="country"></span>
+                                                                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold" x-text="count"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                                        <button type="button" @click="isOpen = false"
+                                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                            Fermer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
                 <!-- Ciblage Avancé -->
                 <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-6 relative overflow-hidden">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-4">
@@ -667,6 +844,50 @@
 @push('scripts')
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script>
+    function demandStats() {
+        return {
+            isOpen: false,
+            loading: false,
+            stats: null,
+            labels: {
+                'college': 'Collège', 'lycee': 'Lycée', 'bac': 'Baccalauréat', 'licence': 'Licence', 'master': 'Master', 'doctorat': 'Doctorat',
+                'etudiant': 'Étudiant', 'recherche_emploi': 'En recherche d\'emploi', 'emploi': 'En emploi', 'entrepreneur': 'Entrepreneur', 'autre': 'Autre',
+                'INTJ': 'L’Architecte', 'INTP': 'Le Logicien', 'ENTJ': 'Le Commandant', 'ENTP': 'L’Innovateur',
+                'INFJ': 'L’Avocat', 'INFP': 'Le Médiateur', 'ENFJ': 'Le Protagoniste', 'ENFP': 'Le Campaigner',
+                'ISTJ': 'Le Logisticien', 'ISFJ': 'Le Défenseur', 'ESTJ': 'Le Directeur', 'ESFJ': 'Le Consul',
+                'ISTP': 'Le Virtuose', 'ISFP': 'L’Aventurier', 'ESTP': 'L’Entrepreneur', 'ESFP': 'L’Amuseur'
+            },
+            async fetchStats() {
+                this.loading = true;
+                this.isOpen = true;
+                
+                try {
+                    const response = await fetch('{{ route('mentor.resources.stats') }}');
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        this.stats = data.stats;
+                        if (window.showToast) window.showToast('Données récupérées ! 10 crédits débités.');
+                    } else {
+                        this.isOpen = false;
+                        if (window.showToast) window.showToast(data.error || 'Erreur lors de la récupération', 'error');
+                        if (response.status === 402 && confirm('Crédits insuffisants. Voulez-vous recharger votre compte ?')) {
+                            window.location.href = "{{ route('mentor.wallet.index') }}";
+                        }
+                    }
+                } catch (error) {
+                    this.isOpen = false;
+                    if (window.showToast) window.showToast('Erreur réseau', 'error');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            formatLabel(key) {
+                return this.labels[key] || key;
+            }
+        }
+    }
+
     function toggleAll(name, checked) {
         document.getElementsByName(name).forEach(el => {
             el.checked = checked;

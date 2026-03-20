@@ -25,13 +25,157 @@ class ResourceController extends Controller
      */
     public function index()
     {
-        $mentorProfile = auth()->user()->mentorProfile;
+        // On réinitialise le déblocage des stats quand on revient à la liste
+        session()->forget('resource_stats_unlocked');
 
-        // On récupère toujours les ressources pour savoir si le mentor en a déjà créé
         $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
 
-        // Check middleware handles redirection now
         return view('mentor.resources.index', compact('resources'));
+    }
+
+    /**
+     * Boutique de ressources (Marketplace)
+     */
+    public function marketplace(Request $request)
+    {
+        $query = Resource::query()
+            ->where(fn ($q) => $q->where('user_id', '!=', auth()->id()))
+            ->where(fn ($q) => $q->where('is_published', true))
+            ->where(fn ($q) => $q->where('is_validated', true));
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('tags', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where(fn ($q) => $q->where('type', $request->type));
+        }
+
+        if ($request->filled('author')) {
+            if ($request->author === 'brillio') {
+                $query->where(fn ($q) => $q->where('user_id', 1));
+            } elseif ($request->author === 'mentors') {
+                $query->where(fn ($q) => $q->where('user_id', '!=', 1));
+            }
+        }
+
+        if ($request->filled('price')) {
+            if ($request->price === 'free') {
+                $query->where(fn ($q) => $q->where('price', 0));
+            } elseif ($request->price === 'paid') {
+                $query->where(fn ($q) => $q->where('price', '>', 0));
+            }
+        }
+
+        $resources = $query->with('user')->latest()->paginate(12);
+        $totalCount = $query->count();
+
+        return view('mentor.resources.marketplace', compact('resources', 'totalCount'));
+    }
+
+    /**
+     * Récupère les statistiques de la demande (Données Jeunes) - Payant 10 Crédits
+     */
+    public function getDemandStats()
+    {
+        $user = auth()->user();
+        $cost = 5;
+
+        // Si déjà débloqué pour cette session de création, on ne prélève pas
+        if (session('resource_stats_unlocked')) {
+            $cost = 0;
+        }
+
+        try {
+            if ($cost > 0) {
+                if ($user->credits_balance < $cost) {
+                    return response()->json([
+                        'error' => "Crédits insuffisants. Cette analyse coûte {$cost} crédits.",
+                        'balance' => $user->credits_balance,
+                    ], 402);
+                }
+
+                $this->walletService->deductCredits(
+                    $user,
+                    $cost,
+                    'service_fee',
+                    'Analyse des statistiques de la demande',
+                    null
+                );
+
+                // On marque comme débloqué pour les rechargements de page
+                session(['resource_stats_unlocked' => true]);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+
+        // Calcul des statistiques
+        $jeunes = User::where('user_type', 'jeune')->where('onboarding_completed', true)->get();
+
+        $stats = [
+            'total' => $jeunes->count(),
+            'education' => [
+                'college' => 0,
+                'lycee' => 0,
+                'bac' => 0,
+                'licence' => 0,
+                'master' => 0,
+                'doctorat' => 0,
+            ],
+            'situation' => [
+                'etudiant' => 0,
+                'recherche_emploi' => 0,
+                'emploi' => 0,
+                'entrepreneur' => 0,
+                'autre' => 0,
+            ],
+            'countries' => [],
+            'personality_types' => [],
+        ];
+
+        foreach ($jeunes as $jeune) {
+            $data = $jeune->onboarding_data ?? [];
+
+            // Education
+            if (isset($data['education_level']) && isset($stats['education'][$data['education_level']])) {
+                $stats['education'][$data['education_level']]++;
+            }
+
+            // Situation
+            if (isset($data['current_situation']) && isset($stats['situation'][$data['current_situation']])) {
+                $stats['situation'][$data['current_situation']]++;
+            }
+
+            // Pays
+            if ($jeune->country) {
+                $country = ucfirst(strtolower($jeune->country));
+                $stats['countries'][$country] = ($stats['countries'][$country] ?? 0) + 1;
+            }
+        }
+
+        // Personality Types (MBTI) - Alignement sur onboarding_completed
+        $mbtiStats = \App\Models\PersonalityTest::query()
+            ->join('users', 'personality_tests.user_id', '=', 'users.id')
+            ->where('users.user_type', 'jeune')
+            ->where('users.onboarding_completed', true)
+            ->where('personality_tests.is_current', true)
+            ->select('personality_tests.personality_type', DB::raw('count(*) as total'))
+            ->groupBy('personality_tests.personality_type')
+            ->pluck('total', 'personality_type')
+            ->toArray();
+
+        $stats['personality_types'] = $mbtiStats;
+
+        return response()->json([
+            'success' => true,
+            'stats' => $stats,
+            'balance' => $user->refresh()->credits_balance,
+        ]);
     }
 
     /**
