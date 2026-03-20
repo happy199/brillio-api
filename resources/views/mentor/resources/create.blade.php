@@ -351,7 +351,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                                                 <!-- Personality -->
                                                 <div class="bg-white p-4 rounded-xl border border-gray-100">
                                                     <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -376,7 +376,7 @@
                                                         <span class="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
                                                         Répartition par Pays
                                                     </h4>
-                                                    <div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                                                    <div class="space-y-2 pr-2 custom-scrollbar">
                                                         <template x-for="(count, country) in stats.countries" :key="country">
                                                             <div class="flex justify-between items-center text-xs py-1.5 border-b border-gray-50 last:border-0">
                                                                 <span class="text-gray-700 font-medium" x-text="country"></span>

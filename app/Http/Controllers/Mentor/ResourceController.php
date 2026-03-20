@@ -114,8 +114,8 @@ class ResourceController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-        // Calcul des statistiques
-        $jeunes = User::where('user_type', 'jeune')->where('onboarding_completed', true)->get();
+        // Calcul des statistiques - On inclut TOUS les jeunes (pas seulement ceux qui ont fini l'onboarding)
+        $jeunes = User::where('user_type', 'jeune')->get();
 
         $stats = [
             'total' => $jeunes->count(),
@@ -158,11 +158,10 @@ class ResourceController extends Controller
             }
         }
 
-        // Personality Types (MBTI) - Alignement sur onboarding_completed
+        // Personality Types (MBTI) - Alignement sur TOUS les jeunes
         $mbtiStats = \App\Models\PersonalityTest::query()
             ->join('users', 'personality_tests.user_id', '=', 'users.id')
             ->where('users.user_type', 'jeune')
-            ->where('users.onboarding_completed', true)
             ->where('personality_tests.is_current', true)
             ->select('personality_tests.personality_type', DB::raw('count(*) as total'))
             ->groupBy('personality_tests.personality_type')
