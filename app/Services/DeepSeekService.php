@@ -39,7 +39,7 @@ class DeepSeekService
     /**
      * Prompt systeme pour orienter l'IA vers les conseils d'orientation
      */
-    private const SYSTEM_PROMPT_TEXT = "Tu es Brillio, un conseiller en orientation professionnelle specialise pour les jeunes africains.\n\nREGLES IMPORTANTES DE COMMUNICATION:\n- Tu DOIS TOUJOURS tutoyer l'utilisateur (jamais de \"vous\", uniquement \"tu\")\n- Tu DOIS utiliser le prenom de l'utilisateur regulierement dans tes reponses pour personnaliser l'echange\n- Sois chaleureux, amical et proche comme un grand frere ou une grande soeur bienveillant(e)\n\nTon role est de :\n- Aider les jeunes a decouvrir leurs talents et interets\n- Donner des conseils d'orientation adaptes au contexte africain\n- Informer sur les metiers, les formations et les opportunites de carriere\n- Encourager et motiver les jeunes dans leurs parcours\n- Repondre aux questions sur les etudes et le monde professionnel\n\nTes reponses doivent etre :\n- Personnalisees (utilise le prenom!)\n- Bienveillantes et encourageantes\n- Pratiques et concretes\n- Adaptees au contexte africain (pays, economie, opportunites locales)\n- Claires et accessibles\n\nTu peux poser des questions pour mieux comprendre le profil de l'utilisateur :\n- Son pays et sa ville\n- Son niveau d'etudes actuel\n- Ses matieres preferees\n- Ses passions et loisirs\n- Ses aspirations professionnelles\n\nN'hesite pas a :\n- Suggerer des metiers adaptes a son profil\n- Recommander des formations disponibles en Afrique\n- Partager des temoignages inspirants\n- Donner des conseils pratiques pour reussir\n\nReponds toujours en francais sauf si l'utilisateur s'adresse a toi dans une autre langue.";
+    private const SYSTEM_PROMPT_TEXT = "Tu es Brillio, un conseiller en orientation professionnelle spécialiste pour les jeunes africains.\n\nREGLES IMPORTANTES DE COMMUNICATION:\n- Tu DOIS TOUJOURS tutoyer l'utilisateur (jamais de \"vous\", uniquement \"tu\")\n- Tu DOIS utiliser le prénom de l'utilisateur régulièrement dans tes réponses pour personnaliser l'échange\n- Sois chaleureux, amical et proche comme un grand frère ou une grande sœur bienveillant(e)\n\nCONSIGNES DE FORMATAGE :\n- Utilise un Markdown propre, aéré et professionnel.\n- N'utilise JAMAIS de balises techniques (comme <answer>, <think>, etc.) dans ton texte final.\n- Les titres doivent être en gras ou utiliser des structures Markdown standards (ex: ### Titre).\n- Evite les suites de signes superflus (ex: Ne laisse pas d'astérisques isolés).\n\nTon rôle est de :\n- Aider les jeunes à découvrir leurs talents et intérêts\n- Donner des conseils d'orientation adaptés au contexte africain\n- Informer sur les métiers, les formations et les opportunités de carrière\n- Encourager et motiver les jeunes dans leurs parcours\n- Répondre aux questions sur les études et le monde professionnel\n\nTes réponses doivent être :\n- Personnalisées (utilise le prénom!)\n- Bienveillantes et encourageantes\n- Pratiques et concrètes\n- Adaptées au contexte africain (pays, économie, opportunités locales)\n- Claires et accessibles\n\nRéponds toujours en français sauf si l'utilisateur s'adresse à toi dans une autre langue.";
 
     public function __construct()
     {
@@ -51,8 +51,8 @@ class DeepSeekService
         $this->siteUrl = config('services.openrouter.site_url', 'https://www.brillio.africa');
         $this->siteName = config('services.openrouter.site_name', 'Brillio');
 
-        // Initialisation du prompt systeme avec l'instruction de formatage pour separer pensee et reponse
-        $this->systemPrompt = self::SYSTEM_PROMPT_TEXT."\n\nIMPORTANT: Pour chaque reponse, tu dois D'ABORD reflechir (tu peux afficher ta reflexion), puis IMPERATIVEMENT ecrire ta reponse finale au destinataire entre les balises <answer> et </answer>. Exemple: <answer>Bonjour Tidjani...</answer>";
+        // Initialisation du prompt systeme
+        $this->systemPrompt = self::SYSTEM_PROMPT_TEXT;
     }
 
     /**
@@ -60,30 +60,25 @@ class DeepSeekService
      */
     private function cleanResponse($content, $formatting = true)
     {
-        // 1. Essayer d'extraire le contenu entre <answer>...</answer>
-        $matches = [];
-        if (preg_match('/<answer>(.*?)<\/answer>/s', $content, $matches)) {
-            $content = $matches[1];
-        }
-        // 2. Si pas de balises <answer>, essayer de nettoyer les balises <think> (comportement standard R1)
-        else {
-            $content = preg_replace('/<think>.*?<\/think>/s', '', $content);
-        }
+        // 1. Suppression des balises de réflexion standard (DeepSeek R1)
+        $content = preg_replace('/<think>.*?<\/think>/s', '', $content);
+        $content = str_replace(['<think>', '</think>'], '', $content);
+
+        // 2. Suppression de toutes les occurrences de balises techniques XML/HTML (comme <answer>)
+        // On le fait de manière permissive pour attraper les balises mal fermées ou répétées
+        $content = preg_replace('/<answer>|<\/answer>/i', '', $content);
+        $content = preg_replace('/<[a-z0-9_\-]+>.*<\/[a-z0-9_\-]+>/i', '', $content); // Supprime toute autre balise xml potentielle
 
         if ($formatting) {
-            // Remplacer les ### par des doubles retours a la ligne pour separer les sections
-            $content = preg_replace('/###\s*/', "\n\n", $content);
+            // Nettoyage des astérisques isolés (souvent des restes de titres mal formés)
+            $content = preg_replace('/^\s*\*\*\s*$/m', '', $content);
+            $content = preg_replace('/^\s*\*\s*$/m', '', $content);
 
-            // Remplacer les ## par des doubles retours a la ligne
-            $content = preg_replace('/##\s*/', "\n\n", $content);
+            // Remplacer les listes numérotées collées pour assurer un retour à la ligne avant
+            // Mais seulement si ce n'est pas déjà le cas
+            $content = preg_replace('/([^\n])(\d+\.\s)/u', "$1\n$2", $content);
 
-            // Remplacer les listes numerotees pour ajouter un retour a la ligne avant
-            $content = preg_replace('/(\d+\.\s)/u', "\n$1", $content);
-
-            // Remplacer les listes a puces pour ajouter un retour a la ligne avant
-            $content = preg_replace('/([•\-✔️👉])\s/u', "\n$1 ", $content);
-
-            // Nettoyer les retours a la ligne multiples (max 2)
+            // Nettoyer les retours à la ligne multiples (max 2)
             $content = preg_replace('/\n{3,}/', "\n\n", $content);
         }
 

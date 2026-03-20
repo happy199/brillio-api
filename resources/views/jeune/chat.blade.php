@@ -563,11 +563,29 @@
                     },
 
                     formatMessage(content) {
-                        // Simple markdown-like formatting
-                        return content
+                        if (!content) return '';
+                        
+                        // Nettoyage final des balises résiduelles au cas où
+                        let formatted = content.replace(/<\/?[^>]+(>|$)/g, "");
+
+                        // Rendu Markdown simplifié
+                        formatted = formatted
+                            // Titres (### Titre)
+                            .replace(/^### (.*$)/gim, '<h3 class="font-bold text-gray-900 mt-3 mb-1">$1</h3>')
+                            .replace(/^## (.*$)/gim, '<h2 class="font-bold text-gray-900 mt-4 mb-2">$1</h2>')
+                            .replace(/^# (.*$)/gim, '<h1 class="font-bold text-gray-900 mt-5 mb-3">$1</h1>')
+                            // Gras (**texte**)
                             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            // Italique (*texte*)
                             .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                            // Listes à puces (- ou *)
+                            .replace(/^\s*[\-\*]\s+(.*)$/gim, '<div class="flex gap-2"><span>•</span><span>$1</span></div>')
+                            // Listes numérotées (1.)
+                            .replace(/^\s*(\d+\.)\s+(.*)$/gim, '<div class="flex gap-2"><span>$1</span><span>$2</span></div>')
+                            // Retours à la ligne
                             .replace(/\n/g, '<br>');
+
+                        return formatted;
                     },
 
                     formatDate(dateString) {
