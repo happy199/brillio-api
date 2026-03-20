@@ -262,8 +262,9 @@ class ResourceController extends Controller
             return back()->with('info', 'Vous avez déjà débloqué cette ressource.');
         }
 
-        // Calcul du coût
-        $unlockCost = $this->walletService->getFeatureCost('resource_purchase', $resource->price);
+        // Calcul du coût : 100 FCFA = 1 Crédit Mentor (coût dynamique)
+        $creditPrice = $this->walletService->getCreditPrice('mentor');
+        $unlockCost = (int) ceil($resource->price / $creditPrice);
 
         if ($user->credits_balance < $unlockCost) {
             return redirect()->route('mentor.wallet.index')->withErrors(['credits' => "Solde insuffisant ($unlockCost crédits nécessaires)."]);
