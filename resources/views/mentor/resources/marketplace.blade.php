@@ -153,7 +153,7 @@
                                 Débloqué
                             </span>
                         @else
-                            <span class="text-xs font-bold text-gray-900">{{ number_format($resource->price, 0, ',', ' ') }} F</span>
+                            <span class="text-xs font-bold text-gray-900">{{ ceil($resource->price / $mentorCreditPrice) }} Crédits</span>
                         @endif
                     </div>
                     

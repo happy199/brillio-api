@@ -85,7 +85,9 @@ class ResourceController extends Controller
             ->pluck('item_id')
             ->toArray();
 
-        return view('mentor.resources.marketplace', compact('resources', 'totalCount', 'purchasedIds'));
+        $mentorCreditPrice = $this->walletService->getCreditPrice('mentor');
+
+        return view('mentor.resources.marketplace', compact('resources', 'totalCount', 'purchasedIds', 'mentorCreditPrice'));
     }
 
     /**
