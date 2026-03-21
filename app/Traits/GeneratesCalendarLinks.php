@@ -14,9 +14,10 @@ trait GeneratesCalendarLinks
         $startAt = $session->scheduled_at->format('Ymd\THis\Z');
         $endAt = $session->scheduled_at->copy()->addMinutes((int) $session->duration_minutes)->format('Ymd\THis\Z');
 
+        $meetingUrl = route('meeting.show', $session->meeting_id);
         $text = urlencode("Session de mentorat : {$session->title}");
-        $details = urlencode($session->description."\n\nLien de la session : ".$session->meeting_link);
-        $location = urlencode($session->meeting_link);
+        $details = urlencode($session->description."\n\nLien de la session : ".$meetingUrl);
+        $location = urlencode($meetingUrl);
 
         return "https://www.google.com/calendar/render?action=TEMPLATE&text={$text}&dates={$startAt}/{$endAt}&details={$details}&location={$location}&sf=true&output=xml";
     }
@@ -31,9 +32,10 @@ trait GeneratesCalendarLinks
         $stamp = now()->format('Ymd\THis\Z');
         $uid = 'session-'.$session->id.'@brillio.com';
 
+        $meetingUrl = route('meeting.show', $session->meeting_id);
         $summary = 'Session de mentorat : '.$session->title;
-        $description = str_replace(["\r", "\n"], '\\n', $session->description."\n\nLien : ".$session->meeting_link);
-        $location = $session->meeting_link;
+        $description = str_replace(["\r", "\n"], '\\n', $session->description."\n\nLien : ".$meetingUrl);
+        $location = $meetingUrl;
         $organizer = $session->mentor->email;
         $organizerName = $session->mentor->name;
 
