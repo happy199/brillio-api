@@ -29,6 +29,7 @@ class MentoringSession extends Model
     protected $casts = [
         'scheduled_at' => 'datetime',
         'is_paid' => 'boolean',
+        'duration_minutes' => 'integer',
         'reminder_24h_sent' => 'boolean',
         'reminder_1h_sent' => 'boolean',
         'report_content' => 'array',

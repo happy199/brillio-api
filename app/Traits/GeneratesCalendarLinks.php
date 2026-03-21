@@ -12,7 +12,7 @@ trait GeneratesCalendarLinks
     public function generateGoogleCalendarUrl(MentoringSession $session): string
     {
         $startAt = $session->scheduled_at->format('Ymd\THis\Z');
-        $endAt = $session->scheduled_at->copy()->addMinutes($session->duration_minutes)->format('Ymd\THis\Z');
+        $endAt = $session->scheduled_at->copy()->addMinutes((int) $session->duration_minutes)->format('Ymd\THis\Z');
 
         $text = urlencode("Session de mentorat : {$session->title}");
         $details = urlencode($session->description."\n\nLien de la session : ".$session->meeting_link);
@@ -27,7 +27,7 @@ trait GeneratesCalendarLinks
     public function generateIcsContent(MentoringSession $session): string
     {
         $startAt = $session->scheduled_at->format('Ymd\THis\Z');
-        $endAt = $session->scheduled_at->copy()->addMinutes($session->duration_minutes)->format('Ymd\THis\Z');
+        $endAt = $session->scheduled_at->copy()->addMinutes((int) $session->duration_minutes)->format('Ymd\THis\Z');
         $stamp = now()->format('Ymd\THis\Z');
         $uid = 'session-'.$session->id.'@brillio.com';
 
