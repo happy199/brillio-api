@@ -4,10 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class MentoringSession extends Model
 {
     use HasFactory;
+
+    protected static function booted()
+    {
+        static::creating(function ($session) {
+            if (empty($session->meeting_link)) {
+                // Generate a secure Jitsi room name
+                // Format: Brillio_{MentorID}_{Random}_{Timestamp}
+                $roomName = 'Brillio_'.($session->mentor_id ?? '0').'_'.Str::random(10).'_'.time();
+                $session->meeting_link = 'https://meet.jit.si/'.$roomName;
+            }
+        });
+    }
 
     protected $fillable = [
         'mentor_id',
