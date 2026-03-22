@@ -75,7 +75,7 @@ class SessionConfirmed extends Mailable
     public function attachments(): array
     {
         return [
-            Attachment::fromData(fn () => $this->generateIcsContent($this->session), 'invitation.ics')
+            Attachment::fromData(fn () => $this->generateIcsContent($this->session, $this->recipient), 'invitation.ics')
                 ->withMime('text/calendar'),
         ];
     }
