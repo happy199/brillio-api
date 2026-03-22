@@ -89,8 +89,9 @@
             @else
             @foreach($mentorship->messages as $message)
             @php $isMine = $message->sender_id === auth()->id(); @endphp
-            <div class="flex {{ $isMine ? 'justify-end' : 'justify-start' }}">
-                <div class="message-bubble">
+            <div class="flex items-start gap-4 {{ $isMine ? 'flex-row-reverse' : '' }} group/msg"
+                x-data="{{ Js::from(['isEditing' => false, 'showDeleteModal' => false, 'body' => $message->body]) }}">
+                <div class="message-bubble relative">
                     @if(! $isMine)
                     <div class="flex items-end gap-2">
                         @if($message->sender->avatar_url)
@@ -104,42 +105,125 @@
                         </div>
                         @endif
                         <div>
-                            @endif
+                    @endif
 
-                            @if($message->body)
-                            <div
-                                class="px-4 py-2.5 rounded-2xl {{ $isMine ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm' }}">
-                                <p class="text-sm whitespace-pre-wrap">{{ $message->body }}</p>
+                    @if($message->is_deleted)
+                        <div class="px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-100 text-gray-400 italic text-sm">
+                            <svg class="w-3.5 h-3.5 inline mb-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Ce message a été supprimé
+                        </div>
+                    @else
+                        <!-- Message Actions (Desktop hover) -->
+                        @if($isMine)
+                        <div class="absolute -left-28 top-0 flex items-center justify-end gap-2 opacity-0 group-hover/msg:opacity-100 transition-all duration-200">
+                            <button @click="isEditing = true" class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition shadow-sm bg-white/90 backdrop-blur-sm border border-gray-100" title="Modifier">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </button>
+                            <button @click="showDeleteModal = true" class="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition shadow-sm bg-white/90 backdrop-blur-sm border border-gray-100" title="Supprimer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                        @endif
+
+                        <!-- Native-free Delete Confirmation Modal -->
+                        <template x-teleport="body">
+                            <div x-show="showDeleteModal" 
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm"
+                                 x-cloak>
+                                <div @click.away="showDeleteModal = false" 
+                                     x-show="showDeleteModal"
+                                     x-transition:enter="transition ease-out duration-300"
+                                     x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-200"
+                                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                     x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+                                     class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 text-center border border-gray-100">
+                                    <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Supprimer le message ?</h3>
+                                    <p class="text-gray-500 mb-8 leading-relaxed">Cette action est définitive. Le contenu du message sera effacé pour tout le monde.</p>
+                                    <div class="flex flex-col gap-3">
+                                        <form action="{{ route('mentor.messages.destroy', $message) }}" method="POST" class="w-full">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl transition shadow-lg shadow-red-200">
+                                                Oui, supprimer
+                                            </button>
+                                        </form>
+                                        <button @click="showDeleteModal = false" class="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-2xl transition">
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                        </template>
+
+                        <!-- Edit Form -->
+                        <div x-show="isEditing" x-cloak class="w-full min-w-[200px]">
+                            <form action="{{ route('mentor.messages.update', $message) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <textarea name="body" x-model="body" rows="3"
+                                    class="w-full rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500 text-sm p-3"></textarea>
+                                <div class="flex justify-end gap-2 mt-2">
+                                    <button type="button" @click="isEditing = false" class="text-xs text-gray-500 hover:text-gray-700 font-medium">Annuler</button>
+                                    <button type="submit" class="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition font-medium">Enregistrer</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Content -->
+                        <div x-show="!isEditing">
+                            @if($message->body)
+                                <div class="px-4 py-2.5 rounded-2xl {{ $isMine ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm' }}">
+                                    <p class="text-sm whitespace-pre-wrap">{{ $message->body }}</p>
+                                </div>
                             @endif
 
                             @if($message->hasAttachment())
-                            <a href="{{ route('mentor.messages.download', $message) }}"
-                                class="mt-1 flex items-center gap-2 px-3 py-2 rounded-xl text-sm {{ $isMine ? 'bg-orange-400 text-white hover:bg-orange-300' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }} transition">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                </svg>
-                                <span class="truncate max-w-[200px]">{{ $message->attachment_name }}</span>
-                                <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-70" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                            </a>
+                                <a href="{{ route('mentor.messages.download', $message) }}"
+                                    class="mt-1 flex items-center gap-2 px-3 py-2 rounded-xl text-sm {{ $isMine ? 'bg-orange-400 text-white hover:bg-orange-300' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }} transition">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                    </svg>
+                                    <span class="truncate max-w-[200px]">{{ $message->attachment_name }}</span>
+                                </a>
                             @endif
 
                             <p class="text-[11px] mt-1 {{ $isMine ? 'text-right text-orange-300' : 'text-gray-400' }}">
                                 {{ $message->created_at->format('d/m H:i') }}
+                                @if($message->edited_at)
+                                    · <span class="italic text-[10px] opacity-80">modifié</span>
+                                @endif
                                 @if($isMine && $message->read_at)
-                                · <span class="text-emerald-400">Lu</span>
+                                    · <span class="text-emerald-400">Lu</span>
                                 @endif
                             </p>
-
-                            @if(! $isMine)
                         </div>
-                    </div>@endif
+                    @endif
+
+                    @if(! $isMine)
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
             @endforeach

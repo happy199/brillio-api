@@ -18,10 +18,14 @@ class Message extends Model
         'attachment_name',
         'attachment_mime',
         'read_at',
+        'edited_at',
+        'is_deleted',
     ];
 
     protected $casts = [
         'read_at' => 'datetime',
+        'edited_at' => 'datetime',
+        'is_deleted' => 'boolean',
     ];
 
     public function mentorship(): BelongsTo
