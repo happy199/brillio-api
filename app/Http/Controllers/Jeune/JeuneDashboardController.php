@@ -432,7 +432,9 @@ class JeuneDashboardController extends Controller
             });
         }
 
-        $mentors = $query->paginate(12);
+        $mentors = $query->orderByDesc('is_validated')
+            ->orderByDesc('id')
+            ->paginate(12);
 
         $specializations = MentorProfile::SPECIALIZATIONS;
         $sectors = MbtiCareersService::getAllSectors();
