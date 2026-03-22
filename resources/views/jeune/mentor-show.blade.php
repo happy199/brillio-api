@@ -132,8 +132,8 @@
                                     </span>
                                     @endif
                                 </div>
-                                @if($step->organization)
-                                <p class="text-sm text-orange-600 font-medium mb-2">{{ $step->organization }}
+                                @if($step->institution_company)
+                                <p class="text-sm text-orange-600 font-medium mb-2">{{ $step->institution_company }}
                                 </p>
                                 @endif
                                 @if($step->description)
