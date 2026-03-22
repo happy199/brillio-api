@@ -46,6 +46,19 @@ trait GeneratesCalendarLinks
         $summary = str_replace([',', ';'], ['\\,', '\\;'], $summary);
         $location = str_replace([',', ';'], ['\\,', '\\;'], $location);
 
+        $isMentor = ($recipient->id === $mentor->id);
+        $attendeeLines = '';
+
+        if ($isMentor) {
+            // For the mentor (organizer), add mentees as attendees
+            foreach ($session->mentees as $mentee) {
+                $attendeeLines .= "ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=\"{$mentee->name}\":mailto:{$mentee->email}\n";
+            }
+        } else {
+            // For a mentee, just add them as the attendee
+            $attendeeLines = "ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=\"{$recipient->name}\":mailto:{$recipient->email}\n";
+        }
+
         return <<<EOT
 BEGIN:VCALENDAR
 VERSION:2.0
@@ -62,8 +75,7 @@ DESCRIPTION:{$description}
 LOCATION:{$location}
 STATUS:CONFIRMED
 ORGANIZER;CN="{$organizerName}":mailto:{$organizerEmail}
-ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN="{$recipient->name}";X-NUM-GUESTS=0:mailto:{$recipient->email}
-SEQUENCE:0
+{$attendeeLines}SEQUENCE:0
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Rappel : {$summary} dans 30 minutes
