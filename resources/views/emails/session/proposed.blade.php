@@ -4,7 +4,11 @@
 <p style="margin: 0 0 20px;">Bonjour <strong>{{ $mentee->name }}</strong>,</p>
 
 <p style="margin: 0 0 30px; font-size: 18px;">
-    📅 Votre mentor <strong>{{ $mentor->name }}</strong> vous propose une session de mentorat !
+    @if($session->created_by === 'mentor')
+        🗓️ Votre mentor <strong>{{ $mentor->name }}</strong> a programmé une session de mentorat avec vous !
+    @else
+        📅 Votre mentor <strong>{{ $mentor->name }}</strong> vous propose une session de mentorat.
+    @endif
 </p>
 
 <div
@@ -14,7 +18,7 @@
     <p style="margin: 0 0 8px; color: #374151;">
         <strong>📅 Date :</strong> {{ $session->scheduled_at->translatedFormat('l j F Y') }}<br>
         <strong>🕐 Heure :</strong> {{ $session->scheduled_at->format('H:i') }}<br>
-        <strong>⏱️ Durée :</strong> {{ $session->duration }} minutes
+        <strong>⏱️ Durée :</strong> {{ $session->duration_minutes }} minutes
     </p>
 
     @if($session->notes)
@@ -42,20 +46,32 @@
 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
     <tr>
         <td align="center">
-            <a href="{{ $acceptUrl }}"
-                style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">
-                ✓ Accepter
-            </a>
+            @if($session->status === 'pending_payment')
+                <a href="{{ $acceptUrl }}"
+                    style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">
+                    💳 Régler la séance ({{ number_format($session->price, 0, ',', ' ') }} XOF)
+                </a>
+            @else
+                <a href="{{ $acceptUrl }}"
+                    style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">
+                    ✓ Accepter
+                </a>
+            @endif
+            
             <a href="{{ $refuseUrl }}"
                 style="display: inline-block; background-color: #f3f4f6; color: #6b7280; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
-                Refuser
+                {{ $session->created_by === 'mentor' ? 'Refuser / Annuler' : 'Refuser' }}
             </a>
         </td>
     </tr>
 </table>
 
 <p style="margin: 20px 0; font-size: 14px; color: #6b7280;">
-    💡 Vous avez <strong>24 heures</strong> pour répondre à cette proposition.
+    💡 @if($session->status === 'pending_payment')
+        Cette séance sera <strong>confirmée</strong> dès réception de votre paiement.
+    @else
+        Vous avez <strong>24 heures</strong> pour répondre à cette proposition.
+    @endif
 </p>
 
 <p style="margin: 30px 0 0; color: #374151;">

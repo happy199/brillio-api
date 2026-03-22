@@ -123,4 +123,59 @@ class MessagesController extends Controller
 
         return Storage::disk('local')->download($message->attachment_path, $message->attachment_name);
     }
+
+    /**
+     * Modifier un message
+     */
+    public function update(Request $request, Message $message)
+    {
+        $user = auth()->user();
+
+        abort_if($message->sender_id !== $user->id, 403);
+        abort_if($message->is_deleted, 403);
+
+        $request->validate([
+            'body' => 'required|string|max:5000',
+        ]);
+
+        $data = ['body' => $request->body];
+
+        // Modération du contenu
+        $moderator = new \App\Services\ContentModerator;
+        $moderationResult = $moderator->moderate($request->body, $message->mentorship);
+
+        if ($moderationResult['is_flagged']) {
+            $data['original_body'] = $request->body;
+            $data['body'] = $moderationResult['redacted'];
+            $data['is_flagged'] = true;
+            $data['flag_reason'] = $moderationResult['reason'];
+        } else {
+            $data['is_flagged'] = false;
+            $data['flag_reason'] = null;
+            $data['original_body'] = null;
+        }
+
+        $message->update(array_merge($data, ['edited_at' => now()]));
+
+        return back()->with('success', 'Message modifié.');
+    }
+
+    /**
+     * Supprimer un message
+     */
+    public function destroy(Message $message)
+    {
+        $user = auth()->user();
+
+        abort_if($message->sender_id !== $user->id, 403);
+
+        $message->update([
+            'is_deleted' => true,
+            'body' => null,
+            'attachment_path' => null,
+            'attachment_name' => null,
+        ]);
+
+        return back()->with('success', 'Message supprimé.');
+    }
 }

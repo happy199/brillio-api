@@ -34,9 +34,13 @@
     <tr>
         <td align="center">
             <a href="{{ $calendarUrl }}"
-                style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
-                📆 Voir mon calendrier
+                style="display: inline-block; background: linear-gradient(135deg, #4285f4 0%, #34a853 100%); color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; margin-bottom: 10px;">
+                📅 Ajouter à mon agenda Google
             </a>
+            <br>
+            <span style="font-size: 12px; color: #6b7280;">
+                📎 Un fichier <strong>invitation.ics</strong> est également joint pour les autres calendriers.
+            </span>
         </td>
     </tr>
 </table>

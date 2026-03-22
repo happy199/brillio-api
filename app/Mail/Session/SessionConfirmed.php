@@ -4,7 +4,9 @@ namespace App\Mail\Session;
 
 use App\Models\MentoringSession;
 use App\Models\User;
+use App\Traits\GeneratesCalendarLinks;
 use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -13,7 +15,7 @@ use Illuminate\Support\Collection;
 
 class SessionConfirmed extends Mailable
 {
-    use Queueable, SerializesModels;
+    use GeneratesCalendarLinks, Queueable, SerializesModels;
 
     public MentoringSession $session;
 
@@ -29,13 +31,12 @@ class SessionConfirmed extends Mailable
     public function __construct(
         MentoringSession $session,
         User $recipient,
-        Collection $participants,
-        string $calendarUrl
+        Collection $participants
     ) {
         $this->session = $session;
         $this->recipient = $recipient;
         $this->participants = $participants;
-        $this->calendarUrl = $calendarUrl;
+        $this->calendarUrl = $this->generateGoogleCalendarUrl($session);
     }
 
     /**
@@ -73,6 +74,9 @@ class SessionConfirmed extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [
+            Attachment::fromData(fn () => $this->generateIcsContent($this->session), 'invitation.ics')
+                ->withMime('text/calendar'),
+        ];
     }
 }

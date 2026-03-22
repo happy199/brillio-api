@@ -72,6 +72,10 @@ class MentorshipNotificationService
      */
     public function sendSessionProposed(MentoringSession $session)
     {
+        if ($session->status === 'confirmed') {
+            return $this->sendSessionConfirmed($session);
+        }
+
         $mentor = $session->mentor;
         // Pour une proposition, on assume un seul jeune (V1) ou on envoie à tous les participants
         foreach ($session->mentees as $mentee) {
@@ -102,11 +106,11 @@ class MentorshipNotificationService
         $calendarUrl = route('jeune.sessions.calendar'); // URL générique ou specifique
 
         // Envoyer au mentor
-        Mail::to($mentor->email)->send(new SessionConfirmed($session, $mentor, $mentees, route('mentor.mentorship.calendar')));
+        Mail::to($mentor->email)->send(new SessionConfirmed($session, $mentor, $mentees));
 
         // Envoyer à chaque jeune
         foreach ($mentees as $mentee) {
-            Mail::to($mentee->email)->send(new SessionConfirmed($session, $mentee, $mentees, $calendarUrl));
+            Mail::to($mentee->email)->send(new SessionConfirmed($session, $mentee, $mentees));
         }
     }
 

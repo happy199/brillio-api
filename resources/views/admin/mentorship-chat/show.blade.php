@@ -117,31 +117,44 @@
 
                     <!-- Message Body -->
                     <div
-                        class="p-4 rounded-2xl shadow-sm {{ $message->sender_id == $mentorship->mentor_id ? 'bg-white text-gray-800' : 'bg-indigo-600 text-white' }} {{ $message->is_flagged ? 'border-2 border-red-500 ring-2 ring-red-200' : '' }}">
-                        @if($message->body)
-                        @if($message->is_flagged)
-                        <div class="mb-2 p-2 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs rounded">
-                            <p class="font-bold mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> CONTENU SIGNALÉ :
-                                {{ $message->flag_reason }}</p>
-                            <p class="italic">Ceci est la version originale (non masquée pour l'admin)</p>
-                        </div>
-                        <p class="whitespace-pre-wrap font-mono bg-red-50/50 p-2 rounded">{{ $message->original_body ??
-                            $message->body }}</p>
-                        <div
-                            class="mt-2 pt-2 border-t border-red-100 text-[10px] opacity-75 flex justify-between items-center">
-                            <span>Version masquée pour les utilisateurs: {{ Str::limit($message->body, 50) }}</span>
-                            <form action="{{ route('admin.mentorship-chat.unflag-message', $message) }}" method="POST"
-                                onsubmit="return confirm('Voulez-vous vraiment lever le signalement sur ce message ? Le texte original sera restauré pour le jeune et le mentor.')">
-                                @csrf
-                                <button type="submit"
-                                    class="text-red-700 hover:text-red-900 font-bold uppercase transition-colors">
-                                    Lever le signalement
-                                </button>
-                            </form>
-                        </div>
-                        @else
-                        <p class="whitespace-pre-wrap">{{ $message->body }}</p>
+                        class="p-4 rounded-2xl shadow-sm {{ $message->sender_id == $mentorship->mentor_id ? 'bg-white text-gray-800' : 'bg-indigo-600 text-white' }} {{ $message->is_flagged ? 'border-2 border-red-500 ring-2 ring-red-200' : '' }} {{ $message->is_deleted ? 'opacity-50' : '' }}">
+                        
+                        @if($message->is_deleted)
+                            <div class="mb-2 p-2 bg-gray-100 text-gray-500 text-xs rounded italic">
+                                <i class="fas fa-trash-alt mr-1"></i> MESSAGE SUPPRIMÉ PAR L'UTILISATEUR
+                            </div>
                         @endif
+
+                        @if($message->body)
+                            @if($message->is_flagged)
+                                <div class="mb-2 p-2 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs rounded">
+                                    <p class="font-bold mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> CONTENU SIGNALÉ :
+                                        {{ $message->flag_reason }}</p>
+                                    <p class="italic">Ceci est la version originale (non masquée pour l'admin)</p>
+                                </div>
+                                <p class="whitespace-pre-wrap font-mono bg-red-50/50 p-2 rounded">{{ $message->original_body ??
+                                    $message->body }}</p>
+                                <div
+                                    class="mt-2 pt-2 border-t border-red-100 text-[10px] opacity-75 flex justify-between items-center">
+                                    <span>Version masquée pour les utilisateurs: {{ Str::limit($message->body, 50) }}</span>
+                                    <form action="{{ route('admin.mentorship-chat.unflag-message', $message) }}" method="POST"
+                                        onsubmit="return confirm('Voulez-vous vraiment lever le signalement sur ce message ? Le texte original sera restauré pour le jeune et le mentor.')">
+                                        @csrf
+                                        <button type="submit"
+                                            class="text-red-700 hover:text-red-900 font-bold uppercase transition-colors">
+                                            Lever le signalement
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <p class="whitespace-pre-wrap">{{ $message->body }}</p>
+                            @endif
+                        @endif
+
+                        @if($message->edited_at)
+                            <div class="mt-1 text-[10px] opacity-60 italic">
+                                (Modifié le {{ $message->edited_at->format('d/m H:i') }})
+                            </div>
                         @endif
 
                         @if($message->hasAttachment())

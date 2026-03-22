@@ -260,6 +260,8 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
         Route::get('/fichier/{message}/download', [\App\Http\Controllers\Jeune\MessagesController::class, 'download'])->name('download');
         Route::get('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'show'])->name('show')->whereNumber('mentorship');
         Route::post('/{mentorship}', [\App\Http\Controllers\Jeune\MessagesController::class, 'store'])->name('store')->whereNumber('mentorship');
+        Route::patch('/{message}/update', [\App\Http\Controllers\Jeune\MessagesController::class, 'update'])->name('update')->whereNumber('message');
+        Route::delete('/{message}', [\App\Http\Controllers\Jeune\MessagesController::class, 'destroy'])->name('destroy')->whereNumber('message');
         Route::post('/{mentorship}/signaler', [\App\Http\Controllers\Common\MentorshipReportController::class, 'report'])->name('report')->whereNumber('mentorship');
     }
     );
@@ -312,6 +314,8 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
         Route::get('/fichier/{message}/download', [\App\Http\Controllers\Mentor\MessagesController::class, 'download'])->name('download');
         Route::get('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'show'])->name('show')->whereNumber('mentorship');
         Route::post('/{mentorship}', [\App\Http\Controllers\Mentor\MessagesController::class, 'store'])->name('store')->whereNumber('mentorship');
+        Route::patch('/{message}/update', [\App\Http\Controllers\Mentor\MessagesController::class, 'update'])->name('update')->whereNumber('message');
+        Route::delete('/{message}', [\App\Http\Controllers\Mentor\MessagesController::class, 'destroy'])->name('destroy')->whereNumber('message');
         Route::post('/{mentorship}/signaler', [\App\Http\Controllers\Common\MentorshipReportController::class, 'report'])->name('report')->whereNumber('mentorship');
     }
     );
