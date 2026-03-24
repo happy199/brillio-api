@@ -511,30 +511,7 @@ class SessionController extends Controller
             $session
         );
 
-        $transcription = $session->transcription_raw;
-
-        // If it's an array (structured Jitsi transcript), we might want to format it
-        if (is_array($transcription)) {
-            $text = '';
-            foreach ($transcription as $segment) {
-                $speaker = $segment['speaker'] ?? 'Anonyme';
-                $content = $segment['text'] ?? ($segment['content'] ?? '');
-                $text .= "[$speaker] : $content\n\n";
-            }
-            $transcriptionText = $text;
-        } else {
-            $transcriptionText = $transcription;
-        }
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML("
-            <h1 style='text-align:center;'>Transcription de la séance</h1>
-            <p><strong>Séance :</strong> {$session->title}</p>
-            <p><strong>Date :</strong> ".$session->scheduled_at->format('d/m/Y H:i')."</p>
-            <hr>
-            <div style='white-space: pre-wrap; font-family: sans-serif; font-size: 12px;'>
-                ".nl2br(e($transcriptionText)).'
-            </div>
-        ');
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('common.reports.transcription_pdf', compact('session'));
 
         return $pdf->download('transcription_seance_'.$session->id.'.pdf');
     }
@@ -553,7 +530,7 @@ class SessionController extends Controller
         }
 
         $mentor = Auth::user();
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('ai_report_prefill', 5);
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('ai_report_generation', 5);
 
         if ($mentor->credits_balance < $cost) {
             $missing = $cost - $mentor->credits_balance;

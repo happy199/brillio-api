@@ -88,7 +88,7 @@
                             d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
                         </path>
                     </svg>
-                    Rejoindre
+                    Rejoindre la séance de mentorat
                 </a>
 
                 <button onclick="document.getElementById('cancel-modal').showModal()"
@@ -286,7 +286,7 @@
                                     <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                     </svg>
-                                    Transcription PDF (5 créd.)
+                                    Transcription PDF ({{ \App\Models\SystemSetting::getValue('feature_cost_transcription_download', 5) }} créd.)
                                 </a>
 
                                 <form action="{{ route('mentor.mentorship.sessions.prefill-report', $session) }}" method="POST">
@@ -296,7 +296,7 @@
                                         <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                         </svg>
-                                        Pré-remplir via l'IA (5 créd.)
+                                        Pré-remplir le compte rendu ({{ \App\Models\SystemSetting::getValue('feature_cost_ai_report_generation', 5) }} créd.)
                                     </button>
                                 </form>
                             @elseif($session->status === 'completed' || $session->scheduled_at->isPast())

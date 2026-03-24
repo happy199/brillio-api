@@ -403,30 +403,7 @@ class SessionController extends Controller
             $session
         );
 
-        $transcription = $session->transcription_raw;
-
-        // Format transcription for PDF
-        if (is_array($transcription)) {
-            $text = '';
-            foreach ($transcription as $segment) {
-                $speaker = $segment['speaker'] ?? 'Anonyme';
-                $content = $segment['text'] ?? ($segment['content'] ?? '');
-                $text .= "[$speaker] : $content\n\n";
-            }
-            $transcriptionText = $text;
-        } else {
-            $transcriptionText = $transcription;
-        }
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML("
-            <h1 style='text-align:center;'>Transcription de la séance</h1>
-            <p><strong>Séance :</strong> {$session->title}</p>
-            <p><strong>Date :</strong> ".\Carbon\Carbon::parse($session->scheduled_at)->format('d/m/Y H:i')."</p>
-            <hr>
-            <div style='white-space: pre-wrap; font-family: sans-serif; font-size: 12px;'>
-                ".nl2br(e($transcriptionText)).'
-            </div>
-        ');
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('common.reports.transcription_pdf', compact('session'));
 
         return $pdf->download('transcription_seance_'.$session->id.'.pdf');
     }
