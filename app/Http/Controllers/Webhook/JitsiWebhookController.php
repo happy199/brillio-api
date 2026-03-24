@@ -111,6 +111,12 @@ class JitsiWebhookController extends Controller
             'timestamp' => 'required|numeric',
         ]);
 
+        Log::info('Transcription Fragment Received', [
+            'session_id' => $session->id,
+            'speaker' => $request->speaker,
+            'text' => $request->text
+        ]);
+
         $currentTranscription = $session->transcription_raw ?: [];
 
         // Si c'était du texte brut (ancien format), on convertit en tableau

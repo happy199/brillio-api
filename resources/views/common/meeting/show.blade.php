@@ -54,9 +54,9 @@
     <script src="https://8x8.vc/{{ $appId }}/external_api.js" async onload="initJitsi()"></script>
     <script>
         function initJitsi() {
-            const domain = "8x8.vc";
+            const domain = '8x8.vc';
             const options = {
-                roomName: "{{ $appId }}/{{ $roomName }}",
+                roomName: "{{ $roomName }}",
                 width: '100%',
                 height: '100%',
                 lang: 'fr',
@@ -69,7 +69,7 @@
                 configOverwrite: {
                     startWithAudioMuted: false,
                     startWithVideoMuted: false,
-                    prejoinPageEnabled: false, // Disable prejoin page if name is known
+                    prejoinPageEnabled: false,
                 },
                 interfaceConfigOverwrite: {
                     SHOW_JITSI_WATERMARK: false,
@@ -84,6 +84,7 @@
                     ]
                 }
             };
+
             const api = new JitsiMeetExternalAPI(domain, options);
 
             // Handle Hangup
@@ -92,6 +93,59 @@
                     window.location.href = "{{ $isMentor ? route('mentor.mentorship.sessions.show', $session) : route('jeune.sessions.show', $session) }}";
                 }
             });
+
+            // --- Système de Transcription Client-Side Gratuit ---
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (SpeechRecognition) {
+                console.log('Transcription IA : Activée');
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'fr-FR';
+                recognition.continuous = true;
+                recognition.interimResults = false;
+
+                recognition.onresult = (event) => {
+                    const result = event.results[event.results.length - 1];
+                    if (result.isFinal) {
+                        const text = result[0].transcript.trim();
+                        if (text && text.length > 2) {
+                            sendTranscriptionFragment(text);
+                        }
+                    }
+                };
+
+                recognition.onend = () => {
+                    try {
+                        recognition.start();
+                    } catch(e) {
+                        console.error('Erreur redémarrage transcription:', e);
+                    }
+                };
+
+                function sendTranscriptionFragment(text) {
+                    fetch('{{ route("meeting.append-transcription", $session) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            text: text,
+                            speaker: {!! json_encode(Auth::user()->name) !!},
+                            timestamp: Math.floor(Date.now() / 1000)
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => console.log('Transcription sent:', data))
+                    .catch(err => console.error('Erreur envoi transcription:', err));
+                }
+
+                try {
+                    recognition.start();
+                } catch(e) {
+                    console.error('Erreur démarrage transcription:', e);
+                }
+            }
         }
     </script>
 </body>
