@@ -56,7 +56,7 @@
         function initJitsi() {
             const domain = '8x8.vc';
             const options = {
-                roomName: "{{ $roomName }}",
+                roomName: "{{ $appId }}/{{ $roomName }}",
                 width: '100%',
                 height: '100%',
                 lang: 'fr',
