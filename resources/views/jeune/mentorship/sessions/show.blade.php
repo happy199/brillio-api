@@ -42,10 +42,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
                                 </path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            En ligne (Jitsi)
+                            En ligne
                         </div>
                     </div>
                 </div>
@@ -77,7 +75,11 @@
                             Séance annulée
                         </div>
                         {{-- Logic d'Accès Individuel --}}
-                    @elseif($session->scheduled_at >= now())
+                    @elseif($session->status === 'completed')
+                        <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-center font-bold text-sm mb-3">
+                            Séance terminée
+                        </div>
+                    @else
                         @php
                              // On récupère le pivot de l'utilisateur connecté pour vérifier son statut personnel
                              $currentUserPivot = $session->mentees->find(auth()->id())?->pivot;
@@ -86,17 +88,13 @@
                              $canAccess = !$session->is_paid || $hasPaid;
                         @endphp
 
-                        @if($session->status === 'confirmed' || $session->status === 'accepted' || $session->status === 'completed')
-                            @if($session->status === 'completed')
-                                 <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-center font-bold text-sm mb-3">
-                                    Séance terminée
-                                </div>
-                            @elseif($canAccess)
+                        @if($session->status === 'confirmed' || $session->status === 'accepted')
+                            @if($canAccess)
                                 <!-- CAS 1: ACCÈS AUTORISÉ (Gratuit ou Payé) -->
                                 @if($session->meeting_link)
                                     <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
                                         class="block w-full text-center py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition mb-3">
-                                        En ligne
+                                        Rejoindre la séance de mentorat
                                     </a>
                                 @else
                                     <button disabled
@@ -118,11 +116,7 @@
                                 </form>
                             @endif
                         @else
-                             <!-- CAS 3: SESSION NON CONFIRMÉE (En attente validation mentor OU Paiement global) -->
-                             <!-- Note: Si confirmé par un autre jeune, le statut global devient 'confirmed', donc on tombe dans le bloc if du haut -->
-                             
-                             <!-- Si le jeune n'a pas payé, on affiche le bouton payer -->
-                             <!-- Si le statut est pending_payment, c'est que personne n'a payé (ou du moins pas confirmé), donc on affiche le bouton -->
+                             <!-- CAS 3: SESSION NON CONFIRMÉE -->
                              @if($session->is_paid)
                                 <form action="{{ route('jeune.sessions.pay-join', $session) }}" method="POST">
                                     @csrf
@@ -139,8 +133,7 @@
                         @endif
 
                         <!-- Cancel Button & Modal Trigger -->
-                        <!-- Cancel Button & Modal Trigger -->
-                        @if($session->status !== 'completed')
+                        @if($session->status !== 'completed' && $session->status !== 'cancelled')
                         <div x-data="{ open: false }">
                             <button @click="open = true"
                                 class="w-full py-2 text-red-600 hover:bg-red-50 font-medium rounded-lg transition text-sm">
@@ -176,9 +169,18 @@
                             </dialog>
                         </div>
                         @endif
-                    @else
-                        <div class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-center font-bold text-sm">
-                            Séance terminée
+                    @endif
+
+                    @if($session->has_transcription)
+                        <div class="mt-6 pt-6 border-t border-gray-100 space-y-3">
+                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">IA & Transcription</h4>
+                            <a href="{{ route('jeune.sessions.download-transcription', $session) }}"
+                                class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                                Transcription PDF ({{ \App\Models\SystemSetting::getValue('feature_cost_transcription_download', 5) }} créd.)
+                            </a>
                         </div>
                     @endif
                 </div>

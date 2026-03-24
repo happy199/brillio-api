@@ -25,6 +25,8 @@ class MonetizationController extends Controller
             'feature_cost_new_chat',
             'feature_cost_unlock_history',
             'feature_cost_compiled_report',
+            'feature_cost_transcription_download',
+            'feature_cost_ai_report_generation',
             'payout_fee_percentage',
             'mentorship_commission_percent',
         ])->get()->keyBy('key');
@@ -38,6 +40,8 @@ class MonetizationController extends Controller
         $newChatCost = $settings['feature_cost_new_chat']->value ?? 10;
         $unlockHistoryCost = $settings['feature_cost_unlock_history']->value ?? 5;
         $compiledReportCost = $settings['feature_cost_compiled_report']->value ?? 5;
+        $transcriptionDownloadCost = $settings['feature_cost_transcription_download']->value ?? 5;
+        $aiReportGenerationCost = $settings['feature_cost_ai_report_generation']->value ?? 5;
         $payoutFeePercentage = $settings['payout_fee_percentage']->value ?? 5;
         $commissionPercent = $settings['mentorship_commission_percent']->value ?? 10;
 
@@ -98,6 +102,8 @@ class MonetizationController extends Controller
             'newChatCost',
             'unlockHistoryCost',
             'compiledReportCost',
+            'transcriptionDownloadCost',
+            'aiReportGenerationCost',
             'payoutFeePercentage',
             'totalCreditsPurchased',
             'creditsPurchasedJeune',
@@ -134,6 +140,8 @@ class MonetizationController extends Controller
             'feature_cost_new_chat' => 'required|integer|min:0',
             'feature_cost_unlock_history' => 'required|integer|min:0',
             'feature_cost_compiled_report' => 'required|integer|min:0',
+            'feature_cost_transcription_download' => 'required|integer|min:0',
+            'feature_cost_ai_report_generation' => 'required|integer|min:0',
             'payout_fee_percentage' => 'required|integer|min:0|max:100',
             'mentorship_commission_percent' => 'required|integer|min:0|max:100',
         ]);

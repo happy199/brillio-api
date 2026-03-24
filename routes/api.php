@@ -94,3 +94,6 @@ Route::middleware('auth:sanctum')->group(function () {
  */
 Route::post('/webhooks/moneroo', [\App\Http\Controllers\MonerooWebhookController::class, 'handle'])
     ->name('api.webhooks.moneroo');
+
+Route::post('/webhooks/jitsi', [\App\Http\Controllers\Webhook\JitsiWebhookController::class, 'handle'])
+    ->name('api.webhooks.jitsi');

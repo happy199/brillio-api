@@ -480,4 +480,85 @@ class SessionController extends Controller
 
         return $pdf->download('rapport_compile_seances_'.date('Ymd_His').'.pdf');
     }
+
+    /**
+     * Télécharger la transcription d'une séance en PDF (5 crédits)
+     */
+    public function downloadTranscription(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (! $session->has_transcription) {
+            return redirect()->back()->with('error', "La transcription n'est pas encore disponible pour cette séance.");
+        }
+
+        $mentor = Auth::user();
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('transcription_download', 5);
+
+        if ($mentor->credits_balance < $cost) {
+            $missing = $cost - $mentor->credits_balance;
+
+            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cette transcription.");
+        }
+
+        app(\App\Services\WalletService::class)->deductCredits(
+            $mentor,
+            $cost,
+            'feature_use',
+            "Téléchargement de la transcription de la séance : {$session->title}",
+            $session
+        );
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('common.reports.transcription_pdf', compact('session'));
+
+        return $pdf->download('transcription_seance_'.$session->id.'.pdf');
+    }
+
+    /**
+     * Pré-remplir le compte rendu avec l'IA (5 crédits)
+     */
+    public function prefillReport(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (! $session->has_transcription) {
+            return redirect()->back()->with('error', "La transcription n'est pas encore disponible. Vous pourrez pré-remplir le rapport une fois le meeting terminé et la transcription générée.");
+        }
+
+        $mentor = Auth::user();
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('ai_report_generation', 5);
+
+        if ($mentor->credits_balance < $cost) {
+            $missing = $cost - $mentor->credits_balance;
+
+            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour utiliser l'IA.");
+        }
+
+        $suggestedReport = app(\App\Services\DeepSeekService::class)->summarizeTranscription($session->transcription_raw);
+
+        if (! $suggestedReport) {
+            return redirect()->back()->with('error', "L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.");
+        }
+
+        app(\App\Services\WalletService::class)->deductCredits(
+            $mentor,
+            $cost,
+            'feature_use',
+            "Pré-remplissage du compte rendu par l'IA : {$session->title}",
+            $session
+        );
+
+        // On ne sauvegarde pas encore, on renvoie vers la page de show avec les données pré-remplies en session
+        // ou on met à jour les champs si le mentor veut juste les voir.
+        // L'utilisateur a demandé "pré-remplir ce compte rendu", donc je vais les mettre en session ou les passer en paramètre.
+        // Mais comme c'est une action POST/GET, je vais rediriger vers le show avec les inputs.
+
+        return redirect()->route('mentor.mentorship.sessions.show', $session)
+            ->with('prefilled_report', $suggestedReport)
+            ->with('success', "Le compte rendu a été pré-rempli par l'IA avec succès ($cost crédits déduits).");
+    }
 }

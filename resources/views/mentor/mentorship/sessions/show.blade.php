@@ -88,7 +88,7 @@
                             d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
                         </path>
                     </svg>
-                    Rejoindre
+                    Rejoindre la séance de mentorat
                 </a>
 
                 <button onclick="document.getElementById('cancel-modal').showModal()"
@@ -188,6 +188,14 @@
                     <p class="text-gray-500 text-sm mb-6">À remplir pendant ou après la séance pour assurer le suivi.
                     </p>
 
+
+                    @php
+                        $prefilled = session('prefilled_report');
+                        $progress = $prefilled['progress'] ?? ($session->report_content['progress'] ?? '');
+                        $obstacles = $prefilled['obstacles'] ?? ($session->report_content['obstacles'] ?? '');
+                        $smart_goals = $prefilled['smart_goals'] ?? ($session->report_content['smart_goals'] ?? '');
+                    @endphp
+
                     <form action="{{ route('mentor.mentorship.sessions.report.update', $session) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -200,7 +208,7 @@
                                     dernière session</label>
                                 <textarea name="progress" rows="3"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
-                                    placeholder="Qu'est-ce qui a été accompli ?">{{ $session->report_content['progress'] ?? '' }}</textarea>
+                                    placeholder="Qu'est-ce qui a été accompli ?">{{ $progress }}</textarea>
                             </div>
 
                             <!-- 2. Topics / Obstacles -->
@@ -209,7 +217,7 @@
                                     Obstacles</label>
                                 <textarea name="obstacles" rows="3"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
-                                    placeholder="Points clés discutés et blocages identifiés...">{{ $session->report_content['obstacles'] ?? '' }}</textarea>
+                                    placeholder="Points clés discutés et blocages identifiés...">{{ $obstacles }}</textarea>
                             </div>
 
                             <!-- 3. SMART Goals -->
@@ -221,7 +229,7 @@
                                 </div>
                                 <textarea name="smart_goals" rows="3"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
-                                    placeholder="Actions concrètes à réaliser...">{{ $session->report_content['smart_goals'] ?? '' }}</textarea>
+                                    placeholder="Actions concrètes à réaliser...">{{ $smart_goals }}</textarea>
                             </div>
                         </div>
 
@@ -268,6 +276,46 @@
                                 FCFA</span>
                         </div>
                         @endif
+
+                        <!-- Actions de Transcription / IA -->
+                        <div class="mt-6 pt-6 border-t border-gray-100 space-y-3">
+                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Options IA & Transcription</h4>
+                            @if($session->has_transcription)
+                                <a href="{{ route('mentor.mentorship.sessions.download-transcription', $session) }}"
+                                    class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    Transcription PDF ({{ \App\Models\SystemSetting::getValue('feature_cost_transcription_download', 5) }} créd.)
+                                </a>
+
+                                <form action="{{ route('mentor.mentorship.sessions.prefill-report', $session) }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-indigo-50 border border-indigo-100 rounded-lg text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
+                                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        Pré-remplir le compte rendu ({{ \App\Models\SystemSetting::getValue('feature_cost_ai_report_generation', 5) }} créd.)
+                                    </button>
+                                </form>
+                            @elseif($session->status === 'completed' || $session->scheduled_at->isPast())
+                                <div class="p-3 bg-red-50 rounded-lg border border-dashed border-red-200">
+                                    <p class="text-[11px] text-red-600 text-center leading-tight">
+                                        Transcription non disponible pour cette séance.
+                                    </p>
+                                </div>
+                            @else
+                                <div class="p-3 bg-gray-50 rounded-lg border border-dashed border-gray-100">
+                                    <p class="text-[11px] text-gray-500 text-center leading-tight">
+                                        <svg class="w-4 h-4 mx-auto mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        La transcription sera disponible une fois la séance terminée.
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
 
