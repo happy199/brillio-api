@@ -495,7 +495,7 @@ class SessionController extends Controller
         }
 
         $mentor = Auth::user();
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('download_transcription', 5);
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('transcription_download', 5);
 
         if ($mentor->credits_balance < $cost) {
             $missing = $cost - $mentor->credits_balance;

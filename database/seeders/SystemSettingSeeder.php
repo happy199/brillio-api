@@ -70,6 +70,18 @@ class SystemSettingSeeder extends Seeder
                 'type' => 'integer',
                 'description' => 'Nombre de crédits pour générer un rapport compilé',
             ],
+            [
+                'key' => 'feature_cost_transcription_download',
+                'value' => '5',
+                'type' => 'integer',
+                'description' => 'Nombre de crédits pour télécharger une transcription de séance (Mentor & Jeune)',
+            ],
+            [
+                'key' => 'feature_cost_ai_report_generation',
+                'value' => '5',
+                'type' => 'integer',
+                'description' => 'Nombre de crédits pour générer automatiquement le compte rendu via l\'IA (Mentor)',
+            ],
 
             // Commissions et frais
             [

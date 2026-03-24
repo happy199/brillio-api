@@ -386,7 +386,7 @@ class SessionController extends Controller
         }
 
         // 3. Credit Check
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('download_transcription', 5);
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('transcription_download', 5);
 
         if ($user->credits_balance < $cost) {
             $missing = $cost - $user->credits_balance;
