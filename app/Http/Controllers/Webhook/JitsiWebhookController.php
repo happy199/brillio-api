@@ -97,6 +97,38 @@ class JitsiWebhookController extends Controller
                 'session_id' => $session->id
             ]);
         }
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Termine et enregistre les données de transcription via l'API Web Speech (Client-side)
+     */
+    public function appendTranscription(Request $request, MentoringSession $session)
+    {
+        $request->validate([
+            'text' => 'required|string',
+            'speaker' => 'required|string',
+            'timestamp' => 'required|numeric',
+        ]);
+
+        $currentTranscription = $session->transcription_raw ?: [];
+
+        // Si c'était du texte brut (ancien format), on convertit en tableau
+        if (! is_array($currentTranscription)) {
+            $currentTranscription = [['text' => (string) $currentTranscription, 'speaker' => 'Système', 'timestamp' => time()]];
+        }
+
+        // Ajouter le nouveau fragment
+        $currentTranscription[] = [
+            'speaker' => $request->speaker,
+            'text' => $request->text,
+            'timestamp' => $request->timestamp,
+        ];
+
+        $session->update([
+            'transcription_raw' => $currentTranscription,
+            'has_transcription' => true,
+        ]);
 
         return response()->json(['status' => 'success']);
     }

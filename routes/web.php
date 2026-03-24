@@ -167,6 +167,7 @@ Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.pu
  */
 Route::middleware(['auth'])->group(function () {
     Route::get('/meeting/{meetingId}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meeting.show');
+    Route::post('/meeting/append-transcription/{session}', [\App\Http\Controllers\Webhook\JitsiWebhookController::class, 'appendTranscription'])->name('meeting.append-transcription');
 });
 
 /*

@@ -464,8 +464,22 @@ class DeepSeekService
     /**
      * Summarize a meeting transcription into the three report fields.
      */
-    public function summarizeTranscription($transcriptionText)
+    public function summarizeTranscription($transcriptionData)
     {
+        // Conversion de la transcription en texte structuré si c'est un tableau de segments
+        if (is_array($transcriptionData)) {
+            $transcriptionText = '';
+            foreach ($transcriptionData as $segment) {
+                if (is_array($segment) && isset($segment['speaker'], $segment['text'])) {
+                    $transcriptionText .= '['.($segment['speaker'] ?? 'Inconnu').'] : '.$segment['text']."\n";
+                } elseif (is_string($segment)) {
+                    $transcriptionText .= $segment."\n";
+                }
+            }
+        } else {
+            $transcriptionText = (string) $transcriptionData;
+        }
+
         $systemPrompt = "Tu es un assistant qui analyse des transcriptions de séances de mentorat.\n".
             "Ta mission est d'extraire les informations clés pour remplir un compte rendu de séance selon trois axes :\n".
             "1. PROGRES : Ce qui a été accompli durant la séance.\n".
