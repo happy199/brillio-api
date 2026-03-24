@@ -480,4 +480,120 @@ class SessionController extends Controller
 
         return $pdf->download('rapport_compile_seances_'.date('Ymd_His').'.pdf');
     }
+
+    /**
+     * Télécharger la transcription d'une séance en PDF (5 crédits)
+     */
+    public function downloadTranscription(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (! $session->has_transcription) {
+            return redirect()->back()->with('error', "La transcription n'est pas encore disponible pour cette séance.");
+        }
+
+        $mentor = Auth::user();
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('download_transcription', 5);
+
+        if ($mentor->credits_balance < $cost) {
+            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis).");
+        }
+
+        app(\App\Services\WalletService::class)->deductCredits(
+            $mentor,
+            $cost,
+            'feature_use',
+            "Téléchargement de la transcription de la séance : {$session->title}",
+            $session
+        );
+
+        $transcription = $session->transcription_raw;
+
+        // If it's an array (structured Jitsi transcript), we might want to format it
+        if (is_array($transcription)) {
+            $text = '';
+            foreach ($transcription as $segment) {
+                $speaker = $segment['speaker'] ?? 'Anonyme';
+                $content = $segment['text'] ?? ($segment['content'] ?? '');
+                $text .= "[$speaker] : $content\n\n";
+            }
+            $transcriptionText = $text;
+        } else {
+            $transcriptionText = $transcription;
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML("
+            <h1 style='text-align:center;'>Transcription de la séance</h1>
+            <p><strong>Séance :</strong> {$session->title}</p>
+            <p><strong>Date :</strong> ".$session->scheduled_at->format('d/m/Y H:i')."</p>
+            <hr>
+            <div style='white-space: pre-wrap; font-family: sans-serif; font-size: 12px;'>
+                ".nl2br(e($transcriptionText)).'
+            </div>
+        ');
+
+        return $pdf->download('transcription_seance_'.$session->id.'.pdf');
+    }
+
+    /**
+     * Pré-remplir le compte rendu avec l'IA (5 crédits)
+     */
+    public function prefillReport(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (! $session->has_transcription) {
+            return redirect()->back()->with('error', "La transcription n'est pas encore disponible. Vous pourrez pré-remplir le rapport une fois le meeting terminé et la transcription générée.");
+        }
+
+        $mentor = Auth::user();
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('ai_report_prefill', 5);
+
+        if ($mentor->credits_balance < $cost) {
+            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis).");
+        }
+
+        // Get transcription text
+        $transcription = $session->transcription_raw;
+        $transcriptionText = '';
+        if (is_array($transcription)) {
+            foreach ($transcription as $segment) {
+                $content = $segment['text'] ?? ($segment['content'] ?? '');
+                $transcriptionText .= $content.' ';
+            }
+        } else {
+            $transcriptionText = $transcription;
+        }
+
+        if (empty(trim($transcriptionText))) {
+            return redirect()->back()->with('error', 'La transcription semble vide.');
+        }
+
+        $suggestedReport = app(\App\Services\DeepSeekService::class)->summarizeTranscription($transcriptionText);
+
+        if (! $suggestedReport) {
+            return redirect()->back()->with('error', "L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.");
+        }
+
+        app(\App\Services\WalletService::class)->deductCredits(
+            $mentor,
+            $cost,
+            'feature_use',
+            "Pré-remplissage du compte rendu par l'IA : {$session->title}",
+            $session
+        );
+
+        // On ne sauvegarde pas encore, on renvoie vers la page de show avec les données pré-remplies en session
+        // ou on met à jour les champs si le mentor veut juste les voir.
+        // L'utilisateur a demandé "pré-remplir ce compte rendu", donc je vais les mettre en session ou les passer en paramètre.
+        // Mais comme c'est une action POST/GET, je vais rediriger vers le show avec les inputs.
+
+        return redirect()->route('mentor.mentorship.sessions.show', $session)
+            ->with('prefilled_report', $suggestedReport)
+            ->with('success', "Le compte rendu a été pré-rempli par l'IA avec succès ($cost crédits déduits).");
+    }
 }

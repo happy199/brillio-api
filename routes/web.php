@@ -372,6 +372,8 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
 
             Route::get('/sessions/{session}', [\App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
             Route::get('/sessions/{session}/download-report', [\App\Http\Controllers\Mentor\SessionController::class, 'downloadReport'])->name('sessions.download-report');
+            Route::get('/sessions/{session}/download-transcription', [\App\Http\Controllers\Mentor\SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
+            Route::post('/sessions/{session}/prefill-report', [\App\Http\Controllers\Mentor\SessionController::class, 'prefillReport'])->name('sessions.prefill-report');
             Route::put('/sessions/{session}/report', [\App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
             Route::post('/sessions/{session}/accept', [\App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');
             Route::post('/sessions/{session}/refuse', [\App\Http\Controllers\Mentor\SessionController::class, 'refuse'])->name('sessions.refuse');

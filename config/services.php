@@ -91,4 +91,8 @@ return [
         'token' => env('MIXPANEL_TOKEN'),
     ],
 
+    'jitsi' => [
+        'webhook_secret' => env('JITSI_WEBHOOK_SECRET'),
+    ],
+
 ];

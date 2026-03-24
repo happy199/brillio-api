@@ -69,7 +69,12 @@
                 configOverwrite: {
                     startWithAudioMuted: false,
                     startWithVideoMuted: false,
-                    prejoinPageEnabled: false // Disable prejoin page if name is known
+                    prejoinPageEnabled: false, // Disable prejoin page if name is known
+                    transcription: {
+                        enabled: true,
+                        autoStart: true,
+                        translationLanguages: []
+                    }
                 },
                 interfaceConfigOverwrite: {
                     SHOW_JITSI_WATERMARK: false,

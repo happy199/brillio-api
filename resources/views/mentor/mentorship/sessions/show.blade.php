@@ -188,6 +188,36 @@
                     <p class="text-gray-500 text-sm mb-6">À remplir pendant ou après la séance pour assurer le suivi.
                     </p>
 
+                    @if($session->has_transcription)
+                    <div class="flex flex-wrap gap-3 mb-6">
+                        <a href="{{ route('mentor.mentorship.sessions.download-transcription', $session) }}"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            Transcription PDF (5 crédits)
+                        </a>
+
+                        <form action="{{ route('mentor.mentorship.sessions.prefill-report', $session) }}" method="POST" onsubmit="return confirm('Pré-remplir le rapport avec l\'IA coûte 5 crédits. Les champs actuels non sauvegardés seront remplacés. Continuer ?')">
+                            @csrf
+                            <button type="submit"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
+                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                Pré-remplir avec l'IA (5 crédits)
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+
+                    @php
+                        $prefilled = session('prefilled_report');
+                        $progress = $prefilled['progress'] ?? ($session->report_content['progress'] ?? '');
+                        $obstacles = $prefilled['obstacles'] ?? ($session->report_content['obstacles'] ?? '');
+                        $smart_goals = $prefilled['smart_goals'] ?? ($session->report_content['smart_goals'] ?? '');
+                    @endphp
+
                     <form action="{{ route('mentor.mentorship.sessions.report.update', $session) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -200,7 +230,7 @@
                                     dernière session</label>
                                 <textarea name="progress" rows="3"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
-                                    placeholder="Qu'est-ce qui a été accompli ?">{{ $session->report_content['progress'] ?? '' }}</textarea>
+                                    placeholder="Qu'est-ce qui a été accompli ?">{{ $progress }}</textarea>
                             </div>
 
                             <!-- 2. Topics / Obstacles -->
@@ -209,7 +239,7 @@
                                     Obstacles</label>
                                 <textarea name="obstacles" rows="3"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
-                                    placeholder="Points clés discutés et blocages identifiés...">{{ $session->report_content['obstacles'] ?? '' }}</textarea>
+                                    placeholder="Points clés discutés et blocages identifiés...">{{ $obstacles }}</textarea>
                             </div>
 
                             <!-- 3. SMART Goals -->
@@ -221,7 +251,7 @@
                                 </div>
                                 <textarea name="smart_goals" rows="3"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
-                                    placeholder="Actions concrètes à réaliser...">{{ $session->report_content['smart_goals'] ?? '' }}</textarea>
+                                    placeholder="Actions concrètes à réaliser...">{{ $smart_goals }}</textarea>
                             </div>
                         </div>
 

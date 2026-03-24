@@ -37,6 +37,10 @@ class MentoringSession extends Model
         'meeting_link',
         'report_content', // JSON: { progress, obstacles, smart_goals }
         'created_by', // mentor, mentee
+        'transcription_raw',
+        'transcription_summary',
+        'has_transcription',
+        'transcription_file_path',
     ];
 
     protected $casts = [
@@ -46,6 +50,8 @@ class MentoringSession extends Model
         'reminder_24h_sent' => 'boolean',
         'reminder_1h_sent' => 'boolean',
         'report_content' => 'array',
+        'transcription_raw' => 'array',
+        'has_transcription' => 'boolean',
     ];
 
     public function mentor()
