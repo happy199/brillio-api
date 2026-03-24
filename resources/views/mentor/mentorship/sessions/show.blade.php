@@ -289,7 +289,7 @@
                                     Transcription PDF (5 créd.)
                                 </a>
 
-                                <form action="{{ route('mentor.mentorship.sessions.prefill-report', $session) }}" method="POST" onsubmit="return confirm('Pré-remplir le rapport avec l\'IA coûte 5 crédits. Les champs actuels non sauvegardés seront remplacés. Continuer ?')">
+                                <form action="{{ route('mentor.mentorship.sessions.prefill-report', $session) }}" method="POST">
                                     @csrf
                                     <button type="submit"
                                         class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-indigo-50 border border-indigo-100 rounded-lg text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition shadow-sm">

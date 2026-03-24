@@ -498,7 +498,9 @@ class SessionController extends Controller
         $cost = app(\App\Services\WalletService::class)->getFeatureCost('download_transcription', 5);
 
         if ($mentor->credits_balance < $cost) {
-            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis).");
+            $missing = $cost - $mentor->credits_balance;
+
+            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cette transcription.");
         }
 
         app(\App\Services\WalletService::class)->deductCredits(
@@ -554,26 +556,12 @@ class SessionController extends Controller
         $cost = app(\App\Services\WalletService::class)->getFeatureCost('ai_report_prefill', 5);
 
         if ($mentor->credits_balance < $cost) {
-            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis).");
+            $missing = $cost - $mentor->credits_balance;
+
+            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour utiliser l'IA.");
         }
 
-        // Get transcription text
-        $transcription = $session->transcription_raw;
-        $transcriptionText = '';
-        if (is_array($transcription)) {
-            foreach ($transcription as $segment) {
-                $content = $segment['text'] ?? ($segment['content'] ?? '');
-                $transcriptionText .= $content.' ';
-            }
-        } else {
-            $transcriptionText = $transcription;
-        }
-
-        if (empty(trim($transcriptionText))) {
-            return redirect()->back()->with('error', 'La transcription semble vide.');
-        }
-
-        $suggestedReport = app(\App\Services\DeepSeekService::class)->summarizeTranscription($transcriptionText);
+        $suggestedReport = app(\App\Services\DeepSeekService::class)->summarizeTranscription($session->transcription_raw);
 
         if (! $suggestedReport) {
             return redirect()->back()->with('error', "L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.");
