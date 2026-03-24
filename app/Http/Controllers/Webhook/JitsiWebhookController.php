@@ -131,6 +131,12 @@ class JitsiWebhookController extends Controller
             $currentTranscription = [['text' => (string) $currentTranscription, 'speaker' => 'Système', 'timestamp' => time()]];
         }
 
+        // Éviter les doublons quasi-identiques (ex: deux participants captant la même phrase)
+        $lastFragment = end($currentTranscription);
+        if ($lastFragment && $lastFragment['text'] === $request->text && (time() - $lastFragment['timestamp'] < 3)) {
+            return response()->json(['status' => 'ignored_duplicate']);
+        }
+
         // Ajouter le nouveau fragment
         $currentTranscription[] = [
             'speaker' => $request->speaker,

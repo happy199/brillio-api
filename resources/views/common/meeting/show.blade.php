@@ -98,7 +98,19 @@
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             
             if (SpeechRecognition) {
-                console.log('Transcription IA : Activée');
+                // Créer un indicateur visuel discret
+                const indicator = document.createElement('div');
+                indicator.id = 'transcription-status';
+                indicator.innerHTML = `
+                    <div class="flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-green-500/30">
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                        Transcription active pour {{ Auth::user()->name }}
+                    </div>
+                `;
+                indicator.className = 'absolute bottom-20 left-4 z-50 pointer-events-none opacity-50 hover:opacity-100 transition-opacity';
+                document.body.appendChild(indicator);
+
+                console.log('Transcription IA : Activée pour {{ Auth::user()->name }}');
                 const recognition = new SpeechRecognition();
                 recognition.lang = 'fr-FR';
                 recognition.continuous = true;
@@ -109,8 +121,28 @@
                     if (result.isFinal) {
                         const text = result[0].transcript.trim();
                         if (text && text.length > 2) {
-                            sendTranscriptionFragment(text);
+                            // Vérifier si le micro est coupé dans Jitsi avant d'envoyer
+                            // Cela évite de transcrire le son des enceintes capturé par le micro
+                            api.isAudioMuted().then(muted => {
+                                if (!muted) {
+                                    sendTranscriptionFragment(text);
+                                } else {
+                                    console.log('Transcription bloquée : Utilisateur muet');
+                                }
+                            });
                         }
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Erreur reconnaissance vocale:', event.error);
+                    if (event.error === 'not-allowed') {
+                        indicator.innerHTML = `
+                            <div class="flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-red-500/30">
+                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                Micro bloqué par le navigateur
+                            </div>
+                        `;
                     }
                 };
 
@@ -118,7 +150,7 @@
                     try {
                         recognition.start();
                     } catch(e) {
-                        console.error('Erreur redémarrage transcription:', e);
+                        // Déjà démarré ou erreur fatale
                     }
                 };
 
@@ -136,7 +168,12 @@
                         })
                     })
                     .then(res => res.json())
-                    .then(data => console.log('Transcription sent:', data))
+                    .then(data => {
+                        // Feedback visuel rapide
+                        indicator.classList.remove('opacity-50');
+                        indicator.classList.add('opacity-100');
+                        setTimeout(() => indicator.classList.add('opacity-50'), 2000);
+                    })
                     .catch(err => console.error('Erreur envoi transcription:', err));
                 }
 
@@ -145,6 +182,18 @@
                 } catch(e) {
                     console.error('Erreur démarrage transcription:', e);
                 }
+            } else {
+                console.warn('SpeechRecognition non supporté par ce navigateur.');
+                // Alerter l'utilisateur s'il n'est pas sur Chrome
+                const indicator = document.createElement('div');
+                indicator.innerHTML = `
+                    <div class="flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-yellow-500/30">
+                        <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                        Transcription non supportée (Utilisez Chrome)
+                    </div>
+                `;
+                indicator.className = 'absolute bottom-20 left-4 z-50 pointer-events-none';
+                document.body.appendChild(indicator);
             }
         }
     </script>
