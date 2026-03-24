@@ -366,6 +366,68 @@ class SessionController extends Controller
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.compiled_sessions_pdf', compact('sessions'));
 
-        return $pdf->download('Rapports_Compiles_'.now()->format('Ymd').'.pdf');
+    }
+
+    /**
+     * Télécharger la transcription d'une séance en PDF (5 crédits)
+     */
+    public function downloadTranscription(MentoringSession $session)
+    {
+        $user = auth()->user();
+
+        // 1. Check participation
+        if (! $session->mentees->contains($user->id)) {
+            abort(403);
+        }
+
+        // 2. Check if transcription exists
+        if (! $session->has_transcription) {
+            return redirect()->back()->with('error', "La transcription n'est pas encore disponible pour cette séance.");
+        }
+
+        // 3. Credit Check
+        $cost = app(\App\Services\WalletService::class)->getFeatureCost('download_transcription', 5);
+
+        if ($user->credits_balance < $cost) {
+            $missing = $cost - $user->credits_balance;
+
+            return redirect()->route('jeune.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cette transcription.");
+        }
+
+        // 4. Deduct Credits
+        app(\App\Services\WalletService::class)->deductCredits(
+            $user,
+            $cost,
+            'feature_use',
+            "Téléchargement de la transcription de la séance : {$session->title}",
+            $session
+        );
+
+        $transcription = $session->transcription_raw;
+
+        // Format transcription for PDF
+        if (is_array($transcription)) {
+            $text = '';
+            foreach ($transcription as $segment) {
+                $speaker = $segment['speaker'] ?? 'Anonyme';
+                $content = $segment['text'] ?? ($segment['content'] ?? '');
+                $text .= "[$speaker] : $content\n\n";
+            }
+            $transcriptionText = $text;
+        } else {
+            $transcriptionText = $transcription;
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML("
+            <h1 style='text-align:center;'>Transcription de la séance</h1>
+            <p><strong>Séance :</strong> {$session->title}</p>
+            <p><strong>Date :</strong> ".\Carbon\Carbon::parse($session->scheduled_at)->format('d/m/Y H:i')."</p>
+            <hr>
+            <div style='white-space: pre-wrap; font-family: sans-serif; font-size: 12px;'>
+                ".nl2br(e($transcriptionText)).'
+            </div>
+        ');
+
+        return $pdf->download('transcription_seance_'.$session->id.'.pdf');
     }
 }

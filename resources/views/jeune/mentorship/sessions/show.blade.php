@@ -181,6 +181,19 @@
                             Séance terminée
                         </div>
                     @endif
+
+                    @if($session->has_transcription)
+                        <div class="mt-6 pt-6 border-t border-gray-100 space-y-3">
+                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">IA & Transcription</h4>
+                            <a href="{{ route('jeune.sessions.download-transcription', $session) }}"
+                                class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                                Transcription PDF (5 créd.)
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

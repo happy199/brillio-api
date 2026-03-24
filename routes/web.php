@@ -245,6 +245,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
         Route::post('/mentorat/seances', [\App\Http\Controllers\Jeune\SessionController::class, 'store'])->name('sessions.store');
         Route::get('/mentorat/seances/{session}', [\App\Http\Controllers\Jeune\SessionController::class, 'show'])->name('sessions.show');
         Route::get('/mentorat/seances/{session}/report', [\App\Http\Controllers\Jeune\SessionController::class, 'downloadReport'])->name('sessions.download-report');
+        Route::get('/mentorat/seances/{session}/download-transcription', [\App\Http\Controllers\Jeune\SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
         Route::post('/mentorat/seances/{session}/cancel', [\App\Http\Controllers\Jeune\SessionController::class, 'cancel'])->name('sessions.cancel');
         Route::post('/mentorat/seances/{session}/pay-join', [\App\Http\Controllers\Jeune\SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
     }
