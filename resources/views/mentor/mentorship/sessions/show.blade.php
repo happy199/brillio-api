@@ -188,28 +188,6 @@
                     <p class="text-gray-500 text-sm mb-6">À remplir pendant ou après la séance pour assurer le suivi.
                     </p>
 
-                    @if($session->has_transcription)
-                    <div class="flex flex-wrap gap-3 mb-6">
-                        <a href="{{ route('mentor.mentorship.sessions.download-transcription', $session) }}"
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
-                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                            </svg>
-                            Transcription PDF (5 crédits)
-                        </a>
-
-                        <form action="{{ route('mentor.mentorship.sessions.prefill-report', $session) }}" method="POST" onsubmit="return confirm('Pré-remplir le rapport avec l\'IA coûte 5 crédits. Les champs actuels non sauvegardés seront remplacés. Continuer ?')">
-                            @csrf
-                            <button type="submit"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
-                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                                Pré-remplir avec l'IA (5 crédits)
-                            </button>
-                        </form>
-                    </div>
-                    @endif
 
                     @php
                         $prefilled = session('prefilled_report');
@@ -298,6 +276,46 @@
                                 FCFA</span>
                         </div>
                         @endif
+
+                        <!-- Actions de Transcription / IA -->
+                        <div class="mt-6 pt-6 border-t border-gray-100 space-y-3">
+                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Options IA & Transcription</h4>
+                            @if($session->has_transcription)
+                                <a href="{{ route('mentor.mentorship.sessions.download-transcription', $session) }}"
+                                    class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    Transcription PDF (5 créd.)
+                                </a>
+
+                                <form action="{{ route('mentor.mentorship.sessions.prefill-report', $session) }}" method="POST" onsubmit="return confirm('Pré-remplir le rapport avec l\'IA coûte 5 crédits. Les champs actuels non sauvegardés seront remplacés. Continuer ?')">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-indigo-50 border border-indigo-100 rounded-lg text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
+                                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        Pré-remplir via l'IA (5 créd.)
+                                    </button>
+                                </form>
+                            @elseif($session->status === 'completed' || $session->scheduled_at->isPast())
+                                <div class="p-3 bg-red-50 rounded-lg border border-dashed border-red-200">
+                                    <p class="text-[11px] text-red-600 text-center leading-tight">
+                                        Transcription non disponible pour cette séance.
+                                    </p>
+                                </div>
+                            @else
+                                <div class="p-3 bg-gray-50 rounded-lg border border-dashed border-gray-100">
+                                    <p class="text-[11px] text-gray-500 text-center leading-tight">
+                                        <svg class="w-4 h-4 mx-auto mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        La transcription sera disponible une fois la séance terminée.
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
 
