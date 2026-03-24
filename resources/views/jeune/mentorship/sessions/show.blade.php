@@ -89,11 +89,12 @@
                         @endphp
 
                         @if($session->status === 'confirmed' || $session->status === 'accepted')
+                            @if($canAccess)
                                 <!-- CAS 1: ACCÈS AUTORISÉ (Gratuit ou Payé) -->
                                 @if($session->meeting_link)
                                     <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
                                         class="block w-full text-center py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition mb-3">
-                                        En ligne
+                                        Rejoindre la séance de mentorat
                                     </a>
                                 @else
                                     <button disabled
@@ -115,11 +116,7 @@
                                 </form>
                             @endif
                         @else
-                             <!-- CAS 3: SESSION NON CONFIRMÉE (En attente validation mentor OU Paiement global) -->
-                             <!-- Note: Si confirmé par un autre jeune, le statut global devient 'confirmed', donc on tombe dans le bloc if du haut -->
-                             
-                             <!-- Si le jeune n'a pas payé, on affiche le bouton payer -->
-                             <!-- Si le statut est pending_payment, c'est que personne n'a payé (ou du moins pas confirmé), donc on affiche le bouton -->
+                             <!-- CAS 3: SESSION NON CONFIRMÉE -->
                              @if($session->is_paid)
                                 <form action="{{ route('jeune.sessions.pay-join', $session) }}" method="POST">
                                     @csrf
@@ -136,8 +133,7 @@
                         @endif
 
                         <!-- Cancel Button & Modal Trigger -->
-                        <!-- Cancel Button & Modal Trigger -->
-                        @if($session->status !== 'completed')
+                        @if($session->status !== 'completed' && $session->status !== 'cancelled')
                         <div x-data="{ open: false }">
                             <button @click="open = true"
                                 class="w-full py-2 text-red-600 hover:bg-red-50 font-medium rounded-lg transition text-sm">
@@ -173,10 +169,6 @@
                             </dialog>
                         </div>
                         @endif
-                    @else
-                        <div class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg text-center font-bold text-sm">
-                            Séance terminée
-                        </div>
                     @endif
 
                     @if($session->has_transcription)

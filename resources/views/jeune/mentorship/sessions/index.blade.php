@@ -79,7 +79,7 @@
                     @if($session->meeting_link)
                     <a href="{{ route('meeting.show', $session->meeting_id) }}" target="_blank"
                         class="flex-1 text-center py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">
-                        En ligne
+                        Rejoindre la séance de mentorat
                     </a>
                     @else
                     <button disabled
