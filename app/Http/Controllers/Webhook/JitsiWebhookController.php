@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Http\Controllers\Webhook;
 
 use App\Http\Controllers\Controller;
@@ -19,8 +21,9 @@ class JitsiWebhookController extends Controller
         if ($secret && $request->header('Authorization') !== $secret) {
             Log::warning('Jitsi Webhook: Unauthorized access attempt', [
                 'provided' => $request->header('Authorization'),
-                'ip' => $request->ip()
+                'ip' => $request->ip(),
             ]);
+
             return response()->json(['status' => 'unauthorized'], 401);
         }
 
@@ -47,20 +50,23 @@ class JitsiWebhookController extends Controller
 
         if (empty($roomName)) {
             Log::error('Jitsi Webhook: No room name found in FQN', ['fqn' => $fqn]);
+
             return response()->json(['status' => 'error', 'message' => 'No room name'], 400);
         }
 
-        $session = MentoringSession::where('meeting_link', 'LIKE', '%' . $roomName)->first();
+        $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$roomName)->first();
 
-        if (!$session) {
+        if (! $session) {
             Log::warning('Jitsi Webhook: No session found for room', ['roomName' => $roomName]);
+
             return response()->json(['status' => 'not_found']);
         }
 
         $transcriptionUrl = $payload['data']['preAuthenicatedLink'] ?? null;
 
-        if (!$transcriptionUrl) {
+        if (! $transcriptionUrl) {
             Log::error('Jitsi Webhook: No transcription URL in payload');
+
             return response()->json(['status' => 'error', 'message' => 'No URL'], 400);
         }
 
@@ -70,9 +76,9 @@ class JitsiWebhookController extends Controller
 
             if ($response->successful()) {
                 $content = $response->body();
-                
+
                 // Store file locally
-                $fileName = 'transcriptions/session_' . $session->id . '_' . time() . '.txt';
+                $fileName = 'transcriptions/session_'.$session->id.'_'.time().'.txt';
                 Storage::disk('local')->put($fileName, $content);
 
                 // Try to parse raw content if it's JSON (often Jitsi transcripts can be JSON segments)
@@ -88,15 +94,16 @@ class JitsiWebhookController extends Controller
             } else {
                 Log::error('Jitsi Webhook: Failed to download transcription', [
                     'status' => $response->status(),
-                    'url' => $transcriptionUrl
+                    'url' => $transcriptionUrl,
                 ]);
             }
         } catch (\Exception $e) {
             Log::error('Jitsi Webhook: Error processing transcription', [
                 'error' => $e->getMessage(),
-                'session_id' => $session->id
+                'session_id' => $session->id,
             ]);
         }
+
         return response()->json(['status' => 'success']);
     }
 
@@ -114,7 +121,7 @@ class JitsiWebhookController extends Controller
         Log::info('Transcription Fragment Received', [
             'session_id' => $session->id,
             'speaker' => $request->speaker,
-            'text' => $request->text
+            'text' => $request->text,
         ]);
 
         $currentTranscription = $session->transcription_raw ?: [];
