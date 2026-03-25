@@ -61,7 +61,7 @@
             }
         }
     </script>
-    @vite(['resources/js/app.js'], ['nonce' => request()->attributes->get('csp_nonce')])
+    @vite(['resources/js/app.js'])
 
 
     <style>

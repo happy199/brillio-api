@@ -105,7 +105,7 @@
             }
         }
     </script>
-    @vite(['resources/js/app.js'], ['nonce' => request()->attributes->get('csp_nonce')])
+    @vite(['resources/js/app.js'])
 
     <!-- Google Fonts - Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
