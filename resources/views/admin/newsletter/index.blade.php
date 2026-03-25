@@ -404,7 +404,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     // Select all
     document.getElementById('selectAll').addEventListener('change', function () {
         document.querySelectorAll('.subscriber-checkbox:not([disabled])').forEach(cb => {

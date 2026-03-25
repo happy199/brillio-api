@@ -64,7 +64,7 @@
             </a>
         </div>
     </div>
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function copyAccess() {
             const text = "Accès Brillio - {{ $organization->name }}\nEmail : {{ session('new_user_data')['email'] }}\nMot de passe : {{ session('new_user_data')['password'] }}\nLien : {{ route('organization.login') }}";
             navigator.clipboard.writeText(text).then(() => {

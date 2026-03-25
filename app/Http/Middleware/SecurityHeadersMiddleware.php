@@ -18,6 +18,7 @@ class SecurityHeadersMiddleware
         // Generate a random nonce for this request
         $nonce = base64_encode(random_bytes(16));
         $request->attributes->set('csp_nonce', $nonce);
+        Vite::useCspNonce($nonce);
 
         $response = $next($request);
 

@@ -306,8 +306,8 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function toggleCustomDates(value) {
         const customDates = document.getElementById('custom-dates');
         const startDateInput = document.querySelector('input[name="start_date"]');

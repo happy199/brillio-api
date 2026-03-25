@@ -392,5 +392,5 @@
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 @endpush

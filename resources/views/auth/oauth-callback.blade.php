@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Connexion en cours - Brillio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com"></script>
     <style>
         .loader {
             width: 48px;
@@ -43,7 +43,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         (function () {
             const processUrl = "{{ $processUrl }}";
             const errorUrl = "{{ $errorUrl }}";

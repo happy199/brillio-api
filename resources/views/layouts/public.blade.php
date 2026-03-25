@@ -55,7 +55,7 @@
         })();
     </script>
     <!-- Tailwind CSS via CDN (Development) -->
-    <script src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         tailwind.config = {
             theme: {
@@ -114,11 +114,11 @@
         rel="stylesheet">
 
     <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-REB9p2i70fI3xLiaBihRREJclX1v+05k8i41L1DqD2G/M1+2f/a1mE8zR9J8N16m" crossorigin="anonymous" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="..." crossorigin="anonymous"></script>
 
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/aos@2.3.1/dist/aos.js" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
 
     <style>
         [x-cloak] {
@@ -185,7 +185,7 @@
 
     <!-- JSON-LD Structured Data for SEO -->
     {{-- Organization Schema --}}
-    <script type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
@@ -221,7 +221,7 @@
     </script>
 
     {{-- WebSite Schema with Search Action --}}
-    <script type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -242,7 +242,7 @@
     </script>
 
     {{-- Service/Product Schema --}}
-    <script type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "Service",

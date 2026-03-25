@@ -27,15 +27,15 @@
     <meta property="og:site_name" content="Brillio">
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-PPX01GY0R9');
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
     <style>
         [x-cloak] {
             display: none !important;
@@ -253,7 +253,7 @@
         </div>
     </footer>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function shareProfile() {
             if (navigator.share) {
                 navigator.share({

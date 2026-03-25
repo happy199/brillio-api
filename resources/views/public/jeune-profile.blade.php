@@ -92,7 +92,7 @@
             </div>
         </div>
 
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             function shareProfile() {
                 if (navigator.share) {
                     navigator.share({

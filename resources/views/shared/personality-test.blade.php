@@ -589,7 +589,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         // Global function for AI chat (accessible from onclick) - Jeune only
         function discussWithAIJeune() {
             try {
@@ -614,7 +614,7 @@
     </script>
 
     @push('scripts')
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             function personalityTest() {
                 return {
                     showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,

@@ -191,7 +191,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     document.addEventListener('alpine:init', () => {
         Alpine.data('mentorshipCreator', (config) => ({
             jeunes: config.jeunes,

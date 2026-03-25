@@ -215,7 +215,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function openTerminateModal(url, mentee, mentor) {
         document.getElementById('terminateForm').action = url;
         document.getElementById('menteeName').textContent = mentee;

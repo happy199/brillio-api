@@ -210,7 +210,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function linkedInImporter() {
         return {
             uploading: false,

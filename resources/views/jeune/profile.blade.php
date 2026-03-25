@@ -523,7 +523,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function profileData() {
             return {
                 editPersonal: false,

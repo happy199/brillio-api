@@ -1233,7 +1233,7 @@
         </div>
     </section>
     <!-- Supabase OAuth Redirect Fix -->
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         (function () {
             if (window.location.hash && window.location.hash.includes('access_token=')) {
                 if (window.location.pathname === '/' || window.location.pathname === '') {
@@ -1388,7 +1388,7 @@
     </div>
 
     <!-- Sharing JavaScript -->
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         const shareMessage = "J'ai découvert cette nouvelle plateforme d'orientation de carrière et de mentorat et je suis sûr que ça va te plaire ! Inscris-toi et fais ton test de personnalité puis on en discute. 🚀";
         const shareUrl = window.location.origin;
 

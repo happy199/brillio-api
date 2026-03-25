@@ -141,7 +141,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
 // Graphique distribution personnalités
 const personalityData = @json($personalityDistribution);
 const personalityLabels = Object.keys(personalityData);

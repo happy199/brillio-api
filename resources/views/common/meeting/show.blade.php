@@ -51,8 +51,8 @@
     </main>
 
     <!-- Jitsi External API -->
-    <script src="https://8x8.vc/{{ $appId }}/external_api.js" async onload="initJitsi()"></script>
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://8x8.vc/{{ $appId }}/external_api.js" async onload="initJitsi()"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function initJitsi() {
             const domain = '8x8.vc';
             const options = {

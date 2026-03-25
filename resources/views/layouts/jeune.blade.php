@@ -35,7 +35,7 @@
         })();
     </script>
     <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         tailwind.config = {
             theme: {
@@ -327,7 +327,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         // Gestion du consentement aux cookies
         function acceptCookies() {
             // Stocker dans localStorage
@@ -353,7 +353,7 @@
     </script>
 
     <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-REB9p2i70fI3xLiaBihRREJclX1v+05k8i41L1DqD2G/M1+2f/a1mE8zR9J8N16m" crossorigin="anonymous" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="..." crossorigin="anonymous"></script>
 
     @stack('scripts')
     @include('partials.toast')
