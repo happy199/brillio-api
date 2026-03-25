@@ -45,7 +45,7 @@
 
 
     <!-- Suppress Tailwind CDN warning -->
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         (function() {
             const originalWarn = console.warn;
             console.warn = function(...args) {
@@ -55,8 +55,8 @@
         })();
     </script>
     <!-- Tailwind CSS via CDN (Development) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+    <script src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         tailwind.config = {
             theme: {
                 extend: {
@@ -105,7 +105,7 @@
             }
         }
     </script>
-    @vite(['resources/js/app.js'])
+    @vite(['resources/js/app.js'], ['nonce' => request()->attributes->get('csp_nonce')])
 
     <!-- Google Fonts - Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -114,11 +114,11 @@
         rel="stylesheet">
 
     <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-REB9p2i70fI3xLiaBihRREJclX1v+05k8i41L1DqD2G/M1+2f/a1mE8zR9J8N16m" crossorigin="anonymous" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
 
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
 
     <style>
         [x-cloak] {
