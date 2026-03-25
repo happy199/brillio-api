@@ -18,7 +18,7 @@
     <meta name="theme-color" content="#6366f1">
 
     <!-- Suppress Tailwind CDN warning -->
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         (function() {
             const originalWarn = console.warn;
             console.warn = function(...args) {
@@ -28,7 +28,7 @@
         })();
     </script>
     <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
     @vite(['resources/js/app.js'])
 
     <!-- Alpine.js pour interactivité -->
