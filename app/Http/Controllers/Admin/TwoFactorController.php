@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use PragmaRX\Google2FA\Google2FA;
-use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
+use Illuminate\Http\Request;
+use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorController extends Controller
 {
@@ -30,10 +30,11 @@ class TwoFactorController extends Controller
         ]);
 
         $user = $request->user();
-        $google2fa = new Google2FA();
+        $google2fa = new Google2FA;
 
         if ($google2fa->verifyKey($user->two_factor_secret, $request->code)) {
             $request->session()->put('admin_2fa_verified', true);
+
             return redirect()->route('admin.dashboard');
         }
 
@@ -46,10 +47,10 @@ class TwoFactorController extends Controller
     public function setup()
     {
         $user = auth()->user();
-        $google2fa = new Google2FA();
+        $google2fa = new Google2FA;
 
         // Générer une clé secrète si elle n'existe pas
-        if (!$user->two_factor_secret) {
+        if (! $user->two_factor_secret) {
             $user->two_factor_secret = $google2fa->generateSecretKey();
             $user->save();
         }
@@ -62,7 +63,7 @@ class TwoFactorController extends Controller
 
         $renderer = new ImageRenderer(
             new RendererStyle(200),
-            new SvgImageBackEnd()
+            new SvgImageBackEnd
         );
         $writer = new Writer($renderer);
         $qrCodeSvg = $writer->writeString($qrCodeUrl);
@@ -83,14 +84,14 @@ class TwoFactorController extends Controller
         ]);
 
         $user = $request->user();
-        $google2fa = new Google2FA();
+        $google2fa = new Google2FA;
 
         if ($google2fa->verifyKey($user->two_factor_secret, $request->code)) {
             $user->two_factor_confirmed_at = now();
             $user->save();
-            
+
             $request->session()->put('admin_2fa_verified', true);
-            
+
             return redirect()->route('admin.dashboard')->with('success', 'Double authentification activée avec succès.');
         }
 
