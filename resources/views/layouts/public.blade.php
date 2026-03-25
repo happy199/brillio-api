@@ -185,7 +185,7 @@
 
     <!-- JSON-LD Structured Data for SEO -->
     {{-- Organization Schema --}}
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
@@ -221,7 +221,7 @@
     </script>
 
     {{-- WebSite Schema with Search Action --}}
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -242,7 +242,7 @@
     </script>
 
     {{-- Service/Product Schema --}}
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "Service",
@@ -533,7 +533,7 @@
     </footer>
 
     <!-- Initialize AOS -->
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         AOS.init({
             duration: 800,
             easing: 'ease-out-cubic',
