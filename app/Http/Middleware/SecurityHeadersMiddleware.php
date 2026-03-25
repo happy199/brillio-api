@@ -20,7 +20,7 @@ class SecurityHeadersMiddleware
         // Content Security Policy (CSP)
         // Note: 'unsafe-inline' est utilisé ici pour assurer la compatibilité avec les scripts Blade/Tailwind existants.
         $csp = "default-src 'self'; ";
-        $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://code.jquery.com https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://cdn.mxpnl.com https://unpkg.com; ";
+        $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://code.jquery.com https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://cdn.mxpnl.com https://cdn.tailwindcss.com https://unpkg.com; ";
         $csp .= "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com; ";
         $csp .= "img-src 'self' data: https: https://www.clarity.ms; ";
         $csp .= "font-src 'self' https://fonts.gstatic.com data:; ";

@@ -29,23 +29,34 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Tailwind CSS & Assets via Vite -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        :root {
-            --color-organization-50: {{ $isEnterprise ? $primary . "10" : "#fff1f2" }};
-            --color-organization-100: {{ $isEnterprise ? $primary . "20" : "#ffe4e6" }};
-            --color-organization-200: {{ $isEnterprise ? $primary . "30" : "#fecdd3" }};
-            --color-organization-300: {{ $accent }};
-            --color-organization-400: {{ $accent }};
-            --color-organization-500: {{ $primary }};
-            --color-organization-600: {{ $secondary }};
-            --color-organization-700: {{ $secondary }};
-            --color-organization-800: {{ $isEnterprise ? $primary : "#9f1239" }};
-            --color-organization-900: {{ $isEnterprise ? $primary : "#881337" }};
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        organization: {
+                            50: '{{ $isEnterprise ? $primary . "10" : "#fff1f2" }}',
+                            100: '{{ $isEnterprise ? $primary . "20" : "#ffe4e6" }}',
+                            200: '{{ $isEnterprise ? $primary . "30" : "#fecdd3" }}',
+                            300: '{{ $accent }}',
+                            400: '{{ $accent }}',
+                            500: '{{ $primary }}',
+                            600: '{{ $secondary }}',
+                            700: '{{ $secondary }}',
+                            800: '{{ $isEnterprise ? $primary : "#9f1239" }}',
+                            900: '{{ $isEnterprise ? $primary : "#881337" }}',
+                        }
+                    }
+                }
+            }
         }
-    </style>
+    </script>
+    @vite(['resources/js/app.js'])
 
     <style>
         [x-cloak] {
