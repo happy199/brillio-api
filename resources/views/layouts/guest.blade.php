@@ -17,7 +17,7 @@
         rel="stylesheet">
 
     <!-- Suppress Tailwind CDN warning -->
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         (function() {
             const originalWarn = console.warn;
             console.warn = function(...args) {
@@ -27,7 +27,7 @@
         })();
     </script>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
     <script>
         tailwind.config = {
             theme: {
