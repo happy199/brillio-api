@@ -320,7 +320,7 @@
                     </p>
                 </div>
             </div>
-            <button onclick="acceptCookies()"
+            <button id="acceptCookiesBtn"
                 class="px-6 py-2 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition whitespace-nowrap">
                 Accepter
             </button>
@@ -329,6 +329,12 @@
 
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         // Gestion du consentement aux cookies
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('acceptCookiesBtn');
+            if (btn) {
+                btn.addEventListener('click', acceptCookies);
+            }
+        });
         function acceptCookies() {
             // Stocker dans localStorage
             localStorage.setItem('cookiesAccepted', 'true');
