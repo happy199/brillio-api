@@ -51,8 +51,17 @@
     </main>
 
     <!-- Jitsi External API -->
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://8x8.vc/{{ $appId }}/external_api.js" async onload="initJitsi()"></script>
+    <script id="jitsi-api" nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://8x8.vc/{{ $appId }}/external_api.js" async></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        (function() {
+            const jitsiScript = document.getElementById('jitsi-api');
+            if (window.JitsiMeetExternalAPI) {
+                initJitsi();
+            } else {
+                jitsiScript.addEventListener('load', initJitsi);
+            }
+        })();
+
         function initJitsi() {
             const domain = '8x8.vc';
             const options = {
