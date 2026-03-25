@@ -24,8 +24,8 @@
     $secondaryColor = $isBranded && $org->accent_color ? $org->accent_color : '#d946ef';
     @endphp
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS & Assets via Vite -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
         tailwind.config = {
             theme: {
