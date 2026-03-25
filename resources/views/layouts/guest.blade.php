@@ -18,17 +18,7 @@
 
     <!-- Tailwind CSS & Assets via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+
 
     @include('partials.analytics')
 

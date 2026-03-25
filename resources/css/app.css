@@ -1,17 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary-50: #eef2ff;
-    --color-primary-100: #e0e7ff;
-    --color-primary-200: #c7d2fe;
-    --color-primary-300: #a5b4fc;
-    --color-primary-400: #818cf8;
+    /* Primary / Jeune Palette */
+    --color-primary-50: #f0f4ff;
+    --color-primary-100: #e0e9ff;
+    --color-primary-200: #c7d6fe;
+    --color-primary-300: #a4b8fc;
+    --color-primary-400: #8093f8;
     --color-primary-500: #6366f1;
-    --color-primary-600: #4f46e5;
-    --color-primary-700: #4338ca;
-    --color-primary-800: #3730a3;
-    --color-primary-900: #312e81;
+    --color-primary-600: #5145e5;
+    --color-primary-700: #4536ca;
+    --color-primary-800: #3a2fa3;
+    --color-primary-900: #332c81;
 
+    /* Secondary Palette */
     --color-secondary-50: #fdf4ff;
     --color-secondary-100: #fae8ff;
     --color-secondary-200: #f5d0fe;
@@ -23,6 +25,7 @@
     --color-secondary-800: #86198f;
     --color-secondary-900: #701a75;
 
+    /* Accent Palette */
     --color-accent-50: #fff7ed;
     --color-accent-100: #ffedd5;
     --color-accent-200: #fed7aa;
@@ -34,5 +37,29 @@
     --color-accent-800: #9a3412;
     --color-accent-900: #7c2d12;
 
-    --font-sans: "Poppins", "sans-serif";
+    /* Mentor Palette */
+    --color-mentor-50: #fff7ed;
+    --color-mentor-100: #ffedd5;
+    --color-mentor-200: #fed7aa;
+    --color-mentor-300: #fdba74;
+    --color-mentor-400: #fb923c;
+    --color-mentor-500: #f97316;
+    --color-mentor-600: #ea580c;
+    --color-mentor-700: #c2410c;
+    --color-mentor-800: #9a3412;
+    --color-mentor-900: #7c2d12;
+
+    /* Organization Palette */
+    --color-organization-50: #fff1f2;
+    --color-organization-100: #ffe4e6;
+    --color-organization-200: #fecdd3;
+    --color-organization-300: #fda4af;
+    --color-organization-400: #fb7185;
+    --color-organization-500: #f43f5e;
+    --color-organization-600: #e11d48;
+    --color-organization-700: #be123c;
+    --color-organization-800: #9f1239;
+    --color-organization-900: #881337;
+
+    --font-sans: "Poppins", "Inter", "sans-serif";
 }

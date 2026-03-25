@@ -26,55 +26,15 @@
 
     <!-- Tailwind CSS & Assets via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#f0f4ff',
-                            100: '#e0e9ff',
-                            200: '#c7d6fe',
-                            300: '#a4b8fc',
-                            400: '#8093f8',
-                            500: '{{ $primaryColor }}',
-                            600: '#5145e5',
-                            700: '#4536ca',
-                            800: '#3a2fa3',
-                            900: '#332c81',
-                        },
-                        accent: {
-                            50: '#fdf4ff',
-                            100: '#fae8ff',
-                            200: '#f5d0fe',
-                            300: '#f0abfc',
-                            400: '#e879f9',
-                            500: '{{ $secondaryColor }}',
-                            600: '#c026d3',
-                            700: '#a21caf',
-                            800: '#86198f',
-                            900: '#701a75',
-                        },
-                        branding: {
-                            success: {
-                                bg: '{{ $isBranded ? $primaryColor . "10" : "#f0fdf4" }}',
-                                border: '{{ $isBranded ? $primaryColor . "30" : "#bbf7d0" }}',
-                                text: '{{ $isBranded ? $primaryColor : "#166534" }}',
-                            },
-                            error: {
-                                bg: '{{ $isBranded ? "#fef2f2" : "#fef2f2" }}',
-                                border: '{{ $isBranded ? "#fecaca" : "#fecaca" }}',
-                                text: '{{ $isBranded ? "#991b1b" : "#991b1b" }}',
-                            }
-                        }
-                    }
-                }
-            }
+    <style>
+        :root {
+            --color-primary-500: {{ $primaryColor }};
+            --color-accent-500: {{ $secondaryColor }};
+            --branding-success-bg: {{ $isBranded ? $primaryColor . "10" : "#f0fdf4" }};
+            --branding-success-border: {{ $isBranded ? $primaryColor . "30" : "#bbf7d0" }};
+            --branding-success-text: {{ $isBranded ? $primaryColor : "#166534" }};
         }
-    </script>
+    </style>
 
     <style>
         .gradient-bg {

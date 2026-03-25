@@ -26,31 +26,7 @@
 
     <!-- Tailwind CSS & Assets via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#f0f4ff',
-                            100: '#e0e9ff',
-                            200: '#c7d6fe',
-                            300: '#a4b8fc',
-                            400: '#8093f8',
-                            500: '#6366f1',
-                            600: '#5145e5',
-                            700: '#4536ca',
-                            800: '#3a2fa3',
-                            900: '#332c81',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+
 
     <style>
         .nav-item {
