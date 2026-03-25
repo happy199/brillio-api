@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\WebAuthController;
+use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\Jeune\JeuneDashboardController;
 use App\Http\Controllers\Jeune\OnboardingController;
 use App\Http\Controllers\Mentor\MentorDashboardController;
@@ -21,6 +22,9 @@ use App\Http\Controllers\Website\ContactController as WebsiteContactController;
 use App\Http\Controllers\Website\NewsletterController as WebsiteNewsletterController;
 use App\Http\Controllers\Website\PageController;
 use Illuminate\Support\Facades\Route;
+
+// Portabilité des données (RGPD)
+Route::middleware(['auth'])->post('/export-data', [DataExportController::class, 'export'])->name('user.export-data');
 
 /*
  |--------------------------------------------------------------------------

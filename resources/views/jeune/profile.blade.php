@@ -314,6 +314,25 @@
                     </div>
                 </div>
 
+                <!-- Portabilité des données (RGPD) -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm mt-6">
+                    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Mes Données (RGPD)
+                    </h3>
+                    <p class="text-xs text-gray-500 mb-4">
+                        Téléchargez toutes vos données personnelles (profil, tests, chats, documents) dans un format ouvert.
+                    </p>
+                    <form action="{{ route('user.export-data') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full px-4 py-2 border-2 border-blue-100 text-blue-600 text-sm font-bold rounded-xl hover:bg-blue-50 transition flex items-center justify-center gap-2">
+                            Télécharger l'export JSON
+                        </button>
+                    </form>
+                </div>
+
                 <!-- Zone de Danger -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-red-200 mt-6">
                     <div class="flex items-start gap-3">

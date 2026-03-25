@@ -246,6 +246,23 @@
             </div>
         </div>
 
+        <!-- Data Portability (RGPD) -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Données Personnelles (RGPD)</h2>
+            <p class="text-sm text-gray-600 mb-6">
+                Conformément au RGPD, vous pouvez télécharger l'intégralité de vos données personnelles (profil, messages, transactions) au format JSON.
+            </p>
+            <form action="{{ route('user.export-data') }}" method="POST">
+                @csrf
+                <button type="submit" class="px-6 py-2 border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Télécharger mes données (.json)
+                </button>
+            </form>
+        </div>
+
         <!-- Visibility -->
         <div class="bg-white rounded-2xl p-6 shadow-sm">
             <h2 class="text-lg font-bold text-gray-900 mb-6">Visibilite</h2>
