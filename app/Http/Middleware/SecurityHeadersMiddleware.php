@@ -34,6 +34,7 @@ class SecurityHeadersMiddleware
         $csp .= "frame-ancestors 'self'; ";
         $csp .= "form-action 'self'; ";
         $csp .= "connect-src 'self' https://www.google-analytics.com https://*.clarity.ms https://c.bing.com https://api.mixpanel.com https://8x8.vc wss://8x8.vc; ";
+        $csp .= "frame-src 'self' https://8x8.vc; ";
         $csp .= "base-uri 'self'; ";
         $csp .= "object-src 'none';";
 
@@ -47,7 +48,7 @@ class SecurityHeadersMiddleware
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
-        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()');
+        $response->headers->set('Permissions-Policy', 'camera=(self "https://8x8.vc"), microphone=(self "https://8x8.vc"), geolocation=(), browsing-topics=()');
 
         return $response;
     }
