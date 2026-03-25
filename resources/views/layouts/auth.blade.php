@@ -24,6 +24,16 @@
     $secondaryColor = $isBranded && $org->accent_color ? $org->accent_color : '#d946ef';
     @endphp
 
+    <!-- Suppress Tailwind CDN warning -->
+    <script>
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
