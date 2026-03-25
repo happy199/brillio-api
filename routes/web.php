@@ -10,8 +10,10 @@ use App\Http\Controllers\Admin\MentorController;
 use App\Http\Controllers\Admin\MentorshipController;
 use App\Http\Controllers\Admin\MonetizationController;
 use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\WebAuthController;
+use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\Jeune\JeuneDashboardController;
 use App\Http\Controllers\Jeune\OnboardingController;
 use App\Http\Controllers\Mentor\MentorDashboardController;
@@ -20,6 +22,9 @@ use App\Http\Controllers\Website\ContactController as WebsiteContactController;
 use App\Http\Controllers\Website\NewsletterController as WebsiteNewsletterController;
 use App\Http\Controllers\Website\PageController;
 use Illuminate\Support\Facades\Route;
+
+// Portabilité des données (RGPD)
+Route::middleware(['auth'])->post('/export-data', [DataExportController::class, 'export'])->name('user.export-data');
 
 /*
  |--------------------------------------------------------------------------
@@ -430,8 +435,13 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
         Route::post('/', [AuthController::class, 'login'])->name('login.post');
-    }
-    );
+    });
+
+    // Étape de vérification 2FA (accessible après login mais avant middleware admin_2fa)
+    Route::middleware(['auth', 'is_admin'])->group(function () {
+        Route::get('two-factor', [TwoFactorController::class, 'index'])->name('two_factor.index');
+        Route::post('two-factor', [TwoFactorController::class, 'verify'])->name('two_factor.verify');
+    });
 
     // === Routes Partagées (Admin & Coach) ===
     Route::middleware(['auth', \App\Http\Middleware\EnsureAdminOrCoach::class])->group(function () {
@@ -454,7 +464,12 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
     );
 
     // === Routes Réservées aux Administrateurs ===
-    Route::middleware(['auth', 'is_admin'])->group(function () {
+    Route::middleware(['auth', 'is_admin', 'admin_2fa'])->group(function () {
+        // Configuration 2FA (dans le profil admin)
+        Route::get('profile/two-factor', [TwoFactorController::class, 'setup'])->name('two_factor.setup');
+        Route::post('profile/two-factor', [TwoFactorController::class, 'activate'])->name('two_factor.activate');
+        Route::post('profile/two-factor/deactivate', [TwoFactorController::class, 'deactivate'])->name('two_factor.deactivate');
+
         // Dashboard principal
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

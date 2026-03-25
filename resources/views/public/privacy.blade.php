@@ -102,13 +102,13 @@
             <ul>
                 <li><strong>Droit d'accès :</strong> demander une copie de vos données personnelles</li>
                 <li><strong>Droit de rectification :</strong> corriger des données inexactes</li>
-                <li><strong>Droit à l'effacement :</strong> demander la suppression de vos données</li>
-                <li><strong>Droit à la portabilité :</strong> recevoir vos données dans un format structuré</li>
+                <li><strong>Droit à l'effacement :</strong> demander la suppression de vos données (disponible en 2 clics depuis votre profil)</li>
+                <li><strong>Droit à la portabilité :</strong> recevoir vos données dans un format structuré (disponible en 2 clics depuis votre profil)</li>
                 <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données</li>
             </ul>
             <p>
                 Pour exercer ces droits, contactez-nous à <a
-                    href="mailto:privacy@brillio.africa">privacy@brillio.africa</a>.
+                    href="mailto:contact@brillio.africa">contact@brillio.africa</a>.
             </p>
 
             <h2>8. Utilisation par les mineurs</h2>
@@ -136,7 +136,7 @@
                 contactez-nous :
             </p>
             <ul>
-                <li>Email : <a href="mailto:privacy@brillio.africa">privacy@brillio.africa</a></li>
+                <li>Email : <a href="mailto:contact@brillio.africa">contact@brillio.africa</a></li>
                 <li>Adresse : Cotonou, Bénin</li>
             </ul>
         </div>

@@ -41,6 +41,11 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            // Si le 2FA est activé (confirmé), rediriger vers la vérification
+            if ($request->user()->two_factor_confirmed_at) {
+                return redirect()->route('admin.two_factor.index');
+            }
+
             return redirect()->intended(route('admin.dashboard'));
         }
 
