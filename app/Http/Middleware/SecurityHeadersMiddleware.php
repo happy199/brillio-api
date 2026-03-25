@@ -48,7 +48,7 @@ class SecurityHeadersMiddleware
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
-        $response->headers->set('Permissions-Policy', 'camera=(self "https://8x8.vc"), microphone=(self "https://8x8.vc"), geolocation=(), browsing-topics=()');
+        $response->headers->set('Permissions-Policy', 'camera=*, microphone=*, geolocation=(), browsing-topics=()');
 
         return $response;
     }
