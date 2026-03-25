@@ -119,9 +119,8 @@
 
             <h2>8. Disponibilité du Service</h2>
             <p>
-                Nous nous efforçons de maintenir le Service disponible 24h/24, mais nous ne
-                garantissons pas une disponibilité ininterrompue. Le Service peut être
-                temporairement indisponible pour maintenance ou en cas de force majeure.
+                Nous nous efforçons de maintenir une disponibilité du service de <strong>99,9%</strong> sur une base annuelle. Le Service peut être
+                temporairement indisponible pour des raisons de maintenance programmée ou en cas de force majeure.
             </p>
 
             <h2>9. Modification et résiliation</h2>
@@ -173,7 +172,7 @@
                 Pour toute question concernant ces conditions d'utilisation, contactez-nous :
             </p>
             <ul>
-                <li>Email : <a href="mailto:legal@brillio.africa">legal@brillio.africa</a></li>
+                <li>Email : <a href="mailto:contact@brillio.africa">contact@brillio.africa</a></li>
                 <li>Adresse : Cotonou, Bénin</li>
             </ul>
         </div>

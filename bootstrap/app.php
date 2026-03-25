@@ -36,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'organization_role' => \App\Http\Middleware\EnsureOrganizationRole::class,
             'jeune_published' => \App\Http\Middleware\EnsureJeuneProfilePublished::class,
             'is_coach' => \App\Http\Middleware\IsCoach::class,
+            'admin_2fa' => \App\Http\Middleware\VerifyAdminTwoFactor::class,
         ]);
 
         // Redirection pour les non-authentifiés
