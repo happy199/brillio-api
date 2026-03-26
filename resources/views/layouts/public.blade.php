@@ -44,9 +44,19 @@
     <link rel="canonical" href="{{ url()->current() }}">
 
 
-    <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+    <!-- Suppress Tailwind CDN warning -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
+    <!-- Tailwind CSS via CDN (Development) -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         tailwind.config = {
             theme: {
                 extend: {
@@ -95,6 +105,7 @@
             }
         }
     </script>
+    @vite(['resources/js/app.js'])
 
     <!-- Google Fonts - Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,11 +114,12 @@
         rel="stylesheet">
 
     <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.7/dist/cdn.min.js" integrity="sha384-NArNwzWsUSF+kY2lgW4YriEkjLqi+J+za6HrENUn/3nZqkBnWbxV22kCJEK5Uu6n" crossorigin="anonymous"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/aos@2.3.1/dist/aos.js" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
 
     <style>
         [x-cloak] {
@@ -174,7 +186,7 @@
 
     <!-- JSON-LD Structured Data for SEO -->
     {{-- Organization Schema --}}
-    <script type="application/ld+json">
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "Organization",
@@ -210,7 +222,7 @@
     </script>
 
     {{-- WebSite Schema with Search Action --}}
-    <script type="application/ld+json">
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -231,7 +243,7 @@
     </script>
 
     {{-- Service/Product Schema --}}
-    <script type="application/ld+json">
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
         "@context": "https://schema.org",
         "@type": "Service",
@@ -522,7 +534,7 @@
     </footer>
 
     <!-- Initialize AOS -->
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         AOS.init({
             duration: 800,
             easing: 'ease-out-cubic',

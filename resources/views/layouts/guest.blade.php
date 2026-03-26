@@ -16,8 +16,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+    <!-- Suppress Tailwind CDN warning -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
+    <!-- Tailwind CSS -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         tailwind.config = {
             theme: {
                 extend: {
@@ -28,6 +39,8 @@
             }
         }
     </script>
+    @vite(['resources/js/app.js'])
+
 
     @include('partials.analytics')
 

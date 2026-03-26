@@ -344,7 +344,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     const chatArea = document.getElementById('chat-area');
     if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
 </script>

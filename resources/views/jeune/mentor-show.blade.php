@@ -260,7 +260,7 @@
                         </button>
                     </form>
 
-                    <script>
+                    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
                         function updateMsgCounter(textarea) {
                             const meaningful = (textarea.value.match(/\S/g) || []).length;
                             const counter = document.getElementById('msg-counter');

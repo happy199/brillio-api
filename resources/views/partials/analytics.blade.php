@@ -1,15 +1,15 @@
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}" async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-PPX01GY0R9');
 </script>
-
+ 
 @if(config('services.clarity.id'))
 <!-- Microsoft Clarity -->
-<script type="text/javascript">
+<script nonce="{{ request()->attributes->get('csp_nonce') }}" type="text/javascript" nonce="{{ request()->attributes->get('csp_nonce') }}">
     (function (c, l, a, r, i, t, y) {
         c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
         t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
@@ -17,10 +17,10 @@
     })(window, document, "clarity", "script", "{{ config('services.clarity.id') }}");
 </script>
 @endif
-
+ 
 @if(config('services.mixpanel.token'))
 <!-- Mixpanel -->
-<script type="text/javascript">
+<script nonce="{{ request()->attributes->get('csp_nonce') }}" type="text/javascript" nonce="{{ request()->attributes->get('csp_nonce') }}">
     (function (e, c) {
         if (!c.__SV) {
             var l, h; window.mixpanel = c; c._i = []; c.init = function (q, r, f) {
@@ -30,14 +30,14 @@
                 e.location.protocol && "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//) ? "https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js" : "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"; e = e.getElementsByTagName("script")[0]; e.parentNode.insertBefore(k, e)
         }
     })(document, window.mixpanel || []);
-
+ 
     mixpanel.init("{{ config('services.mixpanel.token') }}", {
         batch_requests: true,
         autocapture: true,
         record_sessions_percent: 100,
         api_host: 'https://api-eu.mixpanel.com'
     });
-
+ 
     @auth
     mixpanel.identify("{{ auth()->id() }}");
     mixpanel.people.set({
@@ -50,7 +50,7 @@
                 @endif
         });
     @endauth
-
+ 
     mixpanel.track_pageview();
 </script>
 @endif

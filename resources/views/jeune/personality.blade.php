@@ -256,11 +256,23 @@
                             <p class="text-sm text-gray-500" x-show="!loading">Question <span
                                     x-text="currentQuestion + 1"></span> sur <span x-text="questions.length"></span></p>
                         </div>
-                        <button @click="closeTest()" class="p-2 hover:bg-gray-100 rounded-full"><svg
-                                class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg></button>
+                        <button @click="closeTest()"
+                                :class="confirmClose ? 'bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-bold border border-red-200 animate-pulse' : 'p-2 hover:bg-gray-100 rounded-full'"
+                                class="transition-all duration-300">
+                            <template x-if="!confirmClose">
+                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </template>
+                            <template x-if="confirmClose">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    Voulez-vous vraiment quitter ?
+                                </span>
+                            </template>
+                        </button>
                     </div>
                     <div x-show="!loading" class="mt-4">
                         <div class="w-full bg-gray-200 rounded-full h-2">
@@ -311,11 +323,11 @@
                                 <template x-for="option in answerOptions" :key="option.value">
                                     <div class="flex flex-col items-center gap-2 sm:gap-3">
                                         <button @click="selectAnswer(option.value)"
-                                            :class="answers[questions[currentQuestion]?.id] === option.value 
-                                                                ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white' 
+                                            :class="answers[questions[currentQuestion]?.id] === option.value
+                                                                ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white'
                                                                     : option.value === 3 ? 'bg-gray-500 border-gray-600 text-white'
                                                                     : 'bg-purple-500 border-purple-600 text-white')
-                                                                : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50' 
+                                                                : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50'
                                                                     : option.value === 3 ? 'border-gray-400 text-gray-400 hover:bg-gray-50'
                                                                     : 'border-purple-500 text-purple-500 hover:bg-purple-50')"
                                             class="w-12 h-12 sm:w-20 sm:h-20 border-2 rounded-lg font-bold text-xl sm:text-3xl transition-all duration-200 hover:scale-105 flex items-center justify-center">
@@ -438,7 +450,7 @@
                                             </template>
                                             <template x-if="(historyTest?.traits_scores?.[dim.left] || 50) != 50">
                                                 <div class="absolute bg-primary-600 h-3 rounded-full"
-                                                    :style="(historyTest?.traits_scores?.[dim.left] || 50) > 50 
+                                                    :style="(historyTest?.traits_scores?.[dim.left] || 50) > 50
                                                                                     ? 'right: 50%; width: ' + Math.min((historyTest?.traits_scores?.[dim.left] || 50) - 50, 50) + '%; border-radius: 9999px 0 0 9999px;'
                                                                                     : 'left: 50%; width: ' + Math.min(50 - (historyTest?.traits_scores?.[dim.left] || 50), 50) + '%; border-radius: 0 9999px 9999px 0;'">
                                                 </div>
@@ -481,10 +493,10 @@
     </div>
 
     @push('scripts')
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             function personalityTest() {
                 return {
-                    showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
+                    showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0, confirmClose: false,
                     answerOptions: [{ value: 1, label: 'Toujours comme ça' }, { value: 2, label: 'Souvent comme ça' }, { value: 3, label: 'Cela dépend de la situation' }, { value: 4, label: 'Souvent comme ça' }, { value: 5, label: 'Toujours comme ça' }],
                     get allAnswered() { return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length; },
                     startTest() {
@@ -492,8 +504,17 @@
                         this.showTest = true;
                         this.loadQuestions(); // Auto-load questions
                     },
-                    closeTest() { if (this.testStarted && Object.keys(this.answers).length > 0 && !confirm('Tu es sur de vouloir quitter ?')) return; this.showTest = false; this.resetTest(); },
-                    resetTest() { this.testStarted = false; this.questions = []; this.answers = {}; this.currentQuestion = 0; },
+                    closeTest() {
+                        if (this.testStarted && Object.keys(this.answers).length > 0 && !this.confirmClose) {
+                            this.confirmClose = true;
+                            // Reset confirmation after 5 seconds if not clicked
+                            setTimeout(() => { this.confirmClose = false; }, 5000);
+                            return;
+                        }
+                        this.showTest = false;
+                        this.resetTest();
+                    },
+                    resetTest() { this.testStarted = false; this.questions = []; this.answers = {}; this.currentQuestion = 0; this.confirmClose = false; },
                     retakeTest() {
                         this.resetTest();
                         this.showTest = true;
@@ -568,6 +589,7 @@
                             if (this.currentQuestion < this.questions.length - 1) {
                                 setTimeout(() => {
                                     this.currentQuestion++;
+                                    this.confirmClose = false; // Reset confirmation if user continues
                                 }, 300);
                             }
                         }

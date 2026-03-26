@@ -256,7 +256,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function roadmapApp() {
         return {
             showAddModal: false,

@@ -214,7 +214,7 @@
     }
 </style>
 
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     @php
     $sessionsJson = $sessions -> map(function ($s) {
         $statusColors = [

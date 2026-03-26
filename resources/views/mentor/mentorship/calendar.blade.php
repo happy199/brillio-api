@@ -522,7 +522,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         @php
             $sessionsJson = $upcomingSessions->map(function ($s) {
                 return [

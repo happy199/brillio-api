@@ -29,10 +29,19 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script>
-
+    <!-- Suppress Tailwind CDN warning -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
+    <!-- Tailwind CSS -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         tailwind.config = {
             theme: {
                 extend: {
@@ -57,6 +66,7 @@
             }
         }
     </script>
+    @vite(['resources/js/app.js'])
 
     <style>
         [x-cloak] {
@@ -310,7 +320,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function copyInvitationUrl() {
             const input = document.getElementById('invitation-url-input');
             input.select();

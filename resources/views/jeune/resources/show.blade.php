@@ -287,7 +287,7 @@
         </div>
     </article>
 </div>
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function shareResource() {
         if (navigator.share) {
             navigator.share({

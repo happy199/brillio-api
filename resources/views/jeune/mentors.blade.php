@@ -259,7 +259,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function applyFilters() {
         const search = document.getElementById('searchInput').value;
         const specialization = document.getElementById('filterSpecialization').value;

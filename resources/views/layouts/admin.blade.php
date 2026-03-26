@@ -17,14 +17,26 @@
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#6366f1">
 
+    <!-- Suppress Tailwind CDN warning -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
     <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    @vite(['resources/js/app.js'])
 
     <!-- Alpine.js pour interactivité -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.7/dist/cdn.min.js" integrity="sha384-NArNwzWsUSF+kY2lgW4YriEkjLqi+J+za6HrENUn/3nZqkBnWbxV22kCJEK5Uu6n" crossorigin="anonymous"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
     <!-- Chart.js pour les graphiques -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.jsdelivr.net/npm/chart.js" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
 
     <!-- Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"

@@ -576,8 +576,8 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function toggleAll(name, checked) {
         document.getElementsByName(name).forEach(el => {
             el.checked = checked;

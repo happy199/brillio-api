@@ -22,9 +22,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+    <!-- Suppress Tailwind CDN warning -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
+    <!-- Tailwind CSS via CDN -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         tailwind.config = {
             theme: {
                 extend: {
@@ -49,6 +59,8 @@
             }
         }
     </script>
+    @vite(['resources/js/app.js'])
+
 
     <style>
         .nav-item {
@@ -277,7 +289,8 @@
         </div>
     </footer>
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.7/dist/cdn.min.js" integrity="sha384-NArNwzWsUSF+kY2lgW4YriEkjLqi+J+za6HrENUn/3nZqkBnWbxV22kCJEK5Uu6n" crossorigin="anonymous"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
     @stack('scripts')
     @include('partials.toast')

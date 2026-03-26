@@ -253,7 +253,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     // Scroll automatique vers le bas des messages
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('messages-container');

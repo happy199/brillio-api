@@ -486,7 +486,7 @@
 @endsection
 
 @push('scripts')
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function previewLogo(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();

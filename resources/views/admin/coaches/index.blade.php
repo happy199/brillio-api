@@ -331,7 +331,7 @@
     }
 </style>
 
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function copyToClipboard(text, message) {
         navigator.clipboard.writeText(text).then(() => {
             alert(message);

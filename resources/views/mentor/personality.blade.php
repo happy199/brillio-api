@@ -483,7 +483,7 @@ $mbtiTypes = [
 </div>
 
 @push('scripts')
-<script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function personalityTest() {
         return {
             showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,

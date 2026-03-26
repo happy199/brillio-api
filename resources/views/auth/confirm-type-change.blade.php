@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmation - Brillio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com"></script>
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);

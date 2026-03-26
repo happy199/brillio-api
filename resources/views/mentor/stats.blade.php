@@ -322,7 +322,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function mentorStatsData() {
             return {
                 showDeleteConfirm: false,
