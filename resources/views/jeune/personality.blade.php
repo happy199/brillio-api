@@ -256,11 +256,23 @@
                             <p class="text-sm text-gray-500" x-show="!loading">Question <span
                                     x-text="currentQuestion + 1"></span> sur <span x-text="questions.length"></span></p>
                         </div>
-                        <button @click="closeTest()" class="p-2 hover:bg-gray-100 rounded-full"><svg
-                                class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg></button>
+                        <button @click="closeTest()" 
+                                :class="confirmClose ? 'bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-bold border border-red-200 animate-pulse' : 'p-2 hover:bg-gray-100 rounded-full'"
+                                class="transition-all duration-300">
+                            <template x-if="!confirmClose">
+                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </template>
+                            <template x-if="confirmClose">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    Voulez-vous vraiment quitter ?
+                                </span>
+                            </template>
+                        </button>
                     </div>
                     <div x-show="!loading" class="mt-4">
                         <div class="w-full bg-gray-200 rounded-full h-2">
@@ -484,7 +496,7 @@
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             function personalityTest() {
                 return {
-                    showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
+                    showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0, confirmClose: false,
                     answerOptions: [{ value: 1, label: 'Toujours comme ça' }, { value: 2, label: 'Souvent comme ça' }, { value: 3, label: 'Cela dépend de la situation' }, { value: 4, label: 'Souvent comme ça' }, { value: 5, label: 'Toujours comme ça' }],
                     get allAnswered() { return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length; },
                     startTest() {
@@ -492,8 +504,17 @@
                         this.showTest = true;
                         this.loadQuestions(); // Auto-load questions
                     },
-                    closeTest() { if (this.testStarted && Object.keys(this.answers).length > 0 && !confirm('Tu es sur de vouloir quitter ?')) return; this.showTest = false; this.resetTest(); },
-                    resetTest() { this.testStarted = false; this.questions = []; this.answers = {}; this.currentQuestion = 0; },
+                    closeTest() { 
+                        if (this.testStarted && Object.keys(this.answers).length > 0 && !this.confirmClose) {
+                            this.confirmClose = true;
+                            // Reset confirmation after 5 seconds if not clicked
+                            setTimeout(() => { this.confirmClose = false; }, 5000);
+                            return;
+                        }
+                        this.showTest = false; 
+                        this.resetTest(); 
+                    },
+                    resetTest() { this.testStarted = false; this.questions = []; this.answers = {}; this.currentQuestion = 0; this.confirmClose = false; },
                     retakeTest() {
                         this.resetTest();
                         this.showTest = true;
@@ -568,6 +589,7 @@
                             if (this.currentQuestion < this.questions.length - 1) {
                                 setTimeout(() => {
                                     this.currentQuestion++;
+                                    this.confirmClose = false; // Reset confirmation if user continues
                                 }, 300);
                             }
                         }
