@@ -252,7 +252,7 @@ class MentorController extends Controller
      */
     public function reorderSteps(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'steps' => 'required|array',
             'steps.*.id' => 'required|integer',
             'steps.*.position' => 'required|integer|min:0',
@@ -265,10 +265,10 @@ class MentorController extends Controller
             return $this->notFound('Profil mentor non trouvé');
         }
 
-        foreach ($request->input('steps') as $stepData) {
+        foreach ($validated['steps'] as $stepData) {
             $profile->roadmapSteps()
-                ->where('id', $stepData['id'])
-                ->update(['position' => $stepData['position']]);
+                ->where('id', (int) $stepData['id'])
+                ->update(['position' => (int) $stepData['position']]);
         }
 
         return $this->success(null, 'Ordre des étapes mis à jour');

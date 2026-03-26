@@ -19,11 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => explode(',', env('ALLOWED_ORIGINS', 'https://brillio.africa,https://www.brillio.africa,http://localhost:3000')),
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => ['Content-Type', 'X-Requested-With', 'Authorization', 'Accept', 'X-XSRF-TOKEN', 'X-CSRF-TOKEN'],
 
     'exposed_headers' => [],
 
