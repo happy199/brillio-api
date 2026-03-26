@@ -29,7 +29,7 @@ class SecurityHeadersMiddleware
         // Note: added 'unsafe-eval' only where strictly necessary for Alpine/Tailwind Play
         $csp .= "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' https://cdn.jsdelivr.net https://code.jquery.com https://www.googletagmanager.com https://www.google-analytics.com https://*.clarity.ms https://cdn.mxpnl.com https://cdn.tailwindcss.com https://unpkg.com https://8x8.vc https://*.8x8.vc https://*.amplitude.com; ";
         $csp .= "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com; ";
-        $csp .= "img-src 'self' data: https: https://*.clarity.ms https://*.8x8.vc https://*.amplitude.com; ";
+        $csp .= "img-src 'self' data: https: https://*.clarity.ms https://*.8x8.vc https://*.amplitude.com https://*.gravatar.com; ";
         $csp .= "font-src 'self' https://fonts.gstatic.com data:; ";
         $csp .= "frame-ancestors 'self'; ";
         $csp .= "form-action 'self'; ";
