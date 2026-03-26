@@ -91,6 +91,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
     ];
 
     /**
@@ -114,6 +115,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'archived_at' => 'datetime',
             'is_blocked' => 'boolean',
             'blocked_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
