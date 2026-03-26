@@ -256,7 +256,7 @@
                             <p class="text-sm text-gray-500" x-show="!loading">Question <span
                                     x-text="currentQuestion + 1"></span> sur <span x-text="questions.length"></span></p>
                         </div>
-                        <button @click="closeTest()" 
+                        <button @click="closeTest()"
                                 :class="confirmClose ? 'bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-bold border border-red-200 animate-pulse' : 'p-2 hover:bg-gray-100 rounded-full'"
                                 class="transition-all duration-300">
                             <template x-if="!confirmClose">
@@ -323,11 +323,11 @@
                                 <template x-for="option in answerOptions" :key="option.value">
                                     <div class="flex flex-col items-center gap-2 sm:gap-3">
                                         <button @click="selectAnswer(option.value)"
-                                            :class="answers[questions[currentQuestion]?.id] === option.value 
-                                                                ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white' 
+                                            :class="answers[questions[currentQuestion]?.id] === option.value
+                                                                ? (option.value <= 2 ? 'bg-teal-500 border-teal-600 text-white'
                                                                     : option.value === 3 ? 'bg-gray-500 border-gray-600 text-white'
                                                                     : 'bg-purple-500 border-purple-600 text-white')
-                                                                : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50' 
+                                                                : (option.value <= 2 ? 'border-teal-500 text-teal-500 hover:bg-teal-50'
                                                                     : option.value === 3 ? 'border-gray-400 text-gray-400 hover:bg-gray-50'
                                                                     : 'border-purple-500 text-purple-500 hover:bg-purple-50')"
                                             class="w-12 h-12 sm:w-20 sm:h-20 border-2 rounded-lg font-bold text-xl sm:text-3xl transition-all duration-200 hover:scale-105 flex items-center justify-center">
@@ -450,7 +450,7 @@
                                             </template>
                                             <template x-if="(historyTest?.traits_scores?.[dim.left] || 50) != 50">
                                                 <div class="absolute bg-primary-600 h-3 rounded-full"
-                                                    :style="(historyTest?.traits_scores?.[dim.left] || 50) > 50 
+                                                    :style="(historyTest?.traits_scores?.[dim.left] || 50) > 50
                                                                                     ? 'right: 50%; width: ' + Math.min((historyTest?.traits_scores?.[dim.left] || 50) - 50, 50) + '%; border-radius: 9999px 0 0 9999px;'
                                                                                     : 'left: 50%; width: ' + Math.min(50 - (historyTest?.traits_scores?.[dim.left] || 50), 50) + '%; border-radius: 0 9999px 9999px 0;'">
                                                 </div>
@@ -504,15 +504,15 @@
                         this.showTest = true;
                         this.loadQuestions(); // Auto-load questions
                     },
-                    closeTest() { 
+                    closeTest() {
                         if (this.testStarted && Object.keys(this.answers).length > 0 && !this.confirmClose) {
                             this.confirmClose = true;
                             // Reset confirmation after 5 seconds if not clicked
                             setTimeout(() => { this.confirmClose = false; }, 5000);
                             return;
                         }
-                        this.showTest = false; 
-                        this.resetTest(); 
+                        this.showTest = false;
+                        this.resetTest();
                     },
                     resetTest() { this.testStarted = false; this.questions = []; this.answers = {}; this.currentQuestion = 0; this.confirmClose = false; },
                     retakeTest() {
