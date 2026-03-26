@@ -33,7 +33,7 @@ class SecurityHeadersMiddleware
         $csp .= "font-src 'self' https://fonts.gstatic.com data:; ";
         $csp .= "frame-ancestors 'self'; ";
         $csp .= "form-action 'self'; ";
-        $csp .= "connect-src 'self' https://www.google-analytics.com https://*.clarity.ms https://c.bing.com https://api.mixpanel.com https://8x8.vc https://*.8x8.vc wss://8x8.vc wss://*.8x8.vc https://api.amplitude.com https://api2.amplitude.com; ";
+        $csp .= "connect-src 'self' https://www.google-analytics.com https://*.clarity.ms https://c.bing.com https://api.mixpanel.com https://8x8.vc https://*.8x8.vc wss://8x8.vc wss://*.8x8.vc https://*.amplitude.com; ";
         $csp .= "frame-src 'self' https://8x8.vc https://*.8x8.vc; ";
         $csp .= "base-uri 'self'; ";
         $csp .= "object-src 'none';";
