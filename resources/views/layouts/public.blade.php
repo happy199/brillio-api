@@ -54,8 +54,7 @@
             };
         })();
     </script>
-    <!-- Tailwind CSS via CDN (Development) -->
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com"></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         tailwind.config = {
             theme: {
@@ -119,7 +118,7 @@
 
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/aos@2.3.1/dist/aos.js" nonce="{{ request()->attributes->get('csp_nonce') }}"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <style>
         [x-cloak] {
