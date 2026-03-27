@@ -54,23 +54,27 @@ class SendSessionReminders extends Command
 
         $emailsSent = 0;
         foreach ($sessions as $session) {
-            // Send to mentor
-            Mail::to($session->mentor->email)->send(
-                new SessionReminder($session, $session->mentor, $session->mentees, $type)
-            );
-            $emailsSent++;
-
-            // Send to each mentee
-            foreach ($session->mentees as $mentee) {
-                $otherParticipants = $session->mentees->reject(fn ($m) => $m->id === $mentee->id);
-                Mail::to($mentee->email)->send(
-                    new SessionReminder($session, $mentee, $otherParticipants, $type)
+            try {
+                // Send to mentor
+                Mail::to($session->mentor->email)->queue(
+                    new SessionReminder($session, $session->mentor, $session->mentees, $type)
                 );
                 $emailsSent++;
-            }
 
-            // Mark as sent
-            $session->update([$sentColumn => true]);
+                // Send to each mentee
+                foreach ($session->mentees as $mentee) {
+                    $otherParticipants = $session->mentees->reject(fn ($m) => $m->id === $mentee->id);
+                    Mail::to($mentee->email)->queue(
+                        new SessionReminder($session, $mentee, $otherParticipants, $type)
+                    );
+                    $emailsSent++;
+                }
+
+                // Mark as sent - done after queueing to avoid re-runs if queue fails
+                $session->update([$sentColumn => true]);
+            } catch (\Exception $e) {
+                $this->error("Failed to queue reminders for session {$session->id}: {$e->getMessage()}");
+            }
         }
 
         $this->info("✅ Sent {$emailsSent} ({$type}) reminders for {$sessions->count()} sessions.");
