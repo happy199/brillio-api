@@ -1,6 +1,11 @@
 <!-- Modal Import LinkedIn -->
-<div id="linkedinImportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-    style="display: none;" x-data="linkedInImporter()">
+<div id="linkedinImportModal" 
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+    x-data="linkedInImporter()" 
+    x-show="show" 
+    x-cloak 
+    x-on:open-linkedin-import.window="show = true"
+    x-transition>
     <style>
         @keyframes progress-stripes {
             from {
@@ -213,6 +218,7 @@
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
     function linkedInImporter() {
         return {
+            show: false,
             uploading: false,
             progress: 0,
             currentAmusingMessage: 'Initialisation...',
@@ -347,7 +353,7 @@
             },
 
             closeModal() {
-                document.getElementById('linkedinImportModal').classList.add('hidden');
+                this.show = false;
                 this.errorMessage = '';
                 this.successMessage = '';
                 this.reset();

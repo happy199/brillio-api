@@ -56,7 +56,7 @@
                 </div>
             </div>
             <button
-                onclick="const m=document.getElementById('linkedinImportModal'); m.classList.remove('hidden'); m.style.display=''"
+                @click="$dispatch('open-linkedin-import')"
                 class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition whitespace-nowrap flex items-center justify-center gap-2">
                 <span>📥</span> Importer LinkedIn
             </button>
