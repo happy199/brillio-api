@@ -3,7 +3,7 @@
 @section('title', 'Mon espace mentor')
 
 @section('content')
-    <div class="space-y-8">
+    <div class="space-y-8" x-data="{}">
         <!-- Welcome Header -->
         <div class="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl p-8 text-white">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -210,7 +210,7 @@
 
             <!-- Importer LinkedIn -->
             <button
-                onclick="const m=document.getElementById('linkedinImportModal'); m.classList.remove('hidden'); m.style.display=''"
+                @click="$dispatch('open-linkedin-import')"
                 class="bg-white rounded-2xl p-6 shadow-sm card-hover group text-left">
                 <div class="flex items-start gap-4">
                     <div
