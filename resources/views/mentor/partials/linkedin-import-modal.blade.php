@@ -1,6 +1,7 @@
 <!-- Modal Import LinkedIn -->
 <div id="linkedinImportModal" 
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+    style="display: none;"
     x-data="linkedInImporter()" 
     x-show="show" 
     x-cloak 
@@ -38,7 +39,7 @@
 
         <div class="p-6 space-y-6">
             <!-- Messages d'erreur/succès -->
-            <div x-show="errorMessage" x-cloak class="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div x-show="errorMessage" style="display: none;" x-cloak class="bg-red-50 border border-red-200 rounded-xl p-4">
                 <div class="flex gap-3">
                     <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +53,7 @@
                 </div>
             </div>
 
-            <div x-show="successMessage" x-cloak class="bg-green-50 border border-green-200 rounded-xl p-4">
+            <div x-show="successMessage" style="display: none;" x-cloak class="bg-green-50 border border-green-200 rounded-xl p-4">
                 <div class="flex gap-3">
                     <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" width="20" height="20" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">

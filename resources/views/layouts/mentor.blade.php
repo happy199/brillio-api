@@ -62,6 +62,7 @@
 
 
     <style>
+        [x-cloak] { display: none !important; }
         .nav-item {
             transition: all 0.2s ease;
         }

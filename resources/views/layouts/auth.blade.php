@@ -88,6 +88,7 @@
     @vite(['resources/js/app.js'])
 
     <style>
+        [x-cloak] { display: none !important; }
         .gradient-bg {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
         }

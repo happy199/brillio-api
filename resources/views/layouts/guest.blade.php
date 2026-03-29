@@ -41,6 +41,10 @@
     @vite(['resources/js/app.js'])
 
 
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
     @include('partials.analytics')
 
     @stack('styles')
