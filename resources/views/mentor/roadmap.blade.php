@@ -168,7 +168,7 @@
     <!-- Add/Edit Modal -->
     <div x-show="showAddModal || showEditModal" x-cloak
         style="display: none;"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" x-transition>
+        class="fixed inset-0 z-[60] flex sm:items-center items-start justify-center p-4 bg-black/50 overflow-y-auto" x-transition>
         <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto" @click.outside="closeModals()">
             <div class="p-6 border-b sticky top-0 bg-white rounded-t-3xl">
                 <div class="flex items-center justify-between">
