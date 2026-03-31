@@ -244,6 +244,17 @@ x-cloak>
                                     <input type="text" x-model="details.target_diploma_other" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Nom du diplôme...">
                                 </div>
                             </template>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Intervalle de la scolarité annuelle (FCFA)</label>
+                                <select x-model="details.tuition_range" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                    <option value="">Choisir un intervalle...</option>
+                                    <option value="-200000">Moins de 200.000</option>
+                                    <option value="200000-500000">200.000 - 500.000</option>
+                                    <option value="500000-1000000">500.000 - 1.000.000</option>
+                                    <option value="1000000-2000000">1.000.000 - 2.000.000</option>
+                                    <option value="+2000000">Plus de 2.000.000</option>
+                                </select>
+                            </div>
                         </div>
                     </template>
 
@@ -276,6 +287,16 @@ x-cloak>
                                     <span>Déçu</span>
                                     <span>Très satisfait</span>
                                 </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Intervalle de la scolarité annuelle (FCFA)</label>
+                                <select x-model="details.tuition_range" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                    <option value="">Choisir un intervalle...</option>
+                                    <option value="-200000">Moins de 200.000</option>
+                                    <option value="200000-500000">200.000 - 500.000</option>
+                                    <option value="500000-1000000">500.000 - 1.000.000</option>
+                                    <option value="1000000-2000000">1.000.000 - 2.000.000</option>
+                                    <option value="+2000000">Plus de 2.000.000</option>
+                                </select>
                             </div>
                         </div>
                     </template>

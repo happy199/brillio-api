@@ -567,6 +567,18 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Intervalle de la scolarité annuelle (FCFA)</label>
+                        <select name="tuition_range" x-model="onboardingData.tuition_range" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                            <option value="">Choisir un intervalle...</option>
+                            <option value="-200000">Moins de 200.000</option>
+                            <option value="200000-500000">200.000 - 500.000</option>
+                            <option value="500000-1000000">500.000 - 1.000.000</option>
+                            <option value="1000000-2000000">1.000.000 - 2.000.000</option>
+                            <option value="+2000000">Plus de 2.000.000</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Centres d'intérêt</label>
                         <p class="text-xs text-gray-500 mb-3">Sélectionnez exactement 5 centres d'intérêt (<span x-text="onboardingData.interests.length"></span>/5)</p>
                         <div class="flex flex-wrap gap-2">
@@ -658,6 +670,7 @@
                     current_situation: '{{ $user->onboarding_data["current_situation"] ?? "" }}',
                     education_level: '{{ $user->onboarding_data["education_level"] ?? "" }}',
                     interests: @json($user->onboarding_data['interests'] ?? []),
+                    tuition_range: '{{ $user->onboarding_data["tuition_range"] ?? "" }}',
                 },
 
                 interestOptions: ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante', 'Education', 'Ingenierie', 'Droit', 'Arts', 'Sciences', 'Entrepreneuriat', 'Communication', 'Agriculture', 'Environnement', 'Sport'],
