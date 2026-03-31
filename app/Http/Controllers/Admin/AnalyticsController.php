@@ -175,11 +175,75 @@ class AnalyticsController extends Controller
         );
         $stats['daily_messages'] = $this->getDailyData(ChatMessage::query(), $start, $end);
 
+        // --- NEW: Master Youth Stats ---
+        $stats['youth_engagement'] = $this->getYouthEngagementStats($start, $end);
+
         return view('admin.analytics.index', [
             'stats' => $stats,
             'specializations' => $this->specializations,
             'dateRange' => $dateRange,
         ]);
+    }
+
+    /**
+     * Calcule les statistiques d'onboarding et d'engagement exhaustives
+     */
+    private function getYouthEngagementStats(Carbon $start, Carbon $end): array
+    {
+        $youths = User::where('user_type', 'jeune')
+            ->whereBetween('created_at', [$start, $end])
+            ->get();
+
+        $stats = [
+            'situations' => [],
+            'sources' => [],
+            'goals' => [],
+            'interests' => [],
+            'tuition_ranges' => [],
+            'mentorship_intent_rate' => 0,
+        ];
+
+        if ($youths->isEmpty()) {
+            return $stats;
+        }
+
+        $interestCount = [];
+        $mentorGoalCount = 0;
+
+        foreach ($youths as $user) {
+            $data = $user->onboarding_data ?? [];
+
+            // Situation
+            $sit = $data['current_situation'] ?? 'non_renseigne';
+            $stats['situations'][$sit] = ($stats['situations'][$sit] ?? 0) + 1;
+
+            // Source
+            $src = $data['how_found_us'] ?? 'non_renseigne';
+            $stats['sources'][$src] = ($stats['sources'][$src] ?? 0) + 1;
+
+            // Tuition
+            $tuition = $data['tuition_range'] ?? 'non_renseigne';
+            $stats['tuition_ranges'][$tuition] = ($stats['tuition_ranges'][$tuition] ?? 0) + 1;
+
+            // Goals
+            $goals = $data['goals'] ?? [];
+            foreach ($goals as $goal) {
+                $stats['goals'][$goal] = ($stats['goals'][$goal] ?? 0) + 1;
+                if ($goal === 'mentor') $mentorGoalCount++;
+            }
+
+            // Interests
+            $interests = $data['interests'] ?? [];
+            foreach ($interests as $interest) {
+                $interestCount[$interest] = ($interestCount[$interest] ?? 0) + 1;
+            }
+        }
+
+        arsort($interestCount);
+        $stats['interests'] = array_slice($interestCount, 0, 10);
+        $stats['mentorship_intent_rate'] = round(($mentorGoalCount / $youths->count()) * 100, 1);
+
+        return $stats;
     }
 
     /**
@@ -456,25 +520,53 @@ class AnalyticsController extends Controller
             $handle = fopen('php://output', 'w');
 
             if ($type === 'users') {
-                // Header
-                fputcsv($handle, ['Nom', 'Email', 'Type', 'Pays', 'Ville', 'MBTI', 'Inscription']);
+                // Header Master
+                fputcsv($handle, [
+                    'Nom', 
+                    'Email', 
+                    'Situation', 
+                    'Niveau', 
+                    'Scolarité (Range)', 
+                    'Ville', 
+                    'MBTI', 
+                    'Intérêts', 
+                    'Objectifs Onboarding', 
+                    'Source Acquisition', 
+                    'Nb Mentorats Sent', 
+                    'Nb Mentorats OK', 
+                    'Nb Sessions OK', 
+                    'Credits Restants',
+                    'Dernière Activité',
+                    'Inscription'
+                ]);
 
-                // Cursor pour éviter de charger 1200+ objets en mémoire
-                $users = User::where('is_admin', false)
+                // Cursor pour performance (large volume)
+                $users = User::where('user_type', 'jeune')
                     ->whereBetween('created_at', [$start, $end])
-                    ->with(['personalityTest'])
+                    ->with(['personalityTest', 'mentorshipsAsMentee', 'mentoringSessionsAsMentee'])
                     ->orderBy('created_at', 'desc')
                     ->cursor();
 
                 foreach ($users as $user) {
+                    $onboarding = $user->onboarding_data ?? [];
+                    
                     fputcsv($handle, [
                         $user->name,
                         $user->email,
-                        ucfirst($user->user_type),
-                        $user->country ?? '-',
+                        ucfirst($onboarding['current_situation'] ?? '-'),
+                        ucfirst($onboarding['education_level'] ?? '-'),
+                        $onboarding['tuition_range'] ?? '-',
                         $user->city ?? '-',
                         $user->personalityTest && $user->personalityTest->completed_at ? $user->personalityTest->personality_type : '-',
-                        $user->created_at->format('d/m/Y H:i'),
+                        implode(', ', $onboarding['interests'] ?? []),
+                        implode(', ', $onboarding['goals'] ?? []),
+                        $onboarding['how_found_us'] ?? '-',
+                        $user->mentorshipsAsMentee->count(),
+                        $user->mentorshipsAsMentee->where('status', 'accepted')->count(),
+                        $user->mentoringSessionsAsMentee->where('status', 'completed')->count(),
+                        $user->wallet_balance ?? 0,
+                        $user->last_login_at ? $user->last_login_at->format('d/m/Y') : 'Jamais',
+                        $user->created_at->format('d/m/Y'),
                     ]);
                 }
             } elseif ($type === 'mentors') {

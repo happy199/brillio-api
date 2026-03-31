@@ -167,8 +167,8 @@
                 </div>
             </div>
             <div class="mt-4 flex items-center text-sm">
-                <span class="text-gray-500">Étapes parcours:</span>
-                <span class="text-orange-600 font-medium ml-1">{{ number_format($stats['total_roadmap_steps']) }}</span>
+                <span class="text-orange-600 font-medium">{{ $stats['youth_engagement']['mentorship_intent_rate'] }}%</span>
+                <span class="text-gray-500 ml-1">veulent un mentor</span>
             </div>
         </div>
     </div>
@@ -178,6 +178,93 @@
         <h3 class="font-semibold text-gray-900 mb-4">Évolution sur la période</h3>
         <div class="h-64">
             <canvas id="evolutionChart"></canvas>
+        </div>
+    </div>
+
+    <!-- NEW: Onboarding & Engagement Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Chart Situation -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Répartition par Situation</h3>
+            <div class="h-64">
+                <canvas id="situationChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart Sources -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Canaux d'Acquisition</h3>
+            <div class="h-64">
+                <canvas id="sourceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart Tuition -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Frais de Scolarité Annuel</h3>
+            <div class="h-64">
+                <canvas id="tuitionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Heatmap Intérêts -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Top 10 Centres d'Intérêt</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                @php
+                    $interestLabels = [
+                        'tech' => 'Technologie',
+                        'design' => 'Design',
+                        'business' => 'Business',
+                        'marketing' => 'Marketing',
+                        'communication' => 'Communication',
+                        'science' => 'Sciences',
+                        'arts' => 'Arts',
+                        'health' => 'Santé',
+                        'law' => 'Droit',
+                        'finance' => 'Finance',
+                        'education' => 'Education',
+                        'autre' => 'Autre'
+                    ];
+                    $totalInterests = array_sum($stats['youth_engagement']['interests']) ?: 1;
+                @endphp
+                @forelse($stats['youth_engagement']['interests'] as $interest => $count)
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-600 w-24 truncate">{{ $interestLabels[$interest] ?? $interest }}</span>
+                    <div class="flex-1 bg-gray-100 rounded-full h-2">
+                        <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ ($count / $totalInterests) * 100 }}%"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 w-8 text-right font-medium">{{ $count }}</span>
+                </div>
+                @empty
+                <p class="text-gray-500 text-center py-4">Pas encore de données</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Objectifs / Motivations -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Objectifs à l'inscription</h3>
+            <div class="space-y-3">
+                @php
+                    $goalLabels = [
+                        'mentor' => 'Trouver un mentor',
+                        'orientation' => 'Orientation scolaire',
+                        'personnalite' => 'Test de personnalité',
+                        'ia' => 'Conseiller IA',
+                        'documents' => 'Gestion de documents',
+                        'non_renseigne' => 'Non spécifié'
+                    ];
+                @endphp
+                @foreach($stats['youth_engagement']['goals'] as $goal => $count)
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">{{ $goalLabels[$goal] ?? $goal }}</span>
+                    <span class="text-sm font-semibold px-2 py-0.5 bg-gray-100 rounded text-gray-700">{{ $count }}</span>
+                </div>
+                @endforeach
+            </div>
         </div>
     </div>
 
@@ -425,6 +512,98 @@
                     }
                 }
             }
+        }
+    });
+
+    // Chart Tuition
+    const tuiCtx = document.getElementById('tuitionChart').getContext('2d');
+    const tuitions = @json($stats['youth_engagement']['tuition_ranges']);
+    const tuiLabels = {
+        'under_200': '- 200k',
+        '200_500': '200k - 500k',
+        '500_1m': '500k - 1M',
+        '1m_2m': '1M - 2M',
+        'over_2m': '+ 2M',
+        'non_renseigne': 'N/C'
+    };
+
+    new Chart(tuiCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(tuitions).map(k => tuiLabels[k] || k),
+            datasets: [{
+                label: 'Nombre de jeunes',
+                data: Object.values(tuitions),
+                backgroundColor: '#3B82F6',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Chart Situation
+    const sitCtx = document.getElementById('situationChart').getContext('2d');
+    const situations = @json($stats['youth_engagement']['situations']);
+    const sitLabels = {
+        'college': 'Collège',
+        'lycee': 'Lycée',
+        'universite': 'Université',
+        'recherche_emploi': 'En recherche',
+        'en_poste': 'En poste',
+        'entrepreneur': 'Entrepreneur',
+        'non_renseigne': 'N/C'
+    };
+
+    new Chart(sitCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(situations).map(k => sitLabels[k] || k),
+            datasets: [{
+                data: Object.values(situations),
+                backgroundColor: ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#6B7280', '#9CA3AF']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } }
+        }
+    });
+
+    // Chart Sources
+    const srcCtx = document.getElementById('sourceChart').getContext('2d');
+    const sources = @json($stats['youth_engagement']['sources']);
+    const srcLabels = {
+        'social_media': 'Réseaux Sociaux',
+        'friend': 'Ami',
+        'school': 'École',
+        'search': 'Google',
+        'event': 'Event',
+        'other': 'Autre',
+        'non_renseigne': 'N/C'
+    };
+
+    new Chart(srcCtx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(sources).map(k => srcLabels[k] || k),
+            datasets: [{
+                data: Object.values(sources),
+                backgroundColor: ['#6366F1', '#EC4899', '#FACC15', '#14B8A6', '#F97316', '#94A3B8', '#D1D5DB']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } }
         }
     });
 </script>
