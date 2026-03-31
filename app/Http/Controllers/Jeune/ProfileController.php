@@ -43,6 +43,12 @@ class ProfileController extends Controller
             'portfolio_url' => 'sometimes|nullable|url|max:255',
             'cv' => 'nullable|file|mimes:pdf|max:5120', // 5MB max
             'is_public' => 'sometimes|boolean',
+
+            // Onboarding Data updates
+            'current_situation' => 'sometimes|required|string|in:etudiant,recherche_emploi,emploi,entrepreneur,autre',
+            'education_level' => 'sometimes|required|string|in:college,lycee,bac,licence,master,doctorat',
+            'interests' => 'sometimes|required|array|size:5',
+            'interests.*' => 'string',
         ]);
 
         // Mise à jour User (seulement les champs présents)
@@ -128,6 +134,21 @@ class ProfileController extends Controller
 
         if (! empty($profileUpdates)) {
             $profile->update($profileUpdates);
+        }
+
+        // Mise à jour Onboarding Data
+        $onboardingFields = ['current_situation', 'education_level', 'interests'];
+        $onboardingUpdates = [];
+        foreach ($onboardingFields as $field) {
+            if ($request->has($field)) {
+                $onboardingUpdates[$field] = $validated[$field];
+            }
+        }
+
+        if (! empty($onboardingUpdates)) {
+            $user->update([
+                'onboarding_data' => array_merge($user->onboarding_data ?? [], $onboardingUpdates)
+            ]);
         }
 
         // Sauvegarder le chemin du CV si modifié

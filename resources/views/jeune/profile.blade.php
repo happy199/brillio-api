@@ -240,7 +240,7 @@
                             </div>
                             <div class="flex-1 flex justify-between items-center">
                                 <h3 class="font-bold text-gray-900">Profil Onboarding</h3>
-                                <button @click="$dispatch('open-profiling-modal')" 
+                                <button @click="editOnboarding = true" 
                                     class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -284,19 +284,17 @@
                                 </p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500 uppercase">Intérêts</p>
-                                <div class="flex flex-wrap gap-1 mt-1">
-                                    @if(isset($user->onboarding_data['interests']))
-                                    @foreach($user->onboarding_data['interests'] as $interest)
-                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{{ $interest
-                                        }}</span>
+                                <p class="text-xs text-gray-500 uppercase mb-1">Centres d'intérêt</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach($user->onboarding_data['interests'] ?? [] as $interest)
+                                        <span class="px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-bold rounded-full border border-green-100">
+                                            {{ $interest }}
+                                        </span>
                                     @endforeach
-                                    @else
-                                    <span class="text-gray-400 text-sm">-</span>
-                                    @endif
                                 </div>
                             </div>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -517,6 +515,98 @@
         </div>
     </div>
 
+    <!-- MODAL 3: Profil Onboarding -->
+    <div x-show="editOnboarding" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" x-cloak
+        x-transition>
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto" @click.away="editOnboarding = false">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Modifier mon profil onboarding</h3>
+                <button @click="editOnboarding = false" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form action="{{ route('jeune.profile.update') }}" method="POST">
+                @csrf
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-3">Situation actuelle</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <template x-for="sit in situations" :key="sit.value">
+                                <button type="button" @click="onboardingData.current_situation = sit.value"
+                                    :class="[
+                                        'px-4 py-2 text-sm rounded-xl border-2 transition text-left',
+                                        onboardingData.current_situation === sit.value 
+                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
+                                            : 'border-gray-100 hover:border-gray-200 text-gray-600'
+                                    ]">
+                                    <span x-text="sit.label"></span>
+                                </button>
+                            </template>
+                        </div>
+                        <input type="hidden" name="current_situation" :value="onboardingData.current_situation">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-3">Niveau d'étude</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <template x-for="edu in educationLevels" :key="edu.value">
+                                <button type="button" @click="onboardingData.education_level = edu.value"
+                                    :class="[
+                                        'px-4 py-2 text-sm rounded-xl border-2 transition text-left',
+                                        onboardingData.education_level === edu.value 
+                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
+                                            : 'border-gray-100 hover:border-gray-200 text-gray-600'
+                                    ]">
+                                    <span x-text="edu.label"></span>
+                                </button>
+                            </template>
+                        </div>
+                        <input type="hidden" name="education_level" :value="onboardingData.education_level">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Centres d'intérêt</label>
+                        <p class="text-xs text-gray-500 mb-3">Sélectionnez exactement 5 centres d'intérêt (<span x-text="onboardingData.interests.length"></span>/5)</p>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="interest in interestOptions" :key="interest">
+                                <button type="button" @click="toggleInterest(interest)"
+                                    :class="[
+                                        'px-3 py-1.5 text-xs rounded-full border-2 transition font-medium',
+                                        onboardingData.interests.includes(interest) 
+                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
+                                            : 'border-gray-100 hover:border-gray-200 text-gray-600'
+                                    ]">
+                                    <span x-text="interest"></span>
+                                </button>
+                            </template>
+                        </div>
+                        <template x-for="interest in onboardingData.interests" :key="interest">
+                            <input type="hidden" name="interests[]" :value="interest">
+                        </template>
+                    </div>
+
+                    <!-- Hidden fields to preserve Profile status -->
+                    <input type="hidden" name="is_public" value="{{ $profile->is_public ? '1' : '0' }}">
+                </div>
+
+                <div class="mt-8 flex justify-end gap-3">
+                    <button type="button" @click="editOnboarding = false"
+                        class="px-6 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                        Annuler
+                    </button>
+                    <button type="submit" :disabled="onboardingData.interests.length !== 5"
+                        :class="onboardingData.interests.length === 5 ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-300 cursor-not-allowed'"
+                        class="px-6 py-2.5 text-white font-bold rounded-xl transition shadow-sm">
+                        Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL 4: Validation par code -->
     <div x-show="showDeleteCode" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" x-cloak
         x-transition>
@@ -562,6 +652,40 @@
                 confirmationCode: '',
                 codeInput: '',
                 codeError: '',
+
+                // Onboarding Data
+                editOnboarding: false,
+                onboardingData: {
+                    current_situation: '{{ $user->onboarding_data["current_situation"] ?? "" }}',
+                    education_level: '{{ $user->onboarding_data["education_level"] ?? "" }}',
+                    interests: @json($user->onboarding_data['interests'] ?? []),
+                },
+
+                interestOptions: ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante', 'Education', 'Ingenierie', 'Droit', 'Arts', 'Sciences', 'Entrepreneuriat', 'Communication', 'Agriculture', 'Environnement', 'Sport'],
+                educationLevels: [
+                    { value: 'college', label: 'Collège' },
+                    { value: 'lycee', label: 'Lycée' },
+                    { value: 'bac', label: 'Baccalauréat' },
+                    { value: 'licence', label: 'Licence / Bachelor' },
+                    { value: 'master', label: 'Master' },
+                    { value: 'doctorat', label: 'Doctorat' }
+                ],
+                situations: [
+                    { value: 'etudiant', label: 'Etudiant(e)' },
+                    { value: 'recherche_emploi', label: 'En recherche d\'emploi' },
+                    { value: 'emploi', label: 'En emploi' },
+                    { value: 'entrepreneur', label: 'Entrepreneur' },
+                    { value: 'autre', label: 'Autre' }
+                ],
+
+                toggleInterest(interest) {
+                    const index = this.onboardingData.interests.indexOf(interest);
+                    if (index > -1) {
+                        this.onboardingData.interests.splice(index, 1);
+                    } else if (this.onboardingData.interests.length < 5) {
+                        this.onboardingData.interests.push(interest);
+                    }
+                },
 
                 async generateCode() {
                     try {
