@@ -19,6 +19,14 @@
         }
     },
 
+    get cityLabel() {
+        if (['college', 'lycee'].includes(this.situation)) return 'Dans quelle ville se situe ton collège ou lycée ?';
+        if (this.situation === 'etudiant') return 'Dans quelle ville se situe ton université / ton école ?';
+        if (['emploi', 'entrepreneur'].includes(this.situation)) return 'Dans quelle ville se situe ton entreprise / ton activité ?';
+        if (this.situation === 'recherche_emploi') return 'Dans quelle ville recherches-tu du travail ?';
+        return 'Dans quelle ville te situes-tu actuellement ?';
+    },
+
     async submitFeedback() {
         if (this.rating === 0) return;
         this.loading = true;
@@ -64,9 +72,7 @@
     },
 
     async skip() {
-        // Détermine quelle partie est sautée selon l'étape actuelle
         const route = this.step === 1 ? '{{ route('jeune.profiling.feedback.skip') }}' : '{{ route('jeune.profiling.situation.skip') }}';
-        
         try {
             await fetch(route, {
                 method: 'POST',
@@ -112,7 +118,7 @@ x-cloak>
             class="relative bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all border border-gray-100 min-h-[350px] flex flex-col justify-center"
         >
             
-            <!-- Close Button (only if not mandatory/first nudge) -->
+            <!-- Close Button -->
             <button @click="skip()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -183,24 +189,36 @@ x-cloak>
                     <template x-if="['college', 'lycee'].includes(situation)">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">En quelle classe es-tu ?</label>
-                                <select x-model="details.class_level" class="w-full rounded-xl border-gray-200 text-sm p-3">
-                                    <option value="">Choisir...</option>
-                                    <template x-if="situation === 'college'">
-                                        <template x-for="c in ['6ème', '5ème', '4ème', '3ème']">
-                                            <option :value="c" x-text="c"></option>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nom de ton établissement</label>
+                                <input type="text" x-model="details.institution" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Nom du collège ou lycée">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ta classe</label>
+                                    <select x-model="details.class_level" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                        <option value="">Choisir...</option>
+                                        <template x-if="situation === 'college'">
+                                            <template x-for="c in ['6ème', '5ème', '4ème', '3ème']">
+                                                <option :value="c" x-text="c"></option>
+                                            </template>
                                         </template>
-                                    </template>
-                                    <template x-if="situation === 'lycee'">
-                                        <template x-for="c in ['2nde', '1ère', 'Terminale']">
-                                            <option :value="c" x-text="c"></option>
+                                        <template x-if="situation === 'lycee'">
+                                            <template x-for="c in ['2nde', '1ère', 'Terminale']">
+                                                <option :value="c" x-text="c"></option>
+                                            </template>
                                         </template>
-                                    </template>
-                                </select>
+                                    </select>
+                                </div>
+                                <template x-if="situation === 'lycee' || details.class_level === '3ème'">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Série / Spécialité</label>
+                                        <input type="text" x-model="details.specialization" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: S1, L, G2...">
+                                    </div>
+                                </template>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Quelle est ta série / spécialité ?</label>
-                                <input type="text" x-model="details.specialization" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: S1, L, G2, Mathématiques...">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Prochain diplôme préparé</label>
+                                <input type="text" x-model="details.target_diploma" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: BEPC, Baccalauréat...">
                             </div>
                         </div>
                     </template>
@@ -220,6 +238,7 @@ x-cloak>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Année</label>
                                     <select x-model="details.year" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                        <option value="">Choisir...</option>
                                         <template x-for="y in ['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat']">
                                             <option :value="y" x-text="y"></option>
                                         </template>
@@ -241,28 +260,44 @@ x-cloak>
                     <template x-if="['emploi', 'entrepreneur'].includes(situation)">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Secteur d'activité</label>
-                                <input type="text" x-model="details.sector" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Marketing Digital">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nom de ton entreprise / activité</label>
+                                <input type="text" x-model="details.company" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Brillio, Freelance...">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Années d'expérience</label>
-                                <input type="number" x-model="details.experience" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Ton poste actuel</label>
+                                <input type="text" x-model="details.position" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Développeur, Manager...">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Es-tu ouvert à de nouvelles opportunités ?</label>
-                                <select x-model="details.availability" class="w-full rounded-xl border-gray-200 text-sm p-3">
-                                    <option value="none">Non, je suis bien ici</option>
-                                    <option value="passive">À l'écoute (en veille)</option>
-                                    <option value="active">Oui, je cherche activement</option>
-                                </select>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Secteur</label>
+                                    <input type="text" x-model="details.sector" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Marketing">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Expérience (années)</label>
+                                    <input type="number" x-model="details.experience" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                </div>
                             </div>
                         </div>
                     </template>
 
-                    <!-- Common: Activity City -->
+                    <!-- If Job Seeker -->
+                    <template x-if="situation === 'recherche_emploi'">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dernière formation ou diplôme obtenu</label>
+                                <input type="text" x-model="details.last_education" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Master en Gestion, Bac...">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dans quel domaine recherches-tu du travail ?</label>
+                                <input type="text" x-model="details.target_field" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Comptabilité, Vente...">
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Common Activity City (Dynamic Label) -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Dans quelle ville se situe ton établissement / ton entreprise ?</label>
-                        <input type="text" x-model="details.city" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Dakar, Abidjan, Lomé...">
+                        <label class="block text-sm font-medium text-gray-700 mb-1" x-text="cityLabel"></label>
+                        <input type="text" x-model="details.city" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Dakar, Abidjan, Bamako...">
                     </div>
                 </div>
 

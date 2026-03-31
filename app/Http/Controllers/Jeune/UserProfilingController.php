@@ -57,9 +57,20 @@ class UserProfilingController extends Controller
         // On récupère la situation de base depuis l'onboarding_data ou current_situation
         $baseSituation = $user->onboarding_data['current_situation'] ?? 'autre';
 
-        // Validation dynamique simplifiée (le plus gros du travail est côté Front)
+        // Validation précise des données situationnelles
         $validated = $request->validate([
             'data' => 'required|array',
+            'data.institution' => 'nullable|string|max:255',
+            'data.class_level' => 'nullable|string|max:50',
+            'data.specialization' => 'nullable|string|max:255',
+            'data.target_diploma' => 'nullable|string|max:255',
+            'data.company' => 'nullable|string|max:255',
+            'data.position' => 'nullable|string|max:255',
+            'data.sector' => 'nullable|string|max:255',
+            'data.experience' => 'nullable|string|max:50',
+            'data.last_education' => 'nullable|string|max:255',
+            'data.target_field' => 'nullable|string|max:255',
+            'data.city' => 'required|string|max:255',
         ]);
 
         UserDetailedProfile::create([
