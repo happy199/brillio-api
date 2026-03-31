@@ -233,7 +233,14 @@ class AnalyticsController extends Controller
             'sources' => [],
             'goals' => [],
             'interests' => [],
-            'tuition_ranges' => [],
+            'tuition_ranges' => [
+                'under_200' => 0,
+                '200_500' => 0,
+                '500_1m' => 0,
+                '1m_2m' => 0,
+                'over_2m' => 0,
+                'non_renseigne' => 0,
+            ],
             'mentorship_intent_rate' => 0,
         ];
 

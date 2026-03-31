@@ -546,21 +546,23 @@
     const tuitions = @json($stats['youth_engagement']['tuition_ranges']);
     const tuiLabels = {
         'under_200': '- 200k',
-        '200_500': '200k - 500k',
-        '500_1m': '500k - 1M',
-        '1m_2m': '1M - 2M',
+        '200_500': '200k-500k',
+        '500_1m': '500k-1M',
+        '1m_2m': '1M-2M',
         'over_2m': '+ 2M',
         'non_renseigne': 'N/C'
     };
 
+    const tuiData = ['under_200', '200_500', '500_1m', '1m_2m', 'over_2m', 'non_renseigne'];
+
     new Chart(tuiCtx, {
         type: 'bar',
         data: {
-            labels: Object.keys(tuitions).map(k => tuiLabels[k] || k),
+            labels: tuiData.map(k => tuiLabels[k]),
             datasets: [{
                 label: 'Nombre de jeunes',
-                data: Object.values(tuitions),
-                backgroundColor: '#3B82F6',
+                data: tuiData.map(k => tuitions[k] || 0),
+                backgroundColor: ['#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F97316', '#94A3B8'],
                 borderRadius: 4
             }]
         },
@@ -569,7 +571,14 @@
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: '#f3f4f6' },
+                    ticks: { 
+                        stepSize: 1,
+                        precision: 0
+                    }
+                },
                 x: { grid: { display: false } }
             }
         }
