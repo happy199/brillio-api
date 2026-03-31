@@ -238,20 +238,49 @@
                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
-                            <h3 class="font-bold text-gray-900">Profil Onboarding</h3>
+                            <div class="flex-1 flex justify-between items-center">
+                                <h3 class="font-bold text-gray-900">Profil Onboarding</h3>
+                                <button @click="$dispatch('open-profiling-modal')" 
+                                    class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
+
+                        @php
+                            $situationLabels = [
+                                'etudiant' => 'Étudiant',
+                                'recherche_emploi' => "Recherche d'emploi",
+                                'emploi' => 'En emploi',
+                                'entrepreneur' => 'Entrepreneur',
+                                'autre' => 'Autre',
+                            ];
+                            $eduLabels = [
+                                'college' => 'Collégien',
+                                'lycee' => 'Lycéen',
+                                'bac' => 'Bachelier',
+                                'licence' => 'Licence',
+                                'master' => 'Master',
+                                'doctorat' => 'Doctorat',
+                            ];
+                            $currentSit = $user->onboarding_data['current_situation'] ?? 'autre';
+                            $currentEdu = $user->onboarding_data['education_level'] ?? '';
+                        @endphp
 
                         <div class="space-y-3">
                             <div>
                                 <p class="text-xs text-gray-500 uppercase">Situation</p>
                                 <p class="font-medium text-gray-900">
-                                    {{ ucfirst($user->onboarding_data['current_situation'] ?? 'Non défini') }}
+                                    {{ $situationLabels[$currentSit] ?? ucfirst($currentSit) }}
                                 </p>
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500 uppercase">Niveau d'étude</p>
                                 <p class="font-medium text-gray-900">
-                                    {{ ucfirst($user->onboarding_data['education_level'] ?? 'Non défini') }}
+                                    {{ $eduLabels[$currentEdu] ?? ucfirst($currentEdu) }}
                                 </p>
                             </div>
                             <div>
@@ -574,5 +603,6 @@
         }
     </script>
 
+    @include('jeune.partials.profiling-modal')
 </div>
 @endsection
