@@ -261,7 +261,29 @@
                 </svg>
             </div>
         </a>
+
+        <!-- Update Situation (Progressive Profiling CTA) -->
+        <div x-data @click="$dispatch('open-profiling-modal')" class="bg-white rounded-2xl p-6 shadow-sm card-hover group text-left cursor-pointer">
+            <div
+                class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">Mettre à jour ma situation</h3>
+            <p class="text-gray-500 text-sm mt-1">Ta vie change ? Tes infos aussi ! Ça nous aide à mieux t'orienter</p>
+            <div class="mt-4 flex items-center text-primary-600 font-medium text-sm">
+                Mettre à jour
+                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </div>
+        </div>
     </div>
+
+    @include('jeune.partials.profiling-modal')
 
     <!-- Mentors recommandes -->
     @if($recommendedMentors->count() > 0)

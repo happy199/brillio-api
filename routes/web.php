@@ -217,6 +217,12 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::post('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profil/publier', [App\Http\Controllers\Jeune\ProfileController::class, 'publishProfile'])->name('profile.publish');
 
+    // Progressive Profiling & Feedback
+    Route::post('/feedback', [\App\Http\Controllers\Jeune\UserProfilingController::class, 'storeFeedback'])->name('profiling.feedback');
+    Route::post('/feedback/skip', [\App\Http\Controllers\Jeune\UserProfilingController::class, 'skipFeedback'])->name('profiling.feedback.skip');
+    Route::post('/situation', [\App\Http\Controllers\Jeune\UserProfilingController::class, 'storeSituation'])->name('profiling.situation');
+    Route::post('/situation/skip', [\App\Http\Controllers\Jeune\UserProfilingController::class, 'skipSituation'])->name('profiling.situation.skip');
+
     // Account archiving
     Route::get('/account/confirmation-code', [App\Http\Controllers\AccountController::class, 'generateConfirmationCode'])->name('account.confirmation-code');
     Route::post('/account/archive', [App\Http\Controllers\AccountController::class, 'archiveAccount'])->name('account.archive');

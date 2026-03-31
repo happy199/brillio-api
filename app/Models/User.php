@@ -70,6 +70,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'onboarding_data',
         'last_login_at',
         'last_engagement_email_sent_at',
+        'last_feedback_at',
+        'last_situation_update_at',
+        'last_rating',
         'email_verified_at',
         'sponsored_by_organization_id',
         'organization_id',
@@ -111,6 +114,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'onboarding_data' => 'array',
             'last_login_at' => 'datetime',
             'last_engagement_email_sent_at' => 'datetime',
+            'last_feedback_at' => 'datetime',
+            'last_situation_update_at' => 'datetime',
+            'last_rating' => 'integer',
             'is_archived' => 'boolean',
             'archived_at' => 'datetime',
             'is_blocked' => 'boolean',
@@ -217,6 +223,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function jeuneProfile(): HasOne
     {
         return $this->hasOne(JeuneProfile::class);
+    }
+
+    /**
+     * Relation vers les feedbacks de l'utilisateur
+     */
+    public function feedbacks(): HasMany
+    {
+        return $this->hasMany(UserFeedback::class);
+    }
+
+    /**
+     * Relation vers le profil détaillé de situation (progressive profiling)
+     */
+    public function detailedProfile(): HasOne
+    {
+        return $this->hasOne(UserDetailedProfile::class)->latestOfMany();
     }
 
     /**
@@ -472,4 +494,48 @@ class User extends Authenticatable implements MustVerifyEmail
             ->pluck('organizations.id')
             ->toArray();
     }
+
+    /**
+     * Détermine si l'utilisateur doit recevoir un "nudge" (une sollicitation) pour son profil ou feedback.
+     */
+    public function needsProfilingNudge(): bool
+    {
+        if (! $this->isJeune()) {
+            return false;
+        }
+
+        return $this->needsFeedbackNudge() || $this->needsSituationNudge();
+    }
+
+    /**
+     * Détermine si on doit redemander un feedback (stars).
+     * - Une seule fois si > 3.
+     * - Toutes les 2 semaines si <= 3.
+     */
+    public function needsFeedbackNudge(): bool
+    {
+        if (is_null($this->last_feedback_at)) {
+            return true;
+        }
+
+        if ($this->last_rating <= 3) {
+            return $this->last_feedback_at->diffInDays(now()) >= 14;
+        }
+
+        return false;
+    }
+
+    /**
+     * Détermine si on doit redemander une mise à jour de situation.
+     * - Tous les 3 mois (90 jours).
+     */
+    public function needsSituationNudge(): bool
+    {
+        if (is_null($this->last_situation_update_at)) {
+            return true;
+        }
+
+        return $this->last_situation_update_at->diffInDays(now()) >= 90;
+    }
 }
+
