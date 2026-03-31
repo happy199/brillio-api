@@ -266,9 +266,18 @@ class AnalyticsController extends Controller
             $src = $onboarding['how_found_us'] ?? 'non_renseigne';
             $stats['sources'][$src] = ($stats['sources'][$src] ?? 0) + 1;
 
-            // Tuition
-            $tuition = $data['tuition_range'] ?? 'non_renseigne';
-            $stats['tuition_ranges'][$tuition] = ($stats['tuition_ranges'][$tuition] ?? 0) + 1;
+            // Tuition Mapping
+            $rawTuition = $data['tuition_range'] ?? 'non_renseigne';
+            $tuitionMap = [
+                '-200000' => 'under_200',
+                '200000-500000' => '200_500',
+                '500000-1000000' => '500_1m',
+                '1000000-2000000' => '1m_2m',
+                '+2000000' => 'over_2m',
+                'non_renseigne' => 'non_renseigne'
+            ];
+            $tuitionKey = $tuitionMap[$rawTuition] ?? 'non_renseigne';
+            $stats['tuition_ranges'][$tuitionKey] = ($stats['tuition_ranges'][$tuitionKey] ?? 0) + 1;
 
             // Goals
             $goals = $data['goals'] ?? [];
@@ -565,8 +574,12 @@ class AnalyticsController extends Controller
             $handle = fopen('php://output', 'w');
 
             if ($type === 'users') {
-                $situation = $request->get('situation');
-                $interest = $request->get('interest');
+                $situations = (array) $request->get('situation', []);
+                $interests = (array) $request->get('interest', []);
+                
+                // Nettoyage des tableaux vides
+                $situations = array_filter($situations);
+                $interests = array_filter($interests);
 
                 // Header Master
                 fputcsv($handle, [
@@ -593,17 +606,21 @@ class AnalyticsController extends Controller
                 $query = User::where('user_type', 'jeune')
                     ->whereBetween('created_at', [$start, $end]);
 
-                if ($situation) {
-                    $query->where(function($q) use ($situation) {
-                        $q->where('onboarding_data->current_situation', $situation)
-                          ->orWhereHas('detailedProfiles', function($sq) use ($situation) {
-                              $sq->where('status', $situation);
+                if (!empty($situations)) {
+                    $query->where(function($q) use ($situations) {
+                        $q->whereIn('onboarding_data->current_situation', $situations)
+                          ->orWhereHas('detailedProfiles', function($sq) use ($situations) {
+                              $sq->whereIn('status', $situations);
                           });
                     });
                 }
 
-                if ($interest) {
-                    $query->where('onboarding_data->interests', 'like', '%"'.$interest.'"%');
+                if (!empty($interests)) {
+                    $query->where(function($q) use ($interests) {
+                        foreach ($interests as $interest) {
+                            $q->orWhereJsonContains('onboarding_data->interests', $interest);
+                        }
+                    });
                 }
 
                 $users = $query->with(['personalityTest', 'mentorshipsAsMentee', 'mentoringSessionsAsMentee', 'detailedProfiles' => fn($q) => $q->latest()])

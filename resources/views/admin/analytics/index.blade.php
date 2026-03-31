@@ -52,26 +52,70 @@
                     </div>
                 </div>
 
-                <!-- Filtre Situation -->
-                <div>
-                    <label class="block text-xs text-gray-500 mb-1">Situation</label>
-                    <select name="situation" class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Toutes les situations</option>
-                        @foreach($allSituations as $key => $label)
-                            <option value="{{ $key }}" {{ ($filters['situation'] ?? '') == $key ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
+                <!-- Situation Multi-select -->
+                <div class="space-y-1" x-data="{ 
+                    open: false, 
+                    selected: @json((array)request('situation', [])),
+                    options: @json($allSituations),
+                    toggle(val) {
+                        const i = this.selected.indexOf(val);
+                        if (i > -1) this.selected.splice(i, 1);
+                        else this.selected.push(val);
+                    },
+                    get label() {
+                        if (this.selected.length === 0) return 'Toutes';
+                        if (this.selected.length === 1) return this.options[this.selected[0]];
+                        return this.selected.length + ' sélectionnées';
+                    }
+                }" @click.away="open = false">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Situation</label>
+                    <div class="relative">
+                        <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm">
+                            <span x-text="label" class="truncate mr-2"></span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-64 overflow-y-auto">
+                            <template x-for="(label, value) in options" :key="value">
+                                <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                    <input type="checkbox" name="situation[]" :value="value" :checked="selected.includes(value)" @change="toggle(value)" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="text-sm text-gray-700" x-text="label"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Filtre Intérêts -->
-                <div>
-                    <label class="block text-xs text-gray-500 mb-1">Centre d'intérêt</label>
-                    <select name="interest" class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Tous les intérêts</option>
-                        @foreach($allInterests as $key => $label)
-                            <option value="{{ $key }}" {{ ($filters['interest'] ?? '') == $key ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
+                <!-- Interet Multi-select -->
+                <div class="space-y-1" x-data="{ 
+                    open: false, 
+                    selected: @json((array)request('interest', [])),
+                    options: @json($allInterests),
+                    toggle(val) {
+                        const i = this.selected.indexOf(val);
+                        if (i > -1) this.selected.splice(i, 1);
+                        else this.selected.push(val);
+                    },
+                    get label() {
+                        if (this.selected.length === 0) return 'Tous';
+                        if (this.selected.length === 1) return this.selected[0];
+                        return this.selected.length + ' sélectionnés';
+                    }
+                }" @click.away="open = false">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Centre d'intérêt</label>
+                    <div class="relative">
+                        <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm">
+                            <span x-text="label" class="truncate mr-2"></span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-64 overflow-y-auto">
+                            <template x-for="item in options" :key="item">
+                                <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                    <input type="checkbox" name="interest[]" :value="item" :checked="selected.includes(item)" @change="toggle(item)" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="text-sm text-gray-700" x-text="item"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
