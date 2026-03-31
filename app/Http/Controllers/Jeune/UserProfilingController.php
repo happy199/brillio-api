@@ -64,6 +64,7 @@ class UserProfilingController extends Controller
             'data.class_level' => 'nullable|string|max:50',
             'data.specialization' => 'nullable|string|max:255',
             'data.target_diploma' => 'nullable|string|max:255',
+            'data.target_diploma_other' => 'nullable|string|max:255',
             'data.company' => 'nullable|string|max:255',
             'data.position' => 'nullable|string|max:255',
             'data.sector' => 'nullable|string|max:255',

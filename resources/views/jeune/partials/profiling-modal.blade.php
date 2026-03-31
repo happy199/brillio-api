@@ -5,6 +5,7 @@
     hoverRating: 0,
     comment: '',
     situation: '{{ $user->onboarding_data['current_situation'] ?? 'autre' }}',
+    educationLevel: '{{ $user->onboarding_data['education_level'] ?? '' }}',
     details: {},
     loading: false,
     success: false,
@@ -19,11 +20,27 @@
         }
     },
 
+    get isSchoolLevel() {
+        return ['college', 'lycee'].includes(this.educationLevel) || ['college', 'lycee'].includes(this.situation);
+    },
+
+    get isUniversityLevel() {
+        return this.situation === 'etudiant' && !['college', 'lycee'].includes(this.educationLevel);
+    },
+
+    get isWorking() {
+        return ['emploi', 'entrepreneur'].includes(this.situation);
+    },
+
+    get isJobSeeker() {
+        return this.situation === 'recherche_emploi';
+    },
+
     get cityLabel() {
-        if (['college', 'lycee'].includes(this.situation)) return 'Dans quelle ville se situe ton collège ou lycée ?';
-        if (this.situation === 'etudiant') return 'Dans quelle ville se situe ton université / ton école ?';
-        if (['emploi', 'entrepreneur'].includes(this.situation)) return 'Dans quelle ville se situe ton entreprise / ton activité ?';
-        if (this.situation === 'recherche_emploi') return 'Dans quelle ville recherches-tu du travail ?';
+        if (this.isSchoolLevel) return 'Dans quelle ville se situe ton collège ou lycée ?';
+        if (this.isUniversityLevel) return 'Dans quelle ville se situe ton université / ton école ?';
+        if (this.isWorking) return 'Dans quelle ville se situe ton entreprise / ton activité ?';
+        if (this.isJobSeeker) return 'Dans quelle ville recherches-tu du travail ?';
         return 'Dans quelle ville te situes-tu actuellement ?';
     },
 
@@ -185,8 +202,8 @@ x-cloak>
                 <div class="space-y-4 max-h-[60vh] overflow-y-auto px-1">
                     <!-- Dynamic Form Sections -->
                     
-                    <!-- If College/Lycée -->
-                    <template x-if="['college', 'lycee'].includes(situation)">
+                    <!-- If School Level (College/Lycee combined) -->
+                    <template x-if="isSchoolLevel">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nom de ton établissement</label>
@@ -197,34 +214,41 @@ x-cloak>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Ta classe</label>
                                     <select x-model="details.class_level" class="w-full rounded-xl border-gray-200 text-sm p-3">
                                         <option value="">Choisir...</option>
-                                        <template x-if="situation === 'college'">
-                                            <template x-for="c in ['6ème', '5ème', '4ème', '3ème']">
-                                                <option :value="c" x-text="c"></option>
-                                            </template>
-                                        </template>
-                                        <template x-if="situation === 'lycee'">
-                                            <template x-for="c in ['2nde', '1ère', 'Terminale']">
-                                                <option :value="c" x-text="c"></option>
-                                            </template>
+                                        <template x-for="c in ['6ème', '5ème', '4ème', '3ème', '2nde', '1ère', 'Terminale']">
+                                            <option :value="c" x-text="c"></option>
                                         </template>
                                     </select>
                                 </div>
-                                <template x-if="situation === 'lycee' || details.class_level === '3ème'">
+                                <template x-if="['3ème', '2nde', '1ère', 'Terminale'].includes(details.class_level)">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Série / Spécialité</label>
-                                        <input type="text" x-model="details.specialization" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: S1, L, G2...">
+                                        <input type="text" x-model="details.specialization" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: S, L, G, F...">
                                     </div>
                                 </template>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Prochain diplôme préparé</label>
-                                <input type="text" x-model="details.target_diploma" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: BEPC, Baccalauréat...">
+                                <select x-model="details.target_diploma" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                    <option value="">Choisir un diplôme...</option>
+                                    <option value="BEPC">BEPC</option>
+                                    <option value="CAP">CAP</option>
+                                    <option value="Probatoire">Probatoire</option>
+                                    <option value="BAC">BAC</option>
+                                    <option value="BT">Brevet de Technicien (BT)</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
                             </div>
+                            <template x-if="details.target_diploma === 'Autre'">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Précisez le diplôme</label>
+                                    <input type="text" x-model="details.target_diploma_other" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Nom du diplôme...">
+                                </div>
+                            </template>
                         </div>
                     </template>
 
-                    <!-- If Student -->
-                    <template x-if="situation === 'etudiant'">
+                    <!-- If University Student -->
+                    <template x-if="isUniversityLevel">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Université ou École</label>
@@ -257,7 +281,7 @@ x-cloak>
                     </template>
 
                     <!-- If Working -->
-                    <template x-if="['emploi', 'entrepreneur'].includes(situation)">
+                    <template x-if="isWorking">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nom de ton entreprise / activité</label>
@@ -281,7 +305,7 @@ x-cloak>
                     </template>
 
                     <!-- If Job Seeker -->
-                    <template x-if="situation === 'recherche_emploi'">
+                    <template x-if="isJobSeeker">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Dernière formation ou diplôme obtenu</label>
