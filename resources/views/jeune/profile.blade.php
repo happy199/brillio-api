@@ -294,12 +294,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Colonne Droite: Public Toggle -->
+        <!-- Colonne Droite: Public Toggle -->
             <div>
                 <div class="bg-white rounded-2xl p-6 shadow-sm sticky top-6">
                     <h3 class="font-bold text-gray-900 mb-6 flex items-center gap-2">
