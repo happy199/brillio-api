@@ -53,9 +53,9 @@
                 </div>
 
                 <!-- Situation Multi-select -->
-                <div class="space-y-1" x-data="{ 
+                <div class="space-y-1" x-data='{ 
                     open: false, 
-                    selected: @json((array)request('situation', [])),
+                    selected: @json((array)request("situation", [])),
                     options: @json($allSituations),
                     toggle(val) {
                         const i = this.selected.indexOf(val);
@@ -63,11 +63,11 @@
                         else this.selected.push(val);
                     },
                     get label() {
-                        if (this.selected.length === 0) return 'Toutes';
+                        if (this.selected.length === 0) return "Toutes";
                         if (this.selected.length === 1) return this.options[this.selected[0]];
-                        return this.selected.length + ' sélectionnées';
+                        return this.selected.length + " sélectionnées";
                     }
-                }" @click.away="open = false">
+                }' @click.away="open = false">
                     <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Situation</label>
                     <div class="relative">
                         <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm">
@@ -86,9 +86,9 @@
                 </div>
 
                 <!-- Interet Multi-select -->
-                <div class="space-y-1" x-data="{ 
+                <div class="space-y-1" x-data='{ 
                     open: false, 
-                    selected: @json((array)request('interest', [])),
+                    selected: @json((array)request("interest", [])),
                     options: @json($allInterests),
                     toggle(val) {
                         const i = this.selected.indexOf(val);
@@ -96,11 +96,11 @@
                         else this.selected.push(val);
                     },
                     get label() {
-                        if (this.selected.length === 0) return 'Tous';
+                        if (this.selected.length === 0) return "Tous";
                         if (this.selected.length === 1) return this.selected[0];
-                        return this.selected.length + ' sélectionnés';
+                        return this.selected.length + " sélectionnés";
                     }
-                }" @click.away="open = false">
+                }' @click.away="open = false">
                     <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Centre d'intérêt</label>
                     <div class="relative">
                         <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm">
@@ -634,9 +634,9 @@
     const sitLabels = {
         'college': 'Collège',
         'lycee': 'Lycée',
-        'universite': 'Université',
+        'etudiant': 'Université',
         'recherche_emploi': 'En recherche',
-        'en_poste': 'En poste',
+        'emploi': 'En poste',
         'entrepreneur': 'Entrepreneur',
         'non_renseigne': 'N/C'
     };

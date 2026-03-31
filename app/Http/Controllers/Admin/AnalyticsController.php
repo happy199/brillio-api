@@ -182,9 +182,9 @@ class AnalyticsController extends Controller
         $allSituations = [
             'college' => 'Collège',
             'lycee' => 'Lycée',
-            'universite' => 'Université',
+            'etudiant' => 'Université',
             'recherche_emploi' => 'En recherche',
-            'en_poste' => 'En poste',
+            'emploi' => 'En poste',
             'entrepreneur' => 'Entrepreneur',
             'autre' => 'Autre',
         ];
@@ -570,16 +570,25 @@ class AnalyticsController extends Controller
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        return response()->stream(function () use ($type, $start, $end, $request) {
+        $situations = (array) $request->get('situation', []);
+        $interests = (array) $request->get('interest', []);
+        $situations = array_filter($situations);
+        $interests = array_filter($interests);
+        
+        $allSituationsDisplay = [
+            'college' => 'Collège',
+            'lycee' => 'Lycée',
+            'etudiant' => 'Université',
+            'recherche_emploi' => 'En recherche',
+            'emploi' => 'En poste',
+            'entrepreneur' => 'Entrepreneur',
+            'autre' => 'Autre',
+        ];
+
+        return response()->stream(function () use ($type, $start, $end, $situations, $interests, $allSituationsDisplay) {
             $handle = fopen('php://output', 'w');
 
             if ($type === 'users') {
-                $situations = (array) $request->get('situation', []);
-                $interests = (array) $request->get('interest', []);
-                
-                // Nettoyage des tableaux vides
-                $situations = array_filter($situations);
-                $interests = array_filter($interests);
 
                 // Header Master
                 fputcsv($handle, [
@@ -632,10 +641,13 @@ class AnalyticsController extends Controller
                     $latestDetailed = $user->detailedProfiles->first();
                     $data = $latestDetailed ? array_merge($onboarding, $latestDetailed->data ?? []) : $onboarding;
                     
+                    $sitRaw = $latestDetailed->status ?? ($onboarding['current_situation'] ?? '-');
+                    $sitLabel = $allSituationsDisplay[$sitRaw] ?? ucfirst($sitRaw);
+                    
                     fputcsv($handle, [
                         $user->name,
                         $user->email,
-                        ucfirst($latestDetailed->status ?? ($onboarding['current_situation'] ?? '-')),
+                        $sitLabel,
                         ucfirst($data['class_level'] ?? ($onboarding['education_level'] ?? '-')),
                         $data['institution'] ?? ($data['company'] ?? '-'),
                         $data['tuition_range'] ?? '-',
