@@ -52,9 +52,34 @@
                     </div>
                 </div>
 
+                <!-- Filtre Situation -->
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Situation</label>
+                    <select name="situation" class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Toutes les situations</option>
+                        @foreach($allSituations as $key => $label)
+                            <option value="{{ $key }}" {{ ($filters['situation'] ?? '') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Filtre Intérêts -->
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Centre d'intérêt</label>
+                    <select name="interest" class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Tous les intérêts</option>
+                        @foreach($allInterests as $key => $label)
+                            <option value="{{ $key }}" {{ ($filters['interest'] ?? '') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
                     Filtrer
                 </button>
+                <a href="{{ route('admin.analytics.index') }}" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm">
+                    Reset
+                </a>
             </form>
         </div>
 
@@ -78,8 +103,9 @@
 
             <span class="text-sm text-gray-500 mr-2">Exporter en CSV (Large volume) :</span>
             <a href="{{ route('admin.analytics.export-csv', array_merge(request()->query(), ['type' => 'users'])) }}"
-                class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 text-sm font-medium">
-                Utilisateurs (CSV)
+                class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 text-sm font-medium flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Export Master CSV (Filtres appliqués)
             </a>
             <a href="{{ route('admin.analytics.export-csv', array_merge(request()->query(), ['type' => 'mentors'])) }}"
                 class="px-3 py-1.5 bg-orange-50 text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-100 text-sm font-medium">

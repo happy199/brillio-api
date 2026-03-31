@@ -242,6 +242,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Relation vers toutes les mises à jour de situation détaillées
+     */
+    public function detailedProfiles(): HasMany
+    {
+        return $this->hasMany(UserDetailedProfile::class);
+    }
+
+    /**
      * Relation vers les ressources consultées
      */
     public function resourceViews(): HasMany

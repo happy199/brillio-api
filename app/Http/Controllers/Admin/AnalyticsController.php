@@ -178,10 +178,41 @@ class AnalyticsController extends Controller
         // --- NEW: Master Youth Stats ---
         $stats['youth_engagement'] = $this->getYouthEngagementStats($start, $end);
 
+        // Récupération globale des situations/intérêts pour les filtres
+        $allSituations = [
+            'college' => 'Collège',
+            'lycee' => 'Lycée',
+            'universite' => 'Université',
+            'recherche_emploi' => 'En recherche',
+            'en_poste' => 'En poste',
+            'entrepreneur' => 'Entrepreneur',
+            'autre' => 'Autre',
+        ];
+
+        $allInterests = [
+            'tech' => 'Technologie',
+            'design' => 'Design',
+            'business' => 'Business',
+            'marketing' => 'Marketing',
+            'communication' => 'Communication',
+            'science' => 'Sciences',
+            'arts' => 'Arts',
+            'health' => 'Santé',
+            'law' => 'Droit',
+            'finance' => 'Finance',
+            'education' => 'Education',
+        ];
+
         return view('admin.analytics.index', [
             'stats' => $stats,
             'specializations' => $this->specializations,
             'dateRange' => $dateRange,
+            'allSituations' => $allSituations,
+            'allInterests' => $allInterests,
+            'filters' => [
+                'situation' => $request->get('situation'),
+                'interest' => $request->get('interest'),
+            ]
         ]);
     }
 
@@ -192,6 +223,9 @@ class AnalyticsController extends Controller
     {
         $youths = User::where('user_type', 'jeune')
             ->whereBetween('created_at', [$start, $end])
+            ->with(['detailedProfiles' => function($q) {
+                $q->latest();
+            }])
             ->get();
 
         $stats = [
@@ -211,14 +245,18 @@ class AnalyticsController extends Controller
         $mentorGoalCount = 0;
 
         foreach ($youths as $user) {
-            $data = $user->onboarding_data ?? [];
+            $onboarding = $user->onboarding_data ?? [];
+            $latestDetailed = $user->detailedProfiles->first();
+            
+            // On unifie la donnée : Le profil détaillé (modale profilage) est prioritaire sur l'onboarding initial
+            $data = $latestDetailed ? array_merge($onboarding, $latestDetailed->data ?? []) : $onboarding;
 
             // Situation
-            $sit = $data['current_situation'] ?? 'non_renseigne';
+            $sit = $latestDetailed->status ?? ($onboarding['current_situation'] ?? 'non_renseigne');
             $stats['situations'][$sit] = ($stats['situations'][$sit] ?? 0) + 1;
 
             // Source
-            $src = $data['how_found_us'] ?? 'non_renseigne';
+            $src = $onboarding['how_found_us'] ?? 'non_renseigne';
             $stats['sources'][$src] = ($stats['sources'][$src] ?? 0) + 1;
 
             // Tuition
@@ -516,16 +554,20 @@ class AnalyticsController extends Controller
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        return response()->stream(function () use ($type, $start, $end) {
+        return response()->stream(function () use ($type, $start, $end, $request) {
             $handle = fopen('php://output', 'w');
 
             if ($type === 'users') {
+                $situation = $request->get('situation');
+                $interest = $request->get('interest');
+
                 // Header Master
                 fputcsv($handle, [
                     'Nom', 
                     'Email', 
-                    'Situation', 
+                    'Situation (Actuelle)', 
                     'Niveau', 
+                    'Établissement/Entreprise',
                     'Scolarité (Range)', 
                     'Ville', 
                     'MBTI', 
@@ -540,23 +582,40 @@ class AnalyticsController extends Controller
                     'Inscription'
                 ]);
 
-                // Cursor pour performance (large volume)
-                $users = User::where('user_type', 'jeune')
-                    ->whereBetween('created_at', [$start, $end])
-                    ->with(['personalityTest', 'mentorshipsAsMentee', 'mentoringSessionsAsMentee'])
+                // Query préparée pour le "Smart Sourcing"
+                $query = User::where('user_type', 'jeune')
+                    ->whereBetween('created_at', [$start, $end]);
+
+                if ($situation) {
+                    $query->where(function($q) use ($situation) {
+                        $q->where('onboarding_data->current_situation', $situation)
+                          ->orWhereHas('detailedProfiles', function($sq) use ($situation) {
+                              $sq->where('status', $situation);
+                          });
+                    });
+                }
+
+                if ($interest) {
+                    $query->where('onboarding_data->interests', 'like', '%"'.$interest.'"%');
+                }
+
+                $users = $query->with(['personalityTest', 'mentorshipsAsMentee', 'mentoringSessionsAsMentee', 'detailedProfiles' => fn($q) => $q->latest()])
                     ->orderBy('created_at', 'desc')
                     ->cursor();
 
                 foreach ($users as $user) {
                     $onboarding = $user->onboarding_data ?? [];
+                    $latestDetailed = $user->detailedProfiles->first();
+                    $data = $latestDetailed ? array_merge($onboarding, $latestDetailed->data ?? []) : $onboarding;
                     
                     fputcsv($handle, [
                         $user->name,
                         $user->email,
-                        ucfirst($onboarding['current_situation'] ?? '-'),
-                        ucfirst($onboarding['education_level'] ?? '-'),
-                        $onboarding['tuition_range'] ?? '-',
-                        $user->city ?? '-',
+                        ucfirst($latestDetailed->status ?? ($onboarding['current_situation'] ?? '-')),
+                        ucfirst($data['class_level'] ?? ($onboarding['education_level'] ?? '-')),
+                        $data['institution'] ?? ($data['company'] ?? '-'),
+                        $data['tuition_range'] ?? '-',
+                        $data['city'] ?? ($user->city ?? '-'),
                         $user->personalityTest && $user->personalityTest->completed_at ? $user->personalityTest->personality_type : '-',
                         implode(', ', $onboarding['interests'] ?? []),
                         implode(', ', $onboarding['goals'] ?? []),
