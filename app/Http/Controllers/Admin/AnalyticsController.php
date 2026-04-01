@@ -212,7 +212,7 @@ class AnalyticsController extends Controller
             'filters' => [
                 'situation' => $request->get('situation'),
                 'interest' => $request->get('interest'),
-            ]
+            ],
         ]);
     }
 
@@ -223,7 +223,7 @@ class AnalyticsController extends Controller
     {
         $youths = User::where('user_type', 'jeune')
             ->whereBetween('created_at', [$start, $end])
-            ->with(['detailedProfiles' => function($q) {
+            ->with(['detailedProfiles' => function ($q) {
                 $q->latest();
             }])
             ->get();
@@ -254,7 +254,7 @@ class AnalyticsController extends Controller
         foreach ($youths as $user) {
             $onboarding = $user->onboarding_data ?? [];
             $latestDetailed = $user->detailedProfiles->first();
-            
+
             // On unifie la donnée : Le profil détaillé (modale profilage) est prioritaire sur l'onboarding initial
             $data = $latestDetailed ? array_merge($onboarding, $latestDetailed->data ?? []) : $onboarding;
 
@@ -274,7 +274,7 @@ class AnalyticsController extends Controller
                 '500000-1000000' => '500_1m',
                 '1000000-2000000' => '1m_2m',
                 '+2000000' => 'over_2m',
-                'non_renseigne' => 'non_renseigne'
+                'non_renseigne' => 'non_renseigne',
             ];
             $tuitionKey = $tuitionMap[$rawTuition] ?? 'non_renseigne';
             $stats['tuition_ranges'][$tuitionKey] = ($stats['tuition_ranges'][$tuitionKey] ?? 0) + 1;
@@ -283,7 +283,9 @@ class AnalyticsController extends Controller
             $goals = $data['goals'] ?? [];
             foreach ($goals as $goal) {
                 $stats['goals'][$goal] = ($stats['goals'][$goal] ?? 0) + 1;
-                if ($goal === 'mentor') $mentorGoalCount++;
+                if ($goal === 'mentor') {
+                    $mentorGoalCount++;
+                }
             }
 
             // Interests
@@ -574,7 +576,7 @@ class AnalyticsController extends Controller
         $interests = (array) $request->get('interest', []);
         $situations = array_filter($situations);
         $interests = array_filter($interests);
-        
+
         $allSituationsDisplay = [
             'college' => 'Collège',
             'lycee' => 'Lycée',
@@ -592,47 +594,47 @@ class AnalyticsController extends Controller
 
                 // Header Master
                 fputcsv($handle, [
-                    'Nom', 
-                    'Email', 
-                    'Situation (Actuelle)', 
-                    'Niveau', 
+                    'Nom',
+                    'Email',
+                    'Situation (Actuelle)',
+                    'Niveau',
                     'Établissement/Entreprise',
-                    'Scolarité (Range)', 
-                    'Ville', 
-                    'MBTI', 
-                    'Intérêts', 
-                    'Objectifs Onboarding', 
-                    'Source Acquisition', 
-                    'Nb Mentorats Sent', 
-                    'Nb Mentorats OK', 
-                    'Nb Sessions OK', 
+                    'Scolarité (Range)',
+                    'Ville',
+                    'MBTI',
+                    'Intérêts',
+                    'Objectifs Onboarding',
+                    'Source Acquisition',
+                    'Nb Mentorats Sent',
+                    'Nb Mentorats OK',
+                    'Nb Sessions OK',
                     'Credits Restants',
                     'Dernière Activité',
-                    'Inscription'
+                    'Inscription',
                 ]);
 
                 // Query préparée pour le "Smart Sourcing"
                 $query = User::where('user_type', 'jeune')
                     ->whereBetween('created_at', [$start, $end]);
 
-                if (!empty($situations)) {
-                    $query->where(function($q) use ($situations) {
+                if (! empty($situations)) {
+                    $query->where(function ($q) use ($situations) {
                         $q->whereIn('onboarding_data->current_situation', $situations)
-                          ->orWhereHas('detailedProfiles', function($sq) use ($situations) {
-                              $sq->whereIn('status', $situations);
-                          });
+                            ->orWhereHas('detailedProfiles', function ($sq) use ($situations) {
+                                $sq->whereIn('status', $situations);
+                            });
                     });
                 }
 
-                if (!empty($interests)) {
-                    $query->where(function($q) use ($interests) {
+                if (! empty($interests)) {
+                    $query->where(function ($q) use ($interests) {
                         foreach ($interests as $interest) {
                             $q->orWhereJsonContains('onboarding_data->interests', $interest);
                         }
                     });
                 }
 
-                $users = $query->with(['personalityTest', 'mentorshipsAsMentee', 'mentoringSessionsAsMentee', 'detailedProfiles' => fn($q) => $q->latest()])
+                $users = $query->with(['personalityTest', 'mentorshipsAsMentee', 'mentoringSessionsAsMentee', 'detailedProfiles' => fn ($q) => $q->latest()])
                     ->orderBy('created_at', 'desc')
                     ->cursor();
 
@@ -640,10 +642,10 @@ class AnalyticsController extends Controller
                     $onboarding = $user->onboarding_data ?? [];
                     $latestDetailed = $user->detailedProfiles->first();
                     $data = $latestDetailed ? array_merge($onboarding, $latestDetailed->data ?? []) : $onboarding;
-                    
+
                     $sitRaw = $latestDetailed->status ?? ($onboarding['current_situation'] ?? '-');
                     $sitLabel = $allSituationsDisplay[$sitRaw] ?? ucfirst($sitRaw);
-                    
+
                     fputcsv($handle, [
                         $user->name,
                         $user->email,

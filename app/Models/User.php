@@ -546,4 +546,3 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->last_situation_update_at->diffInDays(now()) >= 90;
     }
 }
-
