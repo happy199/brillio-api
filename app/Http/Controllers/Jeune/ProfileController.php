@@ -148,7 +148,7 @@ class ProfileController extends Controller
 
         if (! empty($onboardingUpdates)) {
             $user->update([
-                'onboarding_data' => array_merge($user->onboarding_data ?? [], $onboardingUpdates)
+                'onboarding_data' => array_merge($user->onboarding_data ?? [], $onboardingUpdates),
             ]);
         }
 

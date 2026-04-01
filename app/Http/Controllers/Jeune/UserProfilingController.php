@@ -44,6 +44,7 @@ class UserProfilingController extends Controller
     public function skipFeedback()
     {
         auth()->user()->update(['last_feedback_at' => now()]);
+
         return response()->json(['message' => 'Nudge reporté']);
     }
 
@@ -53,7 +54,7 @@ class UserProfilingController extends Controller
     public function storeSituation(Request $request)
     {
         $user = auth()->user();
-        
+
         // On récupère la situation de base depuis l'onboarding_data ou current_situation
         $baseSituation = $user->onboarding_data['current_situation'] ?? 'autre';
 
@@ -96,6 +97,7 @@ class UserProfilingController extends Controller
     public function skipSituation()
     {
         auth()->user()->update(['last_situation_update_at' => now()]);
+
         return response()->json(['message' => 'Nudge reporté']);
     }
 }
