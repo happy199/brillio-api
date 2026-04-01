@@ -52,9 +52,78 @@
                     </div>
                 </div>
 
+                <!-- Situation Multi-select -->
+                <div class="space-y-1" x-data='{ 
+                    open: false, 
+                    selected: @json((array)request("situation", [])),
+                    options: @json($allSituations),
+                    toggle(val) {
+                        const i = this.selected.indexOf(val);
+                        if (i > -1) this.selected.splice(i, 1);
+                        else this.selected.push(val);
+                    },
+                    get label() {
+                        if (this.selected.length === 0) return "Toutes";
+                        if (this.selected.length === 1) return this.options[this.selected[0]];
+                        return this.selected.length + " sélectionnées";
+                    }
+                }' @click.away="open = false">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Situation</label>
+                    <div class="relative">
+                        <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm">
+                            <span x-text="label" class="truncate mr-2"></span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-64 overflow-y-auto">
+                            <template x-for="(label, value) in options" :key="value">
+                                <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                    <input type="checkbox" name="situation[]" :value="value" :checked="selected.includes(value)" @change="toggle(value)" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="text-sm text-gray-700" x-text="label"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interet Multi-select -->
+                <div class="space-y-1" x-data='{ 
+                    open: false, 
+                    selected: @json((array)request("interest", [])),
+                    options: @json($allInterests),
+                    toggle(val) {
+                        const i = this.selected.indexOf(val);
+                        if (i > -1) this.selected.splice(i, 1);
+                        else this.selected.push(val);
+                    },
+                    get label() {
+                        if (this.selected.length === 0) return "Tous";
+                        if (this.selected.length === 1) return this.selected[0];
+                        return this.selected.length + " sélectionnés";
+                    }
+                }' @click.away="open = false">
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Centre d'intérêt</label>
+                    <div class="relative">
+                        <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm">
+                            <span x-text="label" class="truncate mr-2"></span>
+                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-64 overflow-y-auto">
+                            <template x-for="item in options" :key="item">
+                                <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                    <input type="checkbox" name="interest[]" :value="item" :checked="selected.includes(item)" @change="toggle(item)" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                    <span class="text-sm text-gray-700" x-text="item"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
                     Filtrer
                 </button>
+                <a href="{{ route('admin.analytics.index') }}" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm">
+                    Reset
+                </a>
             </form>
         </div>
 
@@ -78,8 +147,9 @@
 
             <span class="text-sm text-gray-500 mr-2">Exporter en CSV (Large volume) :</span>
             <a href="{{ route('admin.analytics.export-csv', array_merge(request()->query(), ['type' => 'users'])) }}"
-                class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 text-sm font-medium">
-                Utilisateurs (CSV)
+                class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 text-sm font-medium flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Export Master CSV (Filtres appliqués)
             </a>
             <a href="{{ route('admin.analytics.export-csv', array_merge(request()->query(), ['type' => 'mentors'])) }}"
                 class="px-3 py-1.5 bg-orange-50 text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-100 text-sm font-medium">
@@ -167,8 +237,8 @@
                 </div>
             </div>
             <div class="mt-4 flex items-center text-sm">
-                <span class="text-gray-500">Étapes parcours:</span>
-                <span class="text-orange-600 font-medium ml-1">{{ number_format($stats['total_roadmap_steps']) }}</span>
+                <span class="text-orange-600 font-medium">{{ $stats['youth_engagement']['mentorship_intent_rate'] }}%</span>
+                <span class="text-gray-500 ml-1">veulent un mentor</span>
             </div>
         </div>
     </div>
@@ -178,6 +248,93 @@
         <h3 class="font-semibold text-gray-900 mb-4">Évolution sur la période</h3>
         <div class="h-64">
             <canvas id="evolutionChart"></canvas>
+        </div>
+    </div>
+
+    <!-- NEW: Onboarding & Engagement Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Chart Situation -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Répartition par Situation</h3>
+            <div class="h-64">
+                <canvas id="situationChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart Sources -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Canaux d'Acquisition</h3>
+            <div class="h-64">
+                <canvas id="sourceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart Tuition -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Frais de Scolarité Annuel</h3>
+            <div class="h-64">
+                <canvas id="tuitionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Heatmap Intérêts -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Top 10 Centres d'Intérêt</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                @php
+                    $interestLabels = [
+                        'tech' => 'Technologie',
+                        'design' => 'Design',
+                        'business' => 'Business',
+                        'marketing' => 'Marketing',
+                        'communication' => 'Communication',
+                        'science' => 'Sciences',
+                        'arts' => 'Arts',
+                        'health' => 'Santé',
+                        'law' => 'Droit',
+                        'finance' => 'Finance',
+                        'education' => 'Education',
+                        'autre' => 'Autre'
+                    ];
+                    $totalInterests = array_sum($stats['youth_engagement']['interests']) ?: 1;
+                @endphp
+                @forelse($stats['youth_engagement']['interests'] as $interest => $count)
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-600 w-24 truncate">{{ $interestLabels[$interest] ?? $interest }}</span>
+                    <div class="flex-1 bg-gray-100 rounded-full h-2">
+                        <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ ($count / $totalInterests) * 100 }}%"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 w-8 text-right font-medium">{{ $count }}</span>
+                </div>
+                @empty
+                <p class="text-gray-500 text-center py-4">Pas encore de données</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Objectifs / Motivations -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="font-semibold text-gray-900 mb-4">Objectifs à l'inscription</h3>
+            <div class="space-y-3">
+                @php
+                    $goalLabels = [
+                        'mentor' => 'Trouver un mentor',
+                        'orientation' => 'Orientation scolaire',
+                        'personnalite' => 'Test de personnalité',
+                        'ia' => 'Conseiller IA',
+                        'documents' => 'Gestion de documents',
+                        'non_renseigne' => 'Non spécifié'
+                    ];
+                @endphp
+                @foreach($stats['youth_engagement']['goals'] as $goal => $count)
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">{{ $goalLabels[$goal] ?? $goal }}</span>
+                    <span class="text-sm font-semibold px-2 py-0.5 bg-gray-100 rounded text-gray-700">{{ $count }}</span>
+                </div>
+                @endforeach
+            </div>
         </div>
     </div>
 
@@ -425,6 +582,107 @@
                     }
                 }
             }
+        }
+    });
+
+    // Chart Tuition
+    const tuiCtx = document.getElementById('tuitionChart').getContext('2d');
+    const tuitions = @json($stats['youth_engagement']['tuition_ranges']);
+    const tuiLabels = {
+        'under_200': '- 200k',
+        '200_500': '200k-500k',
+        '500_1m': '500k-1M',
+        '1m_2m': '1M-2M',
+        'over_2m': '+ 2M',
+        'non_renseigne': 'N/C'
+    };
+
+    const tuiData = ['under_200', '200_500', '500_1m', '1m_2m', 'over_2m', 'non_renseigne'];
+
+    new Chart(tuiCtx, {
+        type: 'bar',
+        data: {
+            labels: tuiData.map(k => tuiLabels[k]),
+            datasets: [{
+                label: 'Nombre de jeunes',
+                data: tuiData.map(k => tuitions[k] || 0),
+                backgroundColor: ['#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F97316', '#94A3B8'],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: '#f3f4f6' },
+                    ticks: { 
+                        stepSize: 1,
+                        precision: 0
+                    }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Chart Situation
+    const sitCtx = document.getElementById('situationChart').getContext('2d');
+    const situations = @json($stats['youth_engagement']['situations']);
+    const sitLabels = {
+        'college': 'Collège',
+        'lycee': 'Lycée',
+        'etudiant': 'Université',
+        'recherche_emploi': 'En recherche',
+        'emploi': 'En poste',
+        'entrepreneur': 'Entrepreneur',
+        'non_renseigne': 'N/C'
+    };
+
+    new Chart(sitCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(situations).map(k => sitLabels[k] || k),
+            datasets: [{
+                data: Object.values(situations),
+                backgroundColor: ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#6B7280', '#9CA3AF']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } }
+        }
+    });
+
+    // Chart Sources
+    const srcCtx = document.getElementById('sourceChart').getContext('2d');
+    const sources = @json($stats['youth_engagement']['sources']);
+    const srcLabels = {
+        'social_media': 'Réseaux Sociaux',
+        'friend': 'Ami',
+        'school': 'École',
+        'search': 'Google',
+        'event': 'Event',
+        'other': 'Autre',
+        'non_renseigne': 'N/C'
+    };
+
+    new Chart(srcCtx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(sources).map(k => srcLabels[k] || k),
+            datasets: [{
+                data: Object.values(sources),
+                backgroundColor: ['#6366F1', '#EC4899', '#FACC15', '#14B8A6', '#F97316', '#94A3B8', '#D1D5DB']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } }
         }
     });
 </script>
