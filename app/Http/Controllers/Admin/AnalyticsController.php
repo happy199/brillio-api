@@ -10,6 +10,7 @@ use App\Models\MentorProfile;
 use App\Models\PersonalityTest;
 use App\Models\RoadmapStep;
 use App\Models\User;
+use App\Services\PersonalityService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -203,16 +204,45 @@ class AnalyticsController extends Controller
             'education' => 'Education',
         ];
 
+        // NEW Filters for Smart Sourcing++
+        $allCountries = User::whereNotNull('country')->distinct()->pluck('country')->sort()->values();
+        $allGoals = [
+            'orientation' => 'Orientation scolaire',
+            'personnalite' => 'Test de personnalité',
+            'mentor' => 'Trouver un mentor',
+            'ia' => 'Conseiller IA',
+            'documents' => 'Gestion de documents',
+        ];
+        $allChannels = [
+            'social_media' => 'Réseaux Sociaux',
+            'friend' => 'Ami / Recommandation',
+            'school' => 'École / Université',
+            'search' => 'Recherche Google',
+            'event' => 'Événement',
+            'other' => 'Autre',
+        ];
+        $allPersonalities = PersonalityTest::whereNotNull('personality_type')->distinct()->pluck('personality_type')->sort()->values();
+
         return view('admin.analytics.index', [
             'stats' => $stats,
             'specializations' => $this->specializations,
             'dateRange' => $dateRange,
             'allSituations' => $allSituations,
             'allInterests' => $allInterests,
+            'allCountries' => $allCountries,
+            'allGoals' => $allGoals,
+            'allChannels' => $allChannels,
+            'allPersonalities' => $allPersonalities,
             'filters' => [
-                'situation' => $request->get('situation'),
-                'interest' => $request->get('interest'),
+                'situation' => (array) $request->get('situation', []),
+                'interest' => (array) $request->get('interest', []),
+                'country' => (array) $request->get('country', []),
+                'goal' => (array) $request->get('goal', []),
+                'channel' => (array) $request->get('channel', []),
+                'tuition' => (array) $request->get('tuition', []),
+                'salary' => (array) $request->get('salary', []),
             ],
+            'personalityLabels' => PersonalityService::TYPE_DESCRIPTIONS,
         ]);
     }
 
@@ -239,6 +269,26 @@ class AnalyticsController extends Controller
                 '500_1m' => 0,
                 '1m_2m' => 0,
                 'over_2m' => 0,
+                'non_renseigne' => 0,
+            ],
+            'target_salary_ranges' => [
+                'under_50' => 0,
+                '50_100' => 0,
+                '100_250' => 0,
+                '250_500' => 0,
+                '500_1m' => 0,
+                '1m_3m' => 0,
+                'over_3m' => 0,
+                'non_renseigne' => 0,
+            ],
+            'actual_salary_ranges' => [
+                'under_50' => 0,
+                '50_100' => 0,
+                '100_250' => 0,
+                '250_500' => 0,
+                '500_1m' => 0,
+                '1m_3m' => 0,
+                'over_3m' => 0,
                 'non_renseigne' => 0,
             ],
             'mentorship_intent_rate' => 0,
@@ -278,6 +328,26 @@ class AnalyticsController extends Controller
             ];
             $tuitionKey = $tuitionMap[$rawTuition] ?? 'non_renseigne';
             $stats['tuition_ranges'][$tuitionKey] = ($stats['tuition_ranges'][$tuitionKey] ?? 0) + 1;
+
+            // Salary Mapping (Target vs Actual)
+            $rawSalary = $data['salary_range'] ?? 'non_renseigne';
+            $salaryMap = [
+                '-50000' => 'under_50',
+                '50000-100000' => '50_100',
+                '100000-250000' => '100_250',
+                '250000-500000' => '250_500',
+                '500000-1000000' => '500_1m',
+                '1000000-3000000' => '1m_3m',
+                '+3000000' => 'over_3m',
+                'non_renseigne' => 'non_renseigne',
+            ];
+            $salaryKey = $salaryMap[$rawSalary] ?? 'non_renseigne';
+
+            if (in_array($sit, ['emploi', 'entrepreneur'])) {
+                $stats['actual_salary_ranges'][$salaryKey] = ($stats['actual_salary_ranges'][$salaryKey] ?? 0) + 1;
+            } elseif ($sit === 'recherche_emploi') {
+                $stats['target_salary_ranges'][$salaryKey] = ($stats['target_salary_ranges'][$salaryKey] ?? 0) + 1;
+            }
 
             // Goals
             $goals = $data['goals'] ?? [];
@@ -574,8 +644,21 @@ class AnalyticsController extends Controller
 
         $situations = (array) $request->get('situation', []);
         $interests = (array) $request->get('interest', []);
+        $countries = (array) $request->get('country', []);
+        $goals = (array) $request->get('goal', []);
+        $channels = (array) $request->get('channel', []);
+        $personalities = (array) $request->get('personality', []);
+        $tuitions = (array) $request->get('tuition', []);
+        $salaries = (array) $request->get('salary', []);
+
         $situations = array_filter($situations);
         $interests = array_filter($interests);
+        $countries = array_filter($countries);
+        $goals = array_filter($goals);
+        $channels = array_filter($channels);
+        $personalities = array_filter($personalities);
+        $tuitions = array_filter($tuitions);
+        $salaries = array_filter($salaries);
 
         $allSituationsDisplay = [
             'college' => 'Collège',
@@ -587,7 +670,7 @@ class AnalyticsController extends Controller
             'autre' => 'Autre',
         ];
 
-        return response()->stream(function () use ($type, $start, $end, $situations, $interests, $allSituationsDisplay) {
+        return response()->stream(function () use ($type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $salaries, $allSituationsDisplay) {
             $handle = fopen('php://output', 'w');
 
             if ($type === 'users') {
@@ -631,6 +714,43 @@ class AnalyticsController extends Controller
                         foreach ($interests as $interest) {
                             $q->orWhereJsonContains('onboarding_data->interests', $interest);
                         }
+                    });
+                }
+
+                if (! empty($countries)) {
+                    $query->whereIn('country', $countries);
+                }
+
+                if (! empty($goals)) {
+                    $query->where(function ($q) use ($goals) {
+                        foreach ($goals as $goal) {
+                            $q->orWhereJsonContains('onboarding_data->goals', $goal);
+                        }
+                    });
+                }
+
+                if (! empty($channels)) {
+                    $query->whereIn('onboarding_data->how_found_us', $channels);
+                }
+
+                if (! empty($personalities)) {
+                    $query->whereHas('personalityTest', function ($q) use ($personalities) {
+                        $q->whereIn('personality_type', $personalities);
+                    });
+                }
+
+                if (! empty($tuitions)) {
+                    $query->where(function ($q) use ($tuitions) {
+                        $q->whereIn('onboarding_data->tuition_range', $tuitions)
+                            ->orWhereHas('detailedProfiles', function ($sq) use ($tuitions) {
+                                $sq->whereIn('data->tuition_range', $tuitions);
+                            });
+                    });
+                }
+
+                if (! empty($salaries)) {
+                    $query->whereHas('detailedProfiles', function ($sq) use ($salaries) {
+                        $sq->whereIn('data->salary_range', $salaries);
                     });
                 }
 

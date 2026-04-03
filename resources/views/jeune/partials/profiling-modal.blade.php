@@ -321,6 +321,19 @@ x-cloak>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Expérience (années)</label>
                                     <input type="number" x-model="details.experience" class="w-full rounded-xl border-gray-200 text-sm p-3">
                                 </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tranche de salaire mensuel (FCFA)</label>
+                                    <select x-model="details.salary_range" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                        <option value="">Choisir une tranche...</option>
+                                        <option value="-50000">Moins de 50.000</option>
+                                        <option value="50000-100000">50.000 - 100.000</option>
+                                        <option value="100000-250000">100.000 - 250.000</option>
+                                        <option value="250000-500000">250.000 - 500.000</option>
+                                        <option value="500000-1000000">500.000 - 1.000.000</option>
+                                        <option value="1000000-3000000">1.000.000 - 3.000.000</option>
+                                        <option value="+3000000">Plus de 3.000.000</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </template>
@@ -335,6 +348,19 @@ x-cloak>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Dans quel domaine recherches-tu du travail ?</label>
                                 <input type="text" x-model="details.target_field" class="w-full rounded-xl border-gray-200 text-sm p-3" placeholder="Ex: Comptabilité, Vente...">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Salaire cible mensuel (FCFA)</label>
+                                <select x-model="details.salary_range" class="w-full rounded-xl border-gray-200 text-sm p-3">
+                                    <option value="">Choisir une tranche...</option>
+                                    <option value="-50000">Moins de 50.000</option>
+                                    <option value="50000-100000">50.000 - 100.000</option>
+                                    <option value="100000-250000">100.000 - 250.000</option>
+                                    <option value="250000-500000">250.000 - 500.000</option>
+                                    <option value="500000-1000000">500.000 - 1.000.000</option>
+                                    <option value="1000000-3000000">1.000.000 - 3.000.000</option>
+                                    <option value="+3000000">Plus de 3.000.000</option>
+                                </select>
                             </div>
                         </div>
                     </template>
