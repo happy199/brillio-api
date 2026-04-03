@@ -32,7 +32,7 @@ class SecurityHeadersMiddleware
         $csp .= "img-src 'self' data: https:; ";
         $csp .= "font-src 'self' data: https:; ";
         $csp .= "frame-ancestors 'self'; ";
-        $csp .= "form-action 'self'; ";
+        $csp .= "form-action 'self' *.brillio.africa brillio.africa *.moneroo.io moneroo.io; ";
         $csp .= "connect-src 'self' https: wss:; ";
         $csp .= "frame-src 'self' https:; ";
         $csp .= "base-uri 'self'; ";
