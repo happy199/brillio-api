@@ -73,6 +73,7 @@ class UserProfilingController extends Controller
             'data.last_education' => 'nullable|string|max:255',
             'data.target_field' => 'nullable|string|max:255',
             'data.tuition_range' => 'nullable|string|max:50',
+            'data.salary_range' => 'nullable|string|max:50',
             'data.city' => 'required|string|max:255',
         ]);
 
