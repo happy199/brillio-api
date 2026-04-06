@@ -30,7 +30,7 @@ class SendUnreadMessagesReminders extends Command
                 ->whereNull('read_at')
                 ->count();
 
-            if ($unreadForMentee > 0) {
+            if ($unreadForMentee > 0 && ! $mentorship->mentee->is_archived && ! $mentorship->mentee->archived_at) {
                 $conversationUrl = route('jeune.messages.show', $mentorship);
 
                 Mail::to($mentorship->mentee->email)->send(
@@ -52,7 +52,7 @@ class SendUnreadMessagesReminders extends Command
                 ->whereNull('read_at')
                 ->count();
 
-            if ($unreadForMentor > 0) {
+            if ($unreadForMentor > 0 && ! $mentorship->mentor->is_archived && ! $mentorship->mentor->archived_at) {
                 $conversationUrl = route('mentor.messages.show', $mentorship);
 
                 Mail::to($mentorship->mentor->email)->send(
