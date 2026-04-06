@@ -176,6 +176,12 @@
                     <form action="{{ route('contact.submit') }}" method="POST" class="space-y-6">
                         @csrf
 
+                        {{-- Honeypot anti-spam (invisible pour les humains) --}}
+                        <div class="absolute opacity-0 -z-10 pointer-events-none" aria-hidden="true">
+                            <label for="full_name">Nom complet (ne pas remplir)</label>
+                            <input type="text" id="full_name" name="full_name" tabindex="-1" autocomplete="off">
+                        </div>
+
                         <!-- Name -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
