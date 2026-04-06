@@ -193,6 +193,13 @@ class UserController extends Controller
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte');
         }
 
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)
+                ->send(new \App\Mail\Admin\AccountDeletedMail($user->name));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur envoi notification suppression compte: '.$e->getMessage());
+        }
+
         $user->delete();
 
         return redirect()->route('admin.users.index')
@@ -274,11 +281,20 @@ class UserController extends Controller
             return back()->with('error', 'Vous ne pouvez pas vous bloquer vous-même.');
         }
 
+        $reason = $request->input('reason', 'Non-respect des règles de la plateforme.');
+
         $user->update([
             'is_blocked' => true,
             'blocked_at' => now(),
-            'blocked_reason' => $request->input('reason', 'Non-respect des règles de la plateforme.'),
+            'blocked_reason' => $reason,
         ]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)
+                ->send(new \App\Mail\Admin\AccountBlockedMail($user->name, $reason));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur envoi notification blocage compte: '.$e->getMessage());
+        }
 
         return back()->with('success', "L'utilisateur {$user->name} a été bloqué.");
     }

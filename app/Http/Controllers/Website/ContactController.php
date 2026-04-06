@@ -11,6 +11,11 @@ class ContactController extends Controller
 {
     public function submit(Request $request)
     {
+        // Honeypot anti-spam check
+        if ($request->filled('full_name')) {
+            return back()->with('success', 'Merci ! Ton message a été envoyé. Nous te répondrons bientôt.');
+        }
+
         // Rate limiting
         $key = 'contact-submit:'.$request->ip();
 
