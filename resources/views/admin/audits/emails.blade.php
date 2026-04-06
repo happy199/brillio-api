@@ -49,10 +49,10 @@
                         <td class="px-2 first:pl-5 last:pr-5 py-3 min-w-[200px]">
                             <div class="text-left font-medium text-slate-800 truncate" title="{{ $log->subject }}">{{ \Illuminate\Support\Str::limit($log->subject, 60) }}</div>
                         </td>
-                        <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap" x-data="{ open: false }">
                             <div class="text-center">
                                 <!-- Trigger Modal -->
-                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-slate-200 text-sm font-medium rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm" onclick="document.getElementById('modal-email-{{ $log->id }}').classList.remove('hidden')">
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-slate-200 text-sm font-medium rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm" @click="open = true">
                                     <svg class="w-4 h-4 mr-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -62,8 +62,8 @@
                             </div>
 
                             <!-- Modal -->
-                            <div id="modal-email-{{ $log->id }}" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-                                <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-5xl max-h-[95vh] flex flex-col border border-slate-200">
+                            <div x-show="open" style="display: none;" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                                <div @click.away="open = false" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-5xl max-h-[95vh] flex flex-col border border-slate-200">
                                     <!-- Modal Header -->
                                     <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                         <div class="flex items-center gap-3">
@@ -77,7 +77,7 @@
                                                 <p class="text-xs text-slate-500">Log ID: #{{ $log->id }} • Automatisé par Brillio</p>
                                             </div>
                                         </div>
-                                        <button class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 transition-colors" onclick="document.getElementById('modal-email-{{ $log->id }}').classList.add('hidden')">&times;</button>
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 transition-colors" @click="open = false">&times;</button>
                                     </div>
 
                                     <!-- Email Header Details -->
@@ -106,7 +106,6 @@
                                             <iframe 
                                                 srcdoc="{{ $log->body }}" 
                                                 class="w-full h-full border-none"
-                                                onload="this.style.height = '100%';"
                                             ></iframe>
                                         </div>
                                     </div>
@@ -114,7 +113,7 @@
                                     <!-- Modal Footer -->
                                     <div class="px-6 py-4 border-t border-slate-100 flex justify-between items-center bg-slate-50">
                                         <p class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Audit Système d'Expédition</p>
-                                        <button class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-bold transition-all shadow-md" onclick="document.getElementById('modal-email-{{ $log->id }}').classList.add('hidden')">Fermer l'aperçu</button>
+                                        <button class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-bold transition-all shadow-md" @click="open = false">Fermer l'aperçu</button>
                                     </div>
                                 </div>
                             </div>
