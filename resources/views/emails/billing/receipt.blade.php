@@ -1,4 +1,4 @@
-@extends('emails.layouts.app')
+@extends('emails.layouts.base')
 
 @section('content')
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -33,7 +33,7 @@
             </tr>
             <tr>
                 <td style="padding: 8px 0; color: #6B7280; font-weight: 500;">Montant total :</td>
-                <td style="padding: 8px 0; color: #10B981; font-weight: bold;">
+                <td style="padding: 8px 0; color: #374151; font-weight: bold;">
                     {{ number_format($transaction->amount, 0, ',', ' ') }} {{ $transaction->currency }}
                 </td>
             </tr>
@@ -54,7 +54,7 @@
     </p>
 
     <div style="text-align: center; margin-top: 30px;">
-        <a href="{{ config('app.url') }}" style="background-color: #10B981; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;">
+        <a href="{{ config('app.url') }}" style="background-color: #6B46C1; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;">
             Accéder à mon compte
         </a>
     </div>

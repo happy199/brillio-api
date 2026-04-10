@@ -88,10 +88,10 @@
                 <p style="margin: 5px 0 0 0; color: #6B7280;">Le carrefour de l'orientation</p>
                 <br>
                 <div style="color: #4B5563;">
-                    <!-- Placeholders to be customized by user later -->
                     Brillio Africa<br>
-                    Abidjan, Côte d'Ivoire<br>
-                    Email: contact@brillio.africa
+                    Cotonou, Bénin<br>
+                    Téléphone : +229 01 66 30 17 36<br>
+                    Email : contact@brillio.africa
                 </div>
             </td>
             <td style="width: 50%; text-align: right; vertical-align: top;">
@@ -99,7 +99,7 @@
                 <div style="color: #4B5563;">
                     <strong>Numéro :</strong> {{ $transaction->moneroo_transaction_id }}<br>
                     <strong>Date :</strong> {{ $transaction->completed_at ? $transaction->completed_at->format('d/m/Y') : now()->format('d/m/Y') }}<br>
-                    <strong>Statut :</strong> <span style="color: #10B981; font-weight: bold;">PAYÉE</span>
+                    <strong>Statut :</strong> <span style="color: #6B46C1; font-weight: bold;">PAYÉE</span>
                 </div>
             </td>
         </tr>
@@ -109,7 +109,7 @@
         <h3 style="color: #4B5563; margin-bottom: 10px; font-size: 16px;">FACTURE À :</h3>
         <p style="margin: 0; font-size: 18px; font-weight: bold; color: #111827;">{{ $entity->name ?? '' }}</p>
         <p style="margin: 5px 0 0 0; color: #4B5563;">
-            {{ $entity->email ?? '' }}<br>
+            {{ $entity->contact_email ?? $entity->email ?? '' }}<br>
             @if(isset($entity->country))
                 {{ $entity->city ? $entity->city.', ' : '' }}{{ $entity->country }}
             @endif

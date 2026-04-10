@@ -1,10 +1,10 @@
-@extends('emails.layouts.app')
+@extends('emails.layouts.base')
 
 @section('content')
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     
     <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #10B981; font-size: 24px; font-weight: bold; margin: 0;">Nouvelle Transaction ! 💰</h1>
+        <h1 style="color: #6B46C1; font-size: 24px; font-weight: bold; margin: 0;">Nouvelle Transaction ! 💰</h1>
     </div>
 
     <h2 style="color: #1F2937; font-size: 20px; font-weight: 600; margin-bottom: 20px;">
@@ -15,7 +15,7 @@
         Une nouvelle transaction vient d'être complétée sur la plateforme Brillio.
     </p>
 
-    <div style="background-color: #F3F4F6; border-left: 4px solid #10B981; border-radius: 4px; padding: 20px; margin-bottom: 25px;">
+    <div style="background-color: #F3F4F6; border-left: 4px solid #6B46C1; border-radius: 4px; padding: 20px; margin-bottom: 25px;">
         <h3 style="color: #374151; font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
             Détails de l'Achat
         </h3>
@@ -30,14 +30,25 @@
             <tr>
                 <td style="padding: 8px 0; color: #6B7280; font-weight: 500;">Email :</td>
                 <td style="padding: 8px 0; color: #2563EB;">
-                    <a href="mailto:{{ $entity->email ?? 'N/A' }}">{{ $entity->email ?? 'N/A' }}</a>
+                    <a href="mailto:{{ $entity->contact_email ?? $entity->email ?? 'N/A' }}">{{ $entity->contact_email ?? $entity->email ?? 'N/A' }}</a>
                 </td>
             </tr>
             <tr>
                 <td style="padding: 8px 0; color: #6B7280; font-weight: 500;">Type d'utilisateur :</td>
                 <td style="padding: 8px 0; color: #111827;">
-                    {{ collect(explode('\\', get_class($entity)))->last() }} 
-                    ({{ $transaction->user_type ?? 'N/A' }})
+                    @php
+                        $displayType = 'Inconnu';
+                        if (get_class($entity) === 'App\Models\Organization' || ($transaction->metadata['user_type'] ?? '') === 'organization') {
+                            $displayType = 'Organisation';
+                        } elseif (isset($entity->user_type)) {
+                            $displayType = match($entity->user_type) {
+                                'jeune' => 'Jeune',
+                                'mentor' => 'Mentor',
+                                default => ucfirst($entity->user_type),
+                            };
+                        }
+                    @endphp
+                    {{ $displayType }}
                 </td>
             </tr>
             <tr><td colspan="2" style="height: 10px;"></td></tr>
@@ -55,7 +66,7 @@
             </tr>
             <tr>
                 <td style="padding: 8px 0; color: #6B7280; font-weight: 500;">Montant Encaissé :</td>
-                <td style="padding: 8px 0; color: #10B981; font-weight: bold; font-size: 18px;">
+                <td style="padding: 8px 0; color: #6B46C1; font-weight: bold; font-size: 18px;">
                     {{ number_format($transaction->amount, 0, ',', ' ') }} {{ $transaction->currency }}
                 </td>
             </tr>
