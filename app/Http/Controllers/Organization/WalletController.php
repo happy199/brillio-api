@@ -66,6 +66,7 @@ class WalletController extends Controller
                 'reference' => $reference,
                 'pack_id' => $pack->id,
                 'user_type' => 'organization',
+                'description' => $description,
             ],
         ]);
 

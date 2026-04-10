@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Billing\AdminPaymentNotificationMail;
+use App\Mail\Billing\PaymentReceiptMail;
 use App\Models\MonerooTransaction;
 use App\Models\PayoutRequest;
 use App\Services\MentorshipNotificationService;
@@ -9,6 +11,7 @@ use App\Services\MonerooService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class MonerooWebhookController extends Controller
 {
@@ -158,8 +161,22 @@ class MonerooWebhookController extends Controller
                 'credits' => $transaction->credits_amount,
             ]);
 
-            // Notification email
+            // Notification email for credits (existing system logic)
             $this->notificationService->sendCreditRecharge($user, $transaction->credits_amount);
+
+            // Send Official Invoice & Receipt to Client
+            try {
+                Mail::to($entity->email)->send(new PaymentReceiptMail($transaction, $entity));
+            } catch (\Exception $e) {
+                Log::error('Erreur envoi facture client', ['error' => $e->getMessage()]);
+            }
+
+            // Send Alert to Admin
+            try {
+                Mail::to('contact@brillio.africa')->send(new AdminPaymentNotificationMail($transaction, $entity));
+            } catch (\Exception $e) {
+                Log::error('Erreur envoi notification admin', ['error' => $e->getMessage()]);
+            }
 
             return response()->json(['message' => 'Payment processed'], 200);
 

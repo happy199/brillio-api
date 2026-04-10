@@ -62,6 +62,7 @@ class SubscriptionController extends Controller
                 'reference' => $reference,
                 'plan_id' => $plan->id, // exact plan: period + price
                 'user_type' => 'organization',
+                'description' => $description,
             ],
         ]);
 
