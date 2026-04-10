@@ -21,7 +21,7 @@
             Récapitulatif de votre achat
         </h3>
         
-        <table style="width: 100%; border-collapse: collapse;">
+        <table role="presentation" style="width: 100%; border-collapse: collapse;">
             <tr>
                 <td style="padding: 8px 0; color: #6B7280; font-weight: 500; width: 40%;">Description :</td>
                 <td style="padding: 8px 0; color: #111827; font-weight: 600;">

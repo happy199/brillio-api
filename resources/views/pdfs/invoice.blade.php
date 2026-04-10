@@ -81,7 +81,7 @@
 </head>
 <body>
 
-    <table class="header">
+    <table role="presentation" class="header">
         <tr>
             <td style="width: 50%;">
                 <h1 class="logo">Brillio Africa</h1>
