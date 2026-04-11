@@ -10,6 +10,7 @@ use App\Models\MentorProfile;
 use App\Models\PersonalityTest;
 use App\Models\RoadmapStep;
 use App\Models\User;
+use App\Models\UserFeedback;
 use App\Services\PersonalityService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -178,6 +179,23 @@ class AnalyticsController extends Controller
 
         // --- NEW: Master Youth Stats ---
         $stats['youth_engagement'] = $this->getYouthEngagementStats($start, $end);
+
+        // Avis Utilisateurs (Popups)
+        $stats['feedbacks'] = [
+            'total' => UserFeedback::count(),
+            'period' => UserFeedback::whereBetween('created_at', [$start, $end])->count(),
+            'average_rating' => round(UserFeedback::avg('rating') ?? 0, 1),
+            'rating_distribution' => UserFeedback::whereBetween('created_at', [$start, $end])
+                ->selectRaw('rating, COUNT(*) as count')
+                ->groupBy('rating')
+                ->pluck('count', 'rating')
+                ->toArray(),
+            'recent' => UserFeedback::with('user')
+                ->whereNotNull('comment')
+                ->latest()
+                ->limit(20)
+                ->get(),
+        ];
 
         // Récupération globale des situations/intérêts pour les filtres
         $allSituations = [
