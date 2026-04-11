@@ -170,18 +170,19 @@ x-cloak>
                 </div>
 
                 <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Un petit commentaire ? (Optionnel)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Un petit commentaire ? (Obligatoire)</label>
                     <textarea 
                         x-model="comment" 
                         class="w-full rounded-2xl border-gray-200 focus:border-primary-500 focus:ring-primary-500 text-sm p-4" 
-                        placeholder="Qu'est-ce qu'on pourrait améliorer ?"
+                        placeholder="Qu'est-ce qu'on pourrait améliorer ou que penses-tu de la plateforme ?"
                         rows="3"
+                        required
                     ></textarea>
                 </div>
 
                 <button 
                     @click="submitFeedback" 
-                    :disabled="rating === 0 || loading"
+                    :disabled="rating === 0 || comment.trim() === '' || loading"
                     class="w-full mt-8 py-4 bg-primary-600 text-white font-bold rounded-2xl shadow-lg shadow-primary-200 hover:bg-primary-700 transition disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
                 >
                     <span x-show="!loading">Continuer</span>
