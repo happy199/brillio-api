@@ -109,6 +109,20 @@ class JeuneDashboardController extends Controller
     public function getDynamicPersonalityQuestions(BrillioIAService $brillioIAService)
     {
         $user = auth()->user();
+        
+        // --- CACHE CHECK ---
+        // Si l'utilisateur a déjà des questions reformulées en base, on les retourne immédiatement
+        if (!empty($user->mbti_reformulated_questions)) {
+            Log::info('Utilisation du cache DB pour les questions reformulées', ['user_id' => $user->id]);
+            return response()->json([
+                'success' => true,
+                'total_questions' => count($user->mbti_reformulated_questions),
+                'questions' => $user->mbti_reformulated_questions,
+                'is_personalized' => true,
+                'from_cache' => true
+            ]);
+        }
+
         $questions = PersonalityQuestion::getAllFormatted('fr');
 
         // Préparer le contexte (Onboarding data)
@@ -143,12 +157,19 @@ class JeuneDashboardController extends Controller
 
             $dynamicQuestions = $brillioIAService->reformulatePersonalityQuestions($questions, $situationText);
 
+            // Sauvegarder dans le cache de l'utilisateur
+            $user->update([
+                'mbti_reformulated_questions' => $dynamicQuestions,
+                'mbti_reformulated_at' => now(),
+            ]);
+
             return response()->json([
                 'success' => true,
                 'total_questions' => count($dynamicQuestions),
                 'questions' => $dynamicQuestions,
                 'is_personalized' => true,
                 'context' => $situationText,
+                'from_cache' => false
             ]);
         } catch (\Exception $e) {
             Log::error('Erreur getDynamicPersonalityQuestions: '.$e->getMessage());

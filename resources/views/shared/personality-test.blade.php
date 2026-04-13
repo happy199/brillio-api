@@ -46,6 +46,10 @@
     $colors = $themeConfig[$theme];
     $mbtiTypes = \App\Models\PersonalityTest::PERSONALITY_TYPES;
 
+    // Default Routes
+    $questionsUrl = $questionsUrl ?? ($theme === 'mentor' ? route('mentor.personality.questions') : route('jeune.personality.questions'));
+    $submitUrl = $submitUrl ?? ($theme === 'mentor' ? route('mentor.personality.submit') : route('jeune.personality.submit'));
+
     // Type Colors (Grid & Result)
     if ($theme === 'mentor') {
         // Mentor: All Orange/Red variants
@@ -154,18 +158,6 @@
                         </div>
                     @endforeach
                 </div>
-
-                <!-- Retake Button -->
-                <div class="mt-8 flex justify-center">
-                    <button @click="retakeTest()"
-                        class="px-8 py-3 {{ $colors['button_bg'] }} {{ $colors['button_text'] }} rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Refaire le test
-                    </button>
-                </div>
             </div>
         @endif
 
@@ -203,43 +195,72 @@
 
         <!-- Actions Buttons -->
         @if($theme === 'jeune')
-            <div class="flex flex-col md:flex-row gap-4">
-                <button id="btn-discuss-ai-results"
-                    class="flex-1 bg-primary-600 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-primary-700 transition flex items-center justify-center gap-2">
-                    <span>Discuter avec l'IA sur mes résultats</span>
-                </button>
-                @if(Route::has('jeune.mentors'))
-                    <a href="{{ route('jeune.mentors', ['for_profile' => 'true']) }}"
-                        class="flex-1 bg-white border border-gray-200 text-gray-700 rounded-xl py-4 px-6 font-bold text-center hover:bg-gray-50 transition flex items-center justify-center gap-2">
-                        <span>Voir des mentors dans mes domaines</span>
-                    </a>
-                @endif
+            <div class="space-y-4 mt-8">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <button @click="discussWithAI()"
+                        class="flex-1 bg-primary-600 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-primary-700 transition flex items-center justify-center gap-2 shadow-md">
+                        <span>Discuter avec l'IA sur mes résultats</span>
+                    </button>
+                    @if(Route::has('jeune.mentors'))
+                        <a href="{{ route('jeune.mentors', ['for_profile' => 'true']) }}"
+                            class="flex-1 bg-white border border-gray-200 text-gray-700 rounded-xl py-4 px-6 font-bold text-center hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm">
+                            <span>Voir des mentors dans mes domaines</span>
+                        </a>
+                    @endif
+                </div>
+
+                @php
+                    $exportPdfRoute = $theme === 'jeune' ? 'jeune.personality.export-pdf' : 'mentor.personality.export-pdf';
+                @endphp
+                <a href="{{ route($exportPdfRoute) }}"
+                    class="w-full bg-red-500 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-red-600 transition flex items-center justify-center gap-2 shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    <span>Télécharger mon test en PDF</span>
+                </a>
+
+                <!-- Centered Retake Button -->
+                <div class="flex justify-center pt-2">
+                    <button @click="retakeTest()"
+                        class="px-8 py-3 bg-white border-2 border-primary-500 text-primary-600 rounded-xl font-bold hover:bg-primary-50 transition flex items-center gap-2 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refaire le test
+                    </button>
+                </div>
+            </div>
+        @else
+            <!-- Mentor specific buttons -->
+            <div class="space-y-4 mt-8">
+                @php
+                    $exportPdfRoute = 'mentor.personality.export-pdf';
+                @endphp
+                <a href="{{ route($exportPdfRoute) }}"
+                    class="w-full bg-red-500 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-red-600 transition flex items-center justify-center gap-2 shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    <span>Télécharger mon test en PDF</span>
+                </a>
+                <div class="flex justify-center pt-2">
+                    <button @click="retakeTest()"
+                        class="px-8 py-3 bg-white border-2 border-orange-500 text-orange-600 rounded-xl font-bold hover:bg-orange-50 transition flex items-center gap-2 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refaire le test
+                    </button>
+                </div>
             </div>
         @endif
-
-        <div class="flex flex-col md:flex-row gap-4">
-            @if($theme === 'jeune')
-            <a href="{{ route('jeune.personality.export-pdf') }}" @else <a
-            href="{{ route('mentor.personality.export-pdf') }}" @endif
-                class="flex-1 bg-red-500 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-red-600 transition flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                    </path>
-                </svg>
-                <span>Télécharger mon test en PDF</span>
-            </a>
-            @if($theme === 'jeune')
-            <a href="{{ route('jeune.personality.export-history-pdf') }}" @else <a
-            href="{{ route('mentor.personality.export-history-pdf') }}" @endif
-                class="flex-1 bg-purple-500 text-white rounded-xl py-4 px-6 font-bold text-center hover:bg-purple-600 transition flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>Télécharger l'historique complet</span>
-            </a>
-        </div>
 
         <!-- History Section -->
         @if(isset($testHistory) && count($testHistory) > 0)
@@ -440,12 +461,25 @@
                         <h2 class="text-xl font-bold text-gray-900">Question <span
                                 x-text="currentQuestion + 1"></span>/<span x-text="questions.length"></span></h2>
                     </div>
-                    <button @click="closeTest()"
-                        class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                    <button @click.stop="closeTest()"
+                        class="relative overflow-hidden group transition-all duration-300 rounded-xl flex items-center justify-center min-w-[40px] h-10 px-2"
+                        :class="confirmClose ? 'bg-red-50 border border-red-100 shadow-sm' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'">
+                        
+                        <div class="flex items-center gap-2">
+                            <span x-show="confirmClose" 
+                                  x-transition:enter="transition ease-out duration-200"
+                                  x-transition:enter-start="opacity-0 -translate-x-2"
+                                  x-transition:enter-end="opacity-100 translate-x-0"
+                                  class="text-sm font-bold text-red-600 whitespace-nowrap">
+                                Quitter ?
+                            </span>
+                            <svg class="w-6 h-6 transition-transform duration-300" 
+                                 :class="confirmClose ? 'text-red-600 scale-90' : 'group-hover:rotate-90'"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
                     </button>
                 </div>
 
@@ -768,36 +802,6 @@
         </div>
     </div>
 
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-        // Global function for AI chat (accessible from onclick) - Jeune only
-        function discussWithAIJeune() {
-            try {
-                const personalityType = {{ json_encode($personalityTest->personality_type ?? '') }};
-                const personalityLabel = {{ json_encode($mbtiTypes[$personalityTest->personality_type ?? ''] ?? '') }};
-                const description = {{ json_encode($personalityTest->personality_description ?? '') }};
-
-                if (!personalityType) {
-                    alert('Aucun test de personnalité trouvé.');
-                    return;
-                }
-
-                const message = `Bonjour ! Je viens de passer un test de personnalité MBTI et j'ai obtenu le type ${personalityType} (${personalityLabel}).\n\nVoici ma description : ${description}\n\nPeux-tu m'aider à mieux comprendre mon profil et me donner des conseils pour mon développement personnel et professionnel ?`;
-
-                const chatUrl = {{ json_encode(route('jeune.chat')) }};
-                window.location.href = chatUrl + '?message=' + encodeURIComponent(message);
-            } catch (error) {
-                console.error('Erreur discussWithAIJeune:', error);
-                window.location.href = {{ json_encode(route('jeune.chat')) }};
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const btn = document.getElementById('btn-discuss-ai-results');
-            if (btn) {
-                btn.addEventListener('click', discussWithAIJeune);
-            }
-        });
-    </script>
 
     @push('scripts')
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">
@@ -809,6 +813,8 @@
                     isPersonalizing: false,
                     loadingTitle: 'Chargement...',
                     loadingSubtitle: 'Veuillez patienter quelques instants.',
+                    confirmClose: false,
+                    confirmTimeout: null,
 
                     get allAnswered() {
                         return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length;
@@ -824,14 +830,28 @@
                     },
 
                     closeTest() {
-                        // Confirm before closing if progress
-                        if (this.questions.length > 0 && Object.keys(this.answers).length > 0 && !this.allAnswered) {
-                            if (confirm('Voulez-vous vraiment fermer le test ? Votre progression sera perdue.')) {
-                                this.showTest = false;
-                                this.resetTest();
-                            }
-                        } else {
+                        // If test hasn't started or no answers yet or finished, close directly
+                        if (!this.testStarted || Object.keys(this.answers).length === 0 || this.allAnswered) {
                             this.showTest = false;
+                            this.confirmClose = false;
+                            return;
+                        }
+
+                        if (this.confirmClose) {
+                            // Second click: Close and Reset
+                            this.showTest = false;
+                            this.resetTest();
+                            this.confirmClose = false;
+                            if (this.confirmTimeout) clearTimeout(this.confirmTimeout);
+                        } else {
+                            // First click: Request confirmation
+                            this.confirmClose = true;
+                            
+                            // Auto-reset after 3 seconds if no action
+                            if (this.confirmTimeout) clearTimeout(this.confirmTimeout);
+                            this.confirmTimeout = setTimeout(() => {
+                                this.confirmClose = false;
+                            }, 3000);
                         }
                     },
 
@@ -848,10 +868,30 @@
                     },
 
                     async loadQuestions() {
+                        const isJeune = '{{ $theme }}' === 'jeune';
+                        const cacheKey = 'mbti_questions_cache';
+
+                        // 1. Tentative de chargement instantané depuis le cache local
+                        if (isJeune) {
+                            const cached = localStorage.getItem(cacheKey);
+                            if (cached) {
+                                try {
+                                    const cachedData = JSON.parse(cached);
+                                    if (cachedData.questions && cachedData.questions.length > 0) {
+                                        this.questions = cachedData.questions;
+                                        this.testStarted = true;
+                                        this.loading = false;
+                                        return; // Sortie immédiate : chargement instantané
+                                    }
+                                } catch (e) {
+                                    localStorage.removeItem(cacheKey);
+                                }
+                            }
+                        }
+
                         this.loading = true;
                         
                         // Si c'est un jeune, on active l'état de personnalisation
-                        const isJeune = '{{ $theme }}' === 'jeune';
                         if (isJeune) {
                             this.isPersonalizing = true;
                             this.loadingTitle = "Personnalisation du test";
@@ -863,10 +903,10 @@
 
                         try {
                             // On tente d'abord l'endpoint dynamique pour les jeunes
-                            let url = '{{ $questionsUrl ?? route("jeune.personality.questions") }}';
+                            let url = '{!! $questionsUrl ?? route("jeune.personality.questions") !!}';
                             
                             if (isJeune) {
-                                url = '{{ route("jeune.personality.questions.dynamic") }}';
+                                url = '{!! route("jeune.personality.questions.dynamic") !!}';
                             }
 
                             // Bust cache with timestamp
@@ -881,10 +921,17 @@
                             if (data.success && data.questions) {
                                 this.questions = data.questions;
                                 this.testStarted = true;
+
+                                // Mettre à jour le cache local pour la prochaine fois
+                                if (isJeune) {
+                                    localStorage.setItem(cacheKey, JSON.stringify({
+                                        questions: data.questions,
+                                        timestamp: new Date().getTime()
+                                    }));
+                                }
                             } else {
                                 // Fallback aux questions standards si l'IA échoue
                                 if (isJeune && url.includes('dynamic')) {
-                                    console.warn('AI personalization failed, falling back to standard questions');
                                     await this.loadStandardQuestions();
                                 } else {
                                     alert('Erreur: ' + (data.message || 'Format invalide'));
@@ -892,7 +939,6 @@
                             }
                         } catch (e) {
                             console.error(e);
-                            // Fallback final
                             if (isJeune) {
                                 await this.loadStandardQuestions();
                             } else {
@@ -907,7 +953,7 @@
                         this.loadingTitle = "Chargement...";
                         this.loadingSubtitle = "Récupération des questions standards.";
                         try {
-                            const url = '{{ route("jeune.personality.questions") }}' + '?t=' + new Date().getTime();
+                            const url = '{!! route("jeune.personality.questions") !!}' + '?t=' + new Date().getTime();
                             const response = await fetch(url, {
                                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                             });
@@ -941,7 +987,7 @@
                         if (!this.allAnswered) return;
                         this.submitting = true;
                         try {
-                            const url = '{{ $submitUrl ?? route("jeune.personality.submit") }}';
+                            const url = '{!! $submitUrl ?? route("jeune.personality.submit") !!}';
                             const response = await fetch(url, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
@@ -964,9 +1010,9 @@
                     discussWithAI() {
                         try {
                             // Préparer le message avec le contexte du test
-                            const personalityType = {{ json_encode($personalityTest->personality_type ?? '') }};
-                            const personalityLabel = {{ json_encode($mbtiTypes[$personalityTest->personality_type ?? ''] ?? '') }};
-                            const description = {{ json_encode($personalityTest->personality_description ?? '') }};
+                            const personalityType = {!! json_encode($personalityTest->personality_type ?? '') !!};
+                            const personalityLabel = {!! json_encode($mbtiTypes[$personalityTest->personality_type ?? ''] ?? '') !!};
+                            const description = {!! json_encode($personalityTest->personality_description ?? '') !!};
 
                             if (!personalityType) {
                                 alert('Aucun test de personnalité trouvé.');
@@ -976,12 +1022,12 @@
                             const message = `Bonjour ! Je viens de passer un test de personnalité MBTI et j'ai obtenu le type ${personalityType} (${personalityLabel}).\n\nVoici ma description : ${description}\n\nPeux-tu m'aider à mieux comprendre mon profil et me donner des conseils pour mon développement personnel et professionnel ?`;
 
                             // Rediriger vers le chat avec le message pré-rempli
-                            const chatUrl = {{ json_encode(route('jeune.chat')) }};
+                            const chatUrl = {!! json_encode(route('jeune.chat')) !!};
                             window.location.href = chatUrl + '?message=' + encodeURIComponent(message);
                         } catch (error) {
                             console.error('Erreur discussWithAI:', error);
                             // Fallback: rediriger vers le chat sans message
-                            window.location.href = {{ json_encode(route('jeune.chat')) }};
+                            window.location.href = {!! json_encode(route('jeune.chat')) !!};
                         }
                     },
 
@@ -1003,7 +1049,7 @@
                         this.showCareerModal = true;
 
                         try {
-                            const response = await fetch('{{ route("careers.details-by-title") }}?title=' + encodeURIComponent(career.title));
+                            const response = await fetch('{!! route("careers.details-by-title") !!}?title=' + encodeURIComponent(career.title));
                             const data = await response.json();
 
                             if (data.success && data.career) {
