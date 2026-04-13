@@ -8,7 +8,7 @@ use App\Models\MentorProfile;
 use App\Models\MentorProfileView;
 use App\Models\PersonalityQuestion;
 use App\Models\PersonalityTest;
-use App\Services\DeepSeekService;
+use App\Services\BrillioIAService;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
 use Illuminate\Http\Request;
@@ -104,10 +104,91 @@ class JeuneDashboardController extends Controller
     }
 
     /**
+     * Récupère les questions reformulées par l'IA selon le profil de l'utilisateur
+     */
+    public function getDynamicPersonalityQuestions(BrillioIAService $brillioIAService)
+    {
+        $user = auth()->user();
+        
+        // --- CACHE CHECK ---
+        // Si l'utilisateur a déjà des questions reformulées en base, on les retourne immédiatement
+        if (!empty($user->mbti_reformulated_questions)) {
+            Log::info('Utilisation du cache DB pour les questions reformulées', ['user_id' => $user->id]);
+            return response()->json([
+                'success' => true,
+                'total_questions' => count($user->mbti_reformulated_questions),
+                'questions' => $user->mbti_reformulated_questions,
+                'is_personalized' => true,
+                'from_cache' => true
+            ]);
+        }
+
+        $questions = PersonalityQuestion::getAllFormatted('fr');
+
+        // Préparer le contexte (Onboarding data)
+        $onboarding = $user->onboarding_data ?? [];
+        $situation = $onboarding['current_situation'] ?? 'étudiant';
+        $education = $onboarding['education_level'] ?? '';
+
+        // Traduction des termes techniques pour l'IA
+        $situationMap = [
+            'etudiant' => 'étudiant',
+            'recherche_emploi' => 'jeune diplômé en recherche d\'emploi',
+            'emploi' => 'salarié',
+            'entrepreneur' => 'entrepreneur',
+        ];
+
+        $educationMap = [
+            'college' => 'collégien (élève au collège)',
+            'lycee' => 'lycéen (élève au lycée)',
+            'bac' => 'bachelier',
+        ];
+
+        $situationText = $situationMap[$situation] ?? $situation;
+        if ($situation === 'etudiant' && isset($educationMap[$education])) {
+            $situationText = $educationMap[$education];
+        }
+
+        try {
+            Log::info('Demande de reformulation AI pour le test MBTI', [
+                'user_id' => $user->id,
+                'context' => $situationText,
+            ]);
+
+            $dynamicQuestions = $brillioIAService->reformulatePersonalityQuestions($questions, $situationText);
+
+            // Sauvegarder dans le cache de l'utilisateur
+            $user->update([
+                'mbti_reformulated_questions' => $dynamicQuestions,
+                'mbti_reformulated_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'total_questions' => count($dynamicQuestions),
+                'questions' => $dynamicQuestions,
+                'is_personalized' => true,
+                'context' => $situationText,
+                'from_cache' => false
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erreur getDynamicPersonalityQuestions: '.$e->getMessage());
+
+            return response()->json([
+                'success' => true,
+                'total_questions' => count($questions),
+                'questions' => $questions,
+                'is_personalized' => false,
+                'error' => 'Fallback to original questions due to AI error',
+            ]);
+        }
+    }
+
+    /**
      * Soumet le test de personnalité
      * Utilise OpenMBTI API pour le calcul et MbtiCareersService pour les métiers
      */
-    public function submitPersonalityTest(Request $request, DeepSeekService $deepSeekService, PersonalityService $personalityService)
+    public function submitPersonalityTest(Request $request, BrillioIAService $brillioIAService, PersonalityService $personalityService)
     {
         $validated = $request->validate([
             'responses' => ['required', 'array', 'min:32', 'max:32'],
@@ -621,7 +702,7 @@ class JeuneDashboardController extends Controller
     /**
      * Envoyer un message dans le chat
      */
-    public function sendChatMessage(Request $request, DeepSeekService $deepSeekService)
+    public function sendChatMessage(Request $request, BrillioIAService $brillioIAService)
     {
         $validated = $request->validate([
             'message' => 'required|string|max:2000',
@@ -635,7 +716,7 @@ class JeuneDashboardController extends Controller
             'user_id' => $user->id,
             'conversation_id' => $conversationId,
             'message_length' => strlen($validated['message']),
-            'api_configured' => $deepSeekService->isApiKeyConfigured(),
+            'api_configured' => $brillioIAService->isApiKeyConfigured(),
         ]);
 
         // Recuperer ou creer la conversation
@@ -676,7 +757,7 @@ class JeuneDashboardController extends Controller
                 );
             }
 
-            $conversation = $deepSeekService->createConversation($user);
+            $conversation = $brillioIAService->createConversation($user);
             Log::info('Nouvelle conversation creee', ['conversation_id' => $conversation->id]);
         }
 
@@ -704,7 +785,7 @@ class JeuneDashboardController extends Controller
 
             // Envoyer le message et obtenir la reponse
             Log::info('Appel DeepSeekService->sendMessage');
-            $assistantMessage = $deepSeekService->sendMessage($conversation, $validated['message']);
+            $assistantMessage = $brillioIAService->sendMessage($conversation, $validated['message']);
             Log::info('Reponse recue de DeepSeekService', [
                 'message_id' => $assistantMessage->id,
                 'content_length' => strlen($assistantMessage->content),
@@ -727,7 +808,7 @@ class JeuneDashboardController extends Controller
                 'sender_name' => 'Assistant Brillio',
                 'needs_human_support' => (bool) $conversation->needs_human_support,
                 'is_human_support_active' => (bool) $conversation->human_support_active,
-                'api_used' => $deepSeekService->isApiKeyConfigured(),
+                'api_used' => $brillioIAService->isApiKeyConfigured(),
             ]);
         } catch (\Exception $e) {
             Log::error('Chat error', [

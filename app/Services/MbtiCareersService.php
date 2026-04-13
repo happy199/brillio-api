@@ -1064,11 +1064,111 @@ class MbtiCareersService
     ];
 
     /**
-     * Recupere les metiers pour un type MBTI
+     * Recupere les metiers pour un type MBTI depuis la base de donnees
+     * Avec enrichissement dynamique via l'IA (Phase 3)
      */
     public static function getCareersForType(string $type): array
     {
-        return self::CAREERS_BY_TYPE[strtoupper($type)] ?? [];
+        $type = strtoupper($type);
+
+        // 1. Récupérer les métiers existants en base pour ce type MBTI
+        $careersFromDb = \Illuminate\Support\Facades\DB::table('career_mbti')
+            ->where('mbti_type', $type)
+            ->join('careers', 'careers.id', '=', 'career_mbti.career_id')
+            ->select('careers.*', 'career_mbti.match_reason as pivot_match_reason')
+            ->get();
+
+        // 2. Sélectionner les 6 premiers (ou aléatoires)
+        $selectedFromDb = $careersFromDb->take(6);
+        $selectedTitles = $selectedFromDb->pluck('title')->toArray();
+
+        // 3. Appeler l'IA pour compléter à 10 (on veut 4 nouveaux)
+        $allGlobalTitles = \Illuminate\Support\Facades\DB::table('careers')->pluck('title')->toArray();
+        $brillioAI = app(\App\Services\BrillioIAService::class);
+
+        $aiResult = $brillioAI->generateCareers($type, $allGlobalTitles, $selectedTitles);
+
+        $finalCareers = [];
+
+        // Ajouter les 6 de la DB
+        foreach ($selectedFromDb as $career) {
+            $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
+        }
+
+        // 4. Traiter les 4 métiers de l'IA ou Fallback
+        if ($aiResult['has_new_proposals'] && count($aiResult['careers'] ?? []) >= 4) {
+            foreach (array_slice($aiResult['careers'], 0, 4) as $aiCareer) {
+                // Sauvegarde automatique en base pour enrichissement
+                $newCareer = \App\Models\Career::firstOrCreate(
+                    ['title' => $aiCareer['title']],
+                    [
+                        'description' => $aiCareer['description'],
+                        'african_context' => $aiCareer['african_context'],
+                        'future_prospects' => $aiCareer['future_prospects'],
+                        'ai_impact_level' => $aiCareer['ai_impact_level'],
+                        'demand_level' => 'Moyenne (Suggéré par IA)',
+                    ]
+                );
+
+                // Lier au MBTI si ce n'est pas déjà fait
+                \Illuminate\Support\Facades\DB::table('career_mbti')->updateOrInsert(
+                    ['career_id' => $newCareer->id, 'mbti_type' => $type],
+                    ['match_reason' => $aiCareer['match_reason'] ?? "Ce métier correspond aux forces de ton profil {$type}."]
+                );
+
+                // Lier aux secteurs suggérés
+                if (isset($aiCareer['sectors']) && is_array($aiCareer['sectors'])) {
+                    foreach ($aiCareer['sectors'] as $sectorCode) {
+                        \Illuminate\Support\Facades\DB::table('career_sector')->updateOrInsert(
+                            ['career_id' => $newCareer->id, 'sector_code' => $sectorCode]
+                        );
+                    }
+                }
+
+                $finalCareers[] = [
+                    'id' => $newCareer->id,
+                    'title' => $newCareer->title,
+                    'description' => $newCareer->description,
+                    'match_reason' => $aiCareer['match_reason'] ?? "Correspondance IA avec {$type}.",
+                    'sectors' => $aiCareer['sectors'] ?? [],
+                    'future_prospects' => $newCareer->future_prospects,
+                    'african_context' => $newCareer->african_context,
+                    'ai_impact_level' => $newCareer->ai_impact_level,
+                    'demand_level' => $newCareer->demand_level,
+                ];
+            }
+        } else {
+            // Mode Fallback : On prend 4 autres métiers de la DB qui ne sont pas dans les 6 premiers
+            $fallbackCareers = $careersFromDb->slice(6, 4);
+            foreach ($fallbackCareers as $career) {
+                $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
+            }
+        }
+
+        return $finalCareers;
+    }
+
+    /**
+     * Formate une ligne de métier depuis la DB
+     */
+    private static function formatCareerRow($career, $matchReason): array
+    {
+        $sectors = \Illuminate\Support\Facades\DB::table('career_sector')
+            ->where('career_id', $career->id)
+            ->pluck('sector_code')
+            ->toArray();
+
+        return [
+            'id' => $career->id,
+            'title' => $career->title,
+            'description' => $career->description,
+            'match_reason' => $matchReason,
+            'sectors' => $sectors,
+            'future_prospects' => $career->future_prospects,
+            'african_context' => $career->african_context,
+            'ai_impact_level' => $career->ai_impact_level,
+            'demand_level' => $career->demand_level,
+        ];
     }
 
     /**
@@ -1099,24 +1199,17 @@ class MbtiCareersService
     }
 
     /**
-     * Trouve les types MBTI associes a un secteur
+     * Trouve les types MBTI associes a un secteur via la BDD
      */
     public static function getTypesForSector(string $sectorCode): array
     {
-        $types = [];
-
-        foreach (self::CAREERS_BY_TYPE as $type => $careers) {
-            foreach ($careers as $career) {
-                if (in_array($sectorCode, $career['sectors'] ?? [])) {
-                    if (! in_array($type, $types)) {
-                        $types[] = $type;
-                    }
-                    break;
-                }
-            }
-        }
-
-        return $types;
+        return \Illuminate\Support\Facades\DB::table('career_sector')
+            ->where('sector_code', $sectorCode)
+            ->join('career_mbti', 'career_mbti.career_id', '=', 'career_sector.career_id')
+            ->pluck('career_mbti.mbti_type')
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     /**

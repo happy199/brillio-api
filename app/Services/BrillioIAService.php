@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
  *
  * @see https://openrouter.ai/docs
  */
-class DeepSeekService
+class BrillioIAService
 {
     private $apiKey;
 
@@ -502,6 +502,116 @@ class DeepSeekService
             Log::error('Summarize Transcription Error: '.$e->getMessage());
 
             return null;
+        }
+    }
+
+    /**
+     * Genere 4 metiers supplementaires pour un type MBTI specifique
+     */
+    public function generateCareers(string $mbtiType, array $existingGlobalTitles, array $currentlySelectedTitles)
+    {
+        $mbtiType = strtoupper($mbtiType);
+
+        $systemPrompt = "Tu es un expert en orientation professionnelle pour la jeunesse africaine.\n".
+            "Ta mission est de proposer 4 nouveaux métiers qui correspondent parfaitement au profil MBTI : {$mbtiType}.\n\n".
+            "REGLES :\n".
+            '1. Ne propose AUCUN métier présent dans cette liste de titres existants : '.implode(', ', $existingGlobalTitles).".\n".
+            '2. Ne propose AUCUN métier présent dans cette liste de titres déjà sélectionnés pour ce test : '.implode(', ', $currentlySelectedTitles).".\n".
+            "3. Chaque métier doit être pertinent au contexte africain.\n".
+            "4. Tu dois retourner un objet JSON valide.\n\n".
+            "FORMAT JSON ATTENDU :\n".
+            "{\n".
+            "  \"has_new_proposals\": true,\n".
+            "  \"careers\": [\n".
+            "    {\n".
+            "      \"title\": \"Titre du métier\",\n".
+            "      \"description\": \"Description courte et inspirante\",\n".
+            "      \"african_context\": \"Pourquoi ce métier est une opportunité en Afrique aujourd'hui\",\n".
+            "      \"future_prospects\": \"Perspectives d'avenir (ex: Forte croissance, Transformation digitale)\",\n".
+            "      \"ai_impact_level\": \"low|medium|high\",\n".
+            "      \"match_reason\": \"Pourquoi ce métier convient spécifiquement à un profil {$mbtiType}\",\n".
+            "      \"sectors\": [\"tech\", \"business\", \"creative\", etc.]\n".
+            "    }\n".
+            "  ]\n".
+            '}';
+
+        $prompt = "Peux-tu me proposer 4 métiers originaux et porteurs pour un jeune de profil {$mbtiType} en Afrique ?";
+
+        try {
+            $response = $this->analyzeText($prompt, $systemPrompt);
+            $json = $this->cleanJson($response);
+            $data = json_decode($json, true);
+
+            if (isset($data['has_new_proposals']) && $data['has_new_proposals'] === true && isset($data['careers']) && count($data['careers']) >= 4) {
+                return $data;
+            }
+
+            return ['has_new_proposals' => false, 'careers' => []];
+        } catch (\Exception $e) {
+            Log::error('Generate Careers Error: '.$e->getMessage());
+
+            return ['has_new_proposals' => false, 'careers' => []];
+        }
+    }
+
+    /**
+     * Reformule les questions du test de personnalité en fonction du contexte utilisateur
+     */
+    public function reformulatePersonalityQuestions(array $questions, string $userContext)
+    {
+        $systemPrompt = "Tu es un expert en psychologie et en orientation pour la jeunesse africaine.\n".
+            "Ta mission est de reformuler les traits (options gauche et droite) d'un test de personnalité MBTI pour qu'ils soient parfaitement adaptés au contexte de l'utilisateur suivant : {$userContext}.\n\n".
+            "REGLES DE REFORMULATION :\n".
+            "1. EMPATHIE ET CONTEXTE : Utilise des phrases naturelles, fluides et pleines d'empathie. Propose des situations concrètes qui parlent à cet utilisateur (ex: vie scolaire, loisirs ou ambitions pour un jeune, vie professionnelle pour un actif).\n".
+            "2. ADAPTATION : Évite à tout prix les réponses robotiques ou limitées à un seul mot. Développe suffisamment pour que le sens soit clair et humain.\n".
+            "3. CONCISION : Reste concis (une phrase courte ou un groupe de mots), mais ne sacrifie jamais la compréhension ou l'humanité de la réponse pour la brièveté.\n".
+            "4. FIDELITE : Ne change SURTOUT PAS le sens profond du trait original (modèle MBTI). L'utilisateur doit pouvoir répondre sans ambiguïté.\n".
+            "5. TON : Adopte une posture de 'grand frère' ou 'grande sœur' bienveillant(e), direct(e) et encourageant(e).\n".
+            "6. FORMAT : Tu dois retourner UNIQUEMENT un objet JSON contenant le tableau des questions reformulées.\n\n".
+            "FORMAT JSON ATTENDU :\n".
+            "{\n".
+            "  \"questions\": [\n".
+            "    {\n".
+            "      \"id\": 1,\n".
+            "      \"left_trait\": \"Reformulation empathique et contextualisée gauche\",\n".
+            "      \"right_trait\": \"Reformulation empathique et contextualisée droite\"\n".
+            "    }\n".
+            "  ]\n".
+            "}";
+
+        $prompt = "Voici les 32 questions originales à reformuler pour un(e) {$userContext} :\n\n".json_encode($questions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        try {
+            $response = $this->analyzeText($prompt, $systemPrompt);
+            $json = $this->cleanJson($response);
+            $data = json_decode($json, true);
+
+            if (isset($data['questions']) && is_array($data['questions']) && count($data['questions']) > 0) {
+                // Fusionner les reformulations avec les questions originales pour garder les autres champs (dimension, etc.)
+                $reformulatedMap = [];
+                foreach ($data['questions'] as $rq) {
+                    $reformulatedMap[$rq['id']] = $rq;
+                }
+
+                $finalQuestions = [];
+                foreach ($questions as $q) {
+                    $id = $q['id'];
+                    if (isset($reformulatedMap[$id])) {
+                        $q['left_trait'] = $reformulatedMap[$id]['left_trait'];
+                        $q['right_trait'] = $reformulatedMap[$id]['right_trait'];
+                        $q['text'] = "{$q['left_trait']} ou {$q['right_trait']} ?";
+                    }
+                    $finalQuestions[] = $q;
+                }
+
+                return $finalQuestions;
+            }
+
+            return $questions; // Fallback si JSON invalide
+        } catch (\Exception $e) {
+            Log::error('Reformulate Personality Questions Error: '.$e->getMessage());
+
+            return $questions; // Fallback
         }
     }
 }

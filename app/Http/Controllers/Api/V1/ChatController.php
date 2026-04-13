@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Chat\SendMessageRequest;
 use App\Models\ChatConversation;
-use App\Services\DeepSeekService;
+use App\Services\BrillioIAService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 class ChatController extends Controller
 {
     public function __construct(
-        private DeepSeekService $deepSeekService,
+        private BrillioIAService $brillioIAService,
         private WalletService $walletService
     ) {}
 
@@ -40,7 +40,7 @@ class ChatController extends Controller
         $user = $request->user();
         $limit = $request->integer('limit', 20);
 
-        $conversations = $this->deepSeekService->getUserConversations($user, $limit);
+        $conversations = $this->brillioIAService->getUserConversations($user, $limit);
 
         return $this->success([
             'conversations' => $conversations->map(function ($conv) {
@@ -78,7 +78,7 @@ class ChatController extends Controller
                 'Création d\'une nouvelle conversation IA'
             );
 
-            return $this->deepSeekService->createConversation($user, $title);
+            return $this->brillioIAService->createConversation($user, $title);
         });
 
         return $this->created([
@@ -105,7 +105,7 @@ class ChatController extends Controller
         }
 
         $limit = $request->integer('limit', 50);
-        $messages = $this->deepSeekService->getConversationMessages($conversation, $limit);
+        $messages = $this->brillioIAService->getConversationMessages($conversation, $limit);
 
         return $this->success([
             'conversation_id' => $conversation->id,
@@ -178,7 +178,7 @@ class ChatController extends Controller
                     'Création d\'une nouvelle conversation IA (via message)'
                 );
 
-                return $this->deepSeekService->createConversation($user);
+                return $this->brillioIAService->createConversation($user);
             });
         }
 
@@ -205,7 +205,7 @@ class ChatController extends Controller
         }
 
         // Envoyer le message et obtenir la réponse de l'IA
-        $assistantMessage = $this->deepSeekService->sendMessage(
+        $assistantMessage = $this->brillioIAService->sendMessage(
             $conversation,
             $validated['message']
         );
@@ -241,7 +241,7 @@ class ChatController extends Controller
             return $this->notFound('Conversation non trouvée');
         }
 
-        $this->deepSeekService->deleteConversation($conversation);
+        $this->brillioIAService->deleteConversation($conversation);
 
         return $this->success(null, 'Conversation supprimée');
     }

@@ -18,8 +18,8 @@ use App\Http\Controllers\Jeune\JeuneDashboardController;
 use App\Http\Controllers\Jeune\OnboardingController;
 use App\Http\Controllers\Mentor\MentorDashboardController;
 use App\Http\Controllers\Mentor\WalletController;
+use App\Http\Controllers\Public\CareerController as PublicCareerController;
 use App\Http\Controllers\Website\ContactController as WebsiteContactController;
-use App\Http\Controllers\Website\NewsletterController as WebsiteNewsletterController;
 use App\Http\Controllers\Website\PageController;
 use Illuminate\Support\Facades\Route;
 
@@ -85,6 +85,9 @@ Route::get('/conditions-utilisation', [PageController::class, 'terms'])->name('t
 
 // Profil public mentor (partageable)
 Route::get('/profil-mentor/{mentor}', [PageController::class, 'mentorProfile'])->name('public.mentor.profile');
+
+// Détails métier pour la fiche (public)
+Route::get('/careers/details-by-title', [PublicCareerController::class, 'getDetailsByTitle'])->name('careers.details-by-title');
 
 /*
  |--------------------------------------------------------------------------
@@ -196,6 +199,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::get('/', [JeuneDashboardController::class, 'index'])->name('dashboard');
     Route::get('/test-personnalite', [JeuneDashboardController::class, 'personalityTest'])->name('personality');
     Route::get('/test-personnalite/questions', [JeuneDashboardController::class, 'getPersonalityQuestions'])->name('personality.questions');
+    Route::get('/test-personnalite/questions/dynamic', [JeuneDashboardController::class, 'getDynamicPersonalityQuestions'])->name('personality.questions.dynamic');
     Route::post('/test-personnalite/submit', [JeuneDashboardController::class, 'submitPersonalityTest'])->name('personality.submit');
     Route::get('/test-personnalite/history/{testId}', [JeuneDashboardController::class, 'getHistoryTestDetails'])->name('personality.history');
     Route::get('/test-personnalite/export-pdf', [\App\Http\Controllers\Jeune\PersonalityPdfController::class, 'exportCurrent'])->name('personality.export-pdf');
@@ -557,6 +561,12 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('specializations-moderate', [\App\Http\Controllers\Admin\SpecializationController::class, 'moderate'])->name('specializations.moderate');
         Route::post('specializations/{specialization}/approve', [\App\Http\Controllers\Admin\SpecializationController::class, 'approve'])->name('specializations.approve');
         Route::post('specializations/{specialization}/reject', [\App\Http\Controllers\Admin\SpecializationController::class, 'reject'])->name('specializations.reject');
+
+        // Gestion des carrières
+        Route::resource('careers', \App\Http\Controllers\Admin\CareerController::class);
+        Route::post('careers/bulk-audit', [\App\Http\Controllers\Admin\CareerController::class, 'bulkAudit'])->name('careers.bulk-audit');
+        Route::post('careers/process-audit/{career}', [\App\Http\Controllers\Admin\CareerController::class, 'processSingleAudit'])->name('careers.process-audit');
+        Route::post('ai/generate-career', [\App\Http\Controllers\Admin\AIController::class, 'generateCareerContent'])->name('ai.generate-career');
 
         // Gestion de la Newsletter
         Route::prefix('newsletter')->name('newsletter.')->group(function () {

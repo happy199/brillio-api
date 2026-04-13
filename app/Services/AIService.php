@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Log;
 
 class AIService
 {
-    protected $deepSeekService;
+    protected $brillioIAService;
 
-    public function __construct(DeepSeekService $deepSeekService)
+    public function __construct(BrillioIAService $brillioIAService)
     {
-        $this->deepSeekService = $deepSeekService;
+        $this->brillioIAService = $brillioIAService;
     }
 
     /**
@@ -32,8 +32,8 @@ class AIService
             'Réponds UNIQUEMENT avec une liste JSON de chaînes de caractères. Exemple: ["mot1", "mot2"]';
 
         try {
-            $response = $this->deepSeekService->analyzeText($prompt, 'Tu es un expert en modération de contenu et en psychologie sociale. Tu analyses les risques de communication entre mentors et jeunes.');
-            $keywords = json_decode($this->deepSeekService->cleanJson($response), true);
+            $response = $this->brillioIAService->analyzeText($prompt, 'Tu es un expert en modération de contenu et en psychologie sociale. Tu analyses les risques de communication entre mentors et jeunes.');
+            $keywords = json_decode($this->brillioIAService->cleanJson($response), true);
 
             return is_array($keywords) ? $keywords : [];
         } catch (\Exception $e) {

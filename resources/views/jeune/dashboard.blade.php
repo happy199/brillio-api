@@ -324,4 +324,57 @@
     </div>
     @endif
 </div>
+@push('scripts')
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        /**
+         * Optimisation Brillio : Pré-chargement "Invisible" du test de personnalité.
+         * Lance un appel API en arrière-plan pour que le test soit instantané au clic.
+         */
+        (function() {
+            const prewarmMBTI = async () => {
+                const cacheKey = 'mbti_questions_cache';
+                
+                // Si on a déjà les questions en cache local, on ne fait rien
+                if (localStorage.getItem(cacheKey)) {
+                    console.log('%c[Brillio Opti] Questions MBTI déjà présentes en cache local.', 'color: #6366f1; font-weight: bold;');
+                    return;
+                }
+
+                // Délai de 2 secondes pour ne pas interférer avec le chargement initial du dashboard
+                setTimeout(async () => {
+                    console.log('%c[Brillio Opti] Lancement du pré-chargement invisible...', 'color: #6366f1; font-weight: bold;');
+                    try {
+                        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                        const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '{{ csrf_token() }}';
+                        
+                        const response = await fetch('{{ route("jeune.personality.questions.dynamic") }}', {
+                            headers: { 
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            }
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success && data.questions) {
+                            localStorage.setItem(cacheKey, JSON.stringify({
+                                questions: data.questions,
+                                timestamp: new Date().getTime()
+                            }));
+                            console.log('%c[Brillio Opti] Questions stockées en cache local avec succès.', 'color: #10b981; font-weight: bold;');
+                        }
+                    } catch (e) {
+                        console.error('[Brillio Opti] Échec du pré-chargement:', e);
+                    }
+                }, 2000);
+            };
+
+            if (document.readyState === 'complete') {
+                prewarmMBTI();
+            } else {
+                window.addEventListener('load', prewarmMBTI);
+            }
+        })();
+    </script>
+@endpush
 @endsection
