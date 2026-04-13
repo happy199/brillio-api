@@ -1,8 +1,8 @@
 <?php
 
+use Database\Seeders\CareerSeeder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Artisan;
-use Database\Seeders\CareerSeeder;
 
 return new class extends Migration
 {
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // On ne supprime pas les métiers en cas de rollback de cette migration spécifique 
+        // On ne supprime pas les métiers en cas de rollback de cette migration spécifique
         // car ils pourraient être rattachés à des données utilisateurs.
     }
 };
