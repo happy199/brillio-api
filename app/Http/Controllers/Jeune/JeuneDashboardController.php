@@ -8,7 +8,7 @@ use App\Models\MentorProfile;
 use App\Models\MentorProfileView;
 use App\Models\PersonalityQuestion;
 use App\Models\PersonalityTest;
-use App\Services\DeepSeekService;
+use App\Services\BrillioIAService;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
 use Illuminate\Http\Request;
@@ -107,7 +107,7 @@ class JeuneDashboardController extends Controller
      * Soumet le test de personnalité
      * Utilise OpenMBTI API pour le calcul et MbtiCareersService pour les métiers
      */
-    public function submitPersonalityTest(Request $request, DeepSeekService $deepSeekService, PersonalityService $personalityService)
+    public function submitPersonalityTest(Request $request, BrillioIAService $brillioIAService, PersonalityService $personalityService)
     {
         $validated = $request->validate([
             'responses' => ['required', 'array', 'min:32', 'max:32'],
@@ -621,7 +621,7 @@ class JeuneDashboardController extends Controller
     /**
      * Envoyer un message dans le chat
      */
-    public function sendChatMessage(Request $request, DeepSeekService $deepSeekService)
+    public function sendChatMessage(Request $request, BrillioIAService $brillioIAService)
     {
         $validated = $request->validate([
             'message' => 'required|string|max:2000',
@@ -635,7 +635,7 @@ class JeuneDashboardController extends Controller
             'user_id' => $user->id,
             'conversation_id' => $conversationId,
             'message_length' => strlen($validated['message']),
-            'api_configured' => $deepSeekService->isApiKeyConfigured(),
+            'api_configured' => $brillioIAService->isApiKeyConfigured(),
         ]);
 
         // Recuperer ou creer la conversation
@@ -676,7 +676,7 @@ class JeuneDashboardController extends Controller
                 );
             }
 
-            $conversation = $deepSeekService->createConversation($user);
+            $conversation = $brillioIAService->createConversation($user);
             Log::info('Nouvelle conversation creee', ['conversation_id' => $conversation->id]);
         }
 
@@ -704,7 +704,7 @@ class JeuneDashboardController extends Controller
 
             // Envoyer le message et obtenir la reponse
             Log::info('Appel DeepSeekService->sendMessage');
-            $assistantMessage = $deepSeekService->sendMessage($conversation, $validated['message']);
+            $assistantMessage = $brillioIAService->sendMessage($conversation, $validated['message']);
             Log::info('Reponse recue de DeepSeekService', [
                 'message_id' => $assistantMessage->id,
                 'content_length' => strlen($assistantMessage->content),
@@ -727,7 +727,7 @@ class JeuneDashboardController extends Controller
                 'sender_name' => 'Assistant Brillio',
                 'needs_human_support' => (bool) $conversation->needs_human_support,
                 'is_human_support_active' => (bool) $conversation->human_support_active,
-                'api_used' => $deepSeekService->isApiKeyConfigured(),
+                'api_used' => $brillioIAService->isApiKeyConfigured(),
             ]);
         } catch (\Exception $e) {
             Log::error('Chat error', [

@@ -93,18 +93,27 @@
                     <h2 class="text-xl font-bold text-gray-900 mb-6">Métiers recommandés pour ton profil</h2>
                     <div class="grid md:grid-cols-2 gap-4">
                         @foreach($personalityTest->recommended_careers as $career)
-                            <div class="border-2 border-gray-100 rounded-xl p-4 hover:border-primary-300 hover:shadow-md transition">
-                                <h3 class="font-bold text-gray-900 mb-2">{{ $career['title'] }}</h3>
-                                <p class="text-sm text-gray-600 mb-3">{{ $career['description'] }}</p>
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                            <button type="button" 
+                                 class="text-left w-full border-2 border-gray-100 rounded-xl p-4 hover:border-primary-300 hover:shadow-md transition cursor-pointer group"
+                                 style="cursor: pointer;"
+                                 data-career="{{ json_encode($career) }}"
+                                 @click="viewCareerDetails(JSON.parse($el.dataset.career))">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-bold text-gray-900 group-hover:text-primary-600 transition">{{ $career['title'] }}</h3>
+                                    <svg class="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-transform transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ $career['description'] }}</p>
+                                <div class="flex items-start gap-2 bg-primary-50 p-2 rounded-lg">
+                                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <p class="text-xs text-primary-600">{{ $career['match_reason'] }}</p>
+                                    <p class="text-xs text-primary-700 font-medium">{{ $career['match_reason'] }}</p>
                                 </div>
-                            </div>
+                            </button>
                         @endforeach
                     </div>
                 </div>
@@ -490,6 +499,131 @@
                 </div>
             </div>
         </div>
+        <!-- Career Details Modal -->
+        <div x-show="showCareerModal" class="fixed inset-0 z-[60] overflow-y-auto" x-cloak style="display: none;"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-md" @click="closeCareerModal()"></div>
+
+            <div class="relative min-h-screen flex items-center justify-center p-4">
+                <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all">
+                    <!-- Close Button -->
+                    <button @click="closeCareerModal()" class="absolute top-4 right-4 z-10 p-2 bg-white/10 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-full transition shadow-sm border border-gray-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <!-- Loading State -->
+                    <div x-show="loadingCareer" class="p-12 flex flex-col items-center justify-center space-y-4">
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
+                        <p class="text-gray-500 font-medium">Récupération de la fiche métier...</p>
+                    </div>
+
+                    <!-- Career Content -->
+                    <template x-if="!loadingCareer && selectedCareer">
+                        <div class="flex flex-col">
+                            <!-- Header -->
+                            <div class="relative bg-gradient-to-br from-primary-600 to-indigo-700 px-8 py-10 text-white">
+                                <div class="flex items-center gap-2 text-primary-100 text-sm font-bold uppercase tracking-wider mb-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    <span>Fiche Métier</span>
+                                </div>
+                                <h2 class="text-3xl md:text-4xl font-extrabold" x-text="selectedCareer.title"></h2>
+                                
+                                <!-- AI Impact & Demand Badges -->
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    <template x-if="selectedCareer.ai_impact_level">
+                                        <span class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5"
+                                              :class="{
+                                                  'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30': selectedCareer.ai_impact_level === 'low',
+                                                  'bg-amber-500/20 text-amber-100 border border-amber-500/30': selectedCareer.ai_impact_level === 'medium',
+                                                  'bg-rose-500/20 text-rose-100 border border-rose-500/30': selectedCareer.ai_impact_level === 'high'
+                                              }">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.536 14.243a1 1 0 011.414 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707zM6.464 14.95a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 011.414-1.414l.707.707z" />
+                                            </svg>
+                                            <span x-text="'IA : ' + (selectedCareer.ai_impact_level === 'low' ? 'Profil Stable' : (selectedCareer.ai_impact_level === 'medium' ? 'Profil Assisté' : 'Profil Challengé'))"></span>
+                                        </span>
+                                    </template>
+                                    
+                                    <template x-if="selectedCareer.demand_level">
+                                        <span class="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-xs font-bold text-white uppercase tracking-wider" 
+                                              x-text="'Demande : ' + (selectedCareer.demand_level === 'high' ? 'Très forte' : (selectedCareer.demand_level === 'medium' ? 'Modérée' : 'Stable'))"></span>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Content Body -->
+                            <div class="p-8 space-y-8 max-h-[60vh] overflow-y-auto bg-gray-50/50">
+                                <!-- Description -->
+                                <section>
+                                    <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+                                        En quelques mots
+                                    </h4>
+                                    <p class="text-gray-700 leading-relaxed" x-text="selectedCareer.description"></p>
+                                </section>
+
+                                <!-- Africa Context -->
+                                <template x-if="selectedCareer.african_context">
+                                    <section class="bg-primary-50 rounded-2xl p-6 border border-primary-100">
+                                        <h4 class="text-primary-900 font-bold mb-3 flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2 2 2 0 012 2v.654M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Pourquoi en Afrique ?
+                                        </h4>
+                                        <p class="text-primary-800 leading-relaxed text-sm" x-text="selectedCareer.african_context"></p>
+                                    </section>
+                                </template>
+
+                                <!-- Future Prospects -->
+                                <template x-if="selectedCareer.future_prospects">
+                                    <section>
+                                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                            Perspectives d'avenir
+                                        </h4>
+                                        <p class="text-gray-700 leading-relaxed text-sm" x-text="selectedCareer.future_prospects"></p>
+                                    </section>
+                                </template>
+
+                                <!-- AI Explanation -->
+                                <template x-if="selectedCareer.ai_impact_explanation">
+                                    <section class="border-t border-gray-100 pt-6">
+                                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                            Le regard de Brillio sur l'IA
+                                        </h4>
+                                        <p class="text-gray-600 italic text-sm" x-text="selectedCareer.ai_impact_explanation"></p>
+                                    </section>
+                                </template>
+
+                                <!-- Fallback Notice -->
+                                <template x-if="selectedCareer.is_fallback">
+                                    <section class="border-t border-gray-100 pt-6 text-center">
+                                        <p class="text-xs text-gray-400 italic">Cette fiche métier sera enrichie prochainement avec plus de détails contextuels.</p>
+                                    </section>
+                                </template>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="px-8 py-4 bg-white border-t border-gray-100 flex justify-between items-center">
+                                <span class="text-xs text-gray-400">© Brillio</span>
+                                <button @click="closeCareerModal()" class="px-6 py-2 bg-gray-900 hover:bg-black text-white rounded-xl font-bold transition shadow-md">
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
     </div>
 
     @push('scripts')
@@ -497,6 +631,7 @@
             function personalityTest() {
                 return {
                     showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0, confirmClose: false,
+                    showCareerModal: false, selectedCareer: null, loadingCareer: false,
                     answerOptions: [{ value: 1, label: 'Toujours comme ça' }, { value: 2, label: 'Souvent comme ça' }, { value: 3, label: 'Cela dépend de la situation' }, { value: 4, label: 'Souvent comme ça' }, { value: 5, label: 'Toujours comme ça' }],
                     get allAnswered() { return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length; },
                     startTest() {
@@ -621,6 +756,44 @@
                             alert('Erreur de connexion.');
                             this.submitting = false;
                         }
+                    },
+
+                    async viewCareerDetails(career) {
+                        if (!career || !career.title) return;
+
+                        this.loadingCareer = true;
+                        this.selectedCareer = null;
+                        this.showCareerModal = true;
+
+                        try {
+                            const response = await fetch('{{ route("careers.details-by-title") }}?title=' + encodeURIComponent(career.title));
+                            const data = await response.json();
+
+                            if (data.success && data.career) {
+                                this.selectedCareer = data.career;
+                            } else {
+                                // Fallback if career not in DB
+                                this.selectedCareer = {
+                                    title: career.title,
+                                    description: career.description || '',
+                                    is_fallback: true
+                                };
+                            }
+                        } catch (e) {
+                            console.error('Error fetching career details:', e);
+                            this.selectedCareer = {
+                                title: career.title,
+                                description: career.description || '',
+                                is_fallback: true
+                            };
+                        } finally {
+                            this.loadingCareer = false;
+                        }
+                    },
+
+                    closeCareerModal() {
+                        this.showCareerModal = false;
+                        this.selectedCareer = null;
                     }
                 }
             }

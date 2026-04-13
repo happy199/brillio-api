@@ -7,11 +7,11 @@ use Smalot\PdfParser\Parser;
 
 class LinkedInPdfParserService
 {
-    private DeepSeekService $deepSeekService;
+    private BrillioIAService $brillioIAService;
 
-    public function __construct(DeepSeekService $deepSeekService)
+    public function __construct(BrillioIAService $brillioIAService)
     {
-        $this->deepSeekService = $deepSeekService;
+        $this->brillioIAService = $brillioIAService;
     }
 
     /**
@@ -171,9 +171,9 @@ class LinkedInPdfParserService
         $prompt = "Voici le contenu brut du PDF LinkedIn. Extrais les données en JSON :\n\n".substr($text, 0, 60000);
 
         Log::info('🤖 Sending PDF text to AI...');
-        $jsonResponse = $this->deepSeekService->analyzeText($prompt, $systemPrompt);
+        $jsonResponse = $this->brillioIAService->analyzeText($prompt, $systemPrompt);
 
-        $cleanJson = $this->deepSeekService->cleanJson($jsonResponse);
+        $cleanJson = $this->brillioIAService->cleanJson($jsonResponse);
         $data = json_decode($cleanJson, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {

@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
  *
  * @see https://openrouter.ai/docs
  */
-class DeepSeekService
+class BrillioIAService
 {
     private $apiKey;
 
@@ -502,6 +502,55 @@ class DeepSeekService
             Log::error('Summarize Transcription Error: '.$e->getMessage());
 
             return null;
+        }
+    }
+
+    /**
+     * Genere 4 metiers supplementaires pour un type MBTI specifique
+     */
+    public function generateCareers(string $mbtiType, array $existingGlobalTitles, array $currentlySelectedTitles)
+    {
+        $mbtiType = strtoupper($mbtiType);
+
+        $systemPrompt = "Tu es un expert en orientation professionnelle pour la jeunesse africaine.\n".
+            "Ta mission est de proposer 4 nouveaux métiers qui correspondent parfaitement au profil MBTI : {$mbtiType}.\n\n".
+            "REGLES :\n".
+            '1. Ne propose AUCUN métier présent dans cette liste de titres existants : '.implode(', ', $existingGlobalTitles).".\n".
+            '2. Ne propose AUCUN métier présent dans cette liste de titres déjà sélectionnés pour ce test : '.implode(', ', $currentlySelectedTitles).".\n".
+            "3. Chaque métier doit être pertinent au contexte africain.\n".
+            "4. Tu dois retourner un objet JSON valide.\n\n".
+            "FORMAT JSON ATTENDU :\n".
+            "{\n".
+            "  \"has_new_proposals\": true,\n".
+            "  \"careers\": [\n".
+            "    {\n".
+            "      \"title\": \"Titre du métier\",\n".
+            "      \"description\": \"Description courte et inspirante\",\n".
+            "      \"african_context\": \"Pourquoi ce métier est une opportunité en Afrique aujourd'hui\",\n".
+            "      \"future_prospects\": \"Perspectives d'avenir (ex: Forte croissance, Transformation digitale)\",\n".
+            "      \"ai_impact_level\": \"low|medium|high\",\n".
+            "      \"match_reason\": \"Pourquoi ce métier convient spécifiquement à un profil {$mbtiType}\",\n".
+            "      \"sectors\": [\"tech\", \"business\", \"creative\", etc.]\n".
+            "    }\n".
+            "  ]\n".
+            '}';
+
+        $prompt = "Peux-tu me proposer 4 métiers originaux et porteurs pour un jeune de profil {$mbtiType} en Afrique ?";
+
+        try {
+            $response = $this->analyzeText($prompt, $systemPrompt);
+            $json = $this->cleanJson($response);
+            $data = json_decode($json, true);
+
+            if (isset($data['has_new_proposals']) && $data['has_new_proposals'] === true && isset($data['careers']) && count($data['careers']) >= 4) {
+                return $data;
+            }
+
+            return ['has_new_proposals' => false, 'careers' => []];
+        } catch (\Exception $e) {
+            Log::error('Generate Careers Error: '.$e->getMessage());
+
+            return ['has_new_proposals' => false, 'careers' => []];
         }
     }
 }

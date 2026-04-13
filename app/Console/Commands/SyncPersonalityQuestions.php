@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\PersonalityQuestion;
-use App\Services\DeepSeekService;
+use App\Services\BrillioIAService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +27,7 @@ class SyncPersonalityQuestions extends Command
     /**
      * Execute the console command.
      */
-    public function handle(DeepSeekService $deepSeekService): int
+    public function handle(BrillioIAService $brillioIAService): int
     {
         $this->info('Récupération des questions depuis OpenMBTI...');
 
@@ -72,7 +72,7 @@ Questions à traduire :\n";
                 $translationPrompt .= "ID {$q['id']}: Left=\"{$q['leftTrait']}\", Right=\"{$q['rightTrait']}\"\n";
             }
 
-            $translatedJson = $deepSeekService->translate($translationPrompt);
+            $translatedJson = $brillioIAService->translate($translationPrompt);
 
             // Nettoyer la réponse
             $translatedJson = trim($translatedJson);
