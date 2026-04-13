@@ -457,11 +457,37 @@
 
                 <!-- Loading State -->
                 <div x-show="loading" class="flex-1 flex items-center justify-center p-12">
-                    <div class="flex flex-col items-center">
-                        <div
-                            class="animate-spin rounded-full h-12 w-12 border-4 {{ $colors['loading_border'] }} border-t-transparent mb-4">
+                    <div class="flex flex-col items-center max-w-md text-center">
+                        <div class="relative mb-6">
+                            <div
+                                class="animate-spin rounded-full h-16 w-16 border-4 {{ $colors['loading_border'] }} border-t-transparent">
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <svg class="w-6 h-6 {{ $colors['primary_text'] }} animate-pulse" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9l-.707.707M12 21v-1m4.243-4.243l.707.707M16 9.5a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
                         </div>
-                        <p class="text-gray-500">Chargement des questions...</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2" x-text="loadingTitle"></h3>
+                        <p class="text-gray-500" x-text="loadingSubtitle"></p>
+
+                        <!-- Tip -->
+                        <div class="mt-8 p-4 bg-blue-50 rounded-2xl border border-blue-100 flex gap-3 text-left"
+                            x-show="isPersonalizing">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-blue-900 uppercase tracking-wider mb-1">Le savais-tu ?</p>
+                                <p class="text-sm text-blue-800">Brillio adapte chaque question à ton profil actuel pour
+                                    que tes résultats soient les plus précis possibles.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -780,6 +806,9 @@
                     showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
                     showHistoryModal: false, selectedHistory: null,
                     showCareerModal: false, selectedCareer: null, loadingCareer: false,
+                    isPersonalizing: false,
+                    loadingTitle: 'Chargement...',
+                    loadingSubtitle: 'Veuillez patienter quelques instants.',
 
                     get allAnswered() {
                         return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length;
@@ -820,9 +849,65 @@
 
                     async loadQuestions() {
                         this.loading = true;
+                        
+                        // Si c'est un jeune, on active l'état de personnalisation
+                        const isJeune = '{{ $theme }}' === 'jeune';
+                        if (isJeune) {
+                            this.isPersonalizing = true;
+                            this.loadingTitle = "Personnalisation du test";
+                            this.loadingSubtitle = "Brillio adapte les questions à ton profil...";
+                        } else {
+                            this.loadingTitle = "Chargement des questions";
+                            this.loadingSubtitle = "Préparation du test MBTI...";
+                        }
+
                         try {
+                            // On tente d'abord l'endpoint dynamique pour les jeunes
+                            let url = '{{ $questionsUrl ?? route("jeune.personality.questions") }}';
+                            
+                            if (isJeune) {
+                                url = '{{ route("jeune.personality.questions.dynamic") }}';
+                            }
+
                             // Bust cache with timestamp
-                            const url = '{{ $questionsUrl ?? route("jeune.personality.questions") }}' + '?t=' + new Date().getTime();
+                            url += (url.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+
+                            const response = await fetch(url, {
+                                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (data.success && data.questions) {
+                                this.questions = data.questions;
+                                this.testStarted = true;
+                            } else {
+                                // Fallback aux questions standards si l'IA échoue
+                                if (isJeune && url.includes('dynamic')) {
+                                    console.warn('AI personalization failed, falling back to standard questions');
+                                    await this.loadStandardQuestions();
+                                } else {
+                                    alert('Erreur: ' + (data.message || 'Format invalide'));
+                                }
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            // Fallback final
+                            if (isJeune) {
+                                await this.loadStandardQuestions();
+                            } else {
+                                alert('Erreur connexion. Vérifiez votre connexion internet.');
+                            }
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    async loadStandardQuestions() {
+                        this.loadingTitle = "Chargement...";
+                        this.loadingSubtitle = "Récupération des questions standards.";
+                        try {
+                            const url = '{{ route("jeune.personality.questions") }}' + '?t=' + new Date().getTime();
                             const response = await fetch(url, {
                                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
                             });
@@ -830,14 +915,11 @@
                             if (data.success && data.questions) {
                                 this.questions = data.questions;
                                 this.testStarted = true;
-                            } else {
-                                alert('Erreur: ' + (data.message || 'Format invalide'));
                             }
                         } catch (e) {
-                            console.error(e);
-                            alert('Erreur connexion. Vérifiez votre connexion internet.');
+                            console.error('Fallback failed:', e);
+                            alert('Erreur critique lors du chargement des questions.');
                         }
-                        this.loading = false;
                     },
 
                     selectAnswer(value) {

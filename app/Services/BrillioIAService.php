@@ -553,4 +553,64 @@ class BrillioIAService
             return ['has_new_proposals' => false, 'careers' => []];
         }
     }
+
+    /**
+     * Reformule les questions du test de personnalité en fonction du contexte utilisateur
+     */
+    public function reformulatePersonalityQuestions(array $questions, string $userContext)
+    {
+        $systemPrompt = "Tu es un expert en psychologie et en orientation pour la jeunesse africaine.\n".
+            "Ta mission est de reformuler les traits (options gauche et droite) d'un test de personnalité MBTI pour qu'ils soient parfaitement adaptés au contexte de l'utilisateur suivant : {$userContext}.\n\n".
+            "REGLES DE REFORMULATION :\n".
+            "1. ADAPTATION : Utilise un vocabulaire et des exemples concrets qui parlent à cet utilisateur (ex: vie scolaire pour un collégien, vie professionnelle pour un salarié).\n".
+            "2. CONCISION : Les formulations doivent être les plus courtes possibles (quelques mots seulement) mais suffisamment précises.\n".
+            "3. FIDELITE : Ne change SURTOUT PAS le sens profond du trait original (modèle MBTI). L'utilisateur doit pouvoir répondre sans ambiguïté.\n".
+            "4. TON : Utilise un ton direct, simple et accessible.\n".
+            "5. FORMAT : Tu dois retourner UNIQUEMENT un objet JSON contenant le tableau des questions reformulées.\n\n".
+            "FORMAT JSON ATTENDU :\n".
+            "{\n".
+            "  \"questions\": [\n".
+            "    {\n".
+            "      \"id\": 1,\n".
+            "      \"left_trait\": \"Reformulation courte gauche\",\n".
+            "      \"right_trait\": \"Reformulation courte droite\"\n".
+            "    }\n".
+            "  ]\n".
+            "}";
+
+        $prompt = "Voici les 32 questions originales à reformuler pour un(e) {$userContext} :\n\n".json_encode($questions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        try {
+            $response = $this->analyzeText($prompt, $systemPrompt);
+            $json = $this->cleanJson($response);
+            $data = json_decode($json, true);
+
+            if (isset($data['questions']) && is_array($data['questions']) && count($data['questions']) > 0) {
+                // Fusionner les reformulations avec les questions originales pour garder les autres champs (dimension, etc.)
+                $reformulatedMap = [];
+                foreach ($data['questions'] as $rq) {
+                    $reformulatedMap[$rq['id']] = $rq;
+                }
+
+                $finalQuestions = [];
+                foreach ($questions as $q) {
+                    $id = $q['id'];
+                    if (isset($reformulatedMap[$id])) {
+                        $q['left_trait'] = $reformulatedMap[$id]['left_trait'];
+                        $q['right_trait'] = $reformulatedMap[$id]['right_trait'];
+                        $q['text'] = "{$q['left_trait']} ou {$q['right_trait']} ?";
+                    }
+                    $finalQuestions[] = $q;
+                }
+
+                return $finalQuestions;
+            }
+
+            return $questions; // Fallback si JSON invalide
+        } catch (\Exception $e) {
+            Log::error('Reformulate Personality Questions Error: '.$e->getMessage());
+
+            return $questions; // Fallback
+        }
+    }
 }

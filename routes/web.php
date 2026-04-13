@@ -199,6 +199,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::get('/', [JeuneDashboardController::class, 'index'])->name('dashboard');
     Route::get('/test-personnalite', [JeuneDashboardController::class, 'personalityTest'])->name('personality');
     Route::get('/test-personnalite/questions', [JeuneDashboardController::class, 'getPersonalityQuestions'])->name('personality.questions');
+    Route::get('/test-personnalite/questions/dynamic', [JeuneDashboardController::class, 'getDynamicPersonalityQuestions'])->name('personality.questions.dynamic');
     Route::post('/test-personnalite/submit', [JeuneDashboardController::class, 'submitPersonalityTest'])->name('personality.submit');
     Route::get('/test-personnalite/history/{testId}', [JeuneDashboardController::class, 'getHistoryTestDetails'])->name('personality.history');
     Route::get('/test-personnalite/export-pdf', [\App\Http\Controllers\Jeune\PersonalityPdfController::class, 'exportCurrent'])->name('personality.export-pdf');

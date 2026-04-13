@@ -104,6 +104,66 @@ class JeuneDashboardController extends Controller
     }
 
     /**
+     * Récupère les questions reformulées par l'IA selon le profil de l'utilisateur
+     */
+    public function getDynamicPersonalityQuestions(BrillioIAService $brillioIAService)
+    {
+        $user = auth()->user();
+        $questions = PersonalityQuestion::getAllFormatted('fr');
+
+        // Préparer le contexte (Onboarding data)
+        $onboarding = $user->onboarding_data ?? [];
+        $situation = $onboarding['current_situation'] ?? 'étudiant';
+        $education = $onboarding['education_level'] ?? '';
+
+        // Traduction des termes techniques pour l'IA
+        $situationMap = [
+            'etudiant' => 'étudiant',
+            'recherche_emploi' => 'jeune diplômé en recherche d\'emploi',
+            'emploi' => 'salarié',
+            'entrepreneur' => 'entrepreneur',
+        ];
+
+        $educationMap = [
+            'college' => 'collégien (élève au collège)',
+            'lycee' => 'lycéen (élève au lycée)',
+            'bac' => 'bachelier',
+        ];
+
+        $situationText = $situationMap[$situation] ?? $situation;
+        if ($situation === 'etudiant' && isset($educationMap[$education])) {
+            $situationText = $educationMap[$education];
+        }
+
+        try {
+            Log::info('Demande de reformulation AI pour le test MBTI', [
+                'user_id' => $user->id,
+                'context' => $situationText,
+            ]);
+
+            $dynamicQuestions = $brillioIAService->reformulatePersonalityQuestions($questions, $situationText);
+
+            return response()->json([
+                'success' => true,
+                'total_questions' => count($dynamicQuestions),
+                'questions' => $dynamicQuestions,
+                'is_personalized' => true,
+                'context' => $situationText,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erreur getDynamicPersonalityQuestions: '.$e->getMessage());
+
+            return response()->json([
+                'success' => true,
+                'total_questions' => count($questions),
+                'questions' => $questions,
+                'is_personalized' => false,
+                'error' => 'Fallback to original questions due to AI error',
+            ]);
+        }
+    }
+
+    /**
      * Soumet le test de personnalité
      * Utilise OpenMBTI API pour le calcul et MbtiCareersService pour les métiers
      */
