@@ -84,19 +84,20 @@
             $colorClass = $mbtiColors[$personalityTest->personality_type] ?? $colors['primary_gradient'];
         @endphp
         <!-- Large Header Card -->
-        <div class="{{ $colorClass }} rounded-3xl p-8 md:p-12 text-white shadow-xl">
-            <div class="flex items-start gap-6">
+        <div class="{{ $colorClass }} rounded-3xl p-6 md:p-12 text-white shadow-xl">
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
                 <!-- Type Badge -->
-                <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 flex items-center justify-center shadow-lg">
-                    <span class="text-5xl font-extrabold">{{ $personalityTest->personality_type }}</span>
+                <div class="bg-white/20 backdrop-blur-sm rounded-2xl p-6 flex flex-shrink-0 items-center justify-center shadow-lg w-fit">
+                    <span class="text-5xl md:text-6xl font-extrabold">{{ $personalityTest->personality_type }}</span>
                 </div>
 
                 <!-- Content -->
-                <div class="flex-1">
-                    <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ $typeLabel }}</h1>
-                    <p class="text-white/95 text-lg leading-relaxed mb-4">{{ $personalityTest->personality_description }}
+                <div class="flex-1 text-center md:text-left">
+                    <h1 class="text-3xl md:text-5xl font-bold mb-4">{{ $typeLabel }}</h1>
+                    <p class="text-white/95 text-base md:text-lg leading-relaxed mb-4">
+                        {{ $personalityTest->personality_description }}
                     </p>
-                    <p class="text-white/70 text-sm">Test passé le {{ $personalityTest->completed_at->format('d/m/Y') }}</p>
+                    <p class="text-white/70 text-xs md:text-sm">Test passé le {{ $personalityTest->completed_at->format('d/m/Y') }}</p>
                 </div>
             </div>
         </div>
@@ -342,9 +343,9 @@
                         <template x-if="selectedHistory">
                             <div class="space-y-6">
                                 <!-- Type Info -->
-                                <div class="flex items-center gap-4">
+                                <div class="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
                                     <div
-                                        class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-white text-3xl {{ $colors['primary_gradient'] }}">
+                                        class="w-20 h-20 rounded-2xl flex flex-shrink-0 items-center justify-center font-bold text-white text-3xl {{ $colors['primary_gradient'] }}">
                                         <span x-text="selectedHistory.personality_type"></span>
                                     </div>
                                     <div>
