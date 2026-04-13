@@ -324,9 +324,13 @@
                     </svg>
                 </button>
                 <div class="flex-1 relative">
-                    <textarea x-model="newMessage" @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
+                    <textarea x-model="newMessage" 
+                        @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                        @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
+                        x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' })"
                         placeholder="Ecris ton message..." rows="1"
-                        class="w-full px-4 py-3 border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        class="w-full px-4 py-3 border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                        style="min-height: 48px; max-height: 200px;"
                         :disabled="isTyping"></textarea>
                 </div>
                 <button type="submit" :disabled="!newMessage.trim() || isTyping"
@@ -367,7 +371,7 @@
 
                                                             // Check for prefilled message from URL params
                                                             const urlParams = new URLSearchParams(window.location.search);
-                        const prefillMessage = urlParams.get('prefill');
+                        const prefillMessage = urlParams.get('prefill') || urlParams.get('message');
                         if (prefillMessage) {
                             this.newMessage = decodeURIComponent(prefillMessage);
                             // Clean URL without reloading
@@ -383,6 +387,13 @@
                         const userMessage = this.newMessage.trim();
                         this.messages.push({ role: 'user', content: userMessage });
                         this.newMessage = '';
+                        
+                        // Reset textarea height
+                        const textarea = document.querySelector('textarea[x-model="newMessage"]');
+                        if (textarea) {
+                            textarea.style.height = '48px';
+                        }
+
                         this.isTyping = true;
                         this.scrollToBottom();
 

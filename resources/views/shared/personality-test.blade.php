@@ -1024,7 +1024,7 @@
 
                             // Rediriger vers le chat avec le message pré-rempli
                             const chatUrl = {!! json_encode(route('jeune.chat')) !!};
-                            window.location.href = chatUrl + '?message=' + encodeURIComponent(message);
+                            window.location.href = chatUrl + '?prefill=' + encodeURIComponent(message);
                         } catch (error) {
                             console.error('Erreur discussWithAI:', error);
                             // Fallback: rediriger vers le chat sans message
