@@ -577,7 +577,7 @@ class BrillioIAService
             "      \"right_trait\": \"Reformulation empathique et contextualisée droite\"\n".
             "    }\n".
             "  ]\n".
-            "}";
+            '}';
 
         $prompt = "Voici les 32 questions originales à reformuler pour un(e) {$userContext} :\n\n".json_encode($questions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
