@@ -210,6 +210,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Relation vers les messages de chat (Assistant IA)
+     */
+    public function chatMessages(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(ChatMessage::class, ChatConversation::class, 'user_id', 'conversation_id');
+    }
+
+    /**
      * Relation vers les conversations de chat en tant que coach/admin (support humain)
      */
     public function chatConversationsAsHumanSupport(): HasMany
