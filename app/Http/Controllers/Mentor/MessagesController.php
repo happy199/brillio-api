@@ -69,6 +69,10 @@ class MessagesController extends Controller
         $request->validate([
             'body' => 'nullable|string|max:5000',
             'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,zip,txt',
+        ], [
+            'attachment.max' => 'Le fichier est trop volumineux (maximum 10 Mo).',
+            'attachment.mimes' => 'Ce type de fichier n\'est pas autorisé.',
+            'attachment.uploaded' => 'Le fichier n\'a pas pu être téléchargé. Vérifiez sa taille ou votre connexion.',
         ]);
 
         if (! $request->filled('body') && ! $request->hasFile('attachment')) {

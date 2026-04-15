@@ -20,6 +20,7 @@ use App\Http\Controllers\Mentor\MentorDashboardController;
 use App\Http\Controllers\Mentor\WalletController;
 use App\Http\Controllers\Public\CareerController as PublicCareerController;
 use App\Http\Controllers\Website\ContactController as WebsiteContactController;
+use App\Http\Controllers\Website\NewsletterController as WebsiteNewsletterController;
 use App\Http\Controllers\Website\PageController;
 use Illuminate\Support\Facades\Route;
 
