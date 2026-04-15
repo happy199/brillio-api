@@ -21,7 +21,7 @@
 
     <p style="margin: 15px 0 8px; color: #374151;">
         <strong>📅 Date :</strong> {{ $session->scheduled_at->translatedFormat('l j F Y') }}<br>
-        <strong>🕐 Heure :</strong> {{ $session->scheduled_at->format('H:i') }}<br>
+        <strong>🕐 Heure :</strong> {{ $session->scheduled_at->format('H:i') }} ({{ $session->gmt_offset }})<br>
         <strong>⏱️ Durée :</strong> {{ $session->duration_minutes }} minutes
     </p>
 </div>

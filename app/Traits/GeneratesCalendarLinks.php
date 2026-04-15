@@ -27,7 +27,9 @@ trait GeneratesCalendarLinks
      */
     public function generateIcsContent(MentoringSession $session, \App\Models\User $recipient): string
     {
-        // Ensure times are in UTC for the ICS file
+        $timezone = $session->timezone ?: 'UTC';
+
+        // Times in UTC for compatibility
         $startAt = $session->scheduled_at->clone()->setTimezone('UTC')->format('Ymd\THis\Z');
         $endAt = $session->scheduled_at->clone()->addMinutes((int) $session->duration_minutes)->setTimezone('UTC')->format('Ymd\THis\Z');
         $stamp = now()->setTimezone('UTC')->format('Ymd\THis\Z');
@@ -42,22 +44,22 @@ trait GeneratesCalendarLinks
         $organizerEmail = $mentor->email;
         $organizerName = $mentor->name;
 
-        // Escape special characters for summary and location
+        // Escape special characters
         $summary = str_replace([',', ';'], ['\\,', '\\;'], $summary);
         $location = str_replace([',', ';'], ['\\,', '\\;'], $location);
 
         $isMentor = ($recipient->id === $mentor->id);
         $attendeeLines = '';
 
-        if ($isMentor) {
-            // For the mentor (organizer), add mentees as attendees
-            foreach ($session->mentees as $mentee) {
-                $attendeeLines .= "ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=\"{$mentee->name}\":mailto:{$mentee->email}\n";
-            }
-        } else {
-            // For a mentee, just add them as the attendee
-            $attendeeLines = "ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=\"{$recipient->name}\":mailto:{$recipient->email}\n";
+        // Add mentees as attendees
+        foreach ($session->mentees as $mentee) {
+            $role = 'REQ-PARTICIPANT';
+            $attendeeLines .= "ATTENDEE;CUTYPE=INDIVIDUAL;ROLE={$role};PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=\"{$mentee->name}\":mailto:{$mentee->email}\n";
         }
+
+        // Add mentor as attendee too (if mentee is recipient) or just as organizer
+        // Some clients need the organizer to also be an attendee to show the invite properly
+        $attendeeLines .= "ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=CHAIR;PARTSTAT=ACCEPTED;CN=\"{$organizerName}\":mailto:{$organizerEmail}\n";
 
         return <<<EOT
 BEGIN:VCALENDAR

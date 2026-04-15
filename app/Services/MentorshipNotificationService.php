@@ -72,6 +72,8 @@ class MentorshipNotificationService
      */
     public function sendSessionProposed(MentoringSession $session)
     {
+        $session->loadMissing('mentees');
+
         if ($session->status === 'confirmed') {
             return $this->sendSessionConfirmed($session);
         }
@@ -101,6 +103,8 @@ class MentorshipNotificationService
      */
     public function sendSessionConfirmed(MentoringSession $session)
     {
+        $session->loadMissing('mentees');
+
         $mentor = $session->mentor;
         $mentees = $session->mentees;
         $calendarUrl = route('jeune.sessions.calendar'); // URL générique ou specifique

@@ -20,7 +20,7 @@
         <h1 class="title">Compte Rendu de Séance</h1>
         <p class="meta">
             <strong>Séance :</strong> {{ $session->title }}<br>
-            <strong>Date :</strong> {{ $session->scheduled_at->format('d/m/Y à H:i') }}<br>
+            <strong>Date :</strong> {{ $session->full_scheduled_at_with_gmt }}<br>
             <strong>Jeune(s) :</strong> {{ $session->mentees ? $session->mentees->pluck('name')->join(', ') : 'ND' }}<br>
             <strong>Mentor :</strong> {{ $session->mentor ? $session->mentor->name : 'ND' }}
         </p>

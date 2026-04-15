@@ -81,10 +81,12 @@ class SessionController extends Controller
         }
 
         // Récupérer disponibilités (simplifiées pour l'instant)
-        // Idéalement on passe les dispos en JSON pour Alpine/FullCalendar
         $availabilities = $mentor->mentorAvailabilities;
 
-        return view('jeune.mentorship.sessions.create', compact('mentor', 'availabilities'));
+        $timezones = \DateTimeZone::listIdentifiers();
+        $userTimezone = $user->timezone ?? 'Africa/Porto-Novo';
+
+        return view('jeune.mentorship.sessions.create', compact('mentor', 'availabilities', 'timezones', 'userTimezone'));
     }
 
     /**
@@ -94,7 +96,8 @@ class SessionController extends Controller
     {
         $request->validate([
             'mentor_id' => 'required|exists:users,id',
-            'scheduled_at' => 'required|date|after:now',
+            'scheduled_at' => 'required|date',
+            'timezone' => 'required|string|timezone',
             'duration_minutes' => 'required|integer|min:15|max:120',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
@@ -103,15 +106,20 @@ class SessionController extends Controller
         $user = auth()->user();
         $mentor = User::findOrFail($request->mentor_id);
 
-        // TODO: Vérifier disponibilité réelle (conflits)
+        // Conversion de la date selon le fuseau horaire choisi vers UTC pour stockage
+        $scheduledAt = \Carbon\Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
 
-        // Création de la séance (statut 'proposed' ou 'pending_payment' si payant)
-        // Pour l'instant on suppose gratuit ou post-paiement manuel
+        if ($scheduledAt->isPast()) {
+            return redirect()->back()->withInput()->with('error', 'La date de la séance ne peut pas être dans le passé.');
+        }
+
+        // Création de la séance
         $session = MentoringSession::create([
             'mentor_id' => $mentor->id,
             'title' => $request->title,
             'description' => $request->description,
-            'scheduled_at' => $request->scheduled_at,
+            'scheduled_at' => $scheduledAt,
+            'timezone' => $request->timezone,
             'duration_minutes' => $request->duration_minutes,
             'status' => 'proposed', // Attente validation mentor
             'created_by' => 'mentee',

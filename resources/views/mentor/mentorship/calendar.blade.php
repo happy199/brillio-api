@@ -224,7 +224,11 @@
                                                 <h4 class="font-bold text-gray-900">{{ $session->title }}</h4>
                                                 <span class="px-2 py-0.5 text-[10px] font-bold bg-yellow-200 text-yellow-800 rounded-full">DEMANDE</span>
                                             </div>
-                                            <p class="text-sm text-gray-600">{{ $session->scheduled_at->format('H:i') }} - {{ $session->scheduled_at->addMinutes($session->duration_minutes)->format('H:i') }}</p>
+                                            <p class="text-sm text-gray-600">
+                                                {{ $session->scheduled_at->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} - 
+                                                {{ $session->scheduled_at->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->addMinutes($session->duration_minutes)->format('H:i') }}
+                                                ({{ $session->gmt_offset }})
+                                            </p>
                                             <p class="text-xs text-gray-500 mt-1">Avec {{ $session->mentees->pluck('name')->join(', ') }}</p>
                                         </div>
                                         <div class="flex items-center gap-1" x-data="{ openAcceptModal: false }">
@@ -325,8 +329,9 @@
                                     </div>
                                     <div class="flex-1">
                                         <h4 class="font-bold text-gray-900">{{ $session->title }}</h4>
-                                        <p class="text-sm text-gray-500">{{ $session->scheduled_at->format('H:i') }} -
-                                            {{ $session->scheduled_at->addMinutes($session->duration_minutes)->format('H:i') }} •
+                                        <p class="text-sm text-gray-500">{{ $session->scheduled_at->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} -
+                                            {{ $session->scheduled_at->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->addMinutes($session->duration_minutes)->format('H:i') }}
+                                            ({{ $session->gmt_offset }}) •
                                             Avec {{ $session->mentees->pluck('name')->join(', ') }}
                                         </p>
                                     </div>
@@ -390,8 +395,9 @@
                                                 <span class="px-2 py-0.5 text-[10px] font-bold bg-gray-100 text-gray-800 rounded-full">{{ strtoupper($session->status) }}</span>
                                             @endif
                                         </div>
-                                        <p class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($session->scheduled_at)->format('H:i') }} -
-                                            {{ \Carbon\Carbon::parse($session->scheduled_at)->addMinutes($session->duration_minutes)->format('H:i') }} •
+                                        <p class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} -
+                                            {{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->addMinutes($session->duration_minutes)->format('H:i') }}
+                                            ({{ $session->gmt_offset }}) •
                                             Avec {{ $session->mentees->pluck('name')->join(', ') }}
                                         </p>
                                     </div>
@@ -529,8 +535,8 @@
                     'id' => $s->id,
                     'title' => $s->title,
                     'scheduled_at' => $s->scheduled_at->toIso8601String(),
-                    'time' => $s->scheduled_at->format('H:i'),
-                    'endTime' => $s->scheduled_at->copy()->addMinutes($s->duration_minutes)->format('H:i'),
+                    'time' => $s->scheduled_at->setTimezone($s->timezone ?: 'Africa/Porto-Novo')->format('H:i') . ' - ' . $s->scheduled_at->setTimezone($s->timezone ?: 'Africa/Porto-Novo')->copy()->addMinutes($s->duration_minutes)->format('H:i') . ' (' . $s->gmt_offset . ')',
+                    'endTime' => $s->scheduled_at->setTimezone($s->timezone ?: 'Africa/Porto-Novo')->copy()->addMinutes($s->duration_minutes)->format('H:i'),
                     'status' => $s->status,
                     'mentees' => $s->mentees->pluck('name')->join(', '),
                 ];

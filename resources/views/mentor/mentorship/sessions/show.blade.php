@@ -42,7 +42,7 @@
                         {{ $label }}
                     </span>
                 </div>
-                <p class="text-gray-500">{{ $session->scheduled_at->format('d F Y à H:i') }} •
+                <p class="text-gray-500">{{ $session->full_scheduled_at_with_gmt }} •
                     {{ $session->duration_minutes }} min
                 </p>
             </div>

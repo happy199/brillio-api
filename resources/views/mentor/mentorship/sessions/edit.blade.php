@@ -35,7 +35,7 @@
                         class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">{{ old('description', $session->description) }}</textarea>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Date et Heure -->
                     <div>
                         <label for="scheduled_at" class="block text-sm font-medium text-gray-700 mb-1">Date et Heure</label>
@@ -44,6 +44,20 @@
                             min="{{ now()->format('Y-m-d\TH:i') }}"
                             class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">
                         @error('scheduled_at') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Fuseau Horaire -->
+                    <div>
+                        <label for="timezone" class="block text-sm font-medium text-gray-700 mb-1">Fuseau Horaire</label>
+                        <select name="timezone" id="timezone" required
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3">
+                            @foreach ($timezones as $tz)
+                                <option value="{{ $tz }}" {{ old('timezone', $userTimezone) == $tz ? 'selected' : '' }}>
+                                    {{ $tz }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('timezone') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Durée -->

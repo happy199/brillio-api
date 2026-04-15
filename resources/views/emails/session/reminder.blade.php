@@ -16,7 +16,7 @@
     <p style="margin: 0 0 15px; font-weight: 600; color: #92400e; font-size: 16px;">📅 Rappel de session</p>
 
     <p style="margin: 0 0 8px; color: #374151; font-size: 18px; font-weight: 600;">
-        {{ $session->scheduled_at->translatedFormat('l j F Y') }} à {{ $session->scheduled_at->format('H:i') }}
+        {{ $session->scheduled_at->translatedFormat('l j F Y') }} à {{ $session->scheduled_at->format('H:i') }} ({{ $session->gmt_offset }})
     </p>
 
     <p style="margin: 15px 0 8px; color: #374151;">

@@ -151,7 +151,7 @@
                     </td>
                     <td class="metadata-item">
                         <span class="label">Date & Heure</span>
-                        <span class="value">{{ $session->scheduled_at->format('d/m/Y H:i') }}</span>
+                        <span class="value">{{ $session->full_scheduled_at_with_gmt }}</span>
                     </td>
                 </tr>
                 <tr>
