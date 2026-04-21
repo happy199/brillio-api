@@ -218,7 +218,7 @@ class ProfileController extends Controller
             }
 
             $path = $request->file('logo')->store('organizations/logos', 'public');
-            $validated['logo_url'] = '/storage/'.$path;
+            $validated['logo_url'] = $path;
         }
 
         $organization->update($validated);
