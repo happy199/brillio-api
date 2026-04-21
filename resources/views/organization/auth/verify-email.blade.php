@@ -44,7 +44,7 @@ cliquant sur le lien que nous venons de vous envoyer ?')
         <form method="POST" action="{{ route('organization.verification.resend') }}">
             @csrf
             <button type="submit"
-                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-accent-500 to-pink-600 hover:from-accent-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 transition-all transform hover:scale-[1.02]">
+                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-accent-500 to-organization-600 hover:from-accent-600 hover:to-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 transition-all transform hover:scale-[1.02]">
                 Renvoyer l'e-mail de vérification
             </button>
         </form>

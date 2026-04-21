@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="text-center max-w-3xl mx-auto space-y-4">
         <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
-            Mon <span class="text-pink-600">Portefeuille</span>
+            Mon <span class="text-organization-600">Portefeuille</span>
         </h1>
         <p class="text-lg text-gray-500">
             Gérez vos crédits et suivez vos investissements pour les jeunes.
@@ -26,8 +26,8 @@
                             number_format($organization->credits_balance) }} <span
                                 class="text-lg font-normal text-gray-400">Crédits</span></dd>
                     </div>
-                    <div class="hidden md:block bg-pink-50 p-4 rounded-full">
-                        <i class="fas fa-wallet text-pink-600 text-2xl"></i>
+                    <div class="hidden md:block bg-organization-50 p-4 rounded-full">
+                        <i class="fas fa-wallet text-organization-600 text-2xl"></i>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@
                         <i class="fas fa-file-pdf mr-1.5"></i> PDF
                     </a>
                     <a href="{{ route('organization.wallet.history') }}"
-                        class="inline-flex items-center justify-center text-xs font-bold text-pink-600 hover:text-pink-700 bg-pink-50 px-3 py-1.5 rounded-lg transition-colors">
+                        class="inline-flex items-center justify-center text-xs font-bold text-organization-600 hover:text-organization-700 bg-organization-50 px-3 py-1.5 rounded-lg transition-colors">
                         Tout voir <i class="fas fa-arrow-right ml-1.5"></i>
                     </a>
                 </div>
@@ -131,22 +131,22 @@
         <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             @foreach($creditPacks as $pack)
             <div
-                class="relative flex flex-col rounded-2xl border {{ $pack->is_popular ? 'border-pink-500 ring-2 ring-pink-500/10' : 'border-gray-200' }} bg-white p-6 shadow-xl hover:shadow-2xl transition-all group overflow-hidden">
+                class="relative flex flex-col rounded-2xl border {{ $pack->is_popular ? 'border-organization-500 ring-2 ring-organization-500/10' : 'border-gray-200' }} bg-white p-6 shadow-xl hover:shadow-2xl transition-all group overflow-hidden">
                 @if($pack->is_popular)
                 <div
-                    class="absolute top-0 right-0 bg-pink-500 text-white text-[10px] font-black px-4 py-1 rounded-bl-xl uppercase tracking-widest">
+                    class="absolute top-0 right-0 bg-organization-500 text-white text-[10px] font-black px-4 py-1 rounded-bl-xl uppercase tracking-widest">
                     Populaire</div>
                 @endif
 
                 <div class="mb-6">
-                    <h3 class="text-xl font-black text-gray-900 group-hover:text-pink-600 transition-colors">{{
+                    <h3 class="text-xl font-black text-gray-900 group-hover:text-organization-600 transition-colors">{{
                         $pack->name }}</h3>
                     <div class="mt-4 flex items-baseline">
                         <span class="text-5xl font-black tracking-tight text-gray-900">{{ number_format($pack->credits)
                             }}</span>
                         <span class="ml-1 text-sm font-bold text-gray-400 uppercase tracking-widest">Crédits</span>
                     </div>
-                    <p class="mt-2 text-2xl font-bold text-pink-600">{{ number_format($pack->price) }} <span
+                    <p class="mt-2 text-2xl font-bold text-organization-600">{{ number_format($pack->price) }} <span
                             class="text-sm">FCFA</span></p>
                 </div>
 
@@ -155,8 +155,8 @@
                     @foreach($pack->features as $feature)
                     <li class="flex items-start text-sm text-gray-600">
                         <div
-                            class="flex-shrink-0 w-5 h-5 bg-pink-50 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                            <i class="fas fa-check text-pink-600 text-[10px]"></i>
+                            class="flex-shrink-0 w-5 h-5 bg-organization-50 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                            <i class="fas fa-check text-organization-600 text-[10px]"></i>
                         </div>
                         {{ $feature }}
                     </li>
@@ -168,7 +168,7 @@
                     @csrf
                     <input type="hidden" name="pack_id" value="{{ $pack->id }}">
                     <button type="submit"
-                        class="w-full rounded-xl py-4 text-sm font-black uppercase tracking-widest shadow-lg transition-all {{ $pack->is_popular ? 'bg-pink-600 text-white hover:bg-pink-700 shadow-pink-200' : 'bg-gray-900 text-white hover:bg-black shadow-gray-200' }}">
+                        class="w-full rounded-xl py-4 text-sm font-black uppercase tracking-widest shadow-lg transition-all {{ $pack->is_popular ? 'bg-organization-600 text-white hover:bg-organization-700 shadow-organization-200' : 'bg-gray-900 text-white hover:bg-black shadow-gray-200' }}">
                         Acheter
                     </button>
                 </form>

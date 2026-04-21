@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Historique des <span class="text-pink-600">Transactions</span>
+            <h1 class="text-2xl font-bold text-gray-900">Historique des <span class="text-organization-600">Transactions</span>
             </h1>
             <p class="text-gray-500">Consultez et exportez l'ensemble de vos mouvements de crédits.</p>
         </div>
@@ -30,16 +30,16 @@
             <div>
                 <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Du</label>
                 <input type="date" name="date_from" value="{{ request('date_from') }}"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 sm:text-sm">
             </div>
             <div>
                 <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Au</label>
                 <input type="date" name="date_to" value="{{ request('date_to') }}"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm">
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 sm:text-sm">
             </div>
             <div class="flex gap-2">
                 <button type="submit"
-                    class="flex-1 bg-pink-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-pink-700">
+                    class="flex-1 bg-organization-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-organization-700">
                     Filtrer
                 </button>
                 @if(request()->anyFilled(['date_from', 'date_to']))

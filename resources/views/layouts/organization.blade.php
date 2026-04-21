@@ -4,7 +4,7 @@
 <head>
     @php
     $org = $current_organization ?? (auth()->check() ? auth()->user()->organization : null);
-    $isEnterprise = $org && $org->isEnterprise();
+    $isBranded = $org && $org->isPro(); // covers Pro and Enterprise
     $primary = $org?->primary_color ?? '#f43f5e';
 
     // Fallback logic for secondary and accent
@@ -29,44 +29,31 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Suppress Tailwind CDN warning -->
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-        (function() {
-            const originalWarn = console.warn;
-            console.warn = function(...args) {
-                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
-                originalWarn.apply(console, args);
-            };
-        })();
-    </script>
-    <!-- Tailwind CSS -->
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com"></script>
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        organization: {
-                            50: '{{ $isEnterprise ? $primary . "10" : "#fff1f2" }}',
-                            100: '{{ $isEnterprise ? $primary . "20" : "#ffe4e6" }}',
-                            200: '{{ $isEnterprise ? $primary . "30" : "#fecdd3" }}',
-                            300: '{{ $accent }}',
-                            400: '{{ $accent }}',
-                            500: '{{ $primary }}',
-                            600: '{{ $secondary }}',
-                            700: '{{ $secondary }}',
-                            800: '{{ $isEnterprise ? $primary : "#9f1239" }}',
-                            900: '{{ $isEnterprise ? $primary : "#881337" }}',
-                        }
-                    }
-                }
-            }
+    <style>
+        :root {
+            --color-organization-50: {{ $isBranded ? $primary . "10" : "#fff1f2" }};
+            --color-organization-100: {{ $isBranded ? $primary . "20" : "#ffe4e6" }};
+            --color-organization-200: {{ $isBranded ? $primary . "30" : "#fecdd3" }};
+            --color-organization-300: {{ $accent }};
+            --color-organization-400: {{ $accent }};
+            --color-organization-500: {{ $primary }};
+            --color-organization-600: {{ $secondary }};
+            --color-organization-700: {{ $secondary }};
+            --color-organization-800: {{ $isBranded ? $primary : "#9f1239" }};
+            --color-organization-900: {{ $isBranded ? $primary : "#881337" }};
         }
-    </script>
-    @vite(['resources/js/app.js'])
+
+        button:not(:disabled),
+        [role="button"]:not(:disabled),
+        .cursor-pointer {
+            cursor: pointer !important;
+        }
+    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Alpine.js pour l'interactivité -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.7/dist/cdn.min.js" integrity="sha384-NArNwzWsUSF+kY2lgW4YriEkjLqi+J+za6HrENUn/3nZqkBnWbxV22kCJEK5Uu6n" crossorigin="anonymous"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
     <style>
         [x-cloak] {
