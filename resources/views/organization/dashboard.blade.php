@@ -332,6 +332,7 @@ $isBranded = $organization && $organization->isPro();
             <p class="text-sm text-gray-500 mb-6">
                 Suivez l'engagement quotidien, les inscriptions et l'impact de vos programmes avec le plan Pro.
             </p>
+            <a href="{{ route('organization.subscriptions.index') }}"
                 class="inline-flex items-center rounded-md bg-organization-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-organization-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-organization-600">
                 Passer au plan Pro
             </a>
