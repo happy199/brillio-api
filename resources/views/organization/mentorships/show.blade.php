@@ -158,7 +158,6 @@
                     <p class="text-sm text-gray-500">Mentor Certifié</p>
                 </div>
             </div>
-        </div>
     </div>
 </div>
 
@@ -227,4 +226,5 @@
         document.getElementById('terminateModal').classList.add('hidden');
     }
 </script>
+</div>
 @endsection

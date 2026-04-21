@@ -241,15 +241,18 @@
                 </ul>
             </div>
 
-            <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Besoin d'aide ?</h3>
-                <p class="text-sm text-gray-600 mb-4 italic">Vous ne trouvez pas les données que vous cherchez ?</p>
-                <a href="mailto:support@brillio.ai"
-                    class="text-sm font-semibold text-indigo-600 hover:text-indigo-500 flex items-center">
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                <h3 class="text-sm font-bold text-gray-900 mb-2">BESOIN D'AIDE ?</h3>
+                <p class="text-sm text-gray-500 mb-4">
+                    Vous ne trouvez pas les données que vous cherchez ?
+                </p>
+                <a href="mailto:contact@brillio.africa"
+                    class="inline-flex items-center text-organization-600 font-bold hover:text-organization-700 group">
                     Contacter le support
-                    <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="ml-2 h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
                 </a>
             </div>

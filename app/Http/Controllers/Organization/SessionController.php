@@ -117,6 +117,54 @@ class SessionController extends Controller
         return view('organization.sessions.show', compact('organization', 'session'));
     }
 
+    /**
+     * Télécharger la transcription d'une séance (Gratuit pour Enterprise, Payant pour Pro)
+     */
+    public function downloadTranscription(MentoringSession $session)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        // 1. Vérification d'autorisation
+        $isAuthorized = $session->mentees()->where(function ($q) use ($organization) {
+            $q->where('sponsored_by_organization_id', $organization->id);
+        })->exists();
+
+        if (! $isAuthorized) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        // 2. Vérifier si la transcription existe
+        if (! $session->has_transcription) {
+            return redirect()->back()->with('error', "La transcription n'est pas encore disponible pour cette séance.");
+        }
+
+        // 3. Gestion du coût si non Enterprise
+        if (! $organization->isEnterprise()) {
+            $walletService = app(\App\Services\WalletService::class);
+            $cost = $walletService->getFeatureCost('transcription_download', 5);
+
+            if ($organization->credits_balance < $cost) {
+                $missing = $cost - $organization->credits_balance;
+
+                return redirect()->route('organization.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cette transcription.");
+            }
+
+            // Déduire les crédits
+            $walletService->deductCredits(
+                $organization,
+                $cost,
+                'feature_use',
+                "Téléchargement de la transcription de la séance : {$session->title}",
+                $session
+            );
+        }
+
+        // 4. Générer le PDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('common.reports.transcription_pdf', compact('session'));
+
+        return $pdf->download('transcription_seance_'.$session->id.'.pdf');
+    }
+
     private function getStatusColor($status)
     {
         return match ($status) {

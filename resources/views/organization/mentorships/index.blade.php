@@ -231,7 +231,6 @@
     <div class="mt-6">
         {{ $mentorships->links() }}
     </div>
-</div>
 
 <!-- Terminate Modal -->
 <div id="terminateModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
@@ -298,4 +297,5 @@
         document.getElementById('terminateModal').classList.add('hidden');
     }
 </script>
+</div>
 @endsection
