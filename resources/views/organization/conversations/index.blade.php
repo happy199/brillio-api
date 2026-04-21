@@ -3,7 +3,7 @@
 @section('title', 'Suivi des Conversations')
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-6xl mx-auto space-y-6" x-data="{}">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Suivi des Conversations</h1>
@@ -63,7 +63,7 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($mentorships as $mentorship)
                         <tr class="hover:bg-gray-50 transition-colors cursor-pointer" @if($organization->isEnterprise())
-                            onclick="window.location='{{ route('organization.conversations.show', $mentorship) }}'"
+                            x-on:click="window.location='{{ route('organization.conversations.show', $mentorship) }}'"
                             @endif>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-4">

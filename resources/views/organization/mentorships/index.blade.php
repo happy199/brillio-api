@@ -3,7 +3,7 @@
 @section('title', 'Suivi du Mentorat')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{}">
     <div class="sm:flex sm:items-center sm:justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Suivi du Mentorat</h1>
@@ -30,7 +30,7 @@
         <form action="{{ route('organization.mentorships.index') }}" method="GET" class="flex flex-wrap gap-4">
             <div class="w-full sm:w-64">
                 <label for="status" class="block text-sm font-medium text-gray-700">Statut</label>
-                <select name="status" id="status" onchange="this.form.submit()"
+                <select name="status" id="status" x-on:change="this.form.submit()"
                     class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-organization-500 focus:border-organization-500 sm:text-sm rounded-md">
                     <option value="">Tous les statuts</option>
                     <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>En attente</option>
@@ -207,7 +207,7 @@
                                 @endif
                                 @if($mentorship->status === 'accepted')
                                 <button type="button"
-                                    onclick="openTerminateModal('{{ route('organization.mentorships.terminate', $mentorship) }}', '{{ $mentorship->mentee->name }}', '{{ $mentorship->mentor->name }}')"
+                                    x-on:click="openTerminateModal('{{ route('organization.mentorships.terminate', $mentorship) }}', '{{ $mentorship->mentee->name }}', '{{ $mentorship->mentor->name }}')"
                                     class="text-red-600 hover:text-red-900 bg-transparent border-0 p-0 cursor-pointer">
                                     Terminer
                                 </button>
@@ -231,14 +231,13 @@
     <div class="mt-6">
         {{ $mentorships->links() }}
     </div>
-</div>
 
 <!-- Terminate Modal -->
 <div id="terminateModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
     aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
-            onclick="closeTerminateModal()"></div>
+            x-on:click="closeTerminateModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div
             class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
@@ -272,7 +271,7 @@
                         information.</p>
                 </div>
                 <div class="flex gap-3">
-                    <button type="button" onclick="closeTerminateModal()"
+                    <button type="button" x-on:click="closeTerminateModal()"
                         class="flex-1 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
                         Annuler
                     </button>
@@ -298,4 +297,5 @@
         document.getElementById('terminateModal').classList.add('hidden');
     }
 </script>
+</div>
 @endsection

@@ -111,6 +111,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/sessions/calendar', [\App\Http\Controllers\Organization\SessionController::class, 'calendar'])->name('sessions.calendar');
             Route::get('/sessions/events', [\App\Http\Controllers\Organization\SessionController::class, 'events'])->name('sessions.events');
             Route::get('/sessions/{session}', [\App\Http\Controllers\Organization\SessionController::class, 'show'])->name('sessions.show');
+            Route::get('/sessions/{session}/transcription', [\App\Http\Controllers\Organization\SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
 
             // Individual User Export
             Route::get('/users/{user}/export', [SponsoredUsersController::class, 'export'])->name('users.export');

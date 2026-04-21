@@ -44,22 +44,39 @@
             <!-- Main Info -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white shadow rounded-lg overflow-hidden">
-                    <div class="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                    <div class="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center flex-wrap gap-4">
                         <h3 class="text-lg font-medium text-gray-900">{{ $session->title }}</h3>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold 
-                            @if($session->status === 'confirmed') bg-organization-100 text-organization-800 
-                            @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
-                            @elseif($session->status === 'cancelled') bg-red-100 text-red-800
-                            @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800
-                            @else bg-gray-100 text-gray-800 @endif">
-                            @switch($session->status)
-                            @case('confirmed') Confirmée @break
-                            @case('completed') Terminée @break
-                            @case('cancelled') Annulée @break
-                            @case('pending_payment') En attente de paiement @break
-                            @default {{ $session->status }}
-                            @endswitch
-                        </span>
+                        <div class="flex items-center gap-3">
+                            @if($session->has_transcription)
+                            <a href="{{ route('organization.sessions.download-transcription', $session) }}"
+                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-colors">
+                                <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Télécharger transcription
+                                @if(!$organization->isEnterprise())
+                                <span class="ml-1.5 px-1.5 py-0.5 bg-indigo-500 rounded text-[10px]">
+                                    {{ app(\App\Services\WalletService::class)->getFeatureCost('transcription_download', 5) }} crédits
+                                </span>
+                                @endif
+                            </a>
+                            @endif
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold 
+                                @if($session->status === 'confirmed') bg-organization-100 text-organization-800 
+                                @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
+                                @elseif($session->status === 'cancelled') bg-red-100 text-red-800
+                                @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800
+                                @else bg-gray-100 text-gray-800 @endif">
+                                @switch($session->status)
+                                @case('confirmed') Confirmée @break
+                                @case('completed') Terminée @break
+                                @case('cancelled') Annulée @break
+                                @case('pending_payment') En attente de paiement @break
+                                @default {{ $session->status }}
+                                @endswitch
+                            </span>
+                        </div>
                     </div>
                     <div class="p-6">
                         <p class="text-gray-700 whitespace-pre-wrap">{{ $session->description ?: 'Aucune description

@@ -255,7 +255,7 @@ $isBranded = $organization && $organization->isPro();
             <div class="flex-1 min-w-[200px]">
                 <label for="period"
                     class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Période</label>
-                <select name="period" id="period" onchange="toggleCustomDates(this.value)"
+                <select name="period" id="period" x-on:change="toggleCustomDates($event.target.value)"
                     class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm">
                     <option value="7_days" {{ $period=='7_days' ? 'selected' : '' }}>7 derniers jours</option>
                     <option value="30_days" {{ $period=='30_days' ? 'selected' : '' }}>30 derniers jours</option>
