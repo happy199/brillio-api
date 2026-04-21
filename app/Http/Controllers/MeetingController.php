@@ -41,7 +41,7 @@ class MeetingController extends Controller
             $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$meetingId)->firstOrFail();
 
             // 1. Vérifier si l'utilisateur est participant (Mentor ou Menté)
-            $isMentor = $session->mentor_id === $user->id;
+            $isMentor = $session->all_mentors->pluck('id')->contains($user->id);
             $isMentee = $session->mentees()->where('user_id', $user->id)->exists();
 
             if (! $isMentor && ! $isMentee) {
@@ -69,6 +69,46 @@ class MeetingController extends Controller
             Log::error('MeetingController Error: '.$e->getMessage());
             Log::error('Stack trace: '.$e->getTraceAsString());
             throw $e;
+    }
+
+    /**
+     * Accès pour les invités (Bypass Auth via Guest Token)
+     */
+    public function showGuest(Request $request, $meetingId)
+    {
+        $guestToken = $request->get('guestToken');
+
+        try {
+            // 1. Trouver la session par le room name (meetingId)
+            $session = MentoringSession::where('meeting_link', 'LIKE', '%' . $meetingId)
+                ->where('guest_token', $guestToken)
+                ->firstOrFail();
+
+            // 2. Vérifier l'autorisation en session (posée par GuestAccessController)
+            $guestAuth = session("guest_auth_{$session->id}");
+            $mentorEmails = $session->all_mentors->pluck('email')->map(fn($e) => strtolower($e))->toArray();
+
+            if (!$guestAuth || !in_array(strtolower($guestAuth['email']), $mentorEmails)) {
+                return redirect()->route('guest.sessions.confirm', ['session' => $session, 'token' => $guestToken])
+                    ->with('error', 'Veuillez confirmer votre identité pour accéder à la séance.');
+            }
+
+            // 3. Ici, on simule l'utilisateur mentor (celui qui est authentifié par sa session)
+            $user = User::where('email', $guestAuth['email'])->first();
+            $isMentor = true; 
+
+            // Generate JWT for JaaS
+            $roomName = basename($session->meeting_link);
+            $jwt = $this->jitsiService->generateToken($user, $roomName, $isMentor);
+
+            $appId = env('JAAS_APP_ID');
+            $meetingLink = "https://8x8.vc/{$appId}/{$roomName}";
+
+            return view('common.meeting.show', compact('session', 'meetingLink', 'jwt', 'isMentor', 'appId', 'roomName'));
+
+        } catch (\Throwable $e) {
+            Log::error('MeetingController showGuest Error: ' . $e->getMessage());
+            abort(403, 'Accès non autorisé à cette séance.');
         }
     }
 }

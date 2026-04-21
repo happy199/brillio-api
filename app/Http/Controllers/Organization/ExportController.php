@@ -403,14 +403,14 @@ class ExportController extends Controller
                 ->get();
 
             foreach ($mentors as $mentor) {
-                $type = $internalMentorsIds->contains($mentor->id) ? 'Interne' : 'Externe';
+                $type = $mentor->is_guest ? 'Invité' : ($internalMentorsIds->contains($mentor->id) ? 'Interne' : 'Externe');
                 fputcsv($file, [
                     $mentor->name,
                     $mentor->email,
                     $type,
                     $mentor->city ?? '-',
-                    $mentor->mentorProfile->company ?? '-',
-                    $mentor->mentorProfile->job_title ?? '-',
+                    $mentor->mentorProfile->current_company ?? '-',
+                    $mentor->mentorProfile->current_position ?? '-',
                 ]);
             }
 
@@ -436,7 +436,8 @@ class ExportController extends Controller
             ->get();
 
         foreach ($mentors as $mentor) {
-            $mentor->is_internal = $internalMentorsIds->contains($mentor->id);
+            $mentor->is_internal = $internalMentorsIds->contains($mentor->id) && !$mentor->is_guest;
+            $mentor->is_guest_trainer = $mentor->is_guest;
         }
 
         $pdf = Pdf::loadView('reports.mentors', [

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MentorProfile;
 use App\Models\RoadmapStep;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -47,6 +48,19 @@ class MentorController extends Controller
             if ($request->filled('status')) {
                 $query->where('is_published', $request->status === 'published');
             }
+
+            // Filtre par statut d'invité
+            if ($request->filled('type')) {
+                if ($request->type === 'guest') {
+                    $query->whereHas('user', function ($q) {
+                        $q->where('is_guest', true);
+                    });
+                } else {
+                    $query->whereHas('user', function ($q) {
+                        $q->where('is_guest', false);
+                    });
+                }
+            }
         }
 
         // Filtre par spécialisation
@@ -73,6 +87,7 @@ class MentorController extends Controller
                 'total_steps' => RoadmapStep::whereHas('mentorProfile', function ($q) {
                     $q->where('is_published', true);
                 })->count(),
+                'guests' => 0,
             ];
         } else {
             $stats = [
@@ -80,6 +95,7 @@ class MentorController extends Controller
                 'published' => MentorProfile::where('is_published', true)->count(),
                 'draft' => MentorProfile::where('is_published', false)->count(),
                 'total_steps' => RoadmapStep::count(),
+                'guests' => User::where('is_guest', true)->count(),
             ];
         }
 

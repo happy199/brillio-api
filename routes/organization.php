@@ -110,13 +110,27 @@ Route::middleware('auth')->group(function () {
             Route::get('/sessions', [\App\Http\Controllers\Organization\SessionController::class, 'index'])->name('sessions.index');
             Route::get('/sessions/calendar', [\App\Http\Controllers\Organization\SessionController::class, 'calendar'])->name('sessions.calendar');
             Route::get('/sessions/events', [\App\Http\Controllers\Organization\SessionController::class, 'events'])->name('sessions.events');
-            Route::get('/sessions/{session}', [\App\Http\Controllers\Organization\SessionController::class, 'show'])->name('sessions.show');
+            
+            // Wildecard Session route moved to ensure specific /create route (below) takes precedence
             Route::get('/sessions/{session}/transcription', [\App\Http\Controllers\Organization\SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
 
             // Individual User Export
             Route::get('/users/{user}/export', [SponsoredUsersController::class, 'export'])->name('users.export');
         }
         );
+
+        // Enterprise Specific Session Scheduling (Prioritized over Wildcards)
+        Route::middleware('organization_subscription:enterprise')->group(function() {
+            Route::prefix('sessions')->name('sessions.')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'store'])->name('store');
+            });
+        });
+
+        // Common Wildcard Session Access (Pro & Enterprise)
+        Route::middleware('organization_subscription:pro')->group(function() {
+            Route::get('/sessions/{session}', [\App\Http\Controllers\Organization\SessionController::class, 'show'])->name('sessions.show');
+        });
 
         // Exports
         Route::get('/exports', [ExportController::class, 'index'])->name('exports.index');
@@ -156,13 +170,25 @@ Route::middleware('auth')->group(function () {
         );
 
         // Team Management (Enterprise only)
-        Route::middleware('organization_subscription:enterprise')->prefix('team')->name('team.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Organization\TeamController::class, 'index'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Organization\TeamController::class, 'create'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Organization\TeamController::class, 'store'])->name('store');
-            Route::delete('/{user}', [\App\Http\Controllers\Organization\TeamController::class, 'destroy'])->name('destroy');
-        }
-        );
+        Route::middleware('organization_subscription:enterprise')->group(function () {
+            Route::prefix('team')->name('team.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Organization\TeamController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Organization\TeamController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Organization\TeamController::class, 'store'])->name('store');
+                Route::delete('/{user}', [\App\Http\Controllers\Organization\TeamController::class, 'destroy'])->name('destroy');
+            });
+
+            // Guest Trainers Management
+            Route::prefix('guests')->name('guests.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Organization\GuestController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Organization\GuestController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Organization\GuestController::class, 'store'])->name('store');
+                Route::get('/{guest:id}', [\App\Http\Controllers\Organization\GuestController::class, 'show'])->name('show');
+                Route::get('/{guest:id}/edit', [\App\Http\Controllers\Organization\GuestController::class, 'edit'])->name('edit');
+                Route::put('/{guest:id}', [\App\Http\Controllers\Organization\GuestController::class, 'update'])->name('update');
+                Route::delete('/{guest:id}', [\App\Http\Controllers\Organization\GuestController::class, 'destroy'])->name('destroy');
+            });
+        });
     }
     );
 

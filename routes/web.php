@@ -90,6 +90,12 @@ Route::get('/profil-mentor/{mentor}', [PageController::class, 'mentorProfile'])-
 // Détails métier pour la fiche (public)
 Route::get('/careers/details-by-title', [PublicCareerController::class, 'getDetailsByTitle'])->name('careers.details-by-title');
 
+// Flux d'accès Invité (Magic Link)
+Route::prefix('guest')->name('guest.')->group(function () {
+    Route::get('/sessions/{session}/confirm/{token}', [\App\Http\Controllers\GuestAccessController::class, 'confirm'])->name('sessions.confirm');
+    Route::post('/sessions/{session}/confirm/{token}', [\App\Http\Controllers\GuestAccessController::class, 'handleConfirm'])->name('sessions.handle-confirm');
+});
+
 /*
  |--------------------------------------------------------------------------
  | Routes Authentification Jeunes & Mentors
@@ -176,8 +182,12 @@ Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.pu
  */
 Route::middleware(['auth'])->group(function () {
     Route::get('/meeting/{meetingId}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meeting.show');
-    Route::post('/meeting/append-transcription/{session}', [\App\Http\Controllers\Webhook\JitsiWebhookController::class, 'appendTranscription'])->name('meeting.append-transcription');
 });
+
+// Route meeting accessible par les invités (bypass token)
+Route::get('/meeting/{meetingId}/guest', [App\Http\Controllers\MeetingController::class, 'showGuest'])->name('meeting.show.guest');
+
+Route::post('/meeting/append-transcription/{session}', [\App\Http\Controllers\Webhook\JitsiWebhookController::class, 'appendTranscription'])->name('meeting.append-transcription');
 
 /*
  |--------------------------------------------------------------------------

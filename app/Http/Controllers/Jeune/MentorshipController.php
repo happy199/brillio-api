@@ -95,6 +95,11 @@ class MentorshipController extends Controller
             ->with('mentorProfile')
             ->firstOrFail();
 
+        // Vérifier si le mentor est un invité (les invités ne peuvent pas être contactés directement)
+        if ($mentor->is_guest) {
+            return back()->with('error', "Ce profil est un formateur invité. Vous ne pouvez pas lui envoyer de demande de mentorat directe. Il intervient uniquement lors de séances collectives organisées.");
+        }
+
         // Vérifier la disponibilité du mentor
         if (! ($mentor->mentorProfile?->accepts_mentorship_requests ?? true)) {
             return back()->with('error', 'Désolé, ce mentor n\'accepte plus de nouvelles demandes de mentorat pour le moment.');

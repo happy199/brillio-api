@@ -101,16 +101,33 @@ class MentorshipNotificationService
      */
     public function sendSessionConfirmed(MentoringSession $session)
     {
-        $mentor = $session->mentor;
+        $allMentors = $session->all_mentors;
         $mentees = $session->mentees;
-        $calendarUrl = route('jeune.sessions.calendar'); // URL générique ou specifique
 
-        // Envoyer au mentor
-        Mail::to($mentor->email)->send(new SessionConfirmed($session, $mentor, $mentees));
+        // Envoyer à CHAQUE intervenant (Mentor ou Invité)
+        foreach ($allMentors as $mentor) {
+            if ($mentor->is_guest) {
+                // Pour les invités, on utilise le Magic Link
+                Mail::to($mentor->email)->send(new \App\Mail\Session\GuestInvitation($session, $mentor));
+            } else {
+                // Pour les mentors classiques
+                Mail::to($mentor->email)->send(new SessionConfirmed($session, $mentor, $mentees));
+            }
+        }
 
         // Envoyer à chaque jeune
         foreach ($mentees as $mentee) {
             Mail::to($mentee->email)->send(new SessionConfirmed($session, $mentee, $mentees));
+        }
+    }
+
+    /**
+     * Envoyer une invitation spécifique pour un formateur invité (Magic Link)
+     */
+    public function sendGuestInvitation(MentoringSession $session)
+    {
+        if ($session->mentor && $session->mentor->is_guest) {
+            Mail::to($session->mentor->email)->send(new \App\Mail\Session\GuestInvitation($session));
         }
     }
 

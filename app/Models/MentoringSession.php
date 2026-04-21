@@ -19,6 +19,10 @@ class MentoringSession extends Model
                 $roomName = 'Brillio_'.($session->mentor_id ?? '0').'_'.Str::random(10).'_'.time();
                 $session->meeting_link = 'https://meet.jit.si/'.$roomName;
             }
+
+            if (empty($session->guest_token)) {
+                $session->guest_token = Str::random(64);
+            }
         });
     }
 
@@ -41,6 +45,8 @@ class MentoringSession extends Model
         'transcription_summary',
         'has_transcription',
         'transcription_file_path',
+        'guest_token',
+        'scheduled_by_organization_id',
     ];
 
     protected $casts = [
@@ -65,6 +71,29 @@ class MentoringSession extends Model
         return $this->belongsToMany(User::class, 'mentoring_session_user', 'mentoring_session_id', 'user_id')
             ->withPivot('status', 'rejection_reason')
             ->withTimestamps();
+    }
+
+    /**
+     * Additional speakers/mentors participating in this session (e.g. collective sessions)
+     */
+    public function additionalMentors()
+    {
+        return $this->belongsToMany(User::class, 'mentoring_session_mentor', 'mentoring_session_id', 'user_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get all mentors participating in this session (Host + Additional ones)
+     */
+    public function getAllMentorsAttribute()
+    {
+        $mentors = collect([$this->mentor]);
+        
+        if ($this->additionalMentors) {
+            $mentors = $mentors->concat($this->additionalMentors);
+        }
+
+        return $mentors->filter()->unique('id');
     }
 
     /**
