@@ -22,19 +22,19 @@ class JeuneDashboardController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        $user = auth()->user()->load(['personalityTest', 'jeuneProfile']);
 
         // Verifier si l'onboarding est complete
         if (! $user->onboarding_completed) {
             return redirect()->route('jeune.onboarding');
         }
 
-        // Stats du profil
+        // Stats du profil (Optimisé avec comptage direct)
         $stats = [
             'personality_completed' => $user->personalityTest && $user->personalityTest->completed_at,
             'documents_count' => $user->academicDocuments()->count(),
             'conversations_count' => $user->chatConversations()->count(),
-            'messages_count' => $user->chatConversations()->withCount('messages')->get()->sum('messages_count'),
+            'messages_count' => $user->chatMessages()->count(),
             'profile_views' => $user->jeuneProfile?->profile_views ?? 0,
             'mentor_views' => $user->jeuneProfile?->mentor_views ?? 0,
         ];

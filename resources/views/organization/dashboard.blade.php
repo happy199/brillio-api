@@ -3,6 +3,10 @@
 @section('title', 'Tableau de bord')
 
 @section('content')
+@php
+$primary = $organization?->primary_color ?? '#f43f5e';
+$isBranded = $organization && $organization->isPro();
+@endphp
 <div class="space-y-8">
     <!-- Welcome Header -->
     <div class="bg-gradient-to-r from-organization-500 to-organization-600 rounded-xl p-8 text-white">
@@ -33,8 +37,8 @@
         <!-- Registered Youths -->
         <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
             <div class="flex items-center">
-                <div class="flex-shrink-0 bg-blue-50 rounded-lg p-3">
-                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex-shrink-0 bg-organization-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-organization-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
@@ -49,8 +53,8 @@
         <!-- Linked Mentors -->
         <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
             <div class="flex items-center">
-                <div class="flex-shrink-0 bg-indigo-50 rounded-lg p-3">
-                    <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex-shrink-0 bg-organization-100 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-organization-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -68,8 +72,8 @@
         <div
             class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6 border-l-4 border-rose-500">
             <div class="flex items-center">
-                <div class="flex-shrink-0 bg-rose-50 rounded-lg p-3">
-                    <svg class="h-6 w-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex-shrink-0 bg-organization-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-organization-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
@@ -101,8 +105,8 @@
         <!-- Sessions -->
         <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-gray-100 p-6">
             <div class="flex items-center">
-                <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex-shrink-0 bg-organization-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-organization-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -153,8 +157,8 @@
         <!-- Impact: MBTI -->
         <div class="bg-white overflow-hidden rounded-xl shadow-sm border border-purple-100 p-6">
             <div class="flex items-center mb-4">
-                <div class="flex-shrink-0 bg-purple-50 rounded-lg p-3">
-                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex-shrink-0 bg-organization-50 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-organization-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
@@ -298,9 +302,9 @@
             @else Activité du {{ $startDate->format('d/m/Y') }} au {{ $endDate->format('d/m/Y') }}
             @endif
         </h3>
-        @if(!$isPro)
-        <span class="inline-flex items-center rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-800">
-            <svg class="mr-1.5 h-3 w-3 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+        @if(!$isBranded)
+        <span class="inline-flex items-center rounded-full bg-organization-100 px-2.5 py-0.5 text-xs font-medium text-organization-800">
+            <svg class="mr-1.5 h-3 w-3 text-organization-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd"
                     d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
                     clip-rule="evenodd" />
@@ -310,15 +314,15 @@
         @endif
     </div>
 
-    <div class="h-80 {{ !$isPro ? 'filter blur-sm select-none' : '' }}">
+    <div class="h-80 {{ !$isBranded ? 'filter blur-sm select-none' : '' }}">
         <canvas id="activityChart"></canvas>
     </div>
 
-    @if(!$isPro)
+    @if(!$isBranded)
     <div class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
-        <div class="text-center p-6 bg-white rounded-xl shadow-2xl border border-pink-100 max-w-md mx-auto">
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 mb-4">
-                <svg class="h-6 w-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+        <div class="text-center p-6 bg-white rounded-xl shadow-2xl border border-organization-100 max-w-md mx-auto">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-organization-100 mb-4">
+                <svg class="h-6 w-6 text-organization-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
@@ -328,8 +332,7 @@
             <p class="text-sm text-gray-500 mb-6">
                 Suivez l'engagement quotidien, les inscriptions et l'impact de vos programmes avec le plan Pro.
             </p>
-            <a href="{{ route('organization.subscriptions.index') }}"
-                class="inline-flex items-center rounded-md bg-pink-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600">
+                class="inline-flex items-center rounded-md bg-organization-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-organization-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-organization-600">
                 Passer au plan Pro
             </a>
         </div>
@@ -450,8 +453,8 @@
                     {
                         label: 'Inscriptions',
                         data: @json($activityData['signups']),
-                        borderColor: '#e11d48', // organization-600
-                        backgroundColor: 'rgba(225, 29, 72, 0.1)',
+                        borderColor: '{{ $primary }}', 
+                        backgroundColor: '{{ $primary }}1a',
                         tension: 0.4,
                         fill: true
                     },

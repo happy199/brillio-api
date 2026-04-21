@@ -340,7 +340,7 @@
                     return;
                 }
 
-                // Délai de 2 secondes pour ne pas interférer avec le chargement initial du dashboard
+                // Délai de 5 secondes pour laisser le dashboard se charger tranquillement
                 setTimeout(async () => {
                     console.log('%c[Brillio Opti] Lancement du pré-chargement invisible...', 'color: #6366f1; font-weight: bold;');
                     try {

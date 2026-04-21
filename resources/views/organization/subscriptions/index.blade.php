@@ -21,7 +21,7 @@ $periods = [
     {{-- Header --}}
     <div class="text-center max-w-3xl mx-auto space-y-4">
         <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">
-            Choisissez le plan adapté à votre <span class="text-pink-600">impact</span>
+            Choisissez le plan adapté à votre <span class="text-organization-600">impact</span>
         </h1>
         <p class="text-xl text-gray-500">
             Des solutions flexibles pour toutes les organisations, du démarrage à l'expansion.
@@ -32,8 +32,8 @@ $periods = [
     <div class="flex items-center justify-center gap-2 flex-wrap">
         @foreach($periods as $days => $label)
         <button type="button" x-on:click="period = {{ $days }}" :class="period === {{ $days }}
-                ? 'bg-pink-600 text-white shadow-sm'
-                : 'bg-white text-gray-600 border border-gray-300 hover:border-pink-400'"
+                ? 'bg-organization-600 text-white shadow-sm'
+                : 'bg-white text-gray-600 border border-gray-300 hover:border-organization-400'"
             class="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 focus:outline-none">
             {{ $label }}
             @if($days === 365)
@@ -71,7 +71,7 @@ $periods = [
             </ul>
             @if($isFree)
             <div
-                class="mt-8 block w-full rounded-md bg-pink-50 px-3 py-2 text-center text-sm font-semibold text-pink-600">
+                class="mt-8 block w-full rounded-md bg-organization-50 px-3 py-2 text-center text-sm font-semibold text-organization-600">
                 Votre plan actuel
             </div>
             @else
@@ -84,13 +84,13 @@ $periods = [
 
         {{-- Pro --}}
         <div
-            class="relative flex flex-col rounded-2xl border-2 {{ $isPro ? 'border-pink-600 ring-2 ring-pink-600 ring-opacity-50' : 'border-pink-600' }} bg-white p-8 shadow-xl transition-all duration-300">
+            class="relative flex flex-col rounded-2xl border-2 {{ $isPro ? 'border-organization-600 ring-2 ring-organization-600 ring-opacity-50' : 'border-organization-600' }} bg-white p-8 shadow-xl transition-all duration-300">
             <div
-                class="absolute -top-5 left-0 right-0 mx-auto w-32 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 px-3 py-1 text-center text-xs font-semibold text-white shadow-sm">
+                class="absolute -top-5 left-0 right-0 mx-auto w-32 rounded-full bg-gradient-to-r from-organization-600 to-organization-400 px-3 py-1 text-center text-xs font-semibold text-white shadow-sm">
                 Populaire
             </div>
             <div class="mb-4 text-center">
-                <h3 class="text-lg font-semibold leading-6 text-pink-600">Professionnel</h3>
+                <h3 class="text-lg font-semibold leading-6 text-organization-600">Professionnel</h3>
                 <p class="mt-4 text-sm leading-6 text-gray-500">Suivez l'impact et boostez l'engagement.</p>
                 @foreach($periods as $days => $label)
                 @php $proPlan = $proPlans->get($days); @endphp
@@ -115,7 +115,7 @@ $periods = [
             @if($isPro)
             <div class="mt-8 text-center">
                 <div
-                    class="block w-full rounded-md bg-pink-50 px-3 py-2 text-sm font-semibold text-pink-600 border border-pink-200">
+                    class="block w-full rounded-md bg-organization-50 px-3 py-2 text-sm font-semibold text-organization-600 border border-organization-200">
                     Votre plan actuel
                 </div>
                 @php $org = auth()->user()->organization; @endphp
@@ -134,7 +134,7 @@ $periods = [
                 x-show="period === {{ $days }}" {{ $days===30 ? '' : 'style=display:none' }}>
                 @csrf
                 <button type="submit"
-                    class="mt-8 flex flex-col items-center w-full rounded-md bg-pink-600 px-3 py-3 font-semibold text-white shadow-sm hover:bg-pink-500 transition-colors">
+                    class="mt-8 flex flex-col items-center w-full rounded-md bg-organization-600 px-3 py-3 font-semibold text-white shadow-sm hover:bg-organization-500 transition-colors">
                     <span class="text-sm">Souscrire</span>
                     <span class="text-xs font-normal opacity-80">{{ $label }}</span>
                 </button>
@@ -237,7 +237,7 @@ $periods = [
                                 <p class="text-sm text-gray-500 leading-relaxed">
                                     Êtes-vous sûr de vouloir repasser au plan <span class="font-bold">Standard</span> ?
                                     Votre accès aux fonctionnalités <span
-                                        class="text-pink-600 font-bold">Pro/Entreprise</span>
+                                        class="text-organization-600 font-bold">Pro/Entreprise</span>
                                     restera actif jusqu'à la fin de la période de facturation en cours.
                                 </p>
                             </div>
