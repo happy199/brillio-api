@@ -3,7 +3,7 @@
 @section('title', 'Détails du Mentorat')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{}">
     <div class="flex items-center space-x-4">
         <a href="{{ route('organization.mentorships.index') }}"
             class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
@@ -126,7 +126,7 @@
                     @if($mentorship->status === 'accepted')
                     <div class="pt-4 border-t border-gray-100">
                         <button type="button"
-                            onclick="openTerminateModal('{{ route('organization.mentorships.terminate', $mentorship) }}', '{{ $mentorship->mentee->name }}', '{{ $mentorship->mentor->name }}')"
+                            x-on:click="openTerminateModal('{{ route('organization.mentorships.terminate', $mentorship) }}', '{{ $mentorship->mentee->name }}', '{{ $mentorship->mentor->name }}')"
                             class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
                             <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -167,7 +167,7 @@
     aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
-            onclick="closeTerminateModal()"></div>
+            x-on:click="closeTerminateModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div
             class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
@@ -201,7 +201,7 @@
                         information.</p>
                 </div>
                 <div class="flex gap-3">
-                    <button type="button" onclick="closeTerminateModal()"
+                    <button type="button" x-on:click="closeTerminateModal()"
                         class="flex-1 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
                         Annuler
                     </button>

@@ -3,7 +3,7 @@
 @section('title', 'Gestion de l\'équipe')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{}">
     <!-- Header -->
     <div class="flex justify-between items-center">
         <div>
@@ -53,7 +53,7 @@
             </div>
         </div>
         <div class="mt-4 flex flex-wrap gap-3">
-            <button onclick="copyAccess()"
+            <button x-on:click="copyAccess()"
                 class="inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm font-medium rounded-md text-green-700 bg-white hover:bg-green-50">
                 Copier les accès
             </button>
@@ -128,7 +128,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         @if($member->id !== auth()->id())
                         <form action="{{ route('organization.team.destroy', $member) }}" method="POST"
-                            onsubmit="return confirm('Êtes-vous sûr de vouloir retirer ce membre ?')">
+                            x-on:submit="if(!confirm('Êtes-vous sûr de vouloir retirer ce membre ?')) $event.preventDefault()">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-900">Retirer</button>

@@ -3,7 +3,7 @@
 @section('title', 'Séances de Mentorat')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{}">
     <div class="sm:flex sm:items-center sm:justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Séances de Mentorat</h1>
@@ -39,7 +39,7 @@
         <form action="{{ route('organization.sessions.index') }}" method="GET" class="flex flex-wrap gap-4">
             <div class="w-full sm:w-64">
                 <label for="status" class="block text-sm font-medium text-gray-700">Statut</label>
-                <select name="status" id="status" onchange="this.form.submit()"
+                <select name="status" id="status" x-on:change="this.form.submit()"
                     class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-organization-500 focus:border-organization-500 sm:text-sm rounded-md">
                     <option value="">Tous les statuts</option>
                     <option value="confirmed" {{ request('status')=='confirmed' ? 'selected' : '' }}>Confirmée</option>

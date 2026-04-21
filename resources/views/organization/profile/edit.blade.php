@@ -40,7 +40,7 @@
                                     </svg>
                                 </label>
                                 <input type="file" name="logo" id="logo" class="hidden" accept="image/*"
-                                    onchange="previewLogo(this)">
+                                    x-on:change="previewLogo($event.target)">
                             </div>
                             <p class="text-xs text-gray-500 mt-2 text-center">PNG, JPG jusqu'à 2MB.</p>
                             @error('logo')
@@ -200,7 +200,7 @@
                                         <input type="text"
                                             value="{{ old('primary_color', $organization->primary_color ?? '#f43f5e') }}"
                                             class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 py-3 px-4 uppercase font-mono"
-                                            onchange="document.getElementById('primary_color').value = this.value">
+                                            x-on:change="document.getElementById('primary_color').value = $event.target.value">
                                     </div>
                                     @error('primary_color')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -219,7 +219,7 @@
                                         <input type="text"
                                             value="{{ old('secondary_color', $organization->secondary_color ?? '#e11d48') }}"
                                             class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 py-3 px-4 uppercase font-mono"
-                                            onchange="document.getElementById('secondary_color').value = this.value">
+                                            x-on:change="document.getElementById('secondary_color').value = $event.target.value">
                                     </div>
                                     @error('secondary_color')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -238,7 +238,7 @@
                                         <input type="text"
                                             value="{{ old('accent_color', $organization->accent_color ?? '#fb7185') }}"
                                             class="flex-1 focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-0 py-3 px-4 uppercase font-mono"
-                                            onchange="document.getElementById('accent_color').value = this.value">
+                                            x-on:change="document.getElementById('accent_color').value = $event.target.value">
                                     </div>
                                     @error('accent_color')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -328,7 +328,7 @@
                                                     value="{{ $organization->custom_domain && str_ends_with($organization->custom_domain, '.'.(parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa')) ? str_replace('.'.(parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa'), '', $organization->custom_domain) : '' }}"
                                                     class="focus:ring-organization-500 focus:border-organization-500 flex-1 block w-full sm:text-sm border-gray-300 rounded-none rounded-l-md py-2 px-3"
                                                     placeholder="votre-nom"
-                                                    oninput="syncDomainInput(this.value, 'slug')">
+                                                    x-on:input="syncDomainInput($event.target.value, 'slug')">
                                                 <span
                                                     class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-100 text-gray-500 sm:text-sm">
                                                     .{{ parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa'
@@ -356,7 +356,7 @@
                                                     value="{{ $organization->custom_domain && !str_ends_with($organization->custom_domain, '.'.(parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa')) ? $organization->custom_domain : '' }}"
                                                     class="focus:ring-organization-500 focus:border-organization-500 flex-1 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3"
                                                     placeholder="app.votre-entreprise.com"
-                                                    oninput="syncDomainInput(this.value, 'root')">
+                                                    x-on:input="syncDomainInput($event.target.value, 'root')">
                                             </div>
 
                                             <!-- DNS Instructions -->
@@ -377,7 +377,7 @@
                                                         }}</strong>.
                                                 </p>
                                                 <div class="mt-2 flex items-center justify-between">
-                                                    <button type="button" onclick="verifyDNS()" id="btn-verify-dns"
+                                                    <button type="button" x-on:click="verifyDNS()" id="btn-verify-dns"
                                                         class="inline-flex items-center px-2.5 py-1.5 border border-blue-300 shadow-sm text-xs font-medium rounded text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                                                         <span id="verify-spinner" class="hidden mr-1.5">
                                                             <svg class="animate-spin h-3 w-3 text-blue-600"
@@ -393,7 +393,7 @@
                                                         Vérifier la connexion DNS
                                                     </button>
 
-                                                    <button type="button" onclick="activateOnCloudflare()"
+                                                    <button type="button" x-on:click="activateOnCloudflare()"
                                                         id="btn-activate-cloudflare"
                                                         class="hidden inline-flex items-center px-2.5 py-1.5 border border-green-300 shadow-sm text-xs font-medium rounded text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors ml-2">
                                                         <span id="activate-spinner" class="hidden mr-1.5">
@@ -470,7 +470,7 @@
 
                 {{-- Boutons pleine largeur, alignés à droite --}}
                 <div class="flex items-center justify-end mt-6 pt-6 border-t border-gray-100">
-                    <button type="button" onclick="window.history.back()"
+                    <button type="button" x-on:click="window.history.back()"
                         class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500 mr-3">
                         Annuler
                     </button>
