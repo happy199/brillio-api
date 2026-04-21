@@ -84,6 +84,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_blocked',
         'blocked_at',
         'blocked_reason',
+        'is_guest',
     ];
 
     /**
@@ -122,6 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_blocked' => 'boolean',
             'blocked_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'is_guest' => 'boolean',
         ];
     }
 
@@ -175,6 +177,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->is_admin === true;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un formateur invité
+     */
+    public function isGuestTrainer(): bool
+    {
+        return (bool) $this->is_guest;
     }
 
     /**
