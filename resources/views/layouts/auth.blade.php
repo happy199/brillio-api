@@ -19,7 +19,7 @@
 
     @php
     $org = $current_organization ?? null;
-    $isBranded = $org && $org->isEnterprise();
+    $isBranded = $org && $org->isPro();
     $primaryColor = $isBranded && $org->primary_color ? $org->primary_color : '#6366f1';
     $secondaryColor = $isBranded && $org->accent_color ? $org->accent_color : '#d946ef';
     @endphp
@@ -68,6 +68,18 @@
                             800: '#86198f',
                             900: '#701a75',
                         },
+                        organization: {
+                            50: '{{ $isBranded ? $primaryColor . "10" : "#fff1f2" }}',
+                            100: '{{ $isBranded ? $primaryColor . "20" : "#ffe4e6" }}',
+                            200: '{{ $isBranded ? $primaryColor . "30" : "#fecdd3" }}',
+                            300: '{{ $secondaryColor }}',
+                            400: '{{ $secondaryColor }}',
+                            500: '{{ $primaryColor }}',
+                            600: '{{ $secondaryColor }}',
+                            700: '{{ $secondaryColor }}',
+                            800: '{{ $isBranded ? $primaryColor : "#9f1239" }}',
+                            900: '{{ $isBranded ? $primaryColor : "#881337" }}',
+                        },
                         branding: {
                             success: {
                                 bg: '{{ $isBranded ? $primaryColor . "10" : "#f0fdf4" }}',
@@ -86,11 +98,15 @@
         }
     </script>
     @vite(['resources/js/app.js'])
+    
+    <!-- Alpine.js pour l'interactivité -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.7/dist/cdn.min.js" integrity="sha384-NArNwzWsUSF+kY2lgW4YriEkjLqi+J+za6HrENUn/3nZqkBnWbxV22kCJEK5Uu6n" crossorigin="anonymous"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
     <style>
         [x-cloak] { display: none !important; }
         .gradient-bg {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
         }
 
         .glass-card {
