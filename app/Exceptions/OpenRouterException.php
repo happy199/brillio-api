@@ -11,7 +11,7 @@ class OpenRouterException extends Exception
 {
     protected $statusCode;
 
-    public function __construct($message, $statusCode = 0, Exception $previous = null)
+    public function __construct($message, $statusCode = 0, ?Exception $previous = null)
     {
         $this->statusCode = $statusCode;
         parent::__construct($message, $statusCode, $previous);

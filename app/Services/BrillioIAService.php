@@ -273,7 +273,7 @@ class BrillioIAService
         ]);
 
         try {
-            if (!$this->isApiKeyConfigured()) {
+            if (! $this->isApiKeyConfigured()) {
                 Log::warning('OpenRouter API key not configured');
                 $result = $this->getFallbackResponse($messages);
             } else {
@@ -284,23 +284,23 @@ class BrillioIAService
                     'X-Title' => $this->siteName,
                     'Content-Type' => 'application/json',
                 ])
-                ->timeout(60)
-                ->retry(2, 500)
-                ->post($this->apiUrl, [
-                    'model' => $currentModel,
-                    'messages' => $messages,
-                    'max_tokens' => $this->maxTokens,
-                    'temperature' => $this->temperature,
-                ]);
+                    ->timeout(60)
+                    ->retry(2, 500)
+                    ->post($this->apiUrl, [
+                        'model' => $currentModel,
+                        'messages' => $messages,
+                        'max_tokens' => $this->maxTokens,
+                        'temperature' => $this->temperature,
+                    ]);
 
                 // 2. Gestion des erreurs et fallbacks
                 if ($response->status() === 429 || $response->status() >= 500) {
-                    if (!$attemptedModel) {
+                    if (! $attemptedModel) {
                         $fallbackModel = 'google/gemini-flash-1.5-8b';
                         Log::warning("OpenRouter saturé sur {$currentModel}. Basculement sur {$fallbackModel}");
                         $result = $this->callOpenRouterApi($messages, $formatting, $fallbackModel);
                     } else {
-                        Log::error("Echec critique OpenRouter sur modèle de secours.");
+                        Log::error('Echec critique OpenRouter sur modèle de secours.');
                         $result = $this->getFallbackResponse($messages);
                     }
                 } elseif ($response->successful()) {
