@@ -258,125 +258,70 @@ class BrillioIAService
     }
 
     /**
-     * Appelle l'API OpenRouter (DeepSeek)
+     * Appelle l'API OpenRouter (avec gestion de resilience et fallback)
      */
-    private function callOpenRouterApi($messages, $formatting = true)
+    private function callOpenRouterApi($messages, $formatting = true, $attemptedModel = null)
     {
-        $apiKeyVal = isset($this->apiKey) ? $this->apiKey : '';
+        $currentModel = $attemptedModel ?? $this->model;
+        $result = '';
+
         Log::info('=== APPEL API OPENROUTER ===', [
             'api_url' => $this->apiUrl,
-            'model' => $this->model,
-            'messages_count' => count($messages),
+            'model' => $currentModel,
+            'attempt' => $attemptedModel ? 'fallback' : 'primary',
             'api_key_configured' => $this->isApiKeyConfigured(),
-            'api_key_preview' => substr($apiKeyVal, 0, 10).'...',
         ]);
 
         try {
-            if (! $this->isApiKeyConfigured()) {
-                Log::warning('OpenRouter API key not configured', [
-                    'api_key_value' => $this->apiKey,
+            if (!$this->isApiKeyConfigured()) {
+                Log::warning('OpenRouter API key not configured');
+                $result = $this->getFallbackResponse($messages);
+            } else {
+                // 1. Tentative avec Retry pour les erreurs reseau/timeout
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer '.$this->apiKey,
+                    'HTTP-Referer' => $this->siteUrl,
+                    'X-Title' => $this->siteName,
+                    'Content-Type' => 'application/json',
+                ])
+                ->timeout(60)
+                ->retry(2, 500)
+                ->post($this->apiUrl, [
+                    'model' => $currentModel,
+                    'messages' => $messages,
+                    'max_tokens' => $this->maxTokens,
+                    'temperature' => $this->temperature,
                 ]);
 
-                return '';
+                // 2. Gestion des erreurs et fallbacks
+                if ($response->status() === 429 || $response->status() >= 500) {
+                    if (!$attemptedModel) {
+                        $fallbackModel = 'google/gemini-flash-1.5-8b';
+                        Log::warning("OpenRouter saturé sur {$currentModel}. Basculement sur {$fallbackModel}");
+                        $result = $this->callOpenRouterApi($messages, $formatting, $fallbackModel);
+                    } else {
+                        Log::error("Echec critique OpenRouter sur modèle de secours.");
+                        $result = $this->getFallbackResponse($messages);
+                    }
+                } elseif ($response->successful()) {
+                    $data = $response->json();
+                    $content = $data['choices'][0]['message']['content'] ?? null;
+                    if ($content) {
+                        $result = $this->cleanResponse($content, $formatting);
+                    } else {
+                        throw new \App\Exceptions\OpenRouterException('Réponse API sans contenu', $response->status());
+                    }
+                } else {
+                    $error = json_decode($response->body(), true)['error']['message'] ?? 'Erreur inconnue';
+                    throw new \App\Exceptions\OpenRouterException("OpenRouter Error: {$error}", $response->status());
+                }
             }
-
-            Log::info('Envoi requete OpenRouter', [
-                'url' => $this->apiUrl,
-                'model' => $this->model,
-            ]);
-
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer '.$this->apiKey,
-                'HTTP-Referer' => $this->siteUrl,
-                'X-Title' => $this->siteName,
-                'Content-Type' => 'application/json',
-            ])->timeout(300)->post($this->apiUrl, [
-                'model' => $this->model,
-                'messages' => $messages,
-                'max_tokens' => $this->maxTokens,
-                'temperature' => $this->temperature,
-            ]);
-
-            Log::info('Reponse OpenRouter recue', [
-                'status' => $response->status(),
-                'successful' => $response->successful(),
-                'body_length' => strlen($response->body()),
-            ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-
-                // DEBUG: Loguer la reponse brute pour comprendre la structure
-                Log::info('DEBUG OPENROUTER RESPONSE', ['data' => $data]);
-
-                $choices = [];
-                if (isset($data['choices'])) {
-                    $choices = $data['choices'];
-                }
-
-                $firstChoice = null;
-                if (isset($choices[0])) {
-                    $firstChoice = $choices[0];
-                }
-
-                $messageData = null;
-                if (isset($firstChoice['message'])) {
-                    $messageData = $firstChoice['message'];
-                }
-
-                $content = null;
-                if (isset($messageData['content'])) {
-                    $content = $messageData['content'];
-                }
-
-                $hasContent = ! empty($content);
-                $contentLength = 0;
-                if ($content) {
-                    $contentLength = strlen($content);
-                }
-
-                Log::info('Contenu extrait de la reponse', [
-                    'has_content' => $hasContent,
-                    'content_length' => $contentLength,
-                ]);
-
-                if ($content) {
-                    $content = $this->cleanResponse($content, $formatting);
-                    Log::info('=== REPONSE OPENROUTER OK ===');
-
-                    return $content;
-                }
-
-                $errorMsg = 'Pas de contenu dans la reponse OpenRouter';
-                if (isset($data['error']['message'])) {
-                    $errorMsg .= ': '.$data['error']['message'];
-                }
-                throw new \Exception($errorMsg);
-            }
-
-            $errorBody = $response->body();
-            $decodedError = json_decode($errorBody, true);
-            $errorMessage = 'API Error';
-            if (isset($decodedError['error']['message'])) {
-                $errorMessage = $decodedError['error']['message'];
-            }
-
-            Log::error('OpenRouter API error', [
-                'status' => $response->status(),
-                'message' => $errorMessage,
-                'body' => $errorBody,
-            ]);
-
-            throw new \Exception('OpenRouter Error ('.$response->status().'): '.$errorMessage);
         } catch (\Exception $e) {
-            Log::error('OpenRouter API exception', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ]);
-
-            throw $e;
+            Log::error('OpenRouter exception: '.$e->getMessage());
+            $result = $result ?: $this->getFallbackResponse($messages);
         }
+
+        return $result;
     }
 
     /**
