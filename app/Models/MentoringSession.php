@@ -65,6 +65,14 @@ class MentoringSession extends Model
         return $this->belongsTo(User::class, 'mentor_id');
     }
 
+    /**
+     * Get the organization that scheduled this session.
+     */
+    public function organization(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'scheduled_by_organization_id');
+    }
+
     // Participants (Mentees)
     public function mentees()
     {

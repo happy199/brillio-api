@@ -1,11 +1,11 @@
 @extends('layouts.organization')
 
-@section('title', 'Ajouter un formateur / invité')
+@section('title', 'Modifier le formateur / invité')
 
 @section('content')
 <div class="max-w-4xl mx-auto" x-data="{ 
-    steps: [{ title: '', institution: '', year: new Date().getFullYear() }],
-    photoPreview: null,
+    steps: {{ json_encode($guest->mentorProfile->roadmapSteps->map(fn($s) => ['title' => $s->title, 'institution' => $s->institution_company, 'year' => \Carbon\Carbon::parse($s->start_date)->year])) }},
+    photoPreview: '{{ $guest->avatar_url }}',
     addStep() {
         this.steps.push({ title: '', institution: '', year: new Date().getFullYear() });
     },
@@ -24,34 +24,35 @@
     <div class="md:flex md:items-center md:justify-between mb-6">
         <div class="flex-1 min-w-0">
             <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                Ajouter un formateur / invité
+                Modifier : {{ $guest->name }}
             </h2>
             <p class="mt-1 text-sm text-gray-500">
-                Créez manuellement un profil pour une personnalité publique ou un intervenant externe.
+                Mettez à jour les informations du profil invité.
             </p>
+        </div>
+        <div class="mt-4 flex md:mt-0 md:ml-4">
+            <form action="{{ route('organization.guests.destroy', $guest) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Supprimer l'invité
+                </button>
+            </form>
         </div>
     </div>
 
-    <form method="POST" action="{{ route('organization.guests.store') }}" enctype="multipart/form-data" class="space-y-8">
+    <form method="POST" action="{{ route('organization.guests.update', $guest) }}" enctype="multipart/form-data" class="space-y-8">
         @csrf
+        @method('PUT')
 
         <!-- Section 1 : Photo de profil -->
-        <div class="bg-white shadow sm:rounded-lg overflow-hidden">
+        <div class="bg-white shadow sm:rounded-lg overflow-hidden border-t-4 border-organization-500">
             <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Photo de profil</h3>
             </div>
             <div class="p-6 flex flex-col items-center">
                 <div class="relative">
-                    <template x-if="photoPreview">
-                        <img :src="photoPreview" class="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg">
-                    </template>
-                    <template x-if="!photoPreview">
-                        <div class="h-32 w-32 rounded-full bg-gray-100 flex items-center justify-center border-4 border-white shadow-lg">
-                            <svg class="h-16 w-16 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        </div>
-                    </template>
+                    <img :src="photoPreview" class="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg">
                     <label for="photo" class="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md cursor-pointer hover:bg-gray-50 border border-gray-200">
                         <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -60,7 +61,7 @@
                         <input type="file" name="photo" id="photo" class="hidden" accept="image/*" @change="updatePreview">
                     </label>
                 </div>
-                <p class="mt-3 text-xs text-gray-400">Format JPG, PNG ou WebP. Max 2Mo.</p>
+                <p class="mt-3 text-xs text-gray-400">Cliquez sur l'icône pour changer la photo. Max 2Mo.</p>
             </div>
         </div>
 
@@ -68,13 +69,12 @@
         <div class="bg-white shadow sm:rounded-lg overflow-hidden">
             <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Informations personnelles</h3>
-                <p class="mt-1 text-sm text-gray-500">Ces informations seront utilisées pour créer le compte "invité".</p>
             </div>
             <div class="p-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                 <div class="sm:col-span-3">
                     <label for="name" class="block text-sm font-medium text-gray-700">Nom complet</label>
                     <div class="mt-1">
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                        <input type="text" name="name" id="name" value="{{ old('name', $guest->name) }}" required
                             class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">
                     </div>
                 </div>
@@ -82,15 +82,15 @@
                 <div class="sm:col-span-3">
                     <label for="email" class="block text-sm font-medium text-gray-700">Adresse email</label>
                     <div class="mt-1">
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" required
+                        <input type="email" name="email" id="email" value="{{ old('email', $guest->email) }}" required
                             class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">
                     </div>
                 </div>
 
                 <div class="sm:col-span-3">
-                    <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone (optionnel)</label>
+                    <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone</label>
                     <div class="mt-1">
-                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
+                        <input type="text" name="phone" id="phone" value="{{ old('phone', $guest->phone) }}"
                             class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                             class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">
                             <option value="">Sélectionner un pays</option>
                             @foreach($countries as $country)
-                                <option value="{{ $country }}" {{ old('country') == $country ? 'selected' : '' }}>
+                                <option value="{{ $country }}" {{ old('country', $guest->country) == $country ? 'selected' : '' }}>
                                     {{ $country }}
                                 </option>
                             @endforeach
@@ -110,7 +110,7 @@
                     </div>
                 </div>
 
-                <div class="sm:col-span-3" x-data="{ showCustom: {{ old('specialization_id') === 'other' ? 'true' : 'false' }} }">
+                <div class="sm:col-span-4" x-data="{ showCustom: {{ old('specialization_id') === 'other' ? 'true' : 'false' }} }">
                     <label for="specialization_id" class="block text-sm font-medium text-gray-700">Spécialisation</label>
                     <div class="mt-1">
                         <select name="specialization_id" id="specialization_id" 
@@ -118,14 +118,14 @@
                             class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">
                             <option value="">Sélectionner une spécialisation</option>
                             @foreach($specializations as $spec)
-                                <option value="{{ $spec->id }}" {{ old('specialization_id') == $spec->id ? 'selected' : '' }}>
+                                <option value="{{ $spec->id }}" {{ old('specialization_id', $guest->mentorProfile->specialization_id) == $spec->id ? 'selected' : '' }}>
                                     {{ $spec->name }}
                                 </option>
                             @endforeach
                             <option value="other" {{ old('specialization_id') === 'other' ? 'selected' : '' }}>Autre (préciser...)</option>
                         </select>
                     </div>
-                    
+
                     <div x-show="showCustom" x-cloak class="mt-3">
                         <input type="text" name="custom_specialization" id="custom_specialization" value="{{ old('custom_specialization') }}"
                             placeholder="Entrez la nouvelle spécialisation"
@@ -134,10 +134,10 @@
                     </div>
                 </div>
 
-                <div class="sm:col-span-3">
+                <div class="sm:col-span-2">
                     <label for="years_of_experience" class="block text-sm font-medium text-gray-700">Années d'expérience</label>
                     <div class="mt-1">
-                        <input type="number" name="years_of_experience" id="years_of_experience" value="{{ old('years_of_experience') }}" min="0" max="60"
+                        <input type="number" name="years_of_experience" id="years_of_experience" value="{{ old('years_of_experience', $guest->mentorProfile->years_of_experience) }}" min="0" max="60"
                             class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                 <div class="sm:col-span-6">
                     <label for="website_url" class="block text-sm font-medium text-gray-700">Lien LinkedIn ou Site Web</label>
                     <div class="mt-1">
-                        <input type="url" name="website_url" id="website_url" value="{{ old('website_url') }}"
+                        <input type="url" name="website_url" id="website_url" value="{{ old('website_url', $guest->mentorProfile->website_url) }}"
                             class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">
                     </div>
                 </div>
@@ -154,13 +154,13 @@
                     <label for="bio" class="block text-sm font-medium text-gray-700">Biographie</label>
                     <div class="mt-1">
                         <textarea id="bio" name="bio" rows="4"
-                            class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">{{ old('bio') }}</textarea>
+                            class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md py-3 px-4">{{ old('bio', $guest->mentorProfile->bio) }}</textarea>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Section 2 : Parcours académique / professionnel -->
+        <!-- Section 3 : Parcours académique / professionnel -->
         <div class="bg-white shadow sm:rounded-lg overflow-hidden">
             <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
                 <div>
@@ -203,9 +203,6 @@
                         </div>
                     </div>
                 </template>
-                <div x-show="steps.length === 0" class="text-center py-4 text-gray-500 italic text-sm">
-                    Aucune étape ajoutée pour le moment.
-                </div>
             </div>
         </div>
 
@@ -217,7 +214,7 @@
             </a>
             <button type="submit"
                 class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-bold rounded-md text-white bg-organization-600 hover:bg-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-organization-500 transition-all active:scale-95">
-                Créer le formateur invité
+                Mettre à jour le formateur invité
             </button>
         </div>
     </form>

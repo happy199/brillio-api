@@ -98,37 +98,53 @@
                             </span>
                             @endif
                         </div>
-                        <p class="text-sm text-indigo-600 font-medium">{{ $mentor->mentorProfile->current_position ??
-                            'Mentor' }}</p>
-                        <p class="text-gray-500 text-sm italic">{{ $mentor->mentorProfile->current_company ?? '-' }}</p>
+                        <p class="text-sm text-indigo-600 font-medium mb-2">{{ $mentor->mentorProfile->current_position ?? 'Mentor' }}</p>
                     </div>
 
-                    <div class="mt-6 border-t border-gray-100 pt-6 space-y-4">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            {{ $mentor->email }}
+                    <div class="mt-6 border-t border-gray-100 pt-6 space-y-3">
+                        <div class="flex items-center text-sm text-gray-600 group">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center mr-3 group-hover:bg-organization-50 transition-colors">
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-organization-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <span class="truncate">{{ $mentor->email }}</span>
                         </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            {{ $mentor->city ?? 'France' }}
+                        
+                        <div class="flex items-center text-sm text-gray-600 group">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center mr-3 group-hover:bg-organization-50 transition-colors">
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-organization-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            {{ $mentor->city ? $mentor->city . ', ' : '' }}{{ $mentor->country ?? '-' }}
                         </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            {{ $mentor->mentorProfile->years_of_experience ?? '-' }} ans d'expérience
+
+                        <div class="flex items-center text-sm text-gray-600 group">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center mr-3 group-hover:bg-organization-50 transition-colors">
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-organization-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            {{ $mentor->mentorProfile->years_of_experience ?? '0' }} ans d'expérience
+                        </div>
+
+                        <div class="flex items-center text-sm text-gray-600 group">
+                            <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center mr-3 group-hover:bg-organization-50 transition-colors">
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-organization-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <span class="font-medium text-gray-900">
+                                @if($mentor->mentorProfile->current_company)
+                                    {{ $mentor->mentorProfile->current_company }}
+                                @elseif($mentor->mentorProfile->roadmapSteps->isNotEmpty())
+                                    {{ $mentor->mentorProfile->roadmapSteps->sortByDesc('start_date')->first()->institution_company }}
+                                @else
+                                    -
+                                @endif
+                            </span>
                         </div>
                     </div>
                 </div>

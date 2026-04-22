@@ -7,7 +7,11 @@
     <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f7f9; }
         .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .header { background: linear-gradient(135deg, #f97316 0%, #ef4444 50%, #ec4899 100%); padding: 40px 20px; text-align: center; }
+        @php
+            $org = $session->organization;
+            $primaryColor = ($org && $org->primary_color && $org->subscription_plan !== 'free') ? $org->primary_color : '#111827';
+        @endphp
+        .header { background-color: {{ $primaryColor }}; padding: 40px 20px; text-align: center; }
         .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; }
         .content { padding: 40px 30px; }
         .content h2 { color: #111827; margin-top: 0; font-size: 20px; }

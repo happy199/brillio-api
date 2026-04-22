@@ -122,12 +122,35 @@ class MentorshipNotificationService
     }
 
     /**
+     * Envoyer une notification pour une session modifiée (tout le monde)
+     */
+    public function sendSessionUpdated(MentoringSession $session, User $updatedBy)
+    {
+        $allMentors = $session->all_mentors;
+        $mentees = $session->mentees;
+
+        // Notifier les mentors (incluant invités)
+        foreach ($allMentors as $mentor) {
+            if ($mentor->id !== $updatedBy->id) {
+                Mail::to($mentor->email)->send(new \App\Mail\Session\SessionUpdated($session, $mentor, $updatedBy, $mentees));
+            }
+        }
+
+        // Notifier les jeunes
+        foreach ($mentees as $mentee) {
+            if ($mentee->id !== $updatedBy->id) {
+                Mail::to($mentee->email)->send(new \App\Mail\Session\SessionUpdated($session, $mentee, $updatedBy, $mentees));
+            }
+        }
+    }
+
+    /**
      * Envoyer une invitation spécifique pour un formateur invité (Magic Link)
      */
     public function sendGuestInvitation(MentoringSession $session)
     {
         if ($session->mentor && $session->mentor->is_guest) {
-            Mail::to($session->mentor->email)->send(new \App\Mail\Session\GuestInvitation($session));
+            Mail::to($session->mentor->email)->send(new \App\Mail\Session\GuestInvitation($session, $session->mentor));
         }
     }
 
@@ -190,12 +213,14 @@ class MentorshipNotificationService
      */
     public function sendSessionCancelled(MentoringSession $session, User $cancelledBy)
     {
-        $mentor = $session->mentor;
+        $allMentors = $session->all_mentors;
         $mentees = $session->mentees;
 
-        // Notifier le mentor si ce n'est pas lui qui a annulé
-        if ($mentor->id !== $cancelledBy->id) {
-            Mail::to($mentor->email)->send(new SessionCancelled($session, $mentor, $cancelledBy, $mentees));
+        // Notifier les mentors si ce n'est pas eux qui ont annulé
+        foreach ($allMentors as $mentor) {
+            if ($mentor->id !== $cancelledBy->id) {
+                Mail::to($mentor->email)->send(new SessionCancelled($session, $mentor, $cancelledBy, $mentees));
+            }
         }
 
         // Notifier les jeunes qui n'ont pas annulé
@@ -371,12 +396,26 @@ class MentorshipNotificationService
      */
     public function sendReportAvailableNotification(MentoringSession $session)
     {
-        // 1. Notifier chaque jeune participant
+        // 1. Notifier tous les mentors (Hôte + Invités)
+        $allMentors = $session->all_mentors;
+        foreach ($allMentors as $mentor) {
+            $isGuest = $mentor->is_guest;
+            $sessionUrl = $isGuest ? '#' : route('mentor.mentorship.sessions.show', ['session' => $session->id]);
+            
+            Mail::to($mentor->email)->send(new ReportAvailableMail(
+                $mentor, 
+                $session, 
+                $sessionUrl,
+                $isGuest // showDetails if guest
+            ));
+        }
+
+        // 2. Notifier chaque jeune participant
         foreach ($session->mentees as $mentee) {
             $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
             Mail::to($mentee->email)->send(new ReportAvailableMail($mentee, $session, $sessionUrl));
 
-            // 2. Notifier l'organisation parrain si le jeune est sponsorisé
+            // 3. Notifier l'organisation parrain si le jeune est sponsorisé
             $org = $mentee->sponsoringOrganization;
             if ($org && $org->contact_email) {
                 $orgSessionUrl = route('organization.sessions.show', ['session' => $session->id]);

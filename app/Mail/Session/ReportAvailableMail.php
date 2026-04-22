@@ -20,7 +20,8 @@ class ReportAvailableMail extends Mailable implements ShouldQueue
     public function __construct(
         public $recipient,
         public MentoringSession $session,
-        public string $sessionUrl
+        public string $sessionUrl,
+        public bool $showDetails = false
     ) {}
 
     /**

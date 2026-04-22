@@ -37,14 +37,15 @@ class MentorsController extends Controller
         if ($type === 'external') {
             // External mentors: Not linked to organization BUT have sessions with organization's sponsored youths
             $query = User::where('user_type', 'mentor')
+                ->where('is_guest', false)
                 ->whereDoesntHave('organizations', function ($sq) use ($organization) {
                     $sq->where('organizations.id', $organization->id);
                 })
                 ->whereIn('id', $activeMentorsIds)
-                ->with(['mentorProfile']);
+                ->with(['mentorProfile.roadmapSteps']);
         } else {
             // Internal mentors: Linked directly via organization_user
-            $query = $organization->mentors()->with(['mentorProfile']);
+            $query = $organization->mentors()->with(['mentorProfile.roadmapSteps']);
         }
 
         // Search
@@ -74,7 +75,7 @@ class MentorsController extends Controller
         $organization = $this->getCurrentOrganization();
 
         // Check if mentor is linked to organization or has sessions with its youths
-        $isLinked = $organization->mentors()->where('users.id', $mentorUser->id)->exists();
+        $isLinked = $organization->users()->where('users.id', $mentorUser->id)->exists();
         $hasSessionsWithYouths = MentoringSession::where('mentor_id', $mentorUser->id)
             ->whereHas('mentees', function ($q) use ($organization) {
                 $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
@@ -94,7 +95,7 @@ class MentorsController extends Controller
             ]);
         }
 
-        $mentorUser->load(['mentorProfile']);
+        $mentorUser->load(['mentorProfile.roadmapSteps']);
 
         $isInternal = $isLinked;
 

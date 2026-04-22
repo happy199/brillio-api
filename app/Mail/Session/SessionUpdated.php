@@ -9,26 +9,30 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
-class GuestInvitation extends Mailable
+class SessionUpdated extends Mailable
 {
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
     public User $recipient;
-    public string $magicLink;
+    public User $updatedBy;
+    public Collection $participants;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(MentoringSession $session, User $recipient)
-    {
+    public function __construct(
+        MentoringSession $session,
+        User $recipient,
+        User $updatedBy,
+        Collection $participants
+    ) {
         $this->session = $session;
         $this->recipient = $recipient;
-        $this->magicLink = route('guest.sessions.confirm', [
-            'session' => $session->id,
-            'token' => $session->guest_token
-        ]) . '?u=' . $recipient->id;
+        $this->updatedBy = $updatedBy;
+        $this->participants = $participants;
     }
 
     /**
@@ -36,10 +40,8 @@ class GuestInvitation extends Mailable
      */
     public function envelope(): Envelope
     {
-        $orgName = $this->session->organization->name ?? 'une organisation';
-        
         return new Envelope(
-            subject: "Invitation à animer une séance - {$orgName} - Brillio",
+            subject: 'Session de mentorat modifiée - Brillio',
         );
     }
 
@@ -49,11 +51,12 @@ class GuestInvitation extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.session.guest_invitation',
+            view: 'emails.session.updated',
             with: [
                 'session' => $this->session,
                 'recipient' => $this->recipient,
-                'magicLink' => $this->magicLink,
+                'updatedBy' => $this->updatedBy,
+                'participants' => $this->participants,
             ],
         );
     }

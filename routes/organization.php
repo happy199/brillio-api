@@ -124,6 +124,12 @@ Route::middleware('auth')->group(function () {
             Route::prefix('sessions')->name('sessions.')->group(function () {
                 Route::get('/create', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'create'])->name('create');
                 Route::post('/', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'store'])->name('store');
+                Route::get('/{session}/edit', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'edit'])->name('edit');
+                Route::put('/{session}', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'update'])->name('update');
+                Route::post('/{session}/cancel', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'cancel'])->name('cancel');
+                Route::get('/{session}/join/{token}', [\App\Http\Controllers\Organization\SessionController::class, 'join'])->name('join');
+                Route::post('/{session}/prefill-report', [\App\Http\Controllers\Organization\SessionController::class, 'prefillReport'])->name('prefill-report');
+                Route::put('/{session}/report', [\App\Http\Controllers\Organization\SessionController::class, 'updateReport'])->name('report.update');
             });
         });
 

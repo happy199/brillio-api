@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class SessionController extends Controller
 {
@@ -138,31 +139,151 @@ class SessionController extends Controller
             return redirect()->back()->with('error', "La transcription n'est pas encore disponible pour cette séance.");
         }
 
-        // 3. Gestion du coût si non Enterprise
-        if (! $organization->isEnterprise()) {
-            $walletService = app(\App\Services\WalletService::class);
-            $cost = $walletService->getFeatureCost('transcription_download', 5);
+        // 3. Gestion du coût
+        $walletService = app(\App\Services\WalletService::class);
+        $cost = $walletService->getFeatureCost('transcription_download', 5);
 
-            if ($organization->credits_balance < $cost) {
-                $missing = $cost - $organization->credits_balance;
+        if ($organization->credits_balance < $cost) {
+            $missing = $cost - $organization->credits_balance;
 
-                return redirect()->route('organization.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cette transcription.");
-            }
-
-            // Déduire les crédits
-            $walletService->deductCredits(
-                $organization,
-                $cost,
-                'feature_use',
-                "Téléchargement de la transcription de la séance : {$session->title}",
-                $session
-            );
+            return redirect()->route('organization.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cette transcription.");
         }
+
+        // Déduire les crédits
+        $walletService->deductCredits(
+            $organization,
+            $cost,
+            'feature_use',
+            "Téléchargement de la transcription de la séance : {$session->title}",
+            $session
+        );
 
         // 4. Générer le PDF
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('common.reports.transcription_pdf', compact('session'));
 
         return $pdf->download('transcription_seance_'.$session->id.'.pdf');
+    }
+
+    /**
+     * Rejoindre la session en tant que membre de l'organisation (Bypass confirmation email)
+     */
+    public function join(MentoringSession $session, $token)
+    {
+        // 1. Vérifier le token
+        if ($session->guest_token !== $token) {
+            abort(403, "Token d'accès invalide.");
+        }
+
+        $organization = $this->getCurrentOrganization();
+        
+        // 2. Vérifier si la session appartient à l'organisation ou si elle parraine au moins un participant
+        $isAuthorized = $session->scheduled_by_organization_id === $organization->id ||
+                        $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
+
+        if (!$isAuthorized) {
+             abort(403, "Vous n'êtes pas autorisé à rejoindre cette séance.");
+        }
+
+        // 3. Poser l'autorisation en session (comme si on avait validé l'email sur la landing page)
+        Session::put("guest_auth_{$session->id}", [
+            'email' => auth()->user()->email,
+            'expires_at' => now()->addHours(3),
+        ]);
+
+        // 4. Rediriger vers Brillio Live (showGuest)
+        $meetingId = basename($session->meeting_link);
+        
+        return redirect()->route('meeting.show.guest', [
+            'meetingId' => $meetingId,
+            'guestToken' => $token
+        ]);
+    }
+
+    /**
+     * Pré-remplir le compte rendu avec l'IA pour l'organisation (5 crédits par défaut)
+     */
+    public function prefillReport(MentoringSession $session)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        // 1. Vérification d'autorisation (Doit parrainer au moins un participant)
+        $isAuthorized = $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
+        if (!$isAuthorized) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        if (!$session->has_transcription) {
+            return redirect()->back()->with('error', "La transcription n'est pas encore disponible. L'IA a besoin de la transcription pour générer un résumé.");
+        }
+
+        $walletService = app(\App\Services\WalletService::class);
+        $cost = $walletService->getFeatureCost('ai_report_generation', 5);
+
+        if ($organization->credits_balance < $cost) {
+            $missing = $cost - $organization->credits_balance;
+            return redirect()->route('organization.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour utiliser l'IA.");
+        }
+
+        $suggestedReport = app(\App\Services\BrillioIAService::class)->summarizeTranscription($session->transcription_raw);
+
+        if (!$suggestedReport) {
+            return redirect()->back()->with('error', "L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.");
+        }
+
+        // Déduire les crédits
+        $walletService->deductCredits(
+            $organization,
+            $cost,
+            'feature_use',
+            "Génération du compte rendu par l'IA : {$session->title}",
+            $session
+        );
+
+        return redirect()->route('organization.sessions.show', $session)
+            ->with('prefilled_report', $suggestedReport)
+            ->with('success', "Le compte rendu a été pré-rempli par l'IA avec succès ($cost crédits déduits).");
+    }
+
+    /**
+     * Mettre à jour le compte rendu (Organisation)
+     */
+    public function updateReport(Request $request, MentoringSession $session)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        $isAuthorized = $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
+        if (!$isAuthorized) {
+            abort(403, 'Accès non autorisé');
+        }
+
+        $request->validate([
+            'progress' => 'nullable|string',
+            'obstacles' => 'nullable|string',
+            'smart_goals' => 'nullable|string',
+        ]);
+
+        $report = [
+            'progress' => $request->progress,
+            'obstacles' => $request->obstacles,
+            'smart_goals' => $request->smart_goals,
+        ];
+
+        $session->update([
+            'report_content' => $report,
+            'status' => 'completed',
+        ]);
+
+        // Déclencher le paiement du mentor si payant
+        if ($session->is_paid) {
+            app(\App\Services\WalletService::class)->payoutMentor($session);
+        }
+
+        // Notifications
+        $notificationService = app(\App\Services\MentorshipNotificationService::class);
+        $notificationService->sendSessionCompleted($session);
+        $notificationService->sendReportAvailableNotification($session);
+
+        return redirect()->back()->with('success', 'Compte rendu mis à jour avec succès.');
     }
 
     private function getStatusColor($status)

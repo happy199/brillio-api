@@ -14,6 +14,13 @@
         <strong>Date :</strong> {{ $session->scheduled_at->translatedFormat('l j F Y') }}<br>
         <strong>Heure :</strong> {{ $session->scheduled_at->format('H:i') }}
     </p>
+
+    @if($session->cancel_reason)
+    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+        <p style="margin: 0 0 5px; font-weight: 600; color: #374151;">Raison de l'annulation :</p>
+        <p style="margin: 0; color: #4b5563; font-style: italic;">"{{ $session->cancel_reason }}"</p>
+    </div>
+    @endif
 </div>
 
 @if($recipient->id !== $cancelledBy->id)

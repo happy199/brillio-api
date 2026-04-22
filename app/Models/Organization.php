@@ -126,6 +126,7 @@ class Organization extends Model
     {
         return $this->belongsToMany(User::class, 'organization_user')
             ->where('users.user_type', 'mentor')
+            ->where('users.is_guest', false)
             ->withPivot('referral_code_used')
             ->withTimestamps();
     }

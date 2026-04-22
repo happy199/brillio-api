@@ -10,10 +10,33 @@
 
 <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #e2e8f0;">
     <p style="margin: 0 0 10px; font-weight: 600; color: #1e293b; font-size: 16px;">💬 Résumé de la séance</p>
-    <p style="margin: 0; color: #475569;">
-        Vous pouvez maintenant consulter les progrès, les obstacles identifiés et les objectifs fixés lors de cette
-        séance.
-    </p>
+    @if($showDetails && $session->report_content)
+        <div style="margin-top: 15px; space-y: 15px;">
+            @if(isset($session->report_content['progress']))
+                <div style="margin-bottom: 15px;">
+                    <p style="margin: 0 0 5px; font-weight: bold; font-size: 13px; color: #6366f1; text-transform: uppercase;">1. Progrès réalisés</p>
+                    <p style="margin: 0; color: #475569; font-size: 14px;">{{ $session->report_content['progress'] }}</p>
+                </div>
+            @endif
+            @if(isset($session->report_content['obstacles']))
+                <div style="margin-bottom: 15px;">
+                    <p style="margin: 0 0 5px; font-weight: bold; font-size: 13px; color: #6366f1; text-transform: uppercase;">2. Obstacles & Points Clés</p>
+                    <p style="margin: 0; color: #475569; font-size: 14px;">{{ $session->report_content['obstacles'] }}</p>
+                </div>
+            @endif
+            @if(isset($session->report_content['smart_goals']))
+                <div>
+                    <p style="margin: 0 0 5px; font-weight: bold; font-size: 13px; color: #6366f1; text-transform: uppercase;">3. Objectifs SMART</p>
+                    <p style="margin: 0; color: #475569; font-size: 14px;">{{ $session->report_content['smart_goals'] }}</p>
+                </div>
+            @endif
+        </div>
+    @else
+        <p style="margin: 0; color: #475569;">
+            Vous pouvez maintenant consulter les progrès, les obstacles identifiés et les objectifs fixés lors de cette
+            séance.
+        </p>
+    @endif
 </div>
 
 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
