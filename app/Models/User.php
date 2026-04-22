@@ -46,6 +46,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public const TYPE_ORGANIZATION = 'organization';
 
     /**
+     * Liste des pays (priorité Afrique)
+     */
+    public static function getCountries(): array
+    {
+        return [
+            'Sénégal', 'Côte d\'Ivoire', 'Cameroun', 'Mali', 'Bénin', 'Togo', 'Guinée', 'Burkina Faso', 'Gabon', 'Congo (Brazzaville)',
+            'RDC (Kinshasa)', 'Tchad', 'Rwanda', 'Burundi', 'Mauritanie', 'Niger', 'RCA', 'Soudan', 'Éthiopie', 'Djibouti',
+            'Kenya', 'Tanzanie', 'Ouganda', 'Nigeria', 'Ghana', 'Afrique du Sud', 'Angola', 'Mozambique', 'Cap-Vert', 'Madagascar',
+            'Somalie', 'Sierra Leone', 'Libéria', 'Gambie', 'Zambie', 'Zimbabwe', 'Namibie', 'Botswana', 'Malawi', 'Eswatini', 'Lesotho',
+            'Maroc', 'Algérie', 'Tunisie', 'Égypte', 'Libye',
+            'France', 'Belgique', 'Suisse', 'Canada', 'États-Unis', 'Royaume-Uni', 'Allemagne', 'Italie', 'Espagne', 'Autre'
+        ];
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

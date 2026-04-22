@@ -35,8 +35,12 @@
 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
     <tr>
         <td align="center">
+            @php
+                $org = $session->organization;
+                $primaryColor = ($org && $org->primary_color && $org->subscription_plan !== 'free') ? $org->primary_color : '#10b981';
+            @endphp
             <a href="{{ $session->meeting_link }}"
-                style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                style="display: inline-block; background-color: {{ $primaryColor }}; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
                 🎥 Rejoindre la session
             </a>
             <br>

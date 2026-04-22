@@ -21,8 +21,8 @@
     <div class="max-w-md w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <!-- Logo -->
         <div class="text-center">
-            <img class="mx-auto h-16 w-auto" src="{{ asset('assets/logo/logo-brillio.png') }}" alt="Brillio">
-            <h2 class="mt-6 text-3xl font-extrabold text-slate-900 tracking-tight">Bienvenue, {{ $session->mentor->name }}</h2>
+            <img class="mx-auto h-16 w-auto" src="{{ asset('apple-touch-icon.png') }}" alt="Brillio">
+            <h2 class="mt-6 text-3xl font-extrabold text-slate-900 tracking-tight">Bienvenue, {{ $recipient->name ?? $session->mentor->name }}</h2>
             <p class="mt-2 text-sm text-slate-500">
                 Vous avez été invité par <span class="font-bold text-indigo-600">{{ $session->organization->name }}</span> pour animer une séance collective.
             </p>

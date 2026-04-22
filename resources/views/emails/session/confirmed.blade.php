@@ -34,7 +34,7 @@
     <tr>
         <td align="center">
             <a href="{{ $calendarUrl }}"
-                style="display: inline-block; background: linear-gradient(135deg, #4285f4 0%, #34a853 100%); color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; margin-bottom: 10px;">
+                style="display: inline-block; background: #4285f4; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; margin-bottom: 10px;">
                 📅 Ajouter à mon agenda Google
             </a>
             <br>

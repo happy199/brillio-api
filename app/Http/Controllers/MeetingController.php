@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\MentoringSession;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -64,11 +66,12 @@ class MeetingController extends Controller
             $appId = env('JAAS_APP_ID');
             $meetingLink = "https://8x8.vc/{$appId}/{$roomName}";
 
-            return view('common.meeting.show', compact('session', 'meetingLink', 'jwt', 'isMentor', 'appId', 'roomName'));
+            return view('common.meeting.show', compact('session', 'meetingLink', 'jwt', 'isMentor', 'appId', 'roomName', 'user'));
         } catch (\Throwable $e) {
             Log::error('MeetingController Error: '.$e->getMessage());
             Log::error('Stack trace: '.$e->getTraceAsString());
             throw $e;
+        }
     }
 
     /**
@@ -87,8 +90,16 @@ class MeetingController extends Controller
             // 2. Vérifier l'autorisation en session (posée par GuestAccessController)
             $guestAuth = session("guest_auth_{$session->id}");
             $mentorEmails = $session->all_mentors->pluck('email')->map(fn($e) => strtolower($e))->toArray();
+            
+            // Ajouter membres organisation
+            $orgEmails = User::where('organization_id', $session->scheduled_by_organization_id)
+                ->pluck('email')
+                ->map(fn($e) => strtolower($e))
+                ->toArray();
+                
+            $allowedEmails = array_merge($mentorEmails, $orgEmails);
 
-            if (!$guestAuth || !in_array(strtolower($guestAuth['email']), $mentorEmails)) {
+            if (!$guestAuth || !in_array(strtolower($guestAuth['email']), $allowedEmails)) {
                 return redirect()->route('guest.sessions.confirm', ['session' => $session, 'token' => $guestToken])
                     ->with('error', 'Veuillez confirmer votre identité pour accéder à la séance.');
             }
@@ -104,7 +115,7 @@ class MeetingController extends Controller
             $appId = env('JAAS_APP_ID');
             $meetingLink = "https://8x8.vc/{$appId}/{$roomName}";
 
-            return view('common.meeting.show', compact('session', 'meetingLink', 'jwt', 'isMentor', 'appId', 'roomName'));
+            return view('common.meeting.show', compact('session', 'meetingLink', 'jwt', 'isMentor', 'appId', 'roomName', 'user'));
 
         } catch (\Throwable $e) {
             Log::error('MeetingController showGuest Error: ' . $e->getMessage());

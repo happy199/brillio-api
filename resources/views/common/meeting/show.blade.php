@@ -8,6 +8,13 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
+@php
+    $exitUrl = $isMentor ? route('mentor.mentorship.sessions.show', $session) : route('jeune.sessions.show', $session);
+    if ($user && $user->isOrganization()) {
+        $exitUrl = route('organization.sessions.show', $session);
+    }
+@endphp
+
 <body class="bg-gray-900 h-screen flex flex-col overflow-hidden">
     <!-- Header Sécurisé -->
     <header class="bg-black/50 text-white p-3 flex items-center justify-between border-b border-gray-700">
@@ -33,7 +40,7 @@
                 Ne partagez pas l'URL de cette page.
             </div>
 
-            <a href="{{ $isMentor ? route('mentor.mentorship.sessions.show', $session) : route('jeune.sessions.show', $session) }}"
+            <a href="{{ $exitUrl }}"
                 class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -72,8 +79,8 @@
                 parentNode: document.querySelector('#meet'),
                 jwt: "{{ $jwt }}",
                 userInfo: {
-                    displayName: "{{ Auth::user()->name }}",
-                    email: "{{ Auth::user()->email }}"
+                    displayName: "{{ $user->name }}",
+                    email: "{{ $user->email }}"
                 },
                 configOverwrite: {
                     startWithAudioMuted: false,
@@ -99,7 +106,7 @@
             // Handle Hangup
             api.addEventListeners({
                 videoConferenceLeft: function () {
-                    window.location.href = "{{ $isMentor ? route('mentor.mentorship.sessions.show', $session) : route('jeune.sessions.show', $session) }}";
+                    window.location.href = "{{ $exitUrl }}";
                 }
             });
 
@@ -113,13 +120,13 @@
                 indicator.innerHTML = `
                     <div class="flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-green-500/30">
                         <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                        Transcription active pour {{ Auth::user()->name }}
+                        Transcription active pour {{ $user->name }}
                     </div>
                 `;
                 indicator.className = 'absolute bottom-20 left-4 z-50 pointer-events-none opacity-50 hover:opacity-100 transition-opacity';
                 document.body.appendChild(indicator);
 
-                console.log('Transcription IA : Activée pour {{ Auth::user()->name }}');
+                console.log('Transcription IA : Activée pour {{ $user->name }}');
                 const recognition = new SpeechRecognition();
                 recognition.lang = 'fr-FR';
                 recognition.continuous = true;
@@ -172,7 +179,7 @@
                         },
                         body: JSON.stringify({
                             text: text,
-                            speaker: {!! json_encode(Auth::user()->name) !!},
+                            speaker: {!! json_encode($user->name) !!},
                             timestamp: Math.floor(Date.now() / 1000)
                         })
                     })
