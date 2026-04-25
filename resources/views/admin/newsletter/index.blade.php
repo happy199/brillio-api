@@ -356,19 +356,44 @@
                     <div class="p-4 bg-gray-900 text-green-400 text-xs overflow-x-auto">
                         <pre><code>&lt;!DOCTYPE html&gt;
 &lt;html&gt;
-&lt;body style="font-family: Arial; max-width: 600px; margin: 0 auto; padding: 20px;"&gt;
-  &lt;h1 style="color: #6366f1;"&gt;Bonjour ! 👋&lt;/h1&gt;
-  &lt;p style="font-size: 16px; line-height: 1.6;"&gt;
-    Nous avons de grandes nouvelles à partager avec vous...
-  &lt;/p&gt;
-  &lt;a href="https://brillio.africa" 
-     style="background: #6366f1; color: white; padding: 12px 24px; 
-            text-decoration: none; border-radius: 6px; display: inline-block;"&gt;
-    Découvrir maintenant
-  &lt;/a&gt;
-  &lt;p style="color: #666; font-size: 12px; margin-top: 30px;"&gt;
-    Vous recevez cet email car vous êtes inscrit à notre newsletter.
-  &lt;/p&gt;
+&lt;body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;"&gt;
+  &lt;table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0;"&gt;
+    &lt;tr&gt;
+      &lt;td align="center"&gt;
+        &lt;table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;"&gt;
+          &lt;!-- Header --&gt;
+          &lt;tr&gt;
+            &lt;td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 30px; text-align: center;"&gt;
+              &lt;div style="margin-bottom: 15px;"&gt;
+                &lt;img src="{{ config('app.url') }}/android-chrome-512x512.png" 
+                     style="width: 70px; height: 70px; border-radius: 50%; background: white; padding: 3px;"&gt;
+              &lt;/div&gt;
+              &lt;h1 style="color: #ffffff; margin: 0; font-size: 24px;"&gt;Brillio&lt;/h1&gt;
+            &lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;!-- Content --&gt;
+          &lt;tr&gt;
+            &lt;td style="padding: 40px 30px; color: #374151; font-size: 16px; line-height: 1.6;"&gt;
+              &lt;h2 style="color: #6366f1; margin-top: 0;"&gt;Bonjour ! 👋&lt;/h2&gt;
+              &lt;p&gt;Votre message ici...&lt;/p&gt;
+              &lt;div style="text-align: center; margin-top: 30px;"&gt;
+                &lt;a href="https://brillio.africa" 
+                   style="background: #6366f1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block;"&gt;
+                   Découvrir maintenant
+                &lt;/a&gt;
+              &lt;/div&gt;
+            &lt;/td&gt;
+          &lt;/tr&gt;
+          &lt;!-- Footer --&gt;
+          &lt;tr&gt;
+            &lt;td style="background-color: #f9fafb; padding: 20px; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb;"&gt;
+              © 2026 Brillio - Tous droits réservés
+            &lt;/td&gt;
+          &lt;/tr&gt;
+        &lt;/table&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
                     </div>
