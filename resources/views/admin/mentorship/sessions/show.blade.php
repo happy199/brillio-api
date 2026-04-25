@@ -93,9 +93,18 @@
     </div>
 
     <!-- Description & Report -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" x-data="{ showTranscription: false }">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="font-bold text-gray-900">Information & Compte Rendu</h3>
+            @if($session->has_transcription)
+                <button @click="showTranscription = true" 
+                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Voir la transcription
+                </button>
+            @endif
         </div>
         <div class="p-6 space-y-6">
             <div>
@@ -131,6 +140,71 @@
                 @endif
             </div>
         </div>
+
+        <!-- Progress Modal (Transcription) -->
+        <template x-if="showTranscription">
+            <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="showTranscription = false"></div>
+
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                                    <div class="flex justify-between items-center mb-6">
+                                        <h3 class="text-xl leading-6 font-bold text-gray-900" id="modal-title">
+                                            Transcription de la séance
+                                        </h3>
+                                        <button @click="showTranscription = false" class="text-gray-400 hover:text-gray-500">
+                                            <span class="sr-only">Fermer</span>
+                                            <svg class="h-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="max-h-[70vh] overflow-y-auto px-2">
+                                        @if($session->transcription_summary)
+                                            <div class="mb-8 p-4 bg-indigo-50 border-l-4 border-indigo-400 rounded-r-lg">
+                                                <h4 class="text-indigo-800 font-bold text-sm uppercase mb-2">Résumé de la séance (IA)</h4>
+                                                <p class="text-indigo-900 text-sm italic">{{ $session->transcription_summary }}</p>
+                                            </div>
+                                        @endif
+
+                                        @if($session->transcription_raw && is_array($session->transcription_raw))
+                                            <div class="space-y-6">
+                                                @foreach($session->transcription_raw as $entry)
+                                                    <div class="flex flex-col sm:flex-row sm:space-x-4 border-l-2 border-gray-100 pl-4 py-1">
+                                                        <span class="sm:w-32 flex-shrink-0 font-bold text-indigo-700 text-sm pt-0.5">
+                                                            {{ $entry['speaker'] ?? 'Intervenant' }}
+                                                        </span>
+                                                        <div class="flex-grow">
+                                                            <p class="text-gray-800 leading-relaxed">{{ $entry['text'] ?? '' }}</p>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="text-center py-10 text-gray-500 italic">
+                                                Aucune donnée brute disponible pour cette transcription.
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="button" @click="showTranscription = false"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 </div>
 @endsection

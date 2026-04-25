@@ -50,3 +50,7 @@ Schedule::job(new \App\Jobs\SendInactivityReminders)
 Schedule::command('messages:send-unread-reminders')
     ->everyFourHours()
     ->timezone('Africa/Abidjan');
+// Process recurring email campaigns every hour
+Schedule::command('campaigns:process-recurring')
+    ->hourly()
+    ->timezone('Africa/Abidjan');

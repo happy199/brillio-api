@@ -578,6 +578,9 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
             Route::post('/send-email', [NewsletterController::class, 'sendEmail'])->name('send-email');
             Route::put('/{id}', [NewsletterController::class, 'update'])->name('update');
             Route::delete('/{id}', [NewsletterController::class, 'destroy'])->name('destroy');
+            Route::get('/campaigns/{id}', [NewsletterController::class, 'showCampaign'])->name('campaigns.show');
+            Route::post('/campaigns/{id}/toggle', [NewsletterController::class, 'toggleCampaign'])->name('campaigns.toggle');
+            Route::delete('/campaigns/{id}', [NewsletterController::class, 'destroyCampaign'])->name('campaigns.destroy');
         }
         );
 

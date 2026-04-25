@@ -19,6 +19,11 @@
                     <tr>
                         <td
                             style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                            <div style="margin-bottom: 20px;">
+                                <img src="{{ config('app.url') }}/android-chrome-512x512.png" 
+                                     alt="Brillio" 
+                                     style="width: 80px; height: 80px; border-radius: 50%; background-color: #ffffff; padding: 5px; border: 3px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            </div>
                             <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Brillio</h1>
                             <p style="color: #e0e7ff; margin: 5px 0 0; font-size: 14px;">Ton avenir, ton choix</p>
                         </td>

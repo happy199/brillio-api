@@ -58,4 +58,8 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         Integration::handles($exceptions);
-    })->create();
+    })
+    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
+        $schedule->command('campaigns:process-recurring')->everyMinute();
+    })
+    ->create();
