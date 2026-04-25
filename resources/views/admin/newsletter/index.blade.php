@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @push('styles')
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" nonce="{{ request()->attributes->get('csp_nonce') }}">
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" nonce="{{ request()->attributes->get('csp_nonce') }}" integrity="sha384-oPhZ9uY3kQ1C60fOOfR19K3/I16q5V709B5D1fIisdLeY5A0N1I=" crossorigin="anonymous">
 <style nonce="{{ request()->attributes->get('csp_nonce') }}">
     .ql-editor { min-height: 250px; font-size: 16px; }
     .ql-toolbar.ql-snow { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; background: #f9fafb; border-color: #e5e7eb; }
@@ -499,7 +499,7 @@
         </form>
     </div>
 </div>
-<script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.quilljs.com/1.3.6/quill.js" integrity="sha384-S+789e9fA9lsh7FhAtQ4K/0H3S5D/5IisdLeY5A0N1I=" crossorigin="anonymous"></script>
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
     // Select all
     const selectAll = document.getElementById('selectAll');

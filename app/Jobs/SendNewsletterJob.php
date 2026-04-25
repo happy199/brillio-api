@@ -61,7 +61,7 @@ class SendNewsletterJob implements ShouldQueue
                         foreach ($matches as $index => $match) {
                             $extension = $match[1];
                             $imageData = base64_decode($match[2]);
-                            $filename = 'image_'.md5($match[2]).'.'.$extension;
+                            $filename = 'image_'.hash('sha256', $match[2]).'.'.$extension;
 
                             $cid = $message->embedData($imageData, $filename, 'image/'.$extension);
                             $finalHtml = str_replace($match[0], 'src="'.$cid.'"', $finalHtml);
