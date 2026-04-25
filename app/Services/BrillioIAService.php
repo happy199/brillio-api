@@ -409,7 +409,7 @@ class BrillioIAService
     /**
      * Summarize a meeting transcription into the three report fields.
      */
-    public function summarizeTranscription($transcriptionData)
+    public function summarizeTranscription($transcriptionData, $mentorName = 'Le mentor', $menteeNames = 'Le jeune')
     {
         // Conversion de la transcription en texte structuré si c'est un tableau de segments
         if (is_array($transcriptionData)) {
@@ -430,8 +430,15 @@ class BrillioIAService
             "1. PROGRES : Ce qui a été accompli durant la séance.\n".
             "2. OBSTACLES : Les difficultés rencontrées par le jeune.\n".
             "3. OBJECTIFS SMART : Les prochaines étapes concrètes fixées.\n\n".
-            "Réponds UNIQUEMENT sous forme d'un objet JSON avec les clés suivantes : 'progress', 'obstacles', 'smart_goals'.\n".
-            "Le texte doit être concis, professionnel et rédigé à la troisième personne (ex: 'Le jeune a...', 'Nous avons...').";
+            "CONTEXTE DES PARTICIPANTS :\n".
+            "- Mentor : {$mentorName}\n".
+            "- Jeune(s) / Menté(s) : {$menteeNames}\n\n".
+            "CONSIGNES IMPORTANTES :\n".
+            "- Rédige à la troisième personne.\n".
+            "- UTILISE EXCLUSIVEMENT LES NOMS REELS DES PARTICIPANTS fournis ci-dessus pour désigner les personnes (ex: '{$menteeNames} a expliqué...', '{$mentorName} a conseillé...').\n".
+            "- Interdiction d'utiliser des termes génériques comme 'Le jeune', 'L'étudiant' ou 'Le mentor'.\n".
+            "- Réponds UNIQUEMENT sous forme d'un objet JSON avec les clés suivantes : 'progress', 'obstacles', 'smart_goals'.\n".
+            '- Le texte doit être concis et professionnel.';
 
         // Limiter la taille de la transcription pour éviter de dépasser le contexte
         $truncatedTranscription = \Illuminate\Support\Str::limit($transcriptionText, 15000);
