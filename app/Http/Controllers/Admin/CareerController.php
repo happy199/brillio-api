@@ -207,13 +207,14 @@ class CareerController extends Controller
     {
         $systemPrompt = "Tu es un expert en ressources humaines et en orientation professionnelle en Afrique.\n".
             "Ta mission est de compléter une fiche métier existante.\n".
+            "Toutes les réponses doivent être rédigées exclusivement en FRANÇAIS.\n".
             "Réponds UNIQUEMENT sous forme d'un objet JSON.\n\n".
             "FORMAT JSON ATTENDU :\n".
             "{\n".
             "  'description': '...', \n".
             "  'african_context': '...', \n".
             "  'future_prospects': '...', \n".
-            "  'demand_level': '...', \n".
+            "  'demand_level': 'Faible|Moyenne|Forte', \n".
             "  'ai_impact_level': 'low|medium|high', \n".
             "  'ai_impact_explanation': '...'\n".
             '}';
@@ -241,7 +242,17 @@ class CareerController extends Controller
                 $updates['future_prospects'] = $data['future_prospects'] ?? null;
             }
             if (empty($career->demand_level)) {
-                $updates['demand_level'] = $data['demand_level'] ?? null;
+                $rawDemand = strtolower($data['demand_level'] ?? 'moyenne');
+
+                if (str_contains($rawDemand, 'high') || str_contains($rawDemand, 'fort') || str_contains($rawDemand, 'haut')) {
+                    $updates['demand_level'] = 'Forte';
+                } elseif (str_contains($rawDemand, 'medi') || str_contains($rawDemand, 'moyen')) {
+                    $updates['demand_level'] = 'Moyenne';
+                } elseif (str_contains($rawDemand, 'low') || str_contains($rawDemand, 'faibl')) {
+                    $updates['demand_level'] = 'Faible';
+                } else {
+                    $updates['demand_level'] = 'Moyenne';
+                }
             }
             if (empty($career->ai_impact_level)) {
                 $rawImpact = strtolower($data['ai_impact_level'] ?? 'low');
