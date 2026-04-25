@@ -29,6 +29,9 @@ class NewsletterController extends Controller
             'active' => NewsletterSubscriber::active()->count(),
             'unsubscribed' => NewsletterSubscriber::unsubscribed()->count(),
             'total_users' => \App\Models\User::count(),
+            'total_jeunes' => \App\Models\User::where('user_type', 'jeune')->count(),
+            'total_mentors' => \App\Models\User::where('user_type', 'mentor')->count(),
+            'total_organizations' => \App\Models\User::where('user_type', 'organization')->count(),
         ];
 
         return view('admin.newsletter.index', compact('subscribers', 'stats'));
@@ -109,9 +112,14 @@ class NewsletterController extends Controller
         $request->validate([
             'subject' => 'required|string|max:255',
             'body' => 'required|string',
-            'recipient_type' => 'required|string|in:all,all_users,custom,selected',
+            'recipient_type' => 'required|string|in:all,all_users,custom,selected,specific_population',
             'recipients' => 'nullable|array',
+            'populations' => 'nullable|array',
             'custom_emails' => 'nullable|string',
+            'is_recurring' => 'nullable',
+            'frequency' => 'required_if:is_recurring,on|nullable|string|in:daily,weekly,monthly',
+            'start_date' => 'required_if:is_recurring,on|nullable|date',
+            'end_date' => 'required_if:is_recurring,on|nullable|date|after_or_equal:start_date',
         ]);
 
         $recipientEmails = [];
@@ -136,30 +144,70 @@ class NewsletterController extends Controller
             case 'selected':
                 $recipientEmails = $request->recipients ?? [];
                 break;
+            case 'specific_population':
+                if ($request->filled('populations')) {
+                    $recipientEmails = \App\Models\User::whereIn('user_type', $request->populations)
+                        ->whereNull('archived_at')
+                        ->pluck('email')
+                        ->toArray();
+                }
+                break;
         }
 
-        if (empty($recipientEmails)) {
+        if (empty($recipientEmails) && $request->recipient_type !== 'specific_population') {
             return back()->with('error', '⚠️ Aucun destinataire valide trouvé pour cette sélection.');
         }
 
         $recipientEmails = array_values(array_unique($recipientEmails));
+        $isRecurring = $request->has('is_recurring');
+
+        // Gestion des pièces jointes
+        $attachmentPaths = [];
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                if ($file->isValid()) {
+                    $path = $file->store('newsletters/attachments', 'public');
+                    $attachmentPaths[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'mime' => $file->getMimeType(),
+                    ];
+                }
+            }
+        }
 
         // Créer la campagne
         $campaign = EmailCampaign::create([
             'subject' => $request->subject,
             'body' => $request->body,
             'type' => 'newsletter',
+            'is_recurring' => $isRecurring,
+            'frequency' => $isRecurring ? $request->frequency : null,
+            'start_date' => $isRecurring ? $request->start_date : null,
+            'end_date' => $isRecurring ? $request->end_date : null,
+            'next_run_at' => $isRecurring ? \Carbon\Carbon::parse($request->start_date)->startOfDay()->addHours(9) : null,
+            'recipient_filters' => [
+                'type' => $request->recipient_type,
+                'populations' => $request->populations,
+                'custom_emails' => $request->custom_emails,
+            ],
             'recipients_count' => count($recipientEmails),
-            'status' => 'queued',
+            'status' => $isRecurring ? 'active' : 'queued',
             'sent_by' => auth()->id(),
-            'recipient_emails' => $recipientEmails,
+            'recipient_emails' => $isRecurring ? [] : $recipientEmails,
+            'attachments' => $attachmentPaths,
         ]);
 
-        // Dispatcher le Job dans la queue
-        \App\Jobs\SendNewsletterJob::dispatch($campaign);
+        if (! $isRecurring) {
+            // Dispatcher le Job dans la queue seulement si ce n'est pas récurrent
+            \App\Jobs\SendNewsletterJob::dispatch($campaign);
+
+            return redirect()->route('admin.newsletter.index')
+                ->with('success', "La campagne a été mise en file d'attente. L'envoi se fera en arrière-plan.");
+        }
 
         return redirect()->route('admin.newsletter.index')
-            ->with('success', "La campagne a été mise en file d'attente. L'envoi se fera en arrière-plan.");
+            ->with('success', 'La campagne récurrente a été planifiée avec succès.');
     }
 
     /**
@@ -190,5 +238,50 @@ class NewsletterController extends Controller
 
         return redirect()->route('admin.newsletter.index')
             ->with('success', 'Abonné supprimé avec succès.');
+    }
+
+    public function toggleCampaign($id)
+    {
+        $campaign = EmailCampaign::findOrFail($id);
+
+        if (! $campaign->is_recurring) {
+            return back()->with('error', '⚠️ Cette action est réservée aux campagnes récurrentes.');
+        }
+
+        $newStatus = $campaign->status === 'active' ? 'paused' : 'active';
+        $campaign->update(['status' => $newStatus]);
+
+        $message = $newStatus === 'active' ? 'Campagne relancée !' : 'Campagne mise en pause.';
+
+        return back()->with('success', $message);
+    }
+
+    public function destroyCampaign($id)
+    {
+        $campaign = EmailCampaign::findOrFail($id);
+        $campaign->delete();
+
+        return back()->with('success', 'Campagne supprimée avec succès.');
+    }
+
+    public function showCampaign($id)
+    {
+        $campaign = EmailCampaign::with('sentBy')->findOrFail($id);
+
+        return response()->json([
+            'subject' => $campaign->subject,
+            'body' => $campaign->body,
+            'is_recurring' => $campaign->is_recurring,
+            'frequency' => $campaign->frequency,
+            'start_date' => $campaign->start_date?->format('d/m/Y'),
+            'end_date' => $campaign->end_date?->format('d/m/Y'),
+            'next_run_at' => $campaign->next_run_at?->format('d/m/Y H:i'),
+            'recipients_count' => $campaign->recipients_count,
+            'attachments' => $campaign->attachments,
+            'status' => $campaign->status,
+            'sent_by' => $campaign->sentBy?->name ?? 'Système',
+            'created_at' => $campaign->created_at->format('d/m/Y H:i'),
+            'parent_id' => $campaign->parent_id,
+        ]);
     }
 }

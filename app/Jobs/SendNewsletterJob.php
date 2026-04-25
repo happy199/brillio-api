@@ -46,10 +46,38 @@ class SendNewsletterJob implements ShouldQueue
 
         foreach ($recipients as $email) {
             try {
-                Mail::send([], [], function ($message) use ($email, $subject, $body) {
+                $emailBody = $body; // On utilise une copie pour chaque destinataire
+
+                Mail::send([], [], function ($message) use ($email, $subject, &$emailBody) {
                     $message->to($email)
-                        ->subject($subject)
-                        ->html($body);
+                        ->subject($subject);
+
+                    // Conversion des images Base64 en CID (Inline) pour Gmail/Outlook
+                    if (preg_match_all('/src="data:image\/(.*?);base64,(.*?)"/', $emailBody, $matches, PREG_SET_ORDER)) {
+                        foreach ($matches as $index => $match) {
+                            $extension = $match[1];
+                            $imageData = base64_decode($match[2]);
+                            $filename = 'image_'.md5($match[2]).'.'.$extension;
+
+                            // On embarque la donnée et on récupère le CID
+                            $cid = $message->embedData($imageData, $filename, 'image/'.$extension);
+
+                            // On remplace le Base64 par le CID dans le corps du mail
+                            $emailBody = str_replace($match[0], 'src="'.$cid.'"', $emailBody);
+                        }
+                    }
+
+                    $message->html($emailBody);
+
+                    // Pièces jointes classiques
+                    if (! empty($this->campaign->attachments)) {
+                        foreach ($this->campaign->attachments as $attachment) {
+                            $message->attach(storage_path('app/public/'.$attachment['path']), [
+                                'as' => $attachment['name'],
+                                'mime' => $attachment['mime'],
+                            ]);
+                        }
+                    }
                 });
                 $sent++;
             } catch (\Exception $e) {
