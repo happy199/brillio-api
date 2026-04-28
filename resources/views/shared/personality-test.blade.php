@@ -77,7 +77,7 @@
     }
 @endphp
 
-<div class="space-y-8" x-data="personalityTest()" x-cloak>
+<div class="space-y-8" x-data="personalityDashboard()" x-init="init()" x-cloak>
     @if($personalityTest && $personalityTest->completed_at)
         @php
             $typeLabel = $mbtiTypes[$personalityTest->personality_type] ?? $personalityTest->personality_type;
@@ -225,7 +225,7 @@
 
                 <!-- SECTION RECOMMANDATIONS : ÉTABLISSEMENTS (AJOUT DYNAMIQUE) -->
                 @if($theme === 'jeune')
-                <div x-data="recommendationsSystem()" x-init="init()" class="mt-12 py-10 bg-gray-50/80 -mx-6 px-6 sm:-mx-8 sm:px-8 border-t border-gray-100 shadow-inner rounded-b-[2rem]">
+                <div class="mt-12 py-10 bg-gray-50/80 -mx-6 px-6 sm:-mx-8 sm:px-8 border-t border-gray-100 shadow-inner rounded-b-[2rem]">
                     <style>
                         .no-scrollbar::-webkit-scrollbar { display: none; }
                         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -254,7 +254,7 @@
                             <div class="flex-none w-80 snap-start">
                                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition duration-500 group flex flex-col h-full bg-gradient-to-br from-white to-gray-50/50">
                                     <!-- Photo -->
-                                    <div class="relative h-48 overflow-hidden cursor-pointer" @click="$dispatch('open-details', { est })">
+                                    <div class="relative h-48 overflow-hidden cursor-pointer" @click="openDetails(est)">
                                         <img :src="est.photo_path ? '/storage/'+est.photo_path : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=800'" 
                                             class="w-full h-full object-cover group-hover:scale-110 transition duration-1000">
                                         <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -327,7 +327,7 @@
                 </div>
 
                 <!-- SIDE PANEL (DRAWER) -->
-                <div x-data="recommendationsSystem()" @open-details.window="openDetails($event.detail.est)" x-show="sidebarOpen" class="fixed inset-0 z-[100] overflow-hidden" x-cloak>
+                <div x-show="sidebarOpen" class="fixed inset-0 z-[100] overflow-hidden" x-cloak>
                     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" 
                         x-show="sidebarOpen" x-transition:enter="duration-500 ease-out" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
                         x-transition:leave="duration-500 ease-in" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
@@ -581,7 +581,7 @@
                                     <p class="text-xs text-gray-500">{{ $historyTest->completed_at->format('d/m/Y à H:i') }}</p>
                                 </div>
                             </div>
-                            <button @click="viewHistoryDetails(historyData)"
+                            <button @click="$root.viewHistoryDetails(historyData)"
                                 class="text-blue-600 text-sm font-medium hover:underline">Voir détails</button>
                         </div>
                     @endforeach
@@ -590,7 +590,7 @@
         @endif
 
         <!-- History Details Modal -->
-        <div x-show="showHistoryModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak style="display: none;"
+        <div x-show="showHistoryModal" class="fixed inset-0 z-[110] overflow-y-auto" x-cloak style="display: none;"
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
@@ -720,7 +720,7 @@
     @endif
 
     <!-- Modal du Test -->
-    <div x-show="showTest" class="fixed inset-0 z-50 overflow-y-auto" x-cloak style="display: none;"
+    <div x-show="showTest" class="fixed inset-0 z-[130] overflow-y-auto" x-cloak style="display: none;"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
@@ -937,7 +937,7 @@
     </div>
 
     <!-- Modal Détails Métier -->
-    <div x-show="showCareerModal" class="fixed inset-0 z-[60] overflow-y-auto" x-cloak style="display: none;"
+    <div x-show="showCareerModal" class="fixed inset-0 z-[120] overflow-y-auto" x-cloak style="display: none;"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
@@ -1081,12 +1081,22 @@
         </div>
     </div>
 
-
     @push('scripts')
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-            function recommendationsSystem() {
+            function personalityDashboard() {
                 return {
-                    loading: true,
+                    // Test state
+                    showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
+                    showHistoryModal: false, selectedHistory: null,
+                    showCareerModal: false, selectedCareer: null, loadingCareer: false,
+                    isPersonalizing: false,
+                    loadingTitle: 'Chargement...',
+                    loadingSubtitle: 'Veuillez patienter quelques instants.',
+                    confirmClose: false,
+                    confirmTimeout: null,
+
+                    // Recommendations state
+                    loadingRecommendations: true,
                     establishments: [],
                     mbtiType: '',
                     userHasPhone: {{ auth()->user()->phone ? 'true' : 'false' }},
@@ -1096,27 +1106,30 @@
                     estDetails: null,
                     formData: {},
 
-                    formatYoutubeUrl(url) {
-                        if (!url) return '';
-                        if (url.includes('youtu.be/')) {
-                            return url.replace('youtu.be/', 'youtube.com/embed/');
+                    init() {
+                        if ('{{ $theme }}' === 'jeune') {
+                            this.loadRecommendations();
                         }
-                        if (url.includes('watch?v=')) {
-                            return url.replace('watch?v=', 'embed/');
-                        }
-                        return url;
                     },
 
-                    init() {
-                        if ('{{ $theme }}' !== 'jeune') return;
-                        
-                        fetch('{{ route("jeune.establishments.recommended") }}')
-                            .then(res => res.json())
-                            .then(data => {
-                                this.establishments = data.establishments;
-                                this.mbtiType = data.mbti_type;
-                                this.loading = false;
-                            });
+                    async loadRecommendations() {
+                        try {
+                            const res = await fetch('{{ route("jeune.establishments.recommended") }}');
+                            const data = await res.json();
+                            this.establishments = data.establishments;
+                            this.mbtiType = data.mbti_type;
+                        } catch (e) {
+                            console.error('Error loading recommendations:', e);
+                        } finally {
+                            this.loadingRecommendations = false;
+                        }
+                    },
+
+                    formatYoutubeUrl(url) {
+                        if (!url) return '';
+                        if (url.includes('youtu.be/')) return url.replace('youtu.be/', 'youtube.com/embed/');
+                        if (url.includes('watch?v=')) return url.replace('watch?v=', 'embed/');
+                        return url;
                     },
 
                     scrollCarousel(ref, dir) {
@@ -1125,7 +1138,6 @@
 
                     handleInterest(est) {
                         if (est.user_has_interest) return;
-
                         if (!this.userHasPhone) {
                             if (this.activePhoneInput === est.id) {
                                 if (!this.tempPhone || this.tempPhone.length < 8) {
@@ -1138,37 +1150,28 @@
                             }
                             return;
                         }
-
                         this.submitInterest(est);
                     },
 
-                    submitInterest(est, phone = null) {
+                    async submitInterest(est, phone = null) {
                         let payload = {};
                         if (phone) payload.phone = phone;
-
-                        fetch(`/espace-jeune/establishments/${est.id}/interest-quick`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify(payload)
-                        })
-                        .then(res => res.json())
-                        .then(data => {
+                        try {
+                            const res = await fetch(`/espace-jeune/establishments/${est.id}/interest-quick`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                body: JSON.stringify(payload)
+                            });
+                            const data = await res.json();
                             if (data.success) {
                                 est.user_has_interest = true;
                                 this.userHasPhone = true;
                                 this.activePhoneInput = null;
-                                
-                                // Dispatch toast event
-                                window.dispatchEvent(new CustomEvent('toast', { 
-                                    detail: { message: data.message, type: 'success' } 
-                                }));
+                                window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
                             } else {
                                 alert(data.message);
                             }
-                        });
+                        } catch (e) { console.error(e); }
                     },
 
                     openDetails(est) {
@@ -1177,48 +1180,26 @@
                         this.sidebarOpen = true;
                     },
 
-                    submitPreciseInterest() {
+                    async submitPreciseInterest() {
                         if (!this.userHasPhone && (!this.tempPhone || this.tempPhone.length < 8)) {
                             alert('Veuillez entrer un numéro de téléphone valide.');
                             return;
                         }
-
-                        fetch(`/espace-jeune/establishments/${this.estDetails.id}/interest-precise`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({ 
-                                form_data: this.formData,
-                                phone: this.tempPhone 
-                            })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
+                        try {
+                            const res = await fetch(`/espace-jeune/establishments/${this.estDetails.id}/interest-precise`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                body: JSON.stringify({ form_data: this.formData, phone: this.tempPhone })
+                            });
+                            const data = await res.json();
                             if (data.success) {
                                 this.estDetails.user_has_interest = true;
                                 this.userHasPhone = true;
                                 this.sidebarOpen = false;
-                                window.dispatchEvent(new CustomEvent('toast', { 
-                                    detail: { message: data.message, type: 'success' } 
-                                }));
+                                window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
                             }
-                        });
-                    }
-                }
-            }
-
-            function personalityTest() {
-                return {
-                    showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
-                    showHistoryModal: false, selectedHistory: null,
-                    showCareerModal: false, selectedCareer: null, loadingCareer: false,
-                    isPersonalizing: false,
-                    loadingTitle: 'Chargement...',
-                    loadingSubtitle: 'Veuillez patienter quelques instants.',
-                    confirmClose: false,
-                    confirmTimeout: null,
+                        } catch (e) { console.error(e); }
+                    },
 
                     get allAnswered() {
                         return this.questions.length > 0 && Object.keys(this.answers).length === this.questions.length;
@@ -1234,28 +1215,20 @@
                     },
 
                     closeTest() {
-                        // If test hasn't started or no answers yet or finished, close directly
                         if (!this.testStarted || Object.keys(this.answers).length === 0 || this.allAnswered) {
                             this.showTest = false;
                             this.confirmClose = false;
                             return;
                         }
-
                         if (this.confirmClose) {
-                            // Second click: Close and Reset
                             this.showTest = false;
                             this.resetTest();
                             this.confirmClose = false;
                             if (this.confirmTimeout) clearTimeout(this.confirmTimeout);
                         } else {
-                            // First click: Request confirmation
                             this.confirmClose = true;
-                            
-                            // Auto-reset after 3 seconds if no action
                             if (this.confirmTimeout) clearTimeout(this.confirmTimeout);
-                            this.confirmTimeout = setTimeout(() => {
-                                this.confirmClose = false;
-                            }, 3000);
+                            this.confirmTimeout = setTimeout(() => { this.confirmClose = false; }, 3000);
                         }
                     },
 
@@ -1266,16 +1239,9 @@
                         this.currentQuestion = 0;
                     },
 
-                    retakeTest() {
-                        this.resetTest();
-                        this.startTest();
-                    },
-
                     async loadQuestions() {
                         const isJeune = '{{ $theme }}' === 'jeune';
                         const cacheKey = 'mbti_questions_cache';
-
-                        // 1. Tentative de chargement instantané depuis le cache local
                         if (isJeune) {
                             const cached = localStorage.getItem(cacheKey);
                             if (cached) {
@@ -1284,92 +1250,46 @@
                                     if (cachedData.questions && cachedData.questions.length > 0) {
                                         this.questions = cachedData.questions;
                                         this.testStarted = true;
-                                        this.loading = false;
-                                        return; // Sortie immédiate : chargement instantané
+                                        return;
                                     }
-                                } catch (e) {
-                                    localStorage.removeItem(cacheKey);
-                                }
+                                } catch (e) { localStorage.removeItem(cacheKey); }
                             }
                         }
-
                         this.loading = true;
-                        
-                        // Si c'est un jeune, on active l'état de personnalisation
                         if (isJeune) {
                             this.isPersonalizing = true;
                             this.loadingTitle = "Personnalisation du test";
                             this.loadingSubtitle = "Brillio adapte les questions à ton profil...";
-                        } else {
-                            this.loadingTitle = "Chargement des questions";
-                            this.loadingSubtitle = "Préparation du test MBTI...";
                         }
-
                         try {
-                            // On tente d'abord l'endpoint dynamique pour les jeunes
                             let url = '{!! $questionsUrl ?? route("jeune.personality.questions") !!}';
-                            
-                            if (isJeune) {
-                                url = '{!! route("jeune.personality.questions.dynamic") !!}';
-                            }
-
-                            // Bust cache with timestamp
+                            if (isJeune) url = '{!! route("jeune.personality.questions.dynamic") !!}';
                             url += (url.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
-
-                            const response = await fetch(url, {
-                                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-                            });
-                            
+                            const response = await fetch(url, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
                             const data = await response.json();
-                            
                             if (data.success && data.questions) {
                                 this.questions = data.questions;
                                 this.testStarted = true;
-
-                                // Mettre à jour le cache local pour la prochaine fois
-                                if (isJeune) {
-                                    localStorage.setItem(cacheKey, JSON.stringify({
-                                        questions: data.questions,
-                                        timestamp: new Date().getTime()
-                                    }));
-                                }
-                            } else {
-                                // Fallback aux questions standards si l'IA échoue
-                                if (isJeune && url.includes('dynamic')) {
-                                    await this.loadStandardQuestions();
-                                } else {
-                                    alert('Erreur: ' + (data.message || 'Format invalide'));
-                                }
+                                if (isJeune) localStorage.setItem(cacheKey, JSON.stringify({ questions: data.questions, timestamp: new Date().getTime() }));
+                            } else if (isJeune && url.includes('dynamic')) {
+                                await this.loadStandardQuestions();
                             }
                         } catch (e) {
-                            console.error(e);
-                            if (isJeune) {
-                                await this.loadStandardQuestions();
-                            } else {
-                                alert('Erreur connexion. Vérifiez votre connexion internet.');
-                            }
-                        } finally {
-                            this.loading = false;
-                        }
+                            if (isJeune) await this.loadStandardQuestions();
+                            else alert('Erreur connexion.');
+                        } finally { this.loading = false; }
                     },
 
                     async loadStandardQuestions() {
-                        this.loadingTitle = "Chargement...";
-                        this.loadingSubtitle = "Récupération des questions standards.";
                         try {
                             const url = '{!! route("jeune.personality.questions") !!}' + '?t=' + new Date().getTime();
-                            const response = await fetch(url, {
-                                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-                            });
+                            const response = await fetch(url, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
                             const data = await response.json();
                             if (data.success && data.questions) {
                                 this.questions = data.questions;
                                 this.testStarted = true;
                             }
-                        } catch (e) {
-                            console.error('Fallback failed:', e);
-                            alert('Erreur critique lors du chargement des questions.');
-                        }
+                        } catch (e) { alert('Erreur chargement des questions.'); }
                     },
 
                     selectAnswer(value) {
@@ -1378,9 +1298,7 @@
                     },
 
                     nextQuestion() {
-                        if (this.currentQuestion < this.questions.length - 1 && this.answers[this.questions[this.currentQuestion]?.id]) {
-                            this.currentQuestion++;
-                        }
+                        if (this.currentQuestion < this.questions.length - 1 && this.answers[this.questions[this.currentQuestion]?.id]) this.currentQuestion++;
                     },
 
                     previousQuestion() {
@@ -1394,45 +1312,22 @@
                             const url = '{!! $submitUrl ?? route("jeune.personality.submit") !!}';
                             const response = await fetch(url, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                                 body: JSON.stringify({ responses: this.answers })
                             });
                             const data = await response.json();
-                            if (data.success) {
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Erreur soumission.');
-                                this.submitting = false;
-                            }
-                        } catch (e) {
-                            console.error(e);
-                            alert('Erreur connexion.');
-                            this.submitting = false;
-                        }
+                            if (data.success) window.location.reload();
+                            else { alert(data.message); this.submitting = false; }
+                        } catch (e) { alert('Erreur connexion.'); this.submitting = false; }
                     },
 
                     discussWithAI() {
-                        try {
-                            // Préparer le message avec le contexte du test
-                            const personalityType = {!! json_encode($personalityTest->personality_type ?? '') !!};
-                            const personalityLabel = {!! json_encode($mbtiTypes[$personalityTest->personality_type ?? ''] ?? '') !!};
-                            const description = {!! json_encode($personalityTest->personality_description ?? '') !!};
-
-                            if (!personalityType) {
-                                alert('Aucun test de personnalité trouvé.');
-                                return;
-                            }
-
-                            const message = `Bonjour ! Je viens de passer un test de personnalité MBTI et j'ai obtenu le type ${personalityType} (${personalityLabel}).\n\nVoici ma description : ${description}\n\nPeux-tu m'aider à mieux comprendre mon profil et me donner des conseils pour mon développement personnel et professionnel ?`;
-
-                            // Rediriger vers le chat avec le message pré-rempli
-                            const chatUrl = {!! json_encode(route('jeune.chat')) !!};
-                            window.location.href = chatUrl + '?prefill=' + encodeURIComponent(message);
-                        } catch (error) {
-                            console.error('Erreur discussWithAI:', error);
-                            // Fallback: rediriger vers le chat sans message
-                            window.location.href = {!! json_encode(route('jeune.chat')) !!};
-                        }
+                        const personalityType = @js($personalityTest->personality_type ?? '');
+                        const personalityLabel = @js($mbtiTypes[$personalityTest->personality_type ?? ''] ?? '');
+                        const description = @js($personalityTest->personality_description ?? '');
+                        if (!personalityType) return alert('Aucun test trouvé.');
+                        const message = `Bonjour ! Je viens de passer un test de personnalité MBTI et j'ai obtenu le type ${personalityType} (${personalityLabel}).\n\nVoici ma description : ${description}\n\nPeux-tu m'aider à mieux comprendre mon profil et me donner des conseils ?`;
+                        window.location.href = @js(route('jeune.chat')) + '?prefill=' + encodeURIComponent(message);
                     },
 
                     viewHistoryDetails(test) {
@@ -1447,35 +1342,17 @@
 
                     async viewCareerDetails(career) {
                         if (!career || !career.title) return;
-
                         this.loadingCareer = true;
                         this.selectedCareer = null;
                         this.showCareerModal = true;
-
                         try {
                             const response = await fetch('{!! route("careers.details-by-title") !!}?title=' + encodeURIComponent(career.title));
                             const data = await response.json();
-
-                            if (data.success && data.career) {
-                                this.selectedCareer = data.career;
-                            } else {
-                                // Fallback if career not in DB
-                                this.selectedCareer = {
-                                    title: career.title,
-                                    description: career.description || '',
-                                    is_fallback: true
-                                };
-                            }
+                            if (data.success && data.career) this.selectedCareer = data.career;
+                            else this.selectedCareer = { title: career.title, description: career.description || '', is_fallback: true };
                         } catch (e) {
-                            console.error('Error fetching career details:', e);
-                            this.selectedCareer = {
-                                title: career.title,
-                                description: career.description || '',
-                                is_fallback: true
-                            };
-                        } finally {
-                            this.loadingCareer = false;
-                        }
+                            this.selectedCareer = { title: career.title, description: career.description || '', is_fallback: true };
+                        } finally { this.loadingCareer = false; }
                     },
 
                     closeCareerModal() {
