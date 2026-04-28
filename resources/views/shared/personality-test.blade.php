@@ -441,7 +441,7 @@
                                             <div class="flex flex-col gap-6">
                                                 <template x-for="(video, index) in estDetails.presentation_videos" :key="index">
                                                     <div class="w-full rounded-2xl overflow-hidden shadow-sm border border-gray-100 aspect-video bg-gray-100 relative">
-                                                        <iframe class="absolute inset-0 w-full h-full" :src="formatYoutubeUrl(video)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                                        <iframe title="Vidéo de présentation de l'établissement" class="absolute inset-0 w-full h-full" :src="formatYoutubeUrl(video)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                                     </div>
                                                 </template>
                                             </div>
