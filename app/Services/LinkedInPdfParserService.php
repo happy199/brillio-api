@@ -7,7 +7,7 @@ use Smalot\PdfParser\Parser;
 
 class LinkedInPdfParserService
 {
-    private BrillioIAService $brillioIAService;
+    private const BULLET_PATTERN = '/^[•\-\*]/u';
 
     public function __construct(BrillioIAService $brillioIAService)
     {
@@ -350,15 +350,17 @@ class LinkedInPdfParserService
         $allLines = $lines;
         $count = count($allLines);
 
-        // Regex étendue pour les dates (Français + Anglais)
-        $dateRegex = '/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})\s*-\s*(?:.*?(\d{4})|Present|Aujourd’hui|Présent)/i';
+        $monthsList = 'janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|january|february|march|april|may|june|july|august|september|october|november|december';
+        $dateRegex = "/($monthsList)\s+(\d{4})\s*-\s*(?:.*?(\d{4})|Present|Aujourd’hui|Présent)/i";
 
-        for ($i = 0; $i < $count; $i++) {
+        $i = 0;
+        while ($i < $count) {
             $line = trim($allLines[$i]);
 
             // Détection de section
             if (preg_match('/^(Expérience|Experience)$/i', $line)) {
                 $inSection = true;
+                $i++;
 
                 continue;
             }
@@ -378,10 +380,10 @@ class LinkedInPdfParserService
                 $location = ($i + 1 < $count) ? trim($allLines[$i + 1]) : '';
 
                 // Nettoyage : si l'entreprise ou le titre ressemblent à des puces, on les ignore
-                if (preg_match('/^[•\-\*]/u', $company)) {
+                if (preg_match(self::BULLET_PATTERN, $company)) {
                     $company = '';
                 }
-                if (preg_match('/^[•\-\*]/u', $title)) {
+                if (preg_match(self::BULLET_PATTERN, $title)) {
                     $title = '';
                 }
 
@@ -421,8 +423,11 @@ class LinkedInPdfParserService
                 }
 
                 $experiences[] = $exp;
-                $i = $j - 1; // Avancer l'index principal
+                $i = $j; // Sauter à la fin du bloc de description
+
+                continue;
             }
+            $i++;
         }
 
         return $experiences;
@@ -454,7 +459,7 @@ class LinkedInPdfParserService
                 }
 
                 // Ignorer les puces en éducation
-                if (preg_match('/^[•\-\*]/u', $trimmedLine)) {
+                if (preg_match(self::BULLET_PATTERN, $trimmedLine)) {
                     continue;
                 }
 
