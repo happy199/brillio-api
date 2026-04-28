@@ -184,7 +184,8 @@ class LinkedInPdfParserService
             "RÈGLES DE MAPPING DES CHAMPS :\n".
             "- 'headline' → Titre/accroche sous le nom (ex: 'Data Product Manager | J'aligne vision produit...'). Ne JAMAIS mettre ici le contenu de la section Résumé.\n".
             "- 'summary' → Contenu COMPLET de la section 'Résumé' du profil LinkedIn PDF. Si cette section est absente ou vide, mettre une chaîne vide ''. NE PAS substituer par le headline.\n".
-            "- 'location' → Ville et pays du mentor (ex: 'Lille, France' ou 'Courbevoie, Île-de-France, France'). Extraire depuis l'en-tête du PDF.\n\n".
+            "   → 'phone' → Numéro de téléphone (ex: '+33 6 12 34 56 78').\n".
+            "   → 'location' → Ville et pays du mentor (ex: 'Nantes, France'). Chercher SOUS le nom au début du PDF.\n\n".
             "STRUCTURE JSON ATTENDUE :\n".
             '{"name": "Nom complet", "headline": "Titre/accroche du profil", "location": "Ville, Pays", "contact": {"email": "email found or empty", "phone": "phone found or empty", "linkedin": "linkedin url or empty", "website": "website url or empty"}, "summary": "Contenu exact de la section Résumé du PDF ou chaine vide si absente", "skills": ["Compétence 1"], "experience": [{"title": "Poste", "company": "Entreprise", "description": "Tâches", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD or null if currently in this role", "duration_years": 0, "duration_months": 0}], "education": [{"school": "Ecole", "degree": "Diplôme", "year_start": 0, "year_end": 0}]}';
 
@@ -227,6 +228,7 @@ class LinkedInPdfParserService
             'name' => $this->extractName($lines),
             'headline' => $this->extractHeadline($lines),
             'contact' => $this->extractContact($lines),
+            'location' => $this->extractLocation($lines),
             'summary' => '',
             'experience' => $this->extractExperience($lines),
             'education' => $this->extractEducation($lines),
@@ -283,6 +285,25 @@ class LinkedInPdfParserService
             }
         }
 
+        // Fallback: 2ème ligne du PDF
+        return $lines[1] ?? '';
+    }
+
+    private function extractLocation($lines)
+    {
+        // En LinkedIn PDF, la localisation est souvent la 3ème ligne ou proche du haut
+        // On cherche une ligne qui contient une virgule (Ville, Pays) dans les 10 premières lignes
+        for ($i = 0; $i < min(10, count($lines)); $i++) {
+            $line = trim($lines[$i]);
+            // Éviter les lignes de contact ou le nom
+            if (str_contains($line, '@') || str_contains($line, 'linkedin.com')) {
+                continue;
+            }
+            if (str_contains($line, ',')) {
+                return $line;
+            }
+        }
+
         return '';
     }
 
@@ -300,11 +321,11 @@ class LinkedInPdfParserService
                 }
                 $contact['linkedin'] = $url;
             }
-            if (preg_match('/([a-z0-9-]+\.[a-z]{2,})\s*\(Company\)/i', $line, $matches)) {
-                $contact['website'] = 'https://'.$matches[1];
-            }
-            if (preg_match('/\+?\d{10,}/', $line, $matches)) {
-                $contact['phone'] = $matches[0];
+            // Regex téléphone plus robuste (+33..., 06..., etc.)
+            if (preg_match('/(\+\d{1,3}[\s\d]{8,15})/', $line, $matches)) {
+                $contact['phone'] = trim($matches[1]);
+            } elseif (preg_match('/(\d{2}[\s\d]{8,12})/', $line, $matches) && ! str_contains($line, '@')) {
+                $contact['phone'] = trim($matches[1]);
             }
         }
 
