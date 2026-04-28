@@ -37,6 +37,7 @@ class SubscriptionPlanController extends Controller
         $validated['user_type'] = 'organization'; // Subscriptions are for organizations
         $validated['is_popular'] = $request->has('is_popular');
         $validated['is_active'] = $request->has('is_active');
+        $validated['credits'] = 0; // Default for subscriptions
 
         CreditPack::create($validated);
 
