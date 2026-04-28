@@ -528,6 +528,9 @@ class MentorDashboardController extends Controller
             if (! empty($extractedCountry) && empty($user->country)) {
                 $userUpdates['country'] = $extractedCountry;
             }
+            if (! empty($profileData['contact']['phone']) && empty($user->phone)) {
+                $userUpdates['phone'] = $profileData['contact']['phone'];
+            }
             if (! empty($userUpdates)) {
                 $user->update($userUpdates);
                 \Log::info('🌍 City/Country populated from LinkedIn PDF', $userUpdates);
