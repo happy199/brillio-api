@@ -558,17 +558,7 @@
                                 default => 'bg-gray-500',
                             };
                         @endphp
-                        <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition"
-                            x-data="{
-                                historyData: {
-                                    personality_type: @js($historyTest->personality_type),
-                                    personality_label: @js($mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type),
-                                    personality_description: @js($historyTest->personality_description ?? ''),
-                                    completed_at: @js($historyTest->completed_at),
-                                    traits_scores: @js($historyTest->traits_scores ?? []),
-                                    recommended_careers: @js($historyTest->recommended_careers ?? [])
-                                }
-                            }">
+                        <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
                             <div class="flex items-center gap-4">
                                 <div
                                     class="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-white text-sm {{ $badgeColor }}">
@@ -581,7 +571,14 @@
                                     <p class="text-xs text-gray-500">{{ $historyTest->completed_at->format('d/m/Y à H:i') }}</p>
                                 </div>
                             </div>
-                            <button @click="$root.viewHistoryDetails(historyData)"
+                            <button @click="viewHistoryDetails({
+                                personality_type: @js($historyTest->personality_type),
+                                personality_label: @js($mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type),
+                                personality_description: @js($historyTest->personality_description ?? ''),
+                                completed_at: @js($historyTest->completed_at),
+                                traits_scores: @js($historyTest->traits_scores ?? []),
+                                recommended_careers: @js($historyTest->recommended_careers ?? [])
+                            })"
                                 class="text-blue-600 text-sm font-medium hover:underline">Voir détails</button>
                         </div>
                     @endforeach
@@ -1159,7 +1156,7 @@
                         try {
                             const res = await fetch(`/espace-jeune/establishments/${est.id}/interest-quick`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                                 body: JSON.stringify(payload)
                             });
                             const data = await res.json();
@@ -1188,7 +1185,7 @@
                         try {
                             const res = await fetch(`/espace-jeune/establishments/${this.estDetails.id}/interest-precise`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                                 body: JSON.stringify({ form_data: this.formData, phone: this.tempPhone })
                             });
                             const data = await res.json();
@@ -1237,6 +1234,11 @@
                         this.questions = [];
                         this.answers = {};
                         this.currentQuestion = 0;
+                    },
+
+                    retakeTest() {
+                        this.resetTest();
+                        this.startTest();
                     },
 
                     async loadQuestions() {
