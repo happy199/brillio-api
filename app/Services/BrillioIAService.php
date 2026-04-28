@@ -210,7 +210,7 @@ class BrillioIAService
      */
     public function isApiKeyConfigured()
     {
-        return !empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
+        return ! empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
     }
 
     /**
@@ -273,7 +273,7 @@ class BrillioIAService
         ]);
 
         try {
-            if (!$this->isApiKeyConfigured()) {
+            if (! $this->isApiKeyConfigured()) {
                 Log::warning('OpenRouter API key not configured');
                 $result = $this->getFallbackResponse($messages);
             } else {
@@ -295,7 +295,7 @@ class BrillioIAService
 
                 // 2. Gestion des erreurs et fallbacks
                 if ($response->status() === 429 || $response->status() >= 500) {
-                    if (!$attemptedModel) {
+                    if (! $attemptedModel) {
                         $fallbackModel = 'google/gemini-flash-1.5-8b';
                         Log::warning("OpenRouter saturé sur {$currentModel}. Basculement sur {$fallbackModel}");
                         $result = $this->callOpenRouterApi($messages, $formatting, $fallbackModel);
@@ -443,7 +443,7 @@ class BrillioIAService
         // Limiter la taille de la transcription pour éviter de dépasser le contexte
         $truncatedTranscription = \Illuminate\Support\Str::limit($transcriptionText, 15000);
 
-        $prompt = "Voici la transcription de la séance :\n\n" . $truncatedTranscription;
+        $prompt = "Voici la transcription de la séance :\n\n".$truncatedTranscription;
 
         try {
             $response = $this->analyzeText($prompt, $systemPrompt);
@@ -467,8 +467,8 @@ class BrillioIAService
         $systemPrompt = "Tu es un expert en orientation professionnelle pour la jeunesse africaine.\n" .
             "Ta mission est de proposer 4 nouveaux métiers qui correspondent parfaitement au profil MBTI : {$mbtiType}.\n\n" .
             "REGLES :\n" .
-            '1. Ne propose AUCUN métier présent dans cette liste de titres existants : ' . implode(', ', $existingGlobalTitles) . ".\n" .
-            '2. Ne propose AUCUN métier présent dans cette liste de titres déjà sélectionnés pour ce test : ' . implode(', ', $currentlySelectedTitles) . ".\n" .
+            '1. Ne propose AUCUN métier présent dans cette liste de titres existants : '.implode(', ', $existingGlobalTitles).".\n" .
+            '2. Ne propose AUCUN métier présent dans cette liste de titres déjà sélectionnés pour ce test : '.implode(', ', $currentlySelectedTitles).".\n" .
             "3. Chaque métier doit être pertinent au contexte africain.\n" .
             "4. Tu dois retourner un objet JSON valide.\n\n" .
             "FORMAT JSON ATTENDU :\n" .
@@ -531,7 +531,7 @@ class BrillioIAService
             "  ]\n" .
             '}';
 
-        $prompt = "Voici les 32 questions originales à reformuler pour un(e) {$userContext} :\n\n" . json_encode($questions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $prompt = "Voici les 32 questions originales à reformuler pour un(e) {$userContext} :\n\n".json_encode($questions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
         try {
             $response = $this->analyzeText($prompt, $systemPrompt);
@@ -561,7 +561,7 @@ class BrillioIAService
 
             return $questions; // Fallback si JSON invalide
         } catch (\Exception $e) {
-            Log::error('Reformulate Personality Questions Error: ' . $e->getMessage());
+            Log::error('Reformulate Personality Questions Error: '.$e->getMessage());
 
             return $questions; // Fallback
         }
@@ -583,7 +583,7 @@ class BrillioIAService
             "3. Il est interdit de renvoyer 0 établissement sous prétexte d'avoir épuisé un pays. Passe au pays suivant.\n\n" .
             "RÈGLES DE VÉRACITÉ ET DE RECHERCHE CRITIQUES :\n" .
             "1. Ne propose QUE des établissements qui existent RÉELLEMENT physiquement.\n" .
-            "2. Ne propose AUCUN établissement présent dans cette liste : " . implode(', ', $existingNames) . ".\n" .
+            "2. Ne propose AUCUN établissement présent dans cette liste : ".implode(', ', $existingNames).".\n" .
             "3. Tu dois retourner exactement 3 établissements différents.\n" .
             "4. EXTRACTION DE CONTACTS OBLIGATOIRE : Tu dois impérativement chercher partout sur internet le numéro de téléphone et l'adresse email officiels de chaque établissement. Ne laisse ces champs vides que si tu as fouillé et que c'est objectivement impossible à trouver. Mieux vaut le standard général de l'université plutôt qu'un blanc.\n" .
             "5. EXTRACTION GOOGLE MAPS : Cherche le lien Google Maps pointant vers l'établissement et insère-le dans \"google_maps_url\".\n" .
@@ -616,7 +616,7 @@ class BrillioIAService
             "  ]\n" .
             '}';
 
-        $prompt = "Peux-tu fouiller le web et me générer 3 nouveaux établissements d'enseignement de qualité en Afrique francophone (focus initial sur le Bénin, puis au-delà) avec leurs descriptions complètes, tous leurs contacts (tel/email) et me dire à quels profils MBTI ils sont destinés ?";
+        $prompt = 'Peux-tu fouiller le web et me générer 3 nouveaux établissements d\'enseignement de qualité en Afrique francophone (focus initial sur le Bénin, puis au-delà) avec leurs descriptions complètes, tous leurs contacts (tel/email) et me dire à quels profils MBTI ils sont destinés ?';
 
         try {
             // Utilisation d'un modèle Perplexity optimisé pour la recherche Web en direct
@@ -630,7 +630,7 @@ class BrillioIAService
 
             return [];
         } catch (\Exception $e) {
-            Log::error('Generate Establishments Error: ' . $e->getMessage());
+            Log::error('Generate Establishments Error: '.$e->getMessage());
 
             return [];
         }

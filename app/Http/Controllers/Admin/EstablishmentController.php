@@ -85,8 +85,8 @@ class EstablishmentController extends Controller
 
         $validated['is_published'] = $request->has('is_published');
         $validated['has_precise_form'] = $request->has('has_precise_form');
-        $validated['precise_form_config'] = $request->has('has_precise_form') 
-            ? array_values($request->input('precise_form_config', [])) 
+        $validated['precise_form_config'] = $request->has('has_precise_form')
+            ? array_values($request->input('precise_form_config', []))
             : null;
         
         // Handle Social Links from separate inputs
@@ -163,8 +163,8 @@ class EstablishmentController extends Controller
 
         $validated['is_published'] = $request->has('is_published');
         $validated['has_precise_form'] = $request->has('has_precise_form');
-        $validated['precise_form_config'] = $request->has('has_precise_form') 
-            ? array_values($request->input('precise_form_config', [])) 
+        $validated['precise_form_config'] = $request->has('has_precise_form')
+            ? array_values($request->input('precise_form_config', []))
             : null;
         
         $validated['social_links'] = [
@@ -241,8 +241,8 @@ class EstablishmentController extends Controller
     public function exportInterestsCsv(Establishment $establishment)
     {
         $interests = $establishment->interests()->with('user')->get();
-        
-        $filename = "prospects_" . Str::slug($establishment->name) . "_" . date('Y-m-d') . ".csv";
+
+        $filename = "prospects_".Str::slug($establishment->name)."_".date('Y-m-d').".csv";
         $headers = [
             "Content-type"        => "text/csv",
             "Content-Disposition" => "attachment; filename=$filename",
@@ -253,7 +253,7 @@ class EstablishmentController extends Controller
 
         $columns = ['Date', 'Utilisateur', 'Email', 'Téléphone', 'Type', 'Détails du formulaire'];
 
-        $callback = function() use($interests, $columns) {
+        $callback = function () use ($interests, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 

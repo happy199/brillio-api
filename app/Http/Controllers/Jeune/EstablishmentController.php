@@ -80,7 +80,7 @@ class EstablishmentController extends Controller
     public function preciseInterest(Request $request, Establishment $establishment)
     {
         $user = auth()->user();
-        
+
         $validated = $request->validate([
             'form_data' => 'required|array',
             'phone' => 'sometimes|nullable|string'
@@ -112,7 +112,7 @@ class EstablishmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Votre demande a été envoyée avec succès à ' . $establishment->name
+            'message' => 'Votre demande a été envoyée avec succès à '.$establishment->name
         ]);
     }
 }

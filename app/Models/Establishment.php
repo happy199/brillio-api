@@ -60,7 +60,7 @@ class Establishment extends Model
 
         static::creating(function ($establishment) {
             if (empty($establishment->slug)) {
-                $establishment->slug = Str::slug($establishment->name) . '-' . Str::random(5);
+                $establishment->slug = Str::slug($establishment->name).'-'.Str::random(5);
             }
         });
     }
