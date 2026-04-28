@@ -89,6 +89,10 @@
                                 <p class="text-lg font-medium text-gray-900">{{ $user->email }}</p>
                             </div>
                             <div>
+                                <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Téléphone</p>
+                                <p class="text-lg font-medium text-gray-900">{{ $user->phone ?: 'Non renseigné' }}</p>
+                            </div>
+                            <div>
                                 <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Date de naissance</p>
                                 <p class="text-lg font-medium text-gray-900">
                                     {{ $user->date_of_birth ? $user->date_of_birth->format('d/m/Y') : 'Non renseignée'
@@ -414,6 +418,11 @@
                             class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                        <input type="text" name="phone" value="{{ $user->phone }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition" placeholder="Ex: +229 01 02 03 04">
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
                         <input type="date" name="date_of_birth" value="{{ $user->date_of_birth?->format('Y-m-d') }}"
                             class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition">
@@ -471,6 +480,7 @@
 
                     <!-- Hidden fields -->
                     <input type="hidden" name="name" value="{{ $user->name }}">
+                    <input type="hidden" name="phone" value="{{ $user->phone }}">
                     <input type="hidden" name="date_of_birth" value="{{ $user->date_of_birth?->format('Y-m-d') }}">
                     <input type="hidden" name="city" value="{{ $user->city }}">
                     <input type="hidden" name="is_public" value="{{ $profile->is_public ? '1' : '0' }}">
