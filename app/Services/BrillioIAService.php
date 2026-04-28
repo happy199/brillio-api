@@ -155,7 +155,7 @@ class BrillioIAService
 
                 array_push($messages, [
                     'role' => 'system',
-                    'content' => "CONTEXTE UTILISATEUR - UTILISE CES INFORMATIONS POUR PERSONNALISER TES REPONSES:\n" . $userContext . "\n\nIMPORTANT: Tu parles a " . $firstName . '. Utilise son prenom dans tes reponses et tutoie-le/la toujours!',
+                    'content' => "CONTEXTE UTILISATEUR - UTILISE CES INFORMATIONS POUR PERSONNALISER TES REPONSES:\n".$userContext."\n\nIMPORTANT: Tu parles a ".$firstName.'. Utilise son prenom dans tes reponses et tutoie-le/la toujours!',
                 ]);
             }
         }
@@ -180,26 +180,26 @@ class BrillioIAService
         $context = [];
 
         if (isset($user->name) && $user->name) {
-            array_push($context, 'Nom : ' . $user->name);
+            array_push($context, 'Nom : '.$user->name);
         }
 
         if (isset($user->country) && $user->country) {
-            array_push($context, 'Pays : ' . $user->country);
+            array_push($context, 'Pays : '.$user->country);
         }
 
         if (isset($user->city) && $user->city) {
-            array_push($context, 'Ville : ' . $user->city);
+            array_push($context, 'Ville : '.$user->city);
         }
 
         if (isset($user->date_of_birth) && $user->date_of_birth) {
             $age = $user->date_of_birth->age;
-            array_push($context, 'Age : ' . $age . ' ans');
+            array_push($context, 'Age : '.$age.' ans');
         }
 
         // Ajouter le type de personnalite si disponible
         $personalityTest = $user->personalityTest;
         if ($personalityTest && $personalityTest->isCompleted()) {
-            array_push($context, 'Type de personnalite : ' . $personalityTest->personality_type . ' (' . $personalityTest->personality_label . ')');
+            array_push($context, 'Type de personnalite : '.$personalityTest->personality_type.' ('.$personalityTest->personality_label.')');
         }
 
         return implode(', ', $context);
@@ -279,7 +279,7 @@ class BrillioIAService
             } else {
                 // 1. Tentative avec Retry pour les erreurs reseau/timeout
                 $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer '.$this->apiKey,
                     'HTTP-Referer' => $this->siteUrl,
                     'X-Title' => $this->siteName,
                     'Content-Type' => 'application/json',
@@ -317,7 +317,7 @@ class BrillioIAService
                 }
             }
         } catch (\Exception $e) {
-            Log::error('OpenRouter exception: ' . $e->getMessage());
+            Log::error('OpenRouter exception: '.$e->getMessage());
             $result = $result ?: $this->getFallbackResponse($messages);
         }
 
@@ -416,28 +416,28 @@ class BrillioIAService
             $transcriptionText = '';
             foreach ($transcriptionData as $segment) {
                 if (is_array($segment) && isset($segment['speaker'], $segment['text'])) {
-                    $transcriptionText .= '[' . ($segment['speaker'] ?? 'Inconnu') . '] : ' . $segment['text'] . "\n";
+                    $transcriptionText .= '['.($segment['speaker'] ?? 'Inconnu').'] : '.$segment['text']."\n";
                 } elseif (is_string($segment)) {
-                    $transcriptionText .= $segment . "\n";
+                    $transcriptionText .= $segment."\n";
                 }
             }
         } else {
             $transcriptionText = (string) $transcriptionData;
         }
 
-        $systemPrompt = "Tu es un assistant qui analyse des transcriptions de séances de mentorat.\n" .
-            "Ta mission est d'extraire les informations clés pour remplir un compte rendu de séance selon trois axes :\n" .
-            "1. PROGRES : Ce qui a été accompli durant la séance.\n" .
-            "2. OBSTACLES : Les difficultés rencontrées par le jeune.\n" .
-            "3. OBJECTIFS SMART : Les prochaines étapes concrètes fixées.\n\n" .
-            "CONTEXTE DES PARTICIPANTS :\n" .
-            "- Mentor : {$mentorName}\n" .
-            "- Jeune(s) / Menté(s) : {$menteeNames}\n\n" .
-            "CONSIGNES IMPORTANTES :\n" .
-            "- Rédige à la troisième personne.\n" .
-            "- UTILISE EXCLUSIVEMENT LES NOMS REELS DES PARTICIPANTS fournis ci-dessus pour désigner les personnes (ex: '{$menteeNames} a expliqué...', '{$mentorName} a conseillé...').\n" .
-            "- Interdiction d'utiliser des termes génériques comme 'Le jeune', 'L'étudiant' ou 'Le mentor'.\n" .
-            "- Réponds UNIQUEMENT sous forme d'un objet JSON avec les clés suivantes : 'progress', 'obstacles', 'smart_goals'.\n" .
+        $systemPrompt = "Tu es un assistant qui analyse des transcriptions de séances de mentorat.\n".
+            "Ta mission est d'extraire les informations clés pour remplir un compte rendu de séance selon trois axes :\n".
+            "1. PROGRES : Ce qui a été accompli durant la séance.\n".
+            "2. OBSTACLES : Les difficultés rencontrées par le jeune.\n".
+            "3. OBJECTIFS SMART : Les prochaines étapes concrètes fixées.\n\n".
+            "CONTEXTE DES PARTICIPANTS :\n".
+            "- Mentor : {$mentorName}\n".
+            "- Jeune(s) / Menté(s) : {$menteeNames}\n\n".
+            "CONSIGNES IMPORTANTES :\n".
+            "- Rédige à la troisième personne.\n".
+            "- UTILISE EXCLUSIVEMENT LES NOMS REELS DES PARTICIPANTS fournis ci-dessus pour désigner les personnes (ex: '{$menteeNames} a expliqué...', '{$mentorName} a conseillé...').\n".
+            "- Interdiction d'utiliser des termes génériques comme 'Le jeune', 'L'étudiant' ou 'Le mentor'.\n".
+            "- Réponds UNIQUEMENT sous forme d'un objet JSON avec les clés suivantes : 'progress', 'obstacles', 'smart_goals'.\n".
             '- Le texte doit être concis et professionnel.';
 
         // Limiter la taille de la transcription pour éviter de dépasser le contexte
@@ -451,7 +451,7 @@ class BrillioIAService
 
             return json_decode($json, true);
         } catch (\Exception $e) {
-            Log::error('Summarize Transcription Error: ' . $e->getMessage());
+            Log::error('Summarize Transcription Error: '.$e->getMessage());
 
             return null;
         }
@@ -464,27 +464,27 @@ class BrillioIAService
     {
         $mbtiType = strtoupper($mbtiType);
 
-        $systemPrompt = "Tu es un expert en orientation professionnelle pour la jeunesse africaine.\n" .
-            "Ta mission est de proposer 4 nouveaux métiers qui correspondent parfaitement au profil MBTI : {$mbtiType}.\n\n" .
-            "REGLES :\n" .
-            '1. Ne propose AUCUN métier présent dans cette liste de titres existants : '.implode(', ', $existingGlobalTitles).".\n" .
-            '2. Ne propose AUCUN métier présent dans cette liste de titres déjà sélectionnés pour ce test : '.implode(', ', $currentlySelectedTitles).".\n" .
-            "3. Chaque métier doit être pertinent au contexte africain.\n" .
-            "4. Tu dois retourner un objet JSON valide.\n\n" .
-            "FORMAT JSON ATTENDU :\n" .
-            "{\n" .
-            "  \"has_new_proposals\": true,\n" .
-            "  \"careers\": [\n" .
-            "    {\n" .
-            "      \"title\": \"Titre du métier\",\n" .
-            "      \"description\": \"Description courte et inspirante\",\n" .
-            "      \"african_context\": \"Pourquoi ce métier est une opportunité en Afrique aujourd'hui\",\n" .
-            "      \"future_prospects\": \"Perspectives d'avenir (ex: Forte croissance, Transformation digitale)\",\n" .
-            "      \"ai_impact_level\": \"low|medium|high\",\n" .
-            "      \"match_reason\": \"Pourquoi ce métier convient spécifiquement à un profil {$mbtiType}\",\n" .
-            "      \"sectors\": [\"tech\", \"business\", \"creative\", etc.]\n" .
-            "    }\n" .
-            "  ]\n" .
+        $systemPrompt = "Tu es un expert en orientation professionnelle pour la jeunesse africaine.\n".
+            "Ta mission est de proposer 4 nouveaux métiers qui correspondent parfaitement au profil MBTI : {$mbtiType}.\n\n".
+            "REGLES :\n".
+            '1. Ne propose AUCUN métier présent dans cette liste de titres existants : '.implode(', ', $existingGlobalTitles).".\n".
+            '2. Ne propose AUCUN métier présent dans cette liste de titres déjà sélectionnés pour ce test : '.implode(', ', $currentlySelectedTitles).".\n".
+            "3. Chaque métier doit être pertinent au contexte africain.\n".
+            "4. Tu dois retourner un objet JSON valide.\n\n".
+            "FORMAT JSON ATTENDU :\n".
+            "{\n".
+            "  \"has_new_proposals\": true,\n".
+            "  \"careers\": [\n".
+            "    {\n".
+            "      \"title\": \"Titre du métier\",\n".
+            "      \"description\": \"Description courte et inspirante\",\n".
+            "      \"african_context\": \"Pourquoi ce métier est une opportunité en Afrique aujourd'hui\",\n".
+            "      \"future_prospects\": \"Perspectives d'avenir (ex: Forte croissance, Transformation digitale)\",\n".
+            "      \"ai_impact_level\": \"low|medium|high\",\n".
+            "      \"match_reason\": \"Pourquoi ce métier convient spécifiquement à un profil {$mbtiType}\",\n".
+            "      \"sectors\": [\"tech\", \"business\", \"creative\", etc.]\n".
+            "    }\n".
+            "  ]\n".
             '}';
 
         $prompt = "Peux-tu me proposer 4 métiers originaux et porteurs pour un jeune de profil {$mbtiType} en Afrique ?";
@@ -500,7 +500,7 @@ class BrillioIAService
 
             return ['has_new_proposals' => false, 'careers' => []];
         } catch (\Exception $e) {
-            Log::error('Generate Careers Error: ' . $e->getMessage());
+            Log::error('Generate Careers Error: '.$e->getMessage());
 
             return ['has_new_proposals' => false, 'careers' => []];
         }
@@ -511,24 +511,24 @@ class BrillioIAService
      */
     public function reformulatePersonalityQuestions(array $questions, string $userContext)
     {
-        $systemPrompt = "Tu es un expert en psychologie et en orientation pour la jeunesse africaine.\n" .
-            "Ta mission est de reformuler les traits (options gauche et droite) d'un test de personnalité MBTI pour qu'ils soient parfaitement adaptés au contexte de l'utilisateur suivant : {$userContext}.\n\n" .
-            "REGLES DE REFORMULATION :\n" .
-            "1. EMPATHIE ET CONTEXTE : Utilise des phrases naturelles, fluides et pleines d'empathie. Propose des situations concrètes qui parlent à cet utilisateur (ex: vie scolaire, loisirs ou ambitions pour un jeune, vie professionnelle pour un actif).\n" .
-            "2. ADAPTATION : Évite à tout prix les réponses robotiques ou limitées à un seul mot. Développe suffisamment pour que le sens soit clair et humain.\n" .
-            "3. CONCISION : Reste concis (une phrase courte ou un groupe de mots), mais ne sacrifie jamais la compréhension ou l'humanité de la réponse pour la brièveté.\n" .
-            "4. FIDELITE : Ne change SURTOUT PAS le sens profond du trait original (modèle MBTI). L'utilisateur doit pouvoir répondre sans ambiguïté.\n" .
-            "5. TON : Adopte une posture de 'grand frère' ou 'grande sœur' bienveillant(e), direct(e) et encourageant(e).\n" .
-            "6. FORMAT : Tu dois retourner UNIQUEMENT un objet JSON contenant le tableau des questions reformulées.\n\n" .
-            "FORMAT JSON ATTENDU :\n" .
-            "{\n" .
-            "  \"questions\": [\n" .
-            "    {\n" .
-            "      \"id\": 1,\n" .
-            "      \"left_trait\": \"Reformulation empathique et contextualisée gauche\",\n" .
-            "      \"right_trait\": \"Reformulation empathique et contextualisée droite\"\n" .
-            "    }\n" .
-            "  ]\n" .
+        $systemPrompt = "Tu es un expert en psychologie et en orientation pour la jeunesse africaine.\n".
+            "Ta mission est de reformuler les traits (options gauche et droite) d'un test de personnalité MBTI pour qu'ils soient parfaitement adaptés au contexte de l'utilisateur suivant : {$userContext}.\n\n".
+            "REGLES DE REFORMULATION :\n".
+            "1. EMPATHIE ET CONTEXTE : Utilise des phrases naturelles, fluides et pleines d'empathie. Propose des situations concrètes qui parlent à cet utilisateur (ex: vie scolaire, loisirs ou ambitions pour un jeune, vie professionnelle pour un actif).\n".
+            "2. ADAPTATION : Évite à tout prix les réponses robotiques ou limitées à un seul mot. Développe suffisamment pour que le sens soit clair et humain.\n".
+            "3. CONCISION : Reste concis (une phrase courte ou un groupe de mots), mais ne sacrifie jamais la compréhension ou l'humanité de la réponse pour la brièveté.\n".
+            "4. FIDELITE : Ne change SURTOUT PAS le sens profond du trait original (modèle MBTI). L'utilisateur doit pouvoir répondre sans ambiguïté.\n".
+            "5. TON : Adopte une posture de 'grand frère' ou 'grande sœur' bienveillant(e), direct(e) et encourageant(e).\n".
+            "6. FORMAT : Tu dois retourner UNIQUEMENT un objet JSON contenant le tableau des questions reformulées.\n\n".
+            "FORMAT JSON ATTENDU :\n".
+            "{\n".
+            "  \"questions\": [\n".
+            "    {\n".
+            "      \"id\": 1,\n".
+            "      \"left_trait\": \"Reformulation empathique et contextualisée gauche\",\n".
+            "      \"right_trait\": \"Reformulation empathique et contextualisée droite\"\n".
+            "    }\n".
+            "  ]\n".
             '}';
 
         $prompt = "Voici les 32 questions originales à reformuler pour un(e) {$userContext} :\n\n".json_encode($questions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -575,45 +575,45 @@ class BrillioIAService
         $mbtiProfiles = array_keys(\App\Models\PersonalityTest::PERSONALITY_TYPES);
         $mbtiProfilesStr = implode(', ', $mbtiProfiles);
 
-        $systemPrompt = "Tu es un expert en enseignement supérieur et en formation professionnelle en Afrique.\n" .
-            "Ta mission est de découvrir 3 universités, écoles ou centres de formation RÉELS et de les cartographier avec les profils MBTI correspondants.\n\n" .
-            "PRIORITÉS GÉOGRAPHIQUES ET FALLBACK DYNAMIQUE :\n" .
-            "1. Débute systématiquement ta recherche par le BÉNIN.\n" .
-            "2. Si tu ne trouves plus de nouveaux établissements pertinents au Bénin (qui ne soient pas dans la liste des existants), tu DOIS immédiatement chercher dans d'autres pays francophones d'Afrique, en suivant cet ordre : Togo, Sénégal, Côte d'Ivoire, Maroc, Algérie, etc.\n" .
-            "3. Il est interdit de renvoyer 0 établissement sous prétexte d'avoir épuisé un pays. Passe au pays suivant.\n\n" .
-            "RÈGLES DE VÉRACITÉ ET DE RECHERCHE CRITIQUES :\n" .
-            "1. Ne propose QUE des établissements qui existent RÉELLEMENT physiquement.\n" .
-            "2. Ne propose AUCUN établissement présent dans cette liste : ".implode(', ', $existingNames).".\n" .
-            "3. Tu dois retourner exactement 3 établissements différents.\n" .
-            "4. EXTRACTION DE CONTACTS OBLIGATOIRE : Tu dois impérativement chercher partout sur internet le numéro de téléphone et l'adresse email officiels de chaque établissement. Ne laisse ces champs vides que si tu as fouillé et que c'est objectivement impossible à trouver. Mieux vaut le standard général de l'université plutôt qu'un blanc.\n" .
-            "5. EXTRACTION GOOGLE MAPS : Cherche le lien Google Maps pointant vers l'établissement et insère-le dans \"google_maps_url\".\n" .
-            "6. DESCRIPTION COMPLÈTE : La description ne doit plus faire référence à un profil MBTI, mais doit être une description détaillée tirée de ce qu'on trouve sur internet : présentation, atouts, et diplômes majeurs offerts.\n" .
-            "7. MAPPING MBTI : Identifie quels profils MBTI, parmi la liste officielle ({$mbtiProfilesStr}), correspondent le mieux à cet établissement (ex: une école polytechnique matchera avec INTJ, INTP, ISTJ. Une école d'art matchera avec ENFP, ISFP). Tu renverras un tableau de ces profils.\n" .
-            "8. Tu dois retourner un objet JSON valide.\n\n" .
-            "FORMAT JSON ATTENDU :\n" .
-            "{\n" .
-            "  \"establishments\": [\n" .
-            "    {\n" .
-            "      \"name\": \"Nom complet de l'établissement\",\n" .
-            "      \"type\": \"university|training_center\",\n" .
-            "      \"country\": \"Nom du pays (ex: Bénin, Togo...)\",\n" .
-            "      \"city\": \"Ville\",\n" .
-            "      \"description\": \"Description détaillée trouvée sur le web (présentation, atouts, diplômes)\",\n" .
-            "      \"address\": \"Adresse physique précise\",\n" .
-            "      \"phone\": \"Contact téléphonique officiel (obligatoire, cherche fort)\",\n" .
-            "      \"email\": \"Email officiel\",\n" .
-            "      \"website_url\": \"URL officielle\",\n" .
-            "      \"google_maps_url\": \"Lien Google Maps public\",\n" .
-            "      \"tuition_min\": 250000,\n" .
-            "      \"tuition_max\": 1500000,\n" .
-            "      \"sectors\": [\"Tech\", \"Management\", \"Santé\", etc.],\n" .
-            "      \"mbti_types\": [\"INTJ\", \"ENTJ\", \"INTP\"], \n" .
-            "      \"social_links\": {\n" .
-            "        \"linkedin\": \"...\",\n" .
-            "        \"facebook\": \"...\"\n" .
-            "      }\n" .
-            "    }\n" .
-            "  ]\n" .
+        $systemPrompt = "Tu es un expert en enseignement supérieur et en formation professionnelle en Afrique.\n".
+            "Ta mission est de découvrir 3 universités, écoles ou centres de formation RÉELS et de les cartographier avec les profils MBTI correspondants.\n\n".
+            "PRIORITÉS GÉOGRAPHIQUES ET FALLBACK DYNAMIQUE :\n".
+            "1. Débute systématiquement ta recherche par le BÉNIN.\n".
+            "2. Si tu ne trouves plus de nouveaux établissements pertinents au Bénin (qui ne soient pas dans la liste des existants), tu DOIS immédiatement chercher dans d'autres pays francophones d'Afrique, en suivant cet ordre : Togo, Sénégal, Côte d'Ivoire, Maroc, Algérie, etc.\n".
+            "3. Il est interdit de renvoyer 0 établissement sous prétexte d'avoir épuisé un pays. Passe au pays suivant.\n\n".
+            "RÈGLES DE VÉRACITÉ ET DE RECHERCHE CRITIQUES :\n".
+            "1. Ne propose QUE des établissements qui existent RÉELLEMENT physiquement.\n".
+            '2. Ne propose AUCUN établissement présent dans cette liste : '.implode(', ', $existingNames).".\n".
+            "3. Tu dois retourner exactement 3 établissements différents.\n".
+            "4. EXTRACTION DE CONTACTS OBLIGATOIRE : Tu dois impérativement chercher partout sur internet le numéro de téléphone et l'adresse email officiels de chaque établissement. Ne laisse ces champs vides que si tu as fouillé et que c'est objectivement impossible à trouver. Mieux vaut le standard général de l'université plutôt qu'un blanc.\n".
+            "5. EXTRACTION GOOGLE MAPS : Cherche le lien Google Maps pointant vers l'établissement et insère-le dans \"google_maps_url\".\n".
+            "6. DESCRIPTION COMPLÈTE : La description ne doit plus faire référence à un profil MBTI, mais doit être une description détaillée tirée de ce qu'on trouve sur internet : présentation, atouts, et diplômes majeurs offerts.\n".
+            "7. MAPPING MBTI : Identifie quels profils MBTI, parmi la liste officielle ({$mbtiProfilesStr}), correspondent le mieux à cet établissement (ex: une école polytechnique matchera avec INTJ, INTP, ISTJ. Une école d'art matchera avec ENFP, ISFP). Tu renverras un tableau de ces profils.\n".
+            "8. Tu dois retourner un objet JSON valide.\n\n".
+            "FORMAT JSON ATTENDU :\n".
+            "{\n".
+            "  \"establishments\": [\n".
+            "    {\n".
+            "      \"name\": \"Nom complet de l'établissement\",\n".
+            "      \"type\": \"university|training_center\",\n".
+            "      \"country\": \"Nom du pays (ex: Bénin, Togo...)\",\n".
+            "      \"city\": \"Ville\",\n".
+            "      \"description\": \"Description détaillée trouvée sur le web (présentation, atouts, diplômes)\",\n".
+            "      \"address\": \"Adresse physique précise\",\n".
+            "      \"phone\": \"Contact téléphonique officiel (obligatoire, cherche fort)\",\n".
+            "      \"email\": \"Email officiel\",\n".
+            "      \"website_url\": \"URL officielle\",\n".
+            "      \"google_maps_url\": \"Lien Google Maps public\",\n".
+            "      \"tuition_min\": 250000,\n".
+            "      \"tuition_max\": 1500000,\n".
+            "      \"sectors\": [\"Tech\", \"Management\", \"Santé\", etc.],\n".
+            "      \"mbti_types\": [\"INTJ\", \"ENTJ\", \"INTP\"], \n".
+            "      \"social_links\": {\n".
+            "        \"linkedin\": \"...\",\n".
+            "        \"facebook\": \"...\"\n".
+            "      }\n".
+            "    }\n".
+            "  ]\n".
             '}';
 
         $prompt = 'Peux-tu fouiller le web et me générer 3 nouveaux établissements d\'enseignement de qualité en Afrique francophone (focus initial sur le Bénin, puis au-delà) avec leurs descriptions complètes, tous leurs contacts (tel/email) et me dire à quels profils MBTI ils sont destinés ?';

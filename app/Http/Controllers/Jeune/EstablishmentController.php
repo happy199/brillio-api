@@ -17,7 +17,7 @@ class EstablishmentController extends Controller
         $user = auth()->user();
         $test = $user->personalityTest;
 
-        if (!$test || !$test->isCompleted()) {
+        if (! $test || ! $test->isCompleted()) {
             return response()->json(['establishments' => []]);
         }
 
@@ -32,12 +32,13 @@ class EstablishmentController extends Controller
                 $est->user_has_interest = EstablishmentInterest::where('user_id', $user->id)
                     ->where('establishment_id', $est->id)
                     ->exists();
+
                 return $est;
             });
 
         return response()->json([
             'mbti_type' => $mbtiType,
-            'establishments' => $establishments
+            'establishments' => $establishments,
         ]);
     }
 
@@ -49,7 +50,7 @@ class EstablishmentController extends Controller
         $user = auth()->user();
 
         // 1. If phone is provided in request, update user profile
-        if ($request->has('phone') && !empty($request->phone)) {
+        if ($request->has('phone') && ! empty($request->phone)) {
             $user->update(['phone' => $request->phone]);
         }
 
@@ -57,7 +58,7 @@ class EstablishmentController extends Controller
         if (empty($user->phone)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Il manque votre numéro de téléphone.'
+                'message' => 'Il manque votre numéro de téléphone.',
             ], 422);
         }
 
@@ -65,12 +66,12 @@ class EstablishmentController extends Controller
         EstablishmentInterest::firstOrCreate([
             'user_id' => $user->id,
             'establishment_id' => $establishment->id,
-            'type' => 'quick'
+            'type' => 'quick',
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => "{$establishment->name} vous recontactera dans les meilleurs délais."
+            'message' => "{$establishment->name} vous recontactera dans les meilleurs délais.",
         ]);
     }
 
@@ -83,11 +84,11 @@ class EstablishmentController extends Controller
 
         $validated = $request->validate([
             'form_data' => 'required|array',
-            'phone' => 'sometimes|nullable|string'
+            'phone' => 'sometimes|nullable|string',
         ]);
 
         // 1. If phone is provided in request, update user profile
-        if (!empty($request->phone)) {
+        if (! empty($request->phone)) {
             $user->update(['phone' => $request->phone]);
         }
 
@@ -95,7 +96,7 @@ class EstablishmentController extends Controller
         if (empty($user->phone)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Il manque votre numéro de téléphone.'
+                'message' => 'Il manque votre numéro de téléphone.',
             ], 422);
         }
 
@@ -106,13 +107,13 @@ class EstablishmentController extends Controller
             ],
             [
                 'type' => 'precise',
-                'form_data' => $validated['form_data']
+                'form_data' => $validated['form_data'],
             ]
         );
 
         return response()->json([
             'success' => true,
-            'message' => 'Votre demande a été envoyée avec succès à '.$establishment->name
+            'message' => 'Votre demande a été envoyée avec succès à '.$establishment->name,
         ]);
     }
 }

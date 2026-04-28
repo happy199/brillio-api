@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Establishment;
-use App\Models\EstablishmentInterest;
 use App\Models\PersonalityTest;
 use App\Services\BrillioIAService;
 use Illuminate\Http\Request;
@@ -32,6 +31,7 @@ class EstablishmentController extends Controller
     public function create()
     {
         $mbtiTypes = array_keys(PersonalityTest::PERSONALITY_TYPES);
+
         return view('admin.establishments.create', compact('mbtiTypes'));
     }
 
@@ -88,7 +88,7 @@ class EstablishmentController extends Controller
         $validated['precise_form_config'] = $request->has('has_precise_form')
             ? array_values($request->input('precise_form_config', []))
             : null;
-        
+
         // Handle Social Links from separate inputs
         $validated['social_links'] = [
             'linkedin' => $request->input('linkedin'),
@@ -104,6 +104,7 @@ class EstablishmentController extends Controller
     public function edit(Establishment $establishment)
     {
         $mbtiTypes = array_keys(PersonalityTest::PERSONALITY_TYPES);
+
         return view('admin.establishments.edit', compact('establishment', 'mbtiTypes'));
     }
 
@@ -166,7 +167,7 @@ class EstablishmentController extends Controller
         $validated['precise_form_config'] = $request->has('has_precise_form')
             ? array_values($request->input('precise_form_config', []))
             : null;
-        
+
         $validated['social_links'] = [
             'linkedin' => $request->input('linkedin'),
             'facebook' => $request->input('facebook'),
@@ -184,6 +185,7 @@ class EstablishmentController extends Controller
             Storage::disk('public')->delete($establishment->photo_path);
         }
         $establishment->delete();
+
         return redirect()->route('admin.establishments.index')->with('success', 'Établissement supprimé.');
     }
 
@@ -232,6 +234,7 @@ class EstablishmentController extends Controller
     public function interests(Establishment $establishment)
     {
         $interests = $establishment->interests()->with('user')->orderBy('created_at', 'desc')->paginate(20);
+
         return view('admin.establishments.interests', compact('establishment', 'interests'));
     }
 
@@ -242,13 +245,13 @@ class EstablishmentController extends Controller
     {
         $interests = $establishment->interests()->with('user')->get();
 
-        $filename = "prospects_".Str::slug($establishment->name)."_".date('Y-m-d').".csv";
+        $filename = 'prospects_'.Str::slug($establishment->name).'_'.date('Y-m-d').'.csv';
         $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $columns = ['Date', 'Utilisateur', 'Email', 'Téléphone', 'Type', 'Détails du formulaire'];
