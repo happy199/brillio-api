@@ -538,7 +538,14 @@ class SessionController extends Controller
             return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour utiliser l'IA.");
         }
 
-        $suggestedReport = app(\App\Services\BrillioIAService::class)->summarizeTranscription($session->transcription_raw);
+        $mentorName = $session->mentor->name;
+        $menteeNames = $session->mentees->pluck('name')->join(', ');
+
+        $suggestedReport = app(\App\Services\BrillioIAService::class)->summarizeTranscription(
+            $session->transcription_raw,
+            $mentorName,
+            $menteeNames
+        );
 
         if (! $suggestedReport) {
             return redirect()->back()->with('error', "L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.");

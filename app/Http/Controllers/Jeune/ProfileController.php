@@ -34,6 +34,7 @@ class ProfileController extends Controller
         $validated = $request->validate([
             // Champs User
             'name' => 'sometimes|required|string|max:255',
+            'phone' => 'sometimes|nullable|string|max:20',
             'date_of_birth' => 'sometimes|nullable|date|before:today',
             'city' => 'sometimes|nullable|string|max:100',
             'linkedin_url' => 'sometimes|nullable|url|max:255',
@@ -56,6 +57,9 @@ class ProfileController extends Controller
         $userUpdates = [];
         if (array_key_exists('name', $validated)) {
             $userUpdates['name'] = $validated['name'];
+        }
+        if (array_key_exists('phone', $validated)) {
+            $userUpdates['phone'] = $validated['phone'];
         }
         if (array_key_exists('date_of_birth', $validated)) {
             $userUpdates['date_of_birth'] = $validated['date_of_birth'];

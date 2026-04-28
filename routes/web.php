@@ -283,6 +283,11 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
         Route::post('/{mentorship}/signaler', [\App\Http\Controllers\Common\MentorshipReportController::class, 'report'])->name('report')->whereNumber('mentorship');
     }
     );
+
+    // Établissements & Recommandations
+    Route::get('/establishments/recommended', [\App\Http\Controllers\Jeune\EstablishmentController::class, 'recommended'])->name('establishments.recommended');
+    Route::post('/establishments/{establishment}/interest-quick', [\App\Http\Controllers\Jeune\EstablishmentController::class, 'quickInterest'])->name('establishments.interest-quick');
+    Route::post('/establishments/{establishment}/interest-precise', [\App\Http\Controllers\Jeune\EstablishmentController::class, 'preciseInterest'])->name('establishments.interest-precise');
 });
 
 // Routes publiques
@@ -607,6 +612,13 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
         // Gestion des organisations
         Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);
+
+        // Gestion des recommandations (Établissements)
+        Route::resource('establishments', \App\Http\Controllers\Admin\EstablishmentController::class);
+        Route::post('establishments/auto-generate', [\App\Http\Controllers\Admin\EstablishmentController::class, 'autoGenerate'])->name('establishments.auto-generate');
+        Route::get('establishments/{establishment}/interests', [\App\Http\Controllers\Admin\EstablishmentController::class, 'interests'])->name('establishments.interests');
+        Route::get('establishments/{establishment}/interests/export-csv', [\App\Http\Controllers\Admin\EstablishmentController::class, 'exportInterestsCsv'])->name('establishments.interests.export-csv');
+        Route::get('establishments/{establishment}/interests/export-pdf', [\App\Http\Controllers\Admin\EstablishmentController::class, 'exportInterestsPdf'])->name('establishments.interests.export-pdf');
     }
     );
 });

@@ -192,6 +192,33 @@
                     </span>
                 </a>
 
+                <!-- Recommandations Dropdown -->
+                <div x-data="{ open: {{ request()->routeIs('admin.establishments.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open"
+                        class="w-full flex justify-between items-center px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.establishments.*') ? 'bg-indigo-800' : '' }}">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                            </svg>
+                            Recommandations
+                        </span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak class="bg-indigo-900 border-t border-indigo-800">
+                        <a href="{{ route('admin.establishments.index') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.establishments.*') ? 'text-white font-bold' : '' }}">
+                            Établissements
+                        </a>
+                        <a href="#"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 opacity-50 cursor-not-allowed">
+                            Emplois (Bientôt)
+                        </a>
+                    </div>
+                </div>
+
                 @if(!auth()->user()->isCoach())
 
                 <a href="{{ route('admin.accounting.index') }}"
