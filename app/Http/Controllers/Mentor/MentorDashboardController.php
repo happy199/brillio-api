@@ -620,6 +620,11 @@ class MentorDashboardController extends Controller
                 $suggestions[] = 'Vérifiez vos années d\'expérience sur la page "Mon profil"';
             }
 
+            // Avertissement si le parseur de secours a été utilisé
+            if (! empty($profileData['is_fallback'])) {
+                $warnings[] = 'L\'IA a rencontré une difficulté technique. Un parseur simplifié a été utilisé, ce qui peut expliquer des erreurs de structure.';
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Profil LinkedIn importé avec succès !',

@@ -39,7 +39,7 @@
     @endif
 
     <!-- LinkedIn Import Button -->
-    <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-5">
+    <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-5" x-data="{}">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -55,7 +55,7 @@
                 </div>
             </div>
             <button
-                @click="$dispatch('open-linkedin-import')"
+                x-on:click="console.log('Dispatched open-linkedin-import'); $dispatch('open-linkedin-import')"
                 class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition whitespace-nowrap text-center">
                 📥 Importer LinkedIn
             </button>

@@ -141,9 +141,24 @@ class LinkedInPdfParserService
     {
         $systemPrompt = "Tu es un expert en extraction de données de CV (Resume Parser).\n".
             "Ta mission est d'analyser le texte brut d'un profil LinkedIn PDF et d'en extraire les informations structurées au format JSON STRICT.\n\n".
+            "RÈGLES D'EXTRACTION CRITIQUES :\n".
+            "1. STRUCTURE DES SECTIONS : Un profil LinkedIn PDF est organisé ainsi :\n".
+            "   - En-tête : Nom, Titre (Headline), Localisation, Contact.\n".
+            "   - Résumé (Summary) : Un paragraphe de présentation (parfois absent).\n".
+            "   - Expérience : Liste de postes. Chaque poste commence par l'intitulé, puis l'entreprise, les dates et la description.\n".
+            "   - Formation (Education) : Liste de diplômes et écoles.\n".
+            "   - Compétences (Skills) : Liste de mots-clés.\n\n".
+            "2. REGROUPEMENT DES MISSIONS : Les lignes commençant par des tirets (-), des puces (•) ou des points sont des détails de l'expérience ou de la formation qui précède. \n".
+            "   → Tu DOIS impérativement regrouper toutes ces lignes dans le champ 'description' de l'objet parent. \n".
+            "   → NE JAMAIS créer une nouvelle entrée d'expérience ou de formation pour un bullet point.\n\n".
+            "3. NETTOYAGE DES MOTS COLLÉS (STICKY WORDS) : Le parsing PDF colle souvent des mots (ex: 'Engineermars' au lieu de 'Engineer mars', 'RennesFrance' au lieu de 'Rennes, France').\n".
+            "   → Tu DOIS détecter et séparer ces mots pour un rendu professionnel.\n\n".
+            "4. COMPÉTENCES (SKILLS) : Ne conserve que des mots-clés courts (ex: 'Python', 'Gestion de projet', 'React').\n".
+            "   → Si tu trouves une phrase entière dans les compétences, reformule-la en mots-clés ou ignore-la si elle appartient à une description de poste.\n\n".
+            "5. DATES : LinkedIn utilise souvent le format 'mois année - mois année' ou 'mois année - Aujourd’hui'. Convertis-les au format YYYY-MM-DD (ex: 'janvier 2024' -> '2024-01-01').\n\n".
             "RÈGLES IMPORTANTES :\n".
             "- Ne jamais inventer d'information. Si une info est manquante, mets null ou une chaine vide.\n".
-            "- Répont UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n".
+            "- Réponds UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n".
             "- Le format de sortie doit respecter exactement la structure demandée.\n\n".
             "RÈGLE EMOJIS & CARACTÈRES SPÉCIAUX (PDF LinkedIn) :\n".
             "Les PDFs LinkedIn exportés encodent mal les emojis en raison des limitations des polices PDF.\n".
