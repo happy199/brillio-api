@@ -498,8 +498,7 @@
                         </div>
                     </div>
                 </div>
-                </div>
-                @endif
+@endif
 
                 <!-- Centered Retake Button -->
                 <div class="flex justify-center pt-2">
@@ -1077,6 +1076,7 @@
             </div>
         </div>
     </div>
+</div>
 
     @push('scripts')
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">
