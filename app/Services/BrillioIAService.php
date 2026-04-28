@@ -284,7 +284,7 @@ class BrillioIAService
                     'X-Title' => $this->siteName,
                     'Content-Type' => 'application/json',
                 ])
-                    ->timeout(60)
+                    ->timeout(120)
                     ->retry(2, 500)
                     ->post($this->apiUrl, [
                         'model' => $currentModel,

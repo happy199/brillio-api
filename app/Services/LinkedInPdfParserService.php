@@ -56,7 +56,7 @@ class LinkedInPdfParserService
     private function normalizeText(string $text): string
     {
         // Étape 0: Supprimer les artefacts de pagination PDF (ex: "Page 1 of 6")
-        $text = preg_replace('/Page\s+\d+\s+of\s+\d+/i', '', $text) ?? $text;
+        $text = preg_replace('/Page\s+\d+\s+(of|sur)\s+\d+/i', '', $text) ?? $text;
 
         // Étape 1: Décoder les entités HTML numériques (&#x1F4BC; → 💼, &amp; → &, etc.)
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -150,12 +150,16 @@ class LinkedInPdfParserService
             "   - Compétences (Skills) : Liste de mots-clés.\n\n".
             "2. REGROUPEMENT DES MISSIONS : Les lignes commençant par des tirets (-), des puces (•) ou des points sont des détails de l'expérience ou de la formation qui précède. \n".
             "   → Tu DOIS impérativement regrouper toutes ces lignes dans le champ 'description' de l'objet parent. \n".
-            "   → NE JAMAIS créer une nouvelle entrée d'expérience ou de formation pour un bullet point.\n\n".
-            "3. NETTOYAGE DES MOTS COLLÉS (STICKY WORDS) : Le parsing PDF colle souvent des mots (ex: 'Engineermars' au lieu de 'Engineer mars', 'RennesFrance' au lieu de 'Rennes, France').\n".
+            "   → NE JAMAIS créer une nouvelle entrée d'expérience ou de formation pour un bullet point.\n".
+            "   → NE JAMAIS inventer d'étapes si le texte est répétitif ou mal formé.\n\n".
+            "3. DISTINCTION EXPÉRIENCE/FORMATION : \n".
+            "   → La catégorie 'education' est EXCLUSIVEMENT réservée aux diplômes académiques (Master, Licence, Ecole, etc.).\n".
+            "   → NE JAMAIS mettre des missions, tâches ou projets professionnels (ex: 'Conception de...', 'Suivi de...') dans 'education'. Ils vont TOUJOURS dans 'experience'.\n\n".
+            "4. NETTOYAGE DES MOTS COLLÉS (STICKY WORDS) : Le parsing PDF colle souvent des mots (ex: 'Engineermars' au lieu de 'Engineer mars', 'RennesFrance' au lieu de 'Rennes, France').\n".
             "   → Tu DOIS détecter et séparer ces mots pour un rendu professionnel.\n\n".
-            "4. COMPÉTENCES (SKILLS) : Ne conserve que des mots-clés courts (ex: 'Python', 'Gestion de projet', 'React').\n".
+            "5. COMPÉTENCES (SKILLS) : Ne conserve que des mots-clés courts (ex: 'Python', 'Gestion de projet', 'React').\n".
             "   → Si tu trouves une phrase entière dans les compétences, reformule-la en mots-clés ou ignore-la si elle appartient à une description de poste.\n\n".
-            "5. DATES : LinkedIn utilise souvent le format 'mois année - mois année' ou 'mois année - Aujourd’hui'. Convertis-les au format YYYY-MM-DD (ex: 'janvier 2024' -> '2024-01-01').\n\n".
+            "6. DATES : LinkedIn utilise souvent le format 'mois année - mois année' ou 'mois année - Aujourd’hui'. Convertis-les au format YYYY-MM-DD (ex: 'janvier 2024' -> '2024-01-01').\n\n".
             "RÈGLES IMPORTANTES :\n".
             "- Ne jamais inventer d'information. Si une info est manquante, mets null ou une chaine vide.\n".
             "- Réponds UNIQUEMENT avec le bloc JSON, sans texte avant ou après, sans balises markdown (```json), sans commentaires et sans virgules traînantes.\n".
@@ -345,16 +349,29 @@ class LinkedInPdfParserService
         $block = [];
 
         foreach ($lines as $line) {
-            if (stripos($line, 'Expérience') !== false || stripos($line, 'Experience') !== false) {
+            $trimmedLine = trim($line);
+
+            // Détection robuste de début de section (ligne presque exacte)
+            if (preg_match('/^(Expérience|Experience)$/i', $trimmedLine)) {
                 $inSection = true;
 
                 continue;
             }
-            if (stripos($line, 'Formation') !== false || stripos($line, 'Education') !== false) {
+
+            // Détection robuste de fin de section (ligne presque exacte pour Formation/Education)
+            if ($inSection && preg_match('/^(Formation|Education)$/i', $trimmedLine)) {
                 break;
             }
 
             if ($inSection) {
+                // Si la ligne commence par une puce, on l'ajoute à la description du dernier bloc au lieu de créer un nouveau bloc
+                if (preg_match('/^[•\-\*]/u', $trimmedLine) && ! empty($experiences)) {
+                    $lastIdx = count($experiences) - 1;
+                    $experiences[$lastIdx]['description'] .= "\n".$trimmedLine;
+
+                    continue;
+                }
+
                 $block[] = $line;
                 if (count($block) === 4) {
                     $exp = $this->parseExperienceBlock($block);
@@ -404,15 +421,29 @@ class LinkedInPdfParserService
         $block = [];
 
         foreach ($lines as $line) {
-            if (stripos($line, 'Formation') !== false || stripos($line, 'Education') !== false) {
+            $trimmedLine = trim($line);
+
+            if (preg_match('/^(Formation|Education)$/i', $trimmedLine)) {
                 $inSection = true;
 
                 continue;
             }
+
+            // Fin de section si on tombe sur Compétences ou autre section majeure
+            if ($inSection && preg_match('/^(Compétences|Skills|Honneurs|Langues|Languages)$/i', $trimmedLine)) {
+                break;
+            }
+
             if ($inSection) {
-                if (preg_match('/Page \d+ of \d+/', $line)) {
+                if (preg_match('/Page \d+ (of|sur) \d+/', $line)) {
                     continue;
                 }
+
+                // Ignorer les puces en éducation pour le parseur legacy (souvent du bruit)
+                if (preg_match('/^[•\-\*]/u', $trimmedLine)) {
+                    continue;
+                }
+
                 $block[] = $line;
                 if (count($block) === 2) {
                     $school = $block[0];
