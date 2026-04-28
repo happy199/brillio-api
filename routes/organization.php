@@ -130,6 +130,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/subscriptions/downgrade', [\App\Http\Controllers\Organization\SubscriptionController::class, 'downgrade'])
             ->middleware('organization_role:admin')
             ->name('subscriptions.downgrade');
+        Route::post('/subscriptions/request-contact', [\App\Http\Controllers\Organization\SubscriptionController::class, 'requestContact'])
+            ->middleware('organization_role:admin')
+            ->name('subscriptions.request-contact');
         Route::post('/subscriptions/{plan}', [\App\Http\Controllers\Organization\SubscriptionController::class, 'subscribe'])
             ->middleware('organization_role:admin')
             ->name('subscriptions.subscribe');

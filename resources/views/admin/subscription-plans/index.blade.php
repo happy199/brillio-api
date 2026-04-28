@@ -26,14 +26,14 @@
     },
     openCreateModal(targetPlan) {
         this.editMode = false;
-        this.modalTitle = 'Créer une Offre d\'Abonnement ' + (targetPlan === 'free' ? 'Standard (Gratuit)' : (targetPlan === 'pro' ? 'PRO' : 'Entreprise'));
+        this.modalTitle = 'Créer une Offre d\'Abonnement ' + (targetPlan === 'free' ? 'Standard (Gratuit)' : (targetPlan === 'pro' ? 'PRO' : (targetPlan === 'enterprise' ? 'Entreprise' : 'Établissement')));
         this.formAction = '{{ route('admin.subscription-plans.store') }}';
         this.formData = {
             id: '',
             name: '',
             target_plan: targetPlan,
             duration_days: targetPlan === 'free' ? 0 : 30,
-            price: targetPlan === 'free' ? 0 : (targetPlan === 'pro' ? 20000 : 50000),
+            price: targetPlan === 'free' ? 0 : (targetPlan === 'pro' ? 20000 : (targetPlan === 'enterprise' ? 50000 : 0)),
             promo_percent: 0,
             description: '',
             features: [],
@@ -70,7 +70,47 @@
                 class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                 Plans Entreprise
             </button>
+            <button @click="activeTab = 'establishment'"
+                :class="activeTab === 'establishment' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Plans Établissement
+            </button>
         </nav>
+    </div>
+    
+    <!-- Info Plan Établissement -->
+    <div x-show="activeTab === 'establishment'" class="mb-6 p-6 bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl text-white shadow-lg overflow-hidden relative">
+        <div class="absolute top-0 right-0 p-4 opacity-10">
+            <i class="fas fa-university text-9xl"></i>
+        </div>
+        <div class="relative z-10">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-info-circle"></i> À propos du plan Établissement
+            </h3>
+            <p class="text-indigo-100 mb-6 max-w-3xl">
+                Ce plan est destiné aux universités, écoles et centres de formation. Contrairement aux autres plans, il n'est pas payable directement. L'activation se fait après une étude personnalisée de vos besoins.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-medium">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-indigo-300"></i> Modification de la fiche établissement complète
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-indigo-300"></i> Consultation des manifestations d'intérêt des jeunes
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-indigo-300"></i> Formulaires d'intérêt personnalisés (IA/Questions)
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-indigo-300"></i> Outils de prospection & ciblage MBTI
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-indigo-300"></i> Inclusion dans nos newsletters (Milliers de jeunes)
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-indigo-300"></i> Publication d'événements à la communauté
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Actions -->
@@ -117,7 +157,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button @click="openEditModal({{ $plan }})"
+                        <button @click="openEditModal({{ json_encode($plan) }})"
                             class="text-indigo-600 hover:text-indigo-900 mr-3">Modifier</button>
                         <form action="{{ route('admin.subscription-plans.destroy', $plan) }}" method="POST"
                             class="inline" onsubmit="return confirm('Supprimer ce plan ?');">
@@ -128,6 +168,13 @@
                     </td>
                 </tr>
                 @endforeach
+                @if($plans->where('target_plan', 'establishment')->isEmpty())
+                <tr x-show="activeTab === 'establishment'">
+                    <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500 italic">
+                        Il n'y a pas encore d'offres définies pour le plan Établissement. Cliquez sur "+ Nouveau Plan" pour en créer une.
+                    </td>
+                </tr>
+                @endif
             </tbody>
         </table>
     </div>

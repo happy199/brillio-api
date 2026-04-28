@@ -42,8 +42,8 @@ class OrganizationController extends Controller
             'description' => 'nullable|string',
             'logo' => 'nullable|image|max:2048', // 2MB Max
             'status' => 'required|in:active,inactive',
-            'subscription_plan' => ['required', Rule::in(['free', 'pro', 'enterprise'])],
-            'subscription_expires_at' => 'required_if:subscription_plan,pro,enterprise|nullable|date',
+            'subscription_plan' => ['required', Rule::in(['free', 'pro', 'enterprise', 'establishment'])],
+            'subscription_expires_at' => 'required_if:subscription_plan,pro,enterprise,establishment|nullable|date',
         ]);
 
         if ($request->hasFile('logo')) {

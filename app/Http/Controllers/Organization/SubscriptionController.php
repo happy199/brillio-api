@@ -23,8 +23,28 @@ class SubscriptionController extends Controller
         $freePlan = $allPlans->where('target_plan', \App\Models\Organization::PLAN_FREE)->first();
         $proPlans = $allPlans->where('target_plan', 'pro')->keyBy('duration_days');
         $enterprisePlans = $allPlans->where('target_plan', 'enterprise')->keyBy('duration_days');
+        $establishmentPlans = $allPlans->where('target_plan', 'establishment')->keyBy('duration_days');
 
-        return view('organization.subscriptions.index', compact('freePlan', 'proPlans', 'enterprisePlans'));
+        return view('organization.subscriptions.index', compact('freePlan', 'proPlans', 'enterprisePlans', 'establishmentPlans'));
+    }
+
+    /**
+     * Handle request for Establishment Plan contact.
+     */
+    public function requestContact(Request $request)
+    {
+        $organization = $this->getCurrentOrganization();
+        $user = auth()->user();
+
+        // Log the request (or send email)
+        \App\Models\ContactMessage::create([
+            'name' => $user->name,
+            'email' => $user->email,
+            'subject' => "Demande de Plan Établissement - {$organization->name}",
+            'message' => "L'organisation {$organization->name} (ID: {$organization->id}) souhaite être recontactée pour souscrire au plan Établissement.",
+        ]);
+
+        return redirect()->back()->with('success', 'Votre demande a été envoyée. L\'équipe Brillio vous recontactera très prochainement.');
     }
 
     /**

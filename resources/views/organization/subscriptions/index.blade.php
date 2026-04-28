@@ -5,8 +5,9 @@
 @section('content')
 @php
 $isFree = auth()->user()->organization->subscription_plan === \App\Models\Organization::PLAN_FREE;
-$isPro = auth()->user()->organization->isPro();
-$isEnterprise = auth()->user()->organization->isEnterprise();
+$isPro = auth()->user()->organization->isPro() && !auth()->user()->organization->isEnterprise() && !auth()->user()->organization->isEstablishment();
+$isEnterprise = auth()->user()->organization->isEnterprise() && !auth()->user()->organization->isEstablishment();
+$isEstablishment = auth()->user()->organization->isEstablishment();
 
 $periods = [
 30 => '1 mois',
@@ -46,7 +47,7 @@ $periods = [
     </div>
 
     {{-- Pricing Cards --}}
-    <div class="grid gap-8 lg:grid-cols-3 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Standard (Free) --}}
         <div
@@ -201,6 +202,79 @@ $periods = [
             @endforeach
             @endif
         </div>
+
+        {{-- Establishment - Premium Lite Design --}}
+        <div
+            class="relative flex flex-col lg:col-span-3 rounded-[2.5rem] border-2 border-organization-200 bg-white p-8 lg:p-12 shadow-xl hover:shadow-2xl transition-all duration-700 overflow-hidden group">
+            
+            {{-- Subtle Background Accent --}}
+            <div class="absolute -right-20 -top-20 w-96 h-96 bg-organization-50 rounded-full blur-[100px] group-hover:bg-organization-100/50 transition-colors duration-1000"></div>
+            <div class="absolute left-0 top-0 w-2 h-full bg-organization-600"></div>
+
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center gap-12">
+                
+                {{-- Left: Identity --}}
+                <div class="lg:w-1/3 text-center lg:text-left">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-organization-50 text-organization-600 rounded-2xl mb-6 shadow-sm">
+                        <i class="fas fa-university text-3xl"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-gray-900 tracking-tight mb-2">Plan Établissement</h3>
+                    <p class="text-gray-500 font-medium italic mb-8">Universités & Hautes Écoles</p>
+                    
+                    <div class="flex flex-col gap-1">
+                        <span class="text-4xl font-black text-organization-600">Sur Devis</span>
+                        <span class="text-[10px] uppercase tracking-[0.3em] text-gray-400 font-bold">Audit institutionnel inclus</span>
+                    </div>
+                </div>
+
+                {{-- Middle: Features --}}
+                <div class="flex-1 lg:border-x lg:border-gray-100 lg:px-12">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                        @php $activeEstPlan = $establishmentPlans->first(); @endphp
+                        @php 
+                            $features = ($activeEstPlan && $activeEstPlan->features) ? $activeEstPlan->features : [
+                                'Tout du plan Entreprise',
+                                'Fiche Établissement premium',
+                                'Outils de prospection MBTI',
+                                'Formulaires d\'intérêt IA',
+                                'Publication d\'événements',
+                                'Mise en avant prioritaire'
+                            ];
+                        @endphp
+
+                        @foreach($features as $feature)
+                            <div class="flex items-center gap-3 group/feat">
+                                <div class="flex-shrink-0 w-5 h-5 rounded-full bg-organization-50 flex items-center justify-center group-hover/feat:bg-organization-600 transition-colors duration-300">
+                                    <i class="fas fa-check text-[10px] text-organization-600 group-hover/feat:text-white"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-700">{{ $feature }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Right: CTA --}}
+                <div class="lg:w-1/4 flex flex-col items-center gap-4">
+                    @if($isEstablishment)
+                        <div class="w-full rounded-2xl bg-gray-50 border border-gray-100 p-6 text-center">
+                            <i class="fas fa-check-circle text-organization-600 text-2xl mb-2"></i>
+                            <p class="text-sm font-black text-gray-900 uppercase tracking-widest leading-none">Actif</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Soutenu par Brillio</p>
+                        </div>
+                    @else
+                        <form action="{{ route('organization.subscriptions.request-contact') }}" method="POST" class="w-full">
+                            @csrf
+                            <button type="submit"
+                                class="w-full py-5 bg-organization-600 text-white rounded-2xl font-black text-sm tracking-widest hover:bg-organization-700 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 transition-all duration-300">
+                                <i class="fas fa-paper-plane mr-2"></i> ÊTRE RECONTACTÉ
+                            </button>
+                        </form>
+                        <p class="text-[10px] text-gray-400 text-center font-bold uppercase tracking-tighter">Réponse sous 48h maximum</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 
     {{-- Downgrade Modal --}}

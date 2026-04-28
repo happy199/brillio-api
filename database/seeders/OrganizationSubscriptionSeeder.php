@@ -269,5 +269,33 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'display_order' => 24,
             ]
         );
+
+        // 11. Establishment Plan (On Demand / Sur Devis)
+        CreditPack::updateOrCreate(
+            [
+                'target_plan' => 'establishment',
+                'user_type' => 'organization',
+                'type' => 'subscription',
+                'duration_days' => 30, // Default period
+            ],
+            [
+                'name' => 'Établissement',
+                'price' => 0,
+                'credits' => 0,
+                'description' => 'Le plan ultime pour l\'éducation et les centres de formation.',
+                'features' => [
+                    'Tout du plan Entreprise',
+                    'Fiche Établissement premium personnalisée',
+                    'Outils de prospection & ciblage MBTI',
+                    'Formulaires d\'intérêt IA (Questions dynamiques)',
+                    'Manifestations d\'intérêt illimitées',
+                    'Publication d\'événements à la communauté',
+                    'Mise en avant prioritaire dans les recherches',
+                ],
+                'is_active' => true,
+                'is_popular' => false,
+                'display_order' => 30,
+            ]
+        );
     }
 }

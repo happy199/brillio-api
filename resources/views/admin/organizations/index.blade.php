@@ -81,7 +81,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $organization->subscription_plan === 'free' ? 'bg-gray-100 text-gray-800' : ($organization->subscription_plan === 'pro' ? 'bg-purple-100 text-purple-800' : 'bg-indigo-100 text-indigo-800') }}">
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $organization->subscription_plan === 'free' ? 'bg-gray-100 text-gray-800' : ($organization->subscription_plan === 'pro' ? 'bg-purple-100 text-purple-800' : ($organization->subscription_plan === 'establishment' ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800')) }}">
                                 {{ $organization->subscription_status_label }}
                             </span>
                         </td>
