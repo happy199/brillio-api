@@ -560,15 +560,15 @@
                         @endphp
                         <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition"
                             x-data="{
-                                                                                                        historyData: {
-                                                                                                            personality_type: '{{ $historyTest->personality_type }}',
-                                                                                                            personality_label: '{{ $mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type }}',
-                                                                                                            personality_description: {{ json_encode($historyTest->personality_description ?? '') }},
-                                                                                                            completed_at: '{{ $historyTest->completed_at }}',
-                                                                                                            traits_scores: {{ json_encode($historyTest->traits_scores ?? []) }},
-                                                                                                            recommended_careers: {{ json_encode($historyTest->recommended_careers ?? []) }}
-                                                                                                        }
-                                                                                                     }">
+                                historyData: {
+                                    personality_type: @js($historyTest->personality_type),
+                                    personality_label: @js($mbtiTypes[$historyTest->personality_type] ?? $historyTest->personality_type),
+                                    personality_description: @js($historyTest->personality_description ?? ''),
+                                    completed_at: @js($historyTest->completed_at),
+                                    traits_scores: @js($historyTest->traits_scores ?? []),
+                                    recommended_careers: @js($historyTest->recommended_careers ?? [])
+                                }
+                            }">
                             <div class="flex items-center gap-4">
                                 <div
                                     class="w-12 h-12 rounded-lg flex items-center justify-center font-bold text-white text-sm {{ $badgeColor }}">
@@ -581,7 +581,7 @@
                                     <p class="text-xs text-gray-500">{{ $historyTest->completed_at->format('d/m/Y à H:i') }}</p>
                                 </div>
                             </div>
-                            <button @click="$root.viewHistoryDetails(historyData)"
+                            <button @click="viewHistoryDetails(historyData)"
                                 class="text-blue-600 text-sm font-medium hover:underline">Voir détails</button>
                         </div>
                     @endforeach
@@ -1084,6 +1084,131 @@
 
     @push('scripts')
         <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+            function recommendationsSystem() {
+                return {
+                    loading: true,
+                    establishments: [],
+                    mbtiType: '',
+                    userHasPhone: {{ auth()->user()->phone ? 'true' : 'false' }},
+                    activePhoneInput: null,
+                    tempPhone: '',
+                    sidebarOpen: false,
+                    estDetails: null,
+                    formData: {},
+
+                    formatYoutubeUrl(url) {
+                        if (!url) return '';
+                        if (url.includes('youtu.be/')) {
+                            return url.replace('youtu.be/', 'youtube.com/embed/');
+                        }
+                        if (url.includes('watch?v=')) {
+                            return url.replace('watch?v=', 'embed/');
+                        }
+                        return url;
+                    },
+
+                    init() {
+                        if ('{{ $theme }}' !== 'jeune') return;
+                        
+                        fetch('{{ route("jeune.establishments.recommended") }}')
+                            .then(res => res.json())
+                            .then(data => {
+                                this.establishments = data.establishments;
+                                this.mbtiType = data.mbti_type;
+                                this.loading = false;
+                            });
+                    },
+
+                    scrollCarousel(ref, dir) {
+                        this.$refs[ref].scrollBy({ left: dir * 320, behavior: 'smooth' });
+                    },
+
+                    handleInterest(est) {
+                        if (est.user_has_interest) return;
+
+                        if (!this.userHasPhone) {
+                            if (this.activePhoneInput === est.id) {
+                                if (!this.tempPhone || this.tempPhone.length < 8) {
+                                    alert('Veuillez entrer un numéro de téléphone valide.');
+                                    return;
+                                }
+                                this.submitInterest(est, this.tempPhone);
+                            } else {
+                                this.activePhoneInput = est.id;
+                            }
+                            return;
+                        }
+
+                        this.submitInterest(est);
+                    },
+
+                    submitInterest(est, phone = null) {
+                        let payload = {};
+                        if (phone) payload.phone = phone;
+
+                        fetch(`/espace-jeune/establishments/${est.id}/interest-quick`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify(payload)
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                est.user_has_interest = true;
+                                this.userHasPhone = true;
+                                this.activePhoneInput = null;
+                                
+                                // Dispatch toast event
+                                window.dispatchEvent(new CustomEvent('toast', { 
+                                    detail: { message: data.message, type: 'success' } 
+                                }));
+                            } else {
+                                alert(data.message);
+                            }
+                        });
+                    },
+
+                    openDetails(est) {
+                        this.estDetails = est;
+                        this.formData = {};
+                        this.sidebarOpen = true;
+                    },
+
+                    submitPreciseInterest() {
+                        if (!this.userHasPhone && (!this.tempPhone || this.tempPhone.length < 8)) {
+                            alert('Veuillez entrer un numéro de téléphone valide.');
+                            return;
+                        }
+
+                        fetch(`/espace-jeune/establishments/${this.estDetails.id}/interest-precise`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ 
+                                form_data: this.formData,
+                                phone: this.tempPhone 
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                this.estDetails.user_has_interest = true;
+                                this.userHasPhone = true;
+                                this.sidebarOpen = false;
+                                window.dispatchEvent(new CustomEvent('toast', { 
+                                    detail: { message: data.message, type: 'success' } 
+                                }));
+                            }
+                        });
+                    }
+                }
+            }
+
             function personalityTest() {
                 return {
                     showTest: false, testStarted: false, loading: false, submitting: false, questions: [], answers: {}, currentQuestion: 0,
@@ -1356,131 +1481,6 @@
                     closeCareerModal() {
                         this.showCareerModal = false;
                         setTimeout(() => { this.selectedCareer = null; }, 300);
-                    },
-
-                    recommendationsSystem() {
-                        return {
-                            loading: true,
-                            establishments: [],
-                            mbtiType: '',
-                            userHasPhone: {{ auth()->user()->phone ? 'true' : 'false' }},
-                            activePhoneInput: null,
-                            tempPhone: '',
-                            sidebarOpen: false,
-                            estDetails: null,
-                            formData: {},
-
-                            formatYoutubeUrl(url) {
-                                if (!url) return '';
-                                if (url.includes('youtu.be/')) {
-                                    return url.replace('youtu.be/', 'youtube.com/embed/');
-                                }
-                                if (url.includes('watch?v=')) {
-                                    return url.replace('watch?v=', 'embed/');
-                                }
-                                return url;
-                            },
-
-                            init() {
-                                if ('{{ $theme }}' !== 'jeune') return;
-                                
-                                fetch('{{ route("jeune.establishments.recommended") }}')
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        this.establishments = data.establishments;
-                                        this.mbtiType = data.mbti_type;
-                                        this.loading = false;
-                                    });
-                            },
-
-                            scrollCarousel(ref, dir) {
-                                this.$refs[ref].scrollBy({ left: dir * 320, behavior: 'smooth' });
-                            },
-
-                            handleInterest(est) {
-                                if (est.user_has_interest) return;
-
-                                if (!this.userHasPhone) {
-                                    if (this.activePhoneInput === est.id) {
-                                        if (!this.tempPhone || this.tempPhone.length < 8) {
-                                            alert('Veuillez entrer un numéro de téléphone valide.');
-                                            return;
-                                        }
-                                        this.submitInterest(est, this.tempPhone);
-                                    } else {
-                                        this.activePhoneInput = est.id;
-                                    }
-                                    return;
-                                }
-
-                                this.submitInterest(est);
-                            },
-
-                            submitInterest(est, phone = null) {
-                                let payload = {};
-                                if (phone) payload.phone = phone;
-
-                                fetch(`/espace-jeune/establishments/${est.id}/interest-quick`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify(payload)
-                                })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        est.user_has_interest = true;
-                                        this.userHasPhone = true;
-                                        this.activePhoneInput = null;
-                                        
-                                        // Dispatch toast event
-                                        window.dispatchEvent(new CustomEvent('toast', { 
-                                            detail: { message: data.message, type: 'success' } 
-                                        }));
-                                    } else {
-                                        alert(data.message);
-                                    }
-                                });
-                            },
-
-                            openDetails(est) {
-                                this.estDetails = est;
-                                this.formData = {};
-                                this.sidebarOpen = true;
-                            },
-
-                            submitPreciseInterest() {
-                                if (!this.userHasPhone && (!this.tempPhone || this.tempPhone.length < 8)) {
-                                    alert('Veuillez entrer un numéro de téléphone valide.');
-                                    return;
-                                }
-
-                                fetch(`/espace-jeune/establishments/${this.estDetails.id}/interest-precise`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    },
-                                    body: JSON.stringify({ 
-                                        form_data: this.formData,
-                                        phone: this.tempPhone 
-                                    })
-                                })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        this.estDetails.user_has_interest = true;
-                                        this.userHasPhone = true;
-                                        this.sidebarOpen = false;
-                                        window.dispatchEvent(new CustomEvent('toast', { 
-                                            detail: { message: data.message, type: 'success' } 
-                                        }));
-                                    }
-                                });
-                            }
-                        }
                     }
                 }
             }
