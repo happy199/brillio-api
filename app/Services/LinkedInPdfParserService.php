@@ -154,7 +154,8 @@ class LinkedInPdfParserService
             "   → NE JAMAIS inventer d'étapes si le texte est répétitif ou mal formé.\n\n".
             "3. DISTINCTION EXPÉRIENCE/FORMATION : \n".
             "   → La catégorie 'education' est EXCLUSIVEMENT réservée aux diplômes académiques (Master, Licence, Ecole, etc.).\n".
-            "   → NE JAMAIS mettre des missions, tâches ou projets professionnels (ex: 'Conception de...', 'Suivi de...') dans 'education'. Ils vont TOUJOURS dans 'experience'.\n\n".
+            "   → NE JAMAIS mettre des missions, tâches ou projets professionnels (ex: 'Conception de...', 'Suivi de...') dans 'education'. Ils vont TOUJOURS dans 'experience'.\n".
+            "   → NE JAMAIS utiliser des mots isolés sans sens (ex: 'utilisatrices', 'Data') comme titres de poste ou noms d'entreprise s'ils proviennent d'une phrase coupée.\n\n".
             "4. NETTOYAGE DES MOTS COLLÉS (STICKY WORDS) : Le parsing PDF colle souvent des mots (ex: 'Engineermars' au lieu de 'Engineer mars', 'RennesFrance' au lieu de 'Rennes, France').\n".
             "   → Tu DOIS détecter et séparer ces mots pour un rendu professionnel.\n\n".
             "5. COMPÉTENCES (SKILLS) : Ne conserve que des mots-clés courts (ex: 'Python', 'Gestion de projet', 'React').\n".
@@ -346,72 +347,85 @@ class LinkedInPdfParserService
     {
         $experiences = [];
         $inSection = false;
-        $block = [];
+        $allLines = $lines;
+        $count = count($allLines);
 
-        foreach ($lines as $line) {
-            $trimmedLine = trim($line);
+        // Regex étendue pour les dates (Français + Anglais)
+        $dateRegex = '/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})\s*-\s*(?:.*?(\d{4})|Present|Aujourd’hui|Présent)/i';
 
-            // Détection robuste de début de section (ligne presque exacte)
-            if (preg_match('/^(Expérience|Experience)$/i', $trimmedLine)) {
+        for ($i = 0; $i < $count; $i++) {
+            $line = trim($allLines[$i]);
+
+            // Détection de section
+            if (preg_match('/^(Expérience|Experience)$/i', $line)) {
                 $inSection = true;
 
                 continue;
             }
-
-            // Détection robuste de fin de section (ligne presque exacte pour Formation/Education)
-            if ($inSection && preg_match('/^(Formation|Education)$/i', $trimmedLine)) {
+            if ($inSection && preg_match('/^(Formation|Education)$/i', $line)) {
                 break;
             }
 
-            if ($inSection) {
-                // Si la ligne commence par une puce, on l'ajoute à la description du dernier bloc au lieu de créer un nouveau bloc
-                if (preg_match('/^[•\-\*]/u', $trimmedLine) && ! empty($experiences)) {
-                    $lastIdx = count($experiences) - 1;
-                    $experiences[$lastIdx]['description'] .= "\n".$trimmedLine;
+            if ($inSection && preg_match($dateRegex, $line, $matches)) {
+                // On a trouvé une ligne de date !
+                // i-2: Entreprise (si existe)
+                // i-1: Titre (si existe)
+                // i: Dates
+                // i+1: Localisation (si existe)
 
-                    continue;
+                $company = ($i >= 2) ? trim($allLines[$i - 2]) : '';
+                $title = ($i >= 1) ? trim($allLines[$i - 1]) : '';
+                $location = ($i + 1 < $count) ? trim($allLines[$i + 1]) : '';
+
+                // Nettoyage : si l'entreprise ou le titre ressemblent à des puces, on les ignore
+                if (preg_match('/^[•\-\*]/u', $company)) {
+                    $company = '';
+                }
+                if (preg_match('/^[•\-\*]/u', $title)) {
+                    $title = '';
                 }
 
-                $block[] = $line;
-                if (count($block) === 4) {
-                    $exp = $this->parseExperienceBlock($block);
-                    if ($exp) {
-                        $experiences[] = $exp;
+                $startDate = $matches[2];
+                $endDate = (! empty($matches[3])) ? $matches[3] : null;
+
+                $years = $months = 0;
+                if (preg_match('/\((\d+)\s+(ans?|years?)\s*(?:(\d+)\s+(mois|months?))?\)/i', $line, $m)) {
+                    $years = (int) $m[1];
+                    $months = (int) ($m[3] ?? 0);
+                } elseif (preg_match('/\((\d+)\s+(mois|months?)\)/i', $line, $m)) {
+                    $months = (int) $m[1];
+                }
+
+                $exp = [
+                    'title' => $title,
+                    'company' => $company,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'description' => $location, // On commence par la localisation
+                    'duration_years' => $years,
+                    'duration_months' => $months,
+                ];
+
+                // Collecter la description jusqu'à la prochaine date ou section
+                $j = $i + 2;
+                while ($j < $count) {
+                    $nextLine = trim($allLines[$j]);
+                    if (preg_match($dateRegex, $nextLine) || preg_match('/^(Formation|Education|Compétences|Skills|Honneurs|Langues|Languages)$/i', $nextLine)) {
+                        break;
                     }
-                    $block = [];
+                    if ($exp['description'] !== '') {
+                        $exp['description'] .= "\n";
+                    }
+                    $exp['description'] .= $nextLine;
+                    $j++;
                 }
+
+                $experiences[] = $exp;
+                $i = $j - 1; // Avancer l'index principal
             }
         }
 
         return $experiences;
-    }
-
-    private function parseExperienceBlock($block)
-    {
-        $company = $block[0];
-        $title = $block[1];
-        $dates = $block[2];
-        $location = $block[3];
-
-        $startDate = $endDate = null;
-        $years = $months = 0;
-
-        if (preg_match('/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})\s*-\s*(?:.*?(\d{4})|Present|Aujourd’hui|Présent)/i', $dates, $m)) {
-            $startDate = $m[2];
-            $endDate = (! empty($m[3])) ? $m[3] : null;
-        }
-
-        if (preg_match('/\((\d+)\s+ans?\s*(?:(\d+)\s+mois)?\)/i', $dates, $m)) {
-            $years = (int) $m[1];
-            $months = (int) ($m[2] ?? 0);
-        } elseif (preg_match('/\((\d+)\s+mois\)/i', $dates, $m)) {
-            $months = (int) $m[1];
-        }
-
-        return [
-            'title' => $title, 'company' => $company, 'start_date' => $startDate, 'end_date' => $endDate,
-            'description' => $location, 'duration_years' => $years, 'duration_months' => $months,
-        ];
     }
 
     private function extractEducation($lines)
@@ -439,16 +453,19 @@ class LinkedInPdfParserService
                     continue;
                 }
 
-                // Ignorer les puces en éducation pour le parseur legacy (souvent du bruit)
+                // Ignorer les puces en éducation
                 if (preg_match('/^[•\-\*]/u', $trimmedLine)) {
                     continue;
                 }
 
                 $block[] = $line;
-                if (count($block) === 2) {
+                // En éducation, on cherche souvent un bloc Ecole / Diplôme (Dates)
+                if (count($block) >= 2) {
                     $school = $block[0];
                     $degree = $block[1];
                     $start = $end = null;
+
+                    // Tentative d'extraire les dates du diplôme
                     if (preg_match('/\(.*?(\d{4}).*?-.*?(\d{4})\)/', $degree, $m)) {
                         $start = (int) $m[1];
                         $end = (int) $m[2];
@@ -456,6 +473,7 @@ class LinkedInPdfParserService
                         $start = (int) $m[1];
                         $end = (int) date('Y');
                     }
+
                     $education[] = ['school' => $school, 'degree' => $degree, 'year_start' => $start, 'year_end' => $end];
                     $block = [];
                 }
