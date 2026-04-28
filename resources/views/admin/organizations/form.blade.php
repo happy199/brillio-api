@@ -30,7 +30,7 @@
     function toggleExpiryField() {
         var plan = document.getElementById('subscription_plan').value;
         var container = document.getElementById('subscription_expiry_container');
-        if (plan === 'pro' || plan === 'enterprise') {
+        if (plan === 'pro' || plan === 'enterprise' || plan === 'establishment') {
             container.classList.remove('hidden');
         } else {
             container.classList.add('hidden');
@@ -154,6 +154,9 @@
                                     <option value="enterprise" {{ old('subscription_plan', $organization->
                                         subscription_plan ?? '') == 'enterprise' ? 'selected' : '' }}>Enterprise
                                     </option>
+                                    <option value="establishment" {{ old('subscription_plan', $organization->
+                                        subscription_plan ?? '') == 'establishment' ? 'selected' : '' }}>Établissement
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -168,8 +171,8 @@
                             @error('subscription_expires_at')
                             <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
                             @enderror
-                            <p class="text-[11px] text-gray-500 mt-2 font-medium">Obligatoire pour les plans Pro et
-                                Enterprise.</p>
+                            <p class="text-[11px] text-gray-500 mt-2 font-medium">Obligatoire pour les plans Pro,
+                                Enterprise et Établissement.</p>
                         </div>
 
                         <div>

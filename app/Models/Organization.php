@@ -61,6 +61,8 @@ class Organization extends Model
 
     public const PLAN_ENTERPRISE = 'enterprise';
 
+    public const PLAN_ESTABLISHMENT = 'establishment';
+
     /**
      * Get the attributes that should be cast.
      */
@@ -212,20 +214,29 @@ class Organization extends Model
     }
 
     /**
-     * Check if organization is on PRO plan or higher (Enterprise).
+     * Check if organization is on PRO plan or higher (Enterprise, Establishment).
      */
     public function isPro(): bool
     {
         return $this->hasActiveSubscription() &&
-            in_array($this->subscription_plan, [self::PLAN_PRO, self::PLAN_ENTERPRISE]);
+            in_array($this->subscription_plan, [self::PLAN_PRO, self::PLAN_ENTERPRISE, self::PLAN_ESTABLISHMENT]);
     }
 
     /**
-     * Check if organization is on ENTERPRISE plan.
+     * Check if organization is on ENTERPRISE plan or Establishment plan.
      */
     public function isEnterprise(): bool
     {
-        return $this->hasActiveSubscription() && $this->subscription_plan === self::PLAN_ENTERPRISE;
+        return $this->hasActiveSubscription() &&
+            in_array($this->subscription_plan, [self::PLAN_ENTERPRISE, self::PLAN_ESTABLISHMENT]);
+    }
+
+    /**
+     * Check if organization is on ESTABLISHMENT plan.
+     */
+    public function isEstablishment(): bool
+    {
+        return $this->hasActiveSubscription() && $this->subscription_plan === self::PLAN_ESTABLISHMENT;
     }
 
     /**
@@ -235,6 +246,10 @@ class Organization extends Model
     {
         if ($this->subscription_plan === self::PLAN_FREE) {
             return 'Gratuit';
+        }
+
+        if ($this->subscription_plan === self::PLAN_ESTABLISHMENT) {
+            return 'Établissement';
         }
 
         if (! $this->hasActiveSubscription()) {

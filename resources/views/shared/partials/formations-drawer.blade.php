@@ -37,10 +37,40 @@
                                         <p class="text-xl text-gray-700 leading-relaxed font-medium" x-text="estDetails?.description"></p>
                                         
                                         <template x-if="estDetails?.google_maps_url">
-                                            <div class="mt-6">
-                                                <a :href="estDetails?.google_maps_url" target="_blank" class="inline-flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-100 transition">
-                                                    <i class="fas fa-map-marker-alt"></i> Voir sur Google Maps
+                                            <div class="mt-6 flex flex-wrap gap-3">
+                                                <a :href="estDetails?.google_maps_url" target="_blank" class="inline-flex items-center gap-2 bg-rose-50 text-rose-600 px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-rose-100 transition shadow-sm border border-rose-100">
+                                                    <i class="fas fa-map-marker-alt"></i> Google Maps
                                                 </a>
+
+                                                <!-- Site Web & Réseaux -->
+                                                <template x-if="estDetails?.website_url">
+                                                    <a :href="estDetails.website_url" target="_blank" class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100">
+                                                        <i class="fas fa-globe"></i> Site Web
+                                                    </a>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="estDetails?.social_links && (estDetails.social_links.linkedin || estDetails.social_links.facebook || estDetails.social_links.instagram)">
+                                            <div class="mt-8">
+                                                <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Nous suivre</h4>
+                                                <div class="flex gap-4">
+                                                    <template x-if="estDetails.social_links.linkedin">
+                                                        <a :href="estDetails.social_links.linkedin" target="_blank" class="w-14 h-14 rounded-3xl bg-slate-50 text-[#0077b5] flex items-center justify-center hover:bg-[#0077b5] hover:text-white transition-all duration-300 shadow-sm border border-slate-100 text-xl">
+                                                            <i class="fab fa-linkedin-in"></i>
+                                                        </a>
+                                                    </template>
+                                                    <template x-if="estDetails.social_links.facebook">
+                                                        <a :href="estDetails.social_links.facebook" target="_blank" class="w-14 h-14 rounded-3xl bg-slate-50 text-[#1877f2] flex items-center justify-center hover:bg-[#1877f2] hover:text-white transition-all duration-300 shadow-sm border border-slate-100 text-xl">
+                                                            <i class="fab fa-facebook-f"></i>
+                                                        </a>
+                                                    </template>
+                                                    <template x-if="estDetails.social_links.instagram">
+                                                        <a :href="estDetails.social_links.instagram" target="_blank" class="w-14 h-14 rounded-3xl bg-slate-50 text-[#e4405f] flex items-center justify-center hover:bg-[#e4405f] hover:text-white transition-all duration-300 shadow-sm border border-slate-100 text-xl">
+                                                            <i class="fab fa-instagram"></i>
+                                                        </a>
+                                                    </template>
+                                                </div>
                                             </div>
                                         </template>
                                     </section>
@@ -127,43 +157,95 @@
                                                 <h3 class="text-3xl font-black mb-2">Postuler maintenant</h3>
                                                 <p class="text-indigo-200 mb-8 font-medium">Laisse tes coordonnées pour être contacté en priorité.</p>
                                                 
-                                                <form @submit.prevent="submitPreciseInterest" class="space-y-5">
-                                                    <template x-for="(field, idx) in estDetails?.precise_form_config" :key="idx">
-                                                        <div>
-                                                            <label class="block text-xs font-black text-indigo-100 uppercase tracking-widest mb-2 ml-1" x-text="field.label"></label>
-                                                            
-                                                            <template x-if="field.type === 'text'">
-                                                                <input type="text" x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white placeholder-white/40 focus:bg-white/20 focus:ring-0 backdrop-blur-md transition-all">
-                                                            </template>
+                                                <form @submit.prevent="submitPreciseInterest" class="space-y-6">
+                                                    <div class="space-y-5">
+                                                        <template x-for="(field, idx) in estDetails?.precise_form_config" :key="idx">
+                                                            <div>
+                                                                <label class="block text-xs font-black text-indigo-100 uppercase tracking-widest mb-2 ml-1" x-text="field.label"></label>
+                                                                
+                                                                <!-- TEXTE COURT -->
+                                                                <template x-if="field.type === 'text'">
+                                                                    <input type="text" x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white placeholder-white/40 focus:bg-white/20 focus:ring-0 backdrop-blur-md transition-all">
+                                                                </template>
 
-                                                            <template x-if="field.type === 'select'">
-                                                                <select x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white focus:bg-white/20 focus:ring-0 backdrop-blur-md">
-                                                                    <option value="" class="bg-slate-800 text-white">Choisir...</option>
-                                                                    <template x-for="opt in (field.options || '').split(',')">
-                                                                        <option :value="opt.trim()" x-text="opt.trim()" class="bg-slate-800 text-white"></option>
-                                                                    </template>
-                                                                </select>
-                                                            </template>
-                                                        </div>
-                                                    </template>
+                                                                <!-- TEXTE LONG -->
+                                                                <template x-if="field.type === 'textarea'">
+                                                                    <textarea rows="3" x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white placeholder-white/40 focus:bg-white/20 focus:ring-0 backdrop-blur-md transition-all"></textarea>
+                                                                </template>
+
+                                                                <!-- LISTE DÉROULANTE -->
+                                                                <template x-if="field.type === 'select'">
+                                                                    <select x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white focus:bg-white/20 focus:ring-0 backdrop-blur-md">
+                                                                        <option value="" class="bg-slate-800 text-white">Choisir...</option>
+                                                                        <template x-for="opt in (field.options || '').split(',')">
+                                                                            <option :value="opt.trim()" x-text="opt.trim()" class="bg-slate-800 text-white"></option>
+                                                                        </template>
+                                                                    </select>
+                                                                </template>
+
+                                                                <!-- CHOIX UNIQUE (RADIO) -->
+                                                                <template x-if="field.type === 'radio'">
+                                                                    <div class="flex flex-col gap-2">
+                                                                        <template x-for="opt in (field.options || '').split(',')">
+                                                                            <label class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition">
+                                                                                <input type="radio" :name="'field_'+idx" :value="opt.trim()" x-model="formData[field.label]" class="text-indigo-500 focus:ring-0 bg-transparent border-white/30" required>
+                                                                                <span class="text-sm" x-text="opt.trim()"></span>
+                                                                            </label>
+                                                                        </template>
+                                                                    </div>
+                                                                </template>
+
+                                                                <!-- CHOIX MULTIPLE (CHECKBOX) -->
+                                                                <template x-if="field.type === 'checkbox'">
+                                                                    <div class="flex flex-col gap-2" x-data="{ values: [] }" x-init="$watch('values', v => formData[field.label] = v.join(', '))">
+                                                                        <template x-for="opt in (field.options || '').split(',')">
+                                                                            <label class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition">
+                                                                                <input type="checkbox" :value="opt.trim()" x-model="values" class="rounded text-indigo-500 focus:ring-0 bg-transparent border-white/30">
+                                                                                <span class="text-sm" x-text="opt.trim()"></span>
+                                                                            </label>
+                                                                        </template>
+                                                                    </div>
+                                                                </template>
+
+                                                                <!-- NOMBRE -->
+                                                                <template x-if="field.type === 'number'">
+                                                                    <input type="number" x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white focus:bg-white/20 focus:ring-0 backdrop-blur-md transition-all">
+                                                                </template>
+
+                                                                <!-- DATE -->
+                                                                <template x-if="field.type === 'date'">
+                                                                    <input type="date" x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white focus:bg-white/20 focus:ring-0 backdrop-blur-md transition-all">
+                                                                </template>
+                                                            </div>
+                                                        </template>
+                                                    </div>
                                                     
                                                     <!-- Champ téléphone manquant rouge -->
                                                     <template x-if="!userHasPhone">
-                                                        <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100 mt-2 mb-4 shadow-sm">
-                                                            <p class="text-[11px] font-black text-rose-600 mb-2 uppercase tracking-widest flex items-center gap-2">
-                                                                Il manque ton numéro :
-                                                            </p>
-                                                            <input type="tel" x-model="tempPhone" placeholder="ex: 97000000" class="w-full bg-white border-rose-200 rounded-xl text-sm px-4 py-3 font-bold focus:ring-2 focus:ring-rose-500 text-gray-900" required>
+                                                        <div class="p-5 bg-rose-500/20 border-2 border-rose-500/30 rounded-3xl backdrop-blur-xl">
+                                                            <div class="flex items-center gap-3 mb-3">
+                                                                <div class="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center animate-pulse">
+                                                                    <i class="fas fa-phone"></i>
+                                                                </div>
+                                                                <p class="text-xs font-black text-rose-100 uppercase tracking-widest">
+                                                                    Il manque ton numéro :
+                                                                </p>
+                                                            </div>
+                                                            <input type="tel" x-model="tempPhone" placeholder="ex: 97000000" 
+                                                                class="w-full bg-white/10 border border-rose-500/20 rounded-2xl text-lg px-5 py-4 font-black placeholder-rose-200/50 focus:bg-white/20 focus:ring-2 focus:ring-rose-500 transition-all text-white" required>
                                                         </div>
                                                     </template>
 
-                                                    <button type="submit" class="w-full py-5 bg-white text-gray-900 rounded-2xl font-black text-lg hover:scale-[1.02] transition duration-300 shadow-xl mt-4">
+                                                    <button type="submit" class="w-full py-6 bg-white text-gray-900 rounded-3xl font-black text-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-2xl shadow-indigo-900/40">
                                                         Envoyer ma candidature <i class="fas fa-paper-plane ml-2"></i>
                                                     </button>
                                                 </form>
                                             </div>
                                         </section>
                                     </template>
+                                    
+                                    <!-- Spacer final pour le scroll -->
+                                    <div class="h-10"></div>
                                 </div>
                             </div>
                         </div>

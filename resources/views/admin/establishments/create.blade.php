@@ -194,11 +194,13 @@
                                         <option value="text">Texte Court</option>
                                         <option value="textarea">Texte Long</option>
                                         <option value="select">Liste déroulante</option>
+                                        <option value="radio">Choix Unique (Radio)</option>
+                                        <option value="checkbox">Choix Multiple (Cocher)</option>
                                         <option value="number">Nombre</option>
                                         <option value="date">Date</option>
                                     </select>
                                 </div>
-                                <div class="md:col-span-2" x-show="field.type === 'select'">
+                                <div class="md:col-span-2" x-show="['select', 'radio', 'checkbox'].includes(field.type)">
                                     <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1">Options (séparées par une virgule)</label>
                                     <input type="text" :name="'precise_form_config['+index+'][options]'" x-model="field.options_string" class="w-full text-sm border-gray-200 rounded-lg shadow-sm focus:ring-indigo-500" placeholder="ex: Bac, Master, Doctorat">
                                 </div>
