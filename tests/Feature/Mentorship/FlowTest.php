@@ -55,6 +55,7 @@ class FlowTest extends TestCase
             'title' => 'First Session',
             'mentee_ids' => [$jeune->id],
             'scheduled_at' => now()->addDays(2)->format('Y-m-d H:i:s'),
+            'timezone' => 'UTC',
             'duration_minutes' => 60,
             'is_paid' => false,
         ]);
@@ -88,6 +89,7 @@ class FlowTest extends TestCase
         $response = $this->actingAs($jeune)->post(route('jeune.sessions.store'), [
             'mentor_id' => $mentor->id,
             'scheduled_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+            'timezone' => 'UTC',
             'duration_minutes' => 60,
             'title' => 'Question about React',
         ]);
