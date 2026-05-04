@@ -45,8 +45,9 @@
                         {{ \Carbon\Carbon::parse($session->scheduled_at)->isoFormat('D MMM YYYY') }}
                     </span>
                     <span class="text-gray-500 text-sm font-medium">
-                        {{ \Carbon\Carbon::parse($session->scheduled_at)->format('H:i') }} ({{
-                        $session->duration_minutes }} min)
+                        {{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} - 
+                        {{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->addMinutes($session->duration_minutes)->format('H:i') }}
+                        ({{ $session->gmt_offset }}) ({{ $session->duration_minutes }} min)
                     </span>
                 </div>
 
@@ -213,7 +214,7 @@
                                 <input type="checkbox" value="{{ $session->id }}" x-model="selectedSessions" class="session-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" @if($session->status !== 'completed' || empty($session->report_content)) disabled @endif>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                                {{ \Carbon\Carbon::parse($session->scheduled_at)->format('d/m/Y H:i') }}
+                                {{ $session->full_scheduled_at_with_gmt }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 truncate max-w-[200px]" title="{{ $session->title }}">
                                 {{ \Illuminate\Support\Str::limit($session->title, 40) }}

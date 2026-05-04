@@ -15,7 +15,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">{{ $session->title }}</h1>
                 <p class="text-gray-500">Avec {{ $session->mentor->name }} •
-                    {{ $session->scheduled_at->format('d/m/Y à H:i') }}
+                    {{ $session->full_scheduled_at_with_gmt }}
                 </p>
             </div>
         </div>

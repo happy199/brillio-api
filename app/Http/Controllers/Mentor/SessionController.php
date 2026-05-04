@@ -95,14 +95,16 @@ class SessionController extends Controller
     public function create()
     {
         $mentor = Auth::user();
-        // Récupérer seulement les mentés acceptés
         $mentees = $mentor->mentorshipsAsMentor()
             ->where('status', 'accepted')
             ->with('mentee')
             ->get()
             ->pluck('mentee');
 
-        return view('mentor.mentorship.sessions.create', compact('mentees'));
+        $timezones = \DateTimeZone::listIdentifiers();
+        $userTimezone = Auth::user()->timezone ?? 'Africa/Porto-Novo';
+
+        return view('mentor.mentorship.sessions.create', compact('mentees', 'timezones', 'userTimezone'));
     }
 
     /**
@@ -115,7 +117,8 @@ class SessionController extends Controller
             'description' => 'nullable|string',
             'mentee_ids' => 'required|array|min:1',
             'mentee_ids.*' => 'exists:users,id',
-            'scheduled_at' => 'required|date|after:now',
+            'scheduled_at' => 'required|date',
+            'timezone' => 'required|string|timezone',
             'duration_minutes' => 'required|integer|min:15',
             'is_paid' => 'boolean',
             'price' => 'nullable|numeric|min:0|required_if:is_paid,true',
@@ -123,8 +126,14 @@ class SessionController extends Controller
 
         $mentor = Auth::user();
 
-        // Génération lien Jitsi sécurisé (nom de room complexe)
-        // meet.jit.si/Brillio_{MentorID}_{Random}_{Timestamp}
+        // Conversion de la date selon le fuseau horaire choisi vers UTC pour stockage
+        $scheduledAt = \Carbon\Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
+
+        if ($scheduledAt->isPast()) {
+            return redirect()->back()->withInput()->with('error', 'La date de la séance ne peut pas être dans le passé.');
+        }
+
+        // Génération lien Jitsi sécurisé
         $roomName = 'Brillio_'.$mentor->id.'_'.Str::random(10).'_'.time();
         $meetingLink = 'https://meet.jit.si/'.$roomName;
 
@@ -132,11 +141,11 @@ class SessionController extends Controller
             'mentor_id' => $mentor->id,
             'title' => $request->title,
             'description' => $request->description,
-            'scheduled_at' => $request->scheduled_at,
+            'scheduled_at' => $scheduledAt,
+            'timezone' => $request->timezone,
             'duration_minutes' => $request->duration_minutes,
             'is_paid' => $request->boolean('is_paid'),
             'price' => $request->boolean('is_paid') ? $request->price : 0,
-            // Si payant => pending_payment, sinon confirmed direct
             'status' => $request->boolean('is_paid') ? 'pending_payment' : 'confirmed',
             'meeting_link' => $meetingLink,
             'created_by' => 'mentor',
@@ -180,13 +189,10 @@ class SessionController extends Controller
 
         $mentor = Auth::user();
         // Récupérer les mentés acceptés pour la liste de choix
-        $mentees = $mentor->mentorshipsAsMentor()
-            ->where('status', 'accepted')
-            ->with('mentee')
-            ->get()
-            ->pluck('mentee');
+        $timezones = \DateTimeZone::listIdentifiers();
+        $userTimezone = $session->timezone ?: $mentor->timezone ?: 'Africa/Porto-Novo';
 
-        return view('mentor.mentorship.sessions.edit', compact('session', 'mentees'));
+        return view('mentor.mentorship.sessions.edit', compact('session', 'mentees', 'timezones', 'userTimezone'));
     }
 
     /**
@@ -201,12 +207,20 @@ class SessionController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'scheduled_at' => 'required|date|after:now',
+            'scheduled_at' => 'required|date',
+            'timezone' => 'required|string|timezone',
             'duration_minutes' => 'required|integer|min:15',
             'price' => 'nullable|numeric|min:0',
-            'mentee_ids' => 'sometimes|array', // Optional to allow no changes, but logic below handles it
+            'mentee_ids' => 'required|array|min:1',
             'mentee_ids.*' => 'exists:users,id',
         ]);
+
+        // Conversion de la date selon le fuseau horaire choisi vers UTC
+        $scheduledAt = \Carbon\Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
+
+        if ($scheduledAt->isPast() && $scheduledAt->diffInMinutes(now()) > 5) {
+            return redirect()->back()->withInput()->with('error', 'La date de la séance ne peut pas être dans le passé.');
+        }
 
         // Sécurité : Ne pas autoriser le changement de prix si la séance est déjà confirmée ou terminée
         $canChangePrice = ! in_array($session->status, ['confirmed', 'completed']);
@@ -215,7 +229,8 @@ class SessionController extends Controller
         $session->update([
             'title' => $request->title,
             'description' => $request->description,
-            'scheduled_at' => $request->scheduled_at,
+            'scheduled_at' => $scheduledAt,
+            'timezone' => $request->timezone,
             'duration_minutes' => $request->duration_minutes,
             'price' => $newPrice,
         ]);

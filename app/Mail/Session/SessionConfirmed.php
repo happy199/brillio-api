@@ -76,7 +76,7 @@ class SessionConfirmed extends Mailable
     {
         return [
             Attachment::fromData(fn () => $this->generateIcsContent($this->session, $this->recipient), 'invitation.ics')
-                ->withMime('text/calendar'),
+                ->withMime('text/calendar; method=REQUEST'),
         ];
     }
 }

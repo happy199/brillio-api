@@ -114,7 +114,7 @@
                 <tr>
                     <td class="px-6 py-4">
                         <div class="text-sm font-bold text-gray-900">{{ $session->title }}</div>
-                        <div class="text-xs text-gray-500">{{ $session->scheduled_at->format('d/m/Y H:i') }}
+                        <div class="text-xs text-gray-500">{{ $session->full_scheduled_at_with_gmt }}</div>
                             ({{ $session->duration_minutes }} min)</div>
                         <span
                             class="inline-flex mt-1 items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">

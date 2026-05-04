@@ -70,25 +70,37 @@
                             <p class="text-xs text-gray-500 mt-2">Sélectionnez au moins une personne.</p>
                         </div>
 
-                        <!-- Date & Time -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Date, Time & Timezone -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <div>
                                 <label for="scheduled_at" class="block text-sm font-medium text-gray-700 mb-2">Date et Heure
                                     <span class="text-red-500">*</span></label>
                                 <input type="datetime-local" name="scheduled_at" id="scheduled_at"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3"
-                                    min="{{ now()->format('Y-m-d\TH:i') }}" required>
+                                    min="{{ now()->format('Y-m-d\TH:i') }}" value="{{ old('scheduled_at') }}" required>
+                            </div>
+                            <div>
+                                <label for="timezone" class="block text-sm font-medium text-gray-700 mb-2">Fuseau horaire
+                                    <span class="text-red-500">*</span></label>
+                                <select name="timezone" id="timezone"
+                                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3" required>
+                                    @foreach($timezones as $tz)
+                                        <option value="{{ $tz }}" {{ (old('timezone', $userTimezone) == $tz) ? 'selected' : '' }}>
+                                            {{ str_replace('_', ' ', $tz) }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div>
                                 <label for="duration_minutes" class="block text-sm font-medium text-gray-700 mb-2">Durée
                                     (minutes) <span class="text-red-500">*</span></label>
                                 <select name="duration_minutes" id="duration_minutes"
                                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3">
-                                    <option value="30">30 min</option>
-                                    <option value="45">45 min</option>
-                                    <option value="60" selected>1h (60 min)</option>
-                                    <option value="90">1h30 (90 min)</option>
-                                    <option value="120">2h (120 min)</option>
+                                    <option value="30" {{ old('duration_minutes') == '30' ? 'selected' : '' }}>30 min</option>
+                                    <option value="45" {{ old('duration_minutes') == '45' ? 'selected' : '' }}>45 min</option>
+                                    <option value="60" {{ (old('duration_minutes', '60') == '60') ? 'selected' : '' }}>1h (60 min)</option>
+                                    <option value="90" {{ old('duration_minutes') == '90' ? 'selected' : '' }}>1h30 (90 min)</option>
+                                    <option value="120" {{ old('duration_minutes') == '120' ? 'selected' : '' }}>2h (120 min)</option>
                                 </select>
                             </div>
                         </div>

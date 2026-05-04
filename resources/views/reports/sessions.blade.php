@@ -30,7 +30,7 @@
     <tbody>
         @foreach($sessions as $session)
         <tr>
-            <td>{{ $session->scheduled_at->format('d/m/Y H:i') }}</td>
+            <td>{{ $session->full_scheduled_at_with_gmt }}</td>
             <td>{{ $session->mentees->first()?->name ?? 'N/A' }}</td>
             <td>{{ $session->mentor->name }}</td>
             <td>

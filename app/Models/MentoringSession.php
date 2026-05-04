@@ -41,6 +41,7 @@ class MentoringSession extends Model
         'transcription_summary',
         'has_transcription',
         'transcription_file_path',
+        'timezone',
     ];
 
     protected $casts = [
@@ -128,6 +129,32 @@ class MentoringSession extends Model
     /**
      * Get the status color for the badge
      */
+    /**
+     * Get the GMT offset string for the session's timezone
+     */
+    public function getGmtOffsetAttribute(): string
+    {
+        $tz = new \DateTimeZone($this->timezone ?: 'Africa/Porto-Novo');
+        $offset = $tz->getOffset(new \DateTime);
+        $hours = $offset / 3600;
+        $sign = $hours >= 0 ? '+' : '-';
+        $absHours = abs($hours);
+
+        return "GMT {$sign} {$absHours}";
+    }
+
+    /**
+     * Get the formatted scheduled date with GMT information
+     */
+    public function getFullScheduledAtWithGmtAttribute(): string
+    {
+        $timezone = $this->timezone ?: 'Africa/Porto-Novo';
+        $date = $this->scheduled_at->setTimezone($timezone)->translatedFormat('j F Y à H:i');
+        $gmt = $this->gmt_offset;
+
+        return "{$date} ({$gmt})";
+    }
+
     public function getStatusColorAttribute()
     {
         return match ($this->status) {

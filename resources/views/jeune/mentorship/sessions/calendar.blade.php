@@ -174,11 +174,11 @@
         return [
             'id' => $s -> id,
             'title' => $s -> title,
-            'scheduled_at' => $s -> scheduled_at -> toIso8601String(),
-            'time' => $s -> scheduled_at -> format('H:i'),
-            'endTime' => $s -> scheduled_at -> copy() -> addMinutes($s -> duration_minutes) -> format('H:i'),
-            'status' => $s -> status,
-            'mentor_name' => $s -> mentor -> name,
+            'scheduled_at' => $s->scheduled_at->toIso8601String(),
+            'time' => $s->scheduled_at->format('H:i') . ' (' . $s->gmt_offset . ')',
+            'endTime' => $s->scheduled_at->copy()->addMinutes($s->duration_minutes)->format('H:i'),
+            'status' => $s->status,
+            'mentor_name' => $s->mentor->name,
         ];
     });
     @endphp
