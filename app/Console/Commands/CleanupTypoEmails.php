@@ -24,6 +24,8 @@ class CleanupTypoEmails extends Command
         'outlok.com',
         'hotmal.com',
         'gmaill.com',
+        'mailcom',
+        'g-mail.com',
         'icloud.fr', // not necessarily a typo but often misidentified if someone meant .com
         'wanado.fr', // wanadoo.fr
         'lapost.net', // laposte.net
