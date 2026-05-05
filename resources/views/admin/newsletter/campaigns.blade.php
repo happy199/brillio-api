@@ -199,8 +199,8 @@
                         <span>APERÇU DU MESSAGE</span>
                         <span id="modalDate" class="font-normal italic"></span>
                     </div>
-                    <div id="modalBody" class="p-6 bg-white prose max-w-none min-h-[200px]">
-                        <!-- Content will be injected here -->
+                    <div id="modalBodyContainer" class="bg-white min-h-[300px]">
+                        <!-- L'iframe ou le contenu sera injecté ici -->
                     </div>
                 </div>
 
@@ -270,7 +270,22 @@
                 document.getElementById('modalSubject').textContent = data.subject;
                 document.getElementById('modalMeta').textContent = `Envoyé par ${data.sent_by} • ${data.recipients_count} destinataires`;
                 document.getElementById('modalDate').textContent = `Le ${data.created_at}`;
-                document.getElementById('modalBody').innerHTML = data.body;
+                
+                const container = document.getElementById('modalBodyContainer');
+                const isFullHtml = data.body.toLowerCase().includes('<!doctype') || data.body.toLowerCase().includes('<html');
+
+                if (isFullHtml) {
+                    // Pour un HTML complet, on utilise une iframe pour l'isolation
+                    container.innerHTML = `<iframe id="previewIframe" title="Aperçu de la campagne" class="w-full min-h-[500px] border-0"></iframe>`;
+                    const iframe = document.getElementById('previewIframe');
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    doc.open();
+                    doc.write(data.body);
+                    doc.close();
+                } else {
+                    // Sinon affichage standard
+                    container.innerHTML = `<div class="p-6 prose max-w-none">${data.body}</div>`;
+                }
 
                 // Icons and colors
                 const iconBox = document.getElementById('modalTypeIcon');

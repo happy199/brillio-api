@@ -409,10 +409,24 @@
                         <div x-show="emailBody.length === 0" class="text-gray-400 italic text-center py-8">
                             Commencez à rédiger votre message pour voir l'aperçu ici...
                         </div>
-                        <div x-show="emailBody.length > 0">
+                        <div x-show="emailBody.length > 0" class="h-full">
                             <!-- HTML Preview -->
                             <template x-if="format === 'html'">
-                                <div class="prose max-w-none" x-html="emailBody"></div>
+                                <iframe title="Aperçu de l'email" class="w-full min-h-[400px] border-0" 
+                                    x-init="$watch('emailBody', value => {
+                                        const doc = $el.contentDocument;
+                                        doc.open();
+                                        doc.write(value);
+                                        doc.close();
+                                    }); 
+                                    // Initial load
+                                    setTimeout(() => {
+                                        const doc = $el.contentDocument;
+                                        doc.open();
+                                        doc.write(emailBody);
+                                        doc.close();
+                                    }, 100);">
+                                </iframe>
                             </template>
                             <!-- Text Preview -->
                             <template x-if="format === 'text'">

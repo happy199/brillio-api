@@ -46,29 +46,36 @@ class SendNewsletterJob implements ShouldQueue
 
         foreach ($recipients as $email) {
             try {
-                // On génère le HTML complet à partir du template Premium
-                $fullHtml = view('emails.newsletter', [
-                    'content' => $body,
-                    'subject' => $subject,
-                ])->render();
+                // On vérifie si le contenu est un document HTML complet
+                $isFullHtml = str_contains(strtolower($body), '<!doctype') || str_contains(strtolower($body), '<html');
 
-                Mail::send([], [], function ($message) use ($email, $subject, $fullHtml) {
+                if ($isFullHtml) {
+                    $finalHtml = $body;
+                } else {
+                    // Sinon on génère le HTML à partir du template Premium de Brillio
+                    $finalHtml = view('emails.newsletter', [
+                        'content' => $body,
+                        'subject' => $subject,
+                    ])->render();
+                }
+
+                Mail::send([], [], function ($message) use ($email, $subject, $finalHtml) {
                     $message->to($email)->subject($subject);
 
                     // Conversion des images Base64 en CID (Inline) dans le HTML final
-                    $finalHtml = $fullHtml;
-                    if (preg_match_all('/src="data:image\/(.*?);base64,(.*?)"/', $finalHtml, $matches, PREG_SET_ORDER)) {
+                    $bodyToSend = $finalHtml;
+                    if (preg_match_all('/src="data:image\/(.*?);base64,(.*?)"/', $bodyToSend, $matches, PREG_SET_ORDER)) {
                         foreach ($matches as $index => $match) {
                             $extension = $match[1];
                             $imageData = base64_decode($match[2]);
                             $filename = 'image_'.hash('sha256', $match[2]).'.'.$extension;
 
                             $cid = $message->embedData($imageData, $filename, 'image/'.$extension);
-                            $finalHtml = str_replace($match[0], 'src="'.$cid.'"', $finalHtml);
+                            $bodyToSend = str_replace($match[0], 'src="'.$cid.'"', $bodyToSend);
                         }
                     }
 
-                    $message->html($finalHtml);
+                    $message->html($bodyToSend);
 
                     // Pièces jointes
                     if (! empty($this->campaign->attachments)) {
