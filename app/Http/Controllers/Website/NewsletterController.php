@@ -20,7 +20,22 @@ class NewsletterController extends Controller
         }
 
         $request->validate([
-            'email' => 'required|email|max:255',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $typoDomains = [
+                        'icoud.com', 'icloude.com', 'gamail.com', 'gamil.com',
+                        'gmai.com', 'gmal.com', 'yaho.com', 'yhaoo.com',
+                        'outlok.com', 'hotmal.com', 'gmaill.com',
+                    ];
+                    $domain = strtolower(substr(strrchr($value, '@'), 1));
+                    if (in_array($domain, $typoDomains)) {
+                        $fail("Le domaine de l'email ($domain) semble contenir une faute de frappe. Veuillez vérifier votre adresse.");
+                    }
+                },
+            ],
         ]);
 
         // Vérifier si déjà inscrit
