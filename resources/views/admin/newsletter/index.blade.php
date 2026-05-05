@@ -565,6 +565,7 @@
     const htmlEditor = document.getElementById('html-editor');
     const editorContainer = document.getElementById('editor-container');
     const toggleHtmlBtn = document.getElementById('toggle-html');
+    const emailForm = document.getElementById('emailForm');
     let isHtmlMode = false;
 
     // Toggle entre Mode Riche et Mode HTML
@@ -595,18 +596,6 @@
         window.dispatchEvent(new CustomEvent('body-updated', { 
             detail: { html: html } 
         }));
-    }
-
-    // Synchronisation lors de la soumission
-    const emailForm = document.getElementById('emailForm');
-    if (emailForm) {
-        emailForm.addEventListener('submit', function() {
-            if (isHtmlMode) {
-                syncContent(htmlEditor.value);
-            } else {
-                syncContent(quill.root.innerHTML);
-            }
-        });
     }
 
     quill.on('text-change', function() {
@@ -682,10 +671,14 @@
     }
 
     // Email form submission
-    const emailForm = document.getElementById('emailForm');
     if (emailForm) {
         emailForm.addEventListener('submit', function (e) {
-            document.getElementById('bodyInput').value = quill.root.innerHTML;
+            // Synchronisation du corps du message selon le mode
+            if (isHtmlMode) {
+                syncContent(htmlEditor.value);
+            } else {
+                syncContent(quill.root.innerHTML);
+            }
 
             const type = document.querySelector('input[name="recipient_type"]:checked').value;
             const selected = Array.from(document.querySelectorAll('.subscriber-checkbox:checked')).map(cb => cb.value);
