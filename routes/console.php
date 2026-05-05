@@ -8,10 +8,12 @@ Schedule::command('sessions:send-reminders')
     ->timezone('Africa/Abidjan');
 
 // Profil completion reminders: run every Monday at 9 AM
+/*
 Schedule::job(new \App\Jobs\SendProfileCompletionReminders)
     ->mondays()
     ->at('09:00')
     ->timezone('Africa/Abidjan');
+*/
 
 // Weekly new mentors digest: run every Friday at 4 PM
 Schedule::job(new \App\Jobs\SendNewMentorsDigest)
@@ -42,9 +44,11 @@ Schedule::command('organizations:grant-enterprise-credits')
 
 // Rappel d'attraction : Relance hebdomadaire pour les inactifs (7 jours+)
 // Exécution horaire avec limite de 500 par lot (voir SendInactivityReminders)
+/*
 Schedule::job(new \App\Jobs\SendInactivityReminders)
     ->hourly()
     ->timezone('Africa/Abidjan');
+*/
 
 // Rappel messages non lus : toutes les 4h
 Schedule::command('messages:send-unread-reminders')
