@@ -587,16 +587,24 @@
             toggleHtmlBtn.classList.remove('bg-indigo-600', 'text-white');
         }
     });
-
     // Synchronisation avec Alpine.js et le champ caché
     function syncContent(html) {
         document.getElementById('bodyInput').value = html;
         
-        // Dispatch d'un événement personnalisé pour Alpine.js
+        // Dispatch d'un événement personnalisé pour Alpine.js (pour l'aperçu)
         window.dispatchEvent(new CustomEvent('body-updated', { 
             detail: { html: html } 
         }));
     }
+
+    // Synchronisation lors de la soumission
+    form.addEventListener('submit', function() {
+        if (isHtmlMode) {
+            syncContent(htmlEditor.value);
+        } else {
+            syncContent(quill.root.innerHTML);
+        }
+    });
 
     quill.on('text-change', function() {
         if (!isHtmlMode) syncContent(quill.root.innerHTML);

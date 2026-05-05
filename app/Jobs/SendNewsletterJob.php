@@ -47,7 +47,7 @@ class SendNewsletterJob implements ShouldQueue
         foreach ($recipients as $email) {
             try {
                 // On vérifie si le contenu est un document HTML complet
-                $isFullHtml = str_contains(strtolower($body), '<!doctype') || str_contains(strtolower($body), '<html');
+                $isFullHtml = preg_match('/<!doctype|<html>/i', $body);
 
                 if ($isFullHtml) {
                     $finalHtml = $body;
