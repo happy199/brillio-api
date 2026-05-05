@@ -412,7 +412,7 @@
                         <div x-show="emailBody.length > 0" class="h-full">
                             <!-- HTML Preview -->
                             <template x-if="format === 'html'">
-                                <iframe class="w-full min-h-[400px] border-0" 
+                                <iframe title="Aperçu de l'email" class="w-full min-h-[400px] border-0" 
                                     x-init="$watch('emailBody', value => {
                                         const doc = $el.contentDocument;
                                         doc.open();

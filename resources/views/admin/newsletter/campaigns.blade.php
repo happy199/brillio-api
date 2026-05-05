@@ -276,7 +276,7 @@
 
                 if (isFullHtml) {
                     // Pour un HTML complet, on utilise une iframe pour l'isolation
-                    container.innerHTML = `<iframe id="previewIframe" class="w-full min-h-[500px] border-0"></iframe>`;
+                    container.innerHTML = `<iframe id="previewIframe" title="Aperçu de la campagne" class="w-full min-h-[500px] border-0"></iframe>`;
                     const iframe = document.getElementById('previewIframe');
                     const doc = iframe.contentDocument || iframe.contentWindow.document;
                     doc.open();
