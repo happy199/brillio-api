@@ -598,13 +598,16 @@
     }
 
     // Synchronisation lors de la soumission
-    form.addEventListener('submit', function() {
-        if (isHtmlMode) {
-            syncContent(htmlEditor.value);
-        } else {
-            syncContent(quill.root.innerHTML);
-        }
-    });
+    const emailForm = document.getElementById('emailForm');
+    if (emailForm) {
+        emailForm.addEventListener('submit', function() {
+            if (isHtmlMode) {
+                syncContent(htmlEditor.value);
+            } else {
+                syncContent(quill.root.innerHTML);
+            }
+        });
+    }
 
     quill.on('text-change', function() {
         if (!isHtmlMode) syncContent(quill.root.innerHTML);
