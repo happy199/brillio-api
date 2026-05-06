@@ -72,12 +72,12 @@
             <button @click="tab = 'interests'" 
                 :class="tab === 'interests' ? 'border-organization-500 text-organization-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                 class="whitespace-nowrap py-4 px-6 border-b-2 font-bold text-sm transition-colors">
-                Manifestations d'intérêt ({{ $interests->total() }})
+                Manifestations d'intérêt ({{ $totalInterests }})
             </button>
             <button @click="tab = 'clicks'" 
                 :class="tab === 'clicks' ? 'border-organization-500 text-organization-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                 class="whitespace-nowrap py-4 px-6 border-b-2 font-bold text-sm transition-colors">
-                Clics & Vues ({{ $clicks->total() }})
+                Clics & Vues ({{ $totalClicks }})
             </button>
         </div>
 
@@ -90,8 +90,10 @@
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Étudiant</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Localisation</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contacts</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type MBTI</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type d'intérêt</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Détails formulaire</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
@@ -128,18 +130,30 @@
                                     <div class="text-xs text-gray-500">{{ $u->phone ?? 'Pas de numéro' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($u->personalityTest)
-                                    @php
-                                        $type = $u->personalityTest->personality_type;
-                                        $info = $mbtiDescriptions[$type] ?? null;
-                                    @endphp
-                                    <span class="mbti-tooltip inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 cursor-help border border-indigo-200" 
-                                          data-tippy-content="<strong>{{ $info['label'] ?? $type }}</strong><br/><br/>{{ $info['description'] ?? 'Description non disponible.' }}">
-                                        <i class="fas fa-brain mr-1.5 text-indigo-500"></i>
-                                        {{ $info['label'] ?? $type }}
+                                    @if($interest->type === 'precise')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                        <i class="fas fa-list-ul mr-1.5"></i> Précis
                                     </span>
                                     @else
-                                    <span class="text-xs text-gray-400 font-medium italic">Test non passé</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                        <i class="fas fa-bolt mr-1.5"></i> Rapide
+                                    </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">
+                                    @if($interest->form_data)
+                                        <div class="space-y-1">
+                                            @foreach($interest->form_data as $key => $value)
+                                                @if($value)
+                                                <div>
+                                                    <span class="font-bold text-gray-700 capitalize">{{ str_replace('_', ' ', $key) }}:</span>
+                                                    <span class="text-gray-600">{{ is_array($value) ? implode(', ', $value) : $value }}</span>
+                                                </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="italic text-gray-400">Aucun détail</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -154,7 +168,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                                     Aucune manifestation d'intérêt pour le moment.
                                 </td>
                             </tr>
