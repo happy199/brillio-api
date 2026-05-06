@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Storage;
  */
 class MentorController extends Controller
 {
+    use \App\Traits\FormatsUrls;
+
     /**
      * Liste des spécialisations
      */
@@ -439,22 +441,6 @@ class MentorController extends Controller
                 ]);
             }
         }
-    }
-
-    /**
-     * Helper pour formater les URLs
-     */
-    private function formatUrl(?string $url): ?string
-    {
-        if (empty($url)) {
-            return $url;
-        }
-        $url = trim($url);
-        if (! preg_match('/^https?:\/\//i', $url)) {
-            return 'https://'.ltrim($url, '/');
-        }
-
-        return $url;
     }
 
     /**

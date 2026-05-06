@@ -77,42 +77,7 @@ class PromotionController extends Controller
     public function exportPdf()
     {
         $organization = auth()->user()->organization;
-        $establishmentIds = $organization->establishments->pluck('id');
-
-        $prospects = User::select('users.*')
-            ->selectSub(function ($query) use ($establishmentIds) {
-                $query->from('establishment_clicks')
-                    ->whereColumn('user_id', 'users.id')
-                    ->whereIn('establishment_id', $establishmentIds)
-                    ->selectRaw('MAX(created_at)');
-            }, 'last_click_at')
-            ->selectSub(function ($query) use ($establishmentIds) {
-                $query->from('establishment_interests')
-                    ->whereColumn('user_id', 'users.id')
-                    ->whereIn('establishment_id', $establishmentIds)
-                    ->selectRaw('MAX(created_at)');
-            }, 'last_interest_at')
-            ->where(function ($q) use ($establishmentIds) {
-                $q->whereHas('establishmentClicks', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds))
-                    ->orWhereHas('establishmentInterests', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds));
-            })
-            ->orderByRaw('GREATEST(COALESCE(last_click_at, "1970-01-01"), COALESCE(last_interest_at, "1970-01-01")) DESC')
-            ->with(['jeuneProfile', 'personalityTest', 'establishmentClicks' => function ($q) use ($establishmentIds) {
-                $q->whereIn('establishment_id', $establishmentIds);
-            }, 'establishmentInterests' => function ($q) use ($establishmentIds) {
-                $q->whereIn('establishment_id', $establishmentIds);
-            }])
-            ->get();
-
-        $prospects->transform(function ($user) {
-            $user->clicks_count = $user->establishmentClicks->count();
-            $user->has_interest = $user->establishmentInterests->isNotEmpty();
-            $user->last_interaction_at = $user->last_interest_at && $user->last_interest_at > ($user->last_click_at ?? '0')
-                ? $user->last_interest_at
-                : $user->last_click_at;
-
-            return $user;
-        });
+        $prospects = $this->getProspectsData($organization);
 
         $pdf = Pdf::loadView('organization.promotion.pdf', compact('organization', 'prospects'));
 
@@ -125,42 +90,7 @@ class PromotionController extends Controller
     public function exportCsv()
     {
         $organization = auth()->user()->organization;
-        $establishmentIds = $organization->establishments->pluck('id');
-
-        $prospects = User::select('users.*')
-            ->selectSub(function ($query) use ($establishmentIds) {
-                $query->from('establishment_clicks')
-                    ->whereColumn('user_id', 'users.id')
-                    ->whereIn('establishment_id', $establishmentIds)
-                    ->selectRaw('MAX(created_at)');
-            }, 'last_click_at')
-            ->selectSub(function ($query) use ($establishmentIds) {
-                $query->from('establishment_interests')
-                    ->whereColumn('user_id', 'users.id')
-                    ->whereIn('establishment_id', $establishmentIds)
-                    ->selectRaw('MAX(created_at)');
-            }, 'last_interest_at')
-            ->where(function ($q) use ($establishmentIds) {
-                $q->whereHas('establishmentClicks', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds))
-                    ->orWhereHas('establishmentInterests', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds));
-            })
-            ->orderByRaw('GREATEST(COALESCE(last_click_at, "1970-01-01"), COALESCE(last_interest_at, "1970-01-01")) DESC')
-            ->with(['jeuneProfile', 'personalityTest', 'establishmentClicks' => function ($q) use ($establishmentIds) {
-                $q->whereIn('establishment_id', $establishmentIds);
-            }, 'establishmentInterests' => function ($q) use ($establishmentIds) {
-                $q->whereIn('establishment_id', $establishmentIds);
-            }])
-            ->get();
-
-        $prospects->transform(function ($user) {
-            $user->clicks_count = $user->establishmentClicks->count();
-            $user->has_interest = $user->establishmentInterests->isNotEmpty();
-            $user->last_interaction_at = $user->last_interest_at && $user->last_interest_at > ($user->last_click_at ?? '0')
-                ? $user->last_interest_at
-                : $user->last_click_at;
-
-            return $user;
-        });
+        $prospects = $this->getProspectsData($organization);
 
         $headers = [
             'Content-type' => 'text/csv',
@@ -192,5 +122,48 @@ class PromotionController extends Controller
         };
 
         return Response::stream($callback, 200, $headers);
+    }
+
+    /**
+     * Centralise la récupération des prospects pour les exports
+     */
+    private function getProspectsData($organization)
+    {
+        $establishmentIds = $organization->establishments->pluck('id');
+
+        $prospects = User::select('users.*')
+            ->selectSub(function ($query) use ($establishmentIds) {
+                $query->from('establishment_clicks')
+                    ->whereColumn('user_id', 'users.id')
+                    ->whereIn('establishment_id', $establishmentIds)
+                    ->selectRaw('MAX(created_at)');
+            }, 'last_click_at')
+            ->selectSub(function ($query) use ($establishmentIds) {
+                $query->from('establishment_interests')
+                    ->whereColumn('user_id', 'users.id')
+                    ->whereIn('establishment_id', $establishmentIds)
+                    ->selectRaw('MAX(created_at)');
+            }, 'last_interest_at')
+            ->where(function ($q) use ($establishmentIds) {
+                $q->whereHas('establishmentClicks', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds))
+                    ->orWhereHas('establishmentInterests', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds));
+            })
+            ->orderByRaw('GREATEST(COALESCE(last_click_at, "1970-01-01"), COALESCE(last_interest_at, "1970-01-01")) DESC')
+            ->with(['jeuneProfile', 'personalityTest', 'establishmentClicks' => function ($q) use ($establishmentIds) {
+                $q->whereIn('establishment_id', $establishmentIds);
+            }, 'establishmentInterests' => function ($q) use ($establishmentIds) {
+                $q->whereIn('establishment_id', $establishmentIds);
+            }])
+            ->get();
+
+        return $prospects->transform(function ($user) {
+            $user->clicks_count = $user->establishmentClicks->count();
+            $user->has_interest = $user->establishmentInterests->isNotEmpty();
+            $user->last_interaction_at = $user->last_interest_at && $user->last_interest_at > ($user->last_click_at ?? '0')
+                ? $user->last_interest_at
+                : $user->last_click_at;
+
+            return $user;
+        });
     }
 }
