@@ -116,4 +116,18 @@ class EstablishmentController extends Controller
             'message' => 'Votre demande a été envoyée avec succès à '.$establishment->name,
         ]);
     }
+
+    /**
+     * Track click/view on establishment
+     */
+    public function trackClick(Establishment $establishment)
+    {
+        $establishment->clicks()->create([
+            'user_id' => auth()->id(),
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
 }
