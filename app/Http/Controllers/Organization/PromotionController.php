@@ -23,6 +23,15 @@ class PromotionController extends Controller
         $totalClicks = $organization->establishmentClicks()->count();
         $totalInterests = $organization->establishmentInterests()->count();
         
+        $uniqueProspects = User::where(function ($q) use ($establishmentIds) {
+            $q->whereHas('establishmentClicks', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds))
+                ->orWhereHas('establishmentInterests', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds));
+        })->count();
+
+        $recentInterests = \App\Models\EstablishmentInterest::whereIn('establishment_id', $establishmentIds)
+            ->where('created_at', '>=', now()->subDays(30))
+            ->count();
+
         // Liste 1: Manifestations d'intérêt (Interests)
         $interests = \App\Models\EstablishmentInterest::whereIn('establishment_id', $establishmentIds)
             ->with(['user.jeuneProfile', 'user.personalityTest', 'establishment'])
@@ -48,6 +57,8 @@ class PromotionController extends Controller
             'organization',
             'totalClicks',
             'totalInterests',
+            'uniqueProspects',
+            'recentInterests',
             'interests',
             'clicks',
             'mbtiDescriptions'

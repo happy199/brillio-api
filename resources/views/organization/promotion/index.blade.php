@@ -54,13 +54,13 @@
             <div class="absolute top-0 right-0 p-4 opacity-10">
                 <i class="fas fa-calendar-day text-6xl text-organization-600"></i>
             </div>
-            <p class="text-sm font-medium text-gray-500 truncate">Clics récents</p>
-            <p class="mt-2 text-4xl font-bold text-gray-900">{{ number_format($recentClicks) }}</p>
+            <p class="text-sm font-medium text-gray-500 truncate">Intérêts (30j)</p>
+            <p class="mt-2 text-4xl font-bold text-gray-900">{{ number_format($recentInterests) }}</p>
             <div class="mt-4 flex items-center text-sm text-gray-600">
                 <span class="bg-organization-100 text-organization-700 px-2 py-0.5 rounded-full text-xs font-bold mr-2">
-                    <i class="fas fa-history mr-1"></i> 30j
+                    <i class="fas fa-plus mr-1"></i> Nouveau
                 </span>
-                <span>Sur les 30 derniers jours</span>
+                <span>Derniers 30 jours</span>
             </div>
         </div>
     </div>
