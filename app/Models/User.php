@@ -258,6 +258,22 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Relation vers les clics sur les établissements
+     */
+    public function establishmentClicks(): HasMany
+    {
+        return $this->hasMany(EstablishmentClick::class);
+    }
+
+    /**
+     * Relation vers les manifestations d'intérêt pour les établissements
+     */
+    public function establishmentInterests(): HasMany
+    {
+        return $this->hasMany(EstablishmentInterest::class);
+    }
+
+    /**
      * Relation vers les ressources consultées
      */
     public function resourceViews(): HasMany
