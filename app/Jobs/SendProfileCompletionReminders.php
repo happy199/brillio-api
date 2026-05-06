@@ -28,6 +28,20 @@ class SendProfileCompletionReminders implements ShouldQueue
             ->get();
 
         foreach ($users as $user) {
+            // Logique spécifique pour les mentors
+            if ($user->isMentor()) {
+                if ($user->mentorProfile && $user->mentorProfile->is_published) {
+                    // Si le profil est déjà publié, on envoie le mail d'engagement
+                    Mail::to($user->email)->queue(new \App\Mail\Engagement\MentorEngagementMail($user));
+
+                    // On marque l'onboarding comme complété pour éviter de renvoyer ce mail trop souvent
+                    // ou on utilise un autre flag si on veut limiter la fréquence
+                    $user->update(['onboarding_completed' => true]);
+
+                    continue;
+                }
+            }
+
             $missingSections = $this->getMissingSections($user);
 
             if (! empty($missingSections)) {
