@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Organization;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\PersonalityService;
 use Barryvdh\DomPDF\Facade\Pdf;
