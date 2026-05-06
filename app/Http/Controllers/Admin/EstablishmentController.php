@@ -19,15 +19,6 @@ class EstablishmentController extends Controller
         $this->iaService = $iaService;
     }
 
-    public function index()
-    {
-        $establishments = Establishment::withCount('interests')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-
-        return view('admin.establishments.index', compact('establishments'));
-    }
-
     public function create()
     {
         $mbtiTypes = array_keys(PersonalityTest::PERSONALITY_TYPES);
