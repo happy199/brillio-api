@@ -242,7 +242,9 @@ class EstablishmentController extends Controller
             ->orderBy('last_click_at', 'desc')
             ->paginate(20);
 
-        return view('admin.establishments.interests', compact('establishment', 'interests', 'clicks'));
+        $clicksCount = $establishment->clicks()->count();
+
+        return view('admin.establishments.interests', compact('establishment', 'interests', 'clicks', 'clicksCount'));
     }
 
     /**
