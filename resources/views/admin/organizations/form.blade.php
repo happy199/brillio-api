@@ -161,6 +161,20 @@
                             </div>
                         </div>
 
+                        <div>
+                            <label for="establishment_id" class="block text-sm font-semibold text-gray-700 mb-2">Fiche Établissement liée</label>
+                            <select name="establishment_id" id="establishment_id" class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full appearance-none transition-all">
+                                <option value="">Aucune fiche liée</option>
+                                @foreach($establishments as $est)
+                                    <option value="{{ $est->id }}" 
+                                        {{ old('establishment_id', isset($organization) ? $organization->establishmentClicks()->first()?->establishment_id ?? \App\Models\Establishment::where('organization_id', $organization->id)->first()?->id : '') == $est->id ? 'selected' : '' }}>
+                                        {{ $est->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-[10px] text-gray-500 mt-1">Permet à l'organisation de suivre les prospects et clics de cet établissement.</p>
+                        </div>
+
                         <div id="subscription_expiry_container"
                             class="{{ old('subscription_plan', $organization->subscription_plan ?? 'free') == 'free' ? 'hidden' : '' }}">
                             <label for="subscription_expires_at"
