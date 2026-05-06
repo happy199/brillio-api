@@ -46,7 +46,7 @@
                     {{ $prospect->email ?? '-' }}
                 </td>
                 <td>{{ $prospect->phone ?? '-' }}</td>
-                <td>{{ $prospect->jeuneProfile?->city ?? '-' }} / {{ $prospect->jeuneProfile?->country ?? '-' }}</td>
+                <td>{{ $prospect->city ?? '-' }} / {{ $prospect->country ?? '-' }}</td>
                 <td>{{ $prospect->personalityTest?->personality_type ?? '-' }}</td>
                 <td style="text-align: center;">{{ $prospect->clicks_count }}</td>
                 <td>{{ $prospect->has_interest ? 'Manifesté' : 'Visite' }}</td>
