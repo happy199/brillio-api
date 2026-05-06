@@ -512,7 +512,17 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasPrivateCircleRestriction(): bool
     {
         return $this->organizations()
-            ->where(fn ($q) => $q->where('private_circle_enabled', true))
+            ->where(fn ($q) => $q->where('private_circle_enabled', true)->orWhere('private_circle_plus_enabled', true))
+            ->exists();
+    }
+
+    /**
+     * Check if the user is restricted by an active private circle PLUS (Total Isolation).
+     */
+    public function hasPrivateCirclePlusRestriction(): bool
+    {
+        return $this->organizations()
+            ->where('private_circle_plus_enabled', true)
             ->exists();
     }
 
@@ -522,7 +532,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getPrivateCircleOrganizationIds(): array
     {
         return $this->organizations()
-            ->where(fn ($q) => $q->where('private_circle_enabled', true))
+            ->where(fn ($q) => $q->where('private_circle_enabled', true)->orWhere('private_circle_plus_enabled', true))
+            ->pluck('organizations.id')
+            ->toArray();
+    }
+
+    /**
+     * Get the IDs of organizations the user belongs to that have private circle PLUS enabled.
+     */
+    public function getPrivateCirclePlusOrganizationIds(): array
+    {
+        return $this->organizations()
+            ->where('private_circle_plus_enabled', true)
             ->pluck('organizations.id')
             ->toArray();
     }

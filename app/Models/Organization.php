@@ -50,6 +50,7 @@ class Organization extends Model
         'subscription_expires_at',
         'auto_renew',
         'private_circle_enabled',
+        'private_circle_plus_enabled',
     ];
 
     /**
@@ -71,6 +72,7 @@ class Organization extends Model
         'subscription_expires_at' => 'datetime',
         'auto_renew' => 'boolean',
         'private_circle_enabled' => 'boolean',
+        'private_circle_plus_enabled' => 'boolean',
     ];
 
     /**
