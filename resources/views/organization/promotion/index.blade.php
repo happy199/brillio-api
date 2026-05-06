@@ -120,6 +120,10 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 font-medium">{{ $u->country ?? 'Non précisé' }}</div>
+                                    <div class="text-xs text-gray-500">{{ $u->city ?? '-' }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 font-medium">{{ $u->email }}</div>
                                     <div class="text-xs text-gray-500">{{ $u->phone ?? 'Pas de numéro' }}</div>
                                 </td>
@@ -150,7 +154,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                     Aucune manifestation d'intérêt pour le moment.
                                 </td>
                             </tr>
@@ -176,6 +180,7 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dernière visite</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Étudiant</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Localisation</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Clics</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type MBTI</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
@@ -204,8 +209,13 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $prospect->jeuneProfile?->city ?? 'Non précisé' }}</div>
-                                    <div class="text-sm text-gray-500">{{ $prospect->jeuneProfile?->country ?? '-' }}</div>
+                                    <div class="text-sm text-gray-900 font-medium">{{ $prospect->country ?? 'Non précisé' }}</div>
+                                    <div class="text-xs text-gray-500">{{ $prospect->city ?? '-' }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-800 border border-gray-200">
+                                        {{ $prospect->clicks_count }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($prospect->personalityTest)
@@ -234,7 +244,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                     Aucun clic enregistré pour le moment.
                                 </td>
                             </tr>

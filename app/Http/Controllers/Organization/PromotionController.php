@@ -46,6 +46,12 @@ class PromotionController extends Controller
                     ->whereIn('establishment_id', $establishmentIds)
                     ->selectRaw('MAX(created_at)');
             }, 'last_click_at')
+            ->selectSub(function($query) use ($establishmentIds) {
+                $query->from('establishment_clicks')
+                    ->whereColumn('user_id', 'users.id')
+                    ->whereIn('establishment_id', $establishmentIds)
+                    ->selectRaw('COUNT(*)');
+            }, 'clicks_count')
             ->whereHas('establishmentClicks', fn($q) => $q->whereIn('establishment_id', $establishmentIds))
             ->with(['jeuneProfile', 'personalityTest'])
             ->orderBy('last_click_at', 'DESC')
