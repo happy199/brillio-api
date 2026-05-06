@@ -78,6 +78,12 @@
                             </a>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="inline-flex items-center py-1 px-3 bg-blue-50 border border-blue-100 rounded-lg text-sm font-semibold text-blue-700">
+                                <i class="fas fa-mouse-pointer mr-2 text-blue-500"></i>
+                                {{ $establishment->clicks_count }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             @if($establishment->is_published)
                                 <span class="flex items-center text-green-600 text-xs font-bold">
                                     <span class="w-1.5 h-1.5 bg-green-600 rounded-full mr-1.5"></span> Publié

@@ -141,6 +141,14 @@ class Organization extends Model
     }
 
     /**
+     * Get all clicks for this organization's establishments.
+     */
+    public function establishmentClicks(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(EstablishmentClick::class, Establishment::class);
+    }
+
+    /**
      * Scope to filter only active organizations.
      */
     public function scopeActive($query)

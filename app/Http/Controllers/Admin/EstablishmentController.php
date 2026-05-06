@@ -228,14 +228,24 @@ class EstablishmentController extends Controller
         return back()->with('success', "$count nouveaux établissements originaux générés et enregistrés en brouillon.");
     }
 
+    public function index()
+    {
+        $establishments = Establishment::withCount(['interests', 'clicks'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('admin.establishments.index', compact('establishments'));
+    }
+
     /**
      * Show interests for a specific establishment
      */
     public function interests(Establishment $establishment)
     {
         $interests = $establishment->interests()->with('user')->orderBy('created_at', 'desc')->paginate(20);
+        $clicks = $establishment->clicks()->with('user')->orderBy('created_at', 'desc')->paginate(20);
 
-        return view('admin.establishments.interests', compact('establishment', 'interests'));
+        return view('admin.establishments.interests', compact('establishment', 'interests', 'clicks'));
     }
 
     /**
