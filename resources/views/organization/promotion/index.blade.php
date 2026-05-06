@@ -68,8 +68,8 @@
     <!-- Prospects Table -->
     <div class="bg-white shadow-sm rounded-2xl border border-gray-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-            <h3 class="text-lg font-bold text-gray-900">Derniers clics et prospects</h3>
-            <span class="text-sm text-gray-500">Liste des 50 dernières interactions</span>
+            <h3 class="text-lg font-bold text-gray-900">Derniers prospects et interactions</h3>
+            <span class="text-sm text-gray-500">Liste des étudiants ayant interagi avec vos fiches</span>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -78,56 +78,89 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Étudiant</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Localisation</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Type MBTI</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date du clic</th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Clics</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Intérêt</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dernière interaction</th>
                         <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($clicks as $click)
+                    @forelse($prospects as $prospect)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
-                                    <img class="h-10 w-10 rounded-full object-cover border border-gray-100" src="{{ $click->user?->avatar_url }}" alt="">
+                                    @if($prospect->avatar_url)
+                                    <img class="h-10 w-10 rounded-full object-cover border border-gray-100" src="{{ $prospect->avatar_url }}" alt="">
+                                    @else
+                                    <div class="h-10 w-10 rounded-full bg-organization-100 flex items-center justify-center text-organization-600 font-bold border border-organization-200">
+                                        {{ substr($prospect->name, 0, 1) }}
+                                    </div>
+                                    @endif
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-bold text-gray-900">{{ $click->user?->name ?? 'Anonyme' }}</div>
-                                    <div class="text-sm text-gray-500">{{ $click->user?->email ?? '-' }}</div>
+                                    <div class="text-sm font-bold text-gray-900">{{ $prospect->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ $prospect->email }}</div>
+                                    <div class="text-[11px] font-medium {{ $prospect->phone ? 'text-gray-600' : 'text-gray-400 italic' }}">
+                                        <i class="fas fa-phone-alt mr-1 text-[10px]"></i> {{ $prospect->phone ?? 'Pas de numéro' }}
+                                    </div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $click->user?->city ?? 'Non précisé' }}</div>
-                            <div class="text-sm text-gray-500">{{ $click->user?->country ?? '-' }}</div>
+                            <div class="text-sm text-gray-900">{{ $prospect->jeuneProfile?->city ?? 'Non précisé' }}</div>
+                            <div class="text-sm text-gray-500">{{ $prospect->jeuneProfile?->country ?? '-' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if($click->user?->personalityTest)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">
-                                {{ $click->user->personalityTest->mbti_type }}
+                            @if($prospect->personalityTest)
+                            @php
+                                $type = $prospect->personalityTest->personality_type;
+                                $info = $mbtiDescriptions[$type] ?? null;
+                            @endphp
+                            <span class="mbti-tooltip inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 cursor-help border border-indigo-200" 
+                                  data-tippy-content="<strong>{{ $info['label'] ?? $type }}</strong><br/><br/>{{ $info['description'] ?? 'Description non disponible.' }}">
+                                <i class="fas fa-brain mr-1.5 text-indigo-500"></i>
+                                {{ $info['label'] ?? $type }}
                             </span>
                             @else
                             <span class="text-xs text-gray-400 font-medium italic">Test non passé</span>
                             @endif
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-gray-100 text-gray-800 border border-gray-200">
+                                {{ $prospect->clicks_count }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($prospect->has_interest)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                                <i class="fas fa-heart mr-1.5 text-green-500"></i> Manifesté
+                            </span>
+                            @else
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-50 text-gray-400 border border-gray-100">
+                                <i class="far fa-eye mr-1.5"></i> Visite seule
+                            </span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $click->created_at->translatedFormat('d M Y') }}
-                            <div class="text-xs text-gray-400">{{ $click->created_at->format('H:i') }}</div>
+                            {{ \Carbon\Carbon::parse($prospect->last_interaction_at)->translatedFormat('d M Y') }}
+                            <div class="text-xs text-gray-400">{{ \Carbon\Carbon::parse($prospect->last_interaction_at)->format('H:i') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            @if($click->user)
-                            <a href="{{ route('organization.users.show', $click->user) }}" class="text-organization-600 hover:text-organization-900 bg-organization-50 hover:bg-organization-100 px-3 py-1 rounded-lg transition-colors">
-                                <i class="fas fa-eye mr-1"></i> Voir
+                            <a href="{{ route('organization.users.show', $prospect) }}" class="text-organization-600 hover:text-organization-900 bg-organization-50 hover:bg-organization-100 px-3 py-1 rounded-lg transition-colors inline-flex items-center">
+                                <i class="fas fa-user-graduate mr-1.5"></i> Profil
                             </a>
-                            @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
+                        <td colspan="7" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center">
-                                <i class="fas fa-mouse-pointer text-gray-200 text-5xl mb-4"></i>
-                                <p class="text-gray-500 text-lg font-medium">Aucun clic enregistré pour le moment.</p>
-                                <p class="text-gray-400 text-sm mt-1">Votre établissement n'a pas encore reçu de visites d'étudiants.</p>
+                                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-users text-gray-200 text-3xl"></i>
+                                </div>
+                                <p class="text-gray-500 text-lg font-medium">Aucun prospect enregistré pour le moment.</p>
+                                <p class="text-gray-400 text-sm mt-1">Vos établissements n'ont pas encore reçu d'interactions d'étudiants.</p>
                             </div>
                         </td>
                     </tr>
@@ -135,12 +168,26 @@
                 </tbody>
             </table>
         </div>
-        @if($clicks->hasPages())
+        @if($prospects->hasPages())
         <div class="px-6 py-4 border-t border-gray-100">
-            {{ $clicks->links() }}
+            {{ $prospects->links() }}
         </div>
         @endif
     </div>
+
+    @push('scripts')
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        document.addEventListener('DOMContentLoaded', function() {
+            tippy('.mbti-tooltip', {
+                allowHTML: true,
+                placement: 'top',
+                theme: 'light-border',
+                animation: 'shift-away',
+                maxWidth: 300
+            });
+        });
+    </script>
+    @endpush
 
     <!-- Info Box -->
     <div class="bg-gradient-to-r from-organization-500 to-organization-700 rounded-2xl p-8 text-white shadow-lg overflow-hidden relative">

@@ -22,26 +22,35 @@
     </div>
 
     <div class="stats">
-        <p><strong>Total des clics :</strong> {{ number_format($clicks->count()) }}</p>
+        <p><strong>Nombre de prospects :</strong> {{ number_format($prospects->count()) }}</p>
         <p><strong>Date d'extraction :</strong> {{ now()->translatedFormat('d F Y à H:i') }}</p>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>Nom</th>
-                <th>Email</th>
-                <th>Ville / Pays</th>
-                <th>Date du clic</th>
+                <th>Nom / Email</th>
+                <th>Téléphone</th>
+                <th>Localisation</th>
+                <th>MBTI</th>
+                <th>Clics</th>
+                <th>Intérêt</th>
+                <th>Dernière interaction</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($clicks as $click)
+            @foreach($prospects as $prospect)
             <tr>
-                <td>{{ $click->user?->name ?? 'Anonyme' }}</td>
-                <td>{{ $click->user?->email ?? '-' }}</td>
-                <td>{{ $click->user?->city ?? '-' }} / {{ $click->user?->country ?? '-' }}</td>
-                <td>{{ $click->created_at->format('d/m/Y H:i') }}</td>
+                <td>
+                    <strong>{{ $prospect->name ?? 'Anonyme' }}</strong><br/>
+                    {{ $prospect->email ?? '-' }}
+                </td>
+                <td>{{ $prospect->phone ?? '-' }}</td>
+                <td>{{ $prospect->jeuneProfile?->city ?? '-' }} / {{ $prospect->jeuneProfile?->country ?? '-' }}</td>
+                <td>{{ $prospect->personalityTest?->personality_type ?? '-' }}</td>
+                <td style="text-align: center;">{{ $prospect->clicks_count }}</td>
+                <td>{{ $prospect->has_interest ? 'Manifesté' : 'Visite' }}</td>
+                <td>{{ \Carbon\Carbon::parse($prospect->last_interaction_at)->format('d/m/Y H:i') }}</td>
             </tr>
             @endforeach
         </tbody>

@@ -140,12 +140,17 @@ class Organization extends Model
         return $this->hasMany(User::class, 'sponsored_by_organization_id');
     }
 
-    /**
-     * Get all clicks for this organization's establishments.
-     */
     public function establishmentClicks(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
     {
         return $this->hasManyThrough(EstablishmentClick::class, Establishment::class);
+    }
+
+    /**
+     * Get all interests for this organization's establishments.
+     */
+    public function establishmentInterests(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(EstablishmentInterest::class, Establishment::class);
     }
 
     /**
