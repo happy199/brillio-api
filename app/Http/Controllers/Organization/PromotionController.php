@@ -22,7 +22,7 @@ class PromotionController extends Controller
         // Statistiques globales
         $totalClicks = $organization->establishmentClicks()->count();
         $totalInterests = $organization->establishmentInterests()->count();
-        
+
         $uniqueProspects = User::where(function ($q) use ($establishmentIds) {
             $q->whereHas('establishmentClicks', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds))
                 ->orWhereHas('establishmentInterests', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds));
@@ -40,19 +40,19 @@ class PromotionController extends Controller
 
         // Liste 2: Simples clics et vues (Clicks)
         $clicks = User::select('users.*')
-            ->selectSub(function($query) use ($establishmentIds) {
+            ->selectSub(function ($query) use ($establishmentIds) {
                 $query->from('establishment_clicks')
                     ->whereColumn('user_id', 'users.id')
                     ->whereIn('establishment_id', $establishmentIds)
                     ->selectRaw('MAX(created_at)');
             }, 'last_click_at')
-            ->selectSub(function($query) use ($establishmentIds) {
+            ->selectSub(function ($query) use ($establishmentIds) {
                 $query->from('establishment_clicks')
                     ->whereColumn('user_id', 'users.id')
                     ->whereIn('establishment_id', $establishmentIds)
                     ->selectRaw('COUNT(*)');
             }, 'clicks_count')
-            ->whereHas('establishmentClicks', fn($q) => $q->whereIn('establishment_id', $establishmentIds))
+            ->whereHas('establishmentClicks', fn ($q) => $q->whereIn('establishment_id', $establishmentIds))
             ->with(['jeuneProfile', 'personalityTest'])
             ->orderBy('last_click_at', 'DESC')
             ->paginate(25, ['*'], 'clicks_page');

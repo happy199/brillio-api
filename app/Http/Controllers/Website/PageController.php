@@ -39,6 +39,7 @@ class PageController extends Controller
     {
         $partners = \App\Models\Organization::active()
             ->whereNotNull('logo_url')
+            ->where('private_circle_plus_enabled', false)
             ->get();
 
         return view('public.about', compact('partners'));
