@@ -6,10 +6,10 @@
     <title>Bienvenue chez les mentors Brillio</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', Arial, sans-serif; background-color: #f8fafc;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 0;">
         <tr>
             <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
                     <!-- Header -->
                     <tr>
                         <td style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 48px 40px; text-align: center;">
@@ -34,7 +34,7 @@
                             <div style="margin-bottom: 32px;">
                                 <!-- Action 1 -->
                                 <div style="background-color: #f1f5f9; border-radius: 16px; padding: 20px; margin-bottom: 16px;">
-                                    <table width="100%">
+                                    <table role="presentation" width="100%">
                                         <tr>
                                             <td style="width: 40px; vertical-align: top;">
                                                 <span style="font-size: 24px;">📚</span>
@@ -49,7 +49,7 @@
 
                                 <!-- Action 2 -->
                                 <div style="background-color: #f1f5f9; border-radius: 16px; padding: 20px; margin-bottom: 16px;">
-                                    <table width="100%">
+                                    <table role="presentation" width="100%">
                                         <tr>
                                             <td style="width: 40px; vertical-align: top;">
                                                 <span style="font-size: 24px;">✍️</span>
@@ -64,7 +64,7 @@
 
                                 <!-- Action 3 -->
                                 <div style="background-color: #f1f5f9; border-radius: 16px; padding: 20px;">
-                                    <table width="100%">
+                                    <table role="presentation" width="100%">
                                         <tr>
                                             <td style="width: 40px; vertical-align: top;">
                                                 <span style="font-size: 24px;">🔍</span>
@@ -79,7 +79,7 @@
                             </div>
 
                             <!-- Buttons -->
-                            <table width="100%" cellpadding="0" cellspacing="0">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td align="center" style="padding-top: 20px;">
                                         <div style="display: inline-block;">
