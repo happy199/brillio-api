@@ -32,6 +32,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matching MBTI</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intérêts</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clics</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -78,10 +79,10 @@
                             </a>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="inline-flex items-center py-1 px-3 bg-blue-50 border border-blue-100 rounded-lg text-sm font-semibold text-blue-700">
-                                <i class="fas fa-mouse-pointer mr-2 text-blue-500"></i>
+                            <a href="{{ route('admin.establishments.interests', $establishment) }}" class="inline-flex items-center py-1 px-3 bg-blue-50 border border-blue-100 rounded-lg text-sm font-semibold text-blue-700 hover:bg-white transition group">
+                                <i class="fas fa-mouse-pointer mr-2 text-blue-500 group-hover:scale-110 transition"></i>
                                 {{ $establishment->clicks_count }}
-                            </div>
+                            </a>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($establishment->is_published)
