@@ -30,11 +30,15 @@ class CheckOrganizationSubscription
             $requiredLevel = 1;
         } elseif ($plan === Organization::PLAN_ENTERPRISE) {
             $requiredLevel = 2;
+        } elseif ($plan === Organization::PLAN_ESTABLISHMENT) {
+            $requiredLevel = 3;
         }
 
         // Determine current level
         $currentLevel = 0;
-        if ($organization->isEnterprise()) {
+        if ($organization->isEstablishment()) {
+            $currentLevel = 3;
+        } elseif ($organization->isEnterprise()) {
             $currentLevel = 2;
         } elseif ($organization->isPro()) {
             $currentLevel = 1;

@@ -166,6 +166,13 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{user}', [\App\Http\Controllers\Organization\TeamController::class, 'destroy'])->name('destroy');
         }
         );
+
+        // Promotion (Establishment only)
+        Route::middleware('organization_subscription:establishment')->prefix('promotion')->name('promotion.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Organization\PromotionController::class, 'index'])->name('index');
+            Route::get('/export-pdf', [\App\Http\Controllers\Organization\PromotionController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/export-csv', [\App\Http\Controllers\Organization\PromotionController::class, 'exportCsv'])->name('export-csv');
+        });
     }
     );
 

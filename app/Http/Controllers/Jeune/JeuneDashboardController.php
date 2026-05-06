@@ -48,6 +48,11 @@ class JeuneDashboardController extends Controller
             $recommendedQuery->whereHas('user.organizations', function ($q) use ($orgIds) {
                 $q->whereIn('organizations.id', $orgIds);
             });
+        } else {
+            // General youths cannot see Private Circle Plus mentors
+            $recommendedQuery->whereDoesntHave('user.organizations', function ($q) {
+                $q->where('private_circle_plus_enabled', true);
+            });
         }
 
         if ($personalityTest && $personalityTest->personality_type) {
@@ -511,6 +516,11 @@ class JeuneDashboardController extends Controller
             $orgIds = $user->getPrivateCircleOrganizationIds();
             $query->whereHas('user.organizations', function ($q) use ($orgIds) {
                 $q->whereIn('organizations.id', $orgIds);
+            });
+        } else {
+            // General youths cannot see Private Circle Plus mentors
+            $query->whereDoesntHave('user.organizations', function ($q) {
+                $q->where('private_circle_plus_enabled', true);
             });
         }
 

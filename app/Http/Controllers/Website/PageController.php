@@ -39,6 +39,7 @@ class PageController extends Controller
     {
         $partners = \App\Models\Organization::active()
             ->whereNotNull('logo_url')
+            ->where('private_circle_plus_enabled', false)
             ->get();
 
         return view('public.about', compact('partners'));
@@ -96,6 +97,21 @@ class PageController extends Controller
             abort(404);
         }
 
+        // --- PRIVATE CIRCLE PLUS ISOLATION ---
+        $isIsolated = $mentor->user->organizations()->where('private_circle_plus_enabled', true)->exists();
+        if ($isIsolated) {
+            $canSee = false;
+            if (auth()->check()) {
+                $authUser = auth()->user();
+                // Check if they share at least one organization
+                $mentorOrgIds = $mentor->user->organizations()->pluck('organizations.id')->toArray();
+                $canSee = $authUser->organizations()->whereIn('organizations.id', $mentorOrgIds)->exists();
+            }
+            if (! $canSee) {
+                abort(404);
+            }
+        }
+
         // Incrémenter le compteur de vues
         $mentor->increment('profile_views');
 
@@ -144,6 +160,21 @@ class PageController extends Controller
         $profile = \App\Models\JeuneProfile::where('public_slug', $slug)
             ->where('is_public', true)
             ->firstOrFail();
+
+        // --- PRIVATE CIRCLE PLUS ISOLATION ---
+        $isIsolated = $profile->user->organizations()->where('private_circle_plus_enabled', true)->exists();
+        if ($isIsolated) {
+            $canSee = false;
+            if (auth()->check()) {
+                $authUser = auth()->user();
+                // Check if they share at least one organization
+                $jeuneOrgIds = $profile->user->organizations()->pluck('organizations.id')->toArray();
+                $canSee = $authUser->organizations()->whereIn('organizations.id', $jeuneOrgIds)->exists();
+            }
+            if (! $canSee) {
+                abort(404);
+            }
+        }
 
         // Incrémenter le compteur de vues
         $profile->increment('profile_views');

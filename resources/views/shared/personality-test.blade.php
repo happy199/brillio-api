@@ -1134,6 +1134,7 @@
                     },
 
                     handleInterest(est) {
+                        this.trackClick(est);
                         if (est.user_has_interest) return;
                         if (!this.userHasPhone) {
                             if (this.activePhoneInput === est.id) {
@@ -1172,9 +1173,20 @@
                     },
 
                     openDetails(est) {
+                        this.trackClick(est);
                         this.estDetails = est;
                         this.formData = {};
                         this.sidebarOpen = true;
+                    },
+
+                    trackClick(est) {
+                        fetch(`/espace-jeune/establishments/${est.id}/track-click`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        }).catch(e => console.error('Track click error:', e));
                     },
 
                     async submitPreciseInterest() {

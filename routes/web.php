@@ -290,6 +290,11 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::post('/establishments/{establishment}/interest-precise', [\App\Http\Controllers\Jeune\EstablishmentController::class, 'preciseInterest'])->name('establishments.interest-precise');
 });
 
+// Route de tracking universelle (Jeunes & Mentors)
+Route::post('/espace-jeune/establishments/{establishment}/track-click', [\App\Http\Controllers\Jeune\EstablishmentController::class, 'trackClick'])
+    ->middleware(['auth'])
+    ->name('jeune.establishments.track-click');
+
 // Routes publiques
 Route::get('/politique-de-confidentialite', function () {
     return view('privacy-policy');

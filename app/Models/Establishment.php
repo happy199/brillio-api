@@ -74,4 +74,9 @@ class Establishment extends Model
     {
         return $this->hasMany(EstablishmentInterest::class);
     }
+
+    public function clicks()
+    {
+        return $this->hasMany(EstablishmentClick::class);
+    }
 }

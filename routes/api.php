@@ -80,6 +80,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/mentors', [\App\Http\Controllers\Api\V1\MentorController::class, 'index']);
         Route::get('/mentors/{id}', [\App\Http\Controllers\Api\V1\MentorController::class, 'show']);
 
+        // Organizations
+        Route::post('/organizations/{id}/track-click', [\App\Http\Controllers\Api\V1\OrganizationController::class, 'trackClick']);
+
         // Chat (already existing)
         Route::get('/chat/conversations', [\App\Http\Controllers\Api\V1\ChatController::class, 'conversations']);
         Route::post('/chat/send', [\App\Http\Controllers\Api\V1\ChatController::class, 'send']);

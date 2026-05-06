@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 
 class MentorDashboardController extends Controller
 {
+    use \App\Traits\FormatsUrls;
+
     /**
      * Dashboard principal du mentor
      */
@@ -674,26 +676,6 @@ class MentorDashboardController extends Controller
                 'error' => 'Erreur critique lors du parsing : '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine(),
             ], 500);
         }
-    }
-
-    /**
-     * Formater une URL pour s'assurer qu'elle commence par http(s)://
-     */
-    private function formatUrl(?string $url): ?string
-    {
-        if (empty($url)) {
-            return $url;
-        }
-
-        $url = trim($url);
-
-        // Si l'URL ne commence pas par http:// ou https://
-        if (! preg_match('/^https?:\/\//i', $url)) {
-            // Si elle commence par www., ou juste par un nom de domaine
-            return 'https://'.ltrim($url, '/');
-        }
-
-        return $url;
     }
 
     /**

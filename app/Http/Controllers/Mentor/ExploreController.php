@@ -26,6 +26,12 @@ class ExploreController extends Controller
             $query->whereHas('organizations', function ($q) use ($orgIds) {
                 $q->whereIn('organizations.id', $orgIds);
             });
+        } else {
+            // If the mentor is NOT restricted, they still cannot see "Private Circle Plus" youths
+            // unless they are explicitly invited to that organization (which would mean they are linked)
+            $query->whereDoesntHave('organizations', function ($q) {
+                $q->where('private_circle_plus_enabled', true);
+            });
         }
 
         // Filtre MBTI

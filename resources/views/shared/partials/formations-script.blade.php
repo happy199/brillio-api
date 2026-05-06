@@ -48,6 +48,7 @@
             },
 
             handleInterest(est) {
+                this.trackClick(est);
                 if (est.user_has_interest) return;
 
                 if (!this.userHasPhone) {
@@ -96,6 +97,7 @@
             },
 
             openDetails(est) {
+                this.trackClick(est);
                 this.estDetails = est;
                 this.formData = {};
                 this.sidebarOpen = true;
@@ -103,6 +105,16 @@
                 setTimeout(() => {
                     this.panelReady = true;
                 }, 750); // wait for 700ms animation
+            },
+
+            trackClick(est) {
+                fetch(`/espace-jeune/establishments/${est.id}/track-click`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).catch(e => console.error('Track click error:', e));
             },
 
             submitPreciseInterest() {

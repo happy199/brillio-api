@@ -50,6 +50,7 @@ class Organization extends Model
         'subscription_expires_at',
         'auto_renew',
         'private_circle_enabled',
+        'private_circle_plus_enabled',
     ];
 
     /**
@@ -71,6 +72,7 @@ class Organization extends Model
         'subscription_expires_at' => 'datetime',
         'auto_renew' => 'boolean',
         'private_circle_enabled' => 'boolean',
+        'private_circle_plus_enabled' => 'boolean',
     ];
 
     /**
@@ -138,6 +140,27 @@ class Organization extends Model
     public function sponsoredUsers(): HasMany
     {
         return $this->hasMany(User::class, 'sponsored_by_organization_id');
+    }
+
+    /**
+     * Get all establishments for this organization.
+     */
+    public function establishments(): HasMany
+    {
+        return $this->hasMany(Establishment::class);
+    }
+
+    public function establishmentClicks(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(EstablishmentClick::class, Establishment::class);
+    }
+
+    /**
+     * Get all interests for this organization's establishments.
+     */
+    public function establishmentInterests(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(EstablishmentInterest::class, Establishment::class);
     }
 
     /**

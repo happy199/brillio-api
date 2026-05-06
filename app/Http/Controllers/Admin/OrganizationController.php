@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Establishment;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +26,9 @@ class OrganizationController extends Controller
      */
     public function create()
     {
-        return view('admin.organizations.form');
+        $establishments = Establishment::orderBy('name')->get();
+
+        return view('admin.organizations.form', compact('establishments'));
     }
 
     /**
@@ -44,6 +47,7 @@ class OrganizationController extends Controller
             'status' => 'required|in:active,inactive',
             'subscription_plan' => ['required', Rule::in(['free', 'pro', 'enterprise', 'establishment'])],
             'subscription_expires_at' => 'required_if:subscription_plan,pro,enterprise,establishment|nullable|date',
+            'establishment_id' => 'nullable|exists:establishments,id',
         ]);
 
         if ($request->hasFile('logo')) {
@@ -51,7 +55,11 @@ class OrganizationController extends Controller
             $validated['logo_url'] = $path;
         }
 
-        Organization::create($validated);
+        $organization = Organization::create($validated);
+
+        if ($request->filled('establishment_id')) {
+            Establishment::where('id', $request->establishment_id)->update(['organization_id' => $organization->id]);
+        }
 
         return redirect()->route('admin.organizations.index')
             ->with('success', 'Organisation créée avec succès.');
@@ -72,7 +80,9 @@ class OrganizationController extends Controller
      */
     public function edit(Organization $organization)
     {
-        return view('admin.organizations.form', compact('organization'));
+        $establishments = Establishment::orderBy('name')->get();
+
+        return view('admin.organizations.form', compact('organization', 'establishments'));
     }
 
     /**
@@ -89,8 +99,9 @@ class OrganizationController extends Controller
             'description' => 'nullable|string',
             'logo' => 'nullable|image|max:2048',
             'status' => 'required|in:active,inactive',
-            'subscription_plan' => ['required', Rule::in(['free', 'pro', 'enterprise'])],
-            'subscription_expires_at' => 'required_if:subscription_plan,pro,enterprise|nullable|date',
+            'subscription_plan' => ['required', Rule::in(['free', 'pro', 'enterprise', 'establishment'])],
+            'subscription_expires_at' => 'required_if:subscription_plan,pro,enterprise,establishment|nullable|date',
+            'establishment_id' => 'nullable|exists:establishments,id',
         ]);
 
         if ($request->hasFile('logo')) {
@@ -105,6 +116,15 @@ class OrganizationController extends Controller
         }
 
         $organization->update($validated);
+
+        if ($request->has('establishment_id')) {
+            // Unlink current establishments for this organization (main link)
+            Establishment::where('organization_id', $organization->id)->update(['organization_id' => null]);
+
+            if ($request->filled('establishment_id')) {
+                Establishment::where('id', $request->establishment_id)->update(['organization_id' => $organization->id]);
+            }
+        }
 
         return redirect()->route('admin.organizations.index')
             ->with('success', 'Organisation mise à jour avec succès.');

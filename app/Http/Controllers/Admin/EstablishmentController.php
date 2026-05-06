@@ -19,15 +19,6 @@ class EstablishmentController extends Controller
         $this->iaService = $iaService;
     }
 
-    public function index()
-    {
-        $establishments = Establishment::withCount('interests')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-
-        return view('admin.establishments.index', compact('establishments'));
-    }
-
     public function create()
     {
         $mbtiTypes = array_keys(PersonalityTest::PERSONALITY_TYPES);
@@ -228,6 +219,15 @@ class EstablishmentController extends Controller
         return back()->with('success', "$count nouveaux établissements originaux générés et enregistrés en brouillon.");
     }
 
+    public function index()
+    {
+        $establishments = Establishment::withCount(['interests', 'clicks'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('admin.establishments.index', compact('establishments'));
+    }
+
     /**
      * Show interests for a specific establishment
      */
@@ -235,7 +235,16 @@ class EstablishmentController extends Controller
     {
         $interests = $establishment->interests()->with('user')->orderBy('created_at', 'desc')->paginate(20);
 
-        return view('admin.establishments.interests', compact('establishment', 'interests'));
+        $clicks = $establishment->clicks()
+            ->select('user_id', \DB::raw('count(*) as clicks_count'), \DB::raw('max(created_at) as last_click_at'), \DB::raw('max(ip_address) as last_ip'), \DB::raw('max(user_agent) as last_agent'))
+            ->with('user.personalityTest')
+            ->groupBy('user_id')
+            ->orderBy('last_click_at', 'desc')
+            ->paginate(20);
+
+        $clicksCount = $establishment->clicks()->count();
+
+        return view('admin.establishments.interests', compact('establishment', 'interests', 'clicks', 'clicksCount'));
     }
 
     /**
