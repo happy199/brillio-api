@@ -20,18 +20,52 @@ class SendProfileCompletionReminders implements ShouldQueue
      */
     public function handle(): void
     {
-        // On récupère les utilisateurs avec onboarding non complété
-        // Ou des critères spécifiques de profil vide
-        $users = User::where('onboarding_completed', false)
+        // On récupère :
+        // 1. Les utilisateurs avec onboarding non complété
+        // 2. Les mentors avec profil publié mais SANS ressources publiées (pour réengagement mensuel)
+        $users = User::where(function ($query) {
+            $query->where('onboarding_completed', false)
+                ->orWhere(function ($q) {
+                    $q->where('user_type', User::TYPE_MENTOR)
+                        ->where('onboarding_completed', true)
+                        ->whereHas('mentorProfile', fn ($p) => $p->where('is_published', true))
+                        ->whereDoesntHave('resources', fn ($r) => $r->where('is_published', true))
+                        // On limite à un envoi par mois pour le réengagement
+                        ->where(function ($dateQuery) {
+                            $dateQuery->where('last_engagement_email_sent_at', '<=', now()->subDays(30))
+                                ->orWhereNull('last_engagement_email_sent_at');
+                        });
+                });
+        })
             ->where('archived_at', null)
+            ->where('is_blocked', false)
             ->with(['jeuneProfile', 'mentorProfile', 'personalityTest'])
             ->get();
 
         foreach ($users as $user) {
+            // Logique spécifique pour les mentors
+            if ($user->isMentor()) {
+                if ($user->mentorProfile && $user->mentorProfile->is_published) {
+                    // Si le profil est déjà publié, on envoie le mail d'engagement
+                    Mail::to($user->email)->queue(new \App\Mail\Engagement\MentorEngagementMail($user));
+
+                    // On marque comme complété et on met à jour la date d'envoi
+                    $user->update([
+                        'onboarding_completed' => true,
+                        'last_engagement_email_sent_at' => now(),
+                    ]);
+
+                    continue;
+                }
+            }
+
             $missingSections = $this->getMissingSections($user);
 
             if (! empty($missingSections)) {
                 Mail::to($user->email)->queue(new ProfileCompletionReminder($user, $missingSections));
+
+                // On met à jour la date pour ne pas le solliciter trop souvent si besoin
+                $user->update(['last_engagement_email_sent_at' => now()]);
             }
         }
     }
