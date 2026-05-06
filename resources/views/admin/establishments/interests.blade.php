@@ -114,8 +114,9 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dernier Clic</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jeune</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacts</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP / User Agent</th>
                         </tr>
@@ -124,7 +125,7 @@
                         @forelse($clicks as $click)
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $click->created_at->format('d/m/Y H:i') }}
+                                {{ \Carbon\Carbon::parse($click->last_click_at)->format('d/m/Y H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
@@ -138,13 +139,18 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-bold text-sm">
+                                    {{ $click->clicks_count }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $click->user?->email ?? '-' }}</div>
                                 <div class="text-xs text-gray-500">{{ $click->user?->phone ?? 'Pas de numéro' }}</div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-[10px] text-gray-400">
-                                    <div>IP: {{ $click->ip_address }}</div>
-                                    <div class="truncate max-w-xs" title="{{ $click->user_agent }}">{{ Str::limit($click->user_agent, 50) }}</div>
+                                    <div>IP: {{ $click->last_ip }}</div>
+                                    <div class="truncate max-w-xs" title="{{ $click->last_agent }}">{{ Str::limit($click->last_agent, 50) }}</div>
                                 </div>
                             </td>
                         </tr>

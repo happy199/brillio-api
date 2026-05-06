@@ -234,7 +234,13 @@ class EstablishmentController extends Controller
     public function interests(Establishment $establishment)
     {
         $interests = $establishment->interests()->with('user')->orderBy('created_at', 'desc')->paginate(20);
-        $clicks = $establishment->clicks()->with('user')->orderBy('created_at', 'desc')->paginate(20);
+
+        $clicks = $establishment->clicks()
+            ->select('user_id', \DB::raw('count(*) as clicks_count'), \DB::raw('max(created_at) as last_click_at'), \DB::raw('max(ip_address) as last_ip'), \DB::raw('max(user_agent) as last_agent'))
+            ->with('user.personalityTest')
+            ->groupBy('user_id')
+            ->orderBy('last_click_at', 'desc')
+            ->paginate(20);
 
         return view('admin.establishments.interests', compact('establishment', 'interests', 'clicks'));
     }
