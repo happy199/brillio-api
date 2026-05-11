@@ -58,6 +58,7 @@
                                 @foreach($mentees as $mentee)
                                     <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
                                         <input type="checkbox" name="mentee_ids[]" value="{{ $mentee->id }}"
+                                            {{ (is_array(old('mentee_ids')) && in_array($mentee->id, old('mentee_ids'))) || request('mentee_id') == $mentee->id ? 'checked' : '' }}
                                             class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300 h-4 w-4">
                                         <div class="flex items-center gap-3">
                                             <img src="{{ $mentee->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($mentee->name) }}"

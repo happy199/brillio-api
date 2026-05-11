@@ -51,6 +51,12 @@
             </span>
         </div>
 
+        <a href="{{ route('jeune.sessions.create', $mentorship->mentor->id) }}"
+            class="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-100 transition flex items-center gap-1.5 whitespace-nowrap">
+            <i class="fas fa-calendar-plus text-[10px]"></i>
+            Programmer une séance
+        </a>
+
         @if(!$mentorship->isReported())
         <button type="button" @click="isReportModalOpen = true"
             class="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 transition-colors">
@@ -193,6 +199,16 @@
                             @if($message->body)
                                 <div class="px-4 py-2.5 rounded-2xl {{ $isMine ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm' }}">
                                     <p class="text-sm whitespace-pre-wrap">{{ $message->body }}</p>
+                                    
+                                    @if($message->type === 'session_proposal' && isset($message->metadata['session_id']))
+                                        <div class="mt-3 pt-3 border-t {{ $isMine ? 'border-indigo-500' : 'border-gray-200' }}">
+                                            <a href="{{ route('jeune.sessions.show', $message->metadata['session_id']) }}" 
+                                               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition {{ $isMine ? 'bg-white text-indigo-600 hover:bg-indigo-50' : 'bg-indigo-600 text-white hover:bg-indigo-700' }}">
+                                                <i class="fas fa-calendar-check"></i>
+                                                Voir les détails
+                                            </a>
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
 

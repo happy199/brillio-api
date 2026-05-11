@@ -128,6 +128,24 @@ class SessionController extends Controller
         // Attacher le jeune
         $session->mentees()->attach($user->id, ['status' => 'accepted']); // Le jeune accepte sa propre demande
 
+        // Envoyer un message dans la messagerie
+        $mentorship = \App\Models\Mentorship::where('mentor_id', $mentor->id)
+            ->where('mentee_id', $user->id)
+            ->first();
+
+        if ($mentorship) {
+            $mentorship->messages()->create([
+                'sender_id' => $user->id,
+                'body' => "🗓️ Proposition d'une séance de mentorat : {$session->title}",
+                'type' => 'session_proposal',
+                'metadata' => [
+                    'session_id' => $session->id,
+                    'title' => $session->title,
+                    'scheduled_at' => $session->scheduled_at->toDateTimeString(),
+                ],
+            ]);
+        }
+
         // Notification email au mentor
         app(\App\Services\MentorshipNotificationService::class)->sendSessionProposed($session);
 

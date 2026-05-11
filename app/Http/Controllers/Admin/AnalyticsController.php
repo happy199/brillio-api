@@ -48,8 +48,9 @@ class AnalyticsController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
-        // Si des dates personnalisées sont fournies
-        if ($startDate && $endDate) {
+        // On n'utilise les dates personnalisées QUE si le preset est explicitement 'custom'
+        // ou si on a des dates mais pas de preset.
+        if ($preset === 'custom' && $startDate && $endDate) {
             return [
                 'start' => Carbon::parse($startDate)->startOfDay(),
                 'end' => Carbon::parse($endDate)->endOfDay(),
@@ -257,8 +258,10 @@ class AnalyticsController extends Controller
                 'country' => (array) $request->get('country', []),
                 'goal' => (array) $request->get('goal', []),
                 'channel' => (array) $request->get('channel', []),
+                'personality' => (array) $request->get('personality', []),
                 'tuition' => (array) $request->get('tuition', []),
-                'salary' => (array) $request->get('salary', []),
+                'target_salary' => (array) $request->get('target_salary', []),
+                'actual_salary' => (array) $request->get('actual_salary', []),
             ],
             'personalityLabels' => PersonalityService::TYPE_DESCRIPTIONS,
         ]);
@@ -667,7 +670,8 @@ class AnalyticsController extends Controller
         $channels = (array) $request->get('channel', []);
         $personalities = (array) $request->get('personality', []);
         $tuitions = (array) $request->get('tuition', []);
-        $salaries = (array) $request->get('salary', []);
+        $targetSalaries = (array) $request->get('target_salary', []);
+        $actualSalaries = (array) $request->get('actual_salary', []);
 
         $situations = array_filter($situations);
         $interests = array_filter($interests);
@@ -676,7 +680,8 @@ class AnalyticsController extends Controller
         $channels = array_filter($channels);
         $personalities = array_filter($personalities);
         $tuitions = array_filter($tuitions);
-        $salaries = array_filter($salaries);
+        $targetSalaries = array_filter($targetSalaries);
+        $actualSalaries = array_filter($actualSalaries);
 
         $allSituationsDisplay = [
             'college' => 'Collège',
@@ -688,7 +693,7 @@ class AnalyticsController extends Controller
             'autre' => 'Autre',
         ];
 
-        return response()->stream(function () use ($type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $salaries, $allSituationsDisplay) {
+        return response()->stream(function () use ($type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $allSituationsDisplay) {
             $handle = fopen('php://output', 'w');
 
             if ($type === 'users') {
@@ -766,9 +771,17 @@ class AnalyticsController extends Controller
                     });
                 }
 
-                if (! empty($salaries)) {
-                    $query->whereHas('detailedProfiles', function ($sq) use ($salaries) {
-                        $sq->whereIn('data->salary_range', $salaries);
+                if (! empty($targetSalaries)) {
+                    $query->whereHas('detailedProfiles', function ($sq) use ($targetSalaries) {
+                        $sq->where('status', 'recherche_emploi')
+                            ->whereIn('data->salary_range', $targetSalaries);
+                    });
+                }
+
+                if (! empty($actualSalaries)) {
+                    $query->whereHas('detailedProfiles', function ($sq) use ($actualSalaries) {
+                        $sq->whereIn('status', ['emploi', 'entrepreneur'])
+                            ->whereIn('data->salary_range', $actualSalaries);
                     });
                 }
 

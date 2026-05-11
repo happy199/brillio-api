@@ -155,6 +155,24 @@ class SessionController extends Controller
         $pivotStatus = $request->boolean('is_paid') ? 'pending' : 'accepted';
         foreach ($request->mentee_ids as $menteeId) {
             $session->mentees()->attach($menteeId, ['status' => $pivotStatus]);
+
+            // Envoyer un message dans la messagerie
+            $mentorship = \App\Models\Mentorship::where('mentor_id', $mentor->id)
+                ->where('mentee_id', $menteeId)
+                ->first();
+
+            if ($mentorship) {
+                $mentorship->messages()->create([
+                    'sender_id' => $mentor->id,
+                    'body' => "🗓️ Nouvelle séance de mentorat planifiée : {$session->title}",
+                    'type' => 'session_proposal',
+                    'metadata' => [
+                        'session_id' => $session->id,
+                        'title' => $session->title,
+                        'scheduled_at' => $session->scheduled_at->toDateTimeString(),
+                    ],
+                ]);
+            }
         }
 
         // Notification email au jeune

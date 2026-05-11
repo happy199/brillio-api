@@ -11,6 +11,8 @@ class Message extends Model
         'mentorship_id',
         'sender_id',
         'body',
+        'type',
+        'metadata',
         'original_body',
         'is_flagged',
         'flag_reason',
@@ -23,6 +25,7 @@ class Message extends Model
     ];
 
     protected $casts = [
+        'metadata' => 'array',
         'read_at' => 'datetime',
         'edited_at' => 'datetime',
         'is_deleted' => 'boolean',
