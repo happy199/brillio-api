@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
 
 class SessionController extends Controller
@@ -92,7 +93,7 @@ class SessionController extends Controller
     /**
      * Enregistrer la réservation
      */
-    public function store(Request $request)
+    public function store(Request $request, MentorshipNotificationService $notificationService)
     {
         $request->validate([
             'mentor_id' => 'required|exists:users,id',
@@ -128,23 +129,8 @@ class SessionController extends Controller
         // Attacher le jeune
         $session->mentees()->attach($user->id, ['status' => 'accepted']); // Le jeune accepte sa propre demande
 
-        // Envoyer un message dans la messagerie
-        $mentorship = \App\Models\Mentorship::where('mentor_id', $mentor->id)
-            ->where('mentee_id', $user->id)
-            ->first();
-
-        if ($mentorship) {
-            $mentorship->messages()->create([
-                'sender_id' => $user->id,
-                'body' => "🗓️ Proposition d'une séance de mentorat : {$session->title}",
-                'type' => 'session_proposal',
-                'metadata' => [
-                    'session_id' => $session->id,
-                    'title' => $session->title,
-                    'scheduled_at' => $session->scheduled_at->toDateTimeString(),
-                ],
-            ]);
-        }
+        // Envoyer un message dans la messagerie via le service
+        $notificationService->sendSessionChatNotification($session, $user);
 
         // Notification email au mentor
         app(\App\Services\MentorshipNotificationService::class)->sendSessionProposed($session);

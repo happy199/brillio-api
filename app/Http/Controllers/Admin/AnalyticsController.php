@@ -693,7 +693,7 @@ class AnalyticsController extends Controller
             'autre' => 'Autre',
         ];
 
-        return response()->stream(function () use ($type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $allSituationsDisplay) {
+        return response()->stream(function () use ($type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $allSituationsDisplay, $targetSalaries, $actualSalaries) {
             $handle = fopen('php://output', 'w');
 
             if ($type === 'users') {
