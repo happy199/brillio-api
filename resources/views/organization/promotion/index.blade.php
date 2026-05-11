@@ -292,19 +292,30 @@
     <!-- Info Box -->
     <div class="bg-gradient-to-r from-organization-500 to-organization-700 rounded-2xl p-8 text-white shadow-lg overflow-hidden relative">
         <div class="absolute top-0 right-0 -mr-16 -mt-16 opacity-10">
-            <i class="fas fa-lightbulb text-[200px]"></i>
+            <i class="fas fa-rocket text-[200px]"></i>
         </div>
-        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between">
-            <div class="max-w-2xl text-center md:text-left mb-6 md:mb-0">
-                <h3 class="text-2xl font-bold mb-2">Maximisez votre visibilité</h3>
-                <p class="text-organization-100 text-lg">
-                    Chaque clic est un étudiant potentiel intéressé par votre établissement. Utilisez ces données pour comprendre quels profils sont attirés par votre offre et contactez-les pour les guider.
+        <div class="relative z-10">
+            <div class="max-w-3xl mb-8">
+                <h3 class="text-3xl font-bold mb-4">Maximisez votre visibilité</h3>
+                <p class="text-white/90 text-lg leading-relaxed">
+                    Prenez le contrôle de votre image sur Brillio. Mettez à jour les informations de votre établissement pour attirer les meilleurs profils ou utilisez vos crédits pour booster votre visibilité auprès des jeunes talents qui vous correspondent.
                 </p>
             </div>
-            <div class="flex-shrink-0">
-                <a href="{{ route('organization.profile.edit') }}" class="bg-white text-organization-700 px-6 py-3 rounded-xl font-bold shadow-sm hover:bg-organization-50 transition-all inline-flex items-center">
-                    <i class="fas fa-edit mr-2"></i> Optimiser mon profil
+            
+            <div class="flex flex-wrap gap-4">
+                <a href="{{ route('organization.establishments.edit') }}" class="bg-white text-rose-600 px-6 py-4 rounded-xl font-bold shadow-sm hover:bg-rose-50 transition-all inline-flex items-center">
+                    <i class="fas fa-id-card mr-2"></i> Modifier la fiche affichée aux jeunes
                 </a>
+
+                @php $establishment = $organization->establishments->first(); @endphp
+                @if($establishment)
+                <form action="{{ route('organization.establishments.boost', $establishment) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="bg-white/30 hover:bg-white/40 text-white px-6 py-4 rounded-xl font-bold shadow-sm transition-all inline-flex items-center border border-white/40 backdrop-blur-md">
+                        <i class="fas fa-rocket mr-2"></i> Booster la fiche
+                    </button>
+                </form>
+                @endif
             </div>
         </div>
     </div>

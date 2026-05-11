@@ -21,8 +21,7 @@
             </div>
         </div>
 
-            <!-- Filtres Avancés (Smart Sourcing Engine) -->
-            <form action="{{ route('admin.analytics.index') }}" method="GET" class="w-full mt-6 space-y-6" x-data='{
+            <!-- Filtres Avancés (Smart Sourcing Engine) -->            <form action="{{ route('admin.analytics.index') }}" method="GET" class="w-full mt-6 space-y-6" x-data='{
                 situation: {!! json_encode($filters["situation"] ?? [], JSON_HEX_APOS) !!},
                 interest: {!! json_encode($filters["interest"] ?? [], JSON_HEX_APOS) !!},
                 country: {!! json_encode($filters["country"] ?? [], JSON_HEX_APOS) !!},
@@ -30,30 +29,68 @@
                 channel: {!! json_encode($filters["channel"] ?? [], JSON_HEX_APOS) !!},
                 personality: {!! json_encode($filters["personality"] ?? [], JSON_HEX_APOS) !!},
                 tuition: {!! json_encode($filters["tuition"] ?? [], JSON_HEX_APOS) !!},
-                salary: {!! json_encode($filters["salary"] ?? [], JSON_HEX_APOS) !!},
+                target_salary: {!! json_encode($filters["target_salary"] ?? [], JSON_HEX_APOS) !!},
+                actual_salary: {!! json_encode($filters["actual_salary"] ?? [], JSON_HEX_APOS) !!},
                 startDate: "{{ $dateRange["start"]->format("Y-m-d") }}",
                 endDate: "{{ $dateRange["end"]->format("Y-m-d") }}",
+                preset: "{{ $dateRange["preset"] ?? "month" }}",
                 
-                get showTuition() {
-                    let s = this.situation || [];
-                    return s.length === 0 || s.some(val => ["college", "lycee", "etudiant"].includes(val));
+                openMenu: null,
+                
+                allSituations: {!! json_encode($allSituations ?? [], JSON_HEX_APOS) !!},
+                allGoals: {!! json_encode($allGoals ?? [], JSON_HEX_APOS) !!},
+                allInterests: {!! json_encode($allInterests ?? [], JSON_HEX_APOS) !!},
+                allCountries: {!! json_encode($allCountries ?? [], JSON_HEX_APOS) !!},
+                allPersonalities: {!! json_encode($allPersonalities ?? [], JSON_HEX_APOS) !!},
+                tuitionOptions: {
+                    "-200000": "- 200k FCFA",
+                    "200000-500000": "200k - 500k",
+                    "500000-1000000": "500k - 1M",
+                    "1000000-2000000": "1M - 2M",
+                    "+2000000": "+ 2M"
                 },
-                get showSalary() {
-                    let s = this.situation || [];
-                    return s.length === 0 || s.some(val => ["emploi", "entrepreneur"].includes(val));
+                salaryOptions: {
+                    "-50000": "- 50k FCFA",
+                    "50000-100000": "50k - 100k",
+                    "100000-250000": "100k - 250k",
+                    "250000-500000": "250k - 500k",
+                    "500000-1000000": "500k - 1M",
+                    "1000000-3000000": "1M - 3M",
+                    "+3000000": "+ 3M"
                 },
-                setPeriod(value) {
-                    if (value === "custom") {
-                        const customDates = document.getElementById("custom-dates");
-                        if (customDates) {
-                            customDates.scrollIntoView({ behavior: "smooth", block: "center" });
-                            customDates.classList.add("ring-2", "ring-indigo-500", "ring-offset-2");
-                            setTimeout(() => {
-                                customDates.classList.remove("ring-2", "ring-indigo-500", "ring-offset-2");
-                            }, 2000);
-                        }
-                        return;
+
+                getLabel(type) {
+                    let items = this[type] || [];
+                    if (items.length === 0) {
+                        const defaults = {
+                            situation: "Toutes les situations",
+                            interest: "Tous les intérêts",
+                            country: "Tous les pays",
+                            personality: "Toutes",
+                            goal: "Tous les objectifs",
+                            tuition: "Tous les budgets",
+                            target_salary: "Toutes les tranches",
+                            actual_salary: "Toutes les tranches"
+                        };
+                        return defaults[type] || "Tous";
                     }
+                    if (items.length === 1) {
+                        const dicts = {
+                            situation: this.allSituations,
+                            interest: this.allInterests,
+                            goal: this.allGoals,
+                            tuition: this.tuitionOptions,
+                            target_salary: this.salaryOptions,
+                            actual_salary: this.salaryOptions
+                        };
+                        return (dicts[type] && dicts[type][items[0]]) ? dicts[type][items[0]] : items[0];
+                    }
+                    return items.length + " sélectionnés";
+                },
+
+                setPeriod(value) {
+                    this.preset = value;
+                    if (value === "custom") return;
 
                     const today = new Date();
                     const end = new Date(today);
@@ -71,8 +108,8 @@
 
                     const format = (d) => {
                         const y = d.getFullYear();
-                        const m = String(d.getMonth() + 1).padStart(2, '0');
-                        const day = String(d.getDate()).padStart(2, '0');
+                        const m = String(d.getMonth() + 1).padStart(2, "0");
+                        const day = String(d.getDate()).padStart(2, "0");
                         return `${y}-${m}-${day}`;
                     };
 
@@ -84,39 +121,31 @@
                     <!-- Période -->
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Période d'analyse</label>
-                        <select name="preset" @change="setPeriod($event.target.value)"
-                            class="w-full rounded-xl border-gray-200 text-sm focus:ring-primary-500 shadow-sm h-10">
-                            <option value="today" {{ ($dateRange['preset'] ?? '' )=='today' ? 'selected' : '' }}>Aujourd'hui</option>
-                            <option value="3days" {{ ($dateRange['preset'] ?? '' )=='3days' ? 'selected' : '' }}>3 derniers jours</option>
-                            <option value="week" {{ ($dateRange['preset'] ?? '' )=='week' ? 'selected' : '' }}>7 derniers jours</option>
-                            <option value="month" {{ ($dateRange['preset'] ?? 'month' )=='month' ? 'selected' : '' }}>30 derniers jours</option>
-                            <option value="quarter" {{ ($dateRange['preset'] ?? '' )=='quarter' ? 'selected' : '' }}>3 derniers mois</option>
-                            <option value="year" {{ ($dateRange['preset'] ?? '' )=='year' ? 'selected' : '' }}>Cette année</option>
-                            <option value="all" {{ ($dateRange['preset'] ?? '' )=='all' ? 'selected' : '' }}>Tout</option>
-                            <option value="custom" {{ ($dateRange['preset'] ?? '' )=='custom' ? 'selected' : '' }}>Personnalisé</option>
+                        <select name="preset" x-model="preset" @change="setPeriod($event.target.value)"
+                            class="w-full rounded-xl border-gray-200 text-sm focus:ring-indigo-500 shadow-sm h-10">
+                            <option value="today">Aujourd'hui</option>
+                            <option value="3days">3 derniers jours</option>
+                            <option value="week">7 derniers jours</option>
+                            <option value="month">30 derniers jours</option>
+                            <option value="quarter">3 derniers mois</option>
+                            <option value="year">Cette année</option>
+                            <option value="all">Tout</option>
+                            <option value="custom">Personnalisé</option>
                         </select>
                     </div>
 
                     <!-- Situation -->
-                    <div class="space-y-2" x-data='{ 
-                        open: false, 
-                        options: {!! json_encode($allSituations ?? [], JSON_HEX_APOS) !!},
-                        get label() {
-                            if (!this.situation || this.situation.length === 0) return "Toutes les situations";
-                            if (this.situation.length === 1) return (this.options || {})[this.situation[0]] || this.situation[0];
-                            return this.situation.length + " sélectionnées";
-                        }
-                    }' @click.away="open = false">
+                    <div class="space-y-2" @click.away="if(openMenu === 'situation') openMenu = null">
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Situation</label>
                         <div class="relative">
-                            <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm h-10">
-                                <span x-text="label" class="truncate mr-2"></span>
-                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            <button type="button" @click="openMenu = (openMenu === 'situation' ? null : 'situation')" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-indigo-400 transition shadow-sm h-10">
+                                <span x-text="getLabel('situation')" class="truncate mr-2"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openMenu === 'situation' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="(label, value) in options" :key="value">
+                            <div x-show="openMenu === 'situation'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
+                                <template x-for="(label, value) in allSituations" :key="value">
                                     <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="situation[]" :value="value" x-model="situation" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                        <input type="checkbox" name="situation[]" :value="value" x-model="situation" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
                                         <span class="text-sm text-gray-700" x-text="label"></span>
                                     </label>
                                 </template>
@@ -125,25 +154,17 @@
                     </div>
 
                     <!-- Pays -->
-                    <div class="space-y-2" x-data='{ 
-                        open: false, 
-                        options: {!! json_encode($allCountries ?? [], JSON_HEX_APOS) !!},
-                        get label() {
-                            if (!this.country || this.country.length === 0) return "Tous les pays";
-                            if (this.country.length === 1) return this.country[0];
-                            return this.country.length + " sélectionnés";
-                        }
-                    }' @click.away="open = false">
+                    <div class="space-y-2" @click.away="if(openMenu === 'country') openMenu = null">
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Pays</label>
                         <div class="relative">
-                            <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm h-10">
-                                <span x-text="label" class="truncate mr-2"></span>
-                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            <button type="button" @click="openMenu = (openMenu === 'country' ? null : 'country')" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-indigo-400 transition shadow-sm h-10">
+                                <span x-text="getLabel('country')" class="truncate mr-2"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openMenu === 'country' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="item in options" :key="item">
+                            <div x-show="openMenu === 'country'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
+                                <template x-for="item in allCountries" :key="item">
                                     <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="country[]" :value="item" x-model="country" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                        <input type="checkbox" name="country[]" :value="item" x-model="country" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
                                         <span class="text-sm text-gray-700" x-text="item"></span>
                                     </label>
                                 </template>
@@ -152,25 +173,17 @@
                     </div>
 
                     <!-- MBTI -->
-                    <div class="space-y-2" x-data='{ 
-                        open: false, 
-                        options: {!! json_encode($allPersonalities ?? [], JSON_HEX_APOS) !!},
-                        get label() {
-                            if (!this.personality || this.personality.length === 0) return "Toutes";
-                            if (this.personality.length === 1) return this.personality[0];
-                            return this.personality.length + " sélectionnés";
-                        }
-                    }' @click.away="open = false">
+                    <div class="space-y-2" @click.away="if(openMenu === 'personality') openMenu = null">
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Type MBTI</label>
                         <div class="relative">
-                            <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm h-10">
-                                <span x-text="label" class="truncate mr-2"></span>
-                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            <button type="button" @click="openMenu = (openMenu === 'personality' ? null : 'personality')" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-indigo-400 transition shadow-sm h-10">
+                                <span x-text="getLabel('personality')" class="truncate mr-2"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openMenu === 'personality' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="item in options" :key="item">
+                            <div x-show="openMenu === 'personality'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
+                                <template x-for="item in allPersonalities" :key="item">
                                     <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="personality[]" :value="item" x-model="personality" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                        <input type="checkbox" name="personality[]" :value="item" x-model="personality" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
                                         <span class="text-sm text-gray-700" x-text="item"></span>
                                     </label>
                                 </template>
@@ -179,24 +192,17 @@
                     </div>
 
                     <!-- Objectifs -->
-                    <div class="space-y-2" x-data='{ 
-                        open: false, 
-                        options: {!! json_encode($allGoals ?? [], JSON_HEX_APOS) !!},
-                        get label() {
-                            if (!this.goal || this.goal.length === 0) return "Tous les objectifs";
-                            return this.goal.length + " sélectionnés";
-                        }
-                    }' @click.away="open = false">
+                    <div class="space-y-2" @click.away="if(openMenu === 'goal') openMenu = null">
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Objectifs</label>
                         <div class="relative">
-                            <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm h-10">
-                                <span x-text="label" class="truncate mr-2"></span>
-                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            <button type="button" @click="openMenu = (openMenu === 'goal' ? null : 'goal')" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-indigo-400 transition shadow-sm h-10">
+                                <span x-text="getLabel('goal')" class="truncate mr-2"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openMenu === 'goal' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="(label, value) in options" :key="value">
+                            <div x-show="openMenu === 'goal'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
+                                <template x-for="(label, value) in allGoals" :key="value">
                                     <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="goal[]" :value="value" x-model="goal" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                        <input type="checkbox" name="goal[]" :value="value" x-model="goal" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
                                         <span class="text-sm text-gray-700" x-text="label"></span>
                                     </label>
                                 </template>
@@ -205,24 +211,17 @@
                     </div>
 
                     <!-- Intérêts -->
-                    <div class="space-y-2" x-data='{ 
-                        open: false, 
-                        options: {!! json_encode($allInterests ?? [], JSON_HEX_APOS) !!},
-                        get label() {
-                            if (!this.interest || this.interest.length === 0) return "Tous les intérêts";
-                            return this.interest.length + " sélectionnés";
-                        }
-                    }' @click.away="open = false">
+                    <div class="space-y-2" @click.away="if(openMenu === 'interest') openMenu = null">
                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Intérêts</label>
                         <div class="relative">
-                            <button type="button" @click="open = !open" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-primary-400 transition shadow-sm h-10">
-                                <span x-text="label" class="truncate mr-2"></span>
-                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            <button type="button" @click="openMenu = (openMenu === 'interest' ? null : 'interest')" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-indigo-400 transition shadow-sm h-10">
+                                <span x-text="getLabel('interest')" class="truncate mr-2"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openMenu === 'interest' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="(label, value) in options" :key="value">
+                            <div x-show="openMenu === 'interest'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
+                                <template x-for="(label, value) in allInterests" :key="value">
                                     <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="interest[]" :value="value" x-model="interest" class="rounded text-primary-600 focus:ring-primary-500 border-gray-300">
+                                        <input type="checkbox" name="interest[]" :value="value" x-model="interest" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
                                         <span class="text-sm text-gray-700" x-text="label"></span>
                                     </label>
                                 </template>
@@ -231,28 +230,15 @@
                     </div>
 
                     <!-- Scolarité -->
-                    <div class="space-y-2" x-show="showTuition" x-transition x-data='{ 
-                        open: false, 
-                        options: {
-                            "-200000": "- 200.000 FCFA",
-                            "200000-500000": "200k - 500k FCFA",
-                            "500000-1000000": "500k - 1M FCFA",
-                            "1000000-2000000": "1M - 2M FCFA",
-                            "+2000000": "+ 2M FCFA"
-                        },
-                        get label() {
-                            if (!this.tuition || this.tuition.length === 0) return "Tous les budgets";
-                            return this.tuition.length + " sélectionnés";
-                        }
-                    }' @click.away="open = false">
+                    <div class="space-y-2" @click.away="if(openMenu === 'tuition') openMenu = null">
                         <label class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Scolarité (Budget)</label>
                         <div class="relative">
-                            <button type="button" @click="open = !open" class="w-full bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-indigo-400 transition shadow-sm h-10">
-                                <span x-text="label" class="truncate mr-2 text-indigo-700"></span>
-                                <svg class="w-4 h-4 text-indigo-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            <button type="button" @click="openMenu = (openMenu === 'tuition' ? null : 'tuition')" class="w-full bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-indigo-400 transition shadow-sm h-10">
+                                <span x-text="getLabel('tuition')" class="truncate mr-2 text-indigo-700 font-bold"></span>
+                                <svg class="w-4 h-4 text-indigo-400 transition-transform" :class="openMenu === 'tuition' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="(label, value) in options" :key="value">
+                            <div x-show="openMenu === 'tuition'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
+                                <template x-for="(label, value) in tuitionOptions" :key="value">
                                     <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
                                         <input type="checkbox" name="tuition[]" :value="value" x-model="tuition" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
                                         <span class="text-sm text-gray-700" x-text="label"></span>
@@ -262,33 +248,18 @@
                         </div>
                     </div>
 
-                    <!-- Salaire -->
-                    <div class="space-y-2" x-show="showSalary" x-transition x-data='{ 
-                        open: false, 
-                        options: {
-                            "-50000": "Moins de 50.000 FCFA",
-                            "50000-100000": "50k - 100k FCFA",
-                            "100000-250000": "100k - 250k FCFA",
-                            "250000-500000": "250k - 500k FCFA",
-                            "500000-1000000": "500k - 1M FCFA",
-                            "1000000-3000000": "1M - 3M FCFA",
-                            "+3000000": "+ 3M FCFA"
-                        },
-                        get label() {
-                            if (!this.salary || this.salary.length === 0) return "Toutes les tranches";
-                            return this.salary.length + " sélectionnés";
-                        }
-                    }' @click.away="open = false">
+                    <!-- Salaire Cible -->
+                    <div class="space-y-2" @click.away="if(openMenu === 'target_salary') openMenu = null">
                         <label class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Salaire (Cible)</label>
                         <div class="relative">
-                            <button type="button" @click="open = !open" class="w-full bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-emerald-400 transition shadow-sm h-10">
-                                <span x-text="label" class="truncate mr-2 text-emerald-700"></span>
-                                <svg class="w-4 h-4 text-emerald-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            <button type="button" @click="openMenu = (openMenu === 'target_salary' ? null : 'target_salary')" class="w-full bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-emerald-400 transition shadow-sm h-10">
+                                <span x-text="getLabel('target_salary')" class="truncate mr-2 text-emerald-700 font-bold"></span>
+                                <svg class="w-4 h-4 text-emerald-400 transition-transform" :class="openMenu === 'target_salary' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="(label, value) in options" :key="value">
+                            <div x-show="openMenu === 'target_salary'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
+                                <template x-for="(label, value) in salaryOptions" :key="value">
                                     <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="salary[]" :value="value" x-model="salary" class="rounded text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                        <input type="checkbox" name="target_salary[]" :value="value" x-model="target_salary" class="rounded text-emerald-600 focus:ring-emerald-500 border-gray-300">
                                         <span class="text-sm text-gray-700" x-text="label"></span>
                                     </label>
                                 </template>
@@ -296,18 +267,39 @@
                         </div>
                     </div>
 
+                    <!-- Salaire Actuel -->
+                    <div class="space-y-2" @click.away="if(openMenu === 'actual_salary') openMenu = null">
+                        <label class="text-xs font-bold text-blue-600 uppercase tracking-wider">Salaire (Actuel)</label>
+                        <div class="relative">
+                            <button type="button" @click="openMenu = (openMenu === 'actual_salary' ? null : 'actual_salary')" class="w-full bg-blue-50 border border-blue-100 rounded-xl px-4 py-2 text-left text-sm flex items-center justify-between hover:border-blue-400 transition shadow-sm h-10">
+                                <span x-text="getLabel('actual_salary')" class="truncate mr-2 text-blue-700 font-bold"></span>
+                                <svg class="w-4 h-4 text-blue-400 transition-transform" :class="openMenu === 'actual_salary' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="openMenu === 'actual_salary'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
+                                <template x-for="(label, value) in salaryOptions" :key="value">
+                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input type="checkbox" name="actual_salary[]" :value="value" x-model="actual_salary" class="rounded text-blue-600 focus:ring-blue-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="label"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Custom Dates Row -->
-                <div id="custom-dates" class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <div id="custom-dates" class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 transition-all" :class="preset === 'custom' ? 'ring-2 ring-indigo-500 ring-offset-2' : ''">
                     <div class="flex items-center gap-2">
                         <label class="text-xs font-semibold text-gray-400">DU</label>
-                        <input type="date" name="start_date" id="start_date" x-model="startDate" value="{{ $dateRange['start']->format('Y-m-d') }}" class="rounded-lg border-gray-200 text-sm p-1.5 focus:ring-primary-500 shadow-sm">
+                        <input type="date" name="start_date" x-model="startDate" class="rounded-lg border-gray-200 text-sm p-1.5 focus:ring-indigo-500 shadow-sm" :readonly="preset !== 'custom'">
                     </div>
                     <div class="flex items-center gap-2">
                         <label class="text-xs font-semibold text-gray-400">AU</label>
-                        <input type="date" name="end_date" id="end_date" x-model="endDate" value="{{ $dateRange['end']->format('Y-m-d') }}" class="rounded-lg border-gray-200 text-sm p-1.5 focus:ring-primary-500 shadow-sm">
+                        <input type="date" name="end_date" x-model="endDate" class="rounded-lg border-gray-200 text-sm p-1.5 focus:ring-indigo-500 shadow-sm" :readonly="preset !== 'custom'">
                     </div>
+                    <template x-if="preset !== 'custom'">
+                        <span class="text-[10px] text-indigo-400 italic font-medium ml-2">Les dates suivent automatiquement le préréglage sélectionné</span>
+                    </template>
                 </div>
 
                 <!-- Actions Final Row -->
@@ -346,12 +338,6 @@
                 Données du <span class="font-bold text-gray-900">{{ $dateRange['start']->format('d/m/Y') }}</span> au <span class="font-bold text-gray-900">{{ $dateRange['end']->format('d/m/Y') }}</span>
             </div>
         </div>
-
-        <!-- Période actuelle -->
-        <p class="text-sm text-gray-500 mt-3">
-            Données du <strong>{{ $dateRange['start']->format('d/m/Y') }}</strong>
-            au <strong>{{ $dateRange['end']->format('d/m/Y') }}</strong>
-        </p>
     </div>
 
     <!-- Stats principales -->

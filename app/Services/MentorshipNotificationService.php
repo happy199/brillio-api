@@ -521,4 +521,28 @@ class MentorshipNotificationService
             $conversationUrl
         ));
     }
+
+    /**
+     * Créer un message système dans le chat pour notifier d'une séance programmée/proposée
+     */
+    public function sendSessionChatNotification(MentoringSession $session, User $sender)
+    {
+        $mentorship = Mentorship::where('mentor_id', $session->mentor_id)
+            ->where('mentee_id', $session->mentees()->first()->id)
+            ->first();
+
+        if ($mentorship) {
+            $mentorship->messages()->create([
+                'sender_id' => $sender->id,
+                'body' => $sender->id === $session->mentor_id
+                    ? "J'ai programmé une séance de mentorat."
+                    : 'Je vous propose une séance de mentorat.',
+                'type' => 'session_proposal',
+                'metadata' => [
+                    'session_id' => $session->id,
+                    'status' => $session->status,
+                ],
+            ]);
+        }
+    }
 }

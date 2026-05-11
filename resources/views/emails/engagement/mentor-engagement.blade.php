@@ -82,10 +82,8 @@
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td align="center" style="padding-top: 20px;">
-                                        <div style="display: inline-block;">
-                                            <a href="{{ config('app.url') }}/ressources" style="background: #4f46e5; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 700; margin-right: 12px; display: inline-block;">📚 Voir les ressources</a>
-                                            <a href="{{ config('app.url') }}/explorer" style="background: #ffffff; color: #4f46e5; border: 2px solid #4f46e5; padding: 12px 28px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block;">🔍 Explorer les talents</a>
-                                        </div>
+                                        <a href="{{ route('mentor.resources.index') }}" style="background: #4f46e5; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 700; margin: 8px; display: inline-block;">📚 Voir les ressources</a>
+                                        <a href="{{ route('mentor.explore') }}" style="background: #ffffff; color: #4f46e5; border: 2px solid #4f46e5; padding: 12px 28px; text-decoration: none; border-radius: 12px; font-weight: 700; margin: 8px; display: inline-block;">🔍 Explorer les talents</a>
                                     </td>
                                 </tr>
                             </table>

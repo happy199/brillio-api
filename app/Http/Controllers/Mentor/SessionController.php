@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -110,7 +111,7 @@ class SessionController extends Controller
     /**
      * Enregistrer une nouvelle séance
      */
-    public function store(Request $request)
+    public function store(Request $request, MentorshipNotificationService $notificationService)
     {
         $request->validate([
             'title' => 'required|string|max:255',
@@ -155,6 +156,9 @@ class SessionController extends Controller
         $pivotStatus = $request->boolean('is_paid') ? 'pending' : 'accepted';
         foreach ($request->mentee_ids as $menteeId) {
             $session->mentees()->attach($menteeId, ['status' => $pivotStatus]);
+
+            // Envoyer un message dans la messagerie via le service
+            $notificationService->sendSessionChatNotification($session, $mentor);
         }
 
         // Notification email au jeune

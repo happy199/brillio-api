@@ -168,10 +168,18 @@ Route::middleware('auth')->group(function () {
         );
 
         // Promotion (Establishment only)
-        Route::middleware('organization_subscription:establishment')->prefix('promotion')->name('promotion.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Organization\PromotionController::class, 'index'])->name('index');
-            Route::get('/export-pdf', [\App\Http\Controllers\Organization\PromotionController::class, 'exportPdf'])->name('export-pdf');
-            Route::get('/export-csv', [\App\Http\Controllers\Organization\PromotionController::class, 'exportCsv'])->name('export-csv');
+        Route::middleware('organization_subscription:establishment')->group(function () {
+            Route::prefix('promotion')->name('promotion.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Organization\PromotionController::class, 'index'])->name('index');
+                Route::get('/export-pdf', [\App\Http\Controllers\Organization\PromotionController::class, 'exportPdf'])->name('export-pdf');
+                Route::get('/export-csv', [\App\Http\Controllers\Organization\PromotionController::class, 'exportCsv'])->name('export-csv');
+            });
+
+            Route::prefix('establishments')->name('establishments.')->group(function () {
+                Route::get('/edit', [\App\Http\Controllers\Organization\EstablishmentController::class, 'edit'])->name('edit');
+                Route::put('/{establishment}', [\App\Http\Controllers\Organization\EstablishmentController::class, 'update'])->name('update');
+                Route::post('/{establishment}/boost', [\App\Http\Controllers\Organization\EstablishmentController::class, 'boost'])->name('boost');
+            });
         });
     }
     );

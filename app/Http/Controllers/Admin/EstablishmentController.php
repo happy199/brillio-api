@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Establishment;
 use App\Models\PersonalityTest;
 use App\Services\BrillioIAService;
+use App\Services\EstablishmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,9 +15,12 @@ class EstablishmentController extends Controller
 {
     protected $iaService;
 
-    public function __construct(BrillioIAService $iaService)
+    protected $establishmentService;
+
+    public function __construct(BrillioIAService $iaService, EstablishmentService $establishmentService)
     {
         $this->iaService = $iaService;
+        $this->establishmentService = $establishmentService;
     }
 
     public function create()
@@ -28,66 +32,9 @@ class EstablishmentController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string',
-            'country' => 'required|string',
-            'city' => 'nullable|string',
-            'description' => 'nullable|string',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-            'address' => 'nullable|string',
-            'website_url' => 'nullable|url',
-            'google_maps_url' => 'nullable|url',
-            'mbti_types' => 'nullable|array',
-            'sectors' => 'nullable|array',
-            'tuition_min' => 'nullable|numeric',
-            'tuition_max' => 'nullable|numeric',
-            'photo' => 'nullable|image|max:2048',
-            'gallery.*' => 'nullable|image|max:5120',
-            'brochures.*' => 'nullable|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
-            'presentation_videos' => 'nullable|array|max:3',
-            'presentation_videos.*' => 'nullable|url',
-        ]);
+        $validated = $request->validate($this->establishmentService::validationRules());
 
-        if ($request->hasFile('photo')) {
-            $validated['photo_path'] = $request->file('photo')->store('establishments/photos', 'public');
-        }
-
-        if ($request->hasFile('gallery')) {
-            $galleryPaths = [];
-            foreach ($request->file('gallery') as $file) {
-                $galleryPaths[] = $file->store('establishments/gallery', 'public');
-            }
-            $validated['gallery'] = $galleryPaths;
-        }
-
-        if ($request->hasFile('brochures')) {
-            $brochurePaths = [];
-            foreach ($request->file('brochures') as $file) {
-                $brochurePaths[] = $file->store('establishments/brochures', 'public');
-            }
-            $validated['brochures'] = $brochurePaths;
-        }
-
-        if (isset($validated['presentation_videos'])) {
-            $validated['presentation_videos'] = array_values(array_filter($validated['presentation_videos']));
-        }
-
-        $validated['is_published'] = $request->has('is_published');
-        $validated['has_precise_form'] = $request->has('has_precise_form');
-        $validated['precise_form_config'] = $request->has('has_precise_form')
-            ? array_values($request->input('precise_form_config', []))
-            : null;
-
-        // Handle Social Links from separate inputs
-        $validated['social_links'] = [
-            'linkedin' => $request->input('linkedin'),
-            'facebook' => $request->input('facebook'),
-            'instagram' => $request->input('instagram'),
-        ];
-
-        Establishment::create($validated);
+        $this->establishmentService->store($validated, $request);
 
         return redirect()->route('admin.establishments.index')->with('success', 'Établissement créé avec succès.');
     }
@@ -101,71 +48,9 @@ class EstablishmentController extends Controller
 
     public function update(Request $request, Establishment $establishment)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string',
-            'country' => 'required|string',
-            'city' => 'nullable|string',
-            'description' => 'nullable|string',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-            'address' => 'nullable|string',
-            'website_url' => 'nullable|url',
-            'google_maps_url' => 'nullable|url',
-            'mbti_types' => 'nullable|array',
-            'sectors' => 'nullable|array',
-            'tuition_min' => 'nullable|numeric',
-            'tuition_max' => 'nullable|numeric',
-            'photo' => 'nullable|image|max:2048',
-            'gallery.*' => 'nullable|image|max:5120',
-            'brochures.*' => 'nullable|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
-            'presentation_videos' => 'nullable|array|max:3',
-            'presentation_videos.*' => 'nullable|url',
-        ]);
+        $validated = $request->validate($this->establishmentService::validationRules());
 
-        if ($request->hasFile('photo')) {
-            if ($establishment->photo_path) {
-                Storage::disk('public')->delete($establishment->photo_path);
-            }
-            $validated['photo_path'] = $request->file('photo')->store('establishments/photos', 'public');
-        }
-
-        $existingGallery = $establishment->gallery ?? [];
-        if ($request->hasFile('gallery')) {
-            foreach ($request->file('gallery') as $file) {
-                $existingGallery[] = $file->store('establishments/gallery', 'public');
-            }
-        }
-        $validated['gallery'] = $existingGallery;
-
-        $existingBrochures = $establishment->brochures ?? [];
-        if ($request->hasFile('brochures')) {
-            foreach ($request->file('brochures') as $index => $file) {
-                if (isset($existingBrochures[$index])) {
-                    Storage::disk('public')->delete($existingBrochures[$index]);
-                }
-                $existingBrochures[$index] = $file->store('establishments/brochures', 'public');
-            }
-        }
-        $validated['brochures'] = $existingBrochures;
-
-        if ($request->has('presentation_videos')) {
-            $validated['presentation_videos'] = array_values(array_filter($request->input('presentation_videos')));
-        }
-
-        $validated['is_published'] = $request->has('is_published');
-        $validated['has_precise_form'] = $request->has('has_precise_form');
-        $validated['precise_form_config'] = $request->has('has_precise_form')
-            ? array_values($request->input('precise_form_config', []))
-            : null;
-
-        $validated['social_links'] = [
-            'linkedin' => $request->input('linkedin'),
-            'facebook' => $request->input('facebook'),
-            'instagram' => $request->input('instagram'),
-        ];
-
-        $establishment->update($validated);
+        $this->establishmentService->update($establishment, $validated, $request);
 
         return redirect()->route('admin.establishments.index')->with('success', 'Établissement mis à jour.');
     }

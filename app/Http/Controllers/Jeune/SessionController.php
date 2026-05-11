@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
 
 class SessionController extends Controller
@@ -92,7 +93,7 @@ class SessionController extends Controller
     /**
      * Enregistrer la réservation
      */
-    public function store(Request $request)
+    public function store(Request $request, MentorshipNotificationService $notificationService)
     {
         $request->validate([
             'mentor_id' => 'required|exists:users,id',
@@ -127,6 +128,9 @@ class SessionController extends Controller
 
         // Attacher le jeune
         $session->mentees()->attach($user->id, ['status' => 'accepted']); // Le jeune accepte sa propre demande
+
+        // Envoyer un message dans la messagerie via le service
+        $notificationService->sendSessionChatNotification($session, $user);
 
         // Notification email au mentor
         app(\App\Services\MentorshipNotificationService::class)->sendSessionProposed($session);
