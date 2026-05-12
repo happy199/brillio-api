@@ -22,9 +22,11 @@
 
             <h2>1. Introduction</h2>
             <p>
-                Bienvenue sur Brillio. Nous accordons une grande importance à la protection de vos données personnelles.
-                Cette politique de confidentialité explique comment nous collectons, utilisons, stockons et protégeons
-                vos informations lorsque vous utilisez notre application mobile et notre site web.
+                Bienvenue sur Brillio. Nous accordons une importance capitale à la protection de vos données personnelles.
+                Cette politique de confidentialité est établie conformément à la <strong>Loi n° 2017-20 du 20 avril 2018 portant Code du numérique en République du Bénin</strong> (Livre Cinquième) et aux standards de la <strong>CEDEAO</strong> (Acte Additionnel A/SA.1/01/10).
+            </p>
+            <p>
+                Elle explique comment nous collectons, utilisons, stockons et protégeons vos informations lorsque vous utilisez notre plateforme.
             </p>
 
             <h2>2. Données collectées</h2>
@@ -32,112 +34,61 @@
 
             <h3>2.1 Données que vous nous fournissez</h3>
             <ul>
-                <li><strong>Informations de compte :</strong> nom, prénom, adresse email, mot de passe, date de
-                    naissance, pays, ville</li>
-                <li><strong>Données de profil :</strong> photo de profil, informations académiques</li>
-                <li><strong>Résultats du test de personnalité :</strong> réponses au questionnaire MBTI et résultats
-                    calculés</li>
-                <li><strong>Conversations avec le chatbot :</strong> messages échangés avec notre assistant IA</li>
-                <li><strong>Documents académiques :</strong> bulletins, relevés de notes, diplômes que vous choisissez
-                    de télécharger</li>
+                <li><strong>Informations d'identification :</strong> nom, prénom, adresse email, mot de passe, date de naissance, pays, ville.</li>
+                <li><strong>Données de profil :</strong> photo de profil, parcours académique, centres d'intérêt.</li>
+                <li><strong>Données Sensibles (Psychotechniques) :</strong> vos réponses au test de personnalité MBTI et les profils psychologiques qui en découlent. <em>Conformément à l'Article 402 du Code du Numérique, ces données font l'objet d'une protection renforcée.</em></li>
+                <li><strong>Interactions IA :</strong> messages échangés avec notre assistant d'orientation intelligent.</li>
+                <li><strong>Documents :</strong> copies de diplômes ou bulletins que vous téléchargez pour votre dossier d'orientation.</li>
             </ul>
 
             <h3>2.2 Données collectées automatiquement</h3>
+            <p>Lors de votre navigation, nous collectons : l'adresse IP, le type d'appareil, le système d'exploitation et les données d'usage (clics, temps passé).</p>
+
+            <h2>3. Finalités du traitement</h2>
+            <p>Vos données sont traitées pour des finalités spécifiques et légitimes :</p>
             <ul>
-                <li>Identifiants de l'appareil</li>
-                <li>Type d'appareil et système d'exploitation</li>
-                <li>Données d'utilisation de l'application</li>
-                <li>Adresse IP</li>
+                <li>Analyse de votre profil pour une orientation scolaire et professionnelle personnalisée.</li>
+                <li>Mise en relation avec des mentors adaptés à votre type de personnalité.</li>
+                <li>Amélioration de nos algorithmes de recommandation via l'intelligence artificielle.</li>
+                <li>Sécurisation de votre espace personnel.</li>
+                <li>Communication relative à l'évolution de nos services.</li>
             </ul>
 
-            <h2>3. Utilisation des données</h2>
-            <p>Nous utilisons vos données pour :</p>
+            <h2>4. Partage et Transfert des données</h2>
+            <p><strong>Nous ne commercialisons pas vos données personnelles.</strong></p>
+            <p>Vos données peuvent être transmises à :</p>
             <ul>
-                <li>Fournir et améliorer nos services d'orientation</li>
-                <li>Personnaliser votre expérience et les recommandations de l'IA</li>
-                <li>Vous permettre de passer le test de personnalité et consulter vos résultats</li>
-                <li>Stocker vos conversations avec le chatbot</li>
-                <li>Vous mettre en relation avec des profils de mentors pertinents</li>
-                <li>Vous envoyer des communications importantes sur le service</li>
-                <li>Analyser l'utilisation de l'application de manière agrégée</li>
-            </ul>
-
-            <h2>4. Partage des données</h2>
-            <p>
-                <strong>Nous ne vendons jamais vos données personnelles.</strong>
-            </p>
-            <p>Nous pouvons partager vos données avec :</p>
-            <ul>
-                <li><strong>Prestataires de services :</strong> hébergement (serveurs sécurisés), services d'IA
-                    (OpenRouter/DeepSeek pour le chatbot)</li>
-                <li><strong>Autorités légales :</strong> si requis par la loi</li>
+                <li><strong>Sous-traitants techniques :</strong> hébergeurs cloud sécurisés et services d'IA (DeepSeek/OpenRouter).</li>
+                <li><strong>Organisations partenaires :</strong> uniquement si vous êtes lié à une organisation (école, association) via un code d'invitation spécifique.</li>
             </ul>
             <p>
-                Les données envoyées au service d'IA pour le chatbot sont traitées de manière confidentielle et ne sont
-                pas utilisées pour entraîner des modèles tiers.
+                <strong>Transfert international :</strong> Nos serveurs peuvent être situés hors du territoire béninois. En utilisant Brillio, vous consentez au transfert de vos données vers ces serveurs, pour lesquels nous garantissons un niveau de sécurité conforme aux standards internationaux.
             </p>
 
-            <h2>5. Stockage et sécurité</h2>
-            <p>
-                Vos données sont stockées sur des serveurs sécurisés. Nous utilisons des mesures de sécurité
-                techniques et organisationnelles appropriées pour protéger vos données contre l'accès non autorisé,
-                la perte ou la destruction, notamment :
-            </p>
+            <h2>5. Vos Droits et Recours</h2>
+            <p>Conformément au Code du Numérique, vous disposez des droits suivants :</p>
             <ul>
-                <li>Chiffrement des données en transit (HTTPS/TLS)</li>
-                <li>Chiffrement des mots de passe (bcrypt)</li>
-                <li>Authentification par token sécurisé</li>
-                <li>Accès restreint aux données</li>
-            </ul>
-
-            <h2>6. Conservation des données</h2>
-            <p>
-                Nous conservons vos données aussi longtemps que votre compte est actif ou que nécessaire pour
-                vous fournir nos services. Vous pouvez demander la suppression de votre compte et de vos données
-                à tout moment.
-            </p>
-
-            <h2>7. Vos droits</h2>
-            <p>Conformément aux réglementations applicables, vous disposez des droits suivants :</p>
-            <ul>
-                <li><strong>Droit d'accès :</strong> demander une copie de vos données personnelles</li>
-                <li><strong>Droit de rectification :</strong> corriger des données inexactes</li>
-                <li><strong>Droit à l'effacement :</strong> demander la suppression de vos données (disponible en 2 clics depuis votre profil)</li>
-                <li><strong>Droit à la portabilité :</strong> recevoir vos données dans un format structuré (disponible en 2 clics depuis votre profil)</li>
-                <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données</li>
+                <li><strong>Accès et Rectification :</strong> modifier vos informations à tout moment.</li>
+                <li><strong>Oubli et Suppression :</strong> supprimer définitivement votre compte et toutes les données associées.</li>
+                <li><strong>Opposition :</strong> refuser certains traitements de données.</li>
+                <li><strong>Portabilité :</strong> récupérer vos données dans un format structuré.</li>
             </ul>
             <p>
-                Pour exercer ces droits, contactez-nous à <a
-                    href="mailto:contact@brillio.africa">contact@brillio.africa</a>.
+                Pour toute réclamation, vous avez le droit de saisir l'<strong>Autorité de Protection des Données à Caractère Personnel (APDP)</strong> du Bénin (<a href="https://www.apdp.bj" target="_blank">www.apdp.bj</a>).
             </p>
 
-            <h2>8. Utilisation par les mineurs</h2>
+            <h2>6. Sécurité</h2>
             <p>
-                Brillio est destinée aux jeunes, y compris aux mineurs. Si vous avez moins de 18 ans, nous vous
-                encourageons à informer vos parents ou tuteurs de votre utilisation de l'application.
-                Les mineurs de moins de 13 ans ne peuvent pas créer de compte sans le consentement d'un parent.
+                Nous mettons en œuvre des mesures techniques (chiffrement TLS, hachage des mots de passe) et organisationnelles (accès restreints) pour prévenir toute faille de sécurité. En cas de violation de données, nous nous engageons à informer l'APDP et les utilisateurs concernés dans les délais légaux.
             </p>
 
-            <h2>9. Cookies et technologies similaires</h2>
+            <h2>7. Contact</h2>
             <p>
-                Notre site web utilise des cookies pour améliorer votre expérience. Vous pouvez gérer vos
-                préférences de cookies via les paramètres de votre navigateur.
-            </p>
-
-            <h2>10. Modifications de cette politique</h2>
-            <p>
-                Nous pouvons mettre à jour cette politique de confidentialité de temps en temps. Nous vous
-                informerons de tout changement important par email ou via l'application.
-            </p>
-
-            <h2>11. Contact</h2>
-            <p>
-                Pour toute question concernant cette politique de confidentialité ou vos données personnelles,
-                contactez-nous :
+                Pour toute question ou pour exercer vos droits, contactez notre responsable de la protection des données :
             </p>
             <ul>
                 <li>Email : <a href="mailto:contact@brillio.africa">contact@brillio.africa</a></li>
-                <li>Adresse : Cotonou, Bénin</li>
+                <li>Adresse : Cotonou, République du Bénin</li>
             </ul>
         </div>
     </div>

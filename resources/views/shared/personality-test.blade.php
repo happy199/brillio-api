@@ -693,8 +693,28 @@
                 Le test MBTI vous aidera à mieux connaître vos atouts.
                 Cela prend environ 10 minutes.
             </p>
-            <button @click="startTest()"
-                class="px-8 py-4 {{ $colors['button_bg'] }} {{ $colors['button_text'] }} rounded-xl font-bold text-lg hover:shadow-lg hover:scale-105 transition transform shadow-md">
+
+            <!-- Avertissement Légal -->
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 max-w-xl mx-auto border border-white/20 text-left">
+                <div class="flex items-center gap-3 mb-3">
+                    <svg class="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="font-bold text-lg">Protection de vos données</h3>
+                </div>
+                <p class="text-sm text-white/80 leading-relaxed mb-4">
+                    Ce test analyse vos traits de caractère et vos préférences psychologiques. Ces données sont considérées comme <strong>sensibles</strong> au sens du Code du Numérique. Elles seront utilisées exclusivement pour vous proposer une orientation personnalisée et des mentors adaptés.
+                </p>
+                <div class="flex items-start gap-3">
+                    <input type="checkbox" id="personality_consent" x-model="consentGiven" class="mt-1 w-4 h-4 rounded border-white/30 bg-white/10 text-white focus:ring-white/50">
+                    <label for="personality_consent" class="text-xs text-white/90 leading-tight cursor-pointer">
+                        Je consens explicitement au traitement de mes données psychologiques pour les finalités d'orientation de Brillio.
+                    </label>
+                </div>
+            </div>
+
+            <button @click="startTest()" :disabled="!consentGiven"
+                class="px-8 py-4 {{ $colors['button_bg'] }} {{ $colors['button_text'] }} rounded-xl font-bold text-lg hover:shadow-lg hover:scale-105 transition transform shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
                 Commencer le test
             </button>
         </div>
@@ -1091,6 +1111,7 @@
                     loadingSubtitle: 'Veuillez patienter quelques instants.',
                     confirmClose: false,
                     confirmTimeout: null,
+                    consentGiven: false,
 
                     // Recommendations state
                     loadingRecommendations: true,

@@ -128,20 +128,23 @@
                 placeholder="Confirmez votre mot de passe">
         </div>
 
+        <div class="flex items-start gap-3">
+            <div class="flex items-center h-5">
+                <input id="terms" name="terms" type="checkbox" required
+                    class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+            </div>
+            <label for="terms" class="text-sm text-gray-500">
+                J'accepte les <a href="{{ route('terms') }}" class="text-primary-600 hover:underline">Conditions d'utilisation</a>
+                et je consens au traitement de mes données personnelles conformément à la
+                <a href="{{ route('privacy-policy') }}" class="text-primary-600 hover:underline">Politique de confidentialité</a>.
+            </label>
+        </div>
+
         <button type="submit"
             class="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-accent-600 text-white font-semibold rounded-xl hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all shadow-lg">
             Créer mon compte
         </button>
     </form>
-
-    <!-- Terms -->
-    <p class="text-xs text-center text-gray-500">
-        En vous inscrivant, vous acceptez nos
-        <a href="{{ route('terms') }}" class="text-primary-600 hover:underline">Conditions d'utilisation</a>
-        et notre
-        <a href="{{ route('privacy-policy') }}" class="text-primary-600 hover:underline">Politique de
-            confidentialité</a>.
-    </p>
 </div>
 @endsection
 

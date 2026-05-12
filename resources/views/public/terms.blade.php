@@ -22,143 +22,38 @@
 
                 <h2>1. Acceptation des conditions</h2>
                 <p>
-                    En accédant et en utilisant l'application Brillio et le site web brillio.africa
-                    (ci-après "le Service"), vous acceptez d'être lié par les présentes conditions
-                    d'utilisation. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser le Service.
+                    En accédant et en utilisant la plateforme Brillio (site web brillio.africa et applications associées), vous acceptez sans réserve les présentes Conditions Générales d'Utilisation (CGU). Ces conditions sont régies par la <strong>Loi n° 2017-20 du 20 avril 2018 portant Code du numérique en République du Bénin</strong>.
                 </p>
+                <p>Si vous n'acceptez pas ces conditions, veuillez cesser toute utilisation du Service.</p>
 
                 <h2>2. Description du Service</h2>
                 <p>
-                    Brillio est une plateforme d'orientation professionnelle destinée aux jeunes africains.
-                    Le Service comprend :
+                    Brillio est une plateforme numérique d'orientation professionnelle. Elle propose des services automatisés de test de personnalité (MBTI), d'assistance par intelligence artificielle, de mise en relation avec des mentors et de stockage sécurisé de documents académiques.
+                </p>
+
+                <h2>3. Inscription et Consentement Électronique</h2>
+                <p>
+                    La création d'un compte nécessite la fourniture d'informations exactes. Conformément aux dispositions sur les transactions électroniques du Code du Numérique, la validation du formulaire d'inscription avec la case à cocher de consentement constitue une <strong>signature électronique</strong> ayant valeur d'engagement contractuel.
+                </p>
+
+                <h2>4. Responsabilité du Prestataire de Services Numériques</h2>
+                <p>
+                    Conformément aux Articles 560 et suivants du Code du Numérique sur la responsabilité des prestataires :
                 </p>
                 <ul>
-                    <li>Un test de personnalité basé sur le modèle MBTI</li>
-                    <li>Un chatbot d'orientation alimenté par l'intelligence artificielle</li>
-                    <li>Des profils de mentors africains avec leurs parcours professionnels</li>
-                    <li>Un espace de stockage de documents académiques</li>
-                    <li>Des ressources d'orientation adaptées au contexte africain</li>
+                    <li><strong>Contenu IA :</strong> Les conseils du chatbot sont générés de manière automatisée. Brillio ne saurait être tenu responsable des décisions d'orientation prises sur cette seule base.</li>
+                    <li><strong>Contenu Utilisateur :</strong> Brillio agit en tant qu'hébergeur pour vos documents académiques. Nous n'exerçons pas de contrôle a priori sur la véracité des documents téléchargés par les utilisateurs.</li>
+                    <li><strong>Mentorat :</strong> Brillio facilite la mise en relation mais n'intervient pas dans les échanges privés entre mentors et jeunes.</li>
                 </ul>
 
-                <h2>3. Inscription et compte</h2>
-                <h3>3.1 Création de compte</h3>
+                <h2>5. Propriété Intellectuelle</h2>
                 <p>
-                    Pour utiliser certaines fonctionnalités du Service, vous devez créer un compte.
-                    Vous vous engagez à :
-                </p>
-                <ul>
-                    <li>Fournir des informations exactes et à jour</li>
-                    <li>Maintenir la confidentialité de vos identifiants</li>
-                    <li>Nous informer immédiatement de toute utilisation non autorisée</li>
-                </ul>
-
-                <h3>3.2 Responsabilité du compte</h3>
-                <p>
-                    Vous êtes responsable de toutes les activités effectuées sous votre compte.
-                    Brillio ne sera pas responsable des pertes résultant d'une utilisation non autorisée
-                    de votre compte.
+                    L'architecture, le code source, le design et les contenus originaux de Brillio sont protégés par le droit d'auteur et les dispositions du Code du Numérique sur la protection des programmes informatiques. Toute reproduction sans autorisation est passible de sanctions pénales.
                 </p>
 
-                <h2>4. Utilisation acceptable</h2>
-                <p>En utilisant le Service, vous vous engagez à ne pas :</p>
-                <ul>
-                    <li>Violer les lois applicables</li>
-                    <li>Usurper l'identité d'une autre personne</li>
-                    <li>Télécharger des contenus illégaux, offensants ou nuisibles</li>
-                    <li>Tenter de contourner les mesures de sécurité</li>
-                    <li>Utiliser le Service à des fins commerciales non autorisées</li>
-                    <li>Harceler d'autres utilisateurs ou membres de l'équipe</li>
-                    <li>Diffuser des virus ou codes malveillants</li>
-                    <li>Collecter des données d'autres utilisateurs sans autorisation</li>
-                </ul>
-
-                <h2>5. Contenu utilisateur</h2>
-                <h3>5.1 Propriété</h3>
+                <h2>6. Droit Applicable et Litiges</h2>
                 <p>
-                    Vous conservez tous les droits sur le contenu que vous publiez sur le Service
-                    (documents, messages, etc.). En publiant du contenu, vous nous accordez une licence
-                    non exclusive pour stocker et afficher ce contenu dans le cadre du Service.
-                </p>
-
-                <h3>5.2 Responsabilité</h3>
-                <p>
-                    Vous êtes seul responsable du contenu que vous publiez. Ne téléchargez pas de
-                    documents contenant des informations confidentielles de tiers ou des contenus
-                    protégés par des droits d'auteur sans autorisation.
-                </p>
-
-                <h2>6. Propriété intellectuelle</h2>
-                <p>
-                    Le Service, y compris son design, ses fonctionnalités, ses textes, images et code,
-                    est la propriété de Brillio et est protégé par les lois sur la propriété intellectuelle.
-                    Vous n'êtes pas autorisé à copier, modifier, distribuer ou créer des œuvres dérivées
-                    sans notre autorisation écrite.
-                </p>
-
-                <h2>7. Limitations du Service</h2>
-                <h3>7.1 Conseils d'orientation</h3>
-                <p>
-                    Les conseils fournis par le chatbot IA et les informations sur les métiers sont
-                    donnés à titre indicatif. Ils ne remplacent pas les conseils d'un professionnel
-                    de l'orientation qualifié. Les décisions d'orientation restent de votre responsabilité.
-                </p>
-
-                <h3>7.2 Test de personnalité</h3>
-                <p>
-                    Le test MBTI est un outil d'auto-connaissance. Les résultats sont indicatifs et
-                    ne constituent pas un diagnostic psychologique. Ils ne doivent pas être utilisés
-                    comme seul critère pour des décisions importantes.
-                </p>
-
-                <h3>7.3 Profils de mentors</h3>
-                <p>
-                    Les parcours des mentors sont partagés à titre d'inspiration. Brillio ne garantit
-                    pas l'exactitude des informations fournies par les mentors et n'est pas responsable
-                    des interactions entre utilisateurs et mentors.
-                </p>
-
-                <h2>8. Disponibilité du Service</h2>
-                <p>
-                    Nous nous efforçons de maintenir le Service disponible 24h/24, mais nous ne
-                    garantissons pas une disponibilité ininterrompue. Le Service peut être
-                    temporairement indisponible pour maintenance ou en cas de force majeure.
-                </p>
-
-                <h2>9. Modification et résiliation</h2>
-                <h3>9.1 Modifications</h3>
-                <p>
-                    Nous pouvons modifier ces conditions à tout moment. Les modifications entreront
-                    en vigueur dès leur publication. Votre utilisation continue du Service après
-                    modification constitue une acceptation des nouvelles conditions.
-                </p>
-
-                <h3>9.2 Résiliation</h3>
-                <p>
-                    Vous pouvez supprimer votre compte à tout moment. Nous nous réservons le droit
-                    de suspendre ou supprimer votre compte en cas de violation des présentes conditions.
-                </p>
-
-                <h2>10. Limitation de responsabilité</h2>
-                <p>
-                    Dans les limites autorisées par la loi, Brillio ne sera pas responsable des
-                    dommages indirects, accessoires, spéciaux ou consécutifs résultant de votre
-                    utilisation ou de votre incapacité à utiliser le Service.
-                </p>
-                <p>
-                    Le Service est fourni "tel quel" sans garantie d'aucune sorte, expresse ou implicite.
-                </p>
-
-                <h2>11. Indemnisation</h2>
-                <p>
-                    Vous acceptez d'indemniser et de dégager Brillio de toute responsabilité en cas
-                    de réclamation, dommage ou dépense (y compris les frais juridiques) résultant de
-                    votre violation des présentes conditions ou de votre utilisation du Service.
-                </p>
-
-                <h2>12. Droit applicable</h2>
-                <p>
-                    Les présentes conditions sont régies par le droit béninois. Tout litige sera
-                    soumis à la compétence exclusive des tribunaux de Cotonou, Bénin.
+                    Les présentes conditions sont exclusivement régies par le <strong>droit béninois</strong>. En cas de litige relatif à l'interprétation ou à l'exécution des présentes, et à défaut de résolution amiable, les tribunaux de <strong>Cotonou</strong> seront seuls compétents.
                 </p>
 
                 <h2>13. Dispositions générales</h2>
