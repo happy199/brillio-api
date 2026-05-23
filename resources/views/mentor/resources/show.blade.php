@@ -266,9 +266,53 @@
             </div>
             @endif
 
-            <!-- Attachments -->
+            <!-- File Preview & Attachments -->
             @if($resource->file_path)
-            <div class="bg-indigo-50 rounded-xl p-6 border border-indigo-100 flex items-center justify-between gap-4">
+            @php
+                $extension = strtolower(pathinfo($resource->file_path, PATHINFO_EXTENSION));
+                $fileUrl = asset(Storage::url($resource->file_path));
+                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                $videoExtensions = ['mp4', 'webm', 'ogg', 'mov'];
+                $documentExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'csv'];
+                $isSupportedPreview = in_array($extension, array_merge($imageExtensions, $videoExtensions, $documentExtensions, ['pdf']));
+            @endphp
+
+            @if($isSupportedPreview)
+            <div class="mb-8 space-y-4">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Aperçu du fichier</h3>
+                
+                @if(in_array($extension, $imageExtensions))
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 flex justify-center p-4">
+                        <img src="{{ $fileUrl }}" alt="Aperçu" class="max-w-full h-auto max-h-[600px] object-contain rounded-lg">
+                    </div>
+                @elseif(in_array($extension, $videoExtensions))
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-black">
+                        <video controls class="w-full h-auto max-h-[600px]">
+                            <source src="{{ $fileUrl }}">
+                            Votre navigateur ne supporte pas la lecture de cette vidéo.
+                        </video>
+                    </div>
+                @elseif($extension === 'pdf')
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">
+                        <object data="{{ $fileUrl }}" type="application/pdf" width="100%" height="100%" title="Document PDF">
+                            <iframe src="{{ $fileUrl }}" width="100%" height="100%" style="border: none;" title="Aperçu du document PDF">
+                                <p>Votre navigateur ne permet pas de prévisualiser les PDF. <a href="{{ $fileUrl }}">Téléchargez-le ici</a>.</p>
+                            </iframe>
+                        </object>
+                    </div>
+                @elseif(in_array($extension, $documentExtensions))
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">
+                        <!-- Google Docs Viewer pour les documents bureautiques -->
+                        <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true" width="100%" height="100%" frameborder="0" title="Aperçu du document bureautique via Google Docs"></iframe>
+                        <div class="absolute bottom-2 right-2 text-[10px] text-gray-400 bg-white/80 px-2 py-1 rounded">
+                            Aperçu généré par Google
+                        </div>
+                    </div>
+                @endif
+            </div>
+            @endif
+
+            <div class="bg-indigo-50 rounded-xl p-6 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <div class="p-3 bg-white rounded-lg shadow-sm text-indigo-600">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -305,18 +349,41 @@
     });
 
     function shareResource() {
+        const notifySuccess = () => {
+            if (typeof window.showToast === 'function') {
+                window.showToast('Lien copié dans le presse-papier !');
+            } else {
+                alert('Lien copié dans le presse-papier !');
+            }
+        };
+
+        const notifyError = () => {
+            if (typeof window.showToast === 'function') {
+                window.showToast('Impossible de copier le lien', 'error');
+            } else {
+                alert('Impossible de copier le lien');
+            }
+        };
+
         if (navigator.share) {
             navigator.share({
                 title: '{{ $resource->title }} - Ressource Mentor Brillio',
                 text: 'Découvre cette ressource pédagogique sur Brillio !',
                 url: window.location.href
-            }).catch(console.error);
-        } else if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                window.showToast('Lien copié dans le presse-papier !');
-            }).catch(() => {
-                window.showToast('Impossible de copier le lien', 'error');
+            }).catch((err) => {
+                // Si l'utilisateur annule ou si navigator.share échoue, on copie dans le presse-papier
+                copyToClipboard(notifySuccess, notifyError);
             });
+        } else {
+            copyToClipboard(notifySuccess, notifyError);
+        }
+    }
+
+    function copyToClipboard(onSuccess, onError) {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(window.location.href)
+                .then(onSuccess)
+                .catch(onError);
         } else {
             let ta = document.createElement('textarea');
             ta.value = window.location.href;
@@ -327,9 +394,9 @@
             ta.select();
             try {
                 document.execCommand('copy');
-                window.showToast('Lien copié dans le presse-papier !');
+                onSuccess();
             } catch (err) {
-                window.showToast('Impossible de copier le lien', 'error');
+                onError();
             }
             ta.remove();
         }

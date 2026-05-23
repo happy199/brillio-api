@@ -198,11 +198,8 @@ class ResourceController extends Controller
      */
     public function show(Resource $resource)
     {
-        // Sécurité : Ne pas permettre de voir sa propre ressource via ce flux ou ressource non validée
-        if ($resource->user_id === auth()->id() || ! $resource->is_published || ! $resource->is_validated) {
-            if ($resource->user_id === auth()->id()) {
-                return redirect()->route('mentor.resources.edit', $resource);
-            }
+        // Sécurité : Ne pas permettre de voir les ressources non publiées/validées des autres
+        if ($resource->user_id !== auth()->id() && (! $resource->is_published || ! $resource->is_validated)) {
             abort(404);
         }
 
@@ -223,7 +220,7 @@ class ResourceController extends Controller
         $unlockCost = 0;
 
         // Logique de verrouillage pour contenu Payant
-        if ($resource->price > 0) {
+        if ($resource->price > 0 && $resource->user_id !== $user->id) {
             $hasPurchased = Purchase::where('user_id', $user->id)
                 ->where('item_type', Resource::class)
                 ->where('item_id', $resource->id)
