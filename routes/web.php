@@ -241,6 +241,11 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
         ->parameters(['ressources' => 'resource']);
 
     Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Jeune\ResourceController::class, 'unlock'])->name('resources.unlock');
+
+    // Quizzes (Évaluations)
+    Route::get('/quizzes/{quiz}', [\App\Http\Controllers\Jeune\QuizController::class, 'show'])->name('quizzes.show');
+    Route::post('/quizzes/{quiz}/submit', [\App\Http\Controllers\Jeune\QuizController::class, 'submit'])->name('quizzes.submit');
+    Route::get('/quizzes/result/{attempt}', [\App\Http\Controllers\Jeune\QuizController::class, 'result'])->name('quizzes.result');
     Route::post('/mentorship/request', [\App\Http\Controllers\Jeune\MentorshipController::class, 'store'])->name('mentorship.request');
     Route::post('/mentorship/{mentorship}/cancel', [\App\Http\Controllers\Jeune\MentorshipController::class, 'cancel'])->name('mentorship.cancel');
     Route::post('/mentorship/{mentorship}/disconnect', [\App\Http\Controllers\Jeune\MentorshipController::class, 'disconnect'])->name('mentorship.disconnect');
@@ -480,7 +485,6 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('mentors', [MentorController::class, 'index'])->name('mentors.index');
         Route::get('mentors/{mentor}', [MentorController::class, 'show'])->name('mentors.show');
         Route::get('resources', [\App\Http\Controllers\Admin\ResourceController::class, 'index'])->name('resources.index');
-        Route::get('resources/{resource}', [\App\Http\Controllers\Admin\ResourceController::class, 'show'])->name('resources.show');
     }
     );
 
@@ -626,4 +630,9 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('establishments/{establishment}/interests/export-pdf', [\App\Http\Controllers\Admin\EstablishmentController::class, 'exportInterestsPdf'])->name('establishments.interests.export-pdf');
     }
     );
+
+    // === Routes Partagées (Suite : doit être après les routes admin pour éviter les conflits avec create) ===
+    Route::middleware(['auth', \App\Http\Middleware\EnsureAdminOrCoach::class])->group(function () {
+        Route::get('resources/{resource}', [\App\Http\Controllers\Admin\ResourceController::class, 'show'])->name('resources.show');
+    });
 });

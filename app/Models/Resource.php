@@ -71,6 +71,11 @@ class Resource extends Model
         return $this->hasMany(ResourceView::class);
     }
 
+    public function quizzes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
+
     public function purchases()
     {
         return $this->morphMany(Purchase::class, 'item');

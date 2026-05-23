@@ -83,6 +83,7 @@ class ResourceController extends Controller
                     });
             })
             ->with('user') // Le créateur (Mentor/Admin)
+            ->withCount('quizzes') // Load quizzes count to avoid N+1
             ->orderByDesc('created_at');
 
         // --- FILTRES GLOBAUX ---
@@ -134,7 +135,12 @@ class ResourceController extends Controller
             })->whereNotNull('mbti_types'); // On exclut ceux qui n'ont pas de mbti défini si on filtre par mbti
         }
 
-        // 5. Source (Mentor vs Brillio)
+        // 5. Entraînement (Has Quiz)
+        if ($request->filled('has_quiz') && $request->has_quiz === '1') {
+            $query->has('quizzes');
+        }
+
+        // 6. Source (Mentor vs Brillio)
         if ($request->filled('source')) {
             if ($request->source === 'mentor') {
                 $query->whereHas('user', function ($q) {
@@ -331,7 +337,11 @@ class ResourceController extends Controller
                 // SECURITÉ : Ne PAS envoyer le contenu au front
                 $resource->content = null;
                 $resource->file_path = null;
+            } else {
+                $resource->load(['quizzes']);
             }
+        } else {
+            $resource->load(['quizzes']);
         }
 
         return view('jeune.resources.show', compact('resource', 'isLocked', 'unlockCost'));

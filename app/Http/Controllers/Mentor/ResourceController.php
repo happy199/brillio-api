@@ -369,6 +369,7 @@ class ResourceController extends Controller
             'mbti_types' => 'nullable|array',
             'tags' => 'nullable|string',
             'targeting' => 'nullable|array',
+            'quizzes_data' => 'nullable|string',
         ], $messages);
 
         // Vérification des crédits pour le ciblage
@@ -417,6 +418,25 @@ class ResourceController extends Controller
         // Traitement des tags (string vers array)
         $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
+        // Custom validation: Must have at least content, file, or quizzes
+        $hasQuizzes = false;
+        if (! empty($validated['quizzes_data'])) {
+            $quizzesDecoded = json_decode($validated['quizzes_data'], true);
+            if (is_array($quizzesDecoded) && count($quizzesDecoded) > 0) {
+                // Also check if at least one quiz has a title
+                foreach ($quizzesDecoded as $qData) {
+                    if (! empty($qData['title'])) {
+                        $hasQuizzes = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (empty($validated['content']) && ! $request->hasFile('file') && ! $hasQuizzes) {
+            return back()->withInput()->withErrors(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
+        }
+
         // Création Transactionnelle
         try {
             DB::beginTransaction();
@@ -443,6 +463,55 @@ class ResourceController extends Controller
                 'admin_feedback' => null,
                 'unpublished_at' => null,
             ]);
+
+            // Enregistrement des quiz
+            if (! empty($validated['quizzes_data'])) {
+                $quizzes = json_decode($validated['quizzes_data'], true);
+                if (is_array($quizzes)) {
+                    foreach ($quizzes as $quizData) {
+                        if (empty($quizData['title'])) {
+                            continue;
+                        }
+
+                        $quiz = \App\Models\Quiz::create([
+                            'resource_id' => $resource->id,
+                            'title' => $quizData['title'],
+                            'description' => $quizData['description'] ?? null,
+                            'is_active' => true,
+                        ]);
+
+                        if (! empty($quizData['questions']) && is_array($quizData['questions'])) {
+                            foreach ($quizData['questions'] as $qIndex => $questionData) {
+                                if (empty($questionData['question_text'])) {
+                                    continue;
+                                }
+
+                                $question = \App\Models\QuizQuestion::create([
+                                    'quiz_id' => $quiz->id,
+                                    'question_text' => $questionData['question_text'],
+                                    'type' => $questionData['type'] ?? 'single',
+                                    'points' => $questionData['points'] ?? 1,
+                                    'order' => $qIndex,
+                                ]);
+
+                                if (! empty($questionData['options']) && is_array($questionData['options'])) {
+                                    foreach ($questionData['options'] as $optionData) {
+                                        if (empty($optionData['option_text'])) {
+                                            continue;
+                                        }
+
+                                        \App\Models\QuizOption::create([
+                                            'quiz_question_id' => $question->id,
+                                            'option_text' => $optionData['option_text'],
+                                            'is_correct' => ! empty($optionData['is_correct']),
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             // Débit réel si ciblage
             if ($hasTargeting && isset($cost)) {
@@ -518,6 +587,7 @@ class ResourceController extends Controller
             'mbti_types' => 'nullable|array',
             'tags' => 'nullable|string',
             'targeting' => 'nullable|array',
+            'quizzes_data' => 'nullable|string',
         ], $messages);
 
         // Vérification des crédits pour le ciblage (Loophole fix)
@@ -570,6 +640,29 @@ class ResourceController extends Controller
 
         $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
+        // Custom validation: Must have at least content, file, or quizzes
+        $hasQuizzes = false;
+        if ($request->has('quizzes_data')) {
+            $quizzesDecoded = json_decode($request->quizzes_data, true);
+            if (is_array($quizzesDecoded) && count($quizzesDecoded) > 0) {
+                foreach ($quizzesDecoded as $qData) {
+                    if (! empty($qData['title'])) {
+                        $hasQuizzes = true;
+                        break;
+                    }
+                }
+            }
+        } elseif ($resource->quizzes()->count() > 0) {
+            $hasQuizzes = true;
+        }
+
+        $hasContent = ! empty($validated['content']) || (! array_key_exists('content', $validated) && ! empty($resource->content));
+        $hasFile = $request->hasFile('file') || (! empty($resource->file_path) && ! $request->has('remove_file'));
+
+        if (! $hasContent && ! $hasFile && ! $hasQuizzes) {
+            return back()->withInput()->withErrors(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
+        }
+
         // Si la ressource était validée, elle doit être revalidée
         // On vérifie si elle est actuellement validée (is_validated = true)
         $wasValidated = $resource->is_validated;
@@ -598,6 +691,111 @@ class ResourceController extends Controller
             DB::beginTransaction();
 
             $resource->update($updateData);
+
+            if ($request->has('quizzes_data')) {
+                $quizzesData = json_decode($request->quizzes_data, true);
+                if (is_array($quizzesData)) {
+                    $incomingQuizIds = [];
+                    foreach ($quizzesData as $qData) {
+                        if (empty($qData['title'])) {
+                            continue;
+                        }
+
+                        if (! empty($qData['id'])) {
+                            $quiz = \App\Models\Quiz::find($qData['id']);
+                            if ($quiz && $quiz->resource_id == $resource->id) {
+                                $quiz->update([
+                                    'title' => $qData['title'],
+                                    'description' => $qData['description'] ?? null,
+                                ]);
+                                $incomingQuizIds[] = $quiz->id;
+                            } else {
+                                continue;
+                            }
+                        } else {
+                            $quiz = \App\Models\Quiz::create([
+                                'resource_id' => $resource->id,
+                                'title' => $qData['title'],
+                                'description' => $qData['description'] ?? null,
+                                'is_active' => true,
+                            ]);
+                            $incomingQuizIds[] = $quiz->id;
+                        }
+
+                        $incomingQuestionIds = [];
+                        if (! empty($qData['questions']) && is_array($qData['questions'])) {
+                            foreach ($qData['questions'] as $qIndex => $questionData) {
+                                if (empty($questionData['question_text'])) {
+                                    continue;
+                                }
+
+                                if (! empty($questionData['id'])) {
+                                    $question = \App\Models\QuizQuestion::find($questionData['id']);
+                                    if ($question && $question->quiz_id == $quiz->id) {
+                                        $question->update([
+                                            'question_text' => $questionData['question_text'],
+                                            'type' => $questionData['type'] ?? 'single',
+                                            'points' => $questionData['points'] ?? 1,
+                                            'order' => $qIndex,
+                                        ]);
+                                        $incomingQuestionIds[] = $question->id;
+                                    } else {
+                                        continue;
+                                    }
+                                } else {
+                                    $question = \App\Models\QuizQuestion::create([
+                                        'quiz_id' => $quiz->id,
+                                        'question_text' => $questionData['question_text'],
+                                        'type' => $questionData['type'] ?? 'single',
+                                        'points' => $questionData['points'] ?? 1,
+                                        'order' => $qIndex,
+                                    ]);
+                                    $incomingQuestionIds[] = $question->id;
+                                }
+
+                                $incomingOptionIds = [];
+                                if (! empty($questionData['options']) && is_array($questionData['options'])) {
+                                    foreach ($questionData['options'] as $optionData) {
+                                        if (empty($optionData['option_text'])) {
+                                            continue;
+                                        }
+
+                                        if (! empty($optionData['id'])) {
+                                            $option = \App\Models\QuizOption::find($optionData['id']);
+                                            if ($option && $option->quiz_question_id == $question->id) {
+                                                $option->update([
+                                                    'option_text' => $optionData['option_text'],
+                                                    'is_correct' => ! empty($optionData['is_correct']),
+                                                ]);
+                                                $incomingOptionIds[] = $option->id;
+                                            } else {
+                                                continue;
+                                            }
+                                        } else {
+                                            $option = \App\Models\QuizOption::create([
+                                                'quiz_question_id' => $question->id,
+                                                'option_text' => $optionData['option_text'],
+                                                'is_correct' => ! empty($optionData['is_correct']),
+                                            ]);
+                                            $incomingOptionIds[] = $option->id;
+                                        }
+                                    }
+                                }
+                                // Delete missing options
+                                \App\Models\QuizOption::where('quiz_question_id', $question->id)
+                                    ->whereNotIn('id', $incomingOptionIds)->delete();
+                            }
+                        }
+                        // Delete missing questions
+                        \App\Models\QuizQuestion::where('quiz_id', $quiz->id)
+                            ->whereNotIn('id', $incomingQuestionIds)->delete();
+                    }
+
+                    // Delete missing quizzes
+                    \App\Models\Quiz::where('resource_id', $resource->id)
+                        ->whereNotIn('id', $incomingQuizIds)->delete();
+                }
+            }
 
             // Débit réel si besoin de paiement
             if ($needsPayment && isset($cost)) {

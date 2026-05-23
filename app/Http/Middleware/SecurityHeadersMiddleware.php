@@ -29,7 +29,7 @@ class SecurityHeadersMiddleware
         // This maintains Score A (due to nonces and object-src:none) while ensuring stability.
         $csp .= "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' https: cdn.jsdelivr.net *.google-analytics.com *.googletagmanager.com; ";
         $csp .= "style-src 'self' 'unsafe-inline' https: cdn.jsdelivr.net fonts.googleapis.com; ";
-        $csp .= "img-src 'self' data: https: cdn.jsdelivr.net *.google-analytics.com *.googletagmanager.com; ";
+        $csp .= "img-src 'self' data: blob: https: cdn.jsdelivr.net *.google-analytics.com *.googletagmanager.com; ";
         $csp .= "font-src 'self' data: https: fonts.gstatic.com; ";
         $csp .= "frame-ancestors 'self'; ";
         $csp .= "form-action 'self' *.brillio.africa brillio.africa *.moneroo.io moneroo.io; ";

@@ -156,6 +156,11 @@
                         @elseif($resource->type === 'template') Modèle
                         @else {{ ucfirst($resource->type) }} @endif
                         </span>
+                        @if($resource->quizzes()->count() > 0)
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide border bg-indigo-50 text-indigo-700 border-indigo-100 ml-1">
+                            Quiz
+                        </span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         @if(!$resource->is_premium)

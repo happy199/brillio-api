@@ -65,6 +65,7 @@
                 @if(request('search')) <input type="hidden" name="search" value="{{ request('search') }}"> @endif
                 @if(request('filter')) <input type="hidden" name="filter" value="{{ request('filter') }}"> @endif
                 @if(request('source')) <input type="hidden" name="source" value="{{ request('source') }}"> @endif
+                @if(request('has_quiz')) <input type="hidden" name="has_quiz" value="{{ request('has_quiz') }}"> @endif
 
                 <!-- Type Dropdown -->
                 <div class="relative">
@@ -113,6 +114,14 @@
                     </button>
                 </div>
 
+                <!-- Quiz Toggle -->
+                <div class="bg-gray-100 rounded-lg p-1 flex text-xs font-medium">
+                    <button type="submit" name="has_quiz" value="{{ request('has_quiz') === '1' ? '' : '1' }}"
+                        class="px-3 py-1.5 rounded-md transition {{ request('has_quiz') === '1' ? 'bg-indigo-100 text-indigo-700 shadow-sm border border-indigo-200' : 'text-gray-500 hover:text-gray-700' }}">
+                        🎯 Entraînement
+                    </button>
+                </div>
+
                 <!-- MBTI Filter -->
                 <div class="relative min-w-[200px]">
                     <select name="mbti" onchange="this.form.submit()"
@@ -140,7 +149,7 @@
                 </div>
 
                 <!-- Reset Filters Link (if any filter active) -->
-                @if(request()->anyFilled(['search', 'type', 'price', 'mbti', 'source']))
+                @if(request()->anyFilled(['search', 'type', 'price', 'mbti', 'source', 'has_quiz']))
                 <a href="{{ route('jeune.resources.index') }}"
                     class="text-sm text-red-500 hover:text-red-700 underline ml-auto">
                     Réinitialiser
@@ -202,6 +211,11 @@
                             @else {{ ucfirst($resource->type) }}
                             @endif
                         </span>
+                        @if($resource->quizzes_count > 0)
+                        <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                            Quiz
+                        </span>
+                        @endif
                     </div>
                 </a>
 
@@ -299,7 +313,7 @@
                                     {{ $resource->sales_count }}
                                 </span>
                                 @endif
-                                <span class="text-xs text-gray-400">{{ $resource->created_at->format('d M') }}</span>
+                                <span class="text-xs text-gray-400">{{ ucfirst($resource->created_at->translatedFormat('d M')) }}</span>
                             </div>
                         </div>
                     </div>

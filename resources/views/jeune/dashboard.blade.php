@@ -321,6 +321,89 @@
             </a>
             @endforeach
         </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Ressources recommandées (Carrousel) -->
+    @if(isset($recommendedResources) && $recommendedResources->count() > 0)
+    <div class="mt-8 mb-8" x-data="{
+        scrollResourceCarousel(dir) {
+            const el = this.$refs.resCarousel;
+            const scrollAmount = el.clientWidth * 0.8;
+            el.scrollBy({ left: scrollAmount * dir, behavior: 'smooth' });
+        }
+    }">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">Ressources pour vous</h2>
+                <p class="text-sm text-gray-500">Sélection personnalisée basée sur votre profil</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('jeune.resources.index') }}" class="text-primary-600 font-medium text-sm hover:underline mr-2 hidden sm:block">Tout explorer</a>
+                <div class="flex gap-2">
+                    <button @click="scrollResourceCarousel(-1)" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition shadow-sm group">
+                        <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button @click="scrollResourceCarousel(1)" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition shadow-sm group">
+                        <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        </style>
+
+        <div x-ref="resCarousel" class="flex gap-4 overflow-x-auto pb-4 snap-x no-scrollbar scroll-smooth">
+            @foreach($recommendedResources as $resource)
+            <div class="flex-none w-[280px] snap-start">
+                <a href="{{ route('jeune.resources.show', $resource->slug) }}" class="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow group flex flex-col h-full border border-gray-100">
+                    <div class="aspect-video bg-gray-100 rounded-xl mb-4 overflow-hidden relative">
+                        @if($resource->preview_image_path)
+                        <img src="{{ Storage::url($resource->preview_image_path) }}" alt="{{ $resource->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        @else
+                        <div class="w-full h-full flex items-center justify-center bg-indigo-50">
+                            <svg class="w-10 h-10 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        </div>
+                        @endif
+                        @if($resource->is_premium)
+                        <div class="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-lg shadow-sm">
+                            Premium
+                        </div>
+                        @else
+                        <div class="absolute top-2 right-2 bg-emerald-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded-lg shadow-sm">
+                            Gratuit
+                        </div>
+                        @endif
+                    </div>
+                    
+                    <h3 class="font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-indigo-600 transition-colors text-sm">{{ $resource->title }}</h3>
+                    
+                    <div class="mt-auto pt-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            @if($resource->user->avatar_url)
+                            <img src="{{ $resource->user->avatar_url }}" class="w-6 h-6 rounded-full object-cover">
+                            @else
+                            <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600">
+                                {{ substr($resource->user->name, 0, 1) }}
+                            </div>
+                            @endif
+                            <span class="text-xs font-medium text-gray-600 truncate max-w-[100px]">{{ $resource->user->name }}</span>
+                        </div>
+                        @if($resource->quizzes_count > 0)
+                        <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Quiz
+                        </span>
+                        @endif
+                    </div>
+                </a>
+            </div>
+            @endforeach
+        </div>
     </div>
     @endif
 
