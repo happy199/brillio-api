@@ -15,7 +15,7 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="{{ $publicData['name'] }} - Mentor {{ $publicData['specialization'] }}">
     <meta property="og:description" content="{{ Str::limit($publicData['bio'] ?? 'Mentor professionnel', 200) }}">
-    <meta property="og:image" content="{{ $publicData['picture'] ?? asset('images/og-image.png') }}">
+    <meta property="og:image" content="{{ $publicData['picture'] ?? asset('LOGOBRILLIONOIR.png') }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">

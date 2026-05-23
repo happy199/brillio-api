@@ -17,7 +17,7 @@
     <meta property="og:title" content="@yield('og_title', 'Brillio - Ton avenir, ton choix')">
     <meta property="og:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
-    <meta property="og:image" content="@yield('og_image', asset('images/og-image.png'))">
+    <meta property="og:image" content="@yield('og_image', asset('LOGOBRILLIONOIR.png'))">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
