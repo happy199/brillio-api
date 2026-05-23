@@ -7,6 +7,7 @@ use App\Mail\Resource\ResourceRejected;
 use App\Models\Resource;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
+use App\Traits\ManagesQuizzes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class ResourceController extends Controller
 {
+    use ManagesQuizzes;
+
     protected $notificationService;
 
     public function __construct(MentorshipNotificationService $notificationService)
@@ -176,54 +179,7 @@ class ResourceController extends Controller
         ]);
 
         // Sauvegarde des quiz
-        if ($request->has('quizzes_data')) {
-            $quizzesData = json_decode($request->quizzes_data, true);
-            if (is_array($quizzesData)) {
-                foreach ($quizzesData as $qData) {
-                    if (empty($qData['title'])) {
-                        continue;
-                    }
-
-                    $quiz = \App\Models\Quiz::create([
-                        'resource_id' => $resource->id,
-                        'title' => $qData['title'],
-                        'description' => $qData['description'] ?? null,
-                        'is_active' => true,
-                    ]);
-
-                    if (! empty($qData['questions']) && is_array($qData['questions'])) {
-                        foreach ($qData['questions'] as $qIndex => $questionData) {
-                            if (empty($questionData['question_text'])) {
-                                continue;
-                            }
-
-                            $question = \App\Models\QuizQuestion::create([
-                                'quiz_id' => $quiz->id,
-                                'question_text' => $questionData['question_text'],
-                                'type' => $questionData['type'] ?? 'single',
-                                'points' => $questionData['points'] ?? 1,
-                                'order' => $qIndex,
-                            ]);
-
-                            if (! empty($questionData['options']) && is_array($questionData['options'])) {
-                                foreach ($questionData['options'] as $oIndex => $optionData) {
-                                    if (empty($optionData['option_text'])) {
-                                        continue;
-                                    }
-
-                                    \App\Models\QuizOption::create([
-                                        'quiz_question_id' => $question->id,
-                                        'option_text' => $optionData['option_text'],
-                                        'is_correct' => ! empty($optionData['is_correct']),
-                                        'order' => $oIndex,
-                                    ]);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        $this->saveQuizzes($resource, $request->quizzes_data ?? null);
 
         return redirect()->route('admin.resources.index')->with('success', 'Ressource créée avec succès.');
     }
@@ -350,101 +306,7 @@ class ResourceController extends Controller
         ]);
 
         if ($request->has('quizzes_data')) {
-            $quizzesData = json_decode($request->quizzes_data, true);
-            if (is_array($quizzesData)) {
-                $incomingQuizIds = [];
-                foreach ($quizzesData as $qData) {
-                    if (empty($qData['title'])) {
-                        continue;
-                    }
-
-                    if (! empty($qData['id'])) {
-                        $quiz = \App\Models\Quiz::find($qData['id']);
-                        if ($quiz && $quiz->resource_id == $resource->id) {
-                            $quiz->update([
-                                'title' => $qData['title'],
-                                'description' => $qData['description'] ?? null,
-                            ]);
-                            $incomingQuizIds[] = $quiz->id;
-                        } else {
-                            continue;
-                        }
-                    } else {
-                        $quiz = \App\Models\Quiz::create([
-                            'resource_id' => $resource->id,
-                            'title' => $qData['title'],
-                            'description' => $qData['description'] ?? null,
-                            'is_active' => true,
-                        ]);
-                        $incomingQuizIds[] = $quiz->id;
-                    }
-
-                    $incomingQuestionIds = [];
-                    if (! empty($qData['questions']) && is_array($qData['questions'])) {
-                        foreach ($qData['questions'] as $qIndex => $questionData) {
-                            if (empty($questionData['question_text'])) {
-                                continue;
-                            }
-
-                            if (! empty($questionData['id'])) {
-                                $question = \App\Models\QuizQuestion::find($questionData['id']);
-                                if ($question && $question->quiz_id == $quiz->id) {
-                                    $question->update([
-                                        'question_text' => $questionData['question_text'],
-                                        'type' => $questionData['type'] ?? 'single',
-                                        'points' => $questionData['points'] ?? 1,
-                                        'order' => $qIndex,
-                                    ]);
-                                    $incomingQuestionIds[] = $question->id;
-                                } else {
-                                    continue;
-                                }
-                            } else {
-                                $question = \App\Models\QuizQuestion::create([
-                                    'quiz_id' => $quiz->id,
-                                    'question_text' => $questionData['question_text'],
-                                    'type' => $questionData['type'] ?? 'single',
-                                    'points' => $questionData['points'] ?? 1,
-                                    'order' => $qIndex,
-                                ]);
-                                $incomingQuestionIds[] = $question->id;
-                            }
-
-                            $incomingOptionIds = [];
-                            if (! empty($questionData['options']) && is_array($questionData['options'])) {
-                                foreach ($questionData['options'] as $oIndex => $optionData) {
-                                    if (empty($optionData['option_text'])) {
-                                        continue;
-                                    }
-
-                                    if (! empty($optionData['id'])) {
-                                        $option = \App\Models\QuizOption::find($optionData['id']);
-                                        if ($option && $option->quiz_question_id == $question->id) {
-                                            $option->update([
-                                                'option_text' => $optionData['option_text'],
-                                                'is_correct' => ! empty($optionData['is_correct']),
-                                                'order' => $oIndex,
-                                            ]);
-                                            $incomingOptionIds[] = $option->id;
-                                        }
-                                    } else {
-                                        $option = \App\Models\QuizOption::create([
-                                            'quiz_question_id' => $question->id,
-                                            'option_text' => $optionData['option_text'],
-                                            'is_correct' => ! empty($optionData['is_correct']),
-                                            'order' => $oIndex,
-                                        ]);
-                                        $incomingOptionIds[] = $option->id;
-                                    }
-                                }
-                            }
-                            $question->options()->whereNotIn('id', $incomingOptionIds)->delete();
-                        }
-                    }
-                    $quiz->questions()->whereNotIn('id', $incomingQuestionIds)->delete();
-                }
-                $resource->quizzes()->whereNotIn('id', $incomingQuizIds)->delete();
-            }
+            $this->saveQuizzes($resource, $request->quizzes_data);
         }
 
         return redirect()->route('admin.resources.index')->with('success', 'Ressource mise à jour.');

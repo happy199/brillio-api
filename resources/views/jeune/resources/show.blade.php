@@ -290,8 +290,8 @@
                     </div>
                 @elseif($extension === 'pdf')
                     <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">
-                        <object data="{{ $fileUrl }}" type="application/pdf" width="100%" height="100%">
-                            <iframe src="{{ $fileUrl }}" width="100%" height="100%" style="border: none;">
+                        <object data="{{ $fileUrl }}" type="application/pdf" width="100%" height="100%" title="Document PDF">
+                            <iframe src="{{ $fileUrl }}" width="100%" height="100%" style="border: none;" title="Aperçu du document PDF">
                                 <p>Votre navigateur ne permet pas de prévisualiser les PDF. <a href="{{ $fileUrl }}">Téléchargez-le ici</a>.</p>
                             </iframe>
                         </object>
@@ -299,7 +299,7 @@
                 @elseif(in_array($extension, $documentExtensions))
                     <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">
                         <!-- Google Docs Viewer pour les documents bureautiques -->
-                        <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true" width="100%" height="100%" frameborder="0"></iframe>
+                        <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true" width="100%" height="100%" frameborder="0" title="Aperçu du document bureautique via Google Docs"></iframe>
                         <div class="absolute bottom-2 right-2 text-[10px] text-gray-400 bg-white/80 px-2 py-1 rounded">
                             Aperçu généré par Google
                         </div>
