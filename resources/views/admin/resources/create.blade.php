@@ -111,6 +111,143 @@
                     </div>
                 </div>
 
+                <!-- Quiz d'Évaluation -->
+                <div x-data="quizManager()" class="bg-white rounded-xl border border-gray-200 p-6 space-y-6 relative overflow-hidden mb-6 shadow-sm">
+                    <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900">Quiz d'Évaluation <span class="text-sm font-normal text-gray-500 ml-2">(Optionnel)</span></h2>
+                            <p class="text-xs text-gray-500 mt-1">Ajoutez un ou plusieurs quiz pour évaluer la compréhension de votre ressource.</p>
+                        </div>
+                        <button type="button" @click="addQuiz()" class="text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Ajouter un Quiz
+                        </button>
+                    </div>
+
+                    <!-- Hidden input to store JSON data -->
+                    <input type="hidden" name="quizzes_data" :value="JSON.stringify(quizzes)">
+
+                    <div class="space-y-6">
+                        <template x-for="(quiz, qIndex) in quizzes" :key="qIndex">
+                            <div class="border border-indigo-100 bg-indigo-50/30 rounded-xl p-4 relative">
+                                <button type="button" @click="confirmDeleteQuizPrompt(qIndex)" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                                
+                                <div class="space-y-4 pr-8">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Nom du Quiz</label>
+                                        <input type="text" x-model="quiz.title" placeholder="Ex: Entraînement Junior" class="bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">Description courte (Optionnelle)</label>
+                                        <input type="text" x-model="quiz.description" placeholder="Objectif de ce quiz..." class="bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                                    </div>
+                                    
+                                    <!-- Questions -->
+                                    <div class="mt-4 border-t border-indigo-100 pt-4">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="text-sm font-bold text-gray-700">Questions</h4>
+                                            <div class="flex gap-4">
+                                                <button type="button" @click="addQuestion(qIndex, 'single')" class="text-xs text-indigo-600 hover:underline flex items-center gap-1 font-semibold">
+                                                    + Question choix unique
+                                                </button>
+                                                <button type="button" @click="addQuestion(qIndex, 'multiple')" class="text-xs text-indigo-600 hover:underline flex items-center gap-1 font-semibold">
+                                                    + Question choix multiple
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="space-y-4">
+                                            <template x-for="(question, qsIndex) in quiz.questions" :key="qsIndex">
+                                                <div class="bg-white border border-gray-200 rounded-lg p-3 relative shadow-sm">
+                                                    <button type="button" @click="removeQuestion(qIndex, qsIndex)" class="absolute top-3 right-3 text-gray-400 hover:text-red-500">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                    </button>
+                                                    
+                                                    <div class="mb-3 pr-8 flex gap-2 items-start">
+                                                        <div class="flex-1">
+                                                            <input type="text" x-model="question.question_text" placeholder="Posez votre question ici..." class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2">
+                                                        </div>
+                                                        <div class="w-20">
+                                                            <input type="number" x-model="question.points" min="1" placeholder="Pts" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Options -->
+                                                    <div class="pl-4 space-y-2 border-l-2 border-gray-100">
+                                                        <template x-for="(option, optIndex) in question.options" :key="optIndex">
+                                                            <div class="flex items-center gap-2 group">
+                                                                <template x-if="question.type === 'multiple'">
+                                                                    <input type="checkbox" x-model="option.is_correct" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                                                </template>
+                                                                <template x-if="question.type === 'single' || !question.type">
+                                                                    <input type="radio" :name="'correct_'+qIndex+'_'+qsIndex" :checked="option.is_correct" @change="setCorrectOption(qIndex, qsIndex, optIndex)" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                                                                </template>
+                                                                <input type="text" x-model="option.option_text" placeholder="Option de réponse" class="flex-1 bg-transparent border-b border-gray-200 focus:border-indigo-500 focus:ring-0 text-sm px-1 py-1 group-hover:bg-gray-50 transition rounded-t">
+                                                                <button type="button" @click="removeOption(qIndex, qsIndex, optIndex)" class="text-gray-300 hover:text-red-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                                            </div>
+                                                        </template>
+                                                        <button type="button" @click="addOption(qIndex, qsIndex)" class="text-[10px] text-gray-500 hover:text-indigo-600 mt-2 uppercase font-bold tracking-wider inline-flex items-center gap-1">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                                            Ajouter option
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="quizzes.length === 0">
+                            <div class="text-center py-6 text-gray-400 text-sm italic border-2 border-dashed border-gray-200 rounded-xl">
+                                Aucun quiz ajouté. Cliquez sur "Ajouter un Quiz" pour commencer.
+                            </div>
+                        </template>
+
+                    </div>
+
+                    <!-- Modal de suppression de Quiz -->
+                    <template x-if="showDeleteModal">
+                        <div class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div @click="showDeleteModal = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                                <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                        <div class="sm:flex sm:items-start">
+                                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                                    Supprimer le quiz
+                                                </h3>
+                                                <div class="mt-2">
+                                                    <p class="text-sm text-gray-500">
+                                                        Êtes-vous sûr de vouloir supprimer ce quiz ? Cette action ne peut pas être annulée.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                                        <button type="button" @click="confirmDeleteQuiz()" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-bold text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition">
+                                            Supprimer
+                                        </button>
+                                        <button type="button" @click="showDeleteModal = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-bold text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition">
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
                 <!-- Critères Psychométriques (MBTI) - Remonté AVANT le ciblage avancé -->
                 <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
                     <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-4">Critères
@@ -632,6 +769,75 @@
 
         // Interests (Alpine)
         window.dispatchEvent(new CustomEvent('select-all-interests'));
+    }
+
+    let oldQuizzes = {!! old('quizzes_data') ?: 'null' !!};
+
+    function quizManager() {
+        return {
+            quizzes: oldQuizzes || [],
+            showDeleteModal: false,
+            quizToDeleteIndex: null,
+
+            addQuiz() {
+                this.quizzes.push({
+                    title: '',
+                    description: '',
+                    questions: [
+                        {
+                            question_text: '',
+                            type: 'single',
+                            points: 1,
+                            options: [
+                                { option_text: '', is_correct: true },
+                                { option_text: '', is_correct: false }
+                            ]
+                        }
+                    ]
+                });
+            },
+            confirmDeleteQuizPrompt(qIndex) {
+                this.quizToDeleteIndex = qIndex;
+                this.showDeleteModal = true;
+            },
+            confirmDeleteQuiz() {
+                if (this.quizToDeleteIndex !== null) {
+                    this.quizzes.splice(this.quizToDeleteIndex, 1);
+                    this.quizToDeleteIndex = null;
+                }
+                this.showDeleteModal = false;
+            },
+            removeQuiz(qIndex) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer ce quiz ?')) {
+                    this.quizzes.splice(qIndex, 1);
+                }
+            },
+            addQuestion(qIndex, type = 'single') {
+                this.quizzes[qIndex].questions.push({
+                    question_text: '',
+                    type: type,
+                    points: 1,
+                    options: [
+                        { option_text: '', is_correct: false },
+                        { option_text: '', is_correct: false }
+                    ]
+                });
+            },
+            removeQuestion(qIndex, qsIndex) {
+                this.quizzes[qIndex].questions.splice(qsIndex, 1);
+            },
+            addOption(qIndex, qsIndex) {
+                this.quizzes[qIndex].questions[qsIndex].options.push({ option_text: '', is_correct: false });
+            },
+            removeOption(qIndex, qsIndex, optIndex) {
+                this.quizzes[qIndex].questions[qsIndex].options.splice(optIndex, 1);
+            },
+            setCorrectOption(qIndex, qsIndex, optIndex) {
+                this.quizzes[qIndex].questions[qsIndex].options.forEach((opt, idx) => {
+                    opt.is_correct = (idx === optIndex);
+                });
+            }
+        }
     }
 </script>
 @endpush

@@ -262,9 +262,53 @@
             </div>
             @endif
 
-            <!-- Attachments -->
+            <!-- File Preview & Attachments -->
             @if($resource->file_path)
-            <div class="bg-indigo-50 rounded-xl p-6 border border-indigo-100 flex items-center justify-between gap-4">
+            @php
+                $extension = strtolower(pathinfo($resource->file_path, PATHINFO_EXTENSION));
+                $fileUrl = asset(Storage::url($resource->file_path));
+                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                $videoExtensions = ['mp4', 'webm', 'ogg', 'mov'];
+                $documentExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'csv'];
+                $isSupportedPreview = in_array($extension, array_merge($imageExtensions, $videoExtensions, $documentExtensions, ['pdf']));
+            @endphp
+
+            @if($isSupportedPreview)
+            <div class="mb-8 space-y-4">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Aperçu du fichier</h3>
+                
+                @if(in_array($extension, $imageExtensions))
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 flex justify-center p-4">
+                        <img src="{{ $fileUrl }}" alt="Aperçu" class="max-w-full h-auto max-h-[600px] object-contain rounded-lg">
+                    </div>
+                @elseif(in_array($extension, $videoExtensions))
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-black">
+                        <video controls class="w-full h-auto max-h-[600px]">
+                            <source src="{{ $fileUrl }}">
+                            Votre navigateur ne supporte pas la lecture de cette vidéo.
+                        </video>
+                    </div>
+                @elseif($extension === 'pdf')
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">
+                        <object data="{{ $fileUrl }}" type="application/pdf" width="100%" height="100%" title="Document PDF">
+                            <iframe src="{{ $fileUrl }}" width="100%" height="100%" style="border: none;" title="Aperçu du document PDF">
+                                <p>Votre navigateur ne permet pas de prévisualiser les PDF. <a href="{{ $fileUrl }}">Téléchargez-le ici</a>.</p>
+                            </iframe>
+                        </object>
+                    </div>
+                @elseif(in_array($extension, $documentExtensions))
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">
+                        <!-- Google Docs Viewer pour les documents bureautiques -->
+                        <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true" width="100%" height="100%" frameborder="0" title="Aperçu du document bureautique via Google Docs"></iframe>
+                        <div class="absolute bottom-2 right-2 text-[10px] text-gray-400 bg-white/80 px-2 py-1 rounded">
+                            Aperçu généré par Google
+                        </div>
+                    </div>
+                @endif
+            </div>
+            @endif
+
+            <div class="bg-indigo-50 rounded-xl p-6 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <div class="p-3 bg-white rounded-lg shadow-sm text-indigo-600">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -281,6 +325,39 @@
                     class="bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-indigo-700 transition shadow-md hover:shadow-lg">
                     Télécharger
                 </a>
+            </div>
+            @endif
+
+            <!-- Quizzes -->
+            @if(isset($resource->quizzes) && $resource->quizzes->count() > 0)
+            <div class="mt-12 space-y-6">
+                <h3 class="text-2xl font-bold text-gray-900 border-b border-gray-100 pb-4">Quiz d'Évaluation</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @foreach($resource->quizzes as $quiz)
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:border-indigo-300 transition relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-500 z-0"></div>
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-bold text-gray-900 mb-2">{{ $quiz->title }}</h4>
+                            @if($quiz->description)
+                                <p class="text-sm text-gray-500 mb-6">{{ $quiz->description }}</p>
+                            @else
+                                <p class="text-sm text-gray-500 mb-6">Testez vos connaissances sur cette ressource.</p>
+                            @endif
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ $quiz->questions->count() }} questions</span>
+                                <a href="{{ route('jeune.quizzes.show', $quiz) }}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                    Commencer
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
             </div>
             @endif
             @endif

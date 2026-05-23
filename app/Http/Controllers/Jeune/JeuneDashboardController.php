@@ -8,6 +8,7 @@ use App\Models\MentorProfile;
 use App\Models\MentorProfileView;
 use App\Models\PersonalityQuestion;
 use App\Models\PersonalityTest;
+use App\Models\Resource;
 use App\Services\BrillioIAService;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
@@ -63,10 +64,86 @@ class JeuneDashboardController extends Controller
             $recommendedMentors = $recommendedQuery->limit(4)->get();
         }
 
+        // --- RESSOURCES RECOMMANDÉES ---
+        $userProfile = $user->onboarding_data ?? [];
+        $userEducation = $userProfile['education_level'] ?? null;
+        $userSituation = $userProfile['current_situation'] ?? null;
+        $userInterests = $userProfile['interests'] ?? [];
+        $userCountry = $userProfile['country'] ?? null;
+        $rawMbti = $personalityTest?->type_code ?? $userProfile['mbti'] ?? null;
+        $userMbti = $rawMbti ? explode(' ', $rawMbti)[0] : null;
+
+        $resourceQuery = Resource::where('is_published', true)
+            ->where('is_validated', true)
+            ->whereHas('user', function ($q) {
+                $q->where('is_admin', true)
+                    ->orWhereHas('mentorProfile', function ($mp) {
+                        $mp->where('is_published', true);
+                    });
+            })
+            ->with('user');
+
+        $allResources = $resourceQuery->get();
+
+        $targetedResources = collect();
+        $randomResources = collect();
+
+        foreach ($allResources as $resource) {
+            $targeting = $resource->targeting;
+            $isTargeted = false;
+
+            if (! empty($resource->mbti_types) && $userMbti && in_array($userMbti, $resource->mbti_types)) {
+                $isTargeted = true;
+            }
+
+            if (! $isTargeted && ! empty($targeting)) {
+                $targetEducations = $targeting['education_levels'] ?? [];
+                if (! empty($targetEducations) && $userEducation && in_array($userEducation, $targetEducations)) {
+                    $isTargeted = true;
+                }
+
+                $targetSituations = $targeting['situations'] ?? [];
+                if (! $isTargeted && ! empty($targetSituations) && $userSituation && in_array($userSituation, $targetSituations)) {
+                    $isTargeted = true;
+                }
+
+                $targetCountries = $targeting['countries'] ?? [];
+                if (! $isTargeted && ! empty($targetCountries) && $userCountry) {
+                    foreach ($targetCountries as $country) {
+                        if (str_contains(strtolower($userCountry), strtolower($country))) {
+                            $isTargeted = true;
+                            break;
+                        }
+                    }
+                }
+
+                $targetInterests = $targeting['interests'] ?? [];
+                if (! $isTargeted && ! empty($targetInterests) && ! empty($userInterests)) {
+                    $commonInterests = array_intersect($targetInterests, $userInterests);
+                    if (! empty($commonInterests)) {
+                        $isTargeted = true;
+                    }
+                }
+            }
+
+            // Exclure les ressources avec des restrictions fortes non matchées ? Non, on va juste prendre celles qui ont un match direct comme ciblage
+            if ($isTargeted) {
+                $targetedResources->push($resource);
+            } else {
+                $randomResources->push($resource);
+            }
+        }
+
+        $targetedResources = $targetedResources->shuffle();
+        $randomResources = $randomResources->shuffle();
+
+        $recommendedResources = $targetedResources->merge($randomResources)->take(10);
+
         return view('jeune.dashboard', [
             'user' => $user,
             'stats' => $stats,
             'recommendedMentors' => $recommendedMentors,
+            'recommendedResources' => $recommendedResources,
         ]);
     }
 

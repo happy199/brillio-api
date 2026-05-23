@@ -9,6 +9,7 @@ use App\Models\ResourceView;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
+use App\Traits\ManagesQuizzes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +17,8 @@ use Illuminate\Support\Str;
 
 class ResourceController extends Controller
 {
+    use ManagesQuizzes;
+
     protected $walletService;
 
     protected $notificationService;
@@ -369,6 +372,7 @@ class ResourceController extends Controller
             'mbti_types' => 'nullable|array',
             'tags' => 'nullable|string',
             'targeting' => 'nullable|array',
+            'quizzes_data' => 'nullable|string',
         ], $messages);
 
         // Vérification des crédits pour le ciblage
@@ -417,6 +421,25 @@ class ResourceController extends Controller
         // Traitement des tags (string vers array)
         $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
+        // Custom validation: Must have at least content, file, or quizzes
+        $hasQuizzes = false;
+        if (! empty($validated['quizzes_data'])) {
+            $quizzesDecoded = json_decode($validated['quizzes_data'], true);
+            if (is_array($quizzesDecoded) && count($quizzesDecoded) > 0) {
+                // Also check if at least one quiz has a title
+                foreach ($quizzesDecoded as $qData) {
+                    if (! empty($qData['title'])) {
+                        $hasQuizzes = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (empty($validated['content']) && ! $request->hasFile('file') && ! $hasQuizzes) {
+            return back()->withInput()->withErrors(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
+        }
+
         // Création Transactionnelle
         try {
             DB::beginTransaction();
@@ -443,6 +466,9 @@ class ResourceController extends Controller
                 'admin_feedback' => null,
                 'unpublished_at' => null,
             ]);
+
+            // Enregistrement des quiz
+            $this->saveQuizzes($resource, $validated['quizzes_data'] ?? null);
 
             // Débit réel si ciblage
             if ($hasTargeting && isset($cost)) {
@@ -518,6 +544,7 @@ class ResourceController extends Controller
             'mbti_types' => 'nullable|array',
             'tags' => 'nullable|string',
             'targeting' => 'nullable|array',
+            'quizzes_data' => 'nullable|string',
         ], $messages);
 
         // Vérification des crédits pour le ciblage (Loophole fix)
@@ -570,6 +597,29 @@ class ResourceController extends Controller
 
         $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
+        // Custom validation: Must have at least content, file, or quizzes
+        $hasQuizzes = false;
+        if ($request->has('quizzes_data')) {
+            $quizzesDecoded = json_decode($request->quizzes_data, true);
+            if (is_array($quizzesDecoded) && count($quizzesDecoded) > 0) {
+                foreach ($quizzesDecoded as $qData) {
+                    if (! empty($qData['title'])) {
+                        $hasQuizzes = true;
+                        break;
+                    }
+                }
+            }
+        } elseif ($resource->quizzes()->count() > 0) {
+            $hasQuizzes = true;
+        }
+
+        $hasContent = ! empty($validated['content']) || (! array_key_exists('content', $validated) && ! empty($resource->content));
+        $hasFile = $request->hasFile('file') || (! empty($resource->file_path) && ! $request->has('remove_file'));
+
+        if (! $hasContent && ! $hasFile && ! $hasQuizzes) {
+            return back()->withInput()->withErrors(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
+        }
+
         // Si la ressource était validée, elle doit être revalidée
         // On vérifie si elle est actuellement validée (is_validated = true)
         $wasValidated = $resource->is_validated;
@@ -598,6 +648,10 @@ class ResourceController extends Controller
             DB::beginTransaction();
 
             $resource->update($updateData);
+
+            if ($request->has('quizzes_data')) {
+                $this->saveQuizzes($resource, $request->quizzes_data);
+            }
 
             // Débit réel si besoin de paiement
             if ($needsPayment && isset($cost)) {

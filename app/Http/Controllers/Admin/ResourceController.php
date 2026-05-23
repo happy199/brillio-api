@@ -7,6 +7,7 @@ use App\Mail\Resource\ResourceRejected;
 use App\Models\Resource;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
+use App\Traits\ManagesQuizzes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class ResourceController extends Controller
 {
+    use ManagesQuizzes;
+
     protected $notificationService;
 
     public function __construct(MentorshipNotificationService $notificationService)
@@ -107,6 +110,7 @@ class ResourceController extends Controller
             'mbti_types' => 'nullable|array',
             'tags' => 'nullable|string', // Reçu comme string séparée par virgules
             'targeting' => 'nullable|array',
+            'quizzes_data' => 'nullable|string',
         ], $messages);
 
         // Validation conditionnelle pour le prix
@@ -128,6 +132,27 @@ class ResourceController extends Controller
         $previewPath = null;
         if ($request->hasFile('preview_image')) {
             $previewPath = $request->file('preview_image')->store('resources/previews', 'public');
+        }
+
+        // Custom validation: Must have at least content, file, or quizzes
+        $hasQuizzes = false;
+        if ($request->has('quizzes_data')) {
+            $quizzesDecoded = json_decode($request->quizzes_data, true);
+            if (is_array($quizzesDecoded) && count($quizzesDecoded) > 0) {
+                foreach ($quizzesDecoded as $qData) {
+                    if (! empty($qData['title'])) {
+                        $hasQuizzes = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $hasContent = ! empty($validated['content']);
+        $hasFile = $request->hasFile('file');
+
+        if (! $hasContent && ! $hasFile && ! $hasQuizzes) {
+            return back()->withInput()->withErrors(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
         }
 
         // Traitement des tags (string vers array)
@@ -152,6 +177,9 @@ class ResourceController extends Controller
             'is_validated' => true, // Admin valide directement
             'validated_at' => now(),
         ]);
+
+        // Sauvegarde des quiz
+        $this->saveQuizzes($resource, $request->quizzes_data ?? null);
 
         return redirect()->route('admin.resources.index')->with('success', 'Ressource créée avec succès.');
     }
@@ -212,6 +240,7 @@ class ResourceController extends Controller
             'mbti_types' => 'nullable|array',
             'tags' => 'nullable|string',
             'targeting' => 'nullable|array',
+            'quizzes_data' => 'nullable|string',
         ], $messages);
 
         // Validation conditionnelle pour le prix
@@ -238,6 +267,29 @@ class ResourceController extends Controller
             $resource->preview_image_path = $request->file('preview_image')->store('resources/previews', 'public');
         }
 
+        // Custom validation: Must have at least content, file, or quizzes
+        $hasQuizzes = false;
+        if ($request->has('quizzes_data')) {
+            $quizzesDecoded = json_decode($request->quizzes_data, true);
+            if (is_array($quizzesDecoded) && count($quizzesDecoded) > 0) {
+                foreach ($quizzesDecoded as $qData) {
+                    if (! empty($qData['title'])) {
+                        $hasQuizzes = true;
+                        break;
+                    }
+                }
+            }
+        } elseif ($resource->quizzes()->count() > 0) {
+            $hasQuizzes = true;
+        }
+
+        $hasContent = ! empty($validated['content']) || (! array_key_exists('content', $validated) && ! empty($resource->content));
+        $hasFile = $request->hasFile('file') || (! empty($resource->file_path) && ! $request->has('remove_file'));
+
+        if (! $hasContent && ! $hasFile && ! $hasQuizzes) {
+            return back()->withInput()->withErrors(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
+        }
+
         $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
 
         $resource->update([
@@ -252,6 +304,10 @@ class ResourceController extends Controller
             'tags' => $tags,
             'targeting' => $validated['targeting'] ?? [],
         ]);
+
+        if ($request->has('quizzes_data')) {
+            $this->saveQuizzes($resource, $request->quizzes_data);
+        }
 
         return redirect()->route('admin.resources.index')->with('success', 'Ressource mise à jour.');
     }
