@@ -36,7 +36,7 @@ class SecurityHeadersMiddleware
         $csp .= "connect-src 'self' https: wss: cdn.jsdelivr.net *.google-analytics.com *.googletagmanager.com *.clarity.ms z.clarity.ms; ";
         $csp .= "frame-src 'self' https:; ";
         $csp .= "base-uri 'self'; ";
-        $csp .= "object-src 'none';";
+        $csp .= "object-src 'self';";
 
         $response->headers->set('Content-Security-Policy', $csp);
 
