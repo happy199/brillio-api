@@ -917,7 +917,7 @@
                 <!-- Modal d'Information sur le Ciblage -->
                 <div x-data="{ open: false }" @open-targeting-info-modal.window="open = true">
                     <template x-if="open">
-                        <div class="fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                        <div class="fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="targeting-modal-title" role="dialog" aria-modal="true">
                             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                                 <div @click="open = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
                                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -931,7 +931,7 @@
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <h3 class="text-xl font-bold text-gray-900" id="modal-title">Comprendre l'Outil de Ciblage Avancé</h3>
+                                                    <h3 class="text-xl font-bold text-gray-900" id="targeting-modal-title">Comprendre l'Outil de Ciblage Avancé</h3>
                                                 </div>
                                             </div>
                                             <button @click="open = false" class="text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-full p-1 transition">
@@ -1023,110 +1023,6 @@
 <form id="delete-form" action="{{ route('mentor.resources.destroy', $resource) }}" method="POST" class="hidden">
     @csrf
     @method('DELETE')
-                <!-- Modal d'Information sur le Ciblage -->
-                <div x-data="{ open: false }" @open-targeting-info-modal.window="open = true">
-                    <template x-if="open">
-                        <div class="fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                                <div @click="open = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                                <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                        <div class="flex justify-between items-start mb-6 border-b border-gray-100 pb-4">
-                                            <div class="flex items-center gap-3">
-                                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h3 class="text-xl font-bold text-gray-900" id="modal-title">Comprendre l'Outil de Ciblage Avancé</h3>
-                                                </div>
-                                            </div>
-                                            <button @click="open = false" class="text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-full p-1 transition">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                            </button>
-                                        </div>
-
-                                        <div class="space-y-6 text-gray-600 leading-relaxed text-sm">
-                                            <p class="text-base font-medium text-gray-800">
-                                                L'outil de ciblage permet à l'algorithme de Brillio de recommander votre ressource uniquement aux jeunes les plus pertinents. Plus votre ciblage est précis, meilleur sera le taux d'engagement.
-                                            </p>
-
-                                            <!-- Section MBTI -->
-                                            <div class="space-y-4 pt-4 border-t border-gray-100">
-                                                <h4 class="font-bold text-gray-900 flex items-center gap-2 text-base">
-                                                    <span class="text-xl">💡</span> Les 16 Personnalités (MBTI)
-                                                </h4>
-                                                <p>Brillio utilise le test des 16 personnalités pour comprendre le fonctionnement cognitif des jeunes.</p>
-                                                
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                                    <!-- Analystes -->
-                                                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
-                                                        <h5 class="font-bold text-purple-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span>Les Analystes (Rationnels)</h5>
-                                                        <ul class="space-y-2 text-xs">
-                                                            <li><strong class="text-gray-900">INTJ (Architecte)</strong> : Stratèges imaginatifs.</li>
-                                                            <li><strong class="text-gray-900">INTP (Logicien)</strong> : Inventeurs innovateurs.</li>
-                                                            <li><strong class="text-gray-900">ENTJ (Commandant)</strong> : Leaders audacieux.</li>
-                                                            <li><strong class="text-gray-900">ENTP (Innovateur)</strong> : Penseurs curieux.</li>
-                                                        </ul>
-                                                    </div>
-                                                    <!-- Diplomates -->
-                                                    <div class="bg-green-50 p-4 rounded-xl border border-green-100">
-                                                        <h5 class="font-bold text-green-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span>Les Diplomates (Idéalistes)</h5>
-                                                        <ul class="space-y-2 text-xs">
-                                                            <li><strong class="text-gray-900">INFJ (Avocat)</strong> : Idéalistes calmes et mystiques.</li>
-                                                            <li><strong class="text-gray-900">INFP (Médiateur)</strong> : Altruistes poétiques.</li>
-                                                            <li><strong class="text-gray-900">ENFJ (Protagoniste)</strong> : Leaders charismatiques.</li>
-                                                            <li><strong class="text-gray-900">ENFP (Inspirateur)</strong> : Esprits libres sociables.</li>
-                                                        </ul>
-                                                    </div>
-                                                    <!-- Sentinelles -->
-                                                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                                                        <h5 class="font-bold text-blue-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span>Les Sentinelles (Gardiens)</h5>
-                                                        <ul class="space-y-2 text-xs">
-                                                            <li><strong class="text-gray-900">ISTJ (Logisticien)</strong> : Fiables et pragmatiques.</li>
-                                                            <li><strong class="text-gray-900">ISFJ (Défenseur)</strong> : Protecteurs dévoués.</li>
-                                                            <li><strong class="text-gray-900">ESTJ (Directeur)</strong> : Administrateurs hors pair.</li>
-                                                            <li><strong class="text-gray-900">ESFJ (Consul)</strong> : Sociables et attentionnés.</li>
-                                                        </ul>
-                                                    </div>
-                                                    <!-- Explorateurs -->
-                                                    <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
-                                                        <h5 class="font-bold text-yellow-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span>Les Explorateurs (Artisans)</h5>
-                                                        <ul class="space-y-2 text-xs">
-                                                            <li><strong class="text-gray-900">ISTP (Virtuose)</strong> : Expérimentateurs audacieux.</li>
-                                                            <li><strong class="text-gray-900">ISFP (Aventurier)</strong> : Artistes flexibles.</li>
-                                                            <li><strong class="text-gray-900">ESTP (Entrepreneur)</strong> : Preneurs de risques.</li>
-                                                            <li><strong class="text-gray-900">ESFP (Amuseur)</strong> : Spontanés et énergiques.</li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
-                                                <div>
-                                                    <h4 class="font-bold text-gray-900 flex items-center gap-2 mb-2"><span class="text-xl">🌍</span> Pays & Éducation</h4>
-                                                    <p class="text-xs">Adaptez vos ressources selon le système éducatif local (ex: le Baccalauréat au Sénégal n'a pas exactement les mêmes filières qu'au Mali). Ciblez les pays correspondants à votre expertise.</p>
-                                                </div>
-                                                <div>
-                                                    <h4 class="font-bold text-gray-900 flex items-center gap-2 mb-2"><span class="text-xl">💼</span> Situation & Intérêts</h4>
-                                                    <p class="text-xs">Les jeunes en recherche d'emploi n'ont pas les mêmes besoins qu'un lycéen. Utilisez ces filtres pour proposer des conseils professionnels pertinents (CV, entretiens) uniquement à ceux qui en ont besoin.</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="bg-gray-50 px-4 py-4 sm:px-6 flex justify-end">
-                                        <button type="button" @click="open = false" class="inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2.5 bg-indigo-600 text-base font-bold text-white hover:bg-indigo-700 focus:outline-none transition sm:text-sm">
-                                            J'ai compris
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
 </form>
 </div>
 @endsection

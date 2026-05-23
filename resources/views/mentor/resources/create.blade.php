@@ -298,7 +298,7 @@
 
                     <!-- Modal des statistiques -->
                     <template x-if="isOpen">
-                        <div class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+                        <div class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="stats-modal-title" role="dialog"
                             aria-modal="true">
                             <div
                                 class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -311,7 +311,7 @@
                                     class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                         <div class="flex justify-between items-center mb-6">
-                                            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2" id="stats-modal-title">
                                                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -983,7 +983,7 @@
                 <!-- Modal d'Information sur le Ciblage -->
                 <div x-data="{ open: false }" @open-targeting-info-modal.window="open = true">
                     <template x-if="open">
-                        <div class="fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                        <div class="fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="targeting-modal-title" role="dialog" aria-modal="true">
                             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                                 <div @click="open = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
                                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -997,7 +997,7 @@
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <h3 class="text-xl font-bold text-gray-900" id="modal-title">Comprendre l'Outil de Ciblage Avancé</h3>
+                                                    <h3 class="text-xl font-bold text-gray-900" id="targeting-modal-title">Comprendre l'Outil de Ciblage Avancé</h3>
                                                 </div>
                                             </div>
                                             <button @click="open = false" class="text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-full p-1 transition">
