@@ -209,7 +209,7 @@
                 </div>
 
                 <!-- Share Button -->
-                <button onclick="shareResource()"
+                <button id="shareResourceBtn"
                     class="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition font-medium text-sm border border-indigo-100 shadow-sm shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -297,6 +297,12 @@
 
 @push('scripts')
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+    document.addEventListener('DOMContentLoaded', () => {
+        const shareBtn = document.getElementById('shareResourceBtn');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', shareResource);
+        }
+    });
 
     function shareResource() {
         if (navigator.share) {
@@ -305,12 +311,27 @@
                 text: 'Découvre cette ressource pédagogique sur Brillio !',
                 url: window.location.href
             }).catch(console.error);
-        } else {
+        } else if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(window.location.href).then(() => {
                 window.showToast('Lien copié dans le presse-papier !');
             }).catch(() => {
                 window.showToast('Impossible de copier le lien', 'error');
             });
+        } else {
+            let ta = document.createElement('textarea');
+            ta.value = window.location.href;
+            ta.style.position = 'fixed';
+            ta.style.left = '-999999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                window.showToast('Lien copié dans le presse-papier !');
+            } catch (err) {
+                window.showToast('Impossible de copier le lien', 'error');
+            }
+            ta.remove();
         }
     }
 </script>

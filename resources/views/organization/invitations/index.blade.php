@@ -7,15 +7,36 @@
     showDeleteModal: false,
     invitationToDelete: null,
     copyToClipboard(url) {
-        navigator.clipboard.writeText(url).then(() => {
-            window.dispatchEvent(new CustomEvent('copy-notification', { 
-                detail: { message: 'Lien copié dans le presse-papiers !', type: 'success' } 
-            }));
-        }).catch(err => {
-            window.dispatchEvent(new CustomEvent('copy-notification', { 
-                detail: { message: 'Erreur lors de la copie.', type: 'error' } 
-            }));
-        });
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(() => {
+                window.dispatchEvent(new CustomEvent('copy-notification', { 
+                    detail: { message: 'Lien copié dans le presse-papiers !', type: 'success' } 
+                }));
+            }).catch(err => {
+                window.dispatchEvent(new CustomEvent('copy-notification', { 
+                    detail: { message: 'Erreur lors de la copie.', type: 'error' } 
+                }));
+            });
+        } else {
+            let ta = document.createElement('textarea');
+            ta.value = url;
+            ta.style.position = 'fixed';
+            ta.style.left = '-999999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                window.dispatchEvent(new CustomEvent('copy-notification', { 
+                    detail: { message: 'Lien copié dans le presse-papiers !', type: 'success' } 
+                }));
+            } catch (err) {
+                window.dispatchEvent(new CustomEvent('copy-notification', { 
+                    detail: { message: 'Erreur lors de la copie.', type: 'error' } 
+                }));
+            }
+            ta.remove();
+        }
     },
     confirmDelete(url) {
         this.invitationToDelete = url;

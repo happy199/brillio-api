@@ -215,8 +215,8 @@
                         <a href="{{ route('mentor.resources.edit', $resource) }}"
                             class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition">Éditer</a>
                         <button
-                            onclick="navigator.clipboard.writeText('{{ route('jeune.resources.show', $resource) }}').then(() => window.showToast('Lien copié !')).catch(() => window.showToast('Erreur copie', 'error'))"
-                            class="ml-2 text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded transition cursor-pointer"
+                            data-url="{{ route('jeune.resources.show', $resource) }}"
+                            class="copy-btn ml-2 text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-3 py-1 rounded transition cursor-pointer"
                             title="Copier le lien partageable">
                             <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -275,4 +275,36 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const url = this.getAttribute('data-url');
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(url)
+                        .then(() => window.showToast('Lien copié !'))
+                        .catch(() => window.showToast('Erreur copie', 'error'));
+                } else {
+                    let ta = document.createElement('textarea');
+                    ta.value = url;
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-999999px';
+                    document.body.appendChild(ta);
+                    ta.focus();
+                    ta.select();
+                    try {
+                        document.execCommand('copy');
+                        window.showToast('Lien copié !');
+                    } catch (err) {
+                        window.showToast('Erreur copie', 'error');
+                    }
+                    ta.remove();
+                }
+            });
+        });
+    });
+</script>
+@endpush
 @endsection
