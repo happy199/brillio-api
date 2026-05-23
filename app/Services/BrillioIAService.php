@@ -635,4 +635,69 @@ class BrillioIAService
             return [];
         }
     }
+
+    /**
+     * Genere un quiz base sur le contenu d'une ressource
+     */
+    public function generateQuizFromResource(string $title, string $description, ?string $content)
+    {
+        $systemPrompt = "Tu es un expert pédagogique pour la plateforme Brillio.\n".
+            "Ta mission est de créer un quiz d'évaluation de 3 à 5 questions basé UNIQUEMENT sur le contenu fourni.\n\n".
+            "REGLES :\n".
+            "1. Le quiz doit comporter entre 3 et 5 questions pertinentes.\n".
+            "2. Chaque question doit avoir entre 2 et 4 options de réponse.\n".
+            "3. Il doit y avoir au moins une réponse correcte par question (et tu dois indiquer laquelle via is_correct: true).\n".
+            "4. Le type de question peut être 'single' (une seule bonne réponse) ou 'multiple' (plusieurs bonnes réponses).\n".
+            "5. Tu dois retourner un objet JSON valide et structuré EXACTEMENT selon le format attendu.\n\n".
+            "FORMAT JSON ATTENDU :\n".
+            "[\n".
+            "  {\n".
+            "    \"title\": \"Titre généré pour le quiz\",\n".
+            "    \"description\": \"Brève description du quiz\",\n".
+            "    \"questions\": [\n".
+            "      {\n".
+            "        \"question_text\": \"Intitulé de la question\",\n".
+            "        \"points\": 10,\n".
+            "        \"type\": \"single\",\n".
+            "        \"options\": [\n".
+            "          {\"option_text\": \"Option 1\", \"is_correct\": true},\n".
+            "          {\"option_text\": \"Option 2\", \"is_correct\": false}\n".
+            "        ]\n".
+            "      }\n".
+            "    ]\n".
+            "  }\n".
+            ']';
+
+        // Nettoyer les balises HTML du contenu pour le prompt
+        $cleanContent = strip_tags($content ?? '');
+        $cleanContent = \Illuminate\Support\Str::limit($cleanContent, 10000); // Limiter à 10k caractères
+
+        $prompt = "Voici les informations de la ressource :\n\n".
+                  "TITRE: {$title}\n".
+                  "DESCRIPTION: {$description}\n".
+                  "CONTENU:\n{$cleanContent}\n\n".
+                  "Génère un quiz d'évaluation pour cette ressource.";
+
+        try {
+            $response = $this->analyzeText($prompt, $systemPrompt);
+            $json = $this->cleanJson($response);
+            $data = json_decode($json, true);
+
+            // Si le retour est valide et contient au moins un quiz avec des questions
+            if (is_array($data) && count($data) > 0 && isset($data[0]['questions'])) {
+                return $data;
+            }
+
+            // Si le modèle a encapsulé dans un objet
+            if (isset($data['quizzes']) && is_array($data['quizzes'])) {
+                return $data['quizzes'];
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Generate Quiz Error: '.$e->getMessage());
+
+            return null;
+        }
+    }
 }

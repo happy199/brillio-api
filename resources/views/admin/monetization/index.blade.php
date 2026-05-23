@@ -233,6 +233,17 @@
                             </div>
 
                             <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Génération Quiz par IA (Crédits)</label>
+                                <div class="relative">
+                                    <input type="number" name="feature_cost_ai_generation" value="{{ $aiGenerationCost }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Coût pour générer un quiz avec l'IA (Mentor).</p>
+                            </div>
+
+                            <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Conseiller (Crédits)</label>
                                 <div class="relative">
                                     <input type="number" name="feature_cost_contact_advisor" value="{{ $contactAdvisorCost }}"

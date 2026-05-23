@@ -208,15 +208,29 @@
                     </div>
                 </div>
 
-                <!-- Share Button -->
-                <button id="shareResourceBtn"
-                    class="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition font-medium text-sm border border-indigo-100 shadow-sm shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    Partager
-                </button>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 md:mt-0">
+                    <!-- Share Button -->
+                    <button id="shareResourceBtn"
+                        class="flex justify-center items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition font-medium text-sm border border-indigo-100 shadow-sm shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        Partager
+                    </button>
+
+                    <!-- Aperçu comme un jeune -->
+                    @if(auth()->id() === $resource->user_id)
+                    <a href="{{ route('mentor.resources.preview', $resource) }}" target="_blank"
+                        class="flex justify-center items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition font-medium text-sm border border-purple-100 shadow-sm shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Aperçu Jeune
+                    </a>
+                    @endif
+                </div>
             </header>
 
             <!-- Description -->
@@ -349,6 +363,7 @@
     });
 
     function shareResource() {
+        const shareUrl = "{{ route('jeune.resources.show', $resource) }}";
         const notifySuccess = () => {
             if (typeof window.showToast === 'function') {
                 window.showToast('Lien copié dans le presse-papier !');
@@ -367,26 +382,26 @@
 
         if (navigator.share) {
             navigator.share({
-                title: '{{ $resource->title }} - Ressource Mentor Brillio',
+                title: '{{ addslashes($resource->title) }} - Ressource Mentor Brillio',
                 text: 'Découvre cette ressource pédagogique sur Brillio !',
-                url: window.location.href
+                url: shareUrl
             }).catch((err) => {
                 // Si l'utilisateur annule ou si navigator.share échoue, on copie dans le presse-papier
-                copyToClipboard(notifySuccess, notifyError);
+                copyToClipboard(shareUrl, notifySuccess, notifyError);
             });
         } else {
-            copyToClipboard(notifySuccess, notifyError);
+            copyToClipboard(shareUrl, notifySuccess, notifyError);
         }
     }
 
-    function copyToClipboard(onSuccess, onError) {
+    function copyToClipboard(url, onSuccess, onError) {
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(window.location.href)
+            navigator.clipboard.writeText(url)
                 .then(onSuccess)
                 .catch(onError);
         } else {
             let ta = document.createElement('textarea');
-            ta.value = window.location.href;
+            ta.value = url;
             ta.style.position = 'fixed';
             ta.style.left = '-999999px';
             document.body.appendChild(ta);

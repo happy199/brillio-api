@@ -114,15 +114,22 @@
 
                 <!-- Quiz d'évaluation -->
                 <div x-data="quizManager()" class="bg-white rounded-xl border border-gray-200 p-6 space-y-6 relative overflow-hidden mb-6 shadow-sm">
-                    <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-4 gap-4">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900">Quiz d'Évaluation <span class="text-sm font-normal text-gray-500 ml-2">(Optionnel)</span></h2>
                             <p class="text-xs text-gray-500 mt-1">Ajoutez ou modifiez les quiz liés à cette ressource.</p>
                         </div>
-                        <button type="button" @click="addQuiz()" class="text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            Ajouter un Quiz
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="button" @click="generateQuiz()" :disabled="isGenerating" class="text-sm font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg x-show="!isGenerating" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                <svg x-cloak x-show="isGenerating" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                Générer avec l'IA ({{ $quizCost ?? 5 }} Crédits)
+                            </button>
+                            <button type="button" @click="addQuiz()" class="text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Ajouter un Quiz
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Hidden input to store JSON data -->
@@ -250,6 +257,196 @@
                         </div>
                     </template>
                 </div>
+                <!-- Analyse de la demande et Informations -->
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <!-- Analyse de la demande (Payant) -->
+                    <div x-data="demandStats()" class="flex-1">
+                        <button type="button" @click="fetchStats()"
+                            class="w-full h-full inline-flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-4 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-bold">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Outil d'Analyse : Voir les tendances ({{ $analysisCost ?? 5 }} Crédits)
+                        </button>
+
+                    <!-- Modal des statistiques -->
+                    <template x-if="isOpen">
+                        <div class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+                            aria-modal="true">
+                            <div
+                                class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div @click="isOpen = false"
+                                    class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                    aria-hidden="true"></div>
+                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen"
+                                    aria-hidden="true">&#8203;</span>
+                                <div
+                                    class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                        <div class="flex justify-between items-center mb-6">
+                                            <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                                </svg>
+                                                Analyse de la Demande Jeunes Brillio
+                                            </h3>
+                                            <button @click="isOpen = false" class="text-gray-400 hover:text-gray-500">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div x-show="loading" class="py-12 flex flex-col items-center justify-center">
+                                            <svg class="animate-spin h-10 w-10 text-purple-600 mb-4"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                    stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                </path>
+                                            </svg>
+                                            <p class="text-gray-600 font-medium">Analyse en cours...</p>
+                                        </div>
+
+                                        <div x-show="!loading && stats" class="space-y-8 animate-fadeIn">
+                                            <!-- Summary Cards -->
+                                            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                                                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                    <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Total Jeunes</p>
+                                                    <p class="text-2xl font-black text-gray-900" x-text="stats?.total"></p>
+                                                </div>
+                                                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                                    <p class="text-[10px] text-blue-600 uppercase font-bold tracking-wider mb-1">Lycéens</p>
+                                                    <p class="text-2xl font-black text-blue-900" x-text="stats?.education?.lycee || 0"></p>
+                                                </div>
+                                                <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                                                    <p class="text-[10px] text-green-600 uppercase font-bold tracking-wider mb-1">Bac & +</p>
+                                                    <p class="text-2xl font-black text-green-900" x-text="(stats?.education?.bac || 0) + (stats?.education?.licence || 0) + (stats?.education?.master || 0) + (stats?.education?.doctorat || 0)"></p>
+                                                </div>
+                                                <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                                    <p class="text-[10px] text-purple-600 uppercase font-bold tracking-wider mb-1">En emploi</p>
+                                                    <p class="text-2xl font-black text-purple-900" x-text="(stats?.situation?.emploi || 0) + (stats?.situation?.entrepreneur || 0)"></p>
+                                                </div>
+                                                <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                                                    <p class="text-[10px] text-red-600 uppercase font-bold tracking-wider mb-1">En recherche</p>
+                                                    <p class="text-2xl font-black text-red-900" x-text="stats?.situation?.recherche_emploi || 0"></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <!-- Education Chart -->
+                                                <div class="bg-white p-4 rounded-xl border border-gray-100">
+                                                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                        <span class="w-1.5 h-4 bg-indigo-500 rounded-full"></span>
+                                                        Niveaux d'études
+                                                    </h4>
+                                                    <div class="space-y-4">
+                                                        <template x-for="(count, level) in stats?.education || {}" :key="level">
+                                                            <div x-show="count > 0">
+                                                                <div class="flex justify-between text-xs mb-1.5 text-gray-600">
+                                                                    <span class="font-semibold" x-text="formatLabel(level)"></span>
+                                                                    <span class="font-bold text-gray-900" x-text="`${count} (${Math.round((count/stats?.total)*100)}%)`"></span>
+                                                                </div>
+                                                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                                                    <div class="bg-indigo-500 h-2 rounded-full transition-all duration-700" :style="`width: ${Math.round((count/stats?.total)*100)}%`"></div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Situation Chart -->
+                                                <div class="bg-white p-4 rounded-xl border border-gray-100">
+                                                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                        <span class="w-1.5 h-4 bg-purple-500 rounded-full"></span>
+                                                        Situations actuelles
+                                                    </h4>
+                                                    <div class="space-y-4">
+                                                        <template x-for="(count, sit) in stats?.situation || {}" :key="sit">
+                                                            <div x-show="count > 0">
+                                                                <div class="flex justify-between text-xs mb-1.5 text-gray-600">
+                                                                    <span class="font-semibold" x-text="formatLabel(sit)"></span>
+                                                                    <span class="font-bold text-gray-900" x-text="`${count} (${Math.round((count/stats?.total)*100)}%)`"></span>
+                                                                </div>
+                                                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                                                    <div class="bg-purple-500 h-2 rounded-full transition-all duration-700" :style="`width: ${Math.round((count/stats?.total)*100)}%`"></div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                                                <!-- Personality -->
+                                                <div class="bg-white p-4 rounded-xl border border-gray-100">
+                                                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                        <span class="w-1.5 h-4 bg-amber-500 rounded-full"></span>
+                                                        Types Psychométriques (MBTI)
+                                                    </h4>
+                                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                         <template x-for="(count, type) in stats?.personality_types || {}" :key="type">
+                                                             <div class="bg-amber-50 p-2 rounded-lg border border-amber-100 text-center flex flex-col justify-center min-h-[60px]">
+                                                                 <div class="text-[10px] font-bold text-amber-700 leading-tight mb-1" x-text="formatLabel(type)"></div>
+                                                                 <div class="text-[8px] text-amber-500 font-medium uppercase mb-1" x-text="type"></div>
+                                                                 <div class="text-sm font-black text-amber-900" x-text="count"></div>
+                                                             </div>
+                                                         </template>
+                                                     </div>
+                                                    <p x-show="!Object.keys(stats?.personality_types || {}).length" class="text-xs text-gray-400 italic mt-4 text-center">Pas encore de tests complétés.</p>
+                                                </div>
+
+                                                <!-- Location -->
+                                                <div class="bg-white p-4 rounded-xl border border-gray-100">
+                                                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                        <span class="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
+                                                        Répartition par Pays
+                                                    </h4>
+                                                    <div class="space-y-2 pr-2 custom-scrollbar">
+                                                        <template x-for="(count, country) in stats?.countries || {}" :key="country">
+                                                            <div class="flex justify-between items-center text-xs py-1.5 border-b border-gray-50 last:border-0">
+                                                                <span class="text-gray-700 font-medium" x-text="country"></span>
+                                                                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold" x-text="count"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-100">
+                                        <button type="button" @click="isOpen = false"
+                                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                            Fermer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Bouton Informations sur les cibles -->
+                <div class="flex-1">
+                    <button type="button" x-data @click="$dispatch('open-targeting-info-modal')" class="w-full h-full bg-indigo-50 text-indigo-600 border border-indigo-200 font-semibold py-4 px-6 rounded-xl hover:bg-indigo-100 transition flex justify-center items-center gap-2 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Informations sur l'Outil de Ciblage
+                    </button>
+                </div>
+            </div>
+
+                
+                
 
                 
                 <!-- Critères Psychométriques (MBTI) - Remonté AVANT le ciblage -->
@@ -697,6 +894,8 @@
                     </div>
 
                     <div class="pt-4 border-t border-gray-100 space-y-3">
+
+
                         <button type="submit"
                             class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
                             Mettre à jour
@@ -713,11 +912,221 @@
             </div>
         </div>
 </div>
+</div>
+</div>
+                <!-- Modal d'Information sur le Ciblage -->
+                <div x-data="{ open: false }" @open-targeting-info-modal.window="open = true">
+                    <template x-if="open">
+                        <div class="fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div @click="open = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                                <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                        <div class="flex justify-between items-start mb-6 border-b border-gray-100 pb-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <h3 class="text-xl font-bold text-gray-900" id="modal-title">Comprendre l'Outil de Ciblage Avancé</h3>
+                                                </div>
+                                            </div>
+                                            <button @click="open = false" class="text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-full p-1 transition">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                        </div>
+
+                                        <div class="space-y-6 text-gray-600 leading-relaxed text-sm">
+                                            <p class="text-base font-medium text-gray-800">
+                                                L'outil de ciblage permet à l'algorithme de Brillio de recommander votre ressource uniquement aux jeunes les plus pertinents. Plus votre ciblage est précis, meilleur sera le taux d'engagement.
+                                            </p>
+
+                                            <!-- Section MBTI -->
+                                            <div class="space-y-4 pt-4 border-t border-gray-100">
+                                                <h4 class="font-bold text-gray-900 flex items-center gap-2 text-base">
+                                                    <span class="text-xl">💡</span> Les 16 Personnalités (MBTI)
+                                                </h4>
+                                                <p>Brillio utilise le test des 16 personnalités pour comprendre le fonctionnement cognitif des jeunes.</p>
+                                                
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                                    <!-- Analystes -->
+                                                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                                        <h5 class="font-bold text-purple-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span>Les Analystes (Rationnels)</h5>
+                                                        <ul class="space-y-2 text-xs">
+                                                            <li><strong class="text-gray-900">INTJ (Architecte)</strong> : Stratèges imaginatifs.</li>
+                                                            <li><strong class="text-gray-900">INTP (Logicien)</strong> : Inventeurs innovateurs.</li>
+                                                            <li><strong class="text-gray-900">ENTJ (Commandant)</strong> : Leaders audacieux.</li>
+                                                            <li><strong class="text-gray-900">ENTP (Innovateur)</strong> : Penseurs curieux.</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- Diplomates -->
+                                                    <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                                                        <h5 class="font-bold text-green-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span>Les Diplomates (Idéalistes)</h5>
+                                                        <ul class="space-y-2 text-xs">
+                                                            <li><strong class="text-gray-900">INFJ (Avocat)</strong> : Idéalistes calmes et mystiques.</li>
+                                                            <li><strong class="text-gray-900">INFP (Médiateur)</strong> : Altruistes poétiques.</li>
+                                                            <li><strong class="text-gray-900">ENFJ (Protagoniste)</strong> : Leaders charismatiques.</li>
+                                                            <li><strong class="text-gray-900">ENFP (Inspirateur)</strong> : Esprits libres sociables.</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- Sentinelles -->
+                                                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                                        <h5 class="font-bold text-blue-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span>Les Sentinelles (Gardiens)</h5>
+                                                        <ul class="space-y-2 text-xs">
+                                                            <li><strong class="text-gray-900">ISTJ (Logisticien)</strong> : Fiables et pragmatiques.</li>
+                                                            <li><strong class="text-gray-900">ISFJ (Défenseur)</strong> : Protecteurs dévoués.</li>
+                                                            <li><strong class="text-gray-900">ESTJ (Directeur)</strong> : Administrateurs hors pair.</li>
+                                                            <li><strong class="text-gray-900">ESFJ (Consul)</strong> : Sociables et attentionnés.</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- Explorateurs -->
+                                                    <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+                                                        <h5 class="font-bold text-yellow-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span>Les Explorateurs (Artisans)</h5>
+                                                        <ul class="space-y-2 text-xs">
+                                                            <li><strong class="text-gray-900">ISTP (Virtuose)</strong> : Expérimentateurs audacieux.</li>
+                                                            <li><strong class="text-gray-900">ISFP (Aventurier)</strong> : Artistes flexibles.</li>
+                                                            <li><strong class="text-gray-900">ESTP (Entrepreneur)</strong> : Preneurs de risques.</li>
+                                                            <li><strong class="text-gray-900">ESFP (Amuseur)</strong> : Spontanés et énergiques.</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
+                                                <div>
+                                                    <h4 class="font-bold text-gray-900 flex items-center gap-2 mb-2"><span class="text-xl">🌍</span> Pays & Éducation</h4>
+                                                    <p class="text-xs">Adaptez vos ressources selon le système éducatif local (ex: le Baccalauréat au Sénégal n'a pas exactement les mêmes filières qu'au Mali). Ciblez les pays correspondants à votre expertise.</p>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-gray-900 flex items-center gap-2 mb-2"><span class="text-xl">💼</span> Situation & Intérêts</h4>
+                                                    <p class="text-xs">Les jeunes en recherche d'emploi n'ont pas les mêmes besoins qu'un lycéen. Utilisez ces filtres pour proposer des conseils professionnels pertinents (CV, entretiens) uniquement à ceux qui en ont besoin.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 px-4 py-4 sm:px-6 flex justify-end">
+                                        <button type="button" @click="open = false" class="inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2.5 bg-indigo-600 text-base font-bold text-white hover:bg-indigo-700 focus:outline-none transition sm:text-sm">
+                                            J'ai compris
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
 </form>
 
 <form id="delete-form" action="{{ route('mentor.resources.destroy', $resource) }}" method="POST" class="hidden">
     @csrf
     @method('DELETE')
+                <!-- Modal d'Information sur le Ciblage -->
+                <div x-data="{ open: false }" @open-targeting-info-modal.window="open = true">
+                    <template x-if="open">
+                        <div class="fixed inset-0 z-[70] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div @click="open = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                                <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                        <div class="flex justify-between items-start mb-6 border-b border-gray-100 pb-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <h3 class="text-xl font-bold text-gray-900" id="modal-title">Comprendre l'Outil de Ciblage Avancé</h3>
+                                                </div>
+                                            </div>
+                                            <button @click="open = false" class="text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-full p-1 transition">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                        </div>
+
+                                        <div class="space-y-6 text-gray-600 leading-relaxed text-sm">
+                                            <p class="text-base font-medium text-gray-800">
+                                                L'outil de ciblage permet à l'algorithme de Brillio de recommander votre ressource uniquement aux jeunes les plus pertinents. Plus votre ciblage est précis, meilleur sera le taux d'engagement.
+                                            </p>
+
+                                            <!-- Section MBTI -->
+                                            <div class="space-y-4 pt-4 border-t border-gray-100">
+                                                <h4 class="font-bold text-gray-900 flex items-center gap-2 text-base">
+                                                    <span class="text-xl">💡</span> Les 16 Personnalités (MBTI)
+                                                </h4>
+                                                <p>Brillio utilise le test des 16 personnalités pour comprendre le fonctionnement cognitif des jeunes.</p>
+                                                
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                                    <!-- Analystes -->
+                                                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                                        <h5 class="font-bold text-purple-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span>Les Analystes (Rationnels)</h5>
+                                                        <ul class="space-y-2 text-xs">
+                                                            <li><strong class="text-gray-900">INTJ (Architecte)</strong> : Stratèges imaginatifs.</li>
+                                                            <li><strong class="text-gray-900">INTP (Logicien)</strong> : Inventeurs innovateurs.</li>
+                                                            <li><strong class="text-gray-900">ENTJ (Commandant)</strong> : Leaders audacieux.</li>
+                                                            <li><strong class="text-gray-900">ENTP (Innovateur)</strong> : Penseurs curieux.</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- Diplomates -->
+                                                    <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                                                        <h5 class="font-bold text-green-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span>Les Diplomates (Idéalistes)</h5>
+                                                        <ul class="space-y-2 text-xs">
+                                                            <li><strong class="text-gray-900">INFJ (Avocat)</strong> : Idéalistes calmes et mystiques.</li>
+                                                            <li><strong class="text-gray-900">INFP (Médiateur)</strong> : Altruistes poétiques.</li>
+                                                            <li><strong class="text-gray-900">ENFJ (Protagoniste)</strong> : Leaders charismatiques.</li>
+                                                            <li><strong class="text-gray-900">ENFP (Inspirateur)</strong> : Esprits libres sociables.</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- Sentinelles -->
+                                                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                                        <h5 class="font-bold text-blue-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span>Les Sentinelles (Gardiens)</h5>
+                                                        <ul class="space-y-2 text-xs">
+                                                            <li><strong class="text-gray-900">ISTJ (Logisticien)</strong> : Fiables et pragmatiques.</li>
+                                                            <li><strong class="text-gray-900">ISFJ (Défenseur)</strong> : Protecteurs dévoués.</li>
+                                                            <li><strong class="text-gray-900">ESTJ (Directeur)</strong> : Administrateurs hors pair.</li>
+                                                            <li><strong class="text-gray-900">ESFJ (Consul)</strong> : Sociables et attentionnés.</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- Explorateurs -->
+                                                    <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+                                                        <h5 class="font-bold text-yellow-800 mb-2 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span>Les Explorateurs (Artisans)</h5>
+                                                        <ul class="space-y-2 text-xs">
+                                                            <li><strong class="text-gray-900">ISTP (Virtuose)</strong> : Expérimentateurs audacieux.</li>
+                                                            <li><strong class="text-gray-900">ISFP (Aventurier)</strong> : Artistes flexibles.</li>
+                                                            <li><strong class="text-gray-900">ESTP (Entrepreneur)</strong> : Preneurs de risques.</li>
+                                                            <li><strong class="text-gray-900">ESFP (Amuseur)</strong> : Spontanés et énergiques.</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
+                                                <div>
+                                                    <h4 class="font-bold text-gray-900 flex items-center gap-2 mb-2"><span class="text-xl">🌍</span> Pays & Éducation</h4>
+                                                    <p class="text-xs">Adaptez vos ressources selon le système éducatif local (ex: le Baccalauréat au Sénégal n'a pas exactement les mêmes filières qu'au Mali). Ciblez les pays correspondants à votre expertise.</p>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-bold text-gray-900 flex items-center gap-2 mb-2"><span class="text-xl">💼</span> Situation & Intérêts</h4>
+                                                    <p class="text-xs">Les jeunes en recherche d'emploi n'ont pas les mêmes besoins qu'un lycéen. Utilisez ces filtres pour proposer des conseils professionnels pertinents (CV, entretiens) uniquement à ceux qui en ont besoin.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 px-4 py-4 sm:px-6 flex justify-end">
+                                        <button type="button" @click="open = false" class="inline-flex justify-center rounded-xl border border-transparent shadow-sm px-6 py-2.5 bg-indigo-600 text-base font-bold text-white hover:bg-indigo-700 focus:outline-none transition sm:text-sm">
+                                            J'ai compris
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
 </form>
 </div>
 @endsection
@@ -725,6 +1134,49 @@
 @push('scripts')
 <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+    function demandStats() {
+        return {
+            isOpen: false,
+            loading: false,
+            stats: null,
+            labels: {
+                'college': 'Collège', 'lycee': 'Lycée', 'bac': 'Baccalauréat', 'licence': 'Licence', 'master': 'Master', 'doctorat': 'Doctorat',
+                'etudiant': 'Étudiant', 'recherche_emploi': 'En recherche d\'emploi', 'emploi': 'En emploi', 'entrepreneur': 'Entrepreneur', 'autre': 'Autre',
+                'INTJ': 'L’Architecte', 'INTP': 'Le Logicien', 'ENTJ': 'Le Commandant', 'ENTP': 'L’Innovateur',
+                'INFJ': 'L’Avocat', 'INFP': 'Le Médiateur', 'ENFJ': 'Le Protagoniste', 'ENFP': 'Le Campaigner',
+                'ISTJ': 'Le Logisticien', 'ISFJ': 'Le Défenseur', 'ESTJ': 'Le Directeur', 'ESFJ': 'Le Consul',
+                'ISTP': 'Le Virtuose', 'ISFP': 'L’Aventurier', 'ESTP': 'L’Entrepreneur', 'ESFP': 'L’Amuseur'
+            },
+            async fetchStats() {
+                this.loading = true;
+                this.isOpen = true;
+                
+                try {
+                    const response = await fetch('{{ route('mentor.resources.stats') }}');
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        this.stats = data.stats;
+                        if (window.showToast) window.showToast('Données récupérées ! {{ $analysisCost ?? 5 }} crédits débités.');
+                    } else {
+                        this.isOpen = false;
+                        if (window.showToast) window.showToast(data.error || 'Erreur lors de la récupération', 'error');
+                        if (response.status === 402 && confirm('Crédits insuffisants. Voulez-vous recharger votre compte ?')) {
+                            window.location.href = "{{ route('mentor.wallet.index') }}";
+                        }
+                    }
+                } catch (error) {
+                    this.isOpen = false;
+                    if (window.showToast) window.showToast('Erreur réseau', 'error');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            formatLabel(key) {
+                return this.labels[key] || key;
+            }
+        }
+    }
     function toggleAll(name, checked) {
         document.getElementsByName(name).forEach(el => {
             el.checked = checked;
@@ -751,6 +1203,89 @@
             quizzes: oldQuizzes || [],
             showDeleteModal: false,
             quizToDeleteIndex: null,
+            isGenerating: false,
+
+            async generateQuiz() {
+                const titleInput = document.querySelector('input[name="title"]');
+                const title = titleInput ? titleInput.value : '';
+                const descInput = document.querySelector('textarea[name="description"]');
+                const description = descInput ? descInput.value : '';
+                
+                // Get Quill content if available, else try standard input
+                let content = '';
+                const quillEditor = document.querySelector('.ql-editor');
+                if (quillEditor) {
+                    content = quillEditor.innerHTML;
+                } else {
+                    const contentInput = document.querySelector('input[name="content"]');
+                    if (contentInput) content = contentInput.value;
+                }
+
+                const combinedText = (title + ' ' + description + ' ' + content.replace(/<[^>]*>?/gm, '')).trim();
+                if (combinedText.length < 10) {
+                    if (typeof window.showToast === 'function') {
+                        window.showToast("Veuillez fournir du contexte (Titre, Description ou Contenu) pour générer un quiz avec l'IA.", "warning");
+                    } else {
+                        alert("Veuillez fournir du contexte (Titre, Description ou Contenu) pour générer un quiz avec l'IA.");
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+
+                this.isGenerating = true;
+
+                try {
+                    const response = await fetch('{{ route("mentor.resources.generate-quiz") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            title: title,
+                            description: description,
+                            content: content
+                        })
+                    });
+
+                    if (response.status === 402) {
+                        if (typeof window.showToast === 'function') {
+                            window.showToast("Crédits insuffisants. Redirection vers le portefeuille...", "warning");
+                        } else {
+                            alert("Crédits insuffisants. Redirection vers le portefeuille...");
+                        }
+                        setTimeout(() => {
+                            window.location.href = "{{ route('mentor.wallet.index') }}";
+                        }, 1500);
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Une erreur est survenue lors de la génération.');
+                    }
+
+                    if (data.quizzes && data.quizzes.length > 0) {
+                        data.quizzes.forEach(quiz => this.quizzes.push(quiz));
+                        if (typeof window.showToast === 'function') {
+                            window.showToast('Quiz généré avec succès ! Nouveau solde: ' + data.new_balance + ' crédits', 'success');
+                        } else {
+                            alert('Quiz généré avec succès ! Nouveau solde: ' + data.new_balance + ' crédits');
+                        }
+                    } else {
+                        throw new Error('L\'IA n\'a pas pu générer le quiz.');
+                    }
+                } catch (error) {
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(error.message, 'error');
+                    } else {
+                        alert(error.message);
+                    }
+                } finally {
+                    this.isGenerating = false;
+                }
+            },
 
             addQuiz() {
                 this.quizzes.push({
