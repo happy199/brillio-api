@@ -27,6 +27,7 @@ class MonetizationController extends Controller
             'feature_cost_compiled_report',
             'feature_cost_transcription_download',
             'feature_cost_ai_report_generation',
+            'feature_cost_ai_generation',
             'payout_fee_percentage',
             'mentorship_commission_percent',
         ])->get()->keyBy('key');
@@ -36,6 +37,7 @@ class MonetizationController extends Controller
         $creditPriceOrganization = $settings['credit_price_organization']->value ?? 150;
         $targetingCost = $settings['feature_cost_advanced_targeting']->value ?? 10;
         $analysisToolCost = $settings['feature_cost_analysis_tool']->value ?? 5;
+        $aiGenerationCost = $settings['feature_cost_ai_generation']->value ?? 5;
         $contactAdvisorCost = $settings['feature_cost_contact_advisor']->value ?? 10;
         $newChatCost = $settings['feature_cost_new_chat']->value ?? 10;
         $unlockHistoryCost = $settings['feature_cost_unlock_history']->value ?? 5;
@@ -98,6 +100,7 @@ class MonetizationController extends Controller
             'creditPriceOrganization',
             'targetingCost',
             'analysisToolCost',
+            'aiGenerationCost',
             'contactAdvisorCost',
             'newChatCost',
             'unlockHistoryCost',
@@ -136,6 +139,7 @@ class MonetizationController extends Controller
             'credit_price_organization' => 'required|integer|min:1',
             'feature_cost_advanced_targeting' => 'required|integer|min:0',
             'feature_cost_analysis_tool' => 'required|integer|min:0',
+            'feature_cost_ai_generation' => 'required|integer|min:0',
             'feature_cost_contact_advisor' => 'required|integer|min:0',
             'feature_cost_new_chat' => 'required|integer|min:0',
             'feature_cost_unlock_history' => 'required|integer|min:0',

@@ -219,7 +219,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a href="{{ route('mentor.resources.edit', $resource) }}"
                             class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition">Éditer</a>
-                        <a href="{{ route('mentor.resources.show', $resource) }}" target="_blank"
+                        <a href="{{ route('mentor.resources.preview', $resource) }}" target="_blank"
                             class="ml-2 text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded transition inline-block"
                             title="Voir l'aperçu comme un jeune">
                             <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">

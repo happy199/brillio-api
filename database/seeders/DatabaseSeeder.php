@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             OrganizationSubscriptionSeeder::class,
             SystemSettingSeeder::class,
             CareerSeeder::class,
+            AiQuizFeatureCostSeeder::class,
         ]);
     }
 }

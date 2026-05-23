@@ -7,6 +7,7 @@ use App\Models\Purchase;
 use App\Models\Resource;
 use App\Models\ResourceView;
 use App\Models\User;
+use App\Services\BrillioIAService;
 use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use App\Traits\ManagesQuizzes;
@@ -242,6 +243,23 @@ class ResourceController extends Controller
     }
 
     /**
+     * Aperçu de la ressource côté jeune pour le mentor
+     */
+    public function preview(Resource $resource)
+    {
+        // Seul le propriétaire peut voir l'aperçu
+        if ($resource->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $isLocked = false;
+        $unlockCost = 0;
+        $resource->load(['quizzes']);
+
+        return view('jeune.resources.show', compact('resource', 'isLocked', 'unlockCost'));
+    }
+
+    /**
      * Déblocage d'une ressource payante
      */
     public function unlock(Resource $resource)
@@ -330,8 +348,10 @@ class ResourceController extends Controller
 
         $targetingOptions = $this->getDynamicTargetingOptions();
         $targetingCost = $this->walletService->getFeatureCost('advanced_targeting', 10);
+        $analysisCost = $this->walletService->getFeatureCost('analysis_tool', 5);
+        $quizCost = $this->walletService->getFeatureCost('ai_generation', 5);
 
-        return view('mentor.resources.create', compact('targetingOptions', 'targetingCost'));
+        return view('mentor.resources.create', compact('targetingOptions', 'targetingCost', 'analysisCost', 'quizCost'));
     }
 
     /**
@@ -499,8 +519,11 @@ class ResourceController extends Controller
         $resource = auth()->user()->resources()->where('slug', $id)->firstOrFail();
 
         $targetingOptions = $this->getDynamicTargetingOptions();
+        $targetingCost = $this->walletService->getFeatureCost('advanced_targeting', 10);
+        $analysisCost = $this->walletService->getFeatureCost('analysis_tool', 5);
+        $quizCost = $this->walletService->getFeatureCost('ai_generation', 5);
 
-        return view('mentor.resources.edit', compact('resource', 'targetingOptions'));
+        return view('mentor.resources.edit', compact('resource', 'targetingOptions', 'targetingCost', 'analysisCost', 'quizCost'));
     }
 
     /**
@@ -782,5 +805,63 @@ class ResourceController extends Controller
             'situations' => $situations,
             'interests' => array_values(array_unique($interests)),
         ];
+    }
+
+    /**
+     * Génère un quiz avec l'IA basé sur les informations de la ressource
+     */
+    public function generateQuiz(Request $request, BrillioIAService $aiService, WalletService $walletService)
+    {
+        $request->validate([
+            'title' => 'required|string',
+            'description' => 'nullable|string',
+            'content' => 'nullable|string',
+        ]);
+
+        $user = auth()->user();
+        $cost = $walletService->getFeatureCost('ai_generation', 5);
+
+        // Vérifier le solde
+        if ($user->credits_balance < $cost) {
+            return response()->json([
+                'success' => false,
+                'message' => "Solde insuffisant. Cette action nécessite $cost crédits.",
+            ], 402);
+        }
+
+        try {
+            // Appeler l'IA pour générer le quiz
+            $quizzes = $aiService->generateQuizFromResource(
+                $request->title,
+                $request->description ?? '',
+                $request->input('content', '')
+            );
+
+            if (! $quizzes) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "L'IA n'a pas pu générer le quiz. Veuillez réessayer.",
+                ], 500);
+            }
+
+            // Déduire les crédits
+            $walletService->deductCredits(
+                $user,
+                $cost,
+                'ai_generation',
+                'Génération de quiz par IA'
+            );
+
+            return response()->json([
+                'success' => true,
+                'quizzes' => $quizzes,
+                'new_balance' => $user->fresh()->credits_balance,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de la génération du quiz : '.$e->getMessage(),
+            ], 500);
+        }
     }
 }

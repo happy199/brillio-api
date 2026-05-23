@@ -1,4 +1,4 @@
-@extends('layouts.jeune')
+@extends(auth()->user()->user_type === 'mentor' ? 'layouts.mentor' : 'layouts.jeune')
 
 @section('title', $resource->title)
 
@@ -350,9 +350,42 @@
                             @endif
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ $quiz->questions->count() }} questions</span>
-                                <a href="{{ route('jeune.quizzes.show', $quiz) }}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
-                                    Commencer
-                                </a>
+                                @if(auth()->check() && auth()->user()->user_type === 'mentor')
+                                    @php
+                                        $attempts = $quiz->attempts()->whereNotNull('completed_at')->get();
+                                        $total = $attempts->count();
+                                        if($total > 0) {
+                                            $successes = $attempts->filter(function($attempt) {
+                                                return $attempt->max_score > 0 && ($attempt->score / $attempt->max_score) >= 0.5;
+                                            })->count();
+                                            $failures = $total - $successes;
+                                            $avgScore = $attempts->avg('score');
+                                            $avgMax = $attempts->avg('max_score');
+                                            $avgPercent = $avgMax > 0 ? round(($avgScore / $avgMax) * 100) : 0;
+                                        } else {
+                                            $successes = 0;
+                                            $failures = 0;
+                                            $avgPercent = 0;
+                                        }
+                                    @endphp
+                                    <div class="flex items-center space-x-3 text-xs font-medium bg-gray-50 px-3 py-2 rounded-lg">
+                                        <div class="flex items-center text-green-600" title="Succès (Score >= 50%)">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            {{ $successes }}
+                                        </div>
+                                        <div class="flex items-center text-red-500" title="Échecs (Score < 50%)">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            {{ $failures }}
+                                        </div>
+                                        <div class="flex items-center text-indigo-600 font-bold border-l border-gray-200 pl-3" title="Moyenne globale">
+                                            {{ $avgPercent }}%
+                                        </div>
+                                    </div>
+                                @else
+                                    <a href="{{ route('jeune.quizzes.show', $quiz) }}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
+                                        Commencer
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>

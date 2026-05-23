@@ -374,7 +374,9 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
         // Le prefixe 'mentor.' est déjà appliqué par le groupe parent, donc ->names('resources') donnera 'mentor.resources.*'
         Route::get('/ressources/marketplace', [\App\Http\Controllers\Mentor\ResourceController::class, 'marketplace'])->name('resources.marketplace');
         Route::get('/ressources/demande-stats', [\App\Http\Controllers\Mentor\ResourceController::class, 'getDemandStats'])->name('resources.stats');
+        Route::post('/ressources/generate-quiz', [\App\Http\Controllers\Mentor\ResourceController::class, 'generateQuiz'])->name('resources.generate-quiz');
         Route::get('/ressources/{resource}/show', [\App\Http\Controllers\Mentor\ResourceController::class, 'show'])->name('resources.show');
+        Route::get('/ressources/{resource}/preview', [\App\Http\Controllers\Mentor\ResourceController::class, 'preview'])->name('resources.preview');
         Route::post('/ressources/{resource}/unlock', [\App\Http\Controllers\Mentor\ResourceController::class, 'unlock'])->name('resources.unlock');
         Route::resource('ressources', \App\Http\Controllers\Mentor\ResourceController::class)->names('resources')->except(['show']);
 
