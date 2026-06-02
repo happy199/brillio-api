@@ -107,9 +107,13 @@ class MentorshipController extends Controller
         // Filtre par type d'intervenant (Interne / Invité)
         if ($request->filled('mentor_type')) {
             if ($request->mentor_type === 'guest') {
-                $query->whereHas('mentor', function ($q) { $q->where('is_guest', true); });
+                $query->whereHas('mentor', function ($q) {
+                    $q->where('is_guest', true);
+                });
             } else {
-                $query->whereHas('mentor', function ($q) { $q->where('is_guest', false); });
+                $query->whereHas('mentor', function ($q) {
+                    $q->where('is_guest', false);
+                });
             }
         }
 

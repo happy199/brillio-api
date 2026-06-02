@@ -16,8 +16,11 @@ class SessionUpdated extends Mailable
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
+
     public User $recipient;
+
     public User $updatedBy;
+
     public Collection $participants;
 
     /**

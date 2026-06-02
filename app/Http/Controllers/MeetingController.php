@@ -83,30 +83,30 @@ class MeetingController extends Controller
 
         try {
             // 1. Trouver la session par le room name (meetingId)
-            $session = MentoringSession::where('meeting_link', 'LIKE', '%' . $meetingId)
+            $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$meetingId)
                 ->where('guest_token', $guestToken)
                 ->firstOrFail();
 
             // 2. Vérifier l'autorisation en session (posée par GuestAccessController)
             $guestAuth = session("guest_auth_{$session->id}");
-            $mentorEmails = $session->all_mentors->pluck('email')->map(fn($e) => strtolower($e))->toArray();
-            
+            $mentorEmails = $session->all_mentors->pluck('email')->map(fn ($e) => strtolower($e))->toArray();
+
             // Ajouter membres organisation
             $orgEmails = User::where('organization_id', $session->scheduled_by_organization_id)
                 ->pluck('email')
-                ->map(fn($e) => strtolower($e))
+                ->map(fn ($e) => strtolower($e))
                 ->toArray();
-                
+
             $allowedEmails = array_merge($mentorEmails, $orgEmails);
 
-            if (!$guestAuth || !in_array(strtolower($guestAuth['email']), $allowedEmails)) {
+            if (! $guestAuth || ! in_array(strtolower($guestAuth['email']), $allowedEmails)) {
                 return redirect()->route('guest.sessions.confirm', ['session' => $session, 'token' => $guestToken])
                     ->with('error', 'Veuillez confirmer votre identité pour accéder à la séance.');
             }
 
             // 3. Ici, on simule l'utilisateur mentor (celui qui est authentifié par sa session)
             $user = User::where('email', $guestAuth['email'])->first();
-            $isMentor = true; 
+            $isMentor = true;
 
             // Generate JWT for JaaS
             $roomName = basename($session->meeting_link);
@@ -118,7 +118,7 @@ class MeetingController extends Controller
             return view('common.meeting.show', compact('session', 'meetingLink', 'jwt', 'isMentor', 'appId', 'roomName', 'user'));
 
         } catch (\Throwable $e) {
-            Log::error('MeetingController showGuest Error: ' . $e->getMessage());
+            Log::error('MeetingController showGuest Error: '.$e->getMessage());
             abort(403, 'Accès non autorisé à cette séance.');
         }
     }

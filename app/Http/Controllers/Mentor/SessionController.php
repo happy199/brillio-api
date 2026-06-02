@@ -265,7 +265,7 @@ class SessionController extends Controller
             $session->load(['mentor', 'mentees', 'additionalMentors', 'organization']);
             app(\App\Services\MentorshipNotificationService::class)->sendSessionUpdated($session, auth()->user());
         } catch (\Exception $e) {
-            \Log::error("Erreur notifications modification session mentor : " . $e->getMessage());
+            \Log::error('Erreur notifications modification session mentor : '.$e->getMessage());
         }
 
         return redirect()->route('mentor.mentorship.sessions.show', $session)

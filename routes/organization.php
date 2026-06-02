@@ -85,40 +85,40 @@ Route::middleware('auth')->group(function () {
             // Pro Features (Jeunes, Mentorships, Sessions)
             Route::middleware('organization_subscription:pro')->group(
                 function () {
-                // Sponsored Users
-                Route::get('/users', [\App\Http\Controllers\Organization\SponsoredUsersController::class, 'index'])->name('users.index');
-                Route::get('/users/{user}', [\App\Http\Controllers\Organization\SponsoredUsersController::class, 'show'])->name('users.show');
+                    // Sponsored Users
+                    Route::get('/users', [\App\Http\Controllers\Organization\SponsoredUsersController::class, 'index'])->name('users.index');
+                    Route::get('/users/{user}', [\App\Http\Controllers\Organization\SponsoredUsersController::class, 'show'])->name('users.show');
 
-                // Mentors
-                Route::get('/mentors', [\App\Http\Controllers\Organization\MentorsController::class, 'index'])->name('mentors.index');
-                Route::get('/mentors/{mentor:public_slug}/export-pdf', [\App\Http\Controllers\Organization\MentorsController::class, 'exportPdf'])->name('mentors.export-pdf');
-                Route::get('/mentors/{mentor:public_slug}/export-csv', [\App\Http\Controllers\Organization\MentorsController::class, 'exportCsv'])->name('mentors.export-csv');
-                Route::get('/mentors/{mentor:public_slug}', [\App\Http\Controllers\Organization\MentorsController::class, 'show'])->name('mentors.show');
+                    // Mentors
+                    Route::get('/mentors', [\App\Http\Controllers\Organization\MentorsController::class, 'index'])->name('mentors.index');
+                    Route::get('/mentors/{mentor:public_slug}/export-pdf', [\App\Http\Controllers\Organization\MentorsController::class, 'exportPdf'])->name('mentors.export-pdf');
+                    Route::get('/mentors/{mentor:public_slug}/export-csv', [\App\Http\Controllers\Organization\MentorsController::class, 'exportCsv'])->name('mentors.export-csv');
+                    Route::get('/mentors/{mentor:public_slug}', [\App\Http\Controllers\Organization\MentorsController::class, 'show'])->name('mentors.show');
 
-                // Mentorships
-                Route::get('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'index'])->name('mentorships.index');
-                Route::get('/mentorships/create', [\App\Http\Controllers\Organization\MentorshipController::class, 'create'])->name('mentorships.create');
-                Route::post('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'store'])->name('mentorships.store');
-                Route::get('/mentorships/{mentorship}', [\App\Http\Controllers\Organization\MentorshipController::class, 'show'])->name('mentorships.show');
-                Route::post('/mentorships/{mentorship}/validate', [\App\Http\Controllers\Organization\MentorshipController::class, 'validateMentorship'])->name('mentorships.validate');
+                    // Mentorships
+                    Route::get('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'index'])->name('mentorships.index');
+                    Route::get('/mentorships/create', [\App\Http\Controllers\Organization\MentorshipController::class, 'create'])->name('mentorships.create');
+                    Route::post('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'store'])->name('mentorships.store');
+                    Route::get('/mentorships/{mentorship}', [\App\Http\Controllers\Organization\MentorshipController::class, 'show'])->name('mentorships.show');
+                    Route::post('/mentorships/{mentorship}/validate', [\App\Http\Controllers\Organization\MentorshipController::class, 'validateMentorship'])->name('mentorships.validate');
 
-                // Conversation monitoring (Enterprise only)
-                Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
-                Route::get('/conversations/{mentorship}', [ConversationController::class, 'show'])->name('conversations.show');
-                Route::get('/conversations/download/{message}', [ConversationController::class, 'download'])->name('conversations.download');
-                Route::post('/mentorships/{mentorship}/terminate', [\App\Http\Controllers\Organization\MentorshipController::class, 'terminate'])->name('mentorships.terminate');
+                    // Conversation monitoring (Enterprise only)
+                    Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
+                    Route::get('/conversations/{mentorship}', [ConversationController::class, 'show'])->name('conversations.show');
+                    Route::get('/conversations/download/{message}', [ConversationController::class, 'download'])->name('conversations.download');
+                    Route::post('/mentorships/{mentorship}/terminate', [\App\Http\Controllers\Organization\MentorshipController::class, 'terminate'])->name('mentorships.terminate');
 
-                // Sessions & Calendar
-                Route::get('/sessions', [\App\Http\Controllers\Organization\SessionController::class, 'index'])->name('sessions.index');
-                Route::get('/sessions/calendar', [\App\Http\Controllers\Organization\SessionController::class, 'calendar'])->name('sessions.calendar');
-                Route::get('/sessions/events', [\App\Http\Controllers\Organization\SessionController::class, 'events'])->name('sessions.events');
+                    // Sessions & Calendar
+                    Route::get('/sessions', [\App\Http\Controllers\Organization\SessionController::class, 'index'])->name('sessions.index');
+                    Route::get('/sessions/calendar', [\App\Http\Controllers\Organization\SessionController::class, 'calendar'])->name('sessions.calendar');
+                    Route::get('/sessions/events', [\App\Http\Controllers\Organization\SessionController::class, 'events'])->name('sessions.events');
 
-                // Wildecard Session route moved to ensure specific /create route (below) takes precedence
-                Route::get('/sessions/{session}/transcription', [\App\Http\Controllers\Organization\SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
+                    // Wildecard Session route moved to ensure specific /create route (below) takes precedence
+                    Route::get('/sessions/{session}/transcription', [\App\Http\Controllers\Organization\SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
 
-                // Individual User Export
-                Route::get('/users/{user}/export', [SponsoredUsersController::class, 'export'])->name('users.export');
-            }
+                    // Individual User Export
+                    Route::get('/users/{user}/export', [SponsoredUsersController::class, 'export'])->name('users.export');
+                }
             );
 
             // Enterprise Specific Session Scheduling (Prioritized over Wildcards)
@@ -165,31 +165,31 @@ Route::middleware('auth')->group(function () {
             // Wallet
             Route::middleware('organization_role:admin')->group(
                 function () {
-                Route::get('/wallet', [\App\Http\Controllers\Organization\WalletController::class, 'index'])->name('wallet.index');
-                Route::get('/wallet/history', [\App\Http\Controllers\Organization\WalletController::class, 'history'])->name('wallet.history');
-                Route::get('/wallet/export-pdf', [\App\Http\Controllers\Organization\WalletController::class, 'exportPdf'])->name('wallet.export-pdf');
-                Route::get('/wallet/export-csv', [\App\Http\Controllers\Organization\WalletController::class, 'exportCsv'])->name('wallet.export-csv');
-                Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class, 'purchase'])->name('wallet.purchase');
-            }
+                    Route::get('/wallet', [\App\Http\Controllers\Organization\WalletController::class, 'index'])->name('wallet.index');
+                    Route::get('/wallet/history', [\App\Http\Controllers\Organization\WalletController::class, 'history'])->name('wallet.history');
+                    Route::get('/wallet/export-pdf', [\App\Http\Controllers\Organization\WalletController::class, 'exportPdf'])->name('wallet.export-pdf');
+                    Route::get('/wallet/export-csv', [\App\Http\Controllers\Organization\WalletController::class, 'exportCsv'])->name('wallet.export-csv');
+                    Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class, 'purchase'])->name('wallet.purchase');
+                }
             );
 
             // Resources Library
             Route::prefix('resources')->name('resources.')->group(
                 function () {
-                Route::get('/', [\App\Http\Controllers\Organization\ResourceController::class, 'index'])->name('index');
-                Route::get('/{resource:slug}', [\App\Http\Controllers\Organization\ResourceController::class, 'show'])->name('show');
-                Route::post('/{resource:slug}/gift', [\App\Http\Controllers\Organization\ResourceController::class, 'gift'])->name('gift');
-            }
+                    Route::get('/', [\App\Http\Controllers\Organization\ResourceController::class, 'index'])->name('index');
+                    Route::get('/{resource:slug}', [\App\Http\Controllers\Organization\ResourceController::class, 'show'])->name('show');
+                    Route::post('/{resource:slug}/gift', [\App\Http\Controllers\Organization\ResourceController::class, 'gift'])->name('gift');
+                }
             );
 
             // Team Management (Enterprise only)
             Route::middleware('organization_subscription:enterprise')->prefix('team')->name('team.')->group(
                 function () {
-                Route::get('/', [\App\Http\Controllers\Organization\TeamController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Organization\TeamController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Organization\TeamController::class, 'store'])->name('store');
-                Route::delete('/{user}', [\App\Http\Controllers\Organization\TeamController::class, 'destroy'])->name('destroy');
-            }
+                    Route::get('/', [\App\Http\Controllers\Organization\TeamController::class, 'index'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Organization\TeamController::class, 'create'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Organization\TeamController::class, 'store'])->name('store');
+                    Route::delete('/{user}', [\App\Http\Controllers\Organization\TeamController::class, 'destroy'])->name('destroy');
+                }
             );
 
             // Guest Trainers Management

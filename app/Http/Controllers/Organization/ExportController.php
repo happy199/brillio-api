@@ -436,7 +436,7 @@ class ExportController extends Controller
             ->get();
 
         foreach ($mentors as $mentor) {
-            $mentor->is_internal = $internalMentorsIds->contains($mentor->id) && !$mentor->is_guest;
+            $mentor->is_internal = $internalMentorsIds->contains($mentor->id) && ! $mentor->is_guest;
             $mentor->is_guest_trainer = $mentor->is_guest;
         }
 
