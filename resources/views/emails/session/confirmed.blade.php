@@ -20,8 +20,8 @@
     </p>
 
     <p style="margin: 15px 0 8px; color: #374151;">
-        <strong>📅 Date :</strong> {{ $session->scheduled_at->translatedFormat('l j F Y') }}<br>
-        <strong>🕐 Heure :</strong> {{ $session->scheduled_at->format('H:i') }} ({{ $session->gmt_offset }})<br>
+        <strong>📅 Date :</strong> {{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->translatedFormat('l j F Y') }}<br>
+        <strong>🕐 Heure :</strong> {{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} ({{ $session->gmt_offset }} - {{ str_replace('_', ' ', $session->timezone ?: 'Africa/Porto-Novo') }})<br>
         <strong>⏱️ Durée :</strong> {{ $session->duration_minutes }} minutes
     </p>
 </div>

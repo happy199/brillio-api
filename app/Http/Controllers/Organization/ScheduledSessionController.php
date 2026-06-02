@@ -38,7 +38,10 @@ class ScheduledSessionController extends Controller
             ->where('sponsored_by_organization_id', $organization->id)
             ->get();
 
-        return view('organization.sessions.create', compact('standardMentors', 'guestMentors', 'mentees', 'organization'));
+        $timezones = timezone_identifiers_list();
+        $userTimezone = auth()->user()->timezone ?? 'Africa/Porto-Novo';
+
+        return view('organization.sessions.create', compact('standardMentors', 'guestMentors', 'mentees', 'organization', 'timezones', 'userTimezone'));
     }
 
     /**
@@ -58,6 +61,7 @@ class ScheduledSessionController extends Controller
             'mentee_ids.*' => 'exists:users,id',
             'scheduled_at' => 'required|date|after:now',
             'duration_minutes' => 'required|integer|in:30,45,60,90,120',
+            'timezone' => 'required|string|timezone',
         ]);
 
         DB::beginTransaction();
@@ -73,6 +77,7 @@ class ScheduledSessionController extends Controller
                 'description' => $validated['description'],
                 'scheduled_at' => $validated['scheduled_at'],
                 'duration_minutes' => $validated['duration_minutes'],
+                'timezone' => $validated['timezone'],
                 'status' => 'confirmed', 
                 'scheduled_by_organization_id' => $organization->id,
                 'created_by' => 'organization',
@@ -145,7 +150,10 @@ class ScheduledSessionController extends Controller
 
         $session->load(['mentees', 'additionalMentors']);
 
-        return view('organization.sessions.edit', compact('session', 'standardMentors', 'guestMentors', 'mentees', 'organization'));
+        $timezones = timezone_identifiers_list();
+        $userTimezone = $session->timezone ?? auth()->user()->timezone ?? 'Africa/Porto-Novo';
+
+        return view('organization.sessions.edit', compact('session', 'standardMentors', 'guestMentors', 'mentees', 'organization', 'timezones', 'userTimezone'));
     }
 
     /**
@@ -169,6 +177,7 @@ class ScheduledSessionController extends Controller
             'mentee_ids.*' => 'exists:users,id',
             'scheduled_at' => 'required|date|after:now',
             'duration_minutes' => 'required|integer|in:30,45,60,90,120',
+            'timezone' => 'required|string|timezone',
         ]);
 
         DB::beginTransaction();
@@ -182,6 +191,7 @@ class ScheduledSessionController extends Controller
                 'description' => $validated['description'],
                 'scheduled_at' => $validated['scheduled_at'],
                 'duration_minutes' => $validated['duration_minutes'],
+                'timezone' => $validated['timezone'],
             ]);
 
             // Sync mentors

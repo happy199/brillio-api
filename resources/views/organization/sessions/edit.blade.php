@@ -75,15 +75,25 @@
                 </div>
 
                 <!-- Section 3: Date & Temps -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2 sm:col-span-1">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
                         <label for="scheduled_at" class="block text-sm font-bold text-gray-700 mb-2">Date et Heure <span class="text-red-500">*</span></label>
                         <input type="datetime-local" name="scheduled_at" id="scheduled_at" required
                             value="{{ old('scheduled_at', $session->scheduled_at->format('Y-m-d\TH:i')) }}"
                             min="{{ now()->format('Y-m-d\TH:i') }}"
                             class="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-organization-500 focus:border-organization-500 p-4 shadow-sm transition-all">
                     </div>
-                    <div class="col-span-2 sm:col-span-1">
+                    <div>
+                        <label for="timezone" class="block text-sm font-bold text-gray-700 mb-2">Fuseau horaire <span class="text-red-500">*</span></label>
+                        <select name="timezone" id="timezone" required class="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-organization-500 focus:border-organization-500 p-4 shadow-sm">
+                            @foreach($timezones as $tz)
+                                <option value="{{ $tz }}" {{ (old('timezone', $userTimezone) == $tz) ? 'selected' : '' }}>
+                                    {{ str_replace('_', ' ', $tz) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
                         <label for="duration_minutes" class="block text-sm font-bold text-gray-700 mb-2">Durée <span class="text-red-500">*</span></label>
                         <select name="duration_minutes" id="duration_minutes" required
                             class="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-organization-500 focus:border-organization-500 p-4 shadow-sm">

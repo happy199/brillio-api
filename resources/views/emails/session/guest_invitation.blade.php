@@ -42,7 +42,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Date et Heure</div>
-                    <div class="info-value">{{ $session->scheduled_at->translatedFormat('d F Y \à H:i') }} (GMT)</div>
+                    <div class="info-value">{{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->translatedFormat('d F Y \à H:i') }} ({{ $session->gmt_offset }} - {{ str_replace('_', ' ', $session->timezone ?: 'Africa/Porto-Novo') }})</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Durée prévue</div>
