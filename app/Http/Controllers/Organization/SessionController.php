@@ -96,20 +96,25 @@ class SessionController extends Controller
     }
 
     /**
+     * Vérifie si l'organisation a le droit d'accéder à la session
+     */
+    private function authorizeSessionAccess(MentoringSession $session, $organization)
+    {
+        $isAuthorized = $session->scheduled_by_organization_id === $organization->id || 
+                        $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
+
+        if (! $isAuthorized) {
+            abort(403, 'Accès non autorisé');
+        }
+    }
+
+    /**
      * Détail d'une séance
      */
     public function show(MentoringSession $session)
     {
         $organization = $this->getCurrentOrganization();
-
-        // Vérification : au moins un menté doit être parrainé par cette organisation
-        $isAuthorized = $session->mentees()->where(function ($q) use ($organization) {
-            $q->where('sponsored_by_organization_id', $organization->id);
-        })->exists();
-
-        if (! $isAuthorized) {
-            abort(403, 'Accès non autorisé');
-        }
+        $this->authorizeSessionAccess($session, $organization);
 
         if ($organization->isPro()) {
             $session->load(['mentor', 'mentees']);
@@ -124,15 +129,7 @@ class SessionController extends Controller
     public function downloadTranscription(MentoringSession $session)
     {
         $organization = $this->getCurrentOrganization();
-
-        // 1. Vérification d'autorisation
-        $isAuthorized = $session->mentees()->where(function ($q) use ($organization) {
-            $q->where('sponsored_by_organization_id', $organization->id);
-        })->exists();
-
-        if (! $isAuthorized) {
-            abort(403, 'Accès non autorisé');
-        }
+        $this->authorizeSessionAccess($session, $organization);
 
         // 2. Vérifier si la transcription existe
         if (! $session->has_transcription) {
@@ -175,14 +172,7 @@ class SessionController extends Controller
         }
 
         $organization = $this->getCurrentOrganization();
-        
-        // 2. Vérifier si la session appartient à l'organisation ou si elle parraine au moins un participant
-        $isAuthorized = $session->scheduled_by_organization_id === $organization->id ||
-                        $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
-
-        if (!$isAuthorized) {
-             abort(403, "Vous n'êtes pas autorisé à rejoindre cette séance.");
-        }
+        $this->authorizeSessionAccess($session, $organization);
 
         // 3. Poser l'autorisation en session (comme si on avait validé l'email sur la landing page)
         Session::put("guest_auth_{$session->id}", [
@@ -205,12 +195,7 @@ class SessionController extends Controller
     public function prefillReport(MentoringSession $session)
     {
         $organization = $this->getCurrentOrganization();
-
-        // 1. Vérification d'autorisation (Doit parrainer au moins un participant)
-        $isAuthorized = $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
-        if (!$isAuthorized) {
-            abort(403, 'Accès non autorisé');
-        }
+        $this->authorizeSessionAccess($session, $organization);
 
         if (!$session->has_transcription) {
             return redirect()->back()->with('error', "La transcription n'est pas encore disponible. L'IA a besoin de la transcription pour générer un résumé.");
@@ -250,11 +235,7 @@ class SessionController extends Controller
     public function updateReport(Request $request, MentoringSession $session)
     {
         $organization = $this->getCurrentOrganization();
-
-        $isAuthorized = $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
-        if (!$isAuthorized) {
-            abort(403, 'Accès non autorisé');
-        }
+        $this->authorizeSessionAccess($session, $organization);
 
         $request->validate([
             'progress' => 'nullable|string',
