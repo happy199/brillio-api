@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lien expiré - Brillio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com/3.4.3" integrity="sha384-3eIL0rpIOGHnBRknN+xFqC/D/rZxbAtzeQGQ0sL9IsyePqGA7fLZpGRZaQTEBUov" crossorigin="anonymous"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
         body { font-family: 'Outfit', sans-serif; }
     </style>
 </head>

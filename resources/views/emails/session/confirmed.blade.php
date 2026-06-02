@@ -30,7 +30,7 @@
     Un rappel vous sera envoyé <strong>24 heures avant</strong> la session avec le lien de connexion.
 </p>
 
-<table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
     <tr>
         <td align="center">
             <a href="{{ $calendarUrl }}"

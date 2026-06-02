@@ -29,7 +29,7 @@
     Veuillez mettre à jour votre agenda si nécessaire. Vous recevrez un rappel 24 heures avant la session.
 </p>
 
-<table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
     <tr>
         <td align="center">
             <a href="{{ $recipient->isMentor() ? route('mentor.mentorship.calendar') : route('jeune.sessions.calendar') }}"
