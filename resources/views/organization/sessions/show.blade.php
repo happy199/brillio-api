@@ -62,7 +62,7 @@
                                 @endswitch
                             </span>
                             @if($session->status === 'confirmed' && $session->meeting_link)
-                            <a href="{{ route('organization.sessions.join', ['session' => $session, 'token' => $session->guest_token]) }}"
+                            <a href="{{ route('meeting.show', basename($session->meeting_link)) }}" target="_blank"
                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg text-white bg-organization-600 hover:bg-organization-700 shadow-md transition-all transform hover:scale-105 active:scale-95">
                                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

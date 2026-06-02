@@ -162,34 +162,6 @@ class SessionController extends Controller
     }
 
     /**
-     * Rejoindre la session en tant que membre de l'organisation (Bypass confirmation email)
-     */
-    public function join(MentoringSession $session, $token)
-    {
-        // 1. Vérifier le token
-        if ($session->guest_token !== $token) {
-            abort(403, "Token d'accès invalide.");
-        }
-
-        $organization = $this->getCurrentOrganization();
-        $this->authorizeSessionAccess($session, $organization);
-
-        // 3. Poser l'autorisation en session (comme si on avait validé l'email sur la landing page)
-        Session::put("guest_auth_{$session->id}", [
-            'email' => auth()->user()->email,
-            'expires_at' => now()->addHours(3),
-        ]);
-
-        // 4. Rediriger vers Brillio Live (showGuest)
-        $meetingId = basename($session->meeting_link);
-
-        return redirect()->route('meeting.show.guest', [
-            'meetingId' => $meetingId,
-            'guestToken' => $token,
-        ]);
-    }
-
-    /**
      * Pré-remplir le compte rendu avec l'IA pour l'organisation (5 crédits par défaut)
      */
     public function prefillReport(MentoringSession $session)
