@@ -16,8 +16,12 @@ class MentoringSession extends Model
             if (empty($session->meeting_link)) {
                 // Generate a secure Jitsi room name
                 // Format: Brillio_{MentorID}_{Random}_{Timestamp}
-                $roomName = 'Brillio_'.($session->mentor_id ?? '0').'_'.Str::random(10).'_'.time();
-                $session->meeting_link = 'https://meet.jit.si/'.$roomName;
+                $roomName = 'Brillio_' . ($session->mentor_id ?? '0') . '_' . Str::random(10) . '_' . time();
+                $session->meeting_link = 'https://meet.jit.si/' . $roomName;
+            }
+
+            if (empty($session->guest_token)) {
+                $session->guest_token = Str::random(64);
             }
         });
     }
@@ -42,6 +46,8 @@ class MentoringSession extends Model
         'has_transcription',
         'transcription_file_path',
         'timezone',
+        'guest_token',
+        'scheduled_by_organization_id',
     ];
 
     protected $casts = [
@@ -60,12 +66,43 @@ class MentoringSession extends Model
         return $this->belongsTo(User::class, 'mentor_id');
     }
 
+    /**
+     * Get the organization that scheduled this session.
+     */
+    public function organization(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'scheduled_by_organization_id');
+    }
+
     // Participants (Mentees)
     public function mentees()
     {
         return $this->belongsToMany(User::class, 'mentoring_session_user', 'mentoring_session_id', 'user_id')
             ->withPivot('status', 'rejection_reason')
             ->withTimestamps();
+    }
+
+    /**
+     * Additional speakers/mentors participating in this session (e.g. collective sessions)
+     */
+    public function additionalMentors()
+    {
+        return $this->belongsToMany(User::class, 'mentoring_session_mentor', 'mentoring_session_id', 'user_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get all mentors participating in this session (Host + Additional ones)
+     */
+    public function getAllMentorsAttribute()
+    {
+        $mentors = collect([$this->mentor]);
+
+        if ($this->additionalMentors) {
+            $mentors = $mentors->concat($this->additionalMentors);
+        }
+
+        return $mentors->filter()->unique('id');
     }
 
     /**
@@ -81,7 +118,7 @@ class MentoringSession extends Model
      */
     public function getMeetingIdAttribute()
     {
-        if (! $this->meeting_link) {
+        if (!$this->meeting_link) {
             return null;
         }
 
@@ -93,7 +130,7 @@ class MentoringSession extends Model
      */
     public function getCreditCostAttribute()
     {
-        if (! $this->price) {
+        if (!$this->price) {
             return 0;
         }
 

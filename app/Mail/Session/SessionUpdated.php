@@ -3,26 +3,37 @@
 namespace App\Mail\Session;
 
 use App\Models\MentoringSession;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
-class ReportAvailableMail extends Mailable implements ShouldQueue
+class SessionUpdated extends Mailable
 {
     use Queueable, SerializesModels;
+
+    public MentoringSession $session;
+    public User $recipient;
+    public User $updatedBy;
+    public Collection $participants;
 
     /**
      * Create a new message instance.
      */
     public function __construct(
-        public $recipient,
-        public MentoringSession $session,
-        public string $sessionUrl,
-        public bool $showDetails = false
-    ) {}
+        MentoringSession $session,
+        User $recipient,
+        User $updatedBy,
+        Collection $participants
+    ) {
+        $this->session = $session;
+        $this->recipient = $recipient;
+        $this->updatedBy = $updatedBy;
+        $this->participants = $participants;
+    }
 
     /**
      * Get the message envelope.
@@ -30,7 +41,7 @@ class ReportAvailableMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Le compte rendu de la séance \"{$this->session->title}\" est disponible - Brillio",
+            subject: 'Session de mentorat modifiée - Brillio',
         );
     }
 
@@ -40,7 +51,13 @@ class ReportAvailableMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.session.report-available',
+            view: 'emails.session.updated',
+            with: [
+                'session' => $this->session,
+                'recipient' => $this->recipient,
+                'updatedBy' => $this->updatedBy,
+                'participants' => $this->participants,
+            ],
         );
     }
 

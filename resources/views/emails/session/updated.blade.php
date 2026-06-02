@@ -4,12 +4,11 @@
 <p style="margin: 0 0 20px;">Bonjour <strong>{{ $recipient->name }}</strong>,</p>
 
 <p style="margin: 0 0 30px; font-size: 18px;">
-    🎉 Votre session de mentorat est confirmée !
+    La session de mentorat <strong>"{{ $session->title }}"</strong> a été modifiée par <strong>{{ $updatedBy->name }}</strong>.
 </p>
 
-<div
-    style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 8px; padding: 20px; margin: 20px 0; border: 2px solid #10b981;">
-    <p style="margin: 0 0 15px; font-weight: 600; color: #065f46; font-size: 16px;">📋 Détails de votre session</p>
+<div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 8px; padding: 20px; margin: 20px 0; border: 2px solid #38bdf8;">
+    <p style="margin: 0 0 15px; font-weight: 600; color: #0369a1; font-size: 16px;">📅 Nouveaux détails de la session</p>
 
     <p style="margin: 0 0 8px; color: #374151;">
         <strong>👥 Participants :</strong><br>
@@ -27,27 +26,19 @@
 </div>
 
 <p style="margin: 20px 0; color: #374151;">
-    Un rappel vous sera envoyé <strong>24 heures avant</strong> la session avec le lien de connexion.
+    Veuillez mettre à jour votre agenda si nécessaire. Vous recevrez un rappel 24 heures avant la session.
 </p>
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
     <tr>
         <td align="center">
-            <a href="{{ $calendarUrl }}"
-                style="display: inline-block; background: #4285f4; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; margin-bottom: 10px;">
-                📅 Ajouter à mon agenda Google
+            <a href="{{ $recipient->isMentor() ? route('mentor.mentorship.calendar') : route('jeune.sessions.calendar') }}"
+                style="display: inline-block; background-color: #38bdf8; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">
+                Voir mon calendrier
             </a>
-            <br>
-            <span style="font-size: 12px; color: #6b7280;">
-                📎 Un fichier <strong>invitation.ics</strong> est également joint pour les autres calendriers.
-            </span>
         </td>
     </tr>
 </table>
-
-<p style="margin: 20px 0; font-size: 14px; color: #6b7280;">
-    💡 <strong>Conseil :</strong> Préparez vos questions et objectifs pour profiter au maximum de cette session !
-</p>
 
 <p style="margin: 30px 0 0; color: #374151;">
     À très bientôt,<br>

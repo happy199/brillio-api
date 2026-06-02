@@ -99,18 +99,18 @@ class MentorshipController extends Controller
             });
         }
 
-        // Filtres Spécifiques
-        if ($request->filled('mentor_name')) {
-            $mentorName = $request->mentor_name;
-            $query->whereHas('mentor', function ($q) use ($mentorName) {
-                $q->where('name', 'like', "%{$mentorName}%");
-            });
+        // Filtre par organisation (Séances planifiées par une organisation)
+        if ($request->filled('organization_id')) {
+            $query->where('scheduled_by_organization_id', $request->organization_id);
         }
-        if ($request->filled('mentee_name')) {
-            $menteeName = $request->mentee_name;
-            $query->whereHas('mentees', function ($q) use ($menteeName) {
-                $q->where('name', 'like', "%{$menteeName}%");
-            });
+
+        // Filtre par type d'intervenant (Interne / Invité)
+        if ($request->filled('mentor_type')) {
+            if ($request->mentor_type === 'guest') {
+                $query->whereHas('mentor', function ($q) { $q->where('is_guest', true); });
+            } else {
+                $query->whereHas('mentor', function ($q) { $q->where('is_guest', false); });
+            }
         }
 
         $sessions = $query->latest('scheduled_at')->paginate(20);

@@ -12,13 +12,29 @@
     <!-- Header -->
     <div class="sm:flex sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Nos Mentors</h1>
+            <h1 class="text-2xl font-bold text-gray-900">
+                {{ $type === 'guest' ? 'Nos Formateurs / Invités' : 'Nos Mentors' }}
+            </h1>
             <p class="mt-2 text-sm text-gray-700">
-                Liste des {{ $mentors->total() }} mentors liés à votre organisation ou accompagnant vos jeunes.
+                @if($type === 'guest')
+                Liste des intervenants et personnalités publiques ajoutés par votre organisation.
+                @else
+                Liste des {{ $mentors->total() }}+ mentors liés à votre organisation ou accompagnant vos jeunes.
+                @endif
             </p>
         </div>
         @if (auth()->user()->organization_role !== 'viewer')
         <div class="mt-4 sm:mt-0 flex gap-3">
+            @if($type === 'guest')
+            <a href="{{ route('organization.guests.create') }}"
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-organization-600 hover:bg-organization-700 focus:outline-none focus:ring-offset-2 focus:ring-organization-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Ajouter un formateur / invité
+            </a>
+            @else
             <a href="{{ route('organization.invitations.create', ['role' => 'mentor']) }}"
                 class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-organization-600 hover:bg-organization-700 focus:outline-none focus:ring-offset-2 focus:ring-organization-500">
                 <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,6 +43,7 @@
                 </svg>
                 Inviter des mentors
             </a>
+            @endif
         </div>
         @endif
     </div>
@@ -108,6 +125,19 @@
                 </span>
                 @endif
             </a>
+
+            @if($organization->isEnterprise())
+            <a href="{{ route('organization.guests.index') }}"
+                class="{{ $type === 'guest' ? 'border-organization-500 text-organization-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center">
+                Formateurs / Invités
+                @if($type === 'guest')
+                <span
+                    class="ml-2 py-0.5 px-2.5 rounded-full text-xs font-medium bg-organization-100 text-organization-600">
+                    {{ $mentors->total() }}
+                </span>
+                @endif
+            </a>
+            @endif
         </nav>
     </div>
 
@@ -139,8 +169,15 @@
                 <div class="mt-4 border-t border-gray-100 pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-500">Entreprise</span>
-                        <span class="font-medium text-gray-900 truncate max-w-[150px]">{{
-                            $mentor->mentorProfile->current_company ?? '-' }}</span>
+                        <span class="font-medium text-gray-900 truncate max-w-[150px]">
+                            @if($mentor->mentorProfile->current_company)
+                                {{ $mentor->mentorProfile->current_company }}
+                            @elseif($mentor->mentorProfile->roadmapSteps->isNotEmpty())
+                                {{ $mentor->mentorProfile->roadmapSteps->sortByDesc('start_date')->first()->institution_company }}
+                            @else
+                                -
+                            @endif
+                        </span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-500">Spécialisation</span>
@@ -159,6 +196,15 @@
                     </svg>
                     Offrir des crédits
                 </button>
+                @endif
+                @if($type === 'guest' && auth()->user()->organization_role !== 'viewer')
+                <a href="{{ route('organization.guests.edit', $mentor) }}"
+                    class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
+                    <svg class="mr-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Modifier le profil
+                </a>
                 @endif
                 <a href="{{ route('organization.mentors.show', $mentor->mentorProfile) }}"
                     class="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center justify-center transition-colors">

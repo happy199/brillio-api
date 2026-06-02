@@ -46,6 +46,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public const TYPE_ORGANIZATION = 'organization';
 
     /**
+     * Liste des pays (priorité Afrique)
+     */
+    public static function getCountries(): array
+    {
+        return [
+            'Sénégal', 'Côte d\'Ivoire', 'Cameroun', 'Mali', 'Bénin', 'Togo', 'Guinée', 'Burkina Faso', 'Gabon', 'Congo (Brazzaville)',
+            'RDC (Kinshasa)', 'Tchad', 'Rwanda', 'Burundi', 'Mauritanie', 'Niger', 'RCA', 'Soudan', 'Éthiopie', 'Djibouti',
+            'Kenya', 'Tanzanie', 'Ouganda', 'Nigeria', 'Ghana', 'Afrique du Sud', 'Angola', 'Mozambique', 'Cap-Vert', 'Madagascar',
+            'Somalie', 'Sierra Leone', 'Libéria', 'Gambie', 'Zambie', 'Zimbabwe', 'Namibie', 'Botswana', 'Malawi', 'Eswatini', 'Lesotho',
+            'Maroc', 'Algérie', 'Tunisie', 'Égypte', 'Libye',
+            'France', 'Belgique', 'Suisse', 'Canada', 'États-Unis', 'Royaume-Uni', 'Allemagne', 'Italie', 'Espagne', 'Autre'
+        ];
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -84,6 +99,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_blocked',
         'blocked_at',
         'blocked_reason',
+        'is_guest',
     ];
 
     /**
@@ -122,6 +138,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_blocked' => 'boolean',
             'blocked_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'is_guest' => 'boolean',
         ];
     }
 
@@ -175,6 +192,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->is_admin === true;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un formateur invité
+     */
+    public function isGuestTrainer(): bool
+    {
+        return (bool) $this->is_guest;
     }
 
     /**
