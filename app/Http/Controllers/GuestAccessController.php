@@ -46,17 +46,17 @@ class GuestAccessController extends Controller
         }
 
         // 2. Vérifier si l'email correspond à l'un des intervenants ou à un membre de l'organisation
-        $attendeeEmails = $session->all_mentors->pluck('email')->map(fn($e) => strtolower($e))->toArray();
-        
+        $attendeeEmails = $session->all_mentors->pluck('email')->map(fn ($e) => strtolower($e))->toArray();
+
         // Membres de l'organisation
         $orgMemberEmails = User::where('organization_id', $session->scheduled_by_organization_id)
             ->pluck('email')
-            ->map(fn($e) => strtolower($e))
+            ->map(fn ($e) => strtolower($e))
             ->toArray();
-            
+
         $allowedEmails = array_merge($attendeeEmails, $orgMemberEmails);
 
-        if (!in_array(strtolower($request->email), $allowedEmails)) {
+        if (! in_array(strtolower($request->email), $allowedEmails)) {
             return back()->with('error', "L'adresse email saisie ne correspond à aucun intervenant ou membre de l'organisation autorisé pour cette séance.");
         }
 
@@ -68,10 +68,10 @@ class GuestAccessController extends Controller
 
         // 4. Rediriger vers la room Jitsi via le MeetingController bypass
         $meetingId = basename($session->meeting_link);
-        
+
         return redirect()->route('meeting.show.guest', [
             'meetingId' => $meetingId,
-            'guestToken' => $token
+            'guestToken' => $token,
         ]);
     }
 }

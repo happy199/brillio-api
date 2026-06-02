@@ -405,10 +405,10 @@ class MentorshipNotificationService
         foreach ($allMentors as $mentor) {
             $isGuest = $mentor->is_guest;
             $sessionUrl = $isGuest ? '#' : route('mentor.mentorship.sessions.show', ['session' => $session->id]);
-            
+
             Mail::to($mentor->email)->send(new ReportAvailableMail(
-                $mentor, 
-                $session, 
+                $mentor,
+                $session,
                 $sessionUrl,
                 $isGuest // showDetails if guest
             ));

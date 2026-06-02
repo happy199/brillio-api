@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
-use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class ScheduledSessionController extends Controller
 {
@@ -78,7 +76,7 @@ class ScheduledSessionController extends Controller
                 'scheduled_at' => $validated['scheduled_at'],
                 'duration_minutes' => $validated['duration_minutes'],
                 'timezone' => $validated['timezone'],
-                'status' => 'confirmed', 
+                'status' => 'confirmed',
                 'scheduled_by_organization_id' => $organization->id,
                 'created_by' => 'organization',
                 'is_paid' => false,
@@ -86,7 +84,7 @@ class ScheduledSessionController extends Controller
             ]);
 
             // Attacher les mentors additionnels
-            if (!empty($additionalMentorIds)) {
+            if (! empty($additionalMentorIds)) {
                 $session->additionalMentors()->attach($additionalMentorIds);
             }
 
@@ -101,19 +99,20 @@ class ScheduledSessionController extends Controller
             try {
                 // Charger les relations nécessaires pour les notifications
                 $session->load(['mentor', 'mentees', 'additionalMentors', 'organization']);
-                
+
                 $notificationService = app(\App\Services\MentorshipNotificationService::class);
                 $notificationService->sendSessionConfirmed($session);
             } catch (\Exception $e) {
-                \Log::error("Erreur envoi notifications session planifiée : " . $e->getMessage());
+                \Log::error('Erreur envoi notifications session planifiée : '.$e->getMessage());
             }
 
             return redirect()->route('organization.sessions.calendar')
-                ->with('success', "La séance a été planifiée avec succès.");
+                ->with('success', 'La séance a été planifiée avec succès.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', "Erreur lors de la planification : " . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Erreur lors de la planification : '.$e->getMessage());
         }
     }
 
@@ -207,15 +206,16 @@ class ScheduledSessionController extends Controller
                 $session->load(['mentor', 'mentees', 'additionalMentors', 'organization']);
                 app(\App\Services\MentorshipNotificationService::class)->sendSessionUpdated($session, auth()->user());
             } catch (\Exception $e) {
-                \Log::error("Erreur notifications modification session : " . $e->getMessage());
+                \Log::error('Erreur notifications modification session : '.$e->getMessage());
             }
 
             return redirect()->route('organization.sessions.show', $session)
-                ->with('success', "La séance a été modifiée avec succès.");
+                ->with('success', 'La séance a été modifiée avec succès.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', "Erreur lors de la modification : " . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Erreur lors de la modification : '.$e->getMessage());
         }
     }
 
@@ -244,10 +244,10 @@ class ScheduledSessionController extends Controller
             $session->load(['mentor', 'mentees', 'additionalMentors', 'organization']);
             app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, auth()->user());
         } catch (\Exception $e) {
-            \Log::error("Erreur notifications annulation session : " . $e->getMessage());
+            \Log::error('Erreur notifications annulation session : '.$e->getMessage());
         }
 
         return redirect()->route('organization.sessions.calendar')
-            ->with('success', "La séance a été annulée. Tous les participants ont été informés.");
+            ->with('success', 'La séance a été annulée. Tous les participants ont été informés.');
     }
 }

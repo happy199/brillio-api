@@ -16,8 +16,8 @@ class MentoringSession extends Model
             if (empty($session->meeting_link)) {
                 // Generate a secure Jitsi room name
                 // Format: Brillio_{MentorID}_{Random}_{Timestamp}
-                $roomName = 'Brillio_' . ($session->mentor_id ?? '0') . '_' . Str::random(10) . '_' . time();
-                $session->meeting_link = 'https://meet.jit.si/' . $roomName;
+                $roomName = 'Brillio_'.($session->mentor_id ?? '0').'_'.Str::random(10).'_'.time();
+                $session->meeting_link = 'https://meet.jit.si/'.$roomName;
             }
 
             if (empty($session->guest_token)) {
@@ -118,7 +118,7 @@ class MentoringSession extends Model
      */
     public function getMeetingIdAttribute()
     {
-        if (!$this->meeting_link) {
+        if (! $this->meeting_link) {
             return null;
         }
 
@@ -130,7 +130,7 @@ class MentoringSession extends Model
      */
     public function getCreditCostAttribute()
     {
-        if (!$this->price) {
+        if (! $this->price) {
             return 0;
         }
 

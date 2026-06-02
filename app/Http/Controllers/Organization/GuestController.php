@@ -18,7 +18,7 @@ class GuestController extends Controller
     public function index(Request $request)
     {
         $organization = auth()->user()->organization;
-        
+
         $query = User::where('is_guest', true)
             ->whereHas('organizations', function ($q) use ($organization) {
                 $q->where('organizations.id', $organization->id);
@@ -45,6 +45,7 @@ class GuestController extends Controller
     {
         $specializations = \App\Models\Specialization::active()->orderBy('name')->get();
         $countries = User::getCountries();
+
         return view('organization.guests.create', compact('specializations', 'countries'));
     }
 
@@ -92,11 +93,11 @@ class GuestController extends Controller
                 'is_published' => false,
                 'is_validated' => true,
                 'validated_at' => now(),
-                'public_slug' => Str::slug($user->name) . '-' . Str::random(6),
+                'public_slug' => Str::slug($user->name).'-'.Str::random(6),
             ]);
 
             // Ajouter les étapes de parcours si présentes
-            if (!empty($validated['academic_steps'])) {
+            if (! empty($validated['academic_steps'])) {
                 $this->syncAcademicSteps($profile, $validated['academic_steps'], $user->name, 'Store');
             }
 
@@ -107,7 +108,8 @@ class GuestController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', "Une erreur est survenue lors de la création de l'invité : " . $e->getMessage());
+
+            return back()->withInput()->with('error', "Une erreur est survenue lors de la création de l'invité : ".$e->getMessage());
         }
     }
 
@@ -116,14 +118,14 @@ class GuestController extends Controller
      */
     public function edit(User $guest)
     {
-        if (!$guest->organizations->contains(auth()->user()->organization_id)) {
+        if (! $guest->organizations->contains(auth()->user()->organization_id)) {
             abort(403);
         }
 
         $guest->load('mentorProfile.roadmapSteps');
         $specializations = \App\Models\Specialization::active()->orderBy('name')->get();
         $countries = User::getCountries();
-        
+
         return view('organization.guests.edit', compact('guest', 'specializations', 'countries'));
     }
 
@@ -132,7 +134,7 @@ class GuestController extends Controller
      */
     public function update(Request $request, User $guest)
     {
-        if (!$guest->organizations->contains(auth()->user()->organization_id)) {
+        if (! $guest->organizations->contains(auth()->user()->organization_id)) {
             abort(403);
         }
 
@@ -171,7 +173,7 @@ class GuestController extends Controller
 
             // Mise à jour des étapes
             $profile->roadmapSteps()->where('step_type', 'education')->delete();
-            if (!empty($validated['academic_steps'])) {
+            if (! empty($validated['academic_steps'])) {
                 $this->syncAcademicSteps($profile, $validated['academic_steps'], $guest->name, 'Update');
             }
 
@@ -182,7 +184,8 @@ class GuestController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', "Erreur lors de la mise à jour : " . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Erreur lors de la mise à jour : '.$e->getMessage());
         }
     }
 
@@ -191,7 +194,7 @@ class GuestController extends Controller
      */
     public function destroy(User $guest)
     {
-        if (!$guest->organizations->contains(auth()->user()->organization_id)) {
+        if (! $guest->organizations->contains(auth()->user()->organization_id)) {
             abort(403);
         }
 
@@ -211,7 +214,8 @@ class GuestController extends Controller
                 ->with('success', "L'invité a été supprimé avec succès.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', "Erreur lors de la suppression : " . $e->getMessage());
+
+            return back()->with('error', 'Erreur lors de la suppression : '.$e->getMessage());
         }
     }
 
@@ -219,7 +223,7 @@ class GuestController extends Controller
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email' . ($guestId ? ",{$guestId}" : ''),
+            'email' => 'required|email|unique:users,email'.($guestId ? ",{$guestId}" : ''),
             'phone' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:100',
             'specialization_id' => 'nullable|exists:specializations,id',
@@ -238,13 +242,14 @@ class GuestController extends Controller
     private function resolveSpecializationId(array $validated): ?int
     {
         $specId = $validated['specialization_id'] ?? null;
-        if (empty($specId) && !empty($validated['custom_specialization'])) {
+        if (empty($specId) && ! empty($validated['custom_specialization'])) {
             $newSpec = \App\Models\Specialization::firstOrCreate(
                 ['name' => $validated['custom_specialization']],
                 ['status' => 'active', 'created_by_admin' => false]
             );
             $specId = $newSpec->id;
         }
+
         return $specId;
     }
 
@@ -264,17 +269,17 @@ class GuestController extends Controller
                 'step_type' => 'education',
                 'title' => $step['title'],
                 'institution_company' => $step['institution'],
-                'start_date' => $step['year'] . '-01-01',
+                'start_date' => $step['year'].'-01-01',
                 'position' => $index,
             ]);
         }
-        
+
         // Mettre à jour l'entreprise et le poste actuel depuis l'étape la plus récente
         if ($mostRecentStep) {
             $profile->current_company = $mostRecentStep['institution'];
             $profile->current_position = $mostRecentStep['title'];
             $profile->save();
-            
+
             \Illuminate\Support\Facades\Log::info("Sync Guest Profile ({$context}): {$userName} updated with Company: {$profile->current_company}");
         }
     }

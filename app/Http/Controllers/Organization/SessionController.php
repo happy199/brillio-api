@@ -100,7 +100,7 @@ class SessionController extends Controller
      */
     private function authorizeSessionAccess(MentoringSession $session, $organization)
     {
-        $isAuthorized = $session->scheduled_by_organization_id === $organization->id || 
+        $isAuthorized = $session->scheduled_by_organization_id === $organization->id ||
                         $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
 
         if (! $isAuthorized) {
@@ -182,10 +182,10 @@ class SessionController extends Controller
 
         // 4. Rediriger vers Brillio Live (showGuest)
         $meetingId = basename($session->meeting_link);
-        
+
         return redirect()->route('meeting.show.guest', [
             'meetingId' => $meetingId,
-            'guestToken' => $token
+            'guestToken' => $token,
         ]);
     }
 
@@ -197,7 +197,7 @@ class SessionController extends Controller
         $organization = $this->getCurrentOrganization();
         $this->authorizeSessionAccess($session, $organization);
 
-        if (!$session->has_transcription) {
+        if (! $session->has_transcription) {
             return redirect()->back()->with('error', "La transcription n'est pas encore disponible. L'IA a besoin de la transcription pour générer un résumé.");
         }
 
@@ -206,12 +206,13 @@ class SessionController extends Controller
 
         if ($organization->credits_balance < $cost) {
             $missing = $cost - $organization->credits_balance;
+
             return redirect()->route('organization.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour utiliser l'IA.");
         }
 
         $suggestedReport = app(\App\Services\BrillioIAService::class)->summarizeTranscription($session->transcription_raw);
 
-        if (!$suggestedReport) {
+        if (! $suggestedReport) {
             return redirect()->back()->with('error', "L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.");
         }
 

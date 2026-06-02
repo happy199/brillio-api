@@ -15,7 +15,9 @@ class GuestInvitation extends Mailable
     use Queueable, SerializesModels;
 
     public MentoringSession $session;
+
     public User $recipient;
+
     public string $magicLink;
 
     /**
@@ -27,8 +29,8 @@ class GuestInvitation extends Mailable
         $this->recipient = $recipient;
         $this->magicLink = route('guest.sessions.confirm', [
             'session' => $session->id,
-            'token' => $session->guest_token
-        ]) . '?u=' . $recipient->id;
+            'token' => $session->guest_token,
+        ]).'?u='.$recipient->id;
     }
 
     /**
@@ -37,7 +39,7 @@ class GuestInvitation extends Mailable
     public function envelope(): Envelope
     {
         $orgName = $this->session->organization->name ?? 'une organisation';
-        
+
         return new Envelope(
             subject: "Invitation à animer une séance - {$orgName} - Brillio",
         );

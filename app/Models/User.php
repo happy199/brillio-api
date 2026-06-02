@@ -56,7 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'Kenya', 'Tanzanie', 'Ouganda', 'Nigeria', 'Ghana', 'Afrique du Sud', 'Angola', 'Mozambique', 'Cap-Vert', 'Madagascar',
             'Somalie', 'Sierra Leone', 'Libéria', 'Gambie', 'Zambie', 'Zimbabwe', 'Namibie', 'Botswana', 'Malawi', 'Eswatini', 'Lesotho',
             'Maroc', 'Algérie', 'Tunisie', 'Égypte', 'Libye',
-            'France', 'Belgique', 'Suisse', 'Canada', 'États-Unis', 'Royaume-Uni', 'Allemagne', 'Italie', 'Espagne', 'Autre'
+            'France', 'Belgique', 'Suisse', 'Canada', 'États-Unis', 'Royaume-Uni', 'Allemagne', 'Italie', 'Espagne', 'Autre',
         ];
     }
 
