@@ -42,24 +42,36 @@ class MeetingController extends Controller
             // Note: LIKE est plus sûr si jamais le préfixe change un jour, mais ici exact match sur fin de chaine
             $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$meetingId)->firstOrFail();
 
-            // 1. Vérifier si l'utilisateur est participant (Mentor ou Menté)
+            // 1. Vérifier si l'utilisateur est participant (Mentor, Menté, ou Organisation)
             $isMentor = $session->all_mentors->pluck('id')->contains($user->id);
             $isMentee = $session->mentees()->where('user_id', $user->id)->exists();
+            $isOrganizationMember = $user->organization_id === $session->scheduled_by_organization_id ||
+                                    $session->mentees()->where('sponsored_by_organization_id', $user->organization_id)->exists();
 
-            if (! $isMentor && ! $isMentee) {
+            if (! $isMentor && ! $isMentee && ! $isOrganizationMember) {
                 abort(403, 'Accès refusé. Vous ne faites pas partie de cette séance.');
             }
 
             // 2. Vérifier statut session (pas annulée)
             if ($session->status === 'cancelled') {
-                return redirect()->route($isMentor ? 'mentor.mentorship.sessions.show' : 'jeune.sessions.show', $session)
+                $route = 'jeune.sessions.show';
+                if ($isMentor) {
+                    $route = 'mentor.mentorship.sessions.show';
+                }
+                if ($isOrganizationMember) {
+                    $route = 'organization.sessions.show';
+                }
+
+                return redirect()->route($route, $session)
                     ->with('error', 'Cette séance a été annulée.');
             }
 
             // Generate JWT for JaaS
             // Room Name must be the part after the last slash
             $roomName = basename($session->meeting_link);
-            $jwt = $this->jitsiService->generateToken($user, $roomName, $isMentor);
+
+            // L'organisation a les droits de mentor (animateur)
+            $jwt = $this->jitsiService->generateToken($user, $roomName, $isMentor || $isOrganizationMember);
 
             // Update Link to use 8x8 JaaS domain
             // Format: https://8x8.vc/<AppID>/<RoomName>
