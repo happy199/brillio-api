@@ -45,7 +45,7 @@ class MeetingController extends Controller
             // 1. Vérifier si l'utilisateur est participant (Mentor, Menté, ou Organisation)
             $isMentor = $session->all_mentors->pluck('id')->contains($user->id);
             $isMentee = $session->mentees()->where('user_id', $user->id)->exists();
-            $isOrganizationMember = $user->organization_id === $session->scheduled_by_organization_id || 
+            $isOrganizationMember = $user->organization_id === $session->scheduled_by_organization_id ||
                                     $session->mentees()->where('sponsored_by_organization_id', $user->organization_id)->exists();
 
             if (! $isMentor && ! $isMentee && ! $isOrganizationMember) {
@@ -55,8 +55,12 @@ class MeetingController extends Controller
             // 2. Vérifier statut session (pas annulée)
             if ($session->status === 'cancelled') {
                 $route = 'jeune.sessions.show';
-                if ($isMentor) $route = 'mentor.mentorship.sessions.show';
-                if ($isOrganizationMember) $route = 'organization.sessions.show';
+                if ($isMentor) {
+                    $route = 'mentor.mentorship.sessions.show';
+                }
+                if ($isOrganizationMember) {
+                    $route = 'organization.sessions.show';
+                }
 
                 return redirect()->route($route, $session)
                     ->with('error', 'Cette séance a été annulée.');
@@ -65,7 +69,7 @@ class MeetingController extends Controller
             // Generate JWT for JaaS
             // Room Name must be the part after the last slash
             $roomName = basename($session->meeting_link);
-            
+
             // L'organisation a les droits de mentor (animateur)
             $jwt = $this->jitsiService->generateToken($user, $roomName, $isMentor || $isOrganizationMember);
 
