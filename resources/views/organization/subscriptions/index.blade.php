@@ -16,6 +16,10 @@ $periods = [
 270 => '9 mois',
 365 => '1 an',
 ];
+
+$currentCurrency = App\Services\CurrencyService::getCurrentCurrency();
+$currenciesConfigs = App\Services\CurrencyService::getSupportedCurrencies();
+$currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
 @endphp
 
 <div x-data="{ period: 30, showDowngradeModal: false, downgradeTarget: 'free', downgradeTargetLabel: 'Standard' }" class="space-y-12">
@@ -27,6 +31,21 @@ $periods = [
         <p class="text-xl text-gray-500">
             Des solutions flexibles pour toutes les organisations, du démarrage à l'expansion.
         </p>
+    </div>
+
+    {{-- Currency Switcher --}}
+    <div class="flex justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
+            <select @change="window.location.href = '{{ route('currency.switch') }}?currency=' + $event.target.value" 
+                class="rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
+                @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                    {{ $curr['name'] }} ({{ $curr['symbol'] }})
+                </option>
+                @endforeach
+            </select>
+        </div>
     </div>
 
     {{-- Period Selector --}}
@@ -94,13 +113,25 @@ $periods = [
                 <h3 class="text-lg font-semibold leading-6 text-organization-600">Professionnel</h3>
                 <p class="mt-4 text-sm leading-6 text-gray-500">Suivez l'impact et boostez l'engagement.</p>
                 @foreach($periods as $days => $label)
-                @php $proPlan = $proPlans->get($days); @endphp
+                @php 
+                    $proPlan = $proPlans->get($days);
+                    $proPriceHtml = '—';
+                    if ($proPlan) {
+                        $converted = App\Services\CurrencyService::convert($proPlan->price);
+                        $proPriceHtml = number_format(
+                            $converted,
+                            $currConfig['decimals'],
+                            $currConfig['decimal_separator'],
+                            $currConfig['thousands_separator']
+                        );
+                    }
+                @endphp
                 <p class="mt-8 flex flex-wrap items-baseline justify-center gap-x-2" x-show="period === {{ $days }}" {{
                     $days===30 ? '' : 'style=display:none' }}>
                     <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
-                        {{ $proPlan ? number_format($proPlan->price) : '—' }}
+                        {{ $proPriceHtml }}
                     </span>
-                    <span class="text-sm font-semibold leading-6 text-gray-600">FCFA</span>
+                    <span class="text-sm font-semibold leading-6 text-gray-600">{{ $currConfig['symbol'] }}</span>
                     <span class="text-sm text-gray-500">/ {{ $label }}</span>
                 </p>
                 @endforeach
@@ -166,13 +197,25 @@ $periods = [
                 <h3 class="text-lg font-semibold leading-6 text-gray-900">Entreprise</h3>
                 <p class="mt-4 text-sm leading-6 text-gray-500">Accompagnement complet et impact max.</p>
                 @foreach($periods as $days => $label)
-                @php $entPlan = $enterprisePlans->get($days); @endphp
+                @php 
+                    $entPlan = $enterprisePlans->get($days);
+                    $entPriceHtml = '—';
+                    if ($entPlan) {
+                        $converted = App\Services\CurrencyService::convert($entPlan->price);
+                        $entPriceHtml = number_format(
+                            $converted,
+                            $currConfig['decimals'],
+                            $currConfig['decimal_separator'],
+                            $currConfig['thousands_separator']
+                        );
+                    }
+                @endphp
                 <p class="mt-8 flex flex-wrap items-baseline justify-center gap-x-2" x-show="period === {{ $days }}" {{
                     $days===30 ? '' : 'style=display:none' }}>
                     <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
-                        {{ $entPlan ? number_format($entPlan->price) : '—' }}
+                        {{ $entPriceHtml }}
                     </span>
-                    <span class="text-sm font-semibold leading-6 text-gray-600">FCFA</span>
+                    <span class="text-sm font-semibold leading-6 text-gray-600">{{ $currConfig['symbol'] }}</span>
                     <span class="text-sm text-gray-500">/ {{ $label }}</span>
                 </p>
                 @endforeach
