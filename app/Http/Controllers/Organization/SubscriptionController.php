@@ -118,14 +118,39 @@ class SubscriptionController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        if (! $organization->isPro() && ! $organization->isEnterprise()) {
-            return redirect()->back()->with('error', 'Vous êtes déjà sur le plan Standard.');
+        // Target plan can be 'free', 'pro', or 'enterprise'
+        $targetPlan = $request->input('to', 'free');
+
+        if (! in_array($targetPlan, ['free', 'pro', 'enterprise'])) {
+            return redirect()->back()->with('error', 'Plan de rétrogradation invalide.');
+        }
+
+        $planHierarchy = [
+            'free' => 0,
+            'pro' => 1,
+            'enterprise' => 2,
+            'establishment' => 3,
+        ];
+
+        $currentPlanValue = $planHierarchy[$organization->subscription_plan] ?? 0;
+        $targetPlanValue = $planHierarchy[$targetPlan] ?? 0;
+
+        if ($targetPlanValue >= $currentPlanValue) {
+            return redirect()->back()->with('error', 'Vous ne pouvez rétrograder que vers un plan inférieur.');
         }
 
         $organization->update([
             'auto_renew' => false,
+            'pending_downgrade_to' => $targetPlan,
         ]);
 
-        return redirect()->route('organization.subscriptions.index')->with('success', 'Votre demande de rétrogradation a été enregistrée. Votre plan actuel restera actif jusqu\'au '.$organization->subscription_expires_at->format('d/m/Y').'.');
+        $planLabels = [
+            'free' => 'Standard (Gratuit)',
+            'pro' => 'Professionnel',
+            'enterprise' => 'Entreprise',
+        ];
+        $label = $planLabels[$targetPlan] ?? 'Standard';
+
+        return redirect()->route('organization.subscriptions.index')->with('success', 'Votre demande de rétrogradation vers le plan '.$label.' a été enregistrée. Votre plan actuel restera actif jusqu\'au '.$organization->subscription_expires_at->format('d/m/Y').'.');
     }
 }

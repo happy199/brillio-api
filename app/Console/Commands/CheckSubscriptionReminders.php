@@ -44,13 +44,15 @@ class CheckSubscriptionReminders extends Command
 
         foreach ($expiredOrgs as $org) {
             $this->info("Downgrading Organization: {$org->name}");
+            $newPlan = $org->pending_downgrade_to ?: Organization::PLAN_FREE;
             $org->update([
-                'subscription_plan' => Organization::PLAN_FREE,
+                'subscription_plan' => $newPlan,
                 'subscription_expires_at' => null,
                 'auto_renew' => false,
+                'pending_downgrade_to' => null,
             ]);
 
-            $this->notificationService->sendSubscriptionDowngradedNotification($org);
+            $this->notificationService->sendSubscriptionDowngradedNotification($org, $newPlan);
         }
 
         // 2. Reminders intervals

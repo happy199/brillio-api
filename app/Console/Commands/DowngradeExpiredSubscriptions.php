@@ -44,17 +44,26 @@ class DowngradeExpiredSubscriptions extends Command
             $this->warn("Downgrading organization: {$organization->name} (ID: {$organization->id})");
 
             $oldPlan = $organization->subscription_plan;
+            $newPlan = $organization->pending_downgrade_to ?: Organization::PLAN_FREE;
 
             $organization->update([
-                'subscription_plan' => Organization::PLAN_FREE,
+                'subscription_plan' => $newPlan,
                 'subscription_expires_at' => null,
                 'auto_renew' => false,
+                'pending_downgrade_to' => null,
             ]);
+
+            try {
+                app(\App\Services\MentorshipNotificationService::class)->sendSubscriptionDowngradedNotification($organization, $newPlan);
+            } catch (\Exception $e) {
+                Log::error("Failed to send subscription downgrade notification for organization {$organization->id}: ".$e->getMessage());
+            }
 
             Log::info('Organization subscription downgraded automatically', [
                 'organization_id' => $organization->id,
                 'organization_name' => $organization->name,
                 'previous_plan' => $oldPlan,
+                'new_plan' => $newPlan,
                 'downgraded_at' => now()->toDateTimeString(),
             ]);
         }

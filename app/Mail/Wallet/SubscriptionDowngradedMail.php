@@ -18,7 +18,8 @@ class SubscriptionDowngradedMail extends Mailable
      */
     public function __construct(
         public Organization $organization,
-        public string $renewUrl
+        public string $renewUrl,
+        public string $targetPlan = 'free'
     ) {}
 
     /**
@@ -26,8 +27,15 @@ class SubscriptionDowngradedMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $planLabels = [
+            'free' => 'Gratuit',
+            'pro' => 'Professionnel',
+            'enterprise' => 'Entreprise',
+        ];
+        $label = $planLabels[$this->targetPlan] ?? 'Gratuit';
+
         return new Envelope(
-            subject: 'Votre abonnement a expiré - Rétrogradation au plan Gratuit - Brillio',
+            subject: 'Votre abonnement a expiré - Rétrogradation au plan '.$label.' - Brillio',
         );
     }
 

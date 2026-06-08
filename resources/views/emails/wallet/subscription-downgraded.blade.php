@@ -4,14 +4,17 @@
 <p style="margin: 0 0 20px;">Bonjour,</p>
 
 <p style="margin: 0 0 30px; font-size: 18px;">
-    ❌ Votre abonnement payant a expiré et votre compte a été rétrogradé au plan <strong>Gratuit</strong>.
+    ❌ Votre abonnement payant a expiré et votre compte a été rétrogradé au plan <strong>{{ $targetPlan === 'pro' ? 'Professionnel' : ($targetPlan === 'enterprise' ? 'Entreprise' : 'Gratuit') }}</strong>.
 </p>
 
 <div style="background: #fef2f2; border-radius: 8px; padding: 20px; margin: 20px 0; border: 2px solid #ef4444;">
     <p style="margin: 0 0 10px; font-weight: 600; color: #991b1b; font-size: 16px;">📉 Changement de statut</p>
     <p style="margin: 0; color: #374151;">
-        Certaines fonctionnalités premium ne sont plus accessibles. Vos données sont conservées, mais vos capacités de
-        gestion sont désormais limitées.
+        @if($targetPlan === 'free')
+            Certaines fonctionnalités premium ne sont plus accessibles. Vos données sont conservées, mais vos capacités de gestion sont désormais limitées.
+        @else
+            Les fonctionnalités de votre ancien plan ne sont plus accessibles. Vos capacités de gestion ont été ajustées selon votre nouveau plan.
+        @endif
     </p>
 </div>
 
