@@ -89,4 +89,31 @@ class CurrencyTest extends TestCase
         $data = $response->json();
         $this->assertEqualsWithDelta(1075.34, $data['available_balance'], 0.1);
     }
+
+    /**
+     * Test mentor balance API respects currency query parameter.
+     */
+    public function test_mentor_balance_api_respects_currency_parameter()
+    {
+        $user = User::factory()->mentor()->create();
+        $mentorProfile = \App\Models\MentorProfile::factory()->create([
+            'user_id' => $user->id,
+            'available_balance' => 65596, // approx 1075 MAD
+            'total_withdrawn' => 0,
+        ]);
+
+        // Access API with MAD as query parameter
+        $response = $this->actingAs($user)
+            ->getJson('/api/mentor/balance?currency=MAD');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'currency' => 'MAD',
+                'currency_symbol' => 'MAD',
+            ]);
+
+        // Check that value is converted (65596 * 0.01639344 = ~1075.34 MAD)
+        $data = $response->json();
+        $this->assertEqualsWithDelta(1075.34, $data['available_balance'], 0.1);
+    }
 }

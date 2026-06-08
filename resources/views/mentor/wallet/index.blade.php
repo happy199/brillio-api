@@ -104,7 +104,7 @@
 
                                                             async loadBalance() {
                                                                 try {
-                                                                    const response = await fetch('/api/mentor/balance', {
+                                                                    const response = await fetch('/api/mentor/balance?currency={{ App\Services\CurrencyService::getCurrentCurrency() }}', {
                                                                         headers: {
                                                                             'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
                                                                             'Accept': 'application/json'
@@ -140,6 +140,10 @@
 
                                                                 try {
                                                                     const csrfToken = document.querySelector('meta[name=csrf-token]')?.content || '';
+                                                                    const payload = {
+                                                                        ...this.payoutForm,
+                                                                        currency: '{{ App\Services\CurrencyService::getCurrentCurrency() }}'
+                                                                    };
                                                                     const response = await fetch('/api/mentor/payout/request', {
                                                                         method: 'POST',
                                                                         headers: {
@@ -148,7 +152,7 @@
                                                                             'Accept': 'application/json',
                                                                             'X-CSRF-TOKEN': csrfToken
                                                                         },
-                                                                        body: JSON.stringify(this.payoutForm)
+                                                                        body: JSON.stringify(payload)
                                                                     });
 
                                                                     const data = await response.json();
@@ -442,7 +446,7 @@
 
                                                              async loadPayouts() {
                                                                  try {
-                                                                     const response = await fetch('/api/mentor/payout-requests', {
+                                                                     const response = await fetch('/api/mentor/payout-requests?currency={{ App\Services\CurrencyService::getCurrentCurrency() }}', {
                                                                          headers: {
                                                                              'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
                                                                              'Accept': 'application/json'

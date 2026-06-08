@@ -34,7 +34,7 @@ class PayoutController extends Controller
             ], 404);
         }
 
-        $currency = \App\Services\CurrencyService::getCurrentCurrency();
+        $currency = $request->input('currency') ?? \App\Services\CurrencyService::getCurrentCurrency();
         $availableBalance = (float) $mentorProfile->available_balance;
         $totalWithdrawn = (float) $mentorProfile->total_withdrawn;
 
@@ -67,6 +67,15 @@ class PayoutController extends Controller
      */
     public function requestPayout(Request $request)
     {
+        $currency = $request->input('currency') ?? 'XOF';
+
+        // Convert amount from selected currency to XOF before validation and processing
+        if ($currency !== 'XOF' && $request->has('amount')) {
+            $amountInSelectedCurrency = (float) $request->input('amount');
+            $amountInXof = \App\Services\CurrencyService::convert($amountInSelectedCurrency, $currency, 'XOF');
+            $request->merge(['amount' => $amountInXof]);
+        }
+
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:5000',
             'payment_method' => 'required|string',
@@ -195,15 +204,17 @@ class PayoutController extends Controller
             ], 404);
         }
 
+        $currency = $request->input('currency') ?? \App\Services\CurrencyService::getCurrentCurrency();
+
         $payouts = PayoutRequest::where('mentor_profile_id', $mentorProfile->id)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($payout) {
+            ->map(function ($payout) use ($currency) {
                 return [
                     'id' => $payout->id,
-                    'amount' => (float) $payout->amount,
-                    'fee' => (float) $payout->fee,
-                    'net_amount' => (float) $payout->net_amount,
+                    'amount' => (float) \App\Services\CurrencyService::convert($payout->amount, 'XOF', $currency),
+                    'fee' => (float) \App\Services\CurrencyService::convert($payout->fee, 'XOF', $currency),
+                    'net_amount' => (float) \App\Services\CurrencyService::convert($payout->net_amount, 'XOF', $currency),
                     'payment_method' => $payout->payment_method,
                     'phone_number' => $payout->phone_number,
                     'status' => $payout->status,
