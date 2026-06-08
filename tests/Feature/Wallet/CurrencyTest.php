@@ -21,11 +21,11 @@ class CurrencyTest extends TestCase
         // Convert XOF to XOF
         $this->assertEquals(1000, CurrencyService::convert($amount, 'XOF', 'XOF'));
 
-        // Convert XOF to EUR (1 XOF = 0.00152449 EUR)
-        $this->assertEqualsWithDelta(1.52449, CurrencyService::convert($amount, 'XOF', 'EUR'), 0.0001);
+        // Convert XOF to XAF (1 XOF = 1.0 XAF)
+        $this->assertEquals(1000, CurrencyService::convert($amount, 'XOF', 'XAF'));
 
-        // Convert XOF to USD (1 XOF = 0.00163934 USD)
-        $this->assertEqualsWithDelta(1.63934, CurrencyService::convert($amount, 'XOF', 'USD'), 0.0001);
+        // Convert XOF to GNF (1 XOF = 13.1 GNF)
+        $this->assertEqualsWithDelta(13100, CurrencyService::convert($amount, 'XOF', 'GNF'), 0.1);
 
         // Convert XOF to MAD (1 XOF = 0.01639344 MAD)
         $this->assertEqualsWithDelta(16.39344, CurrencyService::convert($amount, 'XOF', 'MAD'), 0.0001);
@@ -38,11 +38,14 @@ class CurrencyTest extends TestCase
     {
         $amount = 1000;
 
-        // EUR formatting (suffix symbol, 2 decimals, comma separator)
-        $this->assertEquals('1,52 €', CurrencyService::format($amount, 'EUR'));
+        // XAF formatting (suffix symbol, 0 decimals, space thousands separator)
+        $this->assertEquals('1 000 FCFA', CurrencyService::format($amount, 'XAF'));
 
-        // USD formatting (prefix symbol, 2 decimals, dot separator)
-        $this->assertEquals('$ 1.64', CurrencyService::format($amount, 'USD'));
+        // GNF formatting (suffix symbol, 0 decimals, space thousands separator)
+        $this->assertEquals('13 100 FG', CurrencyService::format($amount, 'GNF'));
+
+        // MAD formatting (suffix symbol, 2 decimals, comma separator)
+        $this->assertEquals('16,39 MAD', CurrencyService::format($amount, 'MAD'));
 
         // XOF formatting (suffix symbol, 0 decimals)
         $this->assertEquals('1 000 FCFA', CurrencyService::format($amount, 'XOF'));
@@ -53,10 +56,10 @@ class CurrencyTest extends TestCase
      */
     public function test_currency_switch_route()
     {
-        $response = $this->get(route('currency.switch', ['currency' => 'EUR']));
+        $response = $this->get(route('currency.switch', ['currency' => 'MAD']));
 
         $response->assertRedirect();
-        $this->assertEquals('EUR', session('currency'));
+        $this->assertEquals('MAD', session('currency'));
     }
 
     /**
@@ -67,23 +70,23 @@ class CurrencyTest extends TestCase
         $user = User::factory()->mentor()->create();
         $mentorProfile = \App\Models\MentorProfile::factory()->create([
             'user_id' => $user->id,
-            'available_balance' => 65596, // approx 100 EUR
+            'available_balance' => 65596, // approx 1075 MAD
             'total_withdrawn' => 0,
         ]);
 
-        // Access API with EUR in session
+        // Access API with MAD in session
         $response = $this->actingAs($user)
-            ->withSession(['currency' => 'EUR'])
+            ->withSession(['currency' => 'MAD'])
             ->getJson('/api/mentor/balance');
 
         $response->assertStatus(200)
             ->assertJson([
-                'currency' => 'EUR',
-                'currency_symbol' => '€',
+                'currency' => 'MAD',
+                'currency_symbol' => 'MAD',
             ]);
 
-        // Check that value is converted (65596 * 0.00152449 = ~100.00 EUR)
+        // Check that value is converted (65596 * 0.01639344 = ~1075.34 MAD)
         $data = $response->json();
-        $this->assertEqualsWithDelta(100.00, $data['available_balance'], 0.1);
+        $this->assertEqualsWithDelta(1075.34, $data['available_balance'], 0.1);
     }
 }

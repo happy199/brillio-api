@@ -19,23 +19,23 @@ class CurrencyService
                 'thousands_separator' => ' ',
                 'rate_from_xof' => 1.0,
             ],
-            'EUR' => [
-                'name' => 'Euro (EUR)',
-                'symbol' => '€',
+            'XAF' => [
+                'name' => 'Franc CFA (XAF)',
+                'symbol' => 'FCFA',
                 'position' => 'suffix',
-                'decimals' => 2,
+                'decimals' => 0,
                 'decimal_separator' => ',',
                 'thousands_separator' => ' ',
-                'rate_from_xof' => 0.00152449, // 1 EUR = 655.957 XOF
+                'rate_from_xof' => 1.0, // Pegged 1:1 with XOF
             ],
-            'USD' => [
-                'name' => 'Dollar US (USD)',
-                'symbol' => '$',
-                'position' => 'prefix',
-                'decimals' => 2,
-                'decimal_separator' => '.',
-                'thousands_separator' => ',',
-                'rate_from_xof' => 0.00163934, // 1 USD = 610 XOF
+            'GNF' => [
+                'name' => 'Franc Guinéen (GNF)',
+                'symbol' => 'FG',
+                'position' => 'suffix',
+                'decimals' => 0,
+                'decimal_separator' => ',',
+                'thousands_separator' => ' ',
+                'rate_from_xof' => 13.1, // 1 XOF = 13.1 GNF
             ],
             'MAD' => [
                 'name' => 'Dirham marocain (MAD)',

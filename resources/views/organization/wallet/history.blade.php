@@ -3,7 +3,7 @@
 @section('title', 'Historique des Transactions')
 
 @section('content')
-<div class="space-y-8">
+<div x-data class="space-y-8">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -14,7 +14,7 @@
         <div class="flex gap-3 items-center">
             <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-300 shadow-sm">
                 <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
-                <select onchange="window.location.href = '{{ route('currency.switch') }}?currency=' + this.value" 
+                <select @change="window.location.href = '{{ route('currency.switch') }}?currency=' + $event.target.value" 
                     class="rounded-md border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-xs font-semibold text-gray-700 bg-gray-50 py-0.5 cursor-pointer">
                     @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
                     <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
