@@ -84,6 +84,10 @@ Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'ind
 
 Route::get('/conditions-utilisation', [PageController::class, 'terms'])->name('terms');
 
+// Currency Switcher Route
+Route::get('/currency/switch', [\App\Http\Controllers\CurrencySwitchController::class, 'switch'])
+    ->name('currency.switch');
+
 // Profil public mentor (partageable)
 Route::get('/profil-mentor/{mentor}', [PageController::class, 'mentorProfile'])->name('public.mentor.profile');
 

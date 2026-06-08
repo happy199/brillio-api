@@ -69,9 +69,22 @@
 
         <!-- En-tête -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Mon Portefeuille</h1>
-                <p class="text-gray-600">Gérez vos crédits Brillio pour accéder aux contenus premium.</p>
+            <div class="flex flex-col md:flex-row md:items-center gap-4 flex-1 justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Mon Portefeuille</h1>
+                    <p class="text-gray-600">Gérez vos crédits Brillio pour accéder aux contenus premium.</p>
+                </div>
+                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
+                    <select onchange="window.location.href = '{{ route('currency.switch') }}?currency=' + this.value" 
+                        class="rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
+                        @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                        <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                            {{ $curr['name'] }} ({{ $curr['symbol'] }})
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div
                 class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg flex items-center gap-6 transform md:scale-105 transition">
@@ -126,8 +139,7 @@
                                 </div>
                                 <div class="text-right">
                                     <span
-                                        class="block text-lg font-bold text-indigo-600">{{ number_format($pack->price, 0, ',', ' ') }}
-                                        F</span>
+                                        class="block text-lg font-bold text-indigo-600">{{ App\Services\CurrencyService::format($pack->price) }}</span>
                                 </div>
                             </div>
 

@@ -34,10 +34,18 @@ class PayoutController extends Controller
             ], 404);
         }
 
+        $currency = \App\Services\CurrencyService::getCurrentCurrency();
+        $availableBalance = (float) $mentorProfile->available_balance;
+        $totalWithdrawn = (float) $mentorProfile->total_withdrawn;
+
+        $availableBalanceConverted = \App\Services\CurrencyService::convert($availableBalance, 'XOF', $currency);
+        $totalWithdrawnConverted = \App\Services\CurrencyService::convert($totalWithdrawn, 'XOF', $currency);
+
         return response()->json([
-            'available_balance' => (float) $mentorProfile->available_balance,
-            'total_withdrawn' => (float) $mentorProfile->total_withdrawn,
-            'currency' => 'FCFA',
+            'available_balance' => $availableBalanceConverted,
+            'total_withdrawn' => $totalWithdrawnConverted,
+            'currency' => $currency,
+            'currency_symbol' => \App\Services\CurrencyService::symbol($currency),
         ]);
     }
 

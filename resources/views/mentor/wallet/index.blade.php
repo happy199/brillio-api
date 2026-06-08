@@ -10,6 +10,17 @@
             <h1 class="text-2xl font-bold text-gray-900">Mon Portefeuille</h1>
             <p class="text-gray-600">Gérez vos revenus et vos crédits Brillio.</p>
         </div>
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
+            <select onchange="window.location.href = '{{ route('currency.switch') }}?currency=' + this.value" 
+                class="rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
+                @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                    {{ $curr['name'] }} ({{ $curr['symbol'] }})
+                </option>
+                @endforeach
+            </select>
+        </div>
     </div>
 
     <!-- Navigation Tabs -->
@@ -72,9 +83,11 @@
                                                             totalWithdrawn: 0,
                                                             loading: false,
                                                             error: '',
+                                                            currencySymbol: '{{ App\Services\CurrencyService::symbol() }}',
+                                                            minPayoutAmount: {{ App\Services\CurrencyService::convert(5000, 'XOF') }},
                                                             // Variables PHP injectées
                                                             feePercentage: {{ $payoutFeePercentage ?? 5 }},
-                                                            minFee: {{ $payoutMinFee ?? 100 }},
+                                                            minFee: {{ App\Services\CurrencyService::convert($payoutMinFee ?? 100, 'XOF') }},
 
                                                             // Calcul dynamique
                                                             get estimatedFee() {
@@ -100,6 +113,7 @@
                                                                     const data = await response.json();
                                                                     this.availableBalance = data.available_balance || 0;
                                                                     this.totalWithdrawn = data.total_withdrawn || 0;
+                                                                    this.currencySymbol = data.currency_symbol || 'FCFA';
                                                                 } catch (e) {
                                                                     console.error('Error loading balance:', e);
                                                                 }
@@ -162,10 +176,10 @@
                     <div class="flex items-baseline gap-2">
                         <span class="text-4xl font-extrabold"
                             x-text="new Intl.NumberFormat('fr-FR').format(availableBalance)">0</span>
-                        <span class="text-sm font-bold opacity-80">FCFA</span>
+                        <span class="text-sm font-bold opacity-80" x-text="currencySymbol">FCFA</span>
                     </div>
                     <p class="text-emerald-100 text-sm mt-2">Total retiré : <span
-                            x-text="new Intl.NumberFormat('fr-FR').format(totalWithdrawn)">0</span> FCFA</p>
+                            x-text="new Intl.NumberFormat('fr-FR').format(totalWithdrawn)">0</span> <span x-text="currencySymbol">FCFA</span></p>
                 </div>
                 <div>
                     <button @click="showPayoutModal = true"
@@ -197,26 +211,26 @@
 
                     <form @submit.prevent="requestPayout" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Montant (FCFA)</label>
-                            <input type="number" x-model="payoutForm.amount" min="5000" :max="availableBalance" required
-                                placeholder="Minimum 5 000 FCFA"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Montant (<span x-text="currencySymbol"></span>)</label>
+                            <input type="number" x-model="payoutForm.amount" :min="minPayoutAmount" :max="availableBalance" required
+                                :placeholder="'Minimum ' + new Intl.NumberFormat('fr-FR').format(minPayoutAmount) + ' ' + currencySymbol"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 bg-white">
                             <div class="flex justify-between items-start mt-1">
-                                <p class="text-xs text-gray-500">Solde disponible: <span
-                                        x-text="new Intl.NumberFormat('fr-FR').format(availableBalance)"></span> FCFA
+                                <p class="text-xs text-gray-500">Solde disponible : <span
+                                        x-text="new Intl.NumberFormat('fr-FR').format(availableBalance)"></span> <span x-text="currencySymbol"></span>
                                 </p>
 
                                 <div class="text-right text-xs" x-show="payoutForm.amount > 0">
-                                    <p class="text-gray-500">Frais (<span x-text="feePercentage"></span>%): <span
+                                    <p class="text-gray-500">Frais (<span x-text="feePercentage"></span>%) : <span
                                             class="font-medium text-red-500"
                                             x-text="'-' + new Intl.NumberFormat('fr-FR').format(estimatedFee)"></span>
-                                        FCFA</p>
-                                    <p class="font-bold text-gray-900 mt-1">Net à recevoir: <span
+                                        <span x-text="currencySymbol"></span></p>
+                                    <p class="font-bold text-gray-900 mt-1">Net à recevoir : <span
                                             class="text-emerald-600"
-                                            x-text="new Intl.NumberFormat('fr-FR').format(estimatedNet)"></span> FCFA
+                                            x-text="new Intl.NumberFormat('fr-FR').format(estimatedNet)"></span> <span x-text="currencySymbol"></span>
                                     </p>
                                     <p x-show="estimatedFee === minFee" class="text-[10px] text-gray-400 mt-0.5">
-                                        (Minimum perception : <span x-text="minFee"></span> FCFA)</p>
+                                        (Minimum perception : <span x-text="new Intl.NumberFormat('fr-FR').format(minFee)"></span> <span x-text="currencySymbol"></span>)</p>
                                 </div>
                             </div>
                         </div>
@@ -399,6 +413,7 @@
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden" x-data="{
                                                              payoutRequests: [],
                                                              payoutMethods: [],
+                                                             currencySymbol: '{{ App\Services\CurrencyService::symbol() }}',
 
                                                              async loadData() {
                                                                  await Promise.all([this.loadPayouts(), this.loadMethods()]);
@@ -479,11 +494,11 @@
                                     x-text="new Date(payout.created_at).toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'})">
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900"
-                                    x-text="new Intl.NumberFormat('fr-FR').format(payout.amount) + ' FCFA'"></td>
+                                    x-text="new Intl.NumberFormat('fr-FR').format(payout.amount) + ' ' + currencySymbol"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-600"
-                                    x-text="new Intl.NumberFormat('fr-FR').format(payout.fee) + ' FCFA'"></td>
+                                    x-text="new Intl.NumberFormat('fr-FR').format(payout.fee) + ' ' + currencySymbol"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-semibold"
-                                    x-text="new Intl.NumberFormat('fr-FR').format(payout.net_amount) + ' FCFA'"></td>
+                                    x-text="new Intl.NumberFormat('fr-FR').format(payout.net_amount) + ' ' + currencySymbol"></td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-medium"
                                     x-text="getMethodName(payout.payment_method)"></td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -593,9 +608,7 @@
                                 <span class="text-xs font-semibold text-gray-500 uppercase">Crédits</span>
                             </div>
                             <div class="text-right">
-                                <span class="block text-lg font-bold text-orange-600">{{ number_format($pack->price, 0,
-                                    ',', ' ') }}
-                                    F</span>
+                                <span class="block text-lg font-bold text-orange-600">{{ App\Services\CurrencyService::format($pack->price) }}</span>
                             </div>
                         </div>
 

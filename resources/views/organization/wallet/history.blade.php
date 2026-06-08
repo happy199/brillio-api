@@ -11,7 +11,18 @@
             </h1>
             <p class="text-gray-500">Consultez et exportez l'ensemble de vos mouvements de crédits.</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 items-center">
+            <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-300 shadow-sm">
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
+                <select onchange="window.location.href = '{{ route('currency.switch') }}?currency=' + this.value" 
+                    class="rounded-md border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-xs font-semibold text-gray-700 bg-gray-50 py-0.5 cursor-pointer">
+                    @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                    <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                        {{ $curr['symbol'] }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
             <a href="{{ route('organization.wallet.export-csv', request()->all()) }}"
                 class="inline-flex items-center justify-center min-w-[80px] px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                 <i class="fas fa-file-csv mr-2 text-green-600"></i> CSV
@@ -65,7 +76,7 @@
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Crédits</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Valeur (FCFA)</th>
+                            Valeur ({{ App\Services\CurrencyService::symbol() }})</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -103,7 +114,7 @@
                             {{ $t->amount > 0 ? '+' : '' }}{{ number_format($t->amount) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 font-bold">
-                            {{ number_format($t->amount * $creditPrice) }}
+                            {{ App\Services\CurrencyService::format($t->amount * $creditPrice) }}
                         </td>
                     </tr>
                     @empty
@@ -131,8 +142,8 @@
         <i class="fas fa-info-circle text-blue-500 text-xl mt-0.5"></i>
         <div class="text-sm text-blue-800">
             <p class="font-bold mb-1">Calcul de la valeur financière</p>
-            <p>La valeur en FCFA est calculée sur la base du prix actuel du crédit pour organisation : <strong>{{
-                    number_format($creditPrice) }} FCFA / crédit</strong>. Cela vous permet de justifier aussi bien vos
+            <p>La valeur en devises est calculée sur la base du prix actuel du crédit pour organisation : <strong>{{
+                    App\Services\CurrencyService::format($creditPrice) }} / crédit</strong>. Cela vous permet de justifier aussi bien vos
                 achats de crédits que vos redistributions.</p>
         </div>
     </div>

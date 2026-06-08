@@ -184,9 +184,12 @@ class WalletController extends Controller
 
         $callback = function () use ($transactions, $creditPrice) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Date', 'Type', 'Description', 'Crédits', 'Valeur (FCFA)']);
+            $currency = \App\Services\CurrencyService::getCurrentCurrency();
+            fputcsv($file, ['Date', 'Type', 'Description', 'Crédits', "Valeur ({$currency})"]);
 
             foreach ($transactions as $t) {
+                $fcfaAmount = $t->amount * $creditPrice;
+                $convertedAmount = \App\Services\CurrencyService::convert($fcfaAmount, 'XOF', $currency);
                 fputcsv($file, [
                     $t->created_at->format('d/m/Y H:i'),
                     match (strtolower($t->type)) {
@@ -199,7 +202,7 @@ class WalletController extends Controller
                     },
                     $t->description,
                     $t->amount,
-                    $t->amount * $creditPrice,
+                    round($convertedAmount, 2),
                 ]);
             }
             fclose($file);

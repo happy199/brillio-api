@@ -14,6 +14,21 @@
         </p>
     </div>
 
+    <!-- Currency Switcher -->
+    <div class="flex justify-end max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
+            <select onchange="window.location.href = '{{ route('currency.switch') }}?currency=' + this.value" 
+                class="rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
+                @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                    {{ $curr['name'] }} ({{ $curr['symbol'] }})
+                </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
     <!-- Stats Grid -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -40,7 +55,7 @@
                         <i class="fas fa-info-circle text-gray-500"></i>
                     </div>
                     <p class="text-sm text-gray-300 mb-2">1 Crédit Organisation =</p>
-                    <p class="text-3xl font-bold italic">{{ number_format($creditPrice) }} FCFA</p>
+                    <p class="text-3xl font-bold italic">{{ App\Services\CurrencyService::format($creditPrice) }}</p>
                     <p class="mt-4 text-xs text-gray-400 leading-relaxed">
                         Cette valeur est utilisée pour calculer l'équivalent financier de vos dépenses dans vos rapports
                         d'export.
@@ -77,7 +92,7 @@
                             <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-widest">
                                 Crédits</th>
                             <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                Valeur (FCFA)</th>
+                                Valeur ({{ App\Services\CurrencyService::symbol() }})</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -106,7 +121,7 @@
                                 {{ $transaction->amount > 0 ? '+' : '' }}{{ number_format($transaction->amount) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 font-black">
-                                {{ number_format($transaction->amount * $creditPrice) }}
+                                {{ App\Services\CurrencyService::format($transaction->amount * $creditPrice) }}
                             </td>
                         </tr>
                         @empty
@@ -142,12 +157,10 @@
                     <h3 class="text-xl font-black text-gray-900 group-hover:text-organization-600 transition-colors">{{
                         $pack->name }}</h3>
                     <div class="mt-4 flex items-baseline">
-                        <span class="text-5xl font-black tracking-tight text-gray-900">{{ number_format($pack->credits)
-                            }}</span>
+                        <span class="text-5xl font-black tracking-tight text-gray-900">{{ number_format($pack->credits) }}</span>
                         <span class="ml-1 text-sm font-bold text-gray-400 uppercase tracking-widest">Crédits</span>
                     </div>
-                    <p class="mt-2 text-2xl font-bold text-organization-600">{{ number_format($pack->price) }} <span
-                            class="text-sm">FCFA</span></p>
+                    <p class="mt-2 text-2xl font-bold text-organization-600">{{ App\Services\CurrencyService::format($pack->price) }}</p>
                 </div>
 
                 <ul class="space-y-4 mb-8 flex-1">
