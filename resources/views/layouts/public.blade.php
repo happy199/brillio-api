@@ -187,7 +187,7 @@
     {{-- Organization Schema --}}
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
-        "@context": "https://schema.org",
+        "@@context": "https://schema.org",
         "@type": "Organization",
         "name": "Brillio",
         "legalName": "Brillio Africa",
@@ -223,7 +223,7 @@
     {{-- WebSite Schema with Search Action --}}
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
-        "@context": "https://schema.org",
+        "@@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Brillio",
         "alternateName": "Brillio Africa",
@@ -244,7 +244,7 @@
     {{-- Service/Product Schema --}}
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="application/ld+json" nonce="{{ request()->attributes->get('csp_nonce') }}">
     {
-        "@context": "https://schema.org",
+        "@@context": "https://schema.org",
         "@type": "Service",
         "name": "Mentorat Professionnel Brillio",
         "description": "Service de mentorat professionnel connectant jeunes talents avec experts pour orientation carrière et développement personnel en Afrique",
