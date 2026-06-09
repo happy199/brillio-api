@@ -418,6 +418,8 @@
                                                              payoutRequests: [],
                                                              payoutMethods: [],
                                                              currencySymbol: '{{ App\Services\CurrencyService::symbol() }}',
+                                                             showCancelConfirmModal: false,
+                                                             payoutToCancel: null,
 
                                                              async loadData() {
                                                                  await Promise.all([this.loadPayouts(), this.loadMethods()]);
@@ -456,6 +458,36 @@
                                                                      this.payoutRequests = data.payouts || [];
                                                                  } catch (e) {
                                                                      console.error('Error loading payouts:', e);
+                                                                 }
+                                                             },
+
+                                                             async cancelPayout(id) {
+                                                                 this.payoutToCancel = id;
+                                                                 this.showCancelConfirmModal = true;
+                                                             },
+
+                                                             async confirmCancelPayout() {
+                                                                 if (!this.payoutToCancel) return;
+                                                                 try {
+                                                                     const response = await fetch(`/api/mentor/payout/${this.payoutToCancel}/cancel`, {
+                                                                         method: 'POST',
+                                                                         headers: {
+                                                                             'Authorization': `Bearer ${document.querySelector('meta[name=api-token]')?.content || ''}`,
+                                                                             'Accept': 'application/json',
+                                                                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || ''
+                                                                         }
+                                                                     });
+                                                                     const data = await response.json();
+                                                                     if (response.ok) {
+                                                                         this.showCancelConfirmModal = false;
+                                                                         alert(data.message || 'Le retrait a été annulé avec succès.');
+                                                                         location.reload();
+                                                                     } else {
+                                                                         alert(data.message || 'Une erreur est survenue.');
+                                                                     }
+                                                                 } catch (e) {
+                                                                     console.error('Error cancelling payout:', e);
+                                                                     alert('Une erreur est survenue.');
                                                                  }
                                                              }
                                                          }" x-init="loadData()">
@@ -506,21 +538,58 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-medium"
                                     x-text="getMethodName(payout.payment_method)"></td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span x-show="payout.status === 'pending'"
-                                        class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">En
-                                        attente</span>
-                                    <span x-show="payout.status === 'processing'"
-                                        class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">En
-                                        cours</span>
-                                    <span x-show="payout.status === 'completed'"
-                                        class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Complété</span>
-                                    <span x-show="payout.status === 'failed'"
-                                        class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Échoué</span>
+                                    <div class="flex items-center gap-2">
+                                        <span x-show="payout.status === 'pending'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">En attente</span>
+                                        <span x-show="payout.status === 'processing'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">En cours</span>
+                                        <span x-show="payout.status === 'completed'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Complété</span>
+                                        <span x-show="payout.status === 'failed'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Échoué</span>
+                                        <span x-show="payout.status === 'cancelled'"
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Annulé</span>
+
+                                        <button x-show="payout.status === 'pending'"
+                                            @click="cancelPayout(payout.id)"
+                                            class="text-xs text-red-600 hover:text-red-800 hover:underline font-medium focus:outline-none transition">
+                                            Annuler
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </template>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Modal Confirmation Annulation -->
+            <div x-show="showCancelConfirmModal" x-cloak
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                @click.self="showCancelConfirmModal = false">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" @click.stop>
+                    <div class="flex items-center gap-3 mb-4 text-red-600">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                        <h3 class="text-xl font-bold text-gray-900">Confirmer l'annulation</h3>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-6">
+                        Êtes-vous sûr de vouloir annuler ce retrait ? Le montant en FCFA et les crédits associés seront reversés sur votre solde.
+                    </p>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" @click="showCancelConfirmModal = false"
+                            class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                            Fermer
+                        </button>
+                        <button type="button" @click="confirmCancelPayout()"
+                            class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition shadow-md">
+                            Confirmer l'annulation
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

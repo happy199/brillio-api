@@ -35,6 +35,16 @@ class ProcessPayoutJob implements ShouldQueue
     public function handle(MonerooService $monerooService): void
     {
         try {
+            // S'assurer que le payout n'a pas été annulé entre-temps
+            $this->payoutRequest->refresh();
+            if ($this->payoutRequest->status === PayoutRequest::STATUS_CANCELLED) {
+                Log::info('ProcessPayoutJob: Payout already cancelled, skipping processing', [
+                    'payout_id' => $this->payoutRequest->id,
+                ]);
+
+                return;
+            }
+
             Log::info('ProcessPayoutJob: Starting payout processing', [
                 'payout_id' => $this->payoutRequest->id,
                 'amount' => $this->payoutRequest->net_amount,

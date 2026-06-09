@@ -228,4 +228,58 @@ class PayoutController extends Controller
             'payouts' => $payouts,
         ]);
     }
+
+    /**
+     * Annuler une demande de payout en attente
+     */
+    public function cancelPayout(Request $request, PayoutRequest $payout)
+    {
+        $mentorProfile = $request->user()->mentorProfile;
+
+        if (! $mentorProfile || $payout->mentor_profile_id !== $mentorProfile->id) {
+            return response()->json([
+                'message' => 'Action non autorisée.',
+            ], 403);
+        }
+
+        if ($payout->status !== PayoutRequest::STATUS_PENDING) {
+            return response()->json([
+                'message' => 'Ce retrait ne peut plus être annulé car il n\'est plus en attente.',
+            ], 422);
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($payout, $request) {
+                // Mettre à jour le statut du payout
+                $payout->update([
+                    'status' => PayoutRequest::STATUS_CANCELLED,
+                    'error_message' => 'Annulé par le mentor',
+                ]);
+
+                // Restaurer le solde disponible en FCFA
+                $payout->mentorProfile->increment('available_balance', $payout->amount);
+
+                // Rembourser les crédits correspondants
+                $creditPrice = $this->walletService->getCreditPrice('mentor');
+                $creditsRefund = intval($payout->amount / $creditPrice);
+
+                $this->walletService->addCredits(
+                    $request->user(),
+                    $creditsRefund,
+                    'refund',
+                    'Annulation de demande de retrait',
+                    $payout
+                );
+            });
+
+            return response()->json([
+                'message' => 'Demande de retrait annulée avec succès.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de l\'annulation de la demande.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
