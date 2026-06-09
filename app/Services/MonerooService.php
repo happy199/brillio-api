@@ -18,10 +18,10 @@ class MonerooService
 
     public function __construct()
     {
-        $this->secretKey = config('services.moneroo.secret_key');
-        $this->isSandbox = config('services.moneroo.is_sandbox');
-        $this->apiUrl = config('services.moneroo.api_url');
-        $this->currency = config('services.moneroo.currency');
+        $this->secretKey = config('services.moneroo.secret_key') ?? '';
+        $this->isSandbox = (bool) config('services.moneroo.is_sandbox', true);
+        $this->apiUrl = config('services.moneroo.api_url') ?? 'https://api.moneroo.io/v1';
+        $this->currency = config('services.moneroo.currency') ?? 'XOF';
     }
 
     /**

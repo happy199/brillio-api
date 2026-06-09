@@ -44,7 +44,7 @@
         "$name": "{{ auth()->user()->name }}",
         "$email": "{{ auth()->user()->email }}",
         "User Type": "{{ auth()->user()->user_type }}",
-            @if (auth() -> user() -> organization_id)
+            @if (auth()->user()->organization_id)
         "Organization ID": "{{ auth()->user()->organization_id }}",
             "Organization Role": "{{ auth()->user()->organization_role }}",
                 @endif
