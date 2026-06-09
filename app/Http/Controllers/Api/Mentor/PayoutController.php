@@ -34,10 +34,18 @@ class PayoutController extends Controller
             ], 404);
         }
 
+        $currency = $request->input('currency') ?? \App\Services\CurrencyService::getCurrentCurrency();
+        $availableBalance = (float) $mentorProfile->available_balance;
+        $totalWithdrawn = (float) $mentorProfile->total_withdrawn;
+
+        $availableBalanceConverted = \App\Services\CurrencyService::convert($availableBalance, 'XOF', $currency);
+        $totalWithdrawnConverted = \App\Services\CurrencyService::convert($totalWithdrawn, 'XOF', $currency);
+
         return response()->json([
-            'available_balance' => (float) $mentorProfile->available_balance,
-            'total_withdrawn' => (float) $mentorProfile->total_withdrawn,
-            'currency' => 'FCFA',
+            'available_balance' => $availableBalanceConverted,
+            'total_withdrawn' => $totalWithdrawnConverted,
+            'currency' => $currency,
+            'currency_symbol' => \App\Services\CurrencyService::symbol($currency),
         ]);
     }
 
@@ -59,6 +67,15 @@ class PayoutController extends Controller
      */
     public function requestPayout(Request $request)
     {
+        $currency = $request->input('currency') ?? 'XOF';
+
+        // Convert amount from selected currency to XOF before validation and processing
+        if ($currency !== 'XOF' && $request->has('amount')) {
+            $amountInSelectedCurrency = (float) $request->input('amount');
+            $amountInXof = \App\Services\CurrencyService::convert($amountInSelectedCurrency, $currency, 'XOF');
+            $request->merge(['amount' => $amountInXof]);
+        }
+
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:5000',
             'payment_method' => 'required|string',
@@ -187,15 +204,17 @@ class PayoutController extends Controller
             ], 404);
         }
 
+        $currency = $request->input('currency') ?? \App\Services\CurrencyService::getCurrentCurrency();
+
         $payouts = PayoutRequest::where('mentor_profile_id', $mentorProfile->id)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($payout) {
+            ->map(function ($payout) use ($currency) {
                 return [
                     'id' => $payout->id,
-                    'amount' => (float) $payout->amount,
-                    'fee' => (float) $payout->fee,
-                    'net_amount' => (float) $payout->net_amount,
+                    'amount' => (float) \App\Services\CurrencyService::convert($payout->amount, 'XOF', $currency),
+                    'fee' => (float) \App\Services\CurrencyService::convert($payout->fee, 'XOF', $currency),
+                    'net_amount' => (float) \App\Services\CurrencyService::convert($payout->net_amount, 'XOF', $currency),
                     'payment_method' => $payout->payment_method,
                     'phone_number' => $payout->phone_number,
                     'status' => $payout->status,
@@ -208,5 +227,59 @@ class PayoutController extends Controller
         return response()->json([
             'payouts' => $payouts,
         ]);
+    }
+
+    /**
+     * Annuler une demande de payout en attente
+     */
+    public function cancelPayout(Request $request, PayoutRequest $payout)
+    {
+        $mentorProfile = $request->user()->mentorProfile;
+
+        if (! $mentorProfile || $payout->mentor_profile_id !== $mentorProfile->id) {
+            return response()->json([
+                'message' => 'Action non autorisée.',
+            ], 403);
+        }
+
+        if ($payout->status !== PayoutRequest::STATUS_PENDING) {
+            return response()->json([
+                'message' => 'Ce retrait ne peut plus être annulé car il n\'est plus en attente.',
+            ], 422);
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($payout, $request) {
+                // Mettre à jour le statut du payout
+                $payout->update([
+                    'status' => PayoutRequest::STATUS_CANCELLED,
+                    'error_message' => 'Annulé par le mentor',
+                ]);
+
+                // Restaurer le solde disponible en FCFA
+                $payout->mentorProfile->increment('available_balance', $payout->amount);
+
+                // Rembourser les crédits correspondants
+                $creditPrice = $this->walletService->getCreditPrice('mentor');
+                $creditsRefund = intval($payout->amount / $creditPrice);
+
+                $this->walletService->addCredits(
+                    $request->user(),
+                    $creditsRefund,
+                    'refund',
+                    'Annulation de demande de retrait',
+                    $payout
+                );
+            });
+
+            return response()->json([
+                'message' => 'Demande de retrait annulée avec succès.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de l\'annulation de la demande.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

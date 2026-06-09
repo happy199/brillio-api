@@ -49,6 +49,7 @@ class Organization extends Model
         'subscription_plan',
         'subscription_expires_at',
         'auto_renew',
+        'pending_downgrade_to',
         'private_circle_enabled',
         'private_circle_plus_enabled',
     ];

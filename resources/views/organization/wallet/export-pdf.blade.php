@@ -145,7 +145,7 @@
                 <th width="15%">Type</th>
                 <th width="40%">Description</th>
                 <th width="15%" style="text-align: right;">Crédits</th>
-                <th width="15%" style="text-align: right;">Valeur (FCFA)</th>
+                <th width="15%" style="text-align: right;">Valeur ({{ App\Services\CurrencyService::getCurrentCurrency() }})</th>
             </tr>
         </thead>
         <tbody>
@@ -173,7 +173,7 @@
                     {{ $credits > 0 ? '+' : '' }}{{ number_format($credits) }}
                 </td>
                 <td class="amount {{ $fcfa > 0 ? 'positive' : 'negative' }}">
-                    {{ $fcfa > 0 ? '+' : '' }}{{ number_format($fcfa) }}
+                    {{ $fcfa > 0 ? '+' : '' }}{{ App\Services\CurrencyService::format($fcfa) }}
                 </td>
             </tr>
             @endforeach
@@ -182,7 +182,7 @@
 
     <div class="total-box">
         <span class="total-label">Bilan sur la période :</span><br>
-        <span class="total-amount">{{ $balanceFcfa >= 0 ? '+' : '' }}{{ number_format($balanceFcfa) }} FCFA</span><br>
+        <span class="total-amount">{{ $balanceFcfa >= 0 ? '+' : '' }}{{ App\Services\CurrencyService::format($balanceFcfa) }}</span><br>
         <small style="color: #6b7280;">({{ number_format($balanceCredits) }} crédits au total)</small>
     </div>
 

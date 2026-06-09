@@ -16,9 +16,13 @@ $periods = [
 270 => '9 mois',
 365 => '1 an',
 ];
+
+$currentCurrency = App\Services\CurrencyService::getCurrentCurrency();
+$currenciesConfigs = App\Services\CurrencyService::getSupportedCurrencies();
+$currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
 @endphp
 
-<div x-data="{ period: 30, showDowngradeModal: false }" class="space-y-12">
+<div x-data="{ period: 30, showDowngradeModal: false, downgradeTarget: 'free', downgradeTargetLabel: 'Standard' }" class="space-y-12">
     {{-- Header --}}
     <div class="text-center max-w-3xl mx-auto space-y-4">
         <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">
@@ -27,6 +31,21 @@ $periods = [
         <p class="text-xl text-gray-500">
             Des solutions flexibles pour toutes les organisations, du démarrage à l'expansion.
         </p>
+    </div>
+
+    {{-- Currency Switcher --}}
+    <div class="flex justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
+            <select @change="window.location.href = '{{ route('currency.switch') }}?currency=' + $event.target.value" 
+                class="rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
+                @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                    {{ $curr['name'] }} ({{ $curr['symbol'] }})
+                </option>
+                @endforeach
+            </select>
+        </div>
     </div>
 
     {{-- Period Selector --}}
@@ -76,7 +95,7 @@ $periods = [
                 Votre plan actuel
             </div>
             @else
-            <button type="button" x-on:click="showDowngradeModal = true"
+            <button type="button" x-on:click="downgradeTarget = 'free'; downgradeTargetLabel = 'Standard'; showDowngradeModal = true"
                 class="mt-8 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-center text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
                 Rétrograder vers Standard
             </button>
@@ -94,13 +113,25 @@ $periods = [
                 <h3 class="text-lg font-semibold leading-6 text-organization-600">Professionnel</h3>
                 <p class="mt-4 text-sm leading-6 text-gray-500">Suivez l'impact et boostez l'engagement.</p>
                 @foreach($periods as $days => $label)
-                @php $proPlan = $proPlans->get($days); @endphp
+                @php 
+                    $proPlan = $proPlans->get($days);
+                    $proPriceHtml = '—';
+                    if ($proPlan) {
+                        $converted = App\Services\CurrencyService::convert($proPlan->price);
+                        $proPriceHtml = number_format(
+                            $converted,
+                            $currConfig['decimals'],
+                            $currConfig['decimal_separator'],
+                            $currConfig['thousands_separator']
+                        );
+                    }
+                @endphp
                 <p class="mt-8 flex flex-wrap items-baseline justify-center gap-x-2" x-show="period === {{ $days }}" {{
                     $days===30 ? '' : 'style=display:none' }}>
                     <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
-                        {{ $proPlan ? number_format($proPlan->price) : '—' }}
+                        {{ $proPriceHtml }}
                     </span>
-                    <span class="text-sm font-semibold leading-6 text-gray-600">FCFA</span>
+                    <span class="text-sm font-semibold leading-6 text-gray-600">{{ $currConfig['symbol'] }}</span>
                     <span class="text-sm text-gray-500">/ {{ $label }}</span>
                 </p>
                 @endforeach
@@ -121,12 +152,26 @@ $periods = [
                 </div>
                 @php $org = auth()->user()->organization; @endphp
                 @if($org->subscription_expires_at)
-                <p class="mt-2 text-xs text-gray-500">
-                    Expire le <span class="font-semibold text-gray-700">{{
-                        $org->subscription_expires_at->translatedFormat('d F Y') }}</span>
-                </p>
+                    @if(!$org->auto_renew)
+                        @php
+                            $targetDowngrade = $org->pending_downgrade_to === 'pro' ? 'Professionnel' : ($org->pending_downgrade_to === 'enterprise' ? 'Entreprise' : 'Standard');
+                        @endphp
+                        <p class="mt-2 text-xs text-red-500 font-semibold">
+                            Rétrogradation vers {{ $targetDowngrade }} planifiée le {{ $org->subscription_expires_at->translatedFormat('d F Y') }}
+                        </p>
+                    @else
+                        <p class="mt-2 text-xs text-gray-500">
+                            Expire le <span class="font-semibold text-gray-700">{{
+                                $org->subscription_expires_at->translatedFormat('d F Y') }}</span>
+                        </p>
+                    @endif
                 @endif
             </div>
+            @elseif($isEnterprise || $isEstablishment)
+            <button type="button" x-on:click="downgradeTarget = 'pro'; downgradeTargetLabel = 'Professionnel'; showDowngradeModal = true"
+                class="mt-8 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-center text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
+                Rétrograder vers Pro
+            </button>
             @else
             @foreach($periods as $days => $label)
             @php $proPlan = $proPlans->get($days); @endphp
@@ -152,13 +197,25 @@ $periods = [
                 <h3 class="text-lg font-semibold leading-6 text-gray-900">Entreprise</h3>
                 <p class="mt-4 text-sm leading-6 text-gray-500">Accompagnement complet et impact max.</p>
                 @foreach($periods as $days => $label)
-                @php $entPlan = $enterprisePlans->get($days); @endphp
+                @php 
+                    $entPlan = $enterprisePlans->get($days);
+                    $entPriceHtml = '—';
+                    if ($entPlan) {
+                        $converted = App\Services\CurrencyService::convert($entPlan->price);
+                        $entPriceHtml = number_format(
+                            $converted,
+                            $currConfig['decimals'],
+                            $currConfig['decimal_separator'],
+                            $currConfig['thousands_separator']
+                        );
+                    }
+                @endphp
                 <p class="mt-8 flex flex-wrap items-baseline justify-center gap-x-2" x-show="period === {{ $days }}" {{
                     $days===30 ? '' : 'style=display:none' }}>
                     <span class="text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
-                        {{ $entPlan ? number_format($entPlan->price) : '—' }}
+                        {{ $entPriceHtml }}
                     </span>
-                    <span class="text-sm font-semibold leading-6 text-gray-600">FCFA</span>
+                    <span class="text-sm font-semibold leading-6 text-gray-600">{{ $currConfig['symbol'] }}</span>
                     <span class="text-sm text-gray-500">/ {{ $label }}</span>
                 </p>
                 @endforeach
@@ -179,12 +236,26 @@ $periods = [
                 </div>
                 @php $org = auth()->user()->organization; @endphp
                 @if($org->subscription_expires_at)
-                <p class="mt-2 text-xs text-gray-500">
-                    Expire le <span class="font-semibold text-gray-700">{{
-                        $org->subscription_expires_at->translatedFormat('d F Y') }}</span>
-                </p>
+                    @if(!$org->auto_renew)
+                        @php
+                            $targetDowngrade = $org->pending_downgrade_to === 'pro' ? 'Professionnel' : ($org->pending_downgrade_to === 'enterprise' ? 'Entreprise' : 'Standard');
+                        @endphp
+                        <p class="mt-2 text-xs text-red-500 font-semibold">
+                            Rétrogradation vers {{ $targetDowngrade }} planifiée le {{ $org->subscription_expires_at->translatedFormat('d F Y') }}
+                        </p>
+                    @else
+                        <p class="mt-2 text-xs text-gray-500">
+                            Expire le <span class="font-semibold text-gray-700">{{
+                                $org->subscription_expires_at->translatedFormat('d F Y') }}</span>
+                        </p>
+                    @endif
                 @endif
             </div>
+            @elseif($isEstablishment)
+            <button type="button" x-on:click="downgradeTarget = 'enterprise'; downgradeTargetLabel = 'Entreprise'; showDowngradeModal = true"
+                class="mt-8 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-center text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
+                Rétrograder vers Entreprise
+            </button>
             @else
             @foreach($periods as $days => $label)
             @php $entPlan = $enterprisePlans->get($days); @endphp
@@ -259,7 +330,24 @@ $periods = [
                         <div class="w-full rounded-2xl bg-gray-50 border border-gray-100 p-6 text-center">
                             <i class="fas fa-check-circle text-organization-600 text-2xl mb-2"></i>
                             <p class="text-sm font-black text-gray-900 uppercase tracking-widest leading-none">Actif</p>
-                            <p class="text-[10px] text-gray-400 mt-1">Soutenu par Brillio</p>
+                            @php $org = auth()->user()->organization; @endphp
+                            @if($org->subscription_expires_at)
+                                @if(!$org->auto_renew)
+                                    @php
+                                        $targetDowngrade = $org->pending_downgrade_to === 'pro' ? 'Professionnel' : ($org->pending_downgrade_to === 'enterprise' ? 'Entreprise' : 'Standard');
+                                    @endphp
+                                    <p class="mt-2 text-xs text-red-500 font-semibold">
+                                        Rétrogradation vers {{ $targetDowngrade }} planifiée le {{ $org->subscription_expires_at->translatedFormat('d F Y') }}
+                                    </p>
+                                @else
+                                    <p class="mt-2 text-xs text-gray-500">
+                                        Expire le <span class="font-semibold text-gray-700">{{
+                                            $org->subscription_expires_at->translatedFormat('d F Y') }}</span>
+                                    </p>
+                                @endif
+                            @else
+                                <p class="text-[10px] text-gray-400 mt-1">Soutenu par Brillio</p>
+                            @endif
                         </div>
                     @else
                         <form action="{{ route('organization.subscriptions.request-contact') }}" method="POST" class="w-full">
@@ -274,7 +362,6 @@ $periods = [
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     {{-- Downgrade Modal --}}
@@ -309,10 +396,8 @@ $periods = [
                             <h3 class="text-base font-semibold leading-6 text-gray-900">Confirmer la rétrogradation</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500 leading-relaxed">
-                                    Êtes-vous sûr de vouloir repasser au plan <span class="font-bold">Standard</span> ?
-                                    Votre accès aux fonctionnalités <span
-                                        class="text-organization-600 font-bold">Pro/Entreprise</span>
-                                    restera actif jusqu'à la fin de la période de facturation en cours.
+                                    Êtes-vous sûr de vouloir repasser au plan <span class="font-bold" x-text="downgradeTargetLabel"></span> ?
+                                    Votre accès aux fonctionnalités actuelles restera actif jusqu'à la fin de la période de facturation en cours.
                                 </p>
                             </div>
                         </div>
@@ -322,6 +407,7 @@ $periods = [
                     <form action="{{ route('organization.subscriptions.downgrade') }}" method="POST"
                         class="inline-block">
                         @csrf
+                        <input type="hidden" name="to" :value="downgradeTarget">
                         <button type="submit"
                             class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:w-auto transition-colors">
                             Confirmer la rétrogradation

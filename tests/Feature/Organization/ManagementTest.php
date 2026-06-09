@@ -135,4 +135,63 @@ class ManagementTest extends TestCase
         // Ensure the team member is not in the list
         $response->assertDontSee($teamMember->name);
     }
+
+    public function test_organization_admin_can_schedule_downgrade_to_pro()
+    {
+        $this->organization->update([
+            'subscription_plan' => 'enterprise',
+            'subscription_expires_at' => now()->addDays(30),
+            'auto_renew' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)->post($this->getOrgUrl('organization.subscriptions.downgrade'), [
+            'to' => 'pro',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->organization->refresh();
+        $this->assertEquals('enterprise', $this->organization->subscription_plan);
+        $this->assertFalse($this->organization->auto_renew);
+        $this->assertEquals('pro', $this->organization->pending_downgrade_to);
+    }
+
+    public function test_organization_admin_cannot_downgrade_to_higher_plan()
+    {
+        $this->organization->update([
+            'subscription_plan' => 'pro',
+            'subscription_expires_at' => now()->addDays(30),
+            'auto_renew' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)->post($this->getOrgUrl('organization.subscriptions.downgrade'), [
+            'to' => 'enterprise',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+
+        $this->organization->refresh();
+        $this->assertTrue($this->organization->auto_renew);
+        $this->assertNull($this->organization->pending_downgrade_to);
+    }
+
+    public function test_command_downgrades_to_scheduled_plan_upon_expiration()
+    {
+        $this->organization->update([
+            'subscription_plan' => 'enterprise',
+            'subscription_expires_at' => now()->subDay(),
+            'auto_renew' => false,
+            'pending_downgrade_to' => 'pro',
+        ]);
+
+        $this->artisan('organizations:downgrade-expired')
+            ->assertExitCode(0);
+
+        $this->organization->refresh();
+        $this->assertEquals('pro', $this->organization->subscription_plan);
+        $this->assertNull($this->organization->subscription_expires_at);
+        $this->assertNull($this->organization->pending_downgrade_to);
+    }
 }

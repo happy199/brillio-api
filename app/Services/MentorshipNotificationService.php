@@ -450,13 +450,13 @@ class MentorshipNotificationService
     }
 
     /**
-     * Notifier une organisation qu'elle a été rétrogradée au plan gratuit
+     * Notifier une organisation qu'elle a été rétrogradée
      */
-    public function sendSubscriptionDowngradedNotification(\App\Models\Organization $organization)
+    public function sendSubscriptionDowngradedNotification(\App\Models\Organization $organization, string $targetPlan = 'free')
     {
         if ($organization->contact_email) {
             $renewUrl = route('organization.subscriptions.index');
-            Mail::to($organization->contact_email)->send(new SubscriptionDowngradedMail($organization, $renewUrl));
+            Mail::to($organization->contact_email)->send(new SubscriptionDowngradedMail($organization, $renewUrl, $targetPlan));
         }
     }
 

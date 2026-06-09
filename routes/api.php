@@ -36,8 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/payout-methods', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'getPayoutMethods']);
         Route::post('/payout/request', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'requestPayout']);
         Route::get('/payout-requests', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'getPayoutRequests']);
-    }
-    );
+        Route::post('/payout/{payout}/cancel', [\App\Http\Controllers\Api\Mentor\PayoutController::class, 'cancelPayout']);
+    });
 
     // V1 Resources
     Route::prefix('v1')->group(function () {

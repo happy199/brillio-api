@@ -54,6 +54,8 @@ class PayoutRequest extends Model
 
     const STATUS_FAILED = 'failed';
 
+    const STATUS_CANCELLED = 'cancelled';
+
     /**
      * Scope pour obtenir les payouts par statut
      */
