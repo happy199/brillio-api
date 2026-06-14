@@ -558,6 +558,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('resources/{resource}/unpublish', [\App\Http\Controllers\Admin\ResourceController::class, 'unpublish'])->name('resources.unpublish');
 
         // Monétisation
+        Route::post('comptabilite/transactions/{id}/renvoyer-facture', [\App\Http\Controllers\Admin\AccountingController::class, 'resendInvoice'])->name('accounting.resend-invoice');
         Route::get('comptabilite/historique', [\App\Http\Controllers\Admin\AccountingController::class, 'history'])->name('accounting.history');
         Route::get('comptabilite', [\App\Http\Controllers\Admin\AccountingController::class, 'index'])->name('accounting.index');
         Route::get('monetisation', [MonetizationController::class, 'index'])->name('monetization.index');
