@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>Facture Brillio</title>
@@ -12,44 +13,54 @@
             margin: 0;
             padding: 20px;
         }
+
         .header {
             width: 100%;
             border-bottom: 2px solid #6B46C1;
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
+
         .logo {
             color: #6B46C1;
             font-size: 32px;
             font-weight: bold;
             margin: 0;
         }
-        .company-details, .client-details {
+
+        .company-details,
+        .client-details {
             width: 50%;
             display: inline-block;
             vertical-align: top;
         }
+
         .client-details {
             text-align: right;
         }
+
         .title {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 5px;
             color: #1F2937;
         }
+
         .invoice-meta {
             margin-bottom: 40px;
             width: 100%;
         }
+
         .invoice-meta td {
             padding: 5px 0;
         }
+
         .items-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
         }
+
         .items-table th {
             background-color: #F3F4F6;
             color: #4B5563;
@@ -57,18 +68,22 @@
             text-align: left;
             border-bottom: 2px solid #E5E7EB;
         }
+
         .items-table td {
             padding: 15px 12px;
             border-bottom: 1px solid #E5E7EB;
         }
+
         .total-row td {
             font-weight: bold;
             font-size: 16px;
             background-color: #F9FAFB;
         }
+
         .text-right {
             text-align: right;
         }
+
         .footer {
             margin-top: 50px;
             text-align: center;
@@ -79,6 +94,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <table role="presentation" class="header">
@@ -87,9 +103,11 @@
                 <h1 class="logo">Brillio Africa</h1>
                 <p style="margin: 5px 0 0 0; color: #6B7280;">Le carrefour de l'orientation</p>
                 <br>
-                <div style="color: #4B5563;">
-                    Brillio Africa<br>
-                    Cotonou, Bénin<br>
+                <div style="color: #4B5563; line-height: 1.4; font-size: 13px;">
+                    <strong>Brillio Africa SARL</strong><br>
+                    Fidjrossè-Kpota, Cotonou, Bénin<br>
+                    IFU : 3202653526854<br>
+                    RCCM : RB/COT/26 B 42787<br>
                     Téléphone : +229 01 66 30 17 36<br>
                     Email : contact@brillio.africa
                 </div>
@@ -98,7 +116,8 @@
                 <h2 class="title">FACTURE</h2>
                 <div style="color: #4B5563;">
                     <strong>Numéro :</strong> {{ $transaction->moneroo_transaction_id }}<br>
-                    <strong>Date :</strong> {{ $transaction->completed_at ? $transaction->completed_at->format('d/m/Y') : now()->format('d/m/Y') }}<br>
+                    <strong>Date :</strong>
+                    {{ $transaction->completed_at ? $transaction->completed_at->format('d/m/Y') : now()->format('d/m/Y') }}<br>
                     <strong>Statut :</strong> <span style="color: #6B46C1; font-weight: bold;">PAYÉE</span>
                 </div>
             </td>
@@ -111,7 +130,7 @@
         <p style="margin: 5px 0 0 0; color: #4B5563;">
             {{ $entity->contact_email ?? $entity->email ?? '' }}<br>
             @if(isset($entity->country))
-                {{ $entity->city ? $entity->city.', ' : '' }}{{ $entity->country }}
+                {{ $entity->city ? $entity->city . ', ' : '' }}{{ $entity->country }}
             @endif
         </p>
     </div>
@@ -128,7 +147,8 @@
                 <td>
                     <strong>{{ $transaction->metadata['description'] ?? 'Achat sur Brillio' }}</strong>
                     @if($transaction->credits_amount > 0)
-                        <br><span style="color: #6B7280; font-size: 12px;">+ {{ $transaction->credits_amount }} crédits ajoutés au portefeuille</span>
+                        <br><span style="color: #6B7280; font-size: 12px;">+ {{ $transaction->credits_amount }} crédits
+                            ajoutés au portefeuille</span>
                     @endif
                 </td>
                 <td class="text-right">
@@ -137,11 +157,13 @@
             </tr>
             <tr>
                 <td class="text-right" style="padding-top: 30px;">Sous-total :</td>
-                <td class="text-right" style="padding-top: 30px;">{{ number_format($transaction->amount, 0, ',', ' ') }} {{ $transaction->currency }}</td>
+                <td class="text-right" style="padding-top: 30px;">{{ number_format($transaction->amount, 0, ',', ' ') }}
+                    {{ $transaction->currency }}</td>
             </tr>
             <tr class="total-row">
                 <td class="text-right">TOTAL PAYÉ :</td>
-                <td class="text-right" style="color: #6B46C1;">{{ number_format($transaction->amount, 0, ',', ' ') }} {{ $transaction->currency }}</td>
+                <td class="text-right" style="color: #6B46C1;">{{ number_format($transaction->amount, 0, ',', ' ') }}
+                    {{ $transaction->currency }}</td>
             </tr>
         </tbody>
     </table>
@@ -151,10 +173,17 @@
         <strong>Moyen utilisé :</strong> {{ $transaction->metadata['payment_method'] ?? 'En ligne' }}
     </div>
 
-    <div class="footer">
-        Ceci est une facture générée électroniquement et est valide sans signature.<br>
-        Merci de votre confiance. L'équipe Brillio Africa.
+    <div class="footer"
+        style="margin-top: 60px; font-size: 10px; line-height: 1.6; border-top: 1px solid #E5E7EB; padding-top: 15px; text-align: center; color: #6B7280;">
+        <strong>Brillio Africa SARL</strong> • Capital Social : 2 000 000 FCFA • RCCM : RB/COT/26 B 42787 du 13/04/2026
+        • IFU : 3202653526854<br>
+        Régime fiscal : Micro et Petites Entreprises • Centre des impôts : CIPE 4 Cotonou<br>
+        Adresse : N° DE PARCELLE G MAISON RAZAKY TIDJANI, Fidjrossè-Kpota, Cotonou, Bénin<br>
+        Téléphone : +229 01 66 30 17 36 • Email : contact@brillio.africa<br>
+        <span style="font-size: 9px; color: #9CA3AF; display: block; margin-top: 10px;">Ceci est une facture générée
+            électroniquement et est valide sans signature. Merci de votre confiance.</span>
     </div>
 
 </body>
+
 </html>

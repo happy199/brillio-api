@@ -198,6 +198,14 @@ class Organization extends Model
     }
 
     /**
+     * Get the organization email (alias to contact_email).
+     */
+    public function getEmailAttribute(): ?string
+    {
+        return $this->contact_email;
+    }
+
+    /**
      * Get count of pending invitations.
      */
     public function getPendingInvitationsCountAttribute(): int
