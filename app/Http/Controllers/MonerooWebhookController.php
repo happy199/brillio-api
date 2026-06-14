@@ -166,7 +166,8 @@ class MonerooWebhookController extends Controller
 
             // Send Official Invoice & Receipt to Client
             try {
-                Mail::to($entity->email)->send(new PaymentReceiptMail($transaction, $entity));
+                $recipientEmail = $entity->email ?: ($entity->contact_email ?? $user->email);
+                Mail::to($recipientEmail)->send(new PaymentReceiptMail($transaction, $entity));
             } catch (\Exception $e) {
                 Log::error('Erreur envoi facture client', ['error' => $e->getMessage()]);
             }
