@@ -177,6 +177,19 @@
                         </template>
                     </div>
                 </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Numéro de téléphone <span class="text-red-500">*</span></label>
+                    <div class="flex rounded-xl shadow-sm">
+                        <span class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-200 bg-gray-50 text-gray-500 font-medium sm:text-sm" x-text="phonePrefix"></span>
+                        <input type="tel" x-model="formData.phone" @input="validatePhone()" required
+                            :placeholder="phonePlaceholder"
+                            class="flex-1 block w-full min-w-0 rounded-none rounded-r-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 px-4 py-3 sm:text-sm">
+                    </div>
+                    <input type="hidden" name="phone" :value="formData.phone ? formData.phone_prefix + formData.phone.replace(/\D/g, '') : ''">
+                    <p class="mt-1 text-xs text-gray-500" x-show="phoneHelpText" x-text="phoneHelpText"></p>
+                    <p class="mt-1 text-sm text-red-600" x-show="phoneError" x-text="phoneError"></p>
+                </div>
             </div>
 
             <!-- Error message for step 0 -->
@@ -450,6 +463,8 @@
                     birth_date: '',
                     country: '',
                     city: '',
+                    phone: '',
+                    phone_prefix: '',
                     education_level: '',
                     current_situation: '',
                     current_situation_other: '',
@@ -464,6 +479,68 @@
                 ageError: false,
                 maxDate: new Date().toISOString().split('T')[0], // Aujourd'hui
                 minDate: new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0], // 100 ans en arrière
+
+                phonePrefix: '+',
+                phonePlaceholder: 'Numéro de téléphone',
+                phoneHelpText: '',
+                phoneError: '',
+
+                countryConfigs: {
+                    'Algerie': { code: '+213', lengths: [9], placeholder: 'Ex: 5 12 34 56 78' },
+                    'Angola': { code: '+244', lengths: [9], placeholder: 'Ex: 912 345 678' },
+                    'Benin': { code: '+229', lengths: [8, 10], placeholder: 'Ex: 01 02 03 04 05' },
+                    'Botswana': { code: '+267', lengths: [7, 8], placeholder: 'Ex: 71 234 567' },
+                    'Burkina Faso': { code: '+226', lengths: [8], placeholder: 'Ex: 70 12 34 56' },
+                    'Burundi': { code: '+257', lengths: [8], placeholder: 'Ex: 71 23 45 67' },
+                    'Cap-Vert': { code: '+238', lengths: [7], placeholder: 'Ex: 991 23 45' },
+                    'Cameroun': { code: '+237', lengths: [9], placeholder: 'Ex: 6 12 34 56 78' },
+                    'Centrafrique': { code: '+236', lengths: [8], placeholder: 'Ex: 70 12 34 56' },
+                    'Tchad': { code: '+235', lengths: [8], placeholder: 'Ex: 66 12 34 56' },
+                    'Comores': { code: '+269', lengths: [7], placeholder: 'Ex: 321 23 45' },
+                    'Congo': { code: '+242', lengths: [7, 9], placeholder: 'Ex: 05 123 4567' },
+                    'RD Congo': { code: '+243', lengths: [9], placeholder: 'Ex: 81 234 5678' },
+                    'Djibouti': { code: '+253', lengths: [8], placeholder: 'Ex: 77 12 34 56' },
+                    'Egypte': { code: '+20', lengths: [9, 10, 11], placeholder: 'Ex: 10 1234 5678' },
+                    'Guinee Equatoriale': { code: '+240', lengths: [9], placeholder: 'Ex: 222 123 456' },
+                    'Erythree': { code: '+291', lengths: [7], placeholder: 'Ex: 7 123 456' },
+                    'Eswatini': { code: '+268', lengths: [8], placeholder: 'Ex: 7612 3456' },
+                    'Ethiopie': { code: '+251', lengths: [9], placeholder: 'Ex: 91 234 5678' },
+                    'Gabon': { code: '+241', lengths: [7, 8, 9], placeholder: 'Ex: 66 12 34 56' },
+                    'Gambie': { code: '+220', lengths: [7], placeholder: 'Ex: 912 3456' },
+                    'Ghana': { code: '+233', lengths: [9], placeholder: 'Ex: 24 123 4567' },
+                    'Guinee': { code: '+224', lengths: [9], placeholder: 'Ex: 622 12 34 56' },
+                    'Guinee-Bissau': { code: '+245', lengths: [7, 9], placeholder: 'Ex: 95 123 4567' },
+                    'Cote d\'Ivoire': { code: '+225', lengths: [10], placeholder: 'Ex: 07 08 09 10 11' },
+                    'Kenya': { code: '+254', lengths: [9], placeholder: 'Ex: 712 345 678' },
+                    'Lesotho': { code: '+266', lengths: [8], placeholder: 'Ex: 5812 3456' },
+                    'Liberia': { code: '+231', lengths: [7, 9], placeholder: 'Ex: 77 123 4567' },
+                    'Libye': { code: '+218', lengths: [9, 10], placeholder: 'Ex: 91 123 4567' },
+                    'Madagascar': { code: '+261', lengths: [9], placeholder: 'Ex: 32 12 345 67' },
+                    'Malawi': { code: '+265', lengths: [7, 8, 9], placeholder: 'Ex: 888 12 34 56' },
+                    'Mali': { code: '+223', lengths: [8], placeholder: 'Ex: 66 12 34 56' },
+                    'Mauritanie': { code: '+222', lengths: [8], placeholder: 'Ex: 45 12 34 56' },
+                    'Maurice': { code: '+230', lengths: [7, 8], placeholder: 'Ex: 5123 4567' },
+                    'Maroc': { code: '+212', lengths: [9], placeholder: 'Ex: 6 12 34 56 78' },
+                    'Mozambique': { code: '+258', lengths: [9], placeholder: 'Ex: 82 123 4567' },
+                    'Namibie': { code: '+264', lengths: [8, 9], placeholder: 'Ex: 81 123 4567' },
+                    'Niger': { code: '+227', lengths: [8], placeholder: 'Ex: 90 12 34 56' },
+                    'Nigeria': { code: '+234', lengths: [10], placeholder: 'Ex: 803 123 4567' },
+                    'Rwanda': { code: '+250', lengths: [9], placeholder: 'Ex: 788 123 456' },
+                    'Sao Tome-et-Principe': { code: '+239', lengths: [7], placeholder: 'Ex: 990 12 34' },
+                    'Senegal': { code: '+221', lengths: [9], placeholder: 'Ex: 77 123 45 67' },
+                    'Seychelles': { code: '+248', lengths: [7], placeholder: 'Ex: 2 123 456' },
+                    'Sierra Leone': { code: '+232', lengths: [8], placeholder: 'Ex: 76 123 456' },
+                    'Somalie': { code: '+252', lengths: [8, 9], placeholder: 'Ex: 61 123 456' },
+                    'Afrique du Sud': { code: '+27', lengths: [9], placeholder: 'Ex: 82 123 4567' },
+                    'Soudan du Sud': { code: '+211', lengths: [9], placeholder: 'Ex: 912 345 678' },
+                    'Soudan': { code: '+249', lengths: [9], placeholder: 'Ex: 91 234 5678' },
+                    'Tanzanie': { code: '+255', lengths: [9], placeholder: 'Ex: 712 345 678' },
+                    'Togo': { code: '+228', lengths: [8], placeholder: 'Ex: 90 12 34 56' },
+                    'Tunisie': { code: '+216', lengths: [8], placeholder: 'Ex: 98 123 456' },
+                    'Ouganda': { code: '+256', lengths: [9], placeholder: 'Ex: 772 123 456' },
+                    'Zambie': { code: '+260', lengths: [9], placeholder: 'Ex: 955 123 456' },
+                    'Zimbabwe': { code: '+263', lengths: [9], placeholder: 'Ex: 77 123 4567' }
+                },
 
                 // Base de données des principales villes par pays
                 citiesByCountry: {
@@ -531,11 +608,19 @@
                     { value: 'other', label: 'Autre', icon: '✨' },
                 ],
 
+                init() {
+                    if (this.formData.country) {
+                        this.onCountryChange();
+                    }
+                },
+
                 // Validation pour chaque étape
                 get canProceedStep0() {
                     return this.formData.birth_date !== '' &&
                         this.formData.country !== '' &&
                         this.formData.city !== '' &&
+                        this.formData.phone !== '' &&
+                        this.phoneError === '' &&
                         !this.ageError;
                 },
 
@@ -569,6 +654,66 @@
                     return true;
                 },
 
+                validatePhone() {
+                    const country = this.formData.country;
+                    const phone = this.formData.phone;
+                    
+                    if (!country) {
+                        this.phoneError = 'Veuillez sélectionner un pays d\'abord';
+                        return false;
+                    }
+                    
+                    if (!phone) {
+                        this.phoneError = 'Le numéro de téléphone est obligatoire';
+                        return false;
+                    }
+                    
+                    const config = this.countryConfigs[country];
+                    let clean = phone.replace(/\D/g, '');
+                    
+                    if (!config) {
+                        if (clean.length >= 7 && clean.length <= 12) {
+                            this.phoneError = '';
+                            return true;
+                        } else {
+                            this.phoneError = 'Le numéro de téléphone doit contenir entre 7 et 12 chiffres';
+                            return false;
+                        }
+                    }
+                    
+                    // Auto-prepend 0 for Cote d'Ivoire if 9 digits and starts with 1, 5, 7
+                    if (country === 'Cote d\'Ivoire' && clean.length === 9 && ['1', '5', '7'].includes(clean[0])) {
+                        clean = '0' + clean;
+                        this.formData.phone = clean;
+                    }
+                    // Auto-prepend 0 for Benin if 9 digits and starts with 1, 4, 5, 6, 9
+                    if (country === 'Benin' && clean.length === 9 && ['1', '4', '5', '6', '9'].includes(clean[0])) {
+                        clean = '0' + clean;
+                        this.formData.phone = clean;
+                    }
+                    
+                    let isValid = false;
+                    for (let len of config.lengths) {
+                        if (clean.length === len) {
+                            isValid = true;
+                            break;
+                        }
+                        if (clean.length === len + 1 && clean.startsWith('0')) {
+                            isValid = true;
+                            break;
+                        }
+                    }
+                    
+                    if (isValid) {
+                        this.phoneError = '';
+                        return true;
+                    } else {
+                        const expectedStr = config.lengths.join(' ou ');
+                        this.phoneError = 'Format invalide (attendu : ' + expectedStr + ' chiffres)';
+                        return false;
+                    }
+                },
+
                 validateStep() {
                     this.errors['step' + this.currentStep] = '';
 
@@ -584,6 +729,14 @@
                             }
                             if (!this.formData.city) {
                                 this.errors.step0 = 'Veuillez saisir votre ville';
+                                return false;
+                            }
+                            if (!this.formData.phone) {
+                                this.errors.step0 = 'Veuillez saisir votre numéro de téléphone';
+                                return false;
+                            }
+                            if (!this.validatePhone()) {
+                                this.errors.step0 = this.phoneError || 'Le numéro de téléphone est invalide';
                                 return false;
                             }
                             if (this.ageError) {
@@ -663,6 +816,24 @@
                     // Réinitialiser la ville quand le pays change
                     this.formData.city = '';
                     this.filteredCities = [];
+                    
+                    // Réinitialiser le téléphone
+                    this.formData.phone = '';
+                    this.phoneError = '';
+                    
+                    // Mettre à jour l'indicatif
+                    const config = this.countryConfigs[this.formData.country];
+                    if (config) {
+                        this.formData.phone_prefix = config.code;
+                        this.phonePrefix = config.code;
+                        this.phonePlaceholder = config.placeholder;
+                        this.phoneHelpText = 'Format attendu : ' + config.lengths.join(' ou ') + ' chiffres';
+                    } else {
+                        this.formData.phone_prefix = '';
+                        this.phonePrefix = '+';
+                        this.phonePlaceholder = 'Numéro de téléphone';
+                        this.phoneHelpText = '';
+                    }
                 },
 
                 filterCities() {
