@@ -70,7 +70,7 @@ class ResendInvoiceCommand extends Command
         $this->info("Envoi de la facture pour la transaction {$transaction->moneroo_transaction_id} à {$recipientEmail}...");
 
         try {
-            Mail::to($recipientEmail)->send(new PaymentReceiptMail($transaction, $entity));
+            Mail::to($recipientEmail)->sendNow(new PaymentReceiptMail($transaction, $entity));
             $this->info('Facture envoyée avec succès !');
 
             return 0;

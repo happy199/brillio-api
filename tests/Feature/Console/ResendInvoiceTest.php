@@ -42,7 +42,7 @@ class ResendInvoiceTest extends TestCase
             ->expectsOutput('Facture envoyée avec succès !')
             ->assertExitCode(0);
 
-        Mail::assertQueued(PaymentReceiptMail::class, function ($mail) use ($user) {
+        Mail::assertSent(PaymentReceiptMail::class, function ($mail) use ($user) {
             return $mail->hasTo('user@example.com') && $mail->entity->id === $user->id;
         });
     }
@@ -83,7 +83,7 @@ class ResendInvoiceTest extends TestCase
             ->expectsOutput('Facture envoyée avec succès !')
             ->assertExitCode(0);
 
-        Mail::assertQueued(PaymentReceiptMail::class, function ($mail) use ($org) {
+        Mail::assertSent(PaymentReceiptMail::class, function ($mail) use ($org) {
             return $mail->hasTo('org@example.com') && $mail->entity->id === $org->id;
         });
     }
@@ -114,7 +114,7 @@ class ResendInvoiceTest extends TestCase
             ->expectsOutput('Facture envoyée avec succès !')
             ->assertExitCode(0);
 
-        Mail::assertQueued(PaymentReceiptMail::class, function ($mail) {
+        Mail::assertSent(PaymentReceiptMail::class, function ($mail) {
             return $mail->hasTo('override@example.com');
         });
     }

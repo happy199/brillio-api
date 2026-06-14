@@ -41,6 +41,10 @@
                             class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Montant
                         </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -91,10 +95,22 @@
                             ',', ' ') }}
                             FCFA
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                            @if($transaction['type'] === 'in')
+                            <form action="{{ route('admin.accounting.resend-invoice', $transaction['id']) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" 
+                                    class="inline-flex items-center px-3 py-1.5 border border-indigo-600 text-xs font-medium rounded text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                                    title="Renvoyer la facture par email">
+                                    <i class="fas fa-paper-plane mr-1.5"></i> Renvoyer la facture
+                                </button>
+                            </form>
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                        <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                             Aucune transaction trouvée.
                         </td>
                     </tr>

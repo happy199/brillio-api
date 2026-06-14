@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\Billing\PaymentReceiptMail;
 use App\Models\MonerooTransaction;
 use App\Models\PayoutRequest;
 use App\Models\WalletTransaction;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class AccountingController extends Controller
 {
@@ -96,6 +98,7 @@ class AccountingController extends Controller
             ->get()
             ->map(function ($t) {
                 return [
+                    'id' => $t->id,
                     'date' => $t->completed_at,
                     'type' => 'in', // Entrée
                     'label' => 'Achat Crédits',
@@ -110,6 +113,7 @@ class AccountingController extends Controller
             ->get()
             ->map(function ($p) {
                 return [
+                    'id' => $p->id,
                     'date' => $p->completed_at,
                     'type' => 'out', // Sortie
                     'label' => 'Retrait Mentor',
@@ -138,6 +142,43 @@ class AccountingController extends Controller
         );
 
         return view('admin.accounting.history', compact('transactions'));
+    }
+
+    public function resendInvoice($id)
+    {
+        $transaction = MonerooTransaction::with(['user', 'user.organization'])->find($id);
+
+        if (! $transaction) {
+            return redirect()->back()->with('error', 'Transaction introuvable.');
+        }
+
+        $user = $transaction->user;
+        if (! $user) {
+            return redirect()->back()->with('error', 'Utilisateur introuvable pour cette transaction.');
+        }
+
+        $isOrgTransaction = ($transaction->metadata['user_type'] ?? '') === 'organization';
+        $entity = $user;
+
+        if ($isOrgTransaction && $user->organization) {
+            $entity = $user->organization;
+        }
+
+        $recipientEmail = ($entity instanceof \App\Models\Organization)
+            ? ($entity->contact_email ?: $user->email)
+            : $entity->email;
+
+        if (empty($recipientEmail)) {
+            return redirect()->back()->with('error', 'Impossible de déterminer l\'adresse email du destinataire.');
+        }
+
+        try {
+            Mail::to($recipientEmail)->sendNow(new PaymentReceiptMail($transaction, $entity));
+
+            return redirect()->back()->with('success', "La facture a bien été renvoyée à l'adresse {$recipientEmail}.");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', "Une erreur est survenue lors de l'envoi de la facture : ".$e->getMessage());
+        }
     }
 
     private function getChartData($startDate, $endDate)

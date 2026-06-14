@@ -158,12 +158,14 @@
             <tr>
                 <td class="text-right" style="padding-top: 30px;">Sous-total :</td>
                 <td class="text-right" style="padding-top: 30px;">{{ number_format($transaction->amount, 0, ',', ' ') }}
-                    {{ $transaction->currency }}</td>
+                    {{ $transaction->currency }}
+                </td>
             </tr>
             <tr class="total-row">
                 <td class="text-right">TOTAL PAYÉ :</td>
                 <td class="text-right" style="color: #6B46C1;">{{ number_format($transaction->amount, 0, ',', ' ') }}
-                    {{ $transaction->currency }}</td>
+                    {{ $transaction->currency }}
+                </td>
             </tr>
         </tbody>
     </table>
@@ -178,7 +180,7 @@
         <strong>Brillio Africa SARL</strong> • Capital Social : 2 000 000 FCFA • RCCM : RB/COT/26 B 42787 du 13/04/2026
         • IFU : 3202653526854<br>
         Régime fiscal : Micro et Petites Entreprises • Centre des impôts : CIPE 4 Cotonou<br>
-        Adresse : N° DE PARCELLE G MAISON RAZAKY TIDJANI, Fidjrossè-Kpota, Cotonou, Bénin<br>
+        Adresse : Fidjrossè-Kpota, Cotonou, Bénin<br>
         Téléphone : +229 01 66 30 17 36 • Email : contact@brillio.africa<br>
         <span style="font-size: 9px; color: #9CA3AF; display: block; margin-top: 10px;">Ceci est une facture générée
             électroniquement et est valide sans signature. Merci de votre confiance.</span>
