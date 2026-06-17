@@ -44,14 +44,14 @@
             <!-- Masonry Grid -->
             <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6 mx-auto">
                 @foreach($advertisements as $ad)
-                    <div class="break-inside-avoid group relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
+                    <div class="break-inside-avoid group relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                          @click="activeImage = '{{ asset('storage/' . $ad->image_path) }}'; activeTitle = '{{ $ad->title ?? 'Annonce Brillio' }}'; activeUrl = '{{ $ad->link_url }}'">
                         
                         <!-- Image Wrapper -->
                         <div class="relative overflow-hidden bg-gray-50">
                             <img src="{{ asset('storage/' . $ad->image_path) }}" 
                                  alt="{{ $ad->title ?? 'Publicité' }}" 
-                                 class="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                                 class="w-full h-auto block group-hover:scale-103 transition-transform duration-500 ease-out">
                             
                             <!-- Overlay on hover -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
@@ -69,34 +69,6 @@
                                     <span class="text-xs text-white/70">Agrandir le visuel</span>
                                 @endif
                             </div>
-                        </div>
-
-                        <!-- Card Footer / Info -->
-                        <div class="p-4 bg-white flex items-center justify-between border-t border-gray-50">
-                            <div class="flex items-center space-x-2">
-                                @if($ad->organization)
-                                    @if($ad->organization->logo_url)
-                                        <img src="{{ $ad->organization->logo_url }}" alt="{{ $ad->organization->name }}" class="w-6 h-6 rounded-full object-cover">
-                                    @else
-                                        <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 font-bold flex items-center justify-center text-[10px]">
-                                            {{ substr($ad->organization->name, 0, 1) }}
-                                        </div>
-                                    @endif
-                                    <span class="text-xs font-semibold text-gray-700 truncate max-w-[120px]">{{ $ad->organization->name }}</span>
-                                @else
-                                    <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center text-[10px]">
-                                        B
-                                    </div>
-                                    <span class="text-xs font-semibold text-gray-700">Brillio</span>
-                                @endif
-                            </div>
-                            
-                            @if($ad->link_url)
-                                <a href="{{ $ad->link_url }}" target="_blank" @click.stop 
-                                   class="text-[10px] font-bold text-primary-600 hover:text-primary-800 bg-primary-50 px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors">
-                                    Visiter
-                                </a>
-                            @endif
                         </div>
                     </div>
                 @endforeach
