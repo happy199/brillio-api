@@ -95,4 +95,8 @@ return [
         'webhook_secret' => env('JITSI_WEBHOOK_SECRET'),
     ],
 
+    'whatsapp' => [
+        'group_url' => env('WHATSAPP_GROUP_URL', 'https://chat.whatsapp.com/mock-whatsapp-group-link'),
+    ],
+
 ];

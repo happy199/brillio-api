@@ -13,6 +13,12 @@ Schedule::job(new \App\Jobs\SendProfileCompletionReminders)
     ->at('09:00')
     ->timezone('Africa/Abidjan');
 
+// Missing phone reminders: run every Sunday at 9 AM
+Schedule::job(new \App\Jobs\SendMissingPhoneReminders)
+    ->sundays()
+    ->at('09:00')
+    ->timezone('Africa/Abidjan');
+
 // Weekly new mentors digest: run every Friday at 4 PM
 Schedule::job(new \App\Jobs\SendNewMentorsDigest)
     ->fridays()
