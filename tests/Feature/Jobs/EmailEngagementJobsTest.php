@@ -106,6 +106,8 @@ class EmailEngagementJobsTest extends TestCase
         Queue::assertPushed(SendCampaignEmailJob::class, 3);
     }
 
+    private const TARGET_EMAIL = 'target@example.com';
+
     public function test_send_campaign_email_job_sends_email_and_updates_campaign_stats()
     {
         Mail::fake();
@@ -116,7 +118,7 @@ class EmailEngagementJobsTest extends TestCase
             'subject' => 'Test Campaign',
             'body' => 'Hello team!',
             'type' => 'newsletter',
-            'recipient_emails' => ['target@example.com'],
+            'recipient_emails' => [self::TARGET_EMAIL],
             'recipients_count' => 1,
             'status' => 'sending',
             'sent_by' => $user->id,
@@ -125,11 +127,11 @@ class EmailEngagementJobsTest extends TestCase
         ]);
 
         // Run the single send job
-        (new SendCampaignEmailJob($campaign, 'target@example.com'))->handle();
+        (new SendCampaignEmailJob($campaign, self::TARGET_EMAIL))->handle();
 
         // Verify email was sent
         Mail::assertSent(CampaignNewsletterMail::class, function ($mail) {
-            return $mail->hasTo('target@example.com');
+            return $mail->hasTo(self::TARGET_EMAIL);
         });
 
         // Verify campaign statistics updated

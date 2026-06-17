@@ -97,13 +97,11 @@ class AnalyticsController extends Controller
     /**
      * Dashboard analytics principal
      */
-    public function index(Request $request)
+    /**
+     * Compile toutes les statistiques du dashboard pour une période donnée
+     */
+    private function compileDashboardStats(Carbon $start, Carbon $end): array
     {
-        $dateRange = $this->getDateRange($request);
-        $start = $dateRange['start'];
-        $end = $dateRange['end'];
-
-        // Statistiques principales (période sélectionnée)
         $stats = [
             'total_users' => User::where('is_admin', false)->count(),
             'new_users_period' => User::where('is_admin', false)
@@ -212,6 +210,20 @@ class AnalyticsController extends Controller
                 ->limit(20)
                 ->get(),
         ];
+
+        return $stats;
+    }
+
+    /**
+     * Dashboard analytics principal
+     */
+    public function index(Request $request)
+    {
+        $dateRange = $this->getDateRange($request);
+        $start = $dateRange['start'];
+        $end = $dateRange['end'];
+
+        $stats = $this->compileDashboardStats($start, $end);
 
         // Récupération globale des situations/intérêts pour les filtres
         $allSituations = [
