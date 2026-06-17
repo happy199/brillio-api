@@ -203,4 +203,14 @@ class PageController extends Controller
 
         return view('public.advertisements', compact('advertisements'));
     }
+
+    /**
+     * Increment the click counter for an advertisement
+     */
+    public function trackAdvertisementClick(\App\Models\Advertisement $advertisement)
+    {
+        $advertisement->increment('clicks');
+
+        return response()->json(['success' => true, 'clicks' => $advertisement->clicks]);
+    }
 }

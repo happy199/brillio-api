@@ -50,4 +50,25 @@ class PublicAdvertisementTest extends TestCase
         $response->assertDontSee('Pending Ad Title');
         $response->assertDontSee('Rejected Ad Title');
     }
+
+    public function test_clicking_advertisement_increments_clicks_count()
+    {
+        $ad = Advertisement::create([
+            'title' => 'Track Me',
+            'image_path' => 'advertisements/track.webp',
+            'status' => Advertisement::STATUS_APPROVED,
+        ]);
+
+        $this->assertEquals(0, $ad->clicks);
+
+        $response = $this->post(route('public.advertisements.click', $ad));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'clicks' => 1,
+        ]);
+
+        $this->assertEquals(1, $ad->fresh()->clicks);
+    }
 }

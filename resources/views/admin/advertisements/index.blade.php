@@ -117,6 +117,12 @@
                         <div class="text-xs text-gray-500 flex flex-col space-y-1">
                             <span>Soumis par : <strong class="text-gray-700">{{ $ad->creator?->name ?? 'Brillio System' }}</strong></span>
                             <span>Date : {{ $ad->created_at->format('d/m/Y H:i') }}</span>
+                            <span class="inline-flex items-center text-indigo-600 font-semibold mt-1">
+                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                </svg>
+                                {{ $ad->clicks }} {{ $ad->clicks > 1 ? 'clics' : 'clic' }}
+                            </span>
                         </div>
 
                         <!-- Action buttons -->

@@ -79,9 +79,15 @@
 
                         <!-- Date and Actions -->
                         <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                            <span class="text-xs text-gray-500">
-                                Soumis le {{ $ad->created_at->format('d/m/Y') }}
-                            </span>
+                            <div class="flex flex-col space-y-1">
+                                <span class="text-xs text-gray-500">
+                                    Soumis le {{ $ad->created_at->format('d/m/Y') }}
+                                </span>
+                                <span class="inline-flex items-center text-xs font-semibold text-organization-600">
+                                    <i class="fas fa-mouse-pointer mr-1"></i>
+                                    {{ $ad->clicks }} {{ $ad->clicks > 1 ? 'clics' : 'clic' }}
+                                </span>
+                            </div>
                             
                             <div class="flex items-center space-x-4">
                                 <!-- Edit Link -->

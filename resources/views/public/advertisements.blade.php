@@ -138,6 +138,7 @@
         Alpine.data('advertisementGallery', () => ({
             ads: {!! json_encode($advertisements->map(function($ad) {
                 return [
+                    'id' => $ad->id,
                     'image' => asset('storage/' . $ad->image_path),
                     'title' => $ad->title ?? 'Annonce Brillio',
                     'url' => $ad->link_url,
@@ -151,6 +152,16 @@
             
             openAd(index) {
                 this.activeIndex = index;
+                const ad = this.ads[index];
+                if (ad && ad.id) {
+                    fetch(`/publicite/${ad.id}/click`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    }).catch(err => console.error('Failed to track click:', err));
+                }
             },
             
             close() {
@@ -160,12 +171,32 @@
             prev() {
                 if (this.activeIndex > 0) {
                     this.activeIndex--;
+                    const ad = this.activeAd;
+                    if (ad && ad.id) {
+                        fetch(`/publicite/${ad.id}/click`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        }).catch(err => console.error('Failed to track click:', err));
+                    }
                 }
             },
             
             next() {
                 if (this.ads.length - 1 > this.activeIndex) {
                     this.activeIndex++;
+                    const ad = this.activeAd;
+                    if (ad && ad.id) {
+                        fetch(`/publicite/${ad.id}/click`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        }).catch(err => console.error('Failed to track click:', err));
+                    }
                 }
             }
         }));

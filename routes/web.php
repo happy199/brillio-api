@@ -56,6 +56,7 @@ Route::get('/', function () {
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::get('/publicite', [PageController::class, 'advertisements'])->name('public.advertisements');
+Route::post('/publicite/{advertisement}/click', [PageController::class, 'trackAdvertisementClick'])->name('public.advertisements.click');
 Route::post('/contact', [WebsiteContactController::class, 'submit'])->name('contact.submit');
 
 // Newsletter

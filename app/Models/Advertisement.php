@@ -33,6 +33,7 @@ class Advertisement extends Model
         'created_by',
         'validated_by',
         'validated_at',
+        'clicks',
     ];
 
     /**
@@ -42,6 +43,7 @@ class Advertisement extends Model
      */
     protected $casts = [
         'validated_at' => 'datetime',
+        'clicks' => 'integer',
     ];
 
     /**
