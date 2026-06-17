@@ -8,11 +8,12 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Feature\AdvertisementTestHelpers;
 use Tests\TestCase;
 
 class AdvertisementTest extends TestCase
 {
-    use RefreshDatabase;
+    use AdvertisementTestHelpers, RefreshDatabase;
 
     private const NEW_PROPOSAL_TITLE = 'New Proposal';
 
@@ -29,7 +30,7 @@ class AdvertisementTest extends TestCase
             'status' => 'active',
             'slug' => 'test-org',
             'contact_email' => $this->admin->email,
-            'subscription_plan' => 'free', // Test with lowest standard (free) plan
+            'subscription_plan' => 'free',
         ]);
 
         $this->admin->update(['organization_id' => $this->organization->id]);
@@ -44,12 +45,7 @@ class AdvertisementTest extends TestCase
 
     public function test_organization_admin_can_view_advertisements_index()
     {
-        Advertisement::create([
-            'title' => 'My Org Ad',
-            'image_path' => 'advertisements/org.webp',
-            'status' => Advertisement::STATUS_PENDING,
-            'organization_id' => $this->organization->id,
-        ]);
+        $this->makeAd(['title' => 'My Org Ad', 'organization_id' => $this->organization->id]);
 
         $response = $this->actingAs($this->admin)->get($this->getOrgUrl('organization.advertisements.index'));
 
@@ -80,7 +76,6 @@ class AdvertisementTest extends TestCase
 
         $ad = Advertisement::where('title', self::NEW_PROPOSAL_TITLE)->first();
         $this->assertNotNull($ad);
-        // Verify it was converted to webp
         $this->assertStringEndsWith('.webp', $ad->image_path);
         Storage::disk('public')->assertExists($ad->image_path);
     }
@@ -89,10 +84,9 @@ class AdvertisementTest extends TestCase
     {
         Storage::fake('public');
 
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'To Delete',
             'image_path' => 'advertisements/todelete.webp',
-            'status' => Advertisement::STATUS_PENDING,
             'organization_id' => $this->organization->id,
         ]);
 
@@ -109,10 +103,9 @@ class AdvertisementTest extends TestCase
     {
         $otherOrg = Organization::factory()->create(['status' => 'active', 'slug' => 'other-org']);
 
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Other Org Ad',
             'image_path' => 'advertisements/other.webp',
-            'status' => Advertisement::STATUS_PENDING,
             'organization_id' => $otherOrg->id,
         ]);
 
@@ -124,10 +117,9 @@ class AdvertisementTest extends TestCase
 
     public function test_organization_admin_can_view_edit_page()
     {
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Ad to Edit',
             'image_path' => 'advertisements/toedit.webp',
-            'status' => Advertisement::STATUS_PENDING,
             'organization_id' => $this->organization->id,
         ]);
 
@@ -139,7 +131,7 @@ class AdvertisementTest extends TestCase
 
     public function test_organization_admin_can_update_own_advertisement_without_changing_image()
     {
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Old Title',
             'image_path' => 'advertisements/old.webp',
             'status' => Advertisement::STATUS_APPROVED,
@@ -163,10 +155,9 @@ class AdvertisementTest extends TestCase
     public function test_organization_admin_cannot_edit_or_update_other_organization_advertisement()
     {
         $otherOrg = Organization::factory()->create(['status' => 'active', 'slug' => 'other-org']);
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Other Ad',
             'image_path' => 'advertisements/other.webp',
-            'status' => Advertisement::STATUS_PENDING,
             'organization_id' => $otherOrg->id,
         ]);
 

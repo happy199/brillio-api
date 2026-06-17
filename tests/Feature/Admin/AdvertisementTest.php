@@ -8,11 +8,12 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Feature\AdvertisementTestHelpers;
 use Tests\TestCase;
 
 class AdvertisementTest extends TestCase
 {
-    use RefreshDatabase;
+    use AdvertisementTestHelpers, RefreshDatabase;
 
     private const ADMIN_DIRECT_AD_TITLE = 'Admin Direct Ad';
 
@@ -29,10 +30,8 @@ class AdvertisementTest extends TestCase
     public function test_admin_can_view_advertisements_index()
     {
         $organization = Organization::factory()->create();
-        Advertisement::create([
+        $this->makeAd([
             'title' => 'Test Ad',
-            'image_path' => 'advertisements/test.webp',
-            'status' => Advertisement::STATUS_PENDING,
             'organization_id' => $organization->id,
         ]);
 
@@ -73,10 +72,9 @@ class AdvertisementTest extends TestCase
     public function test_admin_can_approve_pending_advertisement()
     {
         $organization = Organization::factory()->create();
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Pending Proposal',
             'image_path' => 'advertisements/pending.webp',
-            'status' => Advertisement::STATUS_PENDING,
             'organization_id' => $organization->id,
         ]);
 
@@ -94,10 +92,9 @@ class AdvertisementTest extends TestCase
     public function test_admin_can_reject_pending_advertisement()
     {
         $organization = Organization::factory()->create();
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Pending Proposal',
             'image_path' => 'advertisements/pending.webp',
-            'status' => Advertisement::STATUS_PENDING,
             'organization_id' => $organization->id,
         ]);
 
@@ -117,7 +114,7 @@ class AdvertisementTest extends TestCase
         Storage::fake('public');
 
         $organization = Organization::factory()->create();
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Delete Me',
             'image_path' => 'advertisements/deleteme.webp',
             'status' => Advertisement::STATUS_APPROVED,
@@ -135,7 +132,7 @@ class AdvertisementTest extends TestCase
 
     public function test_admin_can_view_edit_advertisement_page()
     {
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Ad to Edit',
             'image_path' => 'advertisements/to-edit.webp',
             'status' => Advertisement::STATUS_APPROVED,
@@ -149,7 +146,7 @@ class AdvertisementTest extends TestCase
 
     public function test_admin_can_update_advertisement_without_changing_image()
     {
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Old Title',
             'image_path' => self::OLD_IMAGE_PATH,
             'link_url' => 'https://example.com/old',
@@ -174,7 +171,7 @@ class AdvertisementTest extends TestCase
     {
         Storage::fake('public');
 
-        $ad = Advertisement::create([
+        $ad = $this->makeAd([
             'title' => 'Old Title',
             'image_path' => self::OLD_IMAGE_PATH,
             'status' => Advertisement::STATUS_APPROVED,
@@ -182,7 +179,7 @@ class AdvertisementTest extends TestCase
 
         Storage::disk('public')->put(self::OLD_IMAGE_PATH, 'old content');
 
-        $newFile = \Illuminate\Http\UploadedFile::fake()->image('new-image.jpg', 600, 400);
+        $newFile = UploadedFile::fake()->image('new-image.jpg', 600, 400);
 
         $response = $this->actingAs($this->admin)->put(route('admin.advertisements.update', $ad), [
             'title' => 'Updated Title with Image',
