@@ -96,7 +96,7 @@ return [
     ],
 
     'whatsapp' => [
-        'group_url' => env('WHATSAPP_GROUP_URL', 'https://chat.whatsapp.com/mock-whatsapp-group-link'),
+        'group_url' => env('WHATSAPP_GROUP_URL', 'https://chat.whatsapp.com/LhQzbQlUG3QBeeSRlGlZnH'),
     ],
 
 ];

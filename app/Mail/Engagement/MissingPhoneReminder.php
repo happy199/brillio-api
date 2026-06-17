@@ -27,7 +27,7 @@ class MissingPhoneReminder extends Mailable implements ShouldQueue
     {
         $this->user = $user;
         $this->whatsappChannelUrl = 'https://whatsapp.com/channel/0029VbCwysMKmCPOHlfDBB0g';
-        $this->whatsappGroupUrl = config('services.whatsapp.group_url', 'https://chat.whatsapp.com/mock-whatsapp-group-link');
+        $this->whatsappGroupUrl = config('services.whatsapp.group_url', 'https://chat.whatsapp.com/LhQzbQlUG3QBeeSRlGlZnH');
     }
 
     /**
