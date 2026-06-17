@@ -7,15 +7,39 @@
 
 @section('content')
 <div class="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white py-24 sm:py-32" x-data="{ 
-    activeImage: null, 
-    activeTitle: '', 
-    activeUrl: '',
+    ads: {!! json_encode($advertisements->map(function($ad) {
+        return [
+            'image' => asset('storage/' . $ad->image_path),
+            'title' => $ad->title ?? 'Annonce Brillio',
+            'url' => $ad->link_url,
+        ];
+    })->values(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!},
+    activeIndex: null,
+    
+    get activeAd() {
+        return this.activeIndex !== null ? this.ads[this.activeIndex] : null;
+    },
+    
+    openAd(index) {
+        this.activeIndex = index;
+    },
+    
     close() {
-        this.activeImage = null;
-        this.activeTitle = '';
-        this.activeUrl = '';
+        this.activeIndex = null;
+    },
+    
+    prev() {
+        if (this.activeIndex > 0) {
+            this.activeIndex--;
+        }
+    },
+    
+    next() {
+        if (this.activeIndex < this.ads.length - 1) {
+            this.activeIndex++;
+        }
     }
-}" @keydown.escape.window="close()">
+}" @keydown.escape.window="close()" @keydown.left.window="prev()" @keydown.right.window="next()">
     
     <!-- Background elements -->
     <div class="absolute inset-y-0 right-0 -z-10 w-full overflow-hidden ring-1 ring-gray-100 lg:row-span-4 lg:row-start-1 lg:bg-gray-100/10">
@@ -45,7 +69,7 @@
             <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6 mx-auto">
                 @foreach($advertisements as $ad)
                     <div class="break-inside-avoid group relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-                         @click="activeImage = '{{ str_replace("'", "\'", asset('storage/' . $ad->image_path)) }}'; activeTitle = '{{ str_replace("'", "\'", $ad->title ?? 'Annonce Brillio') }}'; activeUrl = '{{ str_replace("'", "\'", $ad->link_url) }}'">
+                         @click="openAd({{ $loop->index }})">
                         
                         <!-- Image Wrapper -->
                         <div class="relative overflow-hidden bg-gray-50">
@@ -77,7 +101,7 @@
     </div>
 
     <!-- Lightbox Overlay Modal -->
-    <div x-show="activeImage" 
+    <div x-show="activeIndex !== null" 
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -88,22 +112,44 @@
          style="display: none;">
         
         <!-- Close Button (Top Right) -->
-        <button @click="close()" class="absolute top-6 right-6 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all duration-200">
+        <button @click="close()" class="absolute top-6 right-6 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all duration-200 z-50 focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
         </button>
 
+        <!-- Left Nav Arrow (Vertically Centered) -->
+        <button @click="prev()" 
+                :disabled="activeIndex === 0"
+                :class="activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'opacity-100 hover:bg-white/20 hover:scale-105'"
+                class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white bg-white/15 p-3 md:p-4 rounded-full transition-all duration-200 z-50 focus:outline-none"
+                title="Précédent">
+            <svg class="w-6 h-6 md:w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </button>
+
+        <!-- Right Nav Arrow (Vertically Centered) -->
+        <button @click="next()" 
+                :disabled="activeIndex === ads.length - 1"
+                :class="activeIndex === ads.length - 1 ? 'opacity-20 cursor-not-allowed' : 'opacity-100 hover:bg-white/20 hover:scale-105'"
+                class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white bg-white/15 p-3 md:p-4 rounded-full transition-all duration-200 z-50 focus:outline-none"
+                title="Suivant">
+            <svg class="w-6 h-6 md:w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </button>
+
         <!-- Image Container -->
         <div class="relative max-w-4xl w-full flex flex-col items-center" @click.away="close()">
-            <img :src="activeImage" :alt="activeTitle" class="max-h-[75vh] w-auto max-w-full rounded-lg shadow-2xl border border-white/10 object-contain">
+            <img :src="activeAd ? activeAd.image : ''" :alt="activeAd ? activeAd.title : ''" class="max-h-[75vh] w-auto max-w-full rounded-lg shadow-2xl border border-white/10 object-contain">
             
             <!-- Metadata & Action -->
-            <div class="w-full mt-6 text-center">
-                <h3 class="text-xl font-bold text-white mb-3" x-text="activeTitle"></h3>
+            <div class="w-full mt-6 text-center px-4">
+                <h3 class="text-xl font-bold text-white mb-3" x-text="activeAd ? activeAd.title : ''"></h3>
                 
-                <template x-if="activeUrl">
-                    <a :href="activeUrl" target="_blank" 
+                <template x-if="activeAd && activeAd.url">
+                    <a :href="activeAd.url" target="_blank" 
                        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-bold rounded-full shadow-lg hover:shadow-primary-500/20 hover:scale-105 transition-all duration-300">
                         <span>En savoir plus</span>
                         <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
