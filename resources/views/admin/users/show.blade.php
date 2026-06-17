@@ -65,7 +65,7 @@
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-500">Téléphone</dt>
-                            <dd class="text-gray-900">{{ $user->phone ?? '-' }}</dd>
+                            <dd class="text-gray-900">{{ $user->phone ?: 'Néant' }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-500">Inscrit le</dt>
@@ -305,9 +305,8 @@
                 class="flex items-end gap-4">
                 @csrf
                 <div class="flex-1">
-                    <label class="block text-xs font-bold text-indigo-800 mb-2 uppercase tracking-tight">Ajouter une
-                        organisation</label>
-                    <select name="organization_id"
+                    <label for="organization_select" class="block text-xs font-bold text-indigo-800 mb-2 uppercase tracking-tight">Ajouter une organisation</label>
+                    <select id="organization_select" name="organization_id"
                         class="w-full p-3 bg-white border-0 rounded-xl text-sm shadow-sm focus:ring-2 focus:ring-indigo-500"
                         required>
                         <option value="">-- Sélectionner une organisation --</option>

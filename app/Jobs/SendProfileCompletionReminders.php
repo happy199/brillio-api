@@ -20,26 +20,26 @@ class SendProfileCompletionReminders implements ShouldQueue
      */
     public function handle(): void
     {
-        // On récupère :
-        // 1. Les utilisateurs avec onboarding non complété
+        // On récupère uniquement les mentors :
+        // 1. Les mentors avec onboarding non complété
         // 2. Les mentors avec profil publié mais SANS ressources publiées (pour réengagement mensuel)
-        $users = User::where(function ($query) {
-            $query->where('onboarding_completed', false)
-                ->orWhere(function ($q) {
-                    $q->where('user_type', User::TYPE_MENTOR)
-                        ->where('onboarding_completed', true)
-                        ->whereHas('mentorProfile', fn ($p) => $p->where('is_published', true))
-                        ->whereDoesntHave('resources', fn ($r) => $r->where('is_published', true))
-                        // On limite à un envoi par mois pour le réengagement
-                        ->where(function ($dateQuery) {
-                            $dateQuery->where('last_engagement_email_sent_at', '<=', now()->subDays(30))
-                                ->orWhereNull('last_engagement_email_sent_at');
-                        });
-                });
-        })
-            ->where('archived_at', null)
+        $users = User::where('user_type', User::TYPE_MENTOR)
+            ->where(function ($query) {
+                $query->where('onboarding_completed', false)
+                    ->orWhere(function ($q) {
+                        $q->where('onboarding_completed', true)
+                            ->whereHas('mentorProfile', fn ($p) => $p->where('is_published', true))
+                            ->whereDoesntHave('resources', fn ($r) => $r->where('is_published', true))
+                            // On limite à un envoi par mois pour le réengagement
+                            ->where(function ($dateQuery) {
+                                $dateQuery->where('last_engagement_email_sent_at', '<=', now()->subDays(30))
+                                    ->orWhereNull('last_engagement_email_sent_at');
+                            });
+                    });
+            })
+            ->whereNull('archived_at')
             ->where('is_blocked', false)
-            ->with(['jeuneProfile', 'mentorProfile', 'personalityTest'])
+            ->with(['mentorProfile'])
             ->get();
 
         foreach ($users as $user) {

@@ -8,8 +8,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class SendNewsletterJob implements ShouldQueue
 {
@@ -35,70 +33,41 @@ class SendNewsletterJob implements ShouldQueue
     public function handle()
     {
         $recipients = $this->campaign->recipient_emails;
-        $subject = $this->campaign->subject;
-        $body = $this->campaign->body;
+        $totalEmails = is_array($recipients) ? count($recipients) : 0;
 
-        $sent = 0;
-        $failed = 0;
+        if ($totalEmails === 0) {
+            $this->campaign->update([
+                'status' => 'sent',
+                'sent_at' => now(),
+                'recipients_count' => 0,
+                'sent_count' => 0,
+                'failed_count' => 0,
+            ]);
 
-        // Mise à jour du statut
-        $this->campaign->update(['status' => 'sending']);
-
-        foreach ($recipients as $email) {
-            try {
-                // On vérifie si le contenu est un document HTML complet
-                $isFullHtml = preg_match('/<!doctype|<html>/i', $body);
-
-                if ($isFullHtml) {
-                    $finalHtml = $body;
-                } else {
-                    // Sinon on génère le HTML à partir du template Premium de Brillio
-                    $finalHtml = view('emails.newsletter', [
-                        'content' => $body,
-                        'subject' => $subject,
-                    ])->render();
-                }
-
-                Mail::send([], [], function ($message) use ($email, $subject, $finalHtml) {
-                    $message->to($email)->subject($subject);
-
-                    // Conversion des images Base64 en CID (Inline) dans le HTML final
-                    $bodyToSend = $finalHtml;
-                    if (preg_match_all('/src="data:image\/(.*?);base64,(.*?)"/', $bodyToSend, $matches, PREG_SET_ORDER)) {
-                        foreach ($matches as $index => $match) {
-                            $extension = $match[1];
-                            $imageData = base64_decode($match[2]);
-                            $filename = 'image_'.hash('sha256', $match[2]).'.'.$extension;
-
-                            $cid = $message->embedData($imageData, $filename, 'image/'.$extension);
-                            $bodyToSend = str_replace($match[0], 'src="'.$cid.'"', $bodyToSend);
-                        }
-                    }
-
-                    $message->html($bodyToSend);
-
-                    // Pièces jointes
-                    if (! empty($this->campaign->attachments)) {
-                        foreach ($this->campaign->attachments as $attachment) {
-                            $message->attach(storage_path('app/public/'.$attachment['path']), [
-                                'as' => $attachment['name'],
-                                'mime' => $attachment['mime'],
-                            ]);
-                        }
-                    }
-                });
-                $sent++;
-            } catch (\Exception $e) {
-                $failed++;
-                Log::error('Newsletter email failed in Job: '.$e->getMessage(), ['email' => $email]);
-            }
+            return;
         }
 
+        // Dynamic delay interval to spread the sends across the day
+        // Spreads large campaigns over ~12 hours (43200 seconds)
+        // Interval is capped between 2 and 15 seconds per email
+        $interval = (int) (43200 / $totalEmails);
+        if ($interval < 2) {
+            $interval = 2;
+        } elseif ($interval > 15) {
+            $interval = 15;
+        }
+
+        // Mise à jour du statut et réinitialisation des compteurs
         $this->campaign->update([
-            'sent_count' => $sent,
-            'failed_count' => $failed,
-            'status' => $failed > 0 ? 'partial' : 'sent',
-            'sent_at' => now(),
+            'status' => 'sending',
+            'recipients_count' => $totalEmails,
+            'sent_count' => 0,
+            'failed_count' => 0,
         ]);
+
+        foreach ($recipients as $index => $email) {
+            SendCampaignEmailJob::dispatch($this->campaign, $email)
+                ->delay(now()->addSeconds($index * $interval));
+        }
     }
 }

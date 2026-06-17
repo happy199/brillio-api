@@ -34,9 +34,9 @@
                 startDate: "{{ $dateRange["start"]->format("Y-m-d") }}",
                 endDate: "{{ $dateRange["end"]->format("Y-m-d") }}",
                 preset: "{{ $dateRange["preset"] ?? "month" }}",
-                
+
                 openMenu: null,
-                
+
                 allSituations: {!! json_encode($allSituations ?? [], JSON_HEX_APOS) !!},
                 allGoals: {!! json_encode($allGoals ?? [], JSON_HEX_APOS) !!},
                 allInterests: {!! json_encode($allInterests ?? [], JSON_HEX_APOS) !!},
@@ -120,8 +120,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6">
                     <!-- Période -->
                     <div class="space-y-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Période d'analyse</label>
-                        <select name="preset" x-model="preset" @change="setPeriod($event.target.value)"
+                        <label for="preset_select" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Période d'analyse</label>
+                        <select id="preset_select" name="preset" x-model="preset" @change="setPeriod($event.target.value)"
                             class="w-full rounded-xl border-gray-200 text-sm focus:ring-indigo-500 shadow-sm h-10">
                             <option value="today">Aujourd'hui</option>
                             <option value="3days">3 derniers jours</option>
@@ -144,9 +144,9 @@
                             </button>
                             <div x-show="openMenu === 'situation'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
                                 <template x-for="(label, value) in allSituations" :key="value">
-                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="situation[]" :value="value" x-model="situation" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
-                                        <span class="text-sm text-gray-700" x-text="label"></span>
+                                    <label for="situation_checkbox" :for="'situation_' + value" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input id="situation_checkbox" :id="'situation_' + value" type="checkbox" name="situation[]" :value="value" x-model="situation" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="label">Option</span>
                                     </label>
                                 </template>
                             </div>
@@ -162,10 +162,10 @@
                                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openMenu === 'country' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="openMenu === 'country'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="item in allCountries" :key="item">
-                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="country[]" :value="item" x-model="country" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
-                                        <span class="text-sm text-gray-700" x-text="item"></span>
+                                <template x-for="c in allCountries" :key="c">
+                                    <label for="country_checkbox" :for="'country_' + c" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input id="country_checkbox" :id="'country_' + c" type="checkbox" name="country[]" :value="c" x-model="country" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="c">Option</span>
                                     </label>
                                 </template>
                             </div>
@@ -181,10 +181,10 @@
                                 <svg class="w-4 h-4 text-gray-400 transition-transform" :class="openMenu === 'personality' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="openMenu === 'personality'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
-                                <template x-for="item in allPersonalities" :key="item">
-                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="personality[]" :value="item" x-model="personality" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
-                                        <span class="text-sm text-gray-700" x-text="item"></span>
+                                <template x-for="p in allPersonalities" :key="p">
+                                    <label for="personality_checkbox" :for="'personality_' + p" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input id="personality_checkbox" :id="'personality_' + p" type="checkbox" name="personality[]" :value="p" x-model="personality" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="p">Option</span>
                                     </label>
                                 </template>
                             </div>
@@ -201,9 +201,9 @@
                             </button>
                             <div x-show="openMenu === 'goal'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
                                 <template x-for="(label, value) in allGoals" :key="value">
-                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="goal[]" :value="value" x-model="goal" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
-                                        <span class="text-sm text-gray-700" x-text="label"></span>
+                                    <label for="goal_checkbox" :for="'goal_' + value" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input id="goal_checkbox" :id="'goal_' + value" type="checkbox" name="goal[]" :value="value" x-model="goal" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="label">Option</span>
                                     </label>
                                 </template>
                             </div>
@@ -220,9 +220,9 @@
                             </button>
                             <div x-show="openMenu === 'interest'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
                                 <template x-for="(label, value) in allInterests" :key="value">
-                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="interest[]" :value="value" x-model="interest" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
-                                        <span class="text-sm text-gray-700" x-text="label"></span>
+                                    <label for="interest_checkbox" :for="'interest_' + value" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input id="interest_checkbox" :id="'interest_' + value" type="checkbox" name="interest[]" :value="value" x-model="interest" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="label">Option</span>
                                     </label>
                                 </template>
                             </div>
@@ -239,9 +239,9 @@
                             </button>
                             <div x-show="openMenu === 'tuition'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
                                 <template x-for="(label, value) in tuitionOptions" :key="value">
-                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="tuition[]" :value="value" x-model="tuition" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
-                                        <span class="text-sm text-gray-700" x-text="label"></span>
+                                    <label for="tuition_checkbox" :for="'tuition_' + value" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input id="tuition_checkbox" :id="'tuition_' + value" type="checkbox" name="tuition[]" :value="value" x-model="tuition" class="rounded text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="label">Option</span>
                                     </label>
                                 </template>
                             </div>
@@ -258,9 +258,9 @@
                             </button>
                             <div x-show="openMenu === 'target_salary'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
                                 <template x-for="(label, value) in salaryOptions" :key="value">
-                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="target_salary[]" :value="value" x-model="target_salary" class="rounded text-emerald-600 focus:ring-emerald-500 border-gray-300">
-                                        <span class="text-sm text-gray-700" x-text="label"></span>
+                                    <label for="target_salary_checkbox" :for="'target_salary_' + value" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input id="target_salary_checkbox" :id="'target_salary_' + value" type="checkbox" name="target_salary[]" :value="value" x-model="target_salary" class="rounded text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="label">Option</span>
                                     </label>
                                 </template>
                             </div>
@@ -277,25 +277,34 @@
                             </button>
                             <div x-show="openMenu === 'actual_salary'" x-transition class="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 max-h-80 overflow-y-auto">
                                 <template x-for="(label, value) in salaryOptions" :key="value">
-                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                                        <input type="checkbox" name="actual_salary[]" :value="value" x-model="actual_salary" class="rounded text-blue-600 focus:ring-blue-500 border-gray-300">
-                                        <span class="text-sm text-gray-700" x-text="label"></span>
+                                    <label for="actual_salary_checkbox" :for="'actual_salary_' + value" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
+                                        <input id="actual_salary_checkbox" :id="'actual_salary_' + value" type="checkbox" name="actual_salary[]" :value="value" x-model="actual_salary" class="rounded text-blue-600 focus:ring-blue-500 border-gray-300">
+                                        <span class="text-sm text-gray-700" x-text="label">Option</span>
                                     </label>
                                 </template>
                             </div>
                         </div>
+                    </div>
+                    <!-- Téléphone -->
+                    <div class="space-y-2">
+                        <label for="has_phone_select" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Téléphone</label>
+                        <select id="has_phone_select" name="has_phone" class="w-full rounded-xl border-gray-200 text-sm focus:ring-indigo-500 shadow-sm h-10">
+                            <option value="">Tous les jeunes</option>
+                            <option value="1" {{ request('has_phone') === '1' ? 'selected' : '' }}>Avec numéro de téléphone</option>
+                            <option value="0" {{ request('has_phone') === '0' ? 'selected' : '' }}>Sans numéro de téléphone</option>
+                        </select>
                     </div>
                 </div>
 
                 <!-- Custom Dates Row -->
                 <div id="custom-dates" class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 transition-all" :class="preset === 'custom' ? 'ring-2 ring-indigo-500 ring-offset-2' : ''">
                     <div class="flex items-center gap-2">
-                        <label class="text-xs font-semibold text-gray-400">DU</label>
-                        <input type="date" name="start_date" x-model="startDate" class="rounded-lg border-gray-200 text-sm p-1.5 focus:ring-indigo-500 shadow-sm" :readonly="preset !== 'custom'">
+                        <label for="start_date_input" class="text-xs font-semibold text-gray-400">DU</label>
+                        <input id="start_date_input" type="date" name="start_date" x-model="startDate" class="rounded-lg border-gray-200 text-sm p-1.5 focus:ring-indigo-500 shadow-sm" :readonly="preset !== 'custom'">
                     </div>
                     <div class="flex items-center gap-2">
-                        <label class="text-xs font-semibold text-gray-400">AU</label>
-                        <input type="date" name="end_date" x-model="endDate" class="rounded-lg border-gray-200 text-sm p-1.5 focus:ring-indigo-500 shadow-sm" :readonly="preset !== 'custom'">
+                        <label for="end_date_input" class="text-xs font-semibold text-gray-400">AU</label>
+                        <input id="end_date_input" type="date" name="end_date" x-model="endDate" class="rounded-lg border-gray-200 text-sm p-1.5 focus:ring-indigo-500 shadow-sm" :readonly="preset !== 'custom'">
                     </div>
                     <template x-if="preset !== 'custom'">
                         <span class="text-[10px] text-indigo-400 italic font-medium ml-2">Les dates suivent automatiquement le préréglage sélectionné</span>
@@ -327,7 +336,7 @@
                         class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-50 transition shadow-sm">
                         PDF Mentors
                     </a>
-                    <a href="{{ route('admin.analytics.export-csv', array_merge(request()->query(), ['type' => 'users'])) }}" 
+                    <a href="{{ route('admin.analytics.export-csv', array_merge(request()->query(), ['type' => 'users'])) }}"
                         class="px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-sm flex items-center gap-2">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         CSV Smart Sourcing
@@ -428,9 +437,9 @@
     </div>
 
     <!-- Main Demographic Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <!-- Chart Situation -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex flex-col border border-transparent hover:border-gray-100 transition-colors">
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col border border-transparent hover:border-gray-100 transition-colors">
             <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Démographie</h3>
             <p class="text-xs text-gray-500 mb-4">Répartition par situation actuelle</p>
             <div class="h-64 mt-auto">
@@ -439,7 +448,7 @@
         </div>
 
         <!-- Chart Sources -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex flex-col hover:shadow-sm transition-shadow">
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col hover:shadow-sm transition-shadow">
             <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Acquisition</h3>
             <p class="text-xs text-gray-500 mb-4">Canaux d'entrée sur la plateforme</p>
             <div class="h-64 mt-auto">
@@ -448,11 +457,20 @@
         </div>
 
         <!-- Chart Tuition -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex flex-col hover:shadow-sm transition-shadow">
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col hover:shadow-sm transition-shadow">
             <h3 class="font-bold text-indigo-600 mb-1 text-sm uppercase tracking-wider">Scolarité (Budget)</h3>
             <p class="text-xs text-gray-500 mb-4">Capacité de financement annuelle</p>
             <div class="h-64 mt-auto">
                 <canvas id="tuitionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart Phone Stats -->
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col hover:shadow-sm transition-shadow">
+            <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Téléphones</h3>
+            <p class="text-xs text-gray-500 mb-4">Utilisateurs avec/sans numéro</p>
+            <div class="h-64 mt-auto">
+                <canvas id="phoneChart"></canvas>
             </div>
         </div>
     </div>
@@ -864,7 +882,7 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { 
+            plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
             }
         }
@@ -963,7 +981,7 @@
             responsive: true,
             maintainAspectRatio: false,
             cutout: '70%',
-            plugins: { 
+            plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
             }
         }
@@ -996,7 +1014,31 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { 
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+            }
+        }
+    });
+
+    // Chart Phone
+    const phoneCtx = document.getElementById('phoneChart').getContext('2d');
+    const phoneStats = @json($stats['phone_stats']);
+    new Chart(phoneCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Avec numéro', 'Sans numéro'],
+            datasets: [{
+                data: [phoneStats.with_phone, phoneStats.without_phone],
+                backgroundColor: ['#10B981', '#EF4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
             }
         }
