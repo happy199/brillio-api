@@ -72,8 +72,8 @@
             </div>
 
             <!-- Visual File Input -->
-            <div x-data="{ 
-                fileName: '', 
+            <div x-data="{
+                fileName: '',
                 imageUrl: null,
                 handleFileChange(event) {
                     const file = event.target.files[0];
@@ -86,7 +86,7 @@
                     }
                 }
             }">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
                     Fichier visuel publicitaire (Image) <span class="text-red-500">*</span>
                 </label>
                 

@@ -14,6 +14,8 @@ class AdvertisementTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const NEW_PROPOSAL_TITLE = 'New Proposal';
+
     protected $organization;
 
     protected $admin;
@@ -42,7 +44,7 @@ class AdvertisementTest extends TestCase
 
     public function test_organization_admin_can_view_advertisements_index()
     {
-        $ad = Advertisement::create([
+        Advertisement::create([
             'title' => 'My Org Ad',
             'image_path' => 'advertisements/org.webp',
             'status' => Advertisement::STATUS_PENDING,
@@ -62,7 +64,7 @@ class AdvertisementTest extends TestCase
         $image = UploadedFile::fake()->image('ad-visual.png', 800, 600);
 
         $response = $this->actingAs($this->admin)->post($this->getOrgUrl('organization.advertisements.store'), [
-            'title' => 'New Proposal',
+            'title' => self::NEW_PROPOSAL_TITLE,
             'link_url' => 'https://example.com/proposal',
             'image' => $image,
         ]);
@@ -70,13 +72,13 @@ class AdvertisementTest extends TestCase
         $response->assertRedirect(route('organization.advertisements.index'));
 
         $this->assertDatabaseHas('advertisements', [
-            'title' => 'New Proposal',
+            'title' => self::NEW_PROPOSAL_TITLE,
             'link_url' => 'https://example.com/proposal',
             'status' => Advertisement::STATUS_PENDING,
             'organization_id' => $this->organization->id,
         ]);
 
-        $ad = Advertisement::where('title', 'New Proposal')->first();
+        $ad = Advertisement::where('title', self::NEW_PROPOSAL_TITLE)->first();
         $this->assertNotNull($ad);
         // Verify it was converted to webp
         $this->assertStringEndsWith('.webp', $ad->image_path);

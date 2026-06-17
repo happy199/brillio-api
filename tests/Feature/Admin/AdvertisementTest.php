@@ -14,6 +14,10 @@ class AdvertisementTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const ADMIN_DIRECT_AD_TITLE = 'Admin Direct Ad';
+
+    private const OLD_IMAGE_PATH = 'advertisements/old.webp';
+
     protected $admin;
 
     protected function setUp(): void
@@ -25,7 +29,7 @@ class AdvertisementTest extends TestCase
     public function test_admin_can_view_advertisements_index()
     {
         $organization = Organization::factory()->create();
-        $ad = Advertisement::create([
+        Advertisement::create([
             'title' => 'Test Ad',
             'image_path' => 'advertisements/test.webp',
             'status' => Advertisement::STATUS_PENDING,
@@ -45,7 +49,7 @@ class AdvertisementTest extends TestCase
         $image = UploadedFile::fake()->image('admin-ad.png', 800, 600);
 
         $response = $this->actingAs($this->admin)->post(route('admin.advertisements.store'), [
-            'title' => 'Admin Direct Ad',
+            'title' => self::ADMIN_DIRECT_AD_TITLE,
             'link_url' => 'https://example.com/admin',
             'image' => $image,
         ]);
@@ -53,14 +57,14 @@ class AdvertisementTest extends TestCase
         $response->assertRedirect(route('admin.advertisements.index'));
 
         $this->assertDatabaseHas('advertisements', [
-            'title' => 'Admin Direct Ad',
+            'title' => self::ADMIN_DIRECT_AD_TITLE,
             'link_url' => 'https://example.com/admin',
             'status' => Advertisement::STATUS_APPROVED,
             'organization_id' => null,
             'created_by' => $this->admin->id,
         ]);
 
-        $ad = Advertisement::where('title', 'Admin Direct Ad')->first();
+        $ad = Advertisement::where('title', self::ADMIN_DIRECT_AD_TITLE)->first();
         $this->assertNotNull($ad);
         $this->assertStringEndsWith('.webp', $ad->image_path);
         Storage::disk('public')->assertExists($ad->image_path);
@@ -147,7 +151,7 @@ class AdvertisementTest extends TestCase
     {
         $ad = Advertisement::create([
             'title' => 'Old Title',
-            'image_path' => 'advertisements/old.webp',
+            'image_path' => self::OLD_IMAGE_PATH,
             'link_url' => 'https://example.com/old',
             'status' => Advertisement::STATUS_APPROVED,
         ]);
@@ -162,7 +166,7 @@ class AdvertisementTest extends TestCase
             'id' => $ad->id,
             'title' => 'Updated Title',
             'link_url' => 'https://example.com/updated',
-            'image_path' => 'advertisements/old.webp',
+            'image_path' => self::OLD_IMAGE_PATH,
         ]);
     }
 
@@ -172,11 +176,11 @@ class AdvertisementTest extends TestCase
 
         $ad = Advertisement::create([
             'title' => 'Old Title',
-            'image_path' => 'advertisements/old.webp',
+            'image_path' => self::OLD_IMAGE_PATH,
             'status' => Advertisement::STATUS_APPROVED,
         ]);
 
-        Storage::disk('public')->put('advertisements/old.webp', 'old content');
+        Storage::disk('public')->put(self::OLD_IMAGE_PATH, 'old content');
 
         $newFile = \Illuminate\Http\UploadedFile::fake()->image('new-image.jpg', 600, 400);
 
@@ -186,12 +190,12 @@ class AdvertisementTest extends TestCase
         ]);
 
         $response->assertRedirect(route('admin.advertisements.index'));
-        
+
         $updatedAd = $ad->fresh();
         $this->assertEquals('Updated Title with Image', $updatedAd->title);
-        $this->assertNotEquals('advertisements/old.webp', $updatedAd->image_path);
-        
-        Storage::disk('public')->assertMissing('advertisements/old.webp');
+        $this->assertNotEquals(self::OLD_IMAGE_PATH, $updatedAd->image_path);
+
+        Storage::disk('public')->assertMissing(self::OLD_IMAGE_PATH);
         Storage::disk('public')->assertExists($updatedAd->image_path);
     }
 }

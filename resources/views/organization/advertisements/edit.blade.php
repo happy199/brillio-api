@@ -73,8 +73,8 @@
             </div>
 
             <!-- Visual File Input -->
-            <div x-data="{ 
-                fileName: '', 
+            <div x-data="{
+                fileName: '',
                 imageUrl: '{{ asset('storage/' . $advertisement->image_path) }}',
                 hasNewImage: false,
                 handleFileChange(event) {
@@ -94,7 +94,7 @@
                     document.getElementById('image').value = '';
                 }
             }">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
                     Fichier visuel publicitaire (Image) <span class="text-gray-400 font-normal">(laisser vide pour conserver l'image actuelle)</span>
                 </label>
                 
@@ -129,7 +129,7 @@
                         </div>
 
                         <label for="image" class="cursor-pointer bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">
-                            <span x-text="hasNewImage ? 'Changer d\'image' : 'Remplacer l\'image'"></span>
+                            <span x-text="hasNewImage ? 'Changer d\'image' : 'Remplacer l\'image'">Remplacer l'image</span>
                             <input id="image" name="image" type="file" class="sr-only" accept="image/*" @change="handleFileChange($event)">
                         </label>
                     </div>

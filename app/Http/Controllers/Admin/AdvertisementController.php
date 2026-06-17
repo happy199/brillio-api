@@ -39,7 +39,7 @@ class AdvertisementController extends Controller
     {
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_INI_SIZE) {
             return back()->withInput()->withErrors([
-                'image' => "Le fichier image est trop volumineux. La configuration actuelle de PHP sur votre serveur (MAMP) limite les téléchargements à " . ini_get('upload_max_filesize') . ". Veuillez utiliser une image plus petite ou augmenter cette limite dans la configuration de votre serveur (php.ini)."
+                'image' => 'Le fichier image est trop volumineux. La configuration actuelle de PHP sur votre serveur (MAMP) limite les téléchargements à '.ini_get('upload_max_filesize').'. Veuillez utiliser une image plus petite ou augmenter cette limite dans la configuration de votre serveur (php.ini).',
             ]);
         }
 
@@ -48,8 +48,6 @@ class AdvertisementController extends Controller
             'link_url' => 'nullable|url|max:255',
             'image' => 'required|image|mimes:jpeg,jpg,png,webp,gif|max:5120',
         ]);
-
-
 
         if ($request->hasFile('image')) {
             $imagePath = $this->uploadAndConvertToWebp($request->file('image'), 'advertisements');
@@ -89,7 +87,7 @@ class AdvertisementController extends Controller
     {
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_INI_SIZE) {
             return back()->withInput()->withErrors([
-                'image' => "Le fichier image est trop volumineux. La configuration actuelle de PHP sur votre serveur (MAMP) limite les téléchargements à " . ini_get('upload_max_filesize') . ". Veuillez utiliser une image plus petite ou augmenter cette limite dans la configuration de votre serveur (php.ini)."
+                'image' => 'Le fichier image est trop volumineux. La configuration actuelle de PHP sur votre serveur (MAMP) limite les téléchargements à '.ini_get('upload_max_filesize').'. Veuillez utiliser une image plus petite ou augmenter cette limite dans la configuration de votre serveur (php.ini).',
             ]);
         }
 

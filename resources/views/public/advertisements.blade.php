@@ -6,7 +6,7 @@
 
 
 @section('content')
-<div class="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white py-24 sm:py-32" 
+<div class="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white py-24 sm:py-32"
      x-data="advertisementGallery" 
      @keydown.escape.window="close()" 
      @keydown.left.window="prev()" 
@@ -44,7 +44,7 @@
                         
                         <!-- Image Wrapper -->
                         <div class="relative overflow-hidden bg-gray-50">
-                            <img src="{{ asset('storage/' . $ad->image_path) }}" 
+                            <img src="{{ asset('storage/' . $ad->image_path) }}"
                                  alt="{{ $ad->title ?? 'Publicité' }}" 
                                  class="w-full h-auto block group-hover:scale-103 transition-transform duration-500 ease-out">
                             
@@ -79,7 +79,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4 backdrop-blur-md" 
+         class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4 backdrop-blur-md"
          style="display: none;">
         
         <!-- Close Button (Top Right) -->
@@ -101,7 +101,7 @@
         </button>
 
         <!-- Right Nav Arrow (Vertically Centered) -->
-        <button @click.stop="next()" 
+        <button @click.stop="next()"
                 :disabled="activeIndex === ads.length - 1"
                 :class="activeIndex === ads.length - 1 ? 'opacity-20 cursor-not-allowed' : 'opacity-100 hover:bg-white/20 hover:scale-105'"
                 class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white bg-white/15 p-3 md:p-4 rounded-full transition-all duration-200 z-50 focus:outline-none"
@@ -120,7 +120,7 @@
                 <h3 class="text-xl font-bold text-white mb-3" x-text="activeAd ? activeAd.title : ''"></h3>
                 
                 <template x-if="activeAd && activeAd.url">
-                    <a :href="activeAd.url" target="_blank" 
+                    <a :href="activeAd.url" target="_blank"
                        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-bold rounded-full shadow-lg hover:shadow-primary-500/20 hover:scale-105 transition-all duration-300">
                         <span>En savoir plus</span>
                         <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

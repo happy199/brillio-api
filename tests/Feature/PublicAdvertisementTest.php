@@ -16,7 +16,7 @@ class PublicAdvertisementTest extends TestCase
         $organization = Organization::factory()->create();
 
         // Create approved ad
-        $approvedAd = Advertisement::create([
+        Advertisement::create([
             'title' => 'Approved Ad Title',
             'image_path' => 'advertisements/approved.webp',
             'link_url' => 'https://example.com/approved',
@@ -25,7 +25,7 @@ class PublicAdvertisementTest extends TestCase
         ]);
 
         // Create pending ad
-        $pendingAd = Advertisement::create([
+        Advertisement::create([
             'title' => 'Pending Ad Title',
             'image_path' => 'advertisements/pending.webp',
             'link_url' => 'https://example.com/pending',
@@ -34,7 +34,7 @@ class PublicAdvertisementTest extends TestCase
         ]);
 
         // Create rejected ad
-        $rejectedAd = Advertisement::create([
+        Advertisement::create([
             'title' => 'Rejected Ad Title',
             'image_path' => 'advertisements/rejected.webp',
             'link_url' => 'https://example.com/rejected',

@@ -160,7 +160,8 @@
 
                 <div class="flex items-center gap-2 flex-shrink-0">
                     <div x-show="showInput" class="flex items-center gap-2" style="display: none;">
-                        <input type="tel" x-model="phone" placeholder="Ex: +22997000000"
+                        <label for="phone_input" class="sr-only">Numéro de téléphone</label>
+                        <input type="tel" id="phone_input" x-model="phone" placeholder="Ex: +22997000000"
                             class="px-3 py-2 border border-amber-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none text-gray-900 bg-white h-10 w-48"
                             @keydown.enter="savePhone()" :disabled="submitting">
                         <button @click="savePhone()" :disabled="submitting"
