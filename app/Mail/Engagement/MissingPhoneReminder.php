@@ -36,7 +36,7 @@ class MissingPhoneReminder extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "[Urgent] Reçois tes opportunités d'admission et de bourses sur WhatsApp ! 🎓",
+            subject: '🔥 Ne rate plus rien : tes opportunités (Bourses, Emplois, Formations) sur WhatsApp !',
         );
     }
 
