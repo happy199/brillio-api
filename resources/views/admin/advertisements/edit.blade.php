@@ -59,71 +59,7 @@
             </div>
 
             <!-- Image File Input -->
-            <div x-data="{
-                fileName: '',
-                imageUrl: '{{ asset('storage/' . $advertisement->image_path) }}',
-                hasNewImage: false,
-                handleFileChange(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        this.fileName = file.name;
-                        this.imageUrl = URL.createObjectURL(file);
-                        this.hasNewImage = true;
-                    } else {
-                        this.resetImage();
-                    }
-                },
-                resetImage() {
-                    this.fileName = '';
-                    this.imageUrl = '{{ asset('storage/' . $advertisement->image_path) }}';
-                    this.hasNewImage = false;
-                    document.getElementById('image').value = '';
-                }
-            }">
-                <label for="image" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Visuel publicitaire (Image) <span class="text-gray-400 font-normal">(laisser vide pour conserver l'image actuelle)</span>
-                </label>
-                
-                <div class="mt-1 flex flex-col items-center justify-center p-6 border-2 border-gray-300 border-dashed rounded-md hover:border-indigo-400 transition-colors">
-                    
-                    <!-- Preview and Action container -->
-                    <div class="space-y-4 w-full flex flex-col items-center justify-center">
-                        <div class="relative max-w-xs md:max-w-md rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-gray-50">
-                            <img :src="imageUrl" class="max-h-64 object-contain mx-auto" alt="Aperçu du visuel">
-                            
-                            <!-- Cancel new selection button -->
-                            <button type="button" x-show="hasNewImage" @click="resetImage()" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 shadow focus:outline-none transition-colors" title="Annuler le changement">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Status badge / filename indicator -->
-                        <div class="flex flex-col items-center gap-1.5">
-                            <template x-if="!hasNewImage">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">
-                                    Image actuelle
-                                </span>
-                            </template>
-                            <template x-if="hasNewImage">
-                                <div class="text-sm font-semibold text-indigo-600 flex items-center justify-center gap-1.5 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-150">
-                                    <i class="fas fa-file-image"></i>
-                                    <span x-text="fileName" class="truncate max-w-xs"></span>
-                                </div>
-                            </template>
-                        </div>
-
-                        <label for="image" class="cursor-pointer bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-gray-50 transition shadow-sm">
-                            <span x-text="hasNewImage ? 'Changer d\'image' : 'Remplacer l\'image'">Remplacer l'image</span>
-                            <input id="image" name="image" type="file" class="sr-only" accept="image/*" @change="handleFileChange($event)">
-                        </label>
-                    </div>
-                </div>
-                @error('image')
-                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
+            <x-advertisement-image-upload theme="admin" :existing-image="$advertisement->image_path" />
 
             <!-- Form Actions -->
             <div class="flex justify-end space-x-3 pt-6 border-t border-gray-150">
