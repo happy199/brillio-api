@@ -35,7 +35,7 @@
     },
     
     next() {
-        if (this.activeIndex < this.ads.length - 1) {
+        if (this.ads.length - 1 > this.activeIndex) {
             this.activeIndex++;
         }
     }
