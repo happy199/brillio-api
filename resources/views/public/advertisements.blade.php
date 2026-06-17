@@ -171,7 +171,7 @@
             prev() {
                 if (this.activeIndex > 0) {
                     this.activeIndex--;
-                    const ad = this.activeAd;
+                    const ad = this.ads[this.activeIndex];
                     if (ad && ad.id) {
                         fetch(`/publicite/${ad.id}/click`, {
                             method: 'POST',
@@ -187,7 +187,7 @@
             next() {
                 if (this.ads.length - 1 > this.activeIndex) {
                     this.activeIndex++;
-                    const ad = this.activeAd;
+                    const ad = this.ads[this.activeIndex];
                     if (ad && ad.id) {
                         fetch(`/publicite/${ad.id}/click`, {
                             method: 'POST',
