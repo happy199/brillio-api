@@ -83,14 +83,21 @@
                                 Soumis le {{ $ad->created_at->format('d/m/Y') }}
                             </span>
                             
-                            <!-- Delete Button -->
-                            <form action="{{ route('organization.advertisements.destroy', $ad) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette publicité ? Cette action est irréversible.');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800 transition-colors">
-                                    <i class="fas fa-trash-alt mr-1"></i> Supprimer
-                                </button>
-                            </form>
+                            <div class="flex items-center space-x-4">
+                                <!-- Edit Link -->
+                                <a href="{{ route('organization.advertisements.edit', $ad) }}" class="text-sm font-semibold text-organization-600 hover:text-organization-800 transition-colors">
+                                    <i class="fas fa-edit mr-1"></i> Modifier
+                                </a>
+
+                                <!-- Delete Button -->
+                                <form action="{{ route('organization.advertisements.destroy', $ad) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette publicité ? Cette action est irréversible.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800 transition-colors">
+                                        <i class="fas fa-trash-alt mr-1"></i> Supprimer
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
