@@ -6,40 +6,11 @@
 
 
 @section('content')
-<div class="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white py-24 sm:py-32" x-data="{ 
-    ads: {!! json_encode($advertisements->map(function($ad) {
-        return [
-            'image' => asset('storage/' . $ad->image_path),
-            'title' => $ad->title ?? 'Annonce Brillio',
-            'url' => $ad->link_url,
-        ];
-    })->values(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!},
-    activeIndex: null,
-    
-    get activeAd() {
-        return this.activeIndex !== null ? this.ads[this.activeIndex] : null;
-    },
-    
-    openAd(index) {
-        this.activeIndex = index;
-    },
-    
-    close() {
-        this.activeIndex = null;
-    },
-    
-    prev() {
-        if (this.activeIndex > 0) {
-            this.activeIndex--;
-        }
-    },
-    
-    next() {
-        if (this.ads.length - 1 > this.activeIndex) {
-            this.activeIndex++;
-        }
-    }
-}" @keydown.escape.window="close()" @keydown.left.window="prev()" @keydown.right.window="next()">
+<div class="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white py-24 sm:py-32" 
+     x-data="advertisementGallery" 
+     @keydown.escape.window="close()" 
+     @keydown.left.window="prev()" 
+     @keydown.right.window="next()">
     
     <!-- Background elements -->
     <div class="absolute inset-y-0 right-0 -z-10 w-full overflow-hidden ring-1 ring-gray-100 lg:row-span-4 lg:row-start-1 lg:bg-gray-100/10">
@@ -161,4 +132,43 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('advertisementGallery', () => ({
+            ads: {!! json_encode($advertisements->map(function($ad) {
+                return [
+                    'image' => asset('storage/' . $ad->image_path),
+                    'title' => $ad->title ?? 'Annonce Brillio',
+                    'url' => $ad->link_url,
+                ];
+            })->values(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!},
+            activeIndex: null,
+            
+            get activeAd() {
+                return this.activeIndex !== null ? this.ads[this.activeIndex] : null;
+            },
+            
+            openAd(index) {
+                this.activeIndex = index;
+            },
+            
+            close() {
+                this.activeIndex = null;
+            },
+            
+            prev() {
+                if (this.activeIndex > 0) {
+                    this.activeIndex--;
+                }
+            },
+            
+            next() {
+                if (this.ads.length - 1 > this.activeIndex) {
+                    this.activeIndex++;
+                }
+            }
+        }));
+    });
+</script>
 @endsection
