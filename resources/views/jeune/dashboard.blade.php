@@ -87,17 +87,98 @@
         </div>
     </div>
     @else
-    <div class="bg-green-50 border border-green-200 rounded-2xl p-6">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+    <div x-data="{
+        hasPhone: {{ !empty($user->phone) ? 'true' : 'false' }},
+        showInput: false,
+        phone: '{{ $user->phone ?? '' }}',
+        submitting: false,
+        error: '',
+        async savePhone() {
+            if (!this.phone.trim()) {
+                this.error = 'Veuillez saisir un numéro de téléphone.';
+                return;
+            }
+            this.submitting = true;
+            this.error = '';
+            try {
+                const response = await fetch('{{ route('jeune.profile.update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ phone: this.phone })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    this.hasPhone = true;
+                } else {
+                    this.error = data.message || 'Une erreur est survenue.';
+                }
+            } catch (e) {
+                this.error = 'Erreur de connexion.';
+            } finally {
+                this.submitting = false;
+            }
+        }
+    }">
+        <!-- Green block: profile is public and phone number is set -->
+        <div x-show="hasPhone" class="bg-green-50 border border-green-200 rounded-2xl p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-green-800">Votre profil est visible !</h3>
+                    <p class="text-green-700 text-sm">Les mentors peuvent désormais consulter votre profil.</p>
+                </div>
             </div>
-            <div>
-                <h3 class="font-bold text-green-800">Votre profil est visible !</h3>
-                <p class="text-green-700 text-sm">Les mentors peuvent désormais consulter votre profil.</p>
+        </div>
+
+        <!-- Yellow block: profile is public but phone number is missing -->
+        <div x-show="!hasPhone" class="bg-amber-50 border border-amber-200 rounded-2xl p-6" style="display: none;">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-start gap-4 flex-1">
+                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-amber-800">Il manque votre numéro de téléphone</h3>
+                        <p class="text-amber-700 text-sm mt-1">
+                            Il est utilisé pour vous proposer les meilleures offres.
+                        </p>
+                        <p x-show="error" class="text-red-600 text-xs mt-1 font-semibold" x-text="error" style="display: none;"></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <div x-show="showInput" class="flex items-center gap-2" style="display: none;">
+                        <label for="phone_input" class="sr-only">Numéro de téléphone</label>
+                        <input type="tel" id="phone_input" x-model="phone" placeholder="Ex: +22997000000"
+                            class="px-3 py-2 border border-amber-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none text-gray-900 bg-white h-10 w-48"
+                            @keydown.enter="savePhone()" :disabled="submitting">
+                        <button @click="savePhone()" :disabled="submitting"
+                            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-xl shadow-sm transition disabled:opacity-50 h-10 flex items-center justify-center min-w-[100px]">
+                            <span x-show="!submitting">Enregistrer</span>
+                            <span x-show="submitting" style="display: none;">...</span>
+                        </button>
+                        <button @click="showInput = false" :disabled="submitting" class="text-amber-700 hover:text-amber-900 text-xs px-2 font-medium">
+                            Annuler
+                        </button>
+                    </div>
+
+                    <button x-show="!showInput" @click="showInput = true; $nextTick(() => $el.previousElementSibling.querySelector('input').focus())"
+                        class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all h-10">
+                        Je renseigne mon numéro
+                    </button>
+                </div>
             </div>
         </div>
     </div>

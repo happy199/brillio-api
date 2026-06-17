@@ -181,6 +181,16 @@ Route::middleware('auth')->group(function () {
                 }
             );
 
+            // Advertisements
+            Route::prefix('advertisements')->name('advertisements.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Organization\AdvertisementController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Organization\AdvertisementController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Organization\AdvertisementController::class, 'store'])->name('store');
+                Route::get('/{advertisement}/edit', [\App\Http\Controllers\Organization\AdvertisementController::class, 'edit'])->name('edit');
+                Route::put('/{advertisement}', [\App\Http\Controllers\Organization\AdvertisementController::class, 'update'])->name('update');
+                Route::delete('/{advertisement}', [\App\Http\Controllers\Organization\AdvertisementController::class, 'destroy'])->name('destroy');
+            });
+
             // Team Management (Enterprise only)
             Route::middleware('organization_subscription:enterprise')->prefix('team')->name('team.')->group(
                 function () {

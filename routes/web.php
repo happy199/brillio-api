@@ -55,6 +55,8 @@ Route::get('/', function () {
 // Pages informatives
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::get('/publicite', [PageController::class, 'advertisements'])->name('public.advertisements');
+Route::post('/publicite/{advertisement}/click', [PageController::class, 'trackAdvertisementClick'])->name('public.advertisements.click');
 Route::post('/contact', [WebsiteContactController::class, 'submit'])->name('contact.submit');
 
 // Newsletter
@@ -513,6 +515,18 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
         // Dashboard principal
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Advertisements Management
+        Route::prefix('advertisements')->name('advertisements.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdvertisementController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\AdvertisementController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\AdvertisementController::class, 'store'])->name('store');
+            Route::get('/{advertisement}/edit', [\App\Http\Controllers\Admin\AdvertisementController::class, 'edit'])->name('edit');
+            Route::put('/{advertisement}', [\App\Http\Controllers\Admin\AdvertisementController::class, 'update'])->name('update');
+            Route::post('/{advertisement}/approve', [\App\Http\Controllers\Admin\AdvertisementController::class, 'approve'])->name('approve');
+            Route::post('/{advertisement}/reject', [\App\Http\Controllers\Admin\AdvertisementController::class, 'reject'])->name('reject');
+            Route::delete('/{advertisement}', [\App\Http\Controllers\Admin\AdvertisementController::class, 'destroy'])->name('destroy');
+        });
 
         // Audits System
         Route::get('/audits/emails', [\App\Http\Controllers\Admin\AuditController::class, 'emails'])->name('audits.emails');

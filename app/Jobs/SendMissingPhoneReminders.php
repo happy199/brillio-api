@@ -2,30 +2,33 @@
 
 namespace App\Jobs;
 
-use App\Mail\Engagement\ReengagementMail;
+use App\Mail\Engagement\MissingPhoneReminder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
-class SendInactivityReminders extends EngagementReminderJob
+class SendMissingPhoneReminders extends EngagementReminderJob
 {
     /**
-     * Select jeunes who have been inactive for at least a week
-     * and have not received an engagement email in the last 7 days.
+     * Select jeunes who have no phone number
+     * and have not received an engagement email in the last 6 days.
      */
     protected function eligibleUsers(): Builder
     {
         return User::where('user_type', User::TYPE_JEUNE)
             ->whereNull('archived_at')
             ->where('is_blocked', false)
-            ->where('last_login_at', '<=', now()->subWeek())
             ->where(function ($query) {
-                $query->where('last_engagement_email_sent_at', '<=', now()->subWeek())
+                $query->whereNull('phone')
+                    ->orWhere('phone', '');
+            })
+            ->where(function ($query) {
+                $query->where('last_engagement_email_sent_at', '<=', now()->subDays(6))
                     ->orWhereNull('last_engagement_email_sent_at');
             });
     }
 
     protected function buildMailable(User $user): \Illuminate\Mail\Mailable
     {
-        return new ReengagementMail($user);
+        return new MissingPhoneReminder($user);
     }
 }
