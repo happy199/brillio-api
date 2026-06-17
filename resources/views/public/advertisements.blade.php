@@ -83,14 +83,14 @@
          style="display: none;">
         
         <!-- Close Button (Top Right) -->
-        <button @click="close()" class="absolute top-6 right-6 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all duration-200 z-50 focus:outline-none">
+        <button @click.stop="close()" class="absolute top-6 right-6 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all duration-200 z-50 focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
         </button>
 
         <!-- Left Nav Arrow (Vertically Centered) -->
-        <button @click="prev()" 
+        <button @click.stop="prev()" 
                 :disabled="activeIndex === 0"
                 :class="activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'opacity-100 hover:bg-white/20 hover:scale-105'"
                 class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white bg-white/15 p-3 md:p-4 rounded-full transition-all duration-200 z-50 focus:outline-none"
@@ -101,7 +101,7 @@
         </button>
 
         <!-- Right Nav Arrow (Vertically Centered) -->
-        <button @click="next()" 
+        <button @click.stop="next()" 
                 :disabled="activeIndex === ads.length - 1"
                 :class="activeIndex === ads.length - 1 ? 'opacity-20 cursor-not-allowed' : 'opacity-100 hover:bg-white/20 hover:scale-105'"
                 class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white bg-white/15 p-3 md:p-4 rounded-full transition-all duration-200 z-50 focus:outline-none"
