@@ -1,6 +1,9 @@
 @extends('layouts.public')
 
+@php $forceScrolled = true; @endphp
+
 @section('title', 'Annonces & Publicités')
+
 
 @section('content')
 <div class="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white py-24 sm:py-32" x-data="{ 
