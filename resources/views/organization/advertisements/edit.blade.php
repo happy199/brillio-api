@@ -45,8 +45,8 @@
                     Titre / Nom de l'annonce <span class="text-gray-400 font-normal">(optionnel)</span>
                 </label>
                 <div class="mt-1">
-                    <input type="text" name="title" id="title" value="{{ old('title', $advertisement->title) }}" 
-                           class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md px-4 py-3" 
+                    <input type="text" name="title" id="title" value="{{ old('title', $advertisement->title) }}"
+                           class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md px-4 py-3"
                            placeholder="Ex: Forum Étudiant Brillio 2026">
                 </div>
                 @error('title')
@@ -60,8 +60,8 @@
                     Lien cible / Redirection <span class="text-gray-400 font-normal">(optionnel)</span>
                 </label>
                 <div class="mt-1">
-                    <input type="url" name="link_url" id="link_url" value="{{ old('link_url', $advertisement->link_url) }}" 
-                           class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md px-4 py-3" 
+                    <input type="url" name="link_url" id="link_url" value="{{ old('link_url', $advertisement->link_url) }}"
+                           class="shadow-sm focus:ring-organization-500 focus:border-organization-500 block w-full sm:text-sm border-gray-300 rounded-md px-4 py-3"
                            placeholder="https://votre-site.com/evenement">
                 </div>
                 <p class="mt-2 text-xs text-gray-500">

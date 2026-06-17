@@ -10,6 +10,8 @@ class ProfileUpdatePhoneTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const TEST_PHONE_NUMBER = '+22997000000';
+
     public function test_json_update_phone_success()
     {
         $user = User::factory()->create([
@@ -18,7 +20,7 @@ class ProfileUpdatePhoneTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->postJson(route('jeune.profile.update'), [
-            'phone' => '+22997000000',
+            'phone' => self::TEST_PHONE_NUMBER,
         ]);
 
         $response->assertStatus(200);
@@ -28,7 +30,7 @@ class ProfileUpdatePhoneTest extends TestCase
         ]);
 
         $user->refresh();
-        $this->assertEquals('+22997000000', $user->phone);
+        $this->assertEquals(self::TEST_PHONE_NUMBER, $user->phone);
     }
 
     public function test_standard_update_phone_redirects()
@@ -39,13 +41,13 @@ class ProfileUpdatePhoneTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->post(route('jeune.profile.update'), [
-            'phone' => '+22997000000',
+            'phone' => self::TEST_PHONE_NUMBER,
         ]);
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Profil mis à jour avec succès.');
 
         $user->refresh();
-        $this->assertEquals('+22997000000', $user->phone);
+        $this->assertEquals(self::TEST_PHONE_NUMBER, $user->phone);
     }
 }

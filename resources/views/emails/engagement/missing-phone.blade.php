@@ -14,7 +14,7 @@
             ⚠️ Le problème des e-mails ? Ils arrivent souvent trop tard.
         </h3>
         <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #312e81;">
-            Dans le monde professionnel, <strong>les premières heures font toute la différence</strong>. Pour t'éviter de rater l'opportunité qui pourrait propulser ta carrière, Brillio envoie désormais ses alertes en temps réel directement sur <strong>WhatsApp</strong>. 
+            Dans le monde professionnel, <strong>les premières heures font toute la différence</strong>. Pour t'éviter de rater l'opportunité qui pourrait propulser ta carrière, Brillio envoie désormais ses alertes en temps réel directement sur <strong>WhatsApp</strong>.
         </p>
         <p style="margin: 8px 0 0; font-size: 13px; font-weight: 600; color: #4f46e5;">
             🔥 Déjà plus de 3 200 jeunes ont activé leurs alertes pour se positionner en priorité !

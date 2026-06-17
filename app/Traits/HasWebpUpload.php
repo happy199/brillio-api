@@ -20,6 +20,7 @@ trait HasWebpUpload
      */
     protected function uploadAndConvertToWebp($file, $directory = 'publicities', $quality = 85, $disk = 'public')
     {
+        $storedPath = false;
         try {
             $tempPath = $file->getRealPath();
             $info = @getimagesize($tempPath);
@@ -51,37 +52,37 @@ trait HasWebpUpload
                     'original_name' => $file->getClientOriginalName(),
                 ]);
 
-                return $file->store($directory, $disk);
+                $storedPath = $file->store($directory, $disk);
+            } else {
+                // Create temporary filename
+                $filename = Str::uuid().'.webp';
+                $tempWebpPath = tempnam(sys_get_temp_dir(), 'webp_');
+
+                // Save with GD as WebP
+                if (! @imagewebp($image, $tempWebpPath, $quality)) {
+                    imagedestroy($image);
+                    @unlink($tempWebpPath);
+                    Log::warning('GD imagewebp execution failed, storing original file instead.');
+
+                    $storedPath = $file->store($directory, $disk);
+                } else {
+                    imagedestroy($image);
+
+                    // Put file in target directory
+                    $storedPath = Storage::disk($disk)->putFileAs($directory, new File($tempWebpPath), $filename);
+
+                    @unlink($tempWebpPath);
+                }
             }
-
-            // Create temporary filename
-            $filename = Str::uuid().'.webp';
-            $tempWebpPath = tempnam(sys_get_temp_dir(), 'webp_');
-
-            // Save with GD as WebP
-            if (! @imagewebp($image, $tempWebpPath, $quality)) {
-                imagedestroy($image);
-                @unlink($tempWebpPath);
-                Log::warning('GD imagewebp execution failed, storing original file instead.');
-
-                return $file->store($directory, $disk);
-            }
-
-            imagedestroy($image);
-
-            // Put file in target directory
-            $path = Storage::disk($disk)->putFileAs($directory, new File($tempWebpPath), $filename);
-
-            @unlink($tempWebpPath);
-
-            return $path;
         } catch (\Exception $e) {
             Log::error('WebP conversion exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
             // Fallback: store original file
-            return $file->store($directory, $disk);
+            $storedPath = $file->store($directory, $disk);
         }
+
+        return $storedPath;
     }
 }

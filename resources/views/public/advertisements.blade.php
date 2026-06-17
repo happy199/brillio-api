@@ -7,9 +7,9 @@
 
 @section('content')
 <div class="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white py-24 sm:py-32"
-     x-data="advertisementGallery" 
-     @keydown.escape.window="close()" 
-     @keydown.left.window="prev()" 
+     x-data="advertisementGallery"
+     @keydown.escape.window="close()"
+     @keydown.left.window="prev()"
      @keydown.right.window="next()">
     
     <!-- Background elements -->
@@ -44,9 +44,9 @@
                         
                         <!-- Image Wrapper -->
                         <div class="relative overflow-hidden bg-gray-50">
-                            <img src="{{ asset('storage/' . $ad->image_path) }}"
-                                 alt="{{ $ad->title ?? 'Publicité' }}" 
-                                 class="w-full h-auto block group-hover:scale-103 transition-transform duration-500 ease-out">
+                             <img src="{{ asset('storage/' . $ad->image_path) }}"
+                                  alt="{{ $ad->title ?? 'Publicité' }}"
+                                  class="w-full h-auto block group-hover:scale-103 transition-transform duration-500 ease-out">
                             
                             <!-- Overlay on hover -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
@@ -54,9 +54,9 @@
                                     <h3 class="text-white font-bold text-lg leading-tight mb-2 line-clamp-2">{{ $ad->title }}</h3>
                                 @endif
                                 @if($ad->link_url)
-                                    <span class="inline-flex items-center text-sm font-semibold text-primary-300 hover:text-white transition-colors">
-                                        En savoir plus 
-                                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                     <span class="inline-flex items-center text-sm font-semibold text-primary-300 hover:text-white transition-colors">
+                                         En savoir plus
+                                         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                                         </svg>
                                     </span>
@@ -72,7 +72,7 @@
     </div>
 
     <!-- Lightbox Overlay Modal -->
-    <div x-show="activeIndex !== null" 
+    <div x-show="activeIndex !== null"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -90,7 +90,7 @@
         </button>
 
         <!-- Left Nav Arrow (Vertically Centered) -->
-        <button @click.stop="prev()" 
+        <button @click.stop="prev()"
                 :disabled="activeIndex === 0"
                 :class="activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'opacity-100 hover:bg-white/20 hover:scale-105'"
                 class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white bg-white/15 p-3 md:p-4 rounded-full transition-all duration-200 z-50 focus:outline-none"
@@ -117,7 +117,7 @@
             
             <!-- Metadata & Action -->
             <div class="w-full mt-6 text-center px-4">
-                <h3 class="text-xl font-bold text-white mb-3" x-text="activeAd ? activeAd.title : ''"></h3>
+                <h3 class="text-xl font-bold text-white mb-3" x-text="activeAd ? activeAd.title : ''">Annonce</h3>
                 
                 <template x-if="activeAd && activeAd.url">
                     <a :href="activeAd.url" target="_blank"
