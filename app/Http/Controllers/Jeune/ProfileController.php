@@ -161,6 +161,14 @@ class ProfileController extends Controller
             $profile->save();
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil mis à jour avec succès.',
+                'user' => $user,
+            ]);
+        }
+
         return back()->with('success', 'Profil mis à jour avec succès.');
     }
 
