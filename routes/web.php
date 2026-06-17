@@ -520,6 +520,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\AdvertisementController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\AdvertisementController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\AdvertisementController::class, 'store'])->name('store');
+            Route::get('/{advertisement}/edit', [\App\Http\Controllers\Admin\AdvertisementController::class, 'edit'])->name('edit');
+            Route::put('/{advertisement}', [\App\Http\Controllers\Admin\AdvertisementController::class, 'update'])->name('update');
             Route::post('/{advertisement}/approve', [\App\Http\Controllers\Admin\AdvertisementController::class, 'approve'])->name('approve');
             Route::post('/{advertisement}/reject', [\App\Http\Controllers\Admin\AdvertisementController::class, 'reject'])->name('reject');
             Route::delete('/{advertisement}', [\App\Http\Controllers\Admin\AdvertisementController::class, 'destroy'])->name('destroy');

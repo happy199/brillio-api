@@ -128,4 +128,70 @@ class AdvertisementTest extends TestCase
         $this->assertDatabaseMissing('advertisements', ['id' => $ad->id]);
         Storage::disk('public')->assertMissing($ad->image_path);
     }
+
+    public function test_admin_can_view_edit_advertisement_page()
+    {
+        $ad = Advertisement::create([
+            'title' => 'Ad to Edit',
+            'image_path' => 'advertisements/to-edit.webp',
+            'status' => Advertisement::STATUS_APPROVED,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.advertisements.edit', $ad));
+
+        $response->assertStatus(200);
+        $response->assertSee('Ad to Edit');
+    }
+
+    public function test_admin_can_update_advertisement_without_changing_image()
+    {
+        $ad = Advertisement::create([
+            'title' => 'Old Title',
+            'image_path' => 'advertisements/old.webp',
+            'link_url' => 'https://example.com/old',
+            'status' => Advertisement::STATUS_APPROVED,
+        ]);
+
+        $response = $this->actingAs($this->admin)->put(route('admin.advertisements.update', $ad), [
+            'title' => 'Updated Title',
+            'link_url' => 'https://example.com/updated',
+        ]);
+
+        $response->assertRedirect(route('admin.advertisements.index'));
+        $this->assertDatabaseHas('advertisements', [
+            'id' => $ad->id,
+            'title' => 'Updated Title',
+            'link_url' => 'https://example.com/updated',
+            'image_path' => 'advertisements/old.webp',
+        ]);
+    }
+
+    public function test_admin_can_update_advertisement_and_change_image()
+    {
+        Storage::fake('public');
+
+        $ad = Advertisement::create([
+            'title' => 'Old Title',
+            'image_path' => 'advertisements/old.webp',
+            'status' => Advertisement::STATUS_APPROVED,
+        ]);
+
+        Storage::disk('public')->put('advertisements/old.webp', 'old content');
+
+        $newFile = \Illuminate\Http\UploadedFile::fake()->image('new-image.jpg', 600, 400);
+
+        $response = $this->actingAs($this->admin)->put(route('admin.advertisements.update', $ad), [
+            'title' => 'Updated Title with Image',
+            'image' => $newFile,
+        ]);
+
+        $response->assertRedirect(route('admin.advertisements.index'));
+        
+        $updatedAd = $ad->fresh();
+        $this->assertEquals('Updated Title with Image', $updatedAd->title);
+        $this->assertNotEquals('advertisements/old.webp', $updatedAd->image_path);
+        
+        Storage::disk('public')->assertMissing('advertisements/old.webp');
+        Storage::disk('public')->assertExists($updatedAd->image_path);
+    }
 }

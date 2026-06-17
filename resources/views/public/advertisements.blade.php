@@ -56,7 +56,7 @@
                             <!-- Overlay on hover -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
                                 @if($ad->title)
-                                    <h3 class="text-white font-bold text-lg leading-tight mb-2">{{ $ad->title }}</h3>
+                                    <h3 class="text-white font-bold text-lg leading-tight mb-2 line-clamp-2">{{ $ad->title }}</h3>
                                 @endif
                                 @if($ad->link_url)
                                     <span class="inline-flex items-center text-sm font-semibold text-primary-300 hover:text-white transition-colors">
