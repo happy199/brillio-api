@@ -122,6 +122,7 @@
             <tr>
                 <th>Nom</th>
                 <th>Email</th>
+                <th>Téléphone</th>
                 <th>Type</th>
                 <th>Pays</th>
                 <th>MBTI</th>
@@ -131,6 +132,7 @@
             <tr>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->email }}</td>
+                <td>{{ $user->phone ?: 'Néant' }}</td>
                 <td>{{ ucfirst($user->user_type) }}</td>
                 <td>{{ $user->country ?? '-' }}</td>
                 <td>{{ $user->personalityTest && $user->personalityTest->completed_at ? $user->personalityTest->personality_type : '-' }}</td>

@@ -285,6 +285,15 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Téléphone -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Téléphone</label>
+                        <select name="has_phone" class="w-full rounded-xl border-gray-200 text-sm focus:ring-indigo-500 shadow-sm h-10">
+                            <option value="">Tous les jeunes</option>
+                            <option value="1" {{ request('has_phone') === '1' ? 'selected' : '' }}>Avec numéro de téléphone</option>
+                            <option value="0" {{ request('has_phone') === '0' ? 'selected' : '' }}>Sans numéro de téléphone</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Custom Dates Row -->
@@ -428,9 +437,9 @@
     </div>
 
     <!-- Main Demographic Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <!-- Chart Situation -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex flex-col border border-transparent hover:border-gray-100 transition-colors">
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col border border-transparent hover:border-gray-100 transition-colors">
             <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Démographie</h3>
             <p class="text-xs text-gray-500 mb-4">Répartition par situation actuelle</p>
             <div class="h-64 mt-auto">
@@ -439,7 +448,7 @@
         </div>
 
         <!-- Chart Sources -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex flex-col hover:shadow-sm transition-shadow">
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col hover:shadow-sm transition-shadow">
             <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Acquisition</h3>
             <p class="text-xs text-gray-500 mb-4">Canaux d'entrée sur la plateforme</p>
             <div class="h-64 mt-auto">
@@ -448,11 +457,20 @@
         </div>
 
         <!-- Chart Tuition -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex flex-col hover:shadow-sm transition-shadow">
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col hover:shadow-sm transition-shadow">
             <h3 class="font-bold text-indigo-600 mb-1 text-sm uppercase tracking-wider">Scolarité (Budget)</h3>
             <p class="text-xs text-gray-500 mb-4">Capacité de financement annuelle</p>
             <div class="h-64 mt-auto">
                 <canvas id="tuitionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart Phone Stats -->
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col hover:shadow-sm transition-shadow">
+            <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Téléphones</h3>
+            <p class="text-xs text-gray-500 mb-4">Utilisateurs avec/sans numéro</p>
+            <div class="h-64 mt-auto">
+                <canvas id="phoneChart"></canvas>
             </div>
         </div>
     </div>
@@ -996,6 +1014,31 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: { 
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+            }
+        }
+    });
+
+    // Chart Phone
+    const phoneCtx = document.getElementById('phoneChart').getContext('2d');
+    const phoneStats = @json($stats['phone_stats']);
+    
+    new Chart(phoneCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Avec numéro', 'Sans numéro'],
+            datasets: [{
+                data: [phoneStats.with_phone, phoneStats.without_phone],
+                backgroundColor: ['#10B981', '#EF4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
             plugins: { 
                 legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
             }

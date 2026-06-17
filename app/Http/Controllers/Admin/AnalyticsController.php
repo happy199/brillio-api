@@ -181,6 +181,21 @@ class AnalyticsController extends Controller
         // --- NEW: Master Youth Stats ---
         $stats['youth_engagement'] = $this->getYouthEngagementStats($start, $end);
 
+        // Statistiques de numéros de téléphone (pour les utilisateurs non-admins inscrits sur la période)
+        $stats['phone_stats'] = [
+            'with_phone' => User::where('is_admin', false)
+                ->whereBetween('created_at', [$start, $end])
+                ->whereNotNull('phone')
+                ->where('phone', '!=', '')
+                ->count(),
+            'without_phone' => User::where('is_admin', false)
+                ->whereBetween('created_at', [$start, $end])
+                ->where(function ($q) {
+                    $q->whereNull('phone')->orWhere('phone', '');
+                })
+                ->count(),
+        ];
+
         // Avis Utilisateurs (Popups)
         $stats['feedbacks'] = [
             'total' => UserFeedback::count(),
@@ -262,6 +277,7 @@ class AnalyticsController extends Controller
                 'tuition' => (array) $request->get('tuition', []),
                 'target_salary' => (array) $request->get('target_salary', []),
                 'actual_salary' => (array) $request->get('actual_salary', []),
+                'has_phone' => $request->get('has_phone'),
             ],
             'personalityLabels' => PersonalityService::TYPE_DESCRIPTIONS,
         ]);
@@ -595,6 +611,14 @@ class AnalyticsController extends Controller
                 $userQuery = User::where('is_admin', false)
                     ->whereBetween('created_at', [$start, $end]);
 
+                if ($request->get('has_phone') === '1') {
+                    $userQuery->whereNotNull('phone')->where('phone', '!=', '');
+                } elseif ($request->get('has_phone') === '0') {
+                    $userQuery->where(function ($q) {
+                        $q->whereNull('phone')->orWhere('phone', '');
+                    });
+                }
+
                 $userCount = $userQuery->count();
                 if ($userCount > 500) {
                     return back()->with('error', "Le volume de données ({$userCount} utilisateurs) est trop important pour un export PDF. Veuillez utiliser l'export CSV (Large volume).");
@@ -693,7 +717,9 @@ class AnalyticsController extends Controller
             'autre' => 'Autre',
         ];
 
-        return response()->stream(function () use ($type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $allSituationsDisplay, $targetSalaries, $actualSalaries) {
+        $hasPhone = $request->get('has_phone');
+
+        return response()->stream(function () use ($hasPhone, $type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $allSituationsDisplay, $targetSalaries, $actualSalaries) {
             $handle = fopen('php://output', 'w');
 
             if ($type === 'users') {
@@ -702,6 +728,7 @@ class AnalyticsController extends Controller
                 fputcsv($handle, [
                     'Nom',
                     'Email',
+                    'Téléphone',
                     'Situation (Actuelle)',
                     'Niveau',
                     'Établissement/Entreprise',
@@ -722,6 +749,14 @@ class AnalyticsController extends Controller
                 // Query préparée pour le "Smart Sourcing"
                 $query = User::where('user_type', 'jeune')
                     ->whereBetween('created_at', [$start, $end]);
+
+                if ($hasPhone === '1') {
+                    $query->whereNotNull('phone')->where('phone', '!=', '');
+                } elseif ($hasPhone === '0') {
+                    $query->where(function ($q) {
+                        $q->whereNull('phone')->orWhere('phone', '');
+                    });
+                }
 
                 if (! empty($situations)) {
                     $query->where(function ($q) use ($situations) {
@@ -800,6 +835,7 @@ class AnalyticsController extends Controller
                     fputcsv($handle, [
                         $user->name,
                         $user->email,
+                        $user->phone ?: 'Néant',
                         $sitLabel,
                         ucfirst($data['class_level'] ?? ($onboarding['education_level'] ?? '-')),
                         $data['institution'] ?? ($data['company'] ?? '-'),

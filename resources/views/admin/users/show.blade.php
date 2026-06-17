@@ -65,7 +65,7 @@
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-500">Téléphone</dt>
-                            <dd class="text-gray-900">{{ $user->phone ?? '-' }}</dd>
+                            <dd class="text-gray-900">{{ $user->phone ?: 'Néant' }}</dd>
                         </div>
                         <div class="flex justify-between">
                             <dt class="text-gray-500">Inscrit le</dt>
