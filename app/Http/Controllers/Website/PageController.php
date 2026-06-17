@@ -191,4 +191,16 @@ class PageController extends Controller
             'user' => $profile->user,
         ]);
     }
+
+    /**
+     * Page de publicité publique
+     */
+    public function advertisements()
+    {
+        $advertisements = \App\Models\Advertisement::where('status', \App\Models\Advertisement::STATUS_APPROVED)
+            ->inRandomOrder()
+            ->get();
+
+        return view('public.advertisements', compact('advertisements'));
+    }
 }

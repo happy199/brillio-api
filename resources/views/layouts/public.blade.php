@@ -319,6 +319,9 @@
                         propos</a>
                     <a href="{{ route('contact') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Contact</a>
+                    <a href="{{ route('public.advertisements') }}" class="font-medium transition-colors"
+                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Publicités</a>
+
                 </div>
 
                 <!-- CTA Buttons -->
@@ -364,6 +367,9 @@
                     propos</a>
                 <a href="{{ route('contact') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Contact</a>
+                <a href="{{ route('public.advertisements') }}"
+                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Publicités</a>
+
                 <div class="mt-4 space-y-2">
                     <a href="{{ route('auth.login') }}"
                         class="block py-3 px-4 border border-primary-600 text-primary-600 text-center font-semibold rounded-lg hover:bg-primary-50">
