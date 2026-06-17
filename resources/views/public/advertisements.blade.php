@@ -45,7 +45,7 @@
             <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6 mx-auto">
                 @foreach($advertisements as $ad)
                     <div class="break-inside-avoid group relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-                         @click="activeImage = '{{ asset('storage/' . $ad->image_path) }}'; activeTitle = '{{ $ad->title ?? 'Annonce Brillio' }}'; activeUrl = '{{ $ad->link_url }}'">
+                         @click="activeImage = '{{ str_replace("'", "\'", asset('storage/' . $ad->image_path)) }}'; activeTitle = '{{ str_replace("'", "\'", $ad->title ?? 'Annonce Brillio') }}'; activeUrl = '{{ str_replace("'", "\'", $ad->link_url) }}'">
                         
                         <!-- Image Wrapper -->
                         <div class="relative overflow-hidden bg-gray-50">
