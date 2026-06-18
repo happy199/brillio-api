@@ -40,16 +40,13 @@ class UserController extends Controller
             });
         }
 
-        // Filtre par statut d'archivage
-        if ($request->has('archived')) {
-            $query->where('is_archived', true);
+        // Filtre par statut d'archivage / blocage
+        if ($request->has('blocked')) {
+            $query->where('is_blocked', true);
+        } elseif ($request->has('archived')) {
+            $query->where('is_archived', true)->where('is_blocked', false);
         } else {
-            // Par défaut, on ne montre pas les archivés sauf si demandé explicitement
-            // OU on peut décider de tout montrer et utiliser un badget.
-            // Pour l'instant, faisons un filtre explicite : ?archived=1 pour voir les archives
-            // $query->where('is_archived', false);
-            // ^ Si on décommente ça, ils sont masqués par défaut.
-            // Mais l'utilisateur veut un onglet séparé, donc le filtre est logique.
+            $query->where('is_archived', false)->where('is_blocked', false);
         }
 
         // Tri
@@ -207,6 +204,34 @@ class UserController extends Controller
     }
 
     /**
+     * Archive un compte utilisateur (exclu des campagnes de prospection)
+     */
+    public function archive(Request $request, User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Vous ne pouvez pas archiver votre propre compte.');
+        }
+
+        if ($user->is_archived) {
+            return back()->with('error', 'Ce compte est déjà archivé.');
+        }
+
+        if ($user->is_blocked) {
+            return back()->with('error', 'Débloquez d\'abord ce compte avant de l\'archiver.');
+        }
+
+        $reason = $request->input('reason', 'Archivé par un administrateur.');
+
+        $user->update([
+            'is_archived' => true,
+            'archived_at' => now(),
+            'archived_reason' => $reason,
+        ]);
+
+        return back()->with('success', "Le compte de {$user->name} a été archivé.");
+    }
+
+    /**
      * Réactive un compte archivé
      */
     public function reactivate(User $user)
@@ -300,7 +325,7 @@ class UserController extends Controller
     }
 
     /**
-     * Débloque un utilisateur
+     * Débloque un utilisateur et le place en comptes archivés
      */
     public function unblock(User $user)
     {
@@ -308,8 +333,11 @@ class UserController extends Controller
             'is_blocked' => false,
             'blocked_at' => null,
             'blocked_reason' => null,
+            'is_archived' => true,
+            'archived_at' => now(),
+            'archived_reason' => 'Compte débloqué par un administrateur. Réactivation automatique à la prochaine connexion.',
         ]);
 
-        return back()->with('success', "L'utilisateur {$user->name} a été débloqué.");
+        return back()->with('success', "L'utilisateur {$user->name} a été débloqué et déplacé vers les comptes archivés.");
     }
 }

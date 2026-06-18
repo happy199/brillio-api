@@ -349,6 +349,19 @@ jobs:
             
             echo "✅ Analytics tools configured"
 
+            # Configure Excluded Email Recipients
+            echo "🔐 Configuring Excluded Email Recipients..."
+            
+            # Remove any existing EXCLUDED_EMAIL_RECIPIENTS config
+            sed -i '/^EXCLUDED_EMAIL_RECIPIENTS=/d' .env
+            
+            # Add EXCLUDED_EMAIL_RECIPIENTS from repository variable
+            echo "" >> .env
+            echo "# Excluded Email Recipients (comma-separated list)" >> .env
+            echo "EXCLUDED_EMAIL_RECIPIENTS=${{ vars.EXCLUDED_EMAIL_RECIPIENTS }}" >> .env
+            
+            echo "✅ Excluded email recipients configured"
+
 
             # Deploy Cloudflare Origin CA Certificates
             echo "🔐 Provisioning Cloudflare Origin CA certificates..."

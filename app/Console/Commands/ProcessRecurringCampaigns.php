@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\SendNewsletterJob;
 use App\Models\EmailCampaign;
 use App\Models\NewsletterSubscriber;
-use App\Models\User;
+use App\Services\EmailDeliveryService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -70,6 +70,7 @@ class ProcessRecurringCampaigns extends Command
             return [];
         }
 
+        $deliveryService = app(EmailDeliveryService::class);
         $type = $filters['type'] ?? 'all';
         $recipientEmails = [];
 
@@ -78,7 +79,9 @@ class ProcessRecurringCampaigns extends Command
                 $recipientEmails = NewsletterSubscriber::active()->pluck('email')->toArray();
                 break;
             case 'all_users':
-                $recipientEmails = User::whereNull('archived_at')->pluck('email')->toArray();
+                $recipientEmails = $deliveryService->marketingEligibleUsersQuery()
+                    ->pluck('email')
+                    ->toArray();
                 break;
             case 'custom':
                 if (! empty($filters['custom_emails'])) {
@@ -90,15 +93,15 @@ class ProcessRecurringCampaigns extends Command
                 break;
             case 'specific_population':
                 if (! empty($filters['populations'])) {
-                    $recipientEmails = User::whereIn('user_type', $filters['populations'])
-                        ->whereNull('archived_at')
+                    $recipientEmails = $deliveryService->marketingEligibleUsersQuery()
+                        ->whereIn('user_type', $filters['populations'])
                         ->pluck('email')
                         ->toArray();
                 }
                 break;
         }
 
-        return array_values(array_unique($recipientEmails));
+        return $deliveryService->filterRecipientList(array_values(array_unique($recipientEmails)));
     }
 
     private function updateNextRun($master)

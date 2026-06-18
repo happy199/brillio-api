@@ -55,23 +55,23 @@ class EmailEngagementJobsTest extends TestCase
         ]);
 
         // Run the job
-        (new SendProfileCompletionReminders)->handle();
+        (new SendProfileCompletionReminders)->handle(app(\App\Services\EmailDeliveryService::class));
 
         // Verify that the incomplete mentor gets a ProfileCompletionReminder
-        Mail::assertQueued(ProfileCompletionReminder::class, function ($mail) use ($mentorIncomplete) {
+        Mail::assertSent(ProfileCompletionReminder::class, function ($mail) use ($mentorIncomplete) {
             return $mail->hasTo($mentorIncomplete->email);
         });
 
         // Verify that the mentor with no resources gets a MentorEngagementMail
-        Mail::assertQueued(MentorEngagementMail::class, function ($mail) use ($mentorNoResources) {
+        Mail::assertSent(MentorEngagementMail::class, function ($mail) use ($mentorNoResources) {
             return $mail->hasTo($mentorNoResources->email);
         });
 
         // Verify that the young user gets NOTHING from this job
-        Mail::assertNotQueued(ProfileCompletionReminder::class, function ($mail) use ($jeuneIncomplete) {
+        Mail::assertNotSent(ProfileCompletionReminder::class, function ($mail) use ($jeuneIncomplete) {
             return $mail->hasTo($jeuneIncomplete->email);
         });
-        Mail::assertNotQueued(MentorEngagementMail::class, function ($mail) use ($jeuneIncomplete) {
+        Mail::assertNotSent(MentorEngagementMail::class, function ($mail) use ($jeuneIncomplete) {
             return $mail->hasTo($jeuneIncomplete->email);
         });
     }
@@ -127,7 +127,7 @@ class EmailEngagementJobsTest extends TestCase
         ]);
 
         // Run the single send job
-        (new SendCampaignEmailJob($campaign, self::TARGET_EMAIL))->handle();
+        (new SendCampaignEmailJob($campaign, self::TARGET_EMAIL))->handle(app(\App\Services\EmailDeliveryService::class));
 
         // Verify email was sent
         Mail::assertSent(CampaignNewsletterMail::class, function ($mail) {
@@ -140,5 +140,42 @@ class EmailEngagementJobsTest extends TestCase
         $this->assertEquals(0, $campaign->failed_count);
         $this->assertEquals('sent', $campaign->status);
         $this->assertNotNull($campaign->sent_at);
+    }
+
+    public function test_send_campaign_email_job_archives_jeune_on_mailbox_error(): void
+    {
+        $admin = User::factory()->create();
+        $jeune = User::factory()->create([
+            'user_type' => 'jeune',
+            'email' => 'mailbox-full@example.com',
+            'is_archived' => false,
+        ]);
+
+        Mail::shouldReceive('to')
+            ->once()
+            ->with('mailbox-full@example.com')
+            ->andReturnSelf();
+        Mail::shouldReceive('send')
+            ->once()
+            ->andThrow(new \Exception('452-4.2.2 The recipient\'s inbox is out of storage space'));
+
+        $campaign = EmailCampaign::create([
+            'subject' => 'Test Campaign',
+            'body' => 'Hello!',
+            'type' => 'newsletter',
+            'recipient_emails' => ['mailbox-full@example.com'],
+            'recipients_count' => 1,
+            'status' => 'sending',
+            'sent_by' => $admin->id,
+            'sent_count' => 0,
+            'failed_count' => 0,
+        ]);
+
+        (new SendCampaignEmailJob($campaign, 'mailbox-full@example.com'))->handle(app(\App\Services\EmailDeliveryService::class));
+
+        $jeune->refresh();
+        $this->assertTrue($jeune->is_archived);
+        $campaign->refresh();
+        $this->assertEquals(1, $campaign->failed_count);
     }
 }

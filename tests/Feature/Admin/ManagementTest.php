@@ -50,13 +50,40 @@ class ManagementTest extends TestCase
             'blocked_reason' => 'Test reason',
         ]);
 
-        // Unblock
+        // Unblock → moves to archived
         $response = $this->actingAs($this->admin)->post(route('admin.users.unblock', $user));
         $response->assertRedirect();
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'is_blocked' => false,
+            'is_archived' => true,
         ]);
+    }
+
+    public function test_admin_can_archive_active_user()
+    {
+        $user = User::factory()->create(['is_archived' => false]);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.users.archive', $user), [
+            'reason' => 'Boîte mail pleine',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'is_archived' => true,
+            'archived_reason' => 'Boîte mail pleine',
+        ]);
+    }
+
+    public function test_blocked_users_tab_lists_only_blocked_accounts()
+    {
+        User::factory()->create(['is_blocked' => true, 'blocked_at' => now()]);
+        User::factory()->create(['is_blocked' => false]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.users.index', ['blocked' => 1]));
+        $response->assertStatus(200);
+        $response->assertViewHas('users', fn ($users) => $users->count() === 1);
     }
 
     public function test_admin_can_toggle_admin_status()
