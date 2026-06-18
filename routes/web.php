@@ -540,6 +540,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::delete('users/{user}/unlink-organization/{organization}', [UserController::class, 'unlinkOrganization'])->name('users.unlink-organization');
         Route::put('users/{user}/toggle-admin', [UserController::class, 'toggleAdmin'])->name('users.toggle-admin');
         Route::put('users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
+        Route::post('users/{user}/archive', [UserController::class, 'archive'])->name('users.archive');
         Route::post('users/{user}/propose-promotion', [UserController::class, 'proposePromotion'])->name('users.propose-promotion');
         Route::post('users/{user}/block', [UserController::class, 'block'])->name('users.block');
         Route::post('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');

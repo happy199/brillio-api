@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EmailCampaign;
 use App\Models\NewsletterSubscriber;
+use App\Services\EmailDeliveryService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -100,7 +101,7 @@ class NewsletterController extends Controller
         return $pdf->download('newsletter_subscribers_'.now()->format('Y-m-d').'.pdf');
     }
 
-    public function sendEmail(Request $request)
+    public function sendEmail(Request $request, EmailDeliveryService $deliveryService)
     {
         // Fix pour le JS qui envoie du JSON stringifié au lieu d'un array
         if ($request->has('recipients') && is_string($request->input('recipients'))) {
@@ -129,8 +130,9 @@ class NewsletterController extends Controller
                 $recipientEmails = NewsletterSubscriber::active()->pluck('email')->toArray();
                 break;
             case 'all_users':
-                // On prend tous les utilisateurs qui ne sont pas archivés
-                $recipientEmails = \App\Models\User::whereNull('archived_at')->pluck('email')->toArray();
+                $recipientEmails = $deliveryService->marketingEligibleUsersQuery()
+                    ->pluck('email')
+                    ->toArray();
                 break;
             case 'custom':
                 if ($request->filled('custom_emails')) {
@@ -146,13 +148,15 @@ class NewsletterController extends Controller
                 break;
             case 'specific_population':
                 if ($request->filled('populations')) {
-                    $recipientEmails = \App\Models\User::whereIn('user_type', $request->populations)
-                        ->whereNull('archived_at')
+                    $recipientEmails = $deliveryService->marketingEligibleUsersQuery()
+                        ->whereIn('user_type', $request->populations)
                         ->pluck('email')
                         ->toArray();
                 }
                 break;
         }
+
+        $recipientEmails = $deliveryService->filterRecipientList($recipientEmails);
 
         if (empty($recipientEmails) && $request->recipient_type !== 'specific_population') {
             return back()->with('error', '⚠️ Aucun destinataire valide trouvé pour cette sélection.');

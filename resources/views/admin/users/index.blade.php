@@ -7,12 +7,16 @@
 <!-- Tabs Status -->
 <div class="mb-6 flex space-x-1 p-1 bg-gray-100 rounded-xl w-fit">
     <a href="{{ route('admin.users.index') }}"
-        class="px-4 py-2 rounded-lg text-sm font-medium transition {{ !request('archived') ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}">
+        class="px-4 py-2 rounded-lg text-sm font-medium transition {{ !request('archived') && !request('blocked') ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}">
         Utilisateurs Actifs
     </a>
     <a href="{{ route('admin.users.index', ['archived' => 1]) }}"
         class="px-4 py-2 rounded-lg text-sm font-medium transition {{ request('archived') ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}">
         Comptes Archivés
+    </a>
+    <a href="{{ route('admin.users.index', ['blocked' => 1]) }}"
+        class="px-4 py-2 rounded-lg text-sm font-medium transition {{ request('blocked') ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}">
+        Comptes Bloqués
     </a>
 </div>
 
@@ -58,6 +62,9 @@
         @if(request('archived'))
         <input type="hidden" name="archived" value="1">
         @endif
+        @if(request('blocked'))
+        <input type="hidden" name="blocked" value="1">
+        @endif
 
         <div class="flex-1 min-w-[200px]">
             <label class="block text-sm font-medium text-gray-700 mb-1">Recherche</label>
@@ -91,7 +98,7 @@
         </button>
 
         @if(request()->hasAny(['search', 'type', 'country']))
-        <a href="{{ route('admin.users.index', ['archived' => request('archived')]) }}"
+        <a href="{{ route('admin.users.index', array_filter(['archived' => request('archived'), 'blocked' => request('blocked')])) }}"
             class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
             Réinitialiser
         </a>
@@ -109,7 +116,13 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pays</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {{ request('archived') ? 'Archivé le' : 'Actions' }}
+                    @if(request('archived'))
+                    Archivé le
+                    @elseif(request('blocked'))
+                    Bloqué le
+                    @else
+                    Actions
+                    @endif
                 </th>
                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -164,8 +177,9 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     @if(request('archived'))
                     {{ $user->archived_at ? $user->archived_at->format('d/m/Y H:i') : '-' }}
+                    @elseif(request('blocked'))
+                    {{ $user->blocked_at ? $user->blocked_at->format('d/m/Y H:i') : '-' }}
                     @else
-                    {{-- Placeholder or other info --}}
                     @if($user->personalityTest && $user->personalityTest->completed_at)
                     <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
                         {{ $user->personalityTest->personality_type }}
@@ -180,17 +194,26 @@
                         Voir
                     </a>
 
-                    @if($user->is_blocked)
+                    @if(request('blocked'))
                     <form action="{{ route('admin.users.unblock', $user) }}" method="POST" class="inline"
-                        onsubmit="return confirm('Débloquer cet utilisateur ?')">
+                        onsubmit="return confirm('Débloquer cet utilisateur ? Il sera déplacé vers les comptes archivés.')">
                         @csrf
                         <button type="submit" class="text-indigo-600 hover:text-indigo-900 mr-3 font-medium">
                             Débloquer
                         </button>
                     </form>
+                    @if($user->id !== auth()->id())
+                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
+                        onsubmit="return confirm('Supprimer définitivement cet utilisateur ?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-700 hover:text-red-900 font-bold">
+                            Supprimer
+                        </button>
+                    </form>
                     @endif
 
-                    @if($user->is_archived)
+                    @elseif($user->is_archived)
                     <form action="{{ route('admin.users.reactivate', $user) }}" method="POST" class="inline"
                         onsubmit="return confirm('Réactiver ce compte ?')">
                         @csrf
@@ -227,6 +250,14 @@
                         </button>
                     </form>
                     @if(!$user->is_blocked)
+                    <form action="{{ route('admin.users.archive', $user) }}" method="POST" class="inline"
+                        onsubmit="let reason = prompt('Motif de l\'archivage (optionnel) :', 'Archivé par un administrateur.'); if (reason !== null) { this.reason.value = reason; return true; } return false;">
+                        @csrf
+                        <input type="hidden" name="reason" value="">
+                        <button type="submit" class="text-orange-600 hover:text-orange-900 mr-3">
+                            Archiver
+                        </button>
+                    </form>
                     <form action="{{ route('admin.users.block', $user) }}" method="POST" class="inline"
                         onsubmit="let reason = prompt('Motif du blocage :', 'Non-respect des règles de la plateforme.'); if (reason) { this.reason.value = reason; return true; } return false;">
                         @csrf

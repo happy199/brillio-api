@@ -4,11 +4,13 @@ namespace App\Jobs;
 
 use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Models\User;
+use App\Services\EmailDeliveryService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendProfileCompletionReminders implements ShouldQueue
@@ -18,7 +20,7 @@ class SendProfileCompletionReminders implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(EmailDeliveryService $deliveryService): void
     {
         // On récupère uniquement les mentors :
         // 1. Les mentors avec onboarding non complété
@@ -37,23 +39,29 @@ class SendProfileCompletionReminders implements ShouldQueue
                             });
                     });
             })
-            ->whereNull('archived_at')
+            ->where('is_archived', false)
             ->where('is_blocked', false)
             ->with(['mentorProfile'])
             ->get();
 
         foreach ($users as $user) {
+            if ($deliveryService->isExcludedEmail($user->email)) {
+                continue;
+            }
+
             // Logique spécifique pour les mentors
             if ($user->isMentor()) {
                 if ($user->mentorProfile && $user->mentorProfile->is_published) {
-                    // Si le profil est déjà publié, on envoie le mail d'engagement
-                    Mail::to($user->email)->queue(new \App\Mail\Engagement\MentorEngagementMail($user));
-
-                    // On marque comme complété et on met à jour la date d'envoi
-                    $user->update([
-                        'onboarding_completed' => true,
-                        'last_engagement_email_sent_at' => now(),
-                    ]);
+                    try {
+                        Mail::to($user->email)->send(new \App\Mail\Engagement\MentorEngagementMail($user));
+                        $user->update([
+                            'onboarding_completed' => true,
+                            'last_engagement_email_sent_at' => now(),
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error("Email d'engagement mentor échoué pour #{$user->id}: ".$e->getMessage());
+                        $deliveryService->handleDeliveryFailure($user->email, $e);
+                    }
 
                     continue;
                 }
@@ -62,10 +70,13 @@ class SendProfileCompletionReminders implements ShouldQueue
             $missingSections = $this->getMissingSections($user);
 
             if (! empty($missingSections)) {
-                Mail::to($user->email)->queue(new ProfileCompletionReminder($user, $missingSections));
-
-                // On met à jour la date pour ne pas le solliciter trop souvent si besoin
-                $user->update(['last_engagement_email_sent_at' => now()]);
+                try {
+                    Mail::to($user->email)->send(new ProfileCompletionReminder($user, $missingSections));
+                    $user->update(['last_engagement_email_sent_at' => now()]);
+                } catch (\Exception $e) {
+                    Log::error("Email complétion profil échoué pour #{$user->id}: ".$e->getMessage());
+                    $deliveryService->handleDeliveryFailure($user->email, $e);
+                }
             }
         }
     }

@@ -15,7 +15,7 @@ class SendInactivityReminders extends EngagementReminderJob
     protected function eligibleUsers(): Builder
     {
         return User::where('user_type', User::TYPE_JEUNE)
-            ->whereNull('archived_at')
+            ->where('is_archived', false)
             ->where('is_blocked', false)
             ->where('last_login_at', '<=', now()->subWeek())
             ->where(function ($query) {

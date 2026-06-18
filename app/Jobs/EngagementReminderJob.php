@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\User;
+use App\Services\EmailDeliveryService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
@@ -41,16 +42,20 @@ abstract class EngagementReminderJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(EmailDeliveryService $deliveryService): void
     {
         $processedCount = 0;
 
         $this->eligibleUsers()
             ->orderBy('id')
-            ->chunkById(100, function ($users) use (&$processedCount) {
+            ->chunkById(100, function ($users) use (&$processedCount, $deliveryService) {
                 foreach ($users as $user) {
                     if ($processedCount >= $this->limit) {
                         return false; // Stop chunking
+                    }
+
+                    if ($deliveryService->isExcludedEmail($user->email)) {
+                        continue;
                     }
 
                     // Basic email format guard to avoid SMTP errors
@@ -64,14 +69,18 @@ abstract class EngagementReminderJob implements ShouldQueue
                         continue;
                     }
 
-                    Mail::to($user->email)->queue($this->buildMailable($user));
-
-                    $user->update(['last_engagement_email_sent_at' => now()]);
+                    try {
+                        Mail::to($user->email)->send($this->buildMailable($user));
+                        $user->update(['last_engagement_email_sent_at' => now()]);
+                    } catch (\Exception $e) {
+                        Log::error("Email d'engagement échoué pour l'utilisateur #{$user->id}: ".$e->getMessage());
+                        $deliveryService->handleDeliveryFailure($user->email, $e);
+                    }
 
                     $processedCount++;
                 }
             });
 
-        Log::info("Fin du job {$this->jobLabel()} : {$processedCount} emails mis en file d'attente.");
+        Log::info("Fin du job {$this->jobLabel()} : {$processedCount} emails traités.");
     }
 }
