@@ -78,11 +78,12 @@ class SendMissingPhoneRemindersTest extends TestCase
             'user_type' => User::TYPE_JEUNE,
             'phone' => null,
             'email' => 'jeune-archived@example.com',
+            'is_archived' => true,
             'archived_at' => now(),
         ]);
 
         // Run the job
-        (new SendMissingPhoneReminders)->handle();
+        (new SendMissingPhoneReminders)->handle(app(\App\Services\EmailDeliveryService::class));
 
         // Assert emails queued for appropriate users
         Mail::assertQueued(MissingPhoneReminder::class, function ($mail) use ($jeuneMissingPhone) {
@@ -142,7 +143,7 @@ class SendMissingPhoneRemindersTest extends TestCase
         ]);
 
         // Run the job
-        (new SendMissingPhoneReminders)->handle();
+        (new SendMissingPhoneReminders)->handle(app(\App\Services\EmailDeliveryService::class));
 
         // Verify exactly 500 emails were queued
         Mail::assertQueued(MissingPhoneReminder::class, 500);
