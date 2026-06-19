@@ -217,6 +217,48 @@
                     </div>
 
                     <div class="pt-4 mt-6 border-t border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-900 mb-4 tracking-tight uppercase">Offres Mensuelles</h3>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Pro</label>
+                                <div class="relative">
+                                    <input type="number" name="credit_bonus_pro" value="{{ $creditBonusPro }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12"
+                                        min="0">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Crédits offerts automatiquement chaque mois aux organisations Pro.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Entreprise</label>
+                                <div class="relative">
+                                    <input type="number" name="credit_bonus_enterprise" value="{{ $creditBonusEnterprise }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12"
+                                        min="0">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Crédits offerts automatiquement chaque mois aux organisations Enterprise.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Établissement</label>
+                                <div class="relative">
+                                    <input type="number" name="credit_bonus_establishment" value="{{ $creditBonusEstablishment }}"
+                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12"
+                                        min="0">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                        Crédits</div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Crédits offerts automatiquement chaque mois aux organisations Établissement.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 mt-6 border-t border-gray-100">
                         <h3 class="text-sm font-bold text-gray-900 mb-4 tracking-tight uppercase">Coûts des
                             Fonctionnalités</h3>
 

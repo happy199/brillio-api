@@ -30,6 +30,9 @@ class MonetizationController extends Controller
             'feature_cost_ai_generation',
             'payout_fee_percentage',
             'mentorship_commission_percent',
+            'credit_bonus_pro',
+            'credit_bonus_enterprise',
+            'credit_bonus_establishment',
         ])->get()->keyBy('key');
 
         $creditPriceJeune = $settings['credit_price_jeune']->value ?? 50;
@@ -46,6 +49,9 @@ class MonetizationController extends Controller
         $aiReportGenerationCost = $settings['feature_cost_ai_report_generation']->value ?? 5;
         $payoutFeePercentage = $settings['payout_fee_percentage']->value ?? 5;
         $commissionPercent = $settings['mentorship_commission_percent']->value ?? 10;
+        $creditBonusPro = $settings['credit_bonus_pro']->value ?? 25;
+        $creditBonusEnterprise = $settings['credit_bonus_enterprise']->value ?? 50;
+        $creditBonusEstablishment = $settings['credit_bonus_establishment']->value ?? 50;
 
         // Stats Détaillées
 
@@ -124,6 +130,9 @@ class MonetizationController extends Controller
             'fcfaConsumedOrg',
             'orgRevenue',
             'commissionPercent',
+            'creditBonusPro',
+            'creditBonusEnterprise',
+            'creditBonusEstablishment',
             'transactions'
         ));
     }
@@ -148,6 +157,9 @@ class MonetizationController extends Controller
             'feature_cost_ai_report_generation' => 'required|integer|min:0',
             'payout_fee_percentage' => 'required|integer|min:0|max:100',
             'mentorship_commission_percent' => 'required|integer|min:0|max:100',
+            'credit_bonus_pro' => 'required|integer|min:0',
+            'credit_bonus_enterprise' => 'required|integer|min:0',
+            'credit_bonus_establishment' => 'required|integer|min:0',
         ]);
 
         foreach ($validated as $key => $value) {

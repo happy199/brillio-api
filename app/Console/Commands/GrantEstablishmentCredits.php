@@ -8,17 +8,17 @@ use App\Services\WalletService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class GrantEnterpriseCredits extends Command
+class GrantEstablishmentCredits extends Command
 {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'organizations:grant-enterprise-credits';
+    protected $signature = 'organizations:grant-establishment-credits';
 
     /**
      * The console command description.
      */
-    protected $description = 'Distribue automatiquement 50 crédits gratuits aux organisations abonnées au plan Entreprise';
+    protected $description = 'Distribue automatiquement les crédits gratuits aux organisations abonnées au plan Établissement';
 
     public function __construct(protected WalletService $walletService)
     {
@@ -30,17 +30,17 @@ class GrantEnterpriseCredits extends Command
      */
     public function handle(): int
     {
-        $this->info('Distribution des crédits Enterprise mensuels...');
+        $this->info('Distribution des crédits Établissement mensuels...');
 
-        $creditBonus = SystemSetting::getValue('credit_bonus_enterprise', 50);
+        $creditBonus = SystemSetting::getValue('credit_bonus_establishment', 50);
 
-        $enterpriseOrgs = Organization::where('subscription_plan', Organization::PLAN_ENTERPRISE)
+        $establishmentOrgs = Organization::where('subscription_plan', Organization::PLAN_ESTABLISHMENT)
             ->whereNotNull('subscription_expires_at')
             ->where('subscription_expires_at', '>', now())
             ->get();
 
-        if ($enterpriseOrgs->isEmpty()) {
-            $this->info('Aucune organisation Enterprise active trouvée.');
+        if ($establishmentOrgs->isEmpty()) {
+            $this->info('Aucune organisation Établissement active trouvée.');
 
             return 0;
         }
@@ -49,16 +49,16 @@ class GrantEnterpriseCredits extends Command
         $success = 0;
         $errors = 0;
 
-        foreach ($enterpriseOrgs as $organization) {
+        foreach ($establishmentOrgs as $organization) {
             try {
                 $this->walletService->addCredits(
                     $organization,
                     $creditBonus,
                     'bonus',
-                    "{$creditBonus} crédits offerts — Plan Entreprise ({$month})"
+                    "{$creditBonus} crédits offerts — Plan Établissement ({$month})"
                 );
 
-                Log::info('Enterprise credits granted', [
+                Log::info('Establishment credits granted', [
                     'organization_id' => $organization->id,
                     'organization_name' => $organization->name,
                     'credits' => $creditBonus,
@@ -68,7 +68,7 @@ class GrantEnterpriseCredits extends Command
                 $this->line("  ✓ {$organization->name} : +{$creditBonus} crédits");
                 $success++;
             } catch (\Exception $e) {
-                Log::error('Erreur distribution crédits Enterprise', [
+                Log::error('Erreur distribution crédits Établissement', [
                     'organization_id' => $organization->id,
                     'organization_name' => $organization->name,
                     'error' => $e->getMessage(),

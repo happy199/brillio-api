@@ -96,6 +96,26 @@ class SystemSettingSeeder extends Seeder
                 'type' => 'integer',
                 'description' => 'Commission Retrait Mentor (%)',
             ],
+
+            // Crédits offerts mensuellement par plan
+            [
+                'key' => 'credit_bonus_pro',
+                'value' => '25',
+                'type' => 'integer',
+                'description' => 'Crédits offerts mensuellement aux organisations Pro',
+            ],
+            [
+                'key' => 'credit_bonus_enterprise',
+                'value' => '50',
+                'type' => 'integer',
+                'description' => 'Crédits offerts mensuellement aux organisations Enterprise',
+            ],
+            [
+                'key' => 'credit_bonus_establishment',
+                'value' => '50',
+                'type' => 'integer',
+                'description' => 'Crédits offerts mensuellement aux organisations Établissement',
+            ],
         ];
 
         foreach ($settings as $setting) {
