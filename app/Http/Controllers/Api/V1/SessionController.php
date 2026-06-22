@@ -204,8 +204,8 @@ class SessionController extends Controller
         }
 
         $price = $session->credit_cost;
-        if ($user->credits_balance < $price) {
-            return $this->error("Solde insuffisant ($price crédits requis).", 402);
+        if (! $this->hasSufficientCredits($user, 'session_payment', $price)) {
+            return $this->insufficientCreditsError($price);
         }
 
         try {
