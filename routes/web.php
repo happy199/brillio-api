@@ -236,6 +236,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'index'])->name('profile');
     Route::post('/profil', [App\Http\Controllers\Jeune\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profil/unlink-organization', [App\Http\Controllers\Jeune\ProfileController::class, 'unlinkOrganization'])->name('profile.unlink');
     Route::post('/profil/publier', [App\Http\Controllers\Jeune\ProfileController::class, 'publishProfile'])->name('profile.publish');
 
     // Progressive Profiling & Feedback
@@ -342,6 +343,7 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::get('/', [MentorDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profil', [MentorDashboardController::class, 'profile'])->name('profile');
     Route::put('/profil', [MentorDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profil/unlink-organization', [MentorDashboardController::class, 'unlinkOrganization'])->name('profile.unlink');
     Route::post('/profil/publier', [MentorDashboardController::class, 'publishProfile'])->name('profile.publish');
     Route::get('/parcours', [MentorDashboardController::class, 'roadmap'])->name('roadmap');
     Route::get('/parcours/{step}', [MentorDashboardController::class, 'getStep'])->name('roadmap.show');

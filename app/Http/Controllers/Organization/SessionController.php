@@ -23,8 +23,14 @@ class SessionController extends Controller
             $sessions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
         } else {
             $query = MentoringSession::query()
-                ->whereHas('mentees', function ($q) use ($organization) {
-                    $q->where('sponsored_by_organization_id', $organization->id);
+                ->where(function ($q) use ($organization) {
+                    $q->where('scheduled_by_organization_id', $organization->id)
+                        ->orWhereHas('mentees', function ($q2) use ($organization) {
+                            $q2->where('users.sponsored_by_organization_id', $organization->id)
+                                ->orWhereHas('organizations', function ($q3) use ($organization) {
+                                    $q3->where('organizations.id', $organization->id);
+                                });
+                        });
                 })
                 ->with(['mentor', 'mentees']);
 
@@ -52,8 +58,14 @@ class SessionController extends Controller
             $sessions = collect();
         } else {
             $sessions = MentoringSession::query()
-                ->whereHas('mentees', function ($q) use ($organization) {
-                    $q->where('sponsored_by_organization_id', $organization->id);
+                ->where(function ($q) use ($organization) {
+                    $q->where('scheduled_by_organization_id', $organization->id)
+                        ->orWhereHas('mentees', function ($q2) use ($organization) {
+                            $q2->where('users.sponsored_by_organization_id', $organization->id)
+                                ->orWhereHas('organizations', function ($q3) use ($organization) {
+                                    $q3->where('organizations.id', $organization->id);
+                                });
+                        });
                 })
                 ->with(['mentor', 'mentees'])
                 ->get();
@@ -74,8 +86,14 @@ class SessionController extends Controller
         }
 
         $sessions = MentoringSession::query()
-            ->whereHas('mentees', function ($q) use ($organization) {
-                $q->where('sponsored_by_organization_id', $organization->id);
+            ->where(function ($q) use ($organization) {
+                $q->where('scheduled_by_organization_id', $organization->id)
+                    ->orWhereHas('mentees', function ($q2) use ($organization) {
+                        $q2->where('users.sponsored_by_organization_id', $organization->id)
+                            ->orWhereHas('organizations', function ($q3) use ($organization) {
+                                $q3->where('organizations.id', $organization->id);
+                            });
+                    });
             })
             ->with(['mentor', 'mentees'])
             ->get()
@@ -101,7 +119,12 @@ class SessionController extends Controller
     private function authorizeSessionAccess(MentoringSession $session, $organization)
     {
         $isAuthorized = $session->scheduled_by_organization_id === $organization->id ||
-                        $session->mentees()->where('sponsored_by_organization_id', $organization->id)->exists();
+                        $session->mentees()->where(function ($q) use ($organization) {
+                            $q->where('users.sponsored_by_organization_id', $organization->id)
+                                ->orWhereHas('organizations', function ($q2) use ($organization) {
+                                    $q2->where('organizations.id', $organization->id);
+                                });
+                        })->exists();
 
         if (! $isAuthorized) {
             abort(403, 'Accès non autorisé');

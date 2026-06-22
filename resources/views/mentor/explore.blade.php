@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Talents Brillio</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Talents {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}</h1>
             <p class="text-gray-500">Découvrez les jeunes talents à la recherche de mentorat.</p>
         </div>
     </div>

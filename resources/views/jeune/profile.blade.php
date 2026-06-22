@@ -363,6 +363,35 @@
                     </form>
                 </div>
 
+                <!-- Liaison à l'organisation -->
+                @php
+                    $linkedOrg = $user->sponsoringOrganization ?? $user->organizations()->first();
+                @endphp
+                @if($linkedOrg)
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-orange-200 mt-6">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-900 mb-2">Liaison à l'organisation</h3>
+                            <p class="text-xs text-gray-600 mb-4">
+                                Vous êtes actuellement lié(e) à l'organisation <strong>{{ $linkedOrg->name }}</strong>. Cette organisation peut vous lier à un mentor, suivre vos interactions (discussions, calendrier et visioconférence).
+                            </p>
+                            <button @click="showUnlinkConfirm = true"
+                                class="w-full px-4 py-2.5 bg-white border-2 border-orange-200 text-orange-600 text-sm font-semibold rounded-xl hover:bg-orange-50 transition flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                Rompre le lien de parrainnage
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Zone de Danger -->
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-red-200 mt-6">
                     <div class="flex items-start gap-3">
@@ -663,6 +692,38 @@
         </div>
     </div>
 
+    <!-- MODAL: Confirmation de rupture de lien -->
+    <div x-show="showUnlinkConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" x-cloak
+        x-transition>
+        <div class="bg-white rounded-3xl max-w-md w-full p-6" @click.away="showUnlinkConfirm = false">
+            <div class="flex items-center justify-center w-14 h-14 bg-orange-100 rounded-full mx-auto mb-4">
+                <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Rompre le lien ?</h3>
+            <p class="text-gray-600 text-center text-sm mb-6">
+                Un e-mail sera envoyé à l'organisation pour la notifier que vous avez décidé de rompre la relation de mentorat en tant que Jeune. Plus aucune information sur vous ne sera visible dans leur espace.
+                <br><br>
+                Si c'est une erreur, veuillez les recontacter par e-mail. Un e-mail vous sera également envoyé pour vous confirmer que la rupture a été effectuée avec succès.
+            </p>
+
+            <form action="{{ route('jeune.profile.unlink') }}" method="POST">
+                @csrf
+                <div class="flex gap-3">
+                    <button type="button" @click="showUnlinkConfirm = false"
+                        class="flex-1 py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                        class="flex-1 py-3 bg-orange-600 text-white font-semibold rounded-xl hover:bg-orange-700 transition">
+                        Confirmer la rupture
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function profileData() {
             return {
@@ -670,6 +731,7 @@
                 editProfessional: false,
                 showDeleteConfirm: false,
                 showDeleteCode: false,
+                showUnlinkConfirm: false,
                 confirmationCode: '',
                 codeInput: '',
                 codeError: '',

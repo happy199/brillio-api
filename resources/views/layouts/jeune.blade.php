@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
-
+@php
+    $displayOrg = $current_organization ?? (auth()->check() ? (auth()->user()->sponsoringOrganization ?? auth()->user()->organizations->first()) : null);
+@endphp
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
-    <title>@yield('title', 'Espace Jeune') - Brillio</title>
+    <title>@yield('title', 'Espace Jeune') - {{ $displayOrg ? $displayOrg->name : 'Brillio' }}</title>
 
     @include('partials.analytics')
 
@@ -113,11 +115,15 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('jeune.dashboard') }}" class="flex items-center gap-2">
-                        <div
-                            class="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-600 rounded-xl flex items-center justify-center">
-                            <span class="text-xl font-bold text-white">B</span>
-                        </div>
-                        <span class="text-xl font-bold gradient-text hidden sm:block">Brillio</span>
+                        @if($displayOrg && $displayOrg->logo_url)
+                            <img src="{{ $displayOrg->logo_url }}" alt="{{ $displayOrg->name }}" class="h-10 rounded-xl object-contain">
+                            <span class="text-xl font-bold gradient-text hidden sm:block">{{ $displayOrg->name }}</span>
+                        @else
+                            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                <span class="text-xl font-bold text-white">B</span>
+                            </div>
+                            <span class="text-xl font-bold gradient-text hidden sm:block">{{ $displayOrg ? $displayOrg->name : 'Brillio' }}</span>
+                        @endif
                     </a>
                 </div>
 
@@ -293,7 +299,7 @@
     <footer class="bg-white border-t border-gray-100 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <p class="text-sm text-gray-500">2026 Brillio. Tous droits reserves.</p>
+                <p class="text-sm text-gray-500">2026 {{ $displayOrg ? $displayOrg->name : 'Brillio' }}. Tous droits reserves.</p>
                 <div class="flex gap-4">
                     <a href="{{ route('about') }}" class="text-sm text-gray-500 hover:text-primary-600">A propos</a>
                     <a href="{{ route('contact') }}" class="text-sm text-gray-500 hover:text-primary-600">Contact</a>
