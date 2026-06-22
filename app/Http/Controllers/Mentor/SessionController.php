@@ -4,7 +4,11 @@ namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
+use App\Services\BrillioIAService;
 use App\Services\MentorshipNotificationService;
+use App\Services\WalletService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -128,7 +132,7 @@ class SessionController extends Controller
         $mentor = Auth::user();
 
         // Conversion de la date selon le fuseau horaire choisi vers UTC pour stockage
-        $scheduledAt = \Carbon\Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
+        $scheduledAt = Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
 
         if ($scheduledAt->isPast()) {
             return redirect()->back()->withInput()->with('error', 'La date de la séance ne peut pas être dans le passé.');
@@ -162,7 +166,7 @@ class SessionController extends Controller
         }
 
         // Notification email au jeune
-        app(\App\Services\MentorshipNotificationService::class)->sendSessionProposed($session);
+        app(MentorshipNotificationService::class)->sendSessionProposed($session);
 
         return redirect()->route('mentor.mentorship.sessions.show', $session)
             ->with('success', 'Séance proposée avec succès.');
@@ -220,7 +224,7 @@ class SessionController extends Controller
         ]);
 
         // Conversion de la date selon le fuseau horaire choisi vers UTC
-        $scheduledAt = \Carbon\Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
+        $scheduledAt = Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
 
         if ($scheduledAt->isPast() && $scheduledAt->diffInMinutes(now()) > 5) {
             return redirect()->back()->withInput()->with('error', 'La date de la séance ne peut pas être dans le passé.');
@@ -263,7 +267,7 @@ class SessionController extends Controller
         // Notification de modification
         try {
             $session->load(['mentor', 'mentees', 'additionalMentors', 'organization']);
-            app(\App\Services\MentorshipNotificationService::class)->sendSessionUpdated($session, auth()->user());
+            app(MentorshipNotificationService::class)->sendSessionUpdated($session, auth()->user());
         } catch (\Exception $e) {
             \Log::error('Erreur notifications modification session mentor : '.$e->getMessage());
         }
@@ -300,11 +304,11 @@ class SessionController extends Controller
 
         // CRITICAL: Trigger Payout to Mentor now that the report is submitted
         if ($session->is_paid) {
-            app(\App\Services\WalletService::class)->payoutMentor($session);
+            app(WalletService::class)->payoutMentor($session);
         }
 
         // Notification email de fin de séance
-        $notificationService = app(\App\Services\MentorshipNotificationService::class);
+        $notificationService = app(MentorshipNotificationService::class);
         $notificationService->sendSessionCompleted($session);
         $notificationService->sendReportAvailableNotification($session);
 
@@ -326,7 +330,7 @@ class SessionController extends Controller
 
         // 1. Refund all paid mentees (100% since it's mentor's cancellation)
         if ($session->is_paid) {
-            $walletService = app(\App\Services\WalletService::class);
+            $walletService = app(WalletService::class);
             foreach ($session->mentees as $mentee) {
                 $walletService->refundJeune($session, $mentee, 1.0);
             }
@@ -338,7 +342,7 @@ class SessionController extends Controller
         ]);
 
         // Notification email d'annulation
-        app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, Auth::user());
+        app(MentorshipNotificationService::class)->sendSessionCancelled($session, Auth::user());
 
         return redirect()->route('mentor.mentorship.calendar')
             ->with('success', 'Séance annulée. '.($session->is_paid ? 'Les participants ont été intégralement remboursés.' : ''));
@@ -386,7 +390,7 @@ class SessionController extends Controller
 
         // Si gratuit (confirmé direct), notifier
         if (! $isPaid) {
-            app(\App\Services\MentorshipNotificationService::class)->sendSessionConfirmed($session);
+            app(MentorshipNotificationService::class)->sendSessionConfirmed($session);
         }
 
         return redirect()->back()->with('success', $message);
@@ -411,7 +415,7 @@ class SessionController extends Controller
         ]);
 
         // Notification email de refus au jeune
-        app(\App\Services\MentorshipNotificationService::class)->sendSessionRefused($session, $request->refusal_reason);
+        app(MentorshipNotificationService::class)->sendSessionRefused($session, $request->refusal_reason);
 
         return redirect()->back()->with('success', 'Demande de séance refusée.');
     }
@@ -432,13 +436,13 @@ class SessionController extends Controller
             return redirect()->back()->with('info', 'Historique déjà débloqué.');
         }
 
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('unlock_history', 5);
+        $cost = app(WalletService::class)->getFeatureCost('unlock_history', 5);
 
         if ($mentor->credits_balance < $cost) {
             return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Veuillez recharger votre compte pour continuer.");
         }
 
-        app(\App\Services\WalletService::class)->deductCredits(
+        app(WalletService::class)->deductCredits(
             $mentor,
             $cost,
             'feature_unlock',
@@ -462,7 +466,7 @@ class SessionController extends Controller
             return redirect()->back()->with('error', "Ce compte rendu n'est pas encore disponible.");
         }
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.session_pdf', compact('session'));
+        $pdf = Pdf::loadView('mentor.reports.session_pdf', compact('session'));
 
         return $pdf->download('compte_rendu_seance_'.$session->id.'.pdf');
     }
@@ -478,7 +482,7 @@ class SessionController extends Controller
 
         $mentor = Auth::user();
 
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('compiled_report', 5);
+        $cost = app(WalletService::class)->getFeatureCost('compiled_report', 5);
 
         if ($mentor->credits_balance < $cost) {
             return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Veuillez recharger votre compte pour continuer.");
@@ -496,14 +500,14 @@ class SessionController extends Controller
             return redirect()->back()->with('error', 'Aucun compte rendu valide sélectionné.');
         }
 
-        app(\App\Services\WalletService::class)->deductCredits(
+        app(WalletService::class)->deductCredits(
             $mentor,
             $cost,
             'feature_use',
             "Génération d'un rapport compilé (".$sessions->count().' séances)'
         );
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.compiled_sessions_pdf', compact('sessions'));
+        $pdf = Pdf::loadView('mentor.reports.compiled_sessions_pdf', compact('sessions'));
 
         return $pdf->download('rapport_compile_seances_'.date('Ymd_His').'.pdf');
     }
@@ -522,7 +526,7 @@ class SessionController extends Controller
         }
 
         $mentor = Auth::user();
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('transcription_download', 5);
+        $cost = app(WalletService::class)->getFeatureCost('transcription_download', 5);
 
         if ($mentor->credits_balance < $cost) {
             $missing = $cost - $mentor->credits_balance;
@@ -530,7 +534,7 @@ class SessionController extends Controller
             return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cette transcription.");
         }
 
-        app(\App\Services\WalletService::class)->deductCredits(
+        app(WalletService::class)->deductCredits(
             $mentor,
             $cost,
             'feature_use',
@@ -538,7 +542,7 @@ class SessionController extends Controller
             $session
         );
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('common.reports.transcription_pdf', compact('session'));
+        $pdf = Pdf::loadView('common.reports.transcription_pdf', compact('session'));
 
         return $pdf->download('transcription_seance_'.$session->id.'.pdf');
     }
@@ -557,7 +561,7 @@ class SessionController extends Controller
         }
 
         $mentor = Auth::user();
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('ai_report_generation', 5);
+        $cost = app(WalletService::class)->getFeatureCost('ai_report_generation', 5);
 
         if ($mentor->credits_balance < $cost) {
             $missing = $cost - $mentor->credits_balance;
@@ -568,7 +572,7 @@ class SessionController extends Controller
         $mentorName = $session->mentor->name;
         $menteeNames = $session->mentees->pluck('name')->join(', ');
 
-        $suggestedReport = app(\App\Services\BrillioIAService::class)->summarizeTranscription(
+        $suggestedReport = app(BrillioIAService::class)->summarizeTranscription(
             $session->transcription_raw,
             $mentorName,
             $menteeNames
@@ -578,7 +582,7 @@ class SessionController extends Controller
             return redirect()->back()->with('error', "L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.");
         }
 
-        app(\App\Services\WalletService::class)->deductCredits(
+        app(WalletService::class)->deductCredits(
             $mentor,
             $cost,
             'feature_use',

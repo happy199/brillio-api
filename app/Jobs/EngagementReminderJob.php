@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Mail\Mailable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
@@ -29,7 +30,7 @@ abstract class EngagementReminderJob implements ShouldQueue
     /**
      * Build the Mailable instance to send to a given user.
      */
-    abstract protected function buildMailable(User $user): \Illuminate\Mail\Mailable;
+    abstract protected function buildMailable(User $user): Mailable;
 
     /**
      * A label used in the log message at the end of the job.

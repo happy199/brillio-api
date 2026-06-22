@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\CreditPack;
+use App\Models\MonerooTransaction;
+use App\Models\Organization;
+use App\Services\MentorshipNotificationService;
+use App\Services\MonerooService;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +18,7 @@ class PaymentController extends Controller
 
     protected $walletService;
 
-    public function __construct(\App\Services\MonerooService $monerooService, \App\Services\WalletService $walletService)
+    public function __construct(MonerooService $monerooService, WalletService $walletService)
     {
         $this->monerooService = $monerooService;
         $this->walletService = $walletService;
@@ -39,7 +44,7 @@ class PaymentController extends Controller
         }
 
         // Find existing transaction record
-        $localTransaction = \App\Models\MonerooTransaction::where('moneroo_transaction_id', $transactionId)->first();
+        $localTransaction = MonerooTransaction::where('moneroo_transaction_id', $transactionId)->first();
 
         // If transaction already completed (via webhook), redirect based on type
         if ($localTransaction && $localTransaction->status === 'completed') {
@@ -98,7 +103,7 @@ class PaymentController extends Controller
     {
         // Find MonerooTransaction to get metadata
         $monerooTransactionId = $paymentData['id'] ?? null;
-        $localTransaction = \App\Models\MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
+        $localTransaction = MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
 
         if (! $localTransaction) {
             Log::error('Subscription callback: Local transaction not found', ['moneroo_id' => $monerooTransactionId]);
@@ -114,7 +119,7 @@ class PaymentController extends Controller
         $parts = explode('-', $reference);
         $orgId = $parts[1] ?? null;
 
-        $organization = \App\Models\Organization::find($orgId);
+        $organization = Organization::find($orgId);
         $plan = CreditPack::find($planId); // It's a Subscription type credit pack
 
         if ($organization && $plan) {
@@ -130,7 +135,7 @@ class PaymentController extends Controller
             }
 
             // Notification par email
-            app(\App\Services\MentorshipNotificationService::class)->sendSubscriptionActivatedNotification($organization, $plan);
+            app(MentorshipNotificationService::class)->sendSubscriptionActivatedNotification($organization, $plan);
 
             return redirect()->route('organization.subscriptions.index')->with('success', 'Abonnement activé avec succès !');
         }
@@ -149,13 +154,13 @@ class PaymentController extends Controller
         $orgId = $parts[1];
         $packId = $parts[2];
 
-        $organization = \App\Models\Organization::find($orgId);
+        $organization = Organization::find($orgId);
         $pack = CreditPack::find($packId);
 
         if ($organization && $pack) {
             // Find MonerooTransaction to link it
             $monerooTransactionId = $paymentData['id'] ?? null;
-            $localTransaction = \App\Models\MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
+            $localTransaction = MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
 
             // Use WalletService to credit organization
             $this->walletService->addCredits(
@@ -172,7 +177,7 @@ class PaymentController extends Controller
             }
 
             // Notification par email
-            app(\App\Services\MentorshipNotificationService::class)->sendCreditPackPurchasedNotification($organization, $pack);
+            app(MentorshipNotificationService::class)->sendCreditPackPurchasedNotification($organization, $pack);
 
             return redirect()->route('organization.wallet.index')->with('success', "Pack de {$pack->credits} crédits ajouté avec succès !");
         }

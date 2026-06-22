@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrganizationUnlinkedNotificationMail;
+use App\Mail\UserUnlinkedConfirmationMail;
+use App\Models\JeuneProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -113,7 +117,7 @@ class ProfileController extends Controller
 
             // Vérification au cas où (collision très improbable)
             $counter = 1;
-            while (\App\Models\JeuneProfile::where('public_slug', $slug)->exists()) {
+            while (JeuneProfile::where('public_slug', $slug)->exists()) {
                 $slug = $baseSlug.'-'.$hash.'-'.$counter;
                 $counter++;
             }
@@ -193,7 +197,7 @@ class ProfileController extends Controller
             $slug = $baseSlug.'-'.$hash;
 
             $counter = 1;
-            while (\App\Models\JeuneProfile::where('public_slug', $slug)->exists()) {
+            while (JeuneProfile::where('public_slug', $slug)->exists()) {
                 $slug = $baseSlug.'-'.$hash.'-'.$counter;
                 $counter++;
             }
@@ -222,11 +226,11 @@ class ProfileController extends Controller
         // Email to Organization
         $orgEmail = $org->email ?? ($org->owner ? $org->owner->email : null);
         if ($orgEmail) {
-            \Illuminate\Support\Facades\Mail::to($orgEmail)->send(new \App\Mail\OrganizationUnlinkedNotificationMail($user, 'Jeune'));
+            Mail::to($orgEmail)->send(new OrganizationUnlinkedNotificationMail($user, 'Jeune'));
         }
 
         // Email to User
-        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\UserUnlinkedConfirmationMail($org));
+        Mail::to($user->email)->send(new UserUnlinkedConfirmationMail($org));
 
         // Detach
         $user->sponsored_by_organization_id = null;

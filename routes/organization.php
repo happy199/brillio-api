@@ -1,11 +1,27 @@
 <?php
 
+use App\Http\Controllers\Organization\AdvertisementController;
 use App\Http\Controllers\Organization\Auth\RegisterController;
+use App\Http\Controllers\Organization\Auth\VerifyEmailController;
 use App\Http\Controllers\Organization\ConversationController;
+use App\Http\Controllers\Organization\CreditDistributionController;
 use App\Http\Controllers\Organization\DashboardController;
+use App\Http\Controllers\Organization\EstablishmentController;
 use App\Http\Controllers\Organization\ExportController;
+use App\Http\Controllers\Organization\GuestController;
 use App\Http\Controllers\Organization\InvitationController;
+use App\Http\Controllers\Organization\MentorsController;
+use App\Http\Controllers\Organization\MentorshipController;
+use App\Http\Controllers\Organization\PaymentController;
+use App\Http\Controllers\Organization\ProfileController;
+use App\Http\Controllers\Organization\PromotionController;
+use App\Http\Controllers\Organization\ResourceController;
+use App\Http\Controllers\Organization\ScheduledSessionController;
+use App\Http\Controllers\Organization\SessionController;
 use App\Http\Controllers\Organization\SponsoredUsersController;
+use App\Http\Controllers\Organization\SubscriptionController;
+use App\Http\Controllers\Organization\TeamController;
+use App\Http\Controllers\Organization\WalletController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,14 +47,14 @@ Route::middleware('guest')->group(function () {
 
 // Email Verification (Authenticated but not necessarily verified)
 Route::middleware('auth')->prefix('email')->name('verification.')->group(function () {
-    Route::get('/verify', [App\Http\Controllers\Organization\Auth\VerifyEmailController::class, 'notice'])
+    Route::get('/verify', [VerifyEmailController::class, 'notice'])
         ->name('notice');
 
-    Route::get('/verify/{id}/{hash}', [App\Http\Controllers\Organization\Auth\VerifyEmailController::class, 'verify'])
+    Route::get('/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verify');
 
-    Route::post('/verification-notification', [App\Http\Controllers\Organization\Auth\VerifyEmailController::class, 'resend'])
+    Route::post('/verification-notification', [VerifyEmailController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('resend');
 });
@@ -53,20 +69,20 @@ Route::middleware('auth')->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
             // Credit Distribution
-            Route::post('/credits/distribute', [\App\Http\Controllers\Organization\CreditDistributionController::class, 'distribute'])
+            Route::post('/credits/distribute', [CreditDistributionController::class, 'distribute'])
                 ->middleware('organization_role:admin')
                 ->name('credits.distribute');
 
             // Profile
-            Route::get('/profile', [\App\Http\Controllers\Organization\ProfileController::class, 'edit'])->name('profile.edit');
-            Route::put('/profile', [\App\Http\Controllers\Organization\ProfileController::class, 'update'])
+            Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+            Route::put('/profile', [ProfileController::class, 'update'])
                 ->middleware('organization_role:admin')
                 ->name('profile.update');
-            Route::get('/profile/check-domain', [\App\Http\Controllers\Organization\ProfileController::class, 'checkDomainAvailability'])
+            Route::get('/profile/check-domain', [ProfileController::class, 'checkDomainAvailability'])
                 ->name('profile.check-domain');
-            Route::get('/profile/verify-dns', [\App\Http\Controllers\Organization\ProfileController::class, 'verifyDomainDNS'])
+            Route::get('/profile/verify-dns', [ProfileController::class, 'verifyDomainDNS'])
                 ->name('profile.verify-dns');
-            Route::post('/profile/activate-domain', [\App\Http\Controllers\Organization\ProfileController::class, 'activateCustomDomain'])
+            Route::post('/profile/activate-domain', [ProfileController::class, 'activateCustomDomain'])
                 ->middleware('organization_role:admin')
                 ->name('profile.activate-domain');
 
@@ -86,35 +102,35 @@ Route::middleware('auth')->group(function () {
             Route::middleware('organization_subscription:pro')->group(
                 function () {
                     // Sponsored Users
-                    Route::get('/users', [\App\Http\Controllers\Organization\SponsoredUsersController::class, 'index'])->name('users.index');
-                    Route::get('/users/{user}', [\App\Http\Controllers\Organization\SponsoredUsersController::class, 'show'])->name('users.show');
+                    Route::get('/users', [SponsoredUsersController::class, 'index'])->name('users.index');
+                    Route::get('/users/{user}', [SponsoredUsersController::class, 'show'])->name('users.show');
 
                     // Mentors
-                    Route::get('/mentors', [\App\Http\Controllers\Organization\MentorsController::class, 'index'])->name('mentors.index');
-                    Route::get('/mentors/{mentor:public_slug}/export-pdf', [\App\Http\Controllers\Organization\MentorsController::class, 'exportPdf'])->name('mentors.export-pdf');
-                    Route::get('/mentors/{mentor:public_slug}/export-csv', [\App\Http\Controllers\Organization\MentorsController::class, 'exportCsv'])->name('mentors.export-csv');
-                    Route::get('/mentors/{mentor:public_slug}', [\App\Http\Controllers\Organization\MentorsController::class, 'show'])->name('mentors.show');
+                    Route::get('/mentors', [MentorsController::class, 'index'])->name('mentors.index');
+                    Route::get('/mentors/{mentor:public_slug}/export-pdf', [MentorsController::class, 'exportPdf'])->name('mentors.export-pdf');
+                    Route::get('/mentors/{mentor:public_slug}/export-csv', [MentorsController::class, 'exportCsv'])->name('mentors.export-csv');
+                    Route::get('/mentors/{mentor:public_slug}', [MentorsController::class, 'show'])->name('mentors.show');
 
                     // Mentorships
-                    Route::get('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'index'])->name('mentorships.index');
-                    Route::get('/mentorships/create', [\App\Http\Controllers\Organization\MentorshipController::class, 'create'])->name('mentorships.create');
-                    Route::post('/mentorships', [\App\Http\Controllers\Organization\MentorshipController::class, 'store'])->name('mentorships.store');
-                    Route::get('/mentorships/{mentorship}', [\App\Http\Controllers\Organization\MentorshipController::class, 'show'])->name('mentorships.show');
-                    Route::post('/mentorships/{mentorship}/validate', [\App\Http\Controllers\Organization\MentorshipController::class, 'validateMentorship'])->name('mentorships.validate');
+                    Route::get('/mentorships', [MentorshipController::class, 'index'])->name('mentorships.index');
+                    Route::get('/mentorships/create', [MentorshipController::class, 'create'])->name('mentorships.create');
+                    Route::post('/mentorships', [MentorshipController::class, 'store'])->name('mentorships.store');
+                    Route::get('/mentorships/{mentorship}', [MentorshipController::class, 'show'])->name('mentorships.show');
+                    Route::post('/mentorships/{mentorship}/validate', [MentorshipController::class, 'validateMentorship'])->name('mentorships.validate');
 
                     // Conversation monitoring (Enterprise only)
                     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
                     Route::get('/conversations/{mentorship}', [ConversationController::class, 'show'])->name('conversations.show');
                     Route::get('/conversations/download/{message}', [ConversationController::class, 'download'])->name('conversations.download');
-                    Route::post('/mentorships/{mentorship}/terminate', [\App\Http\Controllers\Organization\MentorshipController::class, 'terminate'])->name('mentorships.terminate');
+                    Route::post('/mentorships/{mentorship}/terminate', [MentorshipController::class, 'terminate'])->name('mentorships.terminate');
 
                     // Sessions & Calendar
-                    Route::get('/sessions', [\App\Http\Controllers\Organization\SessionController::class, 'index'])->name('sessions.index');
-                    Route::get('/sessions/calendar', [\App\Http\Controllers\Organization\SessionController::class, 'calendar'])->name('sessions.calendar');
-                    Route::get('/sessions/events', [\App\Http\Controllers\Organization\SessionController::class, 'events'])->name('sessions.events');
+                    Route::get('/sessions', [SessionController::class, 'index'])->name('sessions.index');
+                    Route::get('/sessions/calendar', [SessionController::class, 'calendar'])->name('sessions.calendar');
+                    Route::get('/sessions/events', [SessionController::class, 'events'])->name('sessions.events');
 
                     // Wildecard Session route moved to ensure specific /create route (below) takes precedence
-                    Route::get('/sessions/{session}/transcription', [\App\Http\Controllers\Organization\SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
+                    Route::get('/sessions/{session}/transcription', [SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
 
                     // Individual User Export
                     Route::get('/users/{user}/export', [SponsoredUsersController::class, 'export'])->name('users.export');
@@ -124,19 +140,19 @@ Route::middleware('auth')->group(function () {
             // Enterprise Specific Session Scheduling (Prioritized over Wildcards)
             Route::middleware('organization_subscription:enterprise')->group(function () {
                 Route::prefix('sessions')->name('sessions.')->group(function () {
-                    Route::get('/create', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'create'])->name('create');
-                    Route::post('/', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'store'])->name('store');
-                    Route::get('/{session}/edit', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'edit'])->name('edit');
-                    Route::put('/{session}', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'update'])->name('update');
-                    Route::post('/{session}/cancel', [\App\Http\Controllers\Organization\ScheduledSessionController::class, 'cancel'])->name('cancel');
-                    Route::post('/{session}/prefill-report', [\App\Http\Controllers\Organization\SessionController::class, 'prefillReport'])->name('prefill-report');
-                    Route::put('/{session}/report', [\App\Http\Controllers\Organization\SessionController::class, 'updateReport'])->name('report.update');
+                    Route::get('/create', [ScheduledSessionController::class, 'create'])->name('create');
+                    Route::post('/', [ScheduledSessionController::class, 'store'])->name('store');
+                    Route::get('/{session}/edit', [ScheduledSessionController::class, 'edit'])->name('edit');
+                    Route::put('/{session}', [ScheduledSessionController::class, 'update'])->name('update');
+                    Route::post('/{session}/cancel', [ScheduledSessionController::class, 'cancel'])->name('cancel');
+                    Route::post('/{session}/prefill-report', [SessionController::class, 'prefillReport'])->name('prefill-report');
+                    Route::put('/{session}/report', [SessionController::class, 'updateReport'])->name('report.update');
                 });
             });
 
             // Common Wildcard Session Access (Pro & Enterprise)
             Route::middleware('organization_subscription:pro')->group(function () {
-                Route::get('/sessions/{session}', [\App\Http\Controllers\Organization\SessionController::class, 'show'])->name('sessions.show');
+                Route::get('/sessions/{session}', [SessionController::class, 'show'])->name('sessions.show');
             });
 
             // Exports
@@ -147,83 +163,83 @@ Route::middleware('auth')->group(function () {
                 ->name('exports.generate');
 
             // Subscriptions
-            Route::get('/subscriptions', [\App\Http\Controllers\Organization\SubscriptionController::class, 'index'])->name('subscriptions.index');
-            Route::post('/subscriptions/downgrade', [\App\Http\Controllers\Organization\SubscriptionController::class, 'downgrade'])
+            Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+            Route::post('/subscriptions/downgrade', [SubscriptionController::class, 'downgrade'])
                 ->middleware('organization_role:admin')
                 ->name('subscriptions.downgrade');
-            Route::post('/subscriptions/request-contact', [\App\Http\Controllers\Organization\SubscriptionController::class, 'requestContact'])
+            Route::post('/subscriptions/request-contact', [SubscriptionController::class, 'requestContact'])
                 ->middleware('organization_role:admin')
                 ->name('subscriptions.request-contact');
-            Route::post('/subscriptions/{plan}', [\App\Http\Controllers\Organization\SubscriptionController::class, 'subscribe'])
+            Route::post('/subscriptions/{plan}', [SubscriptionController::class, 'subscribe'])
                 ->middleware('organization_role:admin')
                 ->name('subscriptions.subscribe');
 
             // Payments
-            Route::get('/payment/callback', [\App\Http\Controllers\Organization\PaymentController::class, 'callback'])->name('payment.callback');
+            Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 
             // Wallet
             Route::middleware('organization_role:admin')->group(
                 function () {
-                    Route::get('/wallet', [\App\Http\Controllers\Organization\WalletController::class, 'index'])->name('wallet.index');
-                    Route::get('/wallet/history', [\App\Http\Controllers\Organization\WalletController::class, 'history'])->name('wallet.history');
-                    Route::get('/wallet/export-pdf', [\App\Http\Controllers\Organization\WalletController::class, 'exportPdf'])->name('wallet.export-pdf');
-                    Route::get('/wallet/export-csv', [\App\Http\Controllers\Organization\WalletController::class, 'exportCsv'])->name('wallet.export-csv');
-                    Route::post('/wallet/purchase', [\App\Http\Controllers\Organization\WalletController::class, 'purchase'])->name('wallet.purchase');
+                    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+                    Route::get('/wallet/history', [WalletController::class, 'history'])->name('wallet.history');
+                    Route::get('/wallet/export-pdf', [WalletController::class, 'exportPdf'])->name('wallet.export-pdf');
+                    Route::get('/wallet/export-csv', [WalletController::class, 'exportCsv'])->name('wallet.export-csv');
+                    Route::post('/wallet/purchase', [WalletController::class, 'purchase'])->name('wallet.purchase');
                 }
             );
 
             // Resources Library
             Route::prefix('resources')->name('resources.')->group(
                 function () {
-                    Route::get('/', [\App\Http\Controllers\Organization\ResourceController::class, 'index'])->name('index');
-                    Route::get('/{resource:slug}', [\App\Http\Controllers\Organization\ResourceController::class, 'show'])->name('show');
-                    Route::post('/{resource:slug}/gift', [\App\Http\Controllers\Organization\ResourceController::class, 'gift'])->name('gift');
+                    Route::get('/', [ResourceController::class, 'index'])->name('index');
+                    Route::get('/{resource:slug}', [ResourceController::class, 'show'])->name('show');
+                    Route::post('/{resource:slug}/gift', [ResourceController::class, 'gift'])->name('gift');
                 }
             );
 
             // Advertisements
             Route::prefix('advertisements')->name('advertisements.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Organization\AdvertisementController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Organization\AdvertisementController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Organization\AdvertisementController::class, 'store'])->name('store');
-                Route::get('/{advertisement}/edit', [\App\Http\Controllers\Organization\AdvertisementController::class, 'edit'])->name('edit');
-                Route::put('/{advertisement}', [\App\Http\Controllers\Organization\AdvertisementController::class, 'update'])->name('update');
-                Route::delete('/{advertisement}', [\App\Http\Controllers\Organization\AdvertisementController::class, 'destroy'])->name('destroy');
+                Route::get('/', [AdvertisementController::class, 'index'])->name('index');
+                Route::get('/create', [AdvertisementController::class, 'create'])->name('create');
+                Route::post('/', [AdvertisementController::class, 'store'])->name('store');
+                Route::get('/{advertisement}/edit', [AdvertisementController::class, 'edit'])->name('edit');
+                Route::put('/{advertisement}', [AdvertisementController::class, 'update'])->name('update');
+                Route::delete('/{advertisement}', [AdvertisementController::class, 'destroy'])->name('destroy');
             });
 
             // Team Management (Enterprise only)
             Route::middleware('organization_subscription:enterprise')->prefix('team')->name('team.')->group(
                 function () {
-                    Route::get('/', [\App\Http\Controllers\Organization\TeamController::class, 'index'])->name('index');
-                    Route::get('/create', [\App\Http\Controllers\Organization\TeamController::class, 'create'])->name('create');
-                    Route::post('/', [\App\Http\Controllers\Organization\TeamController::class, 'store'])->name('store');
-                    Route::delete('/{user}', [\App\Http\Controllers\Organization\TeamController::class, 'destroy'])->name('destroy');
+                    Route::get('/', [TeamController::class, 'index'])->name('index');
+                    Route::get('/create', [TeamController::class, 'create'])->name('create');
+                    Route::post('/', [TeamController::class, 'store'])->name('store');
+                    Route::delete('/{user}', [TeamController::class, 'destroy'])->name('destroy');
                 }
             );
 
             // Guest Trainers Management
             Route::prefix('guests')->name('guests.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Organization\GuestController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Http\Controllers\Organization\GuestController::class, 'create'])->name('create');
-                Route::post('/', [\App\Http\Controllers\Organization\GuestController::class, 'store'])->name('store');
-                Route::get('/{guest:id}', [\App\Http\Controllers\Organization\GuestController::class, 'show'])->name('show');
-                Route::get('/{guest:id}/edit', [\App\Http\Controllers\Organization\GuestController::class, 'edit'])->name('edit');
-                Route::put('/{guest:id}', [\App\Http\Controllers\Organization\GuestController::class, 'update'])->name('update');
-                Route::delete('/{guest:id}', [\App\Http\Controllers\Organization\GuestController::class, 'destroy'])->name('destroy');
+                Route::get('/', [GuestController::class, 'index'])->name('index');
+                Route::get('/create', [GuestController::class, 'create'])->name('create');
+                Route::post('/', [GuestController::class, 'store'])->name('store');
+                Route::get('/{guest:id}', [GuestController::class, 'show'])->name('show');
+                Route::get('/{guest:id}/edit', [GuestController::class, 'edit'])->name('edit');
+                Route::put('/{guest:id}', [GuestController::class, 'update'])->name('update');
+                Route::delete('/{guest:id}', [GuestController::class, 'destroy'])->name('destroy');
             });
 
             // Promotion (Establishment only)
             Route::middleware('organization_subscription:establishment')->group(function () {
                 Route::prefix('promotion')->name('promotion.')->group(function () {
-                    Route::get('/', [\App\Http\Controllers\Organization\PromotionController::class, 'index'])->name('index');
-                    Route::get('/export-pdf', [\App\Http\Controllers\Organization\PromotionController::class, 'exportPdf'])->name('export-pdf');
-                    Route::get('/export-csv', [\App\Http\Controllers\Organization\PromotionController::class, 'exportCsv'])->name('export-csv');
+                    Route::get('/', [PromotionController::class, 'index'])->name('index');
+                    Route::get('/export-pdf', [PromotionController::class, 'exportPdf'])->name('export-pdf');
+                    Route::get('/export-csv', [PromotionController::class, 'exportCsv'])->name('export-csv');
                 });
 
                 Route::prefix('establishments')->name('establishments.')->group(function () {
-                    Route::get('/edit', [\App\Http\Controllers\Organization\EstablishmentController::class, 'edit'])->name('edit');
-                    Route::put('/{establishment}', [\App\Http\Controllers\Organization\EstablishmentController::class, 'update'])->name('update');
-                    Route::post('/{establishment}/boost', [\App\Http\Controllers\Organization\EstablishmentController::class, 'boost'])->name('boost');
+                    Route::get('/edit', [EstablishmentController::class, 'edit'])->name('edit');
+                    Route::put('/{establishment}', [EstablishmentController::class, 'update'])->name('update');
+                    Route::post('/{establishment}/boost', [EstablishmentController::class, 'boost'])->name('boost');
                 });
             });
         }

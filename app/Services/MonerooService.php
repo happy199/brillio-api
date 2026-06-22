@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\SystemSetting;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -381,8 +382,8 @@ class MonerooService
     public function calculateFee(float $amount): float
     {
         // Récupérer la configuration depuis SystemSetting (ou valeurs par défaut)
-        $feeRate = \App\Models\SystemSetting::getValue('payout_fee_percentage', 5) / 100; // Par défaut 5%
-        $minFee = \App\Models\SystemSetting::getValue('payout_min_fee', 250); // 250 FCFA minimum
+        $feeRate = SystemSetting::getValue('payout_fee_percentage', 5) / 100; // Par défaut 5%
+        $minFee = SystemSetting::getValue('payout_min_fee', 250); // 250 FCFA minimum
 
         $fee = max($amount * $feeRate, $minFee);
 

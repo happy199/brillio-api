@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Services\MbtiCareersService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 /**
  * Modèle MentorProfile - Profil détaillé des mentors
@@ -111,8 +114,8 @@ class MentorProfile extends Model
      */
     protected static function generateUniqueSlug($mentorProfile)
     {
-        $user = $mentorProfile->user ?? \App\Models\User::find($mentorProfile->user_id);
-        $baseName = \Illuminate\Support\Str::slug(\Illuminate\Support\Str::limit($user->name, 30, ''));
+        $user = $mentorProfile->user ?? User::find($mentorProfile->user_id);
+        $baseName = Str::slug(Str::limit($user->name, 30, ''));
         $hash = substr(md5(uniqid().time()), 0, 8);
         $slug = $baseName.'-'.$hash;
 
@@ -228,7 +231,7 @@ class MentorProfile extends Model
     public function scopeByMbtiType($query, string $mbtiType)
     {
         // Utiliser MbtiCareersService pour trouver les secteurs du type
-        $sectors = \App\Services\MbtiCareersService::getSectorsForType($mbtiType);
+        $sectors = MbtiCareersService::getSectorsForType($mbtiType);
         $sectorCodes = array_keys($sectors);
 
         if (empty($sectorCodes)) {
@@ -256,7 +259,7 @@ class MentorProfile extends Model
     /**
      * Récupère les mentors recommandés pour un type de personnalité
      */
-    public static function getRecommendedForMbtiType(string $mbtiType, int $limit = 6): \Illuminate\Database\Eloquent\Collection
+    public static function getRecommendedForMbtiType(string $mbtiType, int $limit = 6): Collection
     {
         return self::published()
             ->byMbtiType($mbtiType)
@@ -269,7 +272,7 @@ class MentorProfile extends Model
     /**
      * Récupère les mentors par secteur MBTI
      */
-    public static function getBySector(string $sectorCode, int $limit = 12): \Illuminate\Database\Eloquent\Collection
+    public static function getBySector(string $sectorCode, int $limit = 12): Collection
     {
         return self::published()
             ->byMbtiSector($sectorCode)

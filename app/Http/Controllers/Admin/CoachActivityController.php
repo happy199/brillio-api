@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ChatConversation;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CoachActivityController extends Controller
@@ -91,7 +94,7 @@ class CoachActivityController extends Controller
         // Pagination de la collection mappée (astuce Laravel pour paginer une collection simple)
         $perPage = 20;
         $page = $request->get('page', 1);
-        $paginatedActivities = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedActivities = new LengthAwarePaginator(
             $activities->forPage($page, $perPage),
             $activities->count(),
             $perPage,
@@ -133,8 +136,8 @@ class CoachActivityController extends Controller
 
         $filters = [
             'coach' => $request->filled('coach_id') ? User::find($request->coach_id)->name ?? 'Tous' : 'Tous',
-            'date_from' => $request->date_from ? \Carbon\Carbon::parse($request->date_from)->format('d/m/Y') : 'Début',
-            'date_to' => $request->date_to ? \Carbon\Carbon::parse($request->date_to)->format('d/m/Y') : 'Aujourd\'hui',
+            'date_from' => $request->date_from ? Carbon::parse($request->date_from)->format('d/m/Y') : 'Début',
+            'date_to' => $request->date_to ? Carbon::parse($request->date_to)->format('d/m/Y') : 'Aujourd\'hui',
         ];
 
         // Ensure stats are up to date for the PDF logic
@@ -145,7 +148,7 @@ class CoachActivityController extends Controller
             'total_messages' => $activities->sum('messages_count'),
         ];
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.coaches.pdf', [
+        $pdf = Pdf::loadView('admin.coaches.pdf', [
             'activities' => $activities,
             'stats' => $pdfStats,
             'filters' => $filters,

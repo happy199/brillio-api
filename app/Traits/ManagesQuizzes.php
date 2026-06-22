@@ -3,6 +3,8 @@
 namespace App\Traits;
 
 use App\Models\Quiz;
+use App\Models\QuizOption;
+use App\Models\QuizQuestion;
 use App\Models\Resource;
 
 trait ManagesQuizzes
@@ -35,7 +37,7 @@ trait ManagesQuizzes
             }
 
             if (! empty($qData['id'])) {
-                $quiz = \App\Models\Quiz::find($qData['id']);
+                $quiz = Quiz::find($qData['id']);
                 if ($quiz && $quiz->resource_id == $resource->id) {
                     $quiz->update([
                         'title' => $qData['title'],
@@ -46,7 +48,7 @@ trait ManagesQuizzes
                     continue;
                 }
             } else {
-                $quiz = \App\Models\Quiz::create([
+                $quiz = Quiz::create([
                     'resource_id' => $resource->id,
                     'title' => $qData['title'],
                     'description' => $qData['description'] ?? null,
@@ -63,7 +65,7 @@ trait ManagesQuizzes
                     }
 
                     if (! empty($questionData['id'])) {
-                        $question = \App\Models\QuizQuestion::find($questionData['id']);
+                        $question = QuizQuestion::find($questionData['id']);
                         if ($question && $question->quiz_id == $quiz->id) {
                             $question->update([
                                 'question_text' => $questionData['question_text'],
@@ -76,7 +78,7 @@ trait ManagesQuizzes
                             continue;
                         }
                     } else {
-                        $question = \App\Models\QuizQuestion::create([
+                        $question = QuizQuestion::create([
                             'quiz_id' => $quiz->id,
                             'question_text' => $questionData['question_text'],
                             'type' => $questionData['type'] ?? 'single',
@@ -94,7 +96,7 @@ trait ManagesQuizzes
                             }
 
                             if (! empty($optionData['id'])) {
-                                $option = \App\Models\QuizOption::find($optionData['id']);
+                                $option = QuizOption::find($optionData['id']);
                                 if ($option && $option->quiz_question_id == $question->id) {
                                     $option->update([
                                         'option_text' => $optionData['option_text'],
@@ -105,7 +107,7 @@ trait ManagesQuizzes
                                     continue;
                                 }
                             } else {
-                                $option = \App\Models\QuizOption::create([
+                                $option = QuizOption::create([
                                     'quiz_question_id' => $question->id,
                                     'option_text' => $optionData['option_text'],
                                     'is_correct' => ! empty($optionData['is_correct']),
@@ -115,17 +117,17 @@ trait ManagesQuizzes
                         }
                     }
                     // Delete missing options
-                    \App\Models\QuizOption::where('quiz_question_id', $question->id)
+                    QuizOption::where('quiz_question_id', $question->id)
                         ->whereNotIn('id', $incomingOptionIds)->delete();
                 }
             }
             // Delete missing questions
-            \App\Models\QuizQuestion::where('quiz_id', $quiz->id)
+            QuizQuestion::where('quiz_id', $quiz->id)
                 ->whereNotIn('id', $incomingQuestionIds)->delete();
         }
 
         // Delete missing quizzes
-        \App\Models\Quiz::where('resource_id', $resource->id)
+        Quiz::where('resource_id', $resource->id)
             ->whereNotIn('id', $incomingQuizIds)->delete();
     }
 }

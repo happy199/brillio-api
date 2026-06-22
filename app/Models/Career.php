@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Career extends Model
 {
@@ -31,7 +32,7 @@ class Career extends Model
      */
     public function getMbtiTypesListAttribute()
     {
-        return \Illuminate\Support\Facades\DB::table('career_mbti')
+        return DB::table('career_mbti')
             ->where('career_id', $this->id)
             ->pluck('mbti_type')
             ->toArray();
@@ -42,7 +43,7 @@ class Career extends Model
      */
     public function getSectorsListAttribute()
     {
-        return \Illuminate\Support\Facades\DB::table('career_sector')
+        return DB::table('career_sector')
             ->where('career_id', $this->id)
             ->pluck('sector_code')
             ->toArray();

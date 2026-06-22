@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Api\V1\MentorshipController as V1MentorshipController;
+use App\Jobs\GenerateMentorshipKeywords;
 use App\Models\Mentorship;
+use App\Models\Session;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -130,7 +133,7 @@ class MentorshipController extends V1MentorshipController
         ]);
 
         // Notification
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipTerminated($mentorship, $user, $request->diction_reason);
+        app(MentorshipNotificationService::class)->sendMentorshipTerminated($mentorship, $user, $request->diction_reason);
 
         return $this->success($mentorship, 'Mentorat terminé avec succès.');
     }
@@ -165,10 +168,10 @@ class MentorshipController extends V1MentorshipController
             'updated_at' => now(),
         ]);
 
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipAccepted($mentorship);
+        app(MentorshipNotificationService::class)->sendMentorshipAccepted($mentorship);
 
-        if (class_exists(\App\Jobs\GenerateMentorshipKeywords::class)) {
-            \App\Jobs\GenerateMentorshipKeywords::dispatch($mentorship);
+        if (class_exists(GenerateMentorshipKeywords::class)) {
+            GenerateMentorshipKeywords::dispatch($mentorship);
         }
 
         return $this->success($mentorship, 'Demande de mentorat acceptée avec succès.');
@@ -215,7 +218,7 @@ class MentorshipController extends V1MentorshipController
             'updated_at' => now(),
         ]);
 
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipRefused($mentorship, $request->refusal_reason);
+        app(MentorshipNotificationService::class)->sendMentorshipRefused($mentorship, $request->refusal_reason);
 
         return $this->success($mentorship, 'Demande refusée.');
     }
@@ -285,7 +288,7 @@ class MentorshipController extends V1MentorshipController
     {
         $mentor = $request->user();
 
-        $sessions = \App\Models\Session::whereHas('mentorship', function ($query) use ($mentor) {
+        $sessions = Session::whereHas('mentorship', function ($query) use ($mentor) {
             $query->where('mentor_id', $mentor->id)
                 ->where('status', 'accepted');
         })

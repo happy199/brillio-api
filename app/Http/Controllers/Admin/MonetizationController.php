@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
+use App\Models\MonerooTransaction;
 use App\Models\SystemSetting;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
@@ -90,7 +91,7 @@ class MonetizationController extends Controller
         $fcfaConsumedOrg = $creditsConsumedOrg * $creditPriceOrganization;
 
         // Revenue Réel Organizations (Payments completed)
-        $orgRevenue = \App\Models\MonerooTransaction::where('status', 'completed')
+        $orgRevenue = MonerooTransaction::where('status', 'completed')
             ->where('user_type', 'App\Models\User')
             ->whereHas('user', function ($q) {
                 $q->where('user_type', 'organization');

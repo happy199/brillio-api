@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
+use App\Models\PersonalityCompatibility;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -61,7 +62,7 @@ class ExploreController extends Controller
             $mentor = auth()->user();
             if ($mentor->personalityTest && $mentor->personalityTest->personality_type) {
                 $myType = $mentor->personalityTest->personality_type;
-                $compatibleTypes = \App\Models\PersonalityCompatibility::getCompatibleTypes($myType);
+                $compatibleTypes = PersonalityCompatibility::getCompatibleTypes($myType);
                 // Include my own type as per requirement
                 $compatibleTypes[] = $myType;
 

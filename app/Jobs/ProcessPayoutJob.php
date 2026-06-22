@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\PayoutRequest;
 use App\Services\MonerooService;
+use App\Services\WalletService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -113,7 +114,7 @@ class ProcessPayoutJob implements ShouldQueue
 
                 // Rembourser les crédits
                 try {
-                    $walletService = app(\App\Services\WalletService::class);
+                    $walletService = app(WalletService::class);
                     $creditPrice = $walletService->getCreditPrice('mentor');
                     $creditsRefund = intval($this->payoutRequest->amount / $creditPrice);
 
@@ -160,7 +161,7 @@ class ProcessPayoutJob implements ShouldQueue
 
             // Rembourser les crédits (Failed job)
             try {
-                $walletService = app(\App\Services\WalletService::class);
+                $walletService = app(WalletService::class);
                 $creditPrice = $walletService->getCreditPrice('mentor');
                 $creditsRefund = intval($this->payoutRequest->amount / $creditPrice);
 

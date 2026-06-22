@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Mail\Billing\PaymentReceiptMail;
 use App\Models\MonerooTransaction;
+use App\Models\Organization;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -56,7 +57,7 @@ class ResendInvoiceCommand extends Command
 
         $recipientEmail = $this->option('to');
         if (empty($recipientEmail)) {
-            $recipientEmail = ($entity instanceof \App\Models\Organization)
+            $recipientEmail = ($entity instanceof Organization)
                 ? ($entity->contact_email ?: $user->email)
                 : $entity->email;
         }

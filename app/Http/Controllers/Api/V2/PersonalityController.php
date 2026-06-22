@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Api\V1\PersonalityController as V1PersonalityController;
 use App\Http\Requests\Personality\SubmitTestRequest;
+use App\Models\PersonalityQuestion;
+use App\Services\BrillioIAService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use OpenApi\Annotations as OA;
 
 /**
@@ -66,7 +69,7 @@ class PersonalityController extends V1PersonalityController
      *     )
      * )
      */
-    public function dynamicQuestions(Request $request, \App\Services\BrillioIAService $brillioIAService): JsonResponse
+    public function dynamicQuestions(Request $request, BrillioIAService $brillioIAService): JsonResponse
     {
         $user = $request->user();
 
@@ -80,7 +83,7 @@ class PersonalityController extends V1PersonalityController
             ]);
         }
 
-        $questions = \App\Models\PersonalityQuestion::getAllFormatted('fr');
+        $questions = PersonalityQuestion::getAllFormatted('fr');
 
         $onboarding = $user->onboarding_data ?? [];
         $situation = $onboarding['current_situation'] ?? 'étudiant';
@@ -120,7 +123,7 @@ class PersonalityController extends V1PersonalityController
                 'from_cache' => false,
             ]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur API dynamicQuestions: '.$e->getMessage());
+            Log::error('Erreur API dynamicQuestions: '.$e->getMessage());
 
             return $this->success([
                 'total_questions' => count($questions),

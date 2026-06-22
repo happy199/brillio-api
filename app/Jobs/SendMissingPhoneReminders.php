@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Mail\Engagement\MissingPhoneReminder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Mail\Mailable;
 
 class SendMissingPhoneReminders extends EngagementReminderJob
 {
@@ -27,7 +28,7 @@ class SendMissingPhoneReminders extends EngagementReminderJob
             });
     }
 
-    protected function buildMailable(User $user): \Illuminate\Mail\Mailable
+    protected function buildMailable(User $user): Mailable
     {
         return new MissingPhoneReminder($user);
     }

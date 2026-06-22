@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Models\MentorProfile;
+use App\Models\MentorProfileView;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
 class SponsoredUsersController extends Controller
@@ -61,7 +64,7 @@ class SponsoredUsersController extends Controller
         }
 
         if (! $organization->isPro()) {
-            $users = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+            $users = new LengthAwarePaginator([], 0, 12);
         } else {
             $users = $query->latest()->paginate(12)->withQueryString();
         }
@@ -104,7 +107,7 @@ class SponsoredUsersController extends Controller
         // Mentorats
         $mentorships = $user->mentorshipsAsMentee()->with(['mentor'])->get();
         foreach ($mentorships as $mentorship) {
-            $mentorship->sessions_count = \App\Models\MentoringSession::where('mentor_id', $mentorship->mentor_id)
+            $mentorship->sessions_count = MentoringSession::where('mentor_id', $mentorship->mentor_id)
                 ->whereHas('mentees', function ($q) use ($user) {
                     $q->where('users.id', $user->id);
                 })->count();
@@ -180,7 +183,7 @@ class SponsoredUsersController extends Controller
         ];
 
         // 2. Mentors
-        $viewedMentors = \App\Models\MentorProfileView::where('user_id', $user->id)
+        $viewedMentors = MentorProfileView::where('user_id', $user->id)
             ->with('mentor')
             ->orderBy('viewed_at', 'desc')
             ->get()
@@ -259,7 +262,7 @@ class SponsoredUsersController extends Controller
             // SECTION 2: ACTIVITÉ IA & RESSOURCES
             fputcsv($file, ['ACTIVITÉ IA & RESSOURCES']);
             fputcsv($file, ['Conversations IA', $aiStats['count']]);
-            fputcsv($file, ['Dernière activité IA', $aiStats['last_activity'] ? \Carbon\Carbon::parse($aiStats['last_activity'])->format('d/m/Y H:i') : 'Jamais']);
+            fputcsv($file, ['Dernière activité IA', $aiStats['last_activity'] ? Carbon::parse($aiStats['last_activity'])->format('d/m/Y H:i') : 'Jamais']);
             fputcsv($file, ['Ressources consultées', $resourcesViewedCount]);
             fputcsv($file, []);
 

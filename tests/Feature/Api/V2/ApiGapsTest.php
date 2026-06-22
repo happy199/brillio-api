@@ -4,8 +4,10 @@ namespace Tests\Feature\Api\V2;
 
 use App\Models\CreditPack;
 use App\Models\Establishment;
+use App\Models\JeuneProfile;
 use App\Models\MentoringSession;
 use App\Models\PersonalityTest;
+use App\Models\Purchase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -199,7 +201,7 @@ class ApiGapsTest extends TestCase
     public function test_api_unlock_history()
     {
         $user = User::factory()->create(['credits_balance' => 10]);
-        $profile = \App\Models\JeuneProfile::create([
+        $profile = JeuneProfile::create([
             'user_id' => $user->id,
             'has_unlocked_session_history' => false,
         ]);
@@ -354,7 +356,7 @@ class ApiGapsTest extends TestCase
             ->assertJsonPath('success', true);
 
         $this->assertEquals(5, $user->fresh()->credits_balance);
-        $this->assertTrue(\App\Models\Purchase::where('user_id', $user->id)->where('item_id', $resource->id)->exists());
+        $this->assertTrue(Purchase::where('user_id', $user->id)->where('item_id', $resource->id)->exists());
     }
 
     public function test_api_resources_create_mentor()

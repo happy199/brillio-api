@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Career;
+use Illuminate\Support\Facades\DB;
+
 /**
  * Service pour les metiers et secteurs lies aux types MBTI
  * Base de donnees statique de metiers modernes, durables et adaptes au contexte africain
@@ -1072,7 +1075,7 @@ class MbtiCareersService
         $type = strtoupper($type);
 
         // 1. Récupérer les métiers existants en base pour ce type MBTI
-        $careersFromDb = \Illuminate\Support\Facades\DB::table('career_mbti')
+        $careersFromDb = DB::table('career_mbti')
             ->where('mbti_type', $type)
             ->join('careers', 'careers.id', '=', 'career_mbti.career_id')
             ->select('careers.*', 'career_mbti.match_reason as pivot_match_reason')
@@ -1083,8 +1086,8 @@ class MbtiCareersService
         $selectedTitles = $selectedFromDb->pluck('title')->toArray();
 
         // 3. Appeler l'IA pour compléter à 10 (on veut 4 nouveaux)
-        $allGlobalTitles = \Illuminate\Support\Facades\DB::table('careers')->pluck('title')->toArray();
-        $brillioAI = app(\App\Services\BrillioIAService::class);
+        $allGlobalTitles = DB::table('careers')->pluck('title')->toArray();
+        $brillioAI = app(BrillioIAService::class);
 
         $aiResult = $brillioAI->generateCareers($type, $allGlobalTitles, $selectedTitles);
 
@@ -1099,7 +1102,7 @@ class MbtiCareersService
         if ($aiResult['has_new_proposals'] && count($aiResult['careers'] ?? []) >= 4) {
             foreach (array_slice($aiResult['careers'], 0, 4) as $aiCareer) {
                 // Sauvegarde automatique en base pour enrichissement
-                $newCareer = \App\Models\Career::firstOrCreate(
+                $newCareer = Career::firstOrCreate(
                     ['title' => $aiCareer['title']],
                     [
                         'description' => $aiCareer['description'],
@@ -1111,7 +1114,7 @@ class MbtiCareersService
                 );
 
                 // Lier au MBTI si ce n'est pas déjà fait
-                \Illuminate\Support\Facades\DB::table('career_mbti')->updateOrInsert(
+                DB::table('career_mbti')->updateOrInsert(
                     ['career_id' => $newCareer->id, 'mbti_type' => $type],
                     ['match_reason' => $aiCareer['match_reason'] ?? "Ce métier correspond aux forces de ton profil {$type}."]
                 );
@@ -1119,7 +1122,7 @@ class MbtiCareersService
                 // Lier aux secteurs suggérés
                 if (isset($aiCareer['sectors']) && is_array($aiCareer['sectors'])) {
                     foreach ($aiCareer['sectors'] as $sectorCode) {
-                        \Illuminate\Support\Facades\DB::table('career_sector')->updateOrInsert(
+                        DB::table('career_sector')->updateOrInsert(
                             ['career_id' => $newCareer->id, 'sector_code' => $sectorCode]
                         );
                     }
@@ -1153,7 +1156,7 @@ class MbtiCareersService
      */
     private static function formatCareerRow($career, $matchReason): array
     {
-        $sectors = \Illuminate\Support\Facades\DB::table('career_sector')
+        $sectors = DB::table('career_sector')
             ->where('career_id', $career->id)
             ->pluck('sector_code')
             ->toArray();
@@ -1203,7 +1206,7 @@ class MbtiCareersService
      */
     public static function getTypesForSector(string $sectorCode): array
     {
-        return \Illuminate\Support\Facades\DB::table('career_sector')
+        return DB::table('career_sector')
             ->where('sector_code', $sectorCode)
             ->join('career_mbti', 'career_mbti.career_id', '=', 'career_sector.career_id')
             ->pluck('career_mbti.mbti_type')

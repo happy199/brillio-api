@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
+use App\Models\Purchase;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\QuizAttemptAnswer;
@@ -25,7 +26,7 @@ class QuizController extends Controller
 
         // Si premium, le jeune doit l'avoir débloquée
         if ($resource->is_premium) {
-            $hasPurchased = \App\Models\Purchase::where('user_id', auth()->id())
+            $hasPurchased = Purchase::where('user_id', auth()->id())
                 ->where('item_type', get_class($resource))
                 ->where('item_id', $resource->id)
                 ->exists();

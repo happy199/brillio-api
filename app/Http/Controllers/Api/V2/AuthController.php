@@ -6,9 +6,14 @@ use App\Http\Controllers\Api\V1\AuthController as V1AuthController;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Models\User;
 use App\Services\MentorshipNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use OpenApi\Annotations as OA;
 
 /**
@@ -161,18 +166,18 @@ class AuthController extends V1AuthController
     {
         $request->validate(['email' => 'required|email']);
 
-        $user = \App\Models\User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
         if (! $user) {
             return $this->error('Aucun utilisateur trouvé avec cette adresse email.', 422);
         }
 
-        $token = \Illuminate\Support\Str::random(60);
+        $token = Str::random(60);
 
-        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->updateOrInsert(
+        DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],
             [
-                'token' => \Illuminate\Support\Facades\Hash::make($token),
+                'token' => Hash::make($token),
                 'created_at' => now(),
             ]
         );
@@ -180,7 +185,7 @@ class AuthController extends V1AuthController
         try {
             $this->notificationService->sendPasswordResetEmail($user, $token);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur envoi email reset password: '.$e->getMessage());
+            Log::error('Erreur envoi email reset password: '.$e->getMessage());
 
             return $this->error('Une erreur est survenue lors de l\'envoi de l\'email.', 500);
         }
@@ -232,26 +237,26 @@ class AuthController extends V1AuthController
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
         ]);
 
-        $resetRecord = \Illuminate\Support\Facades\DB::table('password_reset_tokens')
+        $resetRecord = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->first();
 
         $errorMsg = null;
 
-        if (! $resetRecord || ! \Illuminate\Support\Facades\Hash::check($request->token, $resetRecord->token)) {
-            \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        if (! $resetRecord || ! Hash::check($request->token, $resetRecord->token)) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             $errorMsg = 'Ce lien de réinitialisation est invalide ou a expiré.';
         } elseif (now()->subMinutes(60)->gt($resetRecord->created_at)) {
-            \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             $errorMsg = 'Ce lien de réinitialisation a expiré.';
         } else {
-            $user = \App\Models\User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->first();
             if (! $user) {
                 $errorMsg = 'Aucun utilisateur trouvé avec cette adresse email.';
             } else {
-                $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+                $user->password = Hash::make($request->password);
                 $user->save();
-                \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+                DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             }
         }
 

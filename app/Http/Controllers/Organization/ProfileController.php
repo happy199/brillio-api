@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
+use App\Models\Organization;
 use App\Services\CloudflareService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -45,7 +46,7 @@ class ProfileController extends Controller
         $baseDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'brillio.africa';
         $fullSubdomain = $domain.'.'.$baseDomain;
 
-        $exists = \App\Models\Organization::where('id', '!=', $organization->id)
+        $exists = Organization::where('id', '!=', $organization->id)
             ->where(function ($query) use ($domain, $fullSubdomain) {
                 $query->where('slug', $domain)
                     ->orWhere('custom_domain', $domain)

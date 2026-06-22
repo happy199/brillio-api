@@ -3,6 +3,7 @@
 namespace Tests\Feature\Mentor;
 
 use App\Models\MentorProfile;
+use App\Models\Specialization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -29,7 +30,7 @@ class ProfileTest extends TestCase
             'onboarding_completed' => true,
         ]);
         $profile = MentorProfile::factory()->create(['user_id' => $user->id]);
-        $spec = \App\Models\Specialization::factory()->create(['status' => 'active']);
+        $spec = Specialization::factory()->create(['status' => 'active']);
 
         $response = $this->actingAs($user)->put(route('mentor.profile.update'), [
             'bio' => 'Ma nouvelle biographie de test',

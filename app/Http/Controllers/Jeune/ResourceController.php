@@ -5,8 +5,12 @@ namespace App\Http\Controllers\Jeune;
 use App\Http\Controllers\Controller;
 use App\Models\Purchase;
 use App\Models\Resource;
+use App\Models\ResourceView;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ResourceController extends Controller
@@ -43,7 +47,7 @@ class ResourceController extends Controller
         ],
     ];
 
-    public function __construct(WalletService $walletService, \App\Services\MentorshipNotificationService $notificationService)
+    public function __construct(WalletService $walletService, MentorshipNotificationService $notificationService)
     {
         $this->walletService = $walletService;
         $this->notificationService = $notificationService;
@@ -69,7 +73,7 @@ class ResourceController extends Controller
 
         // IDs des ressources acquises ou consultées
         $purchasedIds = Purchase::where('user_id', $user->id)->where('item_type', Resource::class)->pluck('item_id');
-        $viewedIds = \App\Models\ResourceView::where('user_id', $user->id)->pluck('resource_id');
+        $viewedIds = ResourceView::where('user_id', $user->id)->pluck('resource_id');
         $myResourceIds = $purchasedIds->merge($viewedIds)->unique();
 
         // Récupérer toutes les ressources validées et publiées
@@ -271,9 +275,9 @@ class ResourceController extends Controller
         // Note: Pour de gros volumes, il faudrait faire le filtrage en SQL (JSON queries), mais pour MVP filtre PHP ok.
         $page = $request->get('page', 1);
         $perPage = 12;
-        $items = $resources instanceof \Illuminate\Support\Collection ? $resources : \Illuminate\Support\Collection::make($resources);
+        $items = $resources instanceof Collection ? $resources : Collection::make($resources);
 
-        $paginatedResources = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedResources = new LengthAwarePaginator(
             $items->forPage($page, $perPage),
             $items->count(),
             $perPage,
@@ -305,7 +309,7 @@ class ResourceController extends Controller
         // Pour les payantes, on peut aussi enregistrer mais "l'acquisition" est définie par l'achat.
         // La demande : "consultée car gratuite".
         if (! $resource->is_premium) {
-            \App\Models\ResourceView::firstOrCreate([
+            ResourceView::firstOrCreate([
                 'user_id' => $user->id,
                 'resource_id' => $resource->id,
             ]);

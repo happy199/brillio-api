@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\CreditPack;
 use Illuminate\Database\Seeder;
 
 class CreditPackSeeder extends Seeder
@@ -12,12 +13,12 @@ class CreditPackSeeder extends Seeder
     public function run(): void
     {
         // Vider la table pour éviter les doublons lors du re-seeding
-        \App\Models\CreditPack::truncate();
+        CreditPack::truncate();
 
         // --- JEUNE (Base 50 FCFA) ---
 
         // 10 Crédits (Pas de promo) - 500F
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'jeune',
             'credits' => 10,
             'price' => 500,
@@ -30,7 +31,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // 50 Crédits (-5%) -> 2375 FCFA
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'jeune',
             'credits' => 50,
             'price' => 2375,
@@ -43,7 +44,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // 100 Crédits (-10%) -> 4500 FCFA
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'jeune',
             'credits' => 100,
             'price' => 4500,
@@ -56,7 +57,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // 500 Crédits (-15%) -> 21250 FCFA
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'jeune',
             'credits' => 500,
             'price' => 21250,
@@ -71,7 +72,7 @@ class CreditPackSeeder extends Seeder
         // --- MENTOR (Base 100 FCFA) ---
 
         // 10 Crédits (Pas de promo) - 1000F
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'mentor',
             'credits' => 10,
             'price' => 1000,
@@ -84,7 +85,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // 50 Crédits (-5%) -> 4750 FCFA
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'mentor',
             'credits' => 50,
             'price' => 4750,
@@ -97,7 +98,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // 100 Crédits (-10%) -> 9000 FCFA
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'mentor',
             'credits' => 100,
             'price' => 9000,
@@ -110,7 +111,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // 500 Crédits (-15%) -> 42500 FCFA
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'mentor',
             'credits' => 500,
             'price' => 42500,
@@ -125,7 +126,7 @@ class CreditPackSeeder extends Seeder
         // --- ORGANIZATION ---
 
         // Pack Initiation - 50 Crédits - 5000F
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'organization',
             'type' => 'credits',
             'credits' => 50,
@@ -139,7 +140,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // Pack Découverte - 100 Crédits - 9500F
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'organization',
             'type' => 'credits',
             'credits' => 100,
@@ -153,7 +154,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // Pack Croissance - 250 Crédits - 22500F
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'organization',
             'type' => 'credits',
             'credits' => 250,
@@ -167,7 +168,7 @@ class CreditPackSeeder extends Seeder
         ]);
 
         // Pack Expansion - 500 Crédits - 42500F
-        \App\Models\CreditPack::create([
+        CreditPack::create([
             'user_type' => 'organization',
             'type' => 'credits',
             'credits' => 500,

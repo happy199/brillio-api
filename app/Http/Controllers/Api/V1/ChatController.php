@@ -9,6 +9,7 @@ use App\Services\BrillioIAService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Annotations as OA;
 
 /**
@@ -67,7 +68,7 @@ class ChatController extends Controller
             return $this->error("Solde insuffisant pour créer une nouvelle conversation ($cost crédits requis).", 402);
         }
 
-        $conversation = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $title, $cost) {
+        $conversation = DB::transaction(function () use ($user, $title, $cost) {
             $this->walletService->deductCredits(
                 $user,
                 $cost,
@@ -165,7 +166,7 @@ class ChatController extends Controller
                 return $this->error("Solde insuffisant pour créer une nouvelle conversation ($cost crédits requis).", 402);
             }
 
-            $conversation = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $cost) {
+            $conversation = DB::transaction(function () use ($user, $cost) {
                 $this->walletService->deductCredits(
                     $user,
                     $cost,
@@ -270,7 +271,7 @@ class ChatController extends Controller
         }
 
         // Demander le support humain
-        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $conversation, $cost) {
+        DB::transaction(function () use ($user, $conversation, $cost) {
             $this->walletService->deductCredits(
                 $user,
                 $cost,

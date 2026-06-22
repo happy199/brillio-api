@@ -5,17 +5,21 @@ namespace App\Http\Controllers\Api\Mentor;
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessPayoutJob;
 use App\Models\PayoutRequest;
+use App\Services\CurrencyService;
+use App\Services\MentorshipNotificationService;
 use App\Services\MonerooService;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class PayoutController extends Controller
 {
     protected MonerooService $monerooService;
 
-    protected \App\Services\WalletService $walletService;
+    protected WalletService $walletService;
 
-    public function __construct(MonerooService $monerooService, \App\Services\WalletService $walletService)
+    public function __construct(MonerooService $monerooService, WalletService $walletService)
     {
         $this->monerooService = $monerooService;
         $this->walletService = $walletService;
@@ -34,18 +38,18 @@ class PayoutController extends Controller
             ], 404);
         }
 
-        $currency = $request->input('currency') ?? \App\Services\CurrencyService::getCurrentCurrency();
+        $currency = $request->input('currency') ?? CurrencyService::getCurrentCurrency();
         $availableBalance = (float) $mentorProfile->available_balance;
         $totalWithdrawn = (float) $mentorProfile->total_withdrawn;
 
-        $availableBalanceConverted = \App\Services\CurrencyService::convert($availableBalance, 'XOF', $currency);
-        $totalWithdrawnConverted = \App\Services\CurrencyService::convert($totalWithdrawn, 'XOF', $currency);
+        $availableBalanceConverted = CurrencyService::convert($availableBalance, 'XOF', $currency);
+        $totalWithdrawnConverted = CurrencyService::convert($totalWithdrawn, 'XOF', $currency);
 
         return response()->json([
             'available_balance' => $availableBalanceConverted,
             'total_withdrawn' => $totalWithdrawnConverted,
             'currency' => $currency,
-            'currency_symbol' => \App\Services\CurrencyService::symbol($currency),
+            'currency_symbol' => CurrencyService::symbol($currency),
         ]);
     }
 
@@ -72,7 +76,7 @@ class PayoutController extends Controller
         // Convert amount from selected currency to XOF before validation and processing
         if ($currency !== 'XOF' && $request->has('amount')) {
             $amountInSelectedCurrency = (float) $request->input('amount');
-            $amountInXof = \App\Services\CurrencyService::convert($amountInSelectedCurrency, $currency, 'XOF');
+            $amountInXof = CurrencyService::convert($amountInSelectedCurrency, $currency, 'XOF');
             $request->merge(['amount' => $amountInXof]);
         }
 
@@ -174,7 +178,7 @@ class PayoutController extends Controller
         ProcessPayoutJob::dispatch($payout);
 
         // Notification email
-        app(\App\Services\MentorshipNotificationService::class)->sendPayoutRequested($payout);
+        app(MentorshipNotificationService::class)->sendPayoutRequested($payout);
 
         return response()->json([
             'message' => 'Demande de retrait créée avec succès',
@@ -204,7 +208,7 @@ class PayoutController extends Controller
             ], 404);
         }
 
-        $currency = $request->input('currency') ?? \App\Services\CurrencyService::getCurrentCurrency();
+        $currency = $request->input('currency') ?? CurrencyService::getCurrentCurrency();
 
         $payouts = PayoutRequest::where('mentor_profile_id', $mentorProfile->id)
             ->orderBy('created_at', 'desc')
@@ -212,9 +216,9 @@ class PayoutController extends Controller
             ->map(function ($payout) use ($currency) {
                 return [
                     'id' => $payout->id,
-                    'amount' => (float) \App\Services\CurrencyService::convert($payout->amount, 'XOF', $currency),
-                    'fee' => (float) \App\Services\CurrencyService::convert($payout->fee, 'XOF', $currency),
-                    'net_amount' => (float) \App\Services\CurrencyService::convert($payout->net_amount, 'XOF', $currency),
+                    'amount' => (float) CurrencyService::convert($payout->amount, 'XOF', $currency),
+                    'fee' => (float) CurrencyService::convert($payout->fee, 'XOF', $currency),
+                    'net_amount' => (float) CurrencyService::convert($payout->net_amount, 'XOF', $currency),
                     'payment_method' => $payout->payment_method,
                     'phone_number' => $payout->phone_number,
                     'status' => $payout->status,
@@ -249,7 +253,7 @@ class PayoutController extends Controller
         }
 
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($payout, $request) {
+            DB::transaction(function () use ($payout, $request) {
                 // Mettre à jour le statut du payout
                 $payout->update([
                     'status' => PayoutRequest::STATUS_CANCELLED,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Jeune;
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
 
 class MentorshipController extends Controller
@@ -141,7 +142,7 @@ class MentorshipController extends Controller
         ]);
 
         // Notification email au mentor
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipRequest($mentorship);
+        app(MentorshipNotificationService::class)->sendMentorshipRequest($mentorship);
 
         return back()->with('success', 'Votre demande de mentorat a été envoyée avec succès.');
     }
@@ -200,7 +201,7 @@ class MentorshipController extends Controller
         ]);
 
         // Notification (Jeune, Mentor, Org)
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipTerminated($mentorship, $user, $request->diction_reason);
+        app(MentorshipNotificationService::class)->sendMentorshipTerminated($mentorship, $user, $request->diction_reason);
 
         return back()->with('success', 'Mentorat terminé avec succès.');
     }

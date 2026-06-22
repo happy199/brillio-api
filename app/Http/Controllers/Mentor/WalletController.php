@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
+use App\Models\CreditPack;
+use App\Models\MonerooTransaction;
+use App\Models\SystemSetting;
+use App\Models\User;
 use App\Models\WalletTransaction;
+use App\Services\MonerooService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -81,13 +86,13 @@ class WalletController extends Controller
         $estimatedValueFcfa = $totalCreditsEarned * $creditPrice;
 
         // Packs dynamiques depuis la DB
-        $packs = \App\Models\CreditPack::where('user_type', 'mentor')
+        $packs = CreditPack::where('user_type', 'mentor')
             ->where('is_active', true)
             ->orderBy('display_order')
             ->get();
 
-        $payoutFeePercentage = \App\Models\SystemSetting::getValue('payout_fee_percentage', 5);
-        $payoutMinFee = \App\Models\SystemSetting::getValue('payout_min_fee', 100);
+        $payoutFeePercentage = SystemSetting::getValue('payout_fee_percentage', 5);
+        $payoutMinFee = SystemSetting::getValue('payout_min_fee', 100);
 
         return view('mentor.wallet.index', compact(
             'user',
@@ -112,7 +117,7 @@ class WalletController extends Controller
             'pack_id' => 'required|exists:credit_packs,id',
         ]);
 
-        $pack = \App\Models\CreditPack::findOrFail($validated['pack_id']);
+        $pack = CreditPack::findOrFail($validated['pack_id']);
 
         // Security check
         if ($pack->user_type !== 'mentor') {
@@ -124,10 +129,10 @@ class WalletController extends Controller
         $user = Auth::user();
 
         try {
-            $monerooService = app(\App\Services\MonerooService::class);
+            $monerooService = app(MonerooService::class);
 
             // Create pending transaction record
-            $transaction = \App\Models\MonerooTransaction::create([
+            $transaction = MonerooTransaction::create([
                 'user_id' => $user->id,
                 'user_type' => get_class($user),
                 'amount' => $amountXOF,
@@ -198,7 +203,7 @@ class WalletController extends Controller
 
         $user = Auth::user();
 
-        if (! $user instanceof \App\Models\User) {
+        if (! $user instanceof User) {
             return back()->withErrors(['code' => 'Session expirée ou utilisateur invalide.']);
         }
 

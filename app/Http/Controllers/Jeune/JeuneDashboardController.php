@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChatConversation;
+use App\Models\ChatMessage;
 use App\Models\MentorProfile;
 use App\Models\MentorProfileView;
 use App\Models\PersonalityQuestion;
@@ -12,6 +13,7 @@ use App\Models\Resource;
 use App\Services\BrillioIAService;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -837,7 +839,7 @@ class JeuneDashboardController extends Controller
                 }
 
                 // Deduct credits
-                app(\App\Services\WalletService::class)->deductCredits(
+                app(WalletService::class)->deductCredits(
                     $user,
                     10,
                     'feature_use',
@@ -854,7 +856,7 @@ class JeuneDashboardController extends Controller
             if ($conversation->human_support_active) {
                 // On enregistre juste le message de l'utilisateur
                 $conversation->messages()->create([
-                    'role' => \App\Models\ChatMessage::ROLE_USER,
+                    'role' => ChatMessage::ROLE_USER,
                     'content' => $validated['message'],
                 ]);
 
@@ -996,7 +998,7 @@ class JeuneDashboardController extends Controller
         }
 
         // Déduire les crédits
-        app(\App\Services\WalletService::class)->deductCredits(
+        app(WalletService::class)->deductCredits(
             $user,
             10,
             'feature_use',

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -100,7 +101,7 @@ class ScheduledSessionController extends Controller
                 // Charger les relations nécessaires pour les notifications
                 $session->load(['mentor', 'mentees', 'additionalMentors', 'organization']);
 
-                $notificationService = app(\App\Services\MentorshipNotificationService::class);
+                $notificationService = app(MentorshipNotificationService::class);
                 $notificationService->sendSessionConfirmed($session);
             } catch (\Exception $e) {
                 \Log::error('Erreur envoi notifications session planifiée : '.$e->getMessage());
@@ -204,7 +205,7 @@ class ScheduledSessionController extends Controller
             // Notification de modification
             try {
                 $session->load(['mentor', 'mentees', 'additionalMentors', 'organization']);
-                app(\App\Services\MentorshipNotificationService::class)->sendSessionUpdated($session, auth()->user());
+                app(MentorshipNotificationService::class)->sendSessionUpdated($session, auth()->user());
             } catch (\Exception $e) {
                 \Log::error('Erreur notifications modification session : '.$e->getMessage());
             }
@@ -242,7 +243,7 @@ class ScheduledSessionController extends Controller
         // Notification d'annulation
         try {
             $session->load(['mentor', 'mentees', 'additionalMentors', 'organization']);
-            app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, auth()->user());
+            app(MentorshipNotificationService::class)->sendSessionCancelled($session, auth()->user());
         } catch (\Exception $e) {
             \Log::error('Erreur notifications annulation session : '.$e->getMessage());
         }

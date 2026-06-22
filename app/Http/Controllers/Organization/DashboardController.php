@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
+use App\Models\UserLogin;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -37,10 +40,10 @@ class DashboardController extends Controller
                 break;
             case 'custom':
                 if ($request->has('start_date')) {
-                    $startDate = \Carbon\Carbon::parse($request->get('start_date'))->startOfDay();
+                    $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
                 }
                 if ($request->has('end_date')) {
-                    $endDate = \Carbon\Carbon::parse($request->get('end_date'))->endOfDay();
+                    $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
                 }
                 break;
             case '30_days':
@@ -79,7 +82,7 @@ class DashboardController extends Controller
                 ->count(),
             'jeune_credits_distributed' => DB::table('wallet_transactions')
                 ->where('type', 'gift')
-                ->where('related_type', \App\Models\Organization::class)
+                ->where('related_type', Organization::class)
                 ->where('related_id', $organization->id)
                 ->whereIn('user_id', function ($query) {
                     $query->select('id')
@@ -89,7 +92,7 @@ class DashboardController extends Controller
                 ->sum('amount'),
             'mentor_credits_distributed' => DB::table('wallet_transactions')
                 ->where('type', 'gift')
-                ->where('related_type', \App\Models\Organization::class)
+                ->where('related_type', Organization::class)
                 ->where('related_id', $organization->id)
                 ->whereIn('user_id', function ($query) {
                     $query->select('id')
@@ -155,7 +158,7 @@ class DashboardController extends Controller
             $stats['top_personalities'] = $personalityStats;
 
             // Activity History for Multi-line Chart
-            $carbonPeriod = \Carbon\CarbonPeriod::create($startDate, $endDate);
+            $carbonPeriod = CarbonPeriod::create($startDate, $endDate);
 
             // Fetch grouped data
             $dailySignupsData = DB::table('users')
@@ -185,7 +188,7 @@ class DashboardController extends Controller
                 ->groupBy('date')
                 ->pluck('count', 'date')->toArray();
 
-            $dailyConnectionsData = \App\Models\UserLogin::where('organization_id', $organization->id)
+            $dailyConnectionsData = UserLogin::where('organization_id', $organization->id)
                 ->whereBetween('login_date', [$startDate->toDateString(), $endDate->toDateString()])
                 ->selectRaw('login_date, count(*) as count')
                 ->groupBy('login_date')
@@ -217,7 +220,7 @@ class DashboardController extends Controller
             $users = $organization->users()->whereNotNull('date_of_birth')->get();
             $ageStats = ['18-24' => 0, '25-30' => 0, '30+' => 0];
             foreach ($users as $user) {
-                $age = \Carbon\Carbon::parse($user->date_of_birth)->age;
+                $age = Carbon::parse($user->date_of_birth)->age;
                 if ($age >= 18 && $age <= 24) {
                     $ageStats['18-24']++;
                 } elseif ($age >= 25 && $age <= 30) {

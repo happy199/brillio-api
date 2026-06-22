@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organization\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
+use App\Models\OrganizationInvitation;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class RegisterController extends Controller
     {
         $invitation = null;
         if ($request->has('ref')) {
-            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $request->ref)
+            $invitation = OrganizationInvitation::where('referral_code', $request->ref)
                 ->whereIn('role', ['admin', 'viewer'])
                 ->first();
 
@@ -43,7 +44,7 @@ class RegisterController extends Controller
         $isJoining = false;
 
         if ($request->has('ref')) {
-            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $request->ref)
+            $invitation = OrganizationInvitation::where('referral_code', $request->ref)
                 ->whereIn('role', ['admin', 'viewer'])
                 ->first();
 

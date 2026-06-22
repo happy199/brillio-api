@@ -7,7 +7,11 @@ use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
+use App\Services\WalletService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SessionController extends Controller
 {
@@ -108,7 +112,7 @@ class SessionController extends Controller
         $mentor = User::findOrFail($request->mentor_id);
 
         // Conversion de la date selon le fuseau horaire choisi vers UTC pour stockage
-        $scheduledAt = \Carbon\Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
+        $scheduledAt = Carbon::parse($request->scheduled_at, $request->timezone)->setTimezone('UTC');
 
         if ($scheduledAt->isPast()) {
             return redirect()->back()->withInput()->with('error', 'La date de la séance ne peut pas être dans le passé.');
@@ -133,7 +137,7 @@ class SessionController extends Controller
         $notificationService->sendSessionChatNotification($session, $user);
 
         // Notification email au mentor
-        app(\App\Services\MentorshipNotificationService::class)->sendSessionProposed($session);
+        app(MentorshipNotificationService::class)->sendSessionProposed($session);
 
         return redirect()->route('jeune.sessions.index')->with('success', 'Votre demande de séance a été envoyée au mentor.');
     }
@@ -173,7 +177,7 @@ class SessionController extends Controller
             'cancel_reason' => 'required|string|max:500',
         ]);
 
-        $walletService = app(\App\Services\WalletService::class);
+        $walletService = app(WalletService::class);
 
         // 1. Refund Logic
         if ($session->is_paid) {
@@ -205,7 +209,7 @@ class SessionController extends Controller
         }
 
         // Notification email d'annulation
-        app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, $user);
+        app(MentorshipNotificationService::class)->sendSessionCancelled($session, $user);
 
         return redirect()->route('jeune.sessions.index')
             ->with('success', 'Votre participation à la séance a été annulée. '.($session->is_paid ? 'Votre remboursement a été traité.' : ''));
@@ -241,8 +245,8 @@ class SessionController extends Controller
         }
 
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($user, $session, $price) {
-                $walletService = app(\App\Services\WalletService::class);
+            DB::transaction(function () use ($user, $session, $price) {
+                $walletService = app(WalletService::class);
 
                 // Debit Jeune
                 $walletService->deductCredits(
@@ -261,7 +265,7 @@ class SessionController extends Controller
                 $session->mentees()->updateExistingPivot($user->id, ['status' => 'accepted']);
 
                 // Notification email de confirmation
-                $notificationService = app(\App\Services\MentorshipNotificationService::class);
+                $notificationService = app(MentorshipNotificationService::class);
                 $notificationService->sendSessionConfirmed($session);
                 $notificationService->sendSessionPayment($session, $user, $price);
 
@@ -295,13 +299,13 @@ class SessionController extends Controller
             return redirect()->back()->with('info', "Vous avez déjà débloqué l'historique complet.");
         }
 
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('unlock_history', 5);
+        $cost = app(WalletService::class)->getFeatureCost('unlock_history', 5);
 
         if ($user->credits_balance < $cost) {
             return redirect()->route('jeune.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Veuillez recharger votre compte pour continuer.");
         }
 
-        app(\App\Services\WalletService::class)->deductCredits(
+        app(WalletService::class)->deductCredits(
             $user,
             $cost,
             'feature_unlock',
@@ -330,10 +334,10 @@ class SessionController extends Controller
         }
 
         // Initialize PDF
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.session_pdf', compact('session'));
+        $pdf = Pdf::loadView('mentor.reports.session_pdf', compact('session'));
 
         // Define filename
-        $filename = 'Compte_Rendu_Seance_'.\Carbon\Carbon::parse($session->scheduled_at)->format('Ymd').'.pdf';
+        $filename = 'Compte_Rendu_Seance_'.Carbon::parse($session->scheduled_at)->format('Ymd').'.pdf';
 
         return $pdf->download($filename);
     }
@@ -363,20 +367,20 @@ class SessionController extends Controller
             return redirect()->back()->with('error', 'Aucun compte rendu valide sélectionné.');
         }
 
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('compiled_report', 5);
+        $cost = app(WalletService::class)->getFeatureCost('compiled_report', 5);
 
         if ($user->credits_balance < $cost) {
             return redirect()->route('jeune.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Veuillez recharger votre compte pour continuer.");
         }
 
-        app(\App\Services\WalletService::class)->deductCredits(
+        app(WalletService::class)->deductCredits(
             $user,
             $cost,
             'feature_use',
             "Génération d'un rapport compilé (".$sessions->count().' séances)'
         );
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mentor.reports.compiled_sessions_pdf', compact('sessions'));
+        $pdf = Pdf::loadView('mentor.reports.compiled_sessions_pdf', compact('sessions'));
 
     }
 
@@ -398,7 +402,7 @@ class SessionController extends Controller
         }
 
         // 3. Credit Check
-        $cost = app(\App\Services\WalletService::class)->getFeatureCost('transcription_download', 5);
+        $cost = app(WalletService::class)->getFeatureCost('transcription_download', 5);
 
         if ($user->credits_balance < $cost) {
             $missing = $cost - $user->credits_balance;
@@ -407,7 +411,7 @@ class SessionController extends Controller
         }
 
         // 4. Deduct Credits
-        app(\App\Services\WalletService::class)->deductCredits(
+        app(WalletService::class)->deductCredits(
             $user,
             $cost,
             'feature_use',
@@ -415,7 +419,7 @@ class SessionController extends Controller
             $session
         );
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('common.reports.transcription_pdf', compact('session'));
+        $pdf = Pdf::loadView('common.reports.transcription_pdf', compact('session'));
 
         return $pdf->download('transcription_seance_'.$session->id.'.pdf');
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CreditPack;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 
 class CreditPackController extends Controller
@@ -15,7 +16,7 @@ class CreditPackController extends Controller
         $organizationPacks = CreditPack::credits()->where('user_type', 'organization')->orderBy('display_order')->get();
 
         // Base prices for calculation in view
-        $walletService = app(\App\Services\WalletService::class);
+        $walletService = app(WalletService::class);
         $jeuneCreditPrice = $walletService->getCreditPrice('jeune');
         $mentorCreditPrice = $walletService->getCreditPrice('mentor');
         $organizationCreditPrice = $walletService->getCreditPrice('organization');

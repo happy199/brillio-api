@@ -3,15 +3,22 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrganizationUnlinkedNotificationMail;
+use App\Mail\UserUnlinkedConfirmationMail;
 use App\Models\MentorProfile;
+use App\Models\Specialization;
+use App\Services\LinkedInPdfParserService;
+use App\Traits\FormatsUrls;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MentorDashboardController extends Controller
 {
-    use \App\Traits\FormatsUrls;
+    use FormatsUrls;
 
     /**
      * Dashboard principal du mentor
@@ -45,7 +52,7 @@ class MentorDashboardController extends Controller
         $profile = $user->mentorProfile;
 
         // Charger les spécialisations actives depuis la base de données
-        $specializations = \App\Models\Specialization::active()
+        $specializations = Specialization::active()
             ->orderBy('name')
             ->get();
 
@@ -130,7 +137,7 @@ class MentorDashboardController extends Controller
         // Gérer la spécialisation
         if ($validated['specialization_id'] === 'new' && ! empty($validated['new_specialization_name'])) {
             // Vérifier si une spécialisation avec ce nom existe déjà
-            $existingSpec = \App\Models\Specialization::where('name', $validated['new_specialization_name'])
+            $existingSpec = Specialization::where('name', $validated['new_specialization_name'])
                 ->orWhere('slug', Str::slug($validated['new_specialization_name']))
                 ->first();
 
@@ -147,7 +154,7 @@ class MentorDashboardController extends Controller
                 }
             } else {
                 // Créer une nouvelle spécialisation en attente de modération
-                $newSpec = \App\Models\Specialization::create([
+                $newSpec = Specialization::create([
                     'name' => $validated['new_specialization_name'],
                     'status' => 'pending',
                     'created_by_admin' => false,
@@ -171,7 +178,7 @@ class MentorDashboardController extends Controller
             // Mettre à jour le compteur de mentors pour l'ancienne et nouvelle spécialisation
             if ($profile->wasChanged('specialization_id')) {
                 if ($profile->getOriginal('specialization_id')) {
-                    \App\Models\Specialization::find($profile->getOriginal('specialization_id'))?->updateMentorCount();
+                    Specialization::find($profile->getOriginal('specialization_id'))?->updateMentorCount();
                 }
                 $profile->specializationModel?->updateMentorCount();
             }
@@ -355,7 +362,7 @@ class MentorDashboardController extends Controller
     /**
      * Importer les données LinkedIn depuis un PDF
      */
-    public function importLinkedInData(Request $request, \App\Services\LinkedInPdfParserService $parserService)
+    public function importLinkedInData(Request $request, LinkedInPdfParserService $parserService)
     {
         $user = auth()->user();
         $profile = $user->mentorProfile;
@@ -698,8 +705,8 @@ class MentorDashboardController extends Controller
             }
 
             try {
-                $start = \Carbon\Carbon::parse($startStr)->startOfDay();
-                $end = $endStr ? \Carbon\Carbon::parse($endStr)->endOfDay() : now()->endOfDay();
+                $start = Carbon::parse($startStr)->startOfDay();
+                $end = $endStr ? Carbon::parse($endStr)->endOfDay() : now()->endOfDay();
 
                 if ($end->isBefore($start)) {
                     continue;
@@ -766,11 +773,11 @@ class MentorDashboardController extends Controller
         // Email to Organization
         $orgEmail = $org->email ?? ($org->owner ? $org->owner->email : null);
         if ($orgEmail) {
-            \Illuminate\Support\Facades\Mail::to($orgEmail)->send(new \App\Mail\OrganizationUnlinkedNotificationMail($user, 'Mentor'));
+            Mail::to($orgEmail)->send(new OrganizationUnlinkedNotificationMail($user, 'Mentor'));
         }
 
         // Email to User
-        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\UserUnlinkedConfirmationMail($org));
+        Mail::to($user->email)->send(new UserUnlinkedConfirmationMail($org));
 
         // Detach
         $user->organization_id = null;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V2;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use OpenApi\Annotations as OA;
 
 /**
@@ -66,7 +67,7 @@ class AccountController extends Controller
 
         $user = $request->user();
         $user->update([
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'password' => Hash::make($request->password),
         ]);
 
         return $this->success(null, 'Mot de passe mis à jour avec succès.');

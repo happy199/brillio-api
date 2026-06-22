@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use OpenApi\Annotations as OA;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Controller pour la gestion des documents académiques (V1)
@@ -139,7 +140,7 @@ class AcademicDocumentController extends Controller
     /**
      * Télécharge un document
      *
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|JsonResponse
+     * @return BinaryFileResponse|JsonResponse
      */
     public function download(Request $request, int $id)
     {

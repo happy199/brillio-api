@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Purchase;
 use App\Models\Resource;
+use App\Models\ResourceView;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +22,7 @@ class ResourceController extends Controller
 {
     public function __construct(
         private WalletService $walletService,
-        private \App\Services\MentorshipNotificationService $notificationService
+        private MentorshipNotificationService $notificationService
     ) {}
 
     /**
@@ -145,7 +147,7 @@ class ResourceController extends Controller
         // Enregistrer la vue
         $resource->increment('views_count');
         if (! $resource->is_premium) {
-            \App\Models\ResourceView::firstOrCreate([
+            ResourceView::firstOrCreate([
                 'user_id' => $user->id,
                 'resource_id' => $resource->id,
             ]);

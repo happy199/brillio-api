@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Models\PersonalityQuestion;
+use App\Models\PersonalityTest;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class PersonalityController extends Controller
     {
         $user = auth()->user();
         $personalityTest = $user->personalityTest;
-        $testHistory = \App\Models\PersonalityTest::where('user_id', $user->id)
+        $testHistory = PersonalityTest::where('user_id', $user->id)
             ->history()
             ->get();
 
@@ -132,7 +133,7 @@ class PersonalityController extends Controller
     {
         $user = auth()->user();
 
-        $test = \App\Models\PersonalityTest::where('user_id', $user->id)
+        $test = PersonalityTest::where('user_id', $user->id)
             ->where('id', $testId)
             ->first();
 

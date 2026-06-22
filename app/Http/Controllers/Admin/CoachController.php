@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\Admin\CoachCredentialsMail;
 use App\Models\MentorProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CoachController extends Controller
@@ -60,7 +62,7 @@ class CoachController extends Controller
                 ]);
 
                 // Envoyer l'email avec les accès
-                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\CoachCredentialsMail($user, $tempPassword));
+                Mail::to($user->email)->send(new CoachCredentialsMail($user, $tempPassword));
             }
 
             $count = $users->count();
@@ -83,7 +85,7 @@ class CoachController extends Controller
                 'email_verified_at' => $user->email_verified_at ?? now(),
             ]);
 
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\CoachCredentialsMail($user, $tempPassword));
+            Mail::to($user->email)->send(new CoachCredentialsMail($user, $tempPassword));
 
             return back()->with('success', "{$user->name} a été promu Coach et a reçu ses accès par email.");
         }
@@ -114,7 +116,7 @@ class CoachController extends Controller
         ]);
 
         // Envoyer l'email
-        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\CoachCredentialsMail($user, $password));
+        Mail::to($user->email)->send(new CoachCredentialsMail($user, $password));
 
         return back()->with('success', "Nouveau compte Coach créé. Les accès ont été envoyés à {$user->email}.");
     }
@@ -129,7 +131,7 @@ class CoachController extends Controller
             'password' => Hash::make($password),
         ]);
 
-        \Illuminate\Support\Facades\Mail::to($coach->email)->send(new \App\Mail\Admin\CoachCredentialsMail($coach, $password));
+        Mail::to($coach->email)->send(new CoachCredentialsMail($coach, $password));
 
         return back()->with('success', "Le mot de passe de {$coach->name} a été réinitialisé et envoyé par email.");
     }

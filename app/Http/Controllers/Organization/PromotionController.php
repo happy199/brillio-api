@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
+use App\Models\EstablishmentInterest;
 use App\Models\User;
 use App\Services\PersonalityService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
@@ -28,12 +30,12 @@ class PromotionController extends Controller
                 ->orWhereHas('establishmentInterests', fn ($sq) => $sq->whereIn('establishment_id', $establishmentIds));
         })->count();
 
-        $recentInterests = \App\Models\EstablishmentInterest::whereIn('establishment_id', $establishmentIds)
+        $recentInterests = EstablishmentInterest::whereIn('establishment_id', $establishmentIds)
             ->where('created_at', '>=', now()->subDays(30))
             ->count();
 
         // Liste 1: Manifestations d'intérêt (Interests)
-        $interests = \App\Models\EstablishmentInterest::whereIn('establishment_id', $establishmentIds)
+        $interests = EstablishmentInterest::whereIn('establishment_id', $establishmentIds)
             ->with(['user.jeuneProfile', 'user.personalityTest', 'establishment'])
             ->latest()
             ->paginate(25, ['*'], 'interests_page');
@@ -114,7 +116,7 @@ class PromotionController extends Controller
                     $prospect->personalityTest?->personality_type ?? '-',
                     $prospect->clicks_count,
                     $prospect->has_interest ? 'Oui' : 'Non',
-                    \Carbon\Carbon::parse($prospect->last_interaction_at)->format('d/m/Y H:i'),
+                    Carbon::parse($prospect->last_interaction_at)->format('d/m/Y H:i'),
                 ]);
             }
 

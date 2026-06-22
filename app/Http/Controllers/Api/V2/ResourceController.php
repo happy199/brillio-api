@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Api\V1\ResourceController as V1ResourceController;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class ResourceController extends V1ResourceController
 {
     public function __construct(
         private WalletService $walletService,
-        private \App\Services\MentorshipNotificationService $notificationService
+        private MentorshipNotificationService $notificationService
     ) {
         parent::__construct($walletService, $notificationService);
     }

@@ -3,11 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\Admin\DemotionNotificationMail;
+use App\Mail\MentorVerifiedMail;
 use App\Models\MentorProfile;
 use App\Models\RoadmapStep;
+use App\Models\Specialization;
 use App\Models\User;
+use App\Services\LinkedInPdfParserService;
+use App\Services\UserAvatarService;
+use App\Traits\FormatsUrls;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -15,7 +22,7 @@ use Illuminate\Support\Facades\Storage;
  */
 class MentorController extends Controller
 {
-    use \App\Traits\FormatsUrls;
+    use FormatsUrls;
 
     /**
      * Liste des spécialisations
@@ -154,7 +161,7 @@ class MentorController extends Controller
 
         // Notifier le mentor
         try {
-            \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
+            Mail::to($mentor->user->email)->send(new MentorVerifiedMail($mentor));
         } catch (\Exception $e) {
             \Log::error('Erreur envoi email validation mentor (approve): '.$e->getMessage());
         }
@@ -179,7 +186,7 @@ class MentorController extends Controller
         // Si on passe de non-validé à validé, on envoie l'email
         if (! $oldValue && $mentor->is_validated) {
             try {
-                \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
+                Mail::to($mentor->user->email)->send(new MentorVerifiedMail($mentor));
             } catch (\Exception $e) {
                 \Log::error('Erreur envoi email validation mentor (toggle): '.$e->getMessage());
             }
@@ -237,7 +244,7 @@ class MentorController extends Controller
     {
         $mentor->load(['user', 'roadmapSteps', 'specializationModel']);
 
-        $specializations = \App\Models\Specialization::where('status', 'active')
+        $specializations = Specialization::where('status', 'active')
             ->orderBy('name')
             ->get();
 
@@ -251,8 +258,8 @@ class MentorController extends Controller
      * Met à jour le profil du mentor
      */
     public function __construct(
-        private \App\Services\UserAvatarService $avatarService,
-        private \App\Services\LinkedInPdfParserService $parserService
+        private UserAvatarService $avatarService,
+        private LinkedInPdfParserService $parserService
     ) {}
 
     /**
@@ -546,7 +553,7 @@ class MentorController extends Controller
 
         // S'assurer de synchroniser le champ specialization (string) avec le slug si possible
         if (! empty($profileData['specialization_id'])) {
-            $specModel = \App\Models\Specialization::find($profileData['specialization_id']);
+            $specModel = Specialization::find($profileData['specialization_id']);
             $profileData['specialization'] = $specModel?->slug;
         } else {
             $profileData['specialization'] = null;
@@ -563,7 +570,7 @@ class MentorController extends Controller
             $mentor->update($profileData);
 
             try {
-                \Illuminate\Support\Facades\Mail::to($mentor->user->email)->send(new \App\Mail\MentorVerifiedMail($mentor));
+                Mail::to($mentor->user->email)->send(new MentorVerifiedMail($mentor));
             } catch (\Exception $e) {
                 \Log::error('Erreur envoi email validation mentor (update): '.$e->getMessage());
             }
@@ -610,7 +617,7 @@ class MentorController extends Controller
     public function storeRoadmapStep(Request $request, MentorProfile $mentor)
     {
         $validated = $request->validate([
-            'step_type' => 'required|in:'.implode(',', array_keys(\App\Models\RoadmapStep::STEP_TYPES)),
+            'step_type' => 'required|in:'.implode(',', array_keys(RoadmapStep::STEP_TYPES)),
             'title' => 'required|string|max:255',
             'institution_company' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
@@ -624,7 +631,7 @@ class MentorController extends Controller
         $validated['position'] = $maxPosition + 1;
         $validated['mentor_profile_id'] = $mentor->id;
 
-        \App\Models\RoadmapStep::create($validated);
+        RoadmapStep::create($validated);
 
         return back()->with('success', 'Étape ajoutée avec succès.');
     }
@@ -632,7 +639,7 @@ class MentorController extends Controller
     /**
      * Met à jour une étape de roadmap
      */
-    public function updateRoadmapStep(Request $request, MentorProfile $mentor, \App\Models\RoadmapStep $step)
+    public function updateRoadmapStep(Request $request, MentorProfile $mentor, RoadmapStep $step)
     {
         // Vérifier que l'étape appartient bien à ce mentor
         if ($step->mentor_profile_id !== $mentor->id) {
@@ -640,7 +647,7 @@ class MentorController extends Controller
         }
 
         $validated = $request->validate([
-            'step_type' => 'required|in:'.implode(',', array_keys(\App\Models\RoadmapStep::STEP_TYPES)),
+            'step_type' => 'required|in:'.implode(',', array_keys(RoadmapStep::STEP_TYPES)),
             'title' => 'required|string|max:255',
             'institution_company' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
@@ -657,7 +664,7 @@ class MentorController extends Controller
     /**
      * Supprime une étape de roadmap
      */
-    public function deleteRoadmapStep(MentorProfile $mentor, \App\Models\RoadmapStep $step)
+    public function deleteRoadmapStep(MentorProfile $mentor, RoadmapStep $step)
     {
         // Vérifier que l'étape appartient bien à ce mentor
         if ($step->mentor_profile_id !== $mentor->id) {
@@ -686,9 +693,9 @@ class MentorController extends Controller
 
         // 2. Notifier l'utilisateur
         try {
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\DemotionNotificationMail($user));
+            Mail::to($user->email)->send(new DemotionNotificationMail($user));
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur envoi notification rétrogradation: '.$e->getMessage());
+            Log::error('Erreur envoi notification rétrogradation: '.$e->getMessage());
         }
 
         return redirect()->route('admin.users.index')

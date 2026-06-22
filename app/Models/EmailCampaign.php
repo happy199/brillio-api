@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmailCampaign extends Model
 {
@@ -43,7 +44,7 @@ class EmailCampaign extends Model
 
     public function sentBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'sent_by');
+        return $this->belongsTo(User::class, 'sent_by');
     }
 
     public function parent(): BelongsTo
@@ -51,7 +52,7 @@ class EmailCampaign extends Model
         return $this->belongsTo(EmailCampaign::class, 'parent_id');
     }
 
-    public function children(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function children(): HasMany
     {
         return $this->hasMany(EmailCampaign::class, 'parent_id');
     }

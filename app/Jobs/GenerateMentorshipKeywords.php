@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class GenerateMentorshipKeywords implements ShouldQueue
 {
@@ -36,7 +37,7 @@ class GenerateMentorshipKeywords implements ShouldQueue
                 'custom_forbidden_keywords' => $keywords,
             ]);
 
-            \Illuminate\Support\Facades\Log::info('Custom keywords generated for mentorship #'.$this->mentorship->id, [
+            Log::info('Custom keywords generated for mentorship #'.$this->mentorship->id, [
                 'count' => count($keywords),
             ]);
         }

@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
+use App\Services\BrillioIAService;
+use App\Services\MentorshipNotificationService;
+use App\Services\WalletService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Session;
 
 class SessionController extends Controller
@@ -20,7 +25,7 @@ class SessionController extends Controller
         $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro()) {
-            $sessions = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+            $sessions = new LengthAwarePaginator([], 0, 12);
         } else {
             $query = MentoringSession::query()
                 ->where(function ($q) use ($organization) {
@@ -160,7 +165,7 @@ class SessionController extends Controller
         }
 
         // 3. Gestion du coût
-        $walletService = app(\App\Services\WalletService::class);
+        $walletService = app(WalletService::class);
         $cost = $walletService->getFeatureCost('transcription_download', 5);
 
         if ($organization->credits_balance < $cost) {
@@ -179,7 +184,7 @@ class SessionController extends Controller
         );
 
         // 4. Générer le PDF
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('common.reports.transcription_pdf', compact('session'));
+        $pdf = Pdf::loadView('common.reports.transcription_pdf', compact('session'));
 
         return $pdf->download('transcription_seance_'.$session->id.'.pdf');
     }
@@ -196,7 +201,7 @@ class SessionController extends Controller
             return redirect()->back()->with('error', "La transcription n'est pas encore disponible. L'IA a besoin de la transcription pour générer un résumé.");
         }
 
-        $walletService = app(\App\Services\WalletService::class);
+        $walletService = app(WalletService::class);
         $cost = $walletService->getFeatureCost('ai_report_generation', 5);
 
         if ($organization->credits_balance < $cost) {
@@ -205,7 +210,7 @@ class SessionController extends Controller
             return redirect()->route('organization.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour utiliser l'IA.");
         }
 
-        $suggestedReport = app(\App\Services\BrillioIAService::class)->summarizeTranscription($session->transcription_raw);
+        $suggestedReport = app(BrillioIAService::class)->summarizeTranscription($session->transcription_raw);
 
         if (! $suggestedReport) {
             return redirect()->back()->with('error', "L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.");
@@ -252,11 +257,11 @@ class SessionController extends Controller
 
         // Déclencher le paiement du mentor si payant
         if ($session->is_paid) {
-            app(\App\Services\WalletService::class)->payoutMentor($session);
+            app(WalletService::class)->payoutMentor($session);
         }
 
         // Notifications
-        $notificationService = app(\App\Services\MentorshipNotificationService::class);
+        $notificationService = app(MentorshipNotificationService::class);
         $notificationService->sendSessionCompleted($session);
         $notificationService->sendReportAvailableNotification($session);
 

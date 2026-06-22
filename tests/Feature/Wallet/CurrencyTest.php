@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Wallet;
 
+use App\Models\MentorProfile;
 use App\Models\User;
 use App\Services\CurrencyService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -68,7 +69,7 @@ class CurrencyTest extends TestCase
     public function test_mentor_balance_api_respects_session_currency()
     {
         $user = User::factory()->mentor()->create();
-        $mentorProfile = \App\Models\MentorProfile::factory()->create([
+        $mentorProfile = MentorProfile::factory()->create([
             'user_id' => $user->id,
             'available_balance' => 65596, // approx 1075 MAD
             'total_withdrawn' => 0,
@@ -96,7 +97,7 @@ class CurrencyTest extends TestCase
     public function test_mentor_balance_api_respects_currency_parameter()
     {
         $user = User::factory()->mentor()->create();
-        $mentorProfile = \App\Models\MentorProfile::factory()->create([
+        $mentorProfile = MentorProfile::factory()->create([
             'user_id' => $user->id,
             'available_balance' => 65596, // approx 1075 MAD
             'total_withdrawn' => 0,

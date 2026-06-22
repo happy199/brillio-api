@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Resource extends Model
 {
@@ -90,7 +91,7 @@ class Resource extends Model
     {
         static::saving(function ($resource) {
             if (empty($resource->slug)) {
-                $resource->slug = \Illuminate\Support\Str::slug($resource->title);
+                $resource->slug = Str::slug($resource->title);
             }
         });
     }

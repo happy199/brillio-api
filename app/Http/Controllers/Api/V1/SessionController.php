@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Models\MentorProfile;
 use App\Models\Mentorship;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class SessionController extends Controller
 {
     public function __construct(
         private WalletService $walletService,
-        private \App\Services\MentorshipNotificationService $notificationService
+        private MentorshipNotificationService $notificationService
     ) {}
 
     /**

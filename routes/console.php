@@ -1,5 +1,10 @@
 <?php
 
+use App\Jobs\SendInactivityReminders;
+use App\Jobs\SendMentorReportReminders;
+use App\Jobs\SendMissingPhoneReminders;
+use App\Jobs\SendNewMentorsDigest;
+use App\Jobs\SendProfileCompletionReminders;
 use Illuminate\Support\Facades\Schedule;
 
 // Session reminders: run every hour to send 24h and 1h reminders
@@ -8,25 +13,25 @@ Schedule::command('sessions:send-reminders')
     ->timezone('Africa/Abidjan');
 
 // Profil completion reminders: run every Monday at 9 AM
-Schedule::job(new \App\Jobs\SendProfileCompletionReminders)
+Schedule::job(new SendProfileCompletionReminders)
     ->mondays()
     ->at('09:00')
     ->timezone('Africa/Abidjan');
 
 // Missing phone reminders: run every Sunday at 9 AM
-Schedule::job(new \App\Jobs\SendMissingPhoneReminders)
+Schedule::job(new SendMissingPhoneReminders)
     ->sundays()
     ->at('09:00')
     ->timezone('Africa/Abidjan');
 
 // Weekly new mentors digest: run every Friday at 4 PM
-Schedule::job(new \App\Jobs\SendNewMentorsDigest)
+Schedule::job(new SendNewMentorsDigest)
     ->fridays()
     ->at('16:00')
     ->timezone('Africa/Abidjan');
 
 // Mentor report reminders (escrow release): daily at 10 AM
-Schedule::job(new \App\Jobs\SendMentorReportReminders)
+Schedule::job(new SendMentorReportReminders)
     ->dailyAt('10:00')
     ->timezone('Africa/Abidjan');
 
@@ -48,7 +53,7 @@ Schedule::command('organizations:grant-enterprise-credits')
 
 // Rappel d'attraction : Relance hebdomadaire pour les inactifs (7 jours+)
 // Exécution horaire avec limite de 500 par lot (voir SendInactivityReminders)
-Schedule::job(new \App\Jobs\SendInactivityReminders)
+Schedule::job(new SendInactivityReminders)
     ->hourly()
     ->timezone('Africa/Abidjan');
 

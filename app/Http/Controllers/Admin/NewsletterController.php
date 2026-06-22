@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendNewsletterJob;
 use App\Models\EmailCampaign;
 use App\Models\NewsletterSubscriber;
+use App\Models\User;
 use App\Services\EmailDeliveryService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class NewsletterController extends Controller
@@ -29,10 +32,10 @@ class NewsletterController extends Controller
             'total' => NewsletterSubscriber::count(),
             'active' => NewsletterSubscriber::active()->count(),
             'unsubscribed' => NewsletterSubscriber::unsubscribed()->count(),
-            'total_users' => \App\Models\User::count(),
-            'total_jeunes' => \App\Models\User::where('user_type', 'jeune')->count(),
-            'total_mentors' => \App\Models\User::where('user_type', 'mentor')->count(),
-            'total_organizations' => \App\Models\User::where('user_type', 'organization')->count(),
+            'total_users' => User::count(),
+            'total_jeunes' => User::where('user_type', 'jeune')->count(),
+            'total_mentors' => User::where('user_type', 'mentor')->count(),
+            'total_organizations' => User::where('user_type', 'organization')->count(),
         ];
 
         return view('admin.newsletter.index', compact('subscribers', 'stats'));
@@ -189,7 +192,7 @@ class NewsletterController extends Controller
             'frequency' => $isRecurring ? $request->frequency : null,
             'start_date' => $isRecurring ? $request->start_date : null,
             'end_date' => $isRecurring ? $request->end_date : null,
-            'next_run_at' => $isRecurring ? \Carbon\Carbon::parse($request->start_date)->startOfDay()->addHours(9) : null,
+            'next_run_at' => $isRecurring ? Carbon::parse($request->start_date)->startOfDay()->addHours(9) : null,
             'recipient_filters' => [
                 'type' => $request->recipient_type,
                 'populations' => $request->populations,
@@ -204,7 +207,7 @@ class NewsletterController extends Controller
 
         if (! $isRecurring) {
             // Dispatcher le Job dans la queue seulement si ce n'est pas récurrent
-            \App\Jobs\SendNewsletterJob::dispatch($campaign);
+            SendNewsletterJob::dispatch($campaign);
 
             return redirect()->route('admin.newsletter.index')
                 ->with('success', "La campagne a été mise en file d'attente. L'envoi se fera en arrière-plan.");

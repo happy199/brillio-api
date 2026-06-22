@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Http\File;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -12,7 +13,7 @@ trait HasWebpUpload
     /**
      * Upload an image file, convert it to WebP format, and save it to storage.
      *
-     * @param  \Illuminate\Http\UploadedFile  $file
+     * @param  UploadedFile  $file
      * @param  string  $directory
      * @param  int  $quality
      * @param  string  $disk

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Api\V1\SessionController as V1SessionController;
 use App\Models\MentoringSession;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class SessionController extends V1SessionController
 {
     public function __construct(
         private WalletService $walletService,
-        private \App\Services\MentorshipNotificationService $notificationService
+        private MentorshipNotificationService $notificationService
     ) {
         parent::__construct($walletService, $notificationService);
     }
@@ -159,7 +160,7 @@ class SessionController extends V1SessionController
             'meeting_url' => $meetingUrl,
         ]);
 
-        app(\App\Services\MentorshipNotificationService::class)->sendSessionConfirmed($session);
+        app(MentorshipNotificationService::class)->sendSessionConfirmed($session);
 
         return $this->success($session, 'Session acceptée.');
     }
@@ -199,7 +200,7 @@ class SessionController extends V1SessionController
             'cancellation_reason' => $request->get('reason', 'Refusée par le mentor'),
         ]);
 
-        app(\App\Services\MentorshipNotificationService::class)->sendSessionCancelled($session, $request->get('reason'));
+        app(MentorshipNotificationService::class)->sendSessionCancelled($session, $request->get('reason'));
 
         return $this->success($session, 'Session refusée.');
     }
@@ -248,7 +249,7 @@ class SessionController extends V1SessionController
 
         // Optionnel : déclencher le payout
         if ($session->status === 'completed' && ! $session->is_paid_to_mentor) {
-            app(\App\Services\WalletService::class)->payoutMentor($session);
+            app(WalletService::class)->payoutMentor($session);
         }
 
         return $this->success($session, 'Compte rendu enregistré.');

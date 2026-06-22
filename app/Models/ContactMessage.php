@@ -27,7 +27,7 @@ class ContactMessage extends Model
 
     public function repliedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'replied_by');
+        return $this->belongsTo(User::class, 'replied_by');
     }
 
     public function scopeNew($query)

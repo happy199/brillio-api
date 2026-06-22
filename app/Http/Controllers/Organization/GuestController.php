@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\MentorProfile;
 use App\Models\RoadmapStep;
+use App\Models\Specialization;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class GuestController extends Controller
@@ -43,7 +46,7 @@ class GuestController extends Controller
      */
     public function create()
     {
-        $specializations = \App\Models\Specialization::active()->orderBy('name')->get();
+        $specializations = Specialization::active()->orderBy('name')->get();
         $countries = User::getCountries();
 
         return view('organization.guests.create', compact('specializations', 'countries'));
@@ -123,7 +126,7 @@ class GuestController extends Controller
         }
 
         $guest->load('mentorProfile.roadmapSteps');
-        $specializations = \App\Models\Specialization::active()->orderBy('name')->get();
+        $specializations = Specialization::active()->orderBy('name')->get();
         $countries = User::getCountries();
 
         return view('organization.guests.edit', compact('guest', 'specializations', 'countries'));
@@ -148,7 +151,7 @@ class GuestController extends Controller
             // Gestion de la photo
             if ($request->hasFile('photo')) {
                 if ($guest->profile_photo_path) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($guest->profile_photo_path);
+                    Storage::disk('public')->delete($guest->profile_photo_path);
                 }
                 $photoPath = $request->file('photo')->store('profile-photos', 'public');
                 $guest->profile_photo_path = $photoPath;
@@ -202,7 +205,7 @@ class GuestController extends Controller
         try {
             // Supprimer la photo
             if ($guest->profile_photo_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($guest->profile_photo_path);
+                Storage::disk('public')->delete($guest->profile_photo_path);
             }
 
             // Supprimer l'utilisateur et ses relations (le cascade s'occupe du profil mentor et roadmap)
@@ -243,7 +246,7 @@ class GuestController extends Controller
     {
         $specId = $validated['specialization_id'] ?? null;
         if (empty($specId) && ! empty($validated['custom_specialization'])) {
-            $newSpec = \App\Models\Specialization::firstOrCreate(
+            $newSpec = Specialization::firstOrCreate(
                 ['name' => $validated['custom_specialization']],
                 ['status' => 'active', 'created_by_admin' => false]
             );
@@ -280,7 +283,7 @@ class GuestController extends Controller
             $profile->current_position = $mostRecentStep['title'];
             $profile->save();
 
-            \Illuminate\Support\Facades\Log::info("Sync Guest Profile ({$context}): {$userName} updated with Company: {$profile->current_company}");
+            Log::info("Sync Guest Profile ({$context}): {$userName} updated with Company: {$profile->current_company}");
         }
     }
 }

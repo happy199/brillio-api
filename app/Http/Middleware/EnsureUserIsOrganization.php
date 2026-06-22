@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -26,7 +27,7 @@ class EnsureUserIsOrganization
         }
 
         // Email Verification check for Organizations
-        if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&
+        if (auth()->user() instanceof MustVerifyEmail &&
         ! auth()->user()->hasVerifiedEmail()) {
             return $request->expectsJson()
                 ? abort(403, 'Votre adresse email n\'est pas vérifiée.')

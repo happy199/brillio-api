@@ -5,6 +5,7 @@ namespace Tests\Feature\Jobs;
 use App\Jobs\SendMissingPhoneReminders;
 use App\Mail\Engagement\MissingPhoneReminder;
 use App\Models\User;
+use App\Services\EmailDeliveryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -83,7 +84,7 @@ class SendMissingPhoneRemindersTest extends TestCase
         ]);
 
         // Run the job
-        (new SendMissingPhoneReminders)->handle(app(\App\Services\EmailDeliveryService::class));
+        (new SendMissingPhoneReminders)->handle(app(EmailDeliveryService::class));
 
         // Assert emails queued for appropriate users
         Mail::assertQueued(MissingPhoneReminder::class, function ($mail) use ($jeuneMissingPhone) {
@@ -143,7 +144,7 @@ class SendMissingPhoneRemindersTest extends TestCase
         ]);
 
         // Run the job
-        (new SendMissingPhoneReminders)->handle(app(\App\Services\EmailDeliveryService::class));
+        (new SendMissingPhoneReminders)->handle(app(EmailDeliveryService::class));
 
         // Verify exactly 500 emails were queued
         Mail::assertQueued(MissingPhoneReminder::class, 500);

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Api\V1\ChatController as V1ChatController;
 use App\Http\Requests\Chat\SendMessageRequest;
+use App\Models\ChatConversation;
 use App\Services\BrillioIAService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Annotations as OA;
 
 /**
@@ -164,7 +166,7 @@ class ChatController extends V1ChatController
     public function requestHumanSupport(Request $request, int $conversationId): JsonResponse
     {
         $user = $request->user();
-        $conversation = \App\Models\ChatConversation::where('id', $conversationId)
+        $conversation = ChatConversation::where('id', $conversationId)
             ->where('user_id', $user->id)
             ->first();
 
@@ -190,7 +192,7 @@ class ChatController extends V1ChatController
         }
 
         // Demander le support humain
-        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $conversation, $cost) {
+        DB::transaction(function () use ($user, $conversation, $cost) {
             $this->walletService->deductCredits(
                 $user,
                 $cost,

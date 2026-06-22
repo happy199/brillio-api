@@ -11,6 +11,7 @@ use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Models\EmailCampaign;
 use App\Models\MentorProfile;
 use App\Models\User;
+use App\Services\EmailDeliveryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -55,7 +56,7 @@ class EmailEngagementJobsTest extends TestCase
         ]);
 
         // Run the job
-        (new SendProfileCompletionReminders)->handle(app(\App\Services\EmailDeliveryService::class));
+        (new SendProfileCompletionReminders)->handle(app(EmailDeliveryService::class));
 
         // Verify that the incomplete mentor gets a ProfileCompletionReminder
         Mail::assertSent(ProfileCompletionReminder::class, function ($mail) use ($mentorIncomplete) {
@@ -127,7 +128,7 @@ class EmailEngagementJobsTest extends TestCase
         ]);
 
         // Run the single send job
-        (new SendCampaignEmailJob($campaign, self::TARGET_EMAIL))->handle(app(\App\Services\EmailDeliveryService::class));
+        (new SendCampaignEmailJob($campaign, self::TARGET_EMAIL))->handle(app(EmailDeliveryService::class));
 
         // Verify email was sent
         Mail::assertSent(CampaignNewsletterMail::class, function ($mail) {
@@ -171,7 +172,7 @@ class EmailEngagementJobsTest extends TestCase
             'failed_count' => 0,
         ]);
 
-        (new SendCampaignEmailJob($campaign, 'mailbox-full@example.com'))->handle(app(\App\Services\EmailDeliveryService::class));
+        (new SendCampaignEmailJob($campaign, 'mailbox-full@example.com'))->handle(app(EmailDeliveryService::class));
 
         $jeune->refresh();
         $this->assertTrue($jeune->is_archived);

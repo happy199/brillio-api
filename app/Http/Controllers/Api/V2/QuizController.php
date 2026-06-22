@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
+use App\Models\Quiz;
+use App\Models\QuizAttempt;
+use App\Models\QuizOption;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -26,7 +29,7 @@ class QuizController extends Controller
      */
     public function show(Request $request, $quizId): JsonResponse
     {
-        $quiz = \App\Models\Quiz::with('questions.options')->findOrFail($quizId);
+        $quiz = Quiz::with('questions.options')->findOrFail($quizId);
 
         if (! $quiz->is_active) {
             return $this->error('Ce quiz n\'est plus disponible.', 404);
@@ -59,7 +62,7 @@ class QuizController extends Controller
      */
     public function submit(Request $request, $quizId): JsonResponse
     {
-        $quiz = \App\Models\Quiz::findOrFail($quizId);
+        $quiz = Quiz::findOrFail($quizId);
         $user = $request->user();
 
         $request->validate([
@@ -71,13 +74,13 @@ class QuizController extends Controller
         $totalQuestions = $quiz->questions()->count();
 
         foreach ($request->answers as $questionId => $optionId) {
-            $option = \App\Models\QuizOption::find($optionId);
+            $option = QuizOption::find($optionId);
             if ($option && $option->is_correct) {
                 $score++;
             }
         }
 
-        $attempt = \App\Models\QuizAttempt::create([
+        $attempt = QuizAttempt::create([
             'quiz_id' => $quiz->id,
             'user_id' => $user->id,
             'score' => $score,
@@ -104,7 +107,7 @@ class QuizController extends Controller
      */
     public function result(Request $request, $attemptId): JsonResponse
     {
-        $attempt = \App\Models\QuizAttempt::with('quiz.questions.options')->findOrFail($attemptId);
+        $attempt = QuizAttempt::with('quiz.questions.options')->findOrFail($attemptId);
 
         if ($attempt->user_id !== $request->user()->id) {
             return $this->forbidden();
