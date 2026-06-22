@@ -208,8 +208,8 @@
                     <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
                         <span class="text-2xl font-bold text-primary-600">{{ substr($siteName, 0, 1) }}</span>
                     </div>
+                    <span class="text-3xl font-bold text-white">{{ $siteName }}</span>
                 @endif
-                <span class="text-3xl font-bold text-white">{{ $siteName }}</span>
             </a>
             <h2 class="mt-6 text-2xl font-bold text-white">
                 @yield('heading')
