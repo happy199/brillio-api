@@ -257,7 +257,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('organizations.credits', $organization) }}" method="POST">
+            <form action="{{ route('admin.organizations.credits', $organization) }}" method="POST">
                 @csrf
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
                     <div class="sm:col-span-1">
