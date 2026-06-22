@@ -16,7 +16,7 @@ use OpenApi\Annotations as OA;
 class SessionController extends V1SessionController
 {
     public function __construct(
-        private WalletService $walletService,
+        WalletService $walletService,
         private MentorshipNotificationService $notificationService
     ) {
         parent::__construct($walletService, $notificationService);
