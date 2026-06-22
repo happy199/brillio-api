@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'jeune_published' => \App\Http\Middleware\EnsureJeuneProfilePublished::class,
             'is_coach' => \App\Http\Middleware\IsCoach::class,
             'admin_2fa' => \App\Http\Middleware\VerifyAdminTwoFactor::class,
+            'swagger_secure' => \App\Http\Middleware\RestrictSwaggerAccess::class,
         ]);
 
         // Redirection pour les non-authentifiés

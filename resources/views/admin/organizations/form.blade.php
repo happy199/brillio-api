@@ -257,20 +257,20 @@
                 </div>
             </div>
 
-            <form action="{{ route('admin.organizations.credits', $organization) }}" method="POST">
+            <form action="{{ route('admin.organizations.credits', $organization) }}" method="POST" x-data="{ creditAction: 'add' }">
                 @csrf
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
                     <div class="sm:col-span-1">
                         <label for="credit_action" class="block text-sm font-semibold text-gray-700 mb-2">Action</label>
-                        <select name="credit_action" id="credit_action" class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full transition-all" required onchange="toggleCreditAmount(this.value)">
+                        <select name="credit_action" id="credit_action" x-model="creditAction" class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full transition-all" required>
                             <option value="add">Ajouter des crédits</option>
                             <option value="deduct">Diminuer des crédits</option>
                             <option value="reset">Vider le solde</option>
                         </select>
                     </div>
-                    <div class="sm:col-span-1" id="credit_amount_container">
+                    <div class="sm:col-span-1" x-show="creditAction !== 'reset'">
                         <label for="amount" class="block text-sm font-semibold text-gray-700 mb-2">Montant (crédits)</label>
-                        <input type="number" name="amount" id="amount" min="1" class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full transition-all" placeholder="Ex: 100">
+                        <input type="number" name="amount" id="amount" min="1" class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full transition-all" placeholder="Ex: 100" :required="creditAction !== 'reset'" :disabled="creditAction === 'reset'">
                     </div>
                     <div class="sm:col-span-1">
                         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all uppercase tracking-wider text-sm flex items-center justify-center gap-2 h-[46px]" onclick="return confirm('Êtes-vous sûr de vouloir appliquer cette modification de crédit ?')">
@@ -282,27 +282,6 @@
             </form>
         </div>
     </div>
-    
-    @push('scripts')
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-        function toggleCreditAmount(action) {
-            var container = document.getElementById('credit_amount_container');
-            var input = document.getElementById('amount');
-            if (action === 'reset') {
-                container.classList.add('hidden');
-                input.required = false;
-                input.value = '';
-            } else {
-                container.classList.remove('hidden');
-                input.required = true;
-            }
-        }
-        document.addEventListener('DOMContentLoaded', function () {
-            var select = document.getElementById('credit_action');
-            if (select) toggleCreditAmount(select.value);
-        });
-    </script>
-    @endpush
     @endif
 </div>
 @endsection

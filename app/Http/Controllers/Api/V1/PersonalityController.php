@@ -9,12 +9,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Controller pour le test de personnalité
+ * Controller pour la gestion des tests de personnalité via API (V1)
  */
 class PersonalityController extends Controller
 {
     public function __construct(
-        private PersonalityService $personalityService
+        protected PersonalityService $personalityService
     ) {}
 
     /**

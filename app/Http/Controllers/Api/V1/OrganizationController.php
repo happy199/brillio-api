@@ -7,6 +7,9 @@ use App\Models\Establishment;
 use App\Models\EstablishmentClick;
 use Illuminate\Http\Request;
 
+/**
+ * Controller pour les organisations via API (V1)
+ */
 class OrganizationController extends Controller
 {
     /**

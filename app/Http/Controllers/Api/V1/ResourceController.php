@@ -11,10 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use OpenApi\Attributes as OA;
+use OpenApi\Annotations as OA;
 
 /**
- * Controller pour la gestion des ressources pédagogiques via API
+ * Controller pour la gestion des ressources d'orientation via API (V1)
  */
 class ResourceController extends Controller
 {
@@ -24,34 +24,25 @@ class ResourceController extends Controller
     ) {}
 
     /**
-     * Liste les ressources pédagogiques avec filtrage
+     * @OA\Get(
+     * path="/api/v1/resources",
+     * summary="Liste les ressources pédagogiques",
+     * tags={"Ressources"},
+     *
+     * @OA\Parameter(name="filter", in="query", @OA\Schema(type="string", enum={"suggestions", "all"})),
+     * @OA\Parameter(name="search", in="query", @OA\Schema(type="string")),
+     * @OA\Parameter(name="type", in="query", @OA\Schema(type="string")),
+     * @OA\Parameter(name="price", in="query", @OA\Schema(type="string", enum={"free", "premium"})),
+     * @OA\Parameter(name="mbti", in="query", @OA\Schema(type="string")),
+     * @OA\Parameter(name="source", in="query", @OA\Schema(type="string", enum={"mentor", "brillio"})),
+     * @OA\Parameter(name="ownership", in="query", @OA\Schema(type="string", enum={"mine", "all"})),
+     *
+     * @OA\Response(response= 200, description="Liste des ressources"),
+     * )
      */
-    #[OA\Get(
-        path: '/api/v1/resources',
-        summary: 'Liste les ressources pédagogiques',
-        tags: ['Ressources'],
-        security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'filter', in: 'query', schema: new OA\Schema(type: 'string', enum: ['suggestions', 'all'])),
-            new OA\Parameter(name: 'search', in: 'query', schema: new OA\Schema(type: 'string')),
-            new OA\Parameter(name: 'type', in: 'query', schema: new OA\Schema(type: 'string')),
-            new OA\Parameter(name: 'price', in: 'query', schema: new OA\Schema(type: 'string', enum: ['free', 'premium'])),
-            new OA\Parameter(name: 'mbti', in: 'query', schema: new OA\Schema(type: 'string')),
-            new OA\Parameter(name: 'source', in: 'query', schema: new OA\Schema(type: 'string', enum: ['mentor', 'brillio'])),
-            new OA\Parameter(name: 'ownership', in: 'query', schema: new OA\Schema(type: 'string', enum: ['mine', 'all'])),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Liste des ressources'),
-        ]
-    )]
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $userEducation = $user->education_level;
-        $userSituation = $user->situation;
-        $userInterests = $user->interests ?? [];
-        $userCountry = $user->country;
-        $userMbti = $user->personalityTest?->personality_type;
 
         $query = Resource::where('is_published', true)->where('is_validated', true);
 
@@ -86,9 +77,9 @@ class ResourceController extends Controller
         // Source : 'mentor' ou 'brillio'
         if ($source = $request->get('source')) {
             if ($source === 'mentor') {
-                $query->whereNotNull('mentor_id');
+                $query->whereNotNull('user_id');
             } elseif ($source === 'brillio') {
-                $query->whereNull('mentor_id');
+                $query->whereNull('user_id');
             }
         }
 
@@ -101,7 +92,7 @@ class ResourceController extends Controller
 
             $query->where(function ($q) use ($user, $purchasedIds) {
                 $q->whereIn('id', $purchasedIds)
-                    ->orWhere('mentor_id', $user->id);
+                    ->orWhere('user_id', $user->id);
             });
         }
 
@@ -127,21 +118,17 @@ class ResourceController extends Controller
     }
 
     /**
-     * Détails d'une ressource
+     * @OA\Get(
+     * path="/api/v1/resources/{id}",
+     * summary= "Détails d'une ressource pédagogique",
+     * tags={"Ressources"},
+     *
+     * @OA\Parameter(name="id", in="path", required= true, @OA\Schema(type="integer")),
+     *
+     * @OA\Response(response= 200, description="Détails de la ressource"),
+     * @OA\Response(response= 404, description="Ressource non trouvée"),
+     * )
      */
-    #[OA\Get(
-        path: '/api/v1/resources/{id}',
-        summary: "Détails d'une ressource pédagogique",
-        tags: ['Ressources'],
-        security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Détails de la ressource'),
-            new OA\Response(response: 404, description: 'Ressource non trouvée'),
-        ]
-    )]
     public function show(int $id, Request $request): JsonResponse
     {
         $resource = Resource::where('id', $id)
@@ -170,22 +157,18 @@ class ResourceController extends Controller
     }
 
     /**
-     * Débloque une ressource premium
+     * @OA\Post(
+     * path="/api/v1/resources/{id}/unlock",
+     * summary="Débloquer une ressource premium",
+     * tags={"Ressources"},
+     *
+     * @OA\Parameter(name="id", in="path", required= true, @OA\Schema(type="integer")),
+     *
+     * @OA\Response(response= 200, description="Ressource débloquée"),
+     * @OA\Response(response= 400, description="Crédits insuffisants"),
+     * @OA\Response(response= 404, description="Ressource non trouvée"),
+     * )
      */
-    #[OA\Post(
-        path: '/api/v1/resources/{id}/unlock',
-        summary: 'Débloquer une ressource premium',
-        tags: ['Ressources'],
-        security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Ressource débloquée'),
-            new OA\Response(response: 400, description: 'Crédits insuffisants'),
-            new OA\Response(response: 404, description: 'Ressource non trouvée'),
-        ]
-    )]
     public function unlock(int $id): JsonResponse
     {
         $user = Auth::user();
@@ -200,7 +183,7 @@ class ResourceController extends Controller
             ->where('item_id', $resource->id)
             ->exists();
 
-        if ($hasPurchased || $resource->mentor_id === $user->id) {
+        if ($hasPurchased || $resource->user_id === $user->id) {
             return $this->success(null, 'Vous avez déjà accès à cette ressource');
         }
 
@@ -221,9 +204,9 @@ class ResourceController extends Controller
                 'user_id' => $user->id,
                 'item_type' => Resource::class,
                 'item_id' => $resource->id,
-                'price_paid' => $resource->price,
-                'credits_spent' => $unlockCost,
-                'payment_status' => 'completed',
+                'original_price_fcfa' => $resource->price,
+                'cost_credits' => $unlockCost,
+                'purchased_at' => now(),
             ]);
 
             // Déduire les crédits
@@ -236,7 +219,7 @@ class ResourceController extends Controller
             );
 
             // Créditer le mentor si applicable
-            if ($resource->mentor_id) {
+            if ($resource->user_id) {
                 // Commission Brillio : 20% par défaut
                 $commission = 0.20;
                 $mentorEarningsFcfa = $resource->price * (1 - $commission);
@@ -267,7 +250,7 @@ class ResourceController extends Controller
         return $this->success(null, 'Ressource débloquée avec succès');
     }
 
-    private function formatResource(Resource $resource, $user): array
+    protected function formatResource(Resource $resource, $user): array
     {
         $hasAccess = ! $resource->is_premium || Purchase::where('user_id', $user->id)
             ->where('item_type', Resource::class)
@@ -288,7 +271,7 @@ class ResourceController extends Controller
         ];
     }
 
-    private function formatResourceDetail(Resource $resource, $user): array
+    protected function formatResourceDetail(Resource $resource, $user): array
     {
         $hasAccess = ! $resource->is_premium || Purchase::where('user_id', $user->id)
             ->where('item_type', Resource::class)

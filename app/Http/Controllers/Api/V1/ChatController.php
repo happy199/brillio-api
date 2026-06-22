@@ -9,9 +9,10 @@ use App\Services\BrillioIAService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Annotations as OA;
 
 /**
- * Controller pour le chatbot IA
+ * Controller pour le chatbot d'orientation via API (V1)
  */
 class ChatController extends Controller
 {
@@ -21,20 +22,16 @@ class ChatController extends Controller
     ) {}
 
     /**
-     * Liste les conversations de l'utilisateur
+     * @OA\Get(
+     * path="/api/v1/chat/conversations",
+     * summary= "Liste les conversations de l'utilisateur",
+     * tags={"Chat"},
+     *
+     * @OA\Parameter(name="limit", in="query", @OA\Schema(type="integer")),
+     *
+     * @OA\Response(response= 200, description="Liste des conversations"),
+     * )
      */
-    #[OA\Get(
-        path: '/api/v1/chat/conversations',
-        summary: "Liste les conversations de l'utilisateur",
-        tags: ['Chat'],
-        security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'limit', in: 'query', schema: new OA\Schema(type: 'integer')),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Liste des conversations'),
-        ]
-    )]
     public function conversations(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -126,27 +123,25 @@ class ChatController extends Controller
     }
 
     /**
-     * Envoie un message et reçoit la réponse de l'IA
+     * @OA\Post(
+     * path="/api/v1/chat/send",
+     * summary= "Envoie un message à l'IA ou à un humain",
+     * tags={"Chat"},
+     *
+     * @OA\RequestBody(
+     * required= true,
+     *
+     * @OA\JsonContent(
+     * required={"message"},
+     *
+     * @OA\Property(property="message", type="string", example= "Bonjour, j'ai besoin d'aide pour mon orientation."),
+     * @OA\Property(property="conversation_id", type="integer", example= 1),
+     * )
+     * ),
+     *
+     * @OA\Response(response= 200, description= "Réponse du chatbot ou confirmation d'envoi"),
+     * )
      */
-    #[OA\Post(
-        path: '/api/v1/chat/send',
-        summary: "Envoie un message à l'IA ou à un humain",
-        tags: ['Chat'],
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['message'],
-                properties: [
-                    new OA\Property(property: 'message', type: 'string', example: "Bonjour, j'ai besoin d'aide pour mon orientation."),
-                    new OA\Property(property: 'conversation_id', type: 'integer', example: 1),
-                ]
-            )
-        ),
-        responses: [
-            new OA\Response(response: 200, description: "Réponse du chatbot ou confirmation d'envoi"),
-        ]
-    )]
     public function send(SendMessageRequest $request): JsonResponse
     {
         $user = $request->user();

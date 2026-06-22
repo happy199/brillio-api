@@ -1,54 +1,63 @@
 <?php
 
+$appModelsPath = 'app/Models';
+$controllerPath = 'app/Http/Controllers/Controller.php';
+
+$makeDocConfig = function ($title, $apiRoute, $docsRoute, $oauthCallback, $jsonFile, $yamlFile, $controllerDir) use ($appModelsPath, $controllerPath) {
+    return [
+        'api' => [
+            'title' => $title,
+        ],
+        'routes' => [
+            'api' => $apiRoute,
+            'docs' => $docsRoute,
+            'oauth2_callback' => $oauthCallback,
+        ],
+        'paths' => [
+            'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
+            'swagger_ui_assets_path' => env('L5_SWAGGER_UI_ASSETS_PATH', 'vendor/swagger-api/swagger-ui/dist/'),
+            'docs_json' => $jsonFile,
+            'docs_yaml' => $yamlFile,
+            'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
+            'annotations' => [
+                base_path($controllerDir),
+                base_path($appModelsPath),
+                base_path($controllerPath),
+            ],
+        ],
+    ];
+};
+
 return [
     'default' => 'default',
     'documentations' => [
-        'default' => [
-            'api' => [
-                'title' => 'L5 Swagger UI',
-            ],
-
-            'routes' => [
-                /*
-                 * Route for accessing api documentation interface
-                 */
-                'api' => 'api/documentation',
-            ],
-            'paths' => [
-                /*
-                 * Edit to include full URL in ui for assets
-                 */
-                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
-
-                /*
-                 * Edit to set path where swagger ui assets should be stored
-                 */
-                'swagger_ui_assets_path' => env('L5_SWAGGER_UI_ASSETS_PATH', 'vendor/swagger-api/swagger-ui/dist/'),
-
-                /*
-                 * File name of the generated json documentation file
-                 */
-                'docs_json' => 'api-docs.json',
-
-                /*
-                 * File name of the generated YAML documentation file
-                 */
-                'docs_yaml' => 'api-docs.yaml',
-
-                /*
-                 * Set this to `json` or `yaml` to determine which documentation file to use in UI
-                 */
-                'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
-
-                /*
-                 * Absolute paths to directory containing the swagger annotations are stored.
-                 */
-                'annotations' => [
-                    base_path('app'),
-                    base_path('app/Http/Controllers'),
-                ],
-            ],
-        ],
+        'default' => $makeDocConfig(
+            'Brillio API Documentation',
+            'api/documentation',
+            'docs/default',
+            'api/oauth2-callback/default',
+            'api-docs.json',
+            'api-docs.yaml',
+            'app/Http/Controllers/Api/V2'
+        ),
+        'v1' => $makeDocConfig(
+            'Brillio API V1',
+            'api/v1/documentation',
+            'docs/v1',
+            'api/oauth2-callback/v1',
+            'v1-api-docs.json',
+            'v1-api-docs.yaml',
+            'app/Http/Controllers/Api/V1'
+        ),
+        'v2' => $makeDocConfig(
+            'Brillio API V2',
+            'api/v2/documentation',
+            'docs/v2',
+            'api/oauth2-callback/v2',
+            'v2-api-docs.json',
+            'v2-api-docs.yaml',
+            'app/Http/Controllers/Api/V2'
+        ),
     ],
     'defaults' => [
         'routes' => [
@@ -66,9 +75,9 @@ return [
              * Middleware allows to prevent unexpected access to API documentation
              */
             'middleware' => [
-                'api' => [],
+                'api' => ['web', 'swagger_secure'],
                 'asset' => [],
-                'docs' => [],
+                'docs' => ['web', 'swagger_secure'],
                 'oauth2_callback' => [],
             ],
 
@@ -126,7 +135,10 @@ return [
              *
              * @see \OpenApi\scan
              */
-            'analyser' => null,
+            'analyser' => new \OpenApi\Analysers\ReflectionAnalyser([
+                new \OpenApi\Analysers\AttributeAnnotationFactory,
+                new \OpenApi\Analysers\DocBlockAnnotationFactory,
+            ]),
 
             /**
              * analysis: defaults to a new \OpenApi\Analysis .

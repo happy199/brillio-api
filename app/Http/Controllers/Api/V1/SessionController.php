@@ -12,10 +12,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use OpenApi\Attributes as OA;
+use OpenApi\Annotations as OA;
 
 /**
- * Controller pour la gestion des séances de mentorat via API
+ * Controller pour la gestion des séances de mentorat via API (V1)
  */
 class SessionController extends Controller
 {
@@ -25,21 +25,17 @@ class SessionController extends Controller
     ) {}
 
     /**
-     * Liste les séances de l'utilisateur
+     * @OA\Get(
+     * path="/api/v1/sessions",
+     * summary="Liste les séances de mentorat",
+     * tags={"Séances"},
+     *
+     * @OA\Parameter(name="type", in="query", @OA\Schema(type="string", enum={"upcoming", "past"})),
+     * @OA\Parameter(name="status", in="query", @OA\Schema(type="string")),
+     *
+     * @OA\Response(response= 200, description="Liste des séances"),
+     * )
      */
-    #[OA\Get(
-        path: '/api/v1/sessions',
-        summary: 'Liste les séances de mentorat',
-        tags: ['Séances'],
-        security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'type', in: 'query', schema: new OA\Schema(type: 'string', enum: ['upcoming', 'past'])),
-            new OA\Parameter(name: 'status', in: 'query', schema: new OA\Schema(type: 'string')),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Liste des séances'),
-        ]
-    )]
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -74,29 +70,27 @@ class SessionController extends Controller
     }
 
     /**
-     * Réserver une nouvelle séance
+     * @OA\Post(
+     * path="/api/v1/sessions",
+     * summary="Réserver une séance de mentorat",
+     * tags={"Séances"},
+     *
+     * @OA\RequestBody(
+     * required= true,
+     *
+     * @OA\JsonContent(
+     * required={"mentor_id", "scheduled_at", "title"},
+     *
+     * @OA\Property(property="mentor_id", type="integer", example= 1),
+     * @OA\Property(property="scheduled_at", type="string", format="date-time"),
+     * @OA\Property(property="title", type="string", example= "Session d'orientation"),
+     * @OA\Property(property="duration_minutes", type="integer", example= 60),
+     * )
+     * ),
+     *
+     * @OA\Response(response= 201, description="Séance réservée"),
+     * )
      */
-    #[OA\Post(
-        path: '/api/v1/sessions',
-        summary: 'Réserver une séance de mentorat',
-        tags: ['Séances'],
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['mentor_id', 'scheduled_at', 'title'],
-                properties: [
-                    new OA\Property(property: 'mentor_id', type: 'integer', example: 1),
-                    new OA\Property(property: 'scheduled_at', type: 'string', format: 'date-time'),
-                    new OA\Property(property: 'title', type: 'string', example: "Session d'orientation"),
-                    new OA\Property(property: 'duration_minutes', type: 'integer', example: 60),
-                ]
-            )
-        ),
-        responses: [
-            new OA\Response(response: 201, description: 'Séance réservée'),
-        ]
-    )]
     public function store(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -232,7 +226,7 @@ class SessionController extends Controller
         }
     }
 
-    private function formatSession(MentoringSession $session): array
+    protected function formatSession(MentoringSession $session): array
     {
         return [
             'id' => $session->id,
