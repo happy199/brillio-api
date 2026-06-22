@@ -140,6 +140,11 @@ class MessagesController extends Controller
             return $this->error('Mentorship not accepted', 403);
         }
 
+        // Limiter la taille totale du payload pour éviter les attaques DoS (Règle SonarQube S5693)
+        if ($request->header('Content-Length') > 15 * 1024 * 1024) { // 15Mo max
+            return $this->error('Taille de la requête trop volumineuse (max 15Mo).', 413);
+        }
+
         $request->validate([
             'body' => 'nullable|string|max:5000',
             'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,zip,txt',

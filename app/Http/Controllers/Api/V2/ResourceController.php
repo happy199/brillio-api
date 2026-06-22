@@ -339,6 +339,11 @@ class ResourceController extends Controller
     {
         $mentor = $request->user();
 
+        // Limiter la taille totale du payload pour éviter les attaques DoS (Règle SonarQube S5693)
+        if ($request->header('Content-Length') > 60 * 1024 * 1024) { // 60Mo max
+            return $this->error('Taille de la requête trop volumineuse (max 60Mo).', 413);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
