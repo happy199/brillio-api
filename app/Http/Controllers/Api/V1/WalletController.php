@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Coupon;
 use App\Models\CreditPack;
 use App\Services\WalletService;
+use App\Traits\HasCreditValidation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,9 +17,13 @@ use OpenApi\Annotations as OA;
  */
 class WalletController extends Controller
 {
+    use HasCreditValidation;
+
     public function __construct(
-        private WalletService $walletService
-    ) {}
+        WalletService $walletService
+    ) {
+        $this->walletService = $walletService;
+    }
 
     /**
      * @OA\Get(
