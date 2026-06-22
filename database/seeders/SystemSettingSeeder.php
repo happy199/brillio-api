@@ -97,26 +97,23 @@ class SystemSettingSeeder extends Seeder
                 'description' => 'Commission Retrait Mentor (%)',
             ],
 
-            // Crédits offerts mensuellement par plan
-            [
-                'key' => 'credit_bonus_pro',
-                'value' => '25',
-                'type' => 'integer',
-                'description' => 'Crédits offerts mensuellement aux organisations Pro',
-            ],
-            [
-                'key' => 'credit_bonus_enterprise',
-                'value' => '50',
-                'type' => 'integer',
-                'description' => 'Crédits offerts mensuellement aux organisations Enterprise',
-            ],
-            [
-                'key' => 'credit_bonus_establishment',
-                'value' => '50',
-                'type' => 'integer',
-                'description' => 'Crédits offerts mensuellement aux organisations Établissement',
-            ],
         ];
+
+        // Génération dynamique pour éviter la duplication de code détectée par SonarQube
+        $bonusPlans = [
+            'pro' => ['val' => '25', 'label' => 'Pro'],
+            'enterprise' => ['val' => '50', 'label' => 'Enterprise'],
+            'establishment' => ['val' => '50', 'label' => 'Établissement'],
+        ];
+
+        foreach ($bonusPlans as $key => $data) {
+            $settings[] = [
+                'key' => "credit_bonus_{$key}",
+                'value' => $data['val'],
+                'type' => 'integer',
+                'description' => "Crédits offerts mensuellement aux organisations {$data['label']}",
+            ];
+        }
 
         foreach ($settings as $setting) {
             SystemSetting::updateOrCreate(
