@@ -114,11 +114,11 @@
                                     },
                                     "user_type": {
                                         "type": "string",
+                                        "example": "jeune",
                                         "enum": [
                                             "jeune",
                                             "mentor"
-                                        ],
-                                        "example": "jeune"
+                                        ]
                                     },
                                     "phone": {
                                         "type": "string",
