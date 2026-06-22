@@ -197,7 +197,7 @@ class ResourceController extends Controller
         }
 
         if ($user->credits_balance < $unlockCost) {
-            return $this->error("Solde insuffisant. Cette ressource coûte {$unlockCost} crédits.", 400);
+            return $this->insufficientCreditsError($unlockCost);
         }
 
         DB::transaction(function () use ($user, $resource, $unlockCost) {
