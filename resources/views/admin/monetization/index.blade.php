@@ -221,9 +221,9 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Pro</label>
+                                <label for="credit_bonus_pro" class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Pro</label>
                                 <div class="relative">
-                                    <input type="number" name="credit_bonus_pro" value="{{ $creditBonusPro }}"
+                                    <input type="number" name="credit_bonus_pro" id="credit_bonus_pro" value="{{ $creditBonusPro }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12"
                                         min="0">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
@@ -233,9 +233,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Entreprise</label>
+                                <label for="credit_bonus_enterprise" class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Entreprise</label>
                                 <div class="relative">
-                                    <input type="number" name="credit_bonus_enterprise" value="{{ $creditBonusEnterprise }}"
+                                    <input type="number" name="credit_bonus_enterprise" id="credit_bonus_enterprise" value="{{ $creditBonusEnterprise }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12"
                                         min="0">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
@@ -245,9 +245,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Établissement</label>
+                                <label for="credit_bonus_establishment" class="block text-sm font-semibold text-gray-700 mb-2">Crédits offerts - Plan Établissement</label>
                                 <div class="relative">
-                                    <input type="number" name="credit_bonus_establishment" value="{{ $creditBonusEstablishment }}"
+                                    <input type="number" name="credit_bonus_establishment" id="credit_bonus_establishment" value="{{ $creditBonusEstablishment }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12"
                                         min="0">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">

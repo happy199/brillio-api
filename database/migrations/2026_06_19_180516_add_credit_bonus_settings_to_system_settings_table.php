@@ -10,33 +10,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add credit bonus settings for each plan
-        DB::table('system_settings')->insert([
-            [
-                'key' => 'credit_bonus_pro',
-                'value' => '25',
+        $plans = [
+            'pro' => ['val' => '25', 'label' => 'Pro'],
+            'enterprise' => ['val' => '50', 'label' => 'Enterprise'],
+            'establishment' => ['val' => '50', 'label' => 'Établissement'],
+        ];
+
+        $payload = [];
+        foreach ($plans as $key => $data) {
+            $payload[] = [
+                'key' => "credit_bonus_{$key}",
+                'value' => $data['val'],
                 'type' => 'integer',
-                'description' => 'Crédits offerts mensuellement aux organisations Pro',
+                'description' => "Crédits offerts mensuellement aux organisations {$data['label']}",
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-            [
-                'key' => 'credit_bonus_enterprise',
-                'value' => '50',
-                'type' => 'integer',
-                'description' => 'Crédits offerts mensuellement aux organisations Enterprise',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'key' => 'credit_bonus_establishment',
-                'value' => '50',
-                'type' => 'integer',
-                'description' => 'Crédits offerts mensuellement aux organisations Établissement',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+            ];
+        }
+
+        DB::table('system_settings')->insert($payload);
     }
 
     /**
