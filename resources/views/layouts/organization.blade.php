@@ -92,7 +92,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="{{ route('organization.dashboard') }}" class="flex items-center">
-                        @if($org && $org->isEnterprise() && $org->logo_url)
+                        @if($org && $org->logo_url)
                         <img src="{{ $org->logo_url }}" alt="{{ $org->name }}"
                             class="h-10 w-auto max-w-[150px] object-contain">
                         @else

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Bienvenue sur Brillio</title>
+    <title>Bienvenue sur {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -335,7 +335,7 @@
 
         <!-- Step 4: Objectifs -->
         <div x-show="currentStep === 3" x-transition class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-2">Vos objectifs sur Brillio</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">Vos objectifs sur {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}</h2>
             <p class="text-gray-500 text-sm mb-4">Qu'esperez-vous trouver ici ? (max 3)</p>
             <div class="mb-4 p-2 bg-primary-50 border border-primary-200 rounded-xl">
                 <p class="text-sm text-primary-700 text-center">
@@ -395,7 +395,7 @@
 
         <!-- Step 5: Comment nous avez-vous trouve -->
         <div x-show="currentStep === 4" x-transition class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-2">Comment avez-vous decouvert Brillio ?</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">Comment avez-vous decouvert {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} ?</h2>
             <p class="text-gray-500 text-sm mb-6">Cela nous aide a mieux comprendre notre communaute</p>
 
             <div class="grid grid-cols-2 gap-3">
@@ -415,7 +415,7 @@
             <div x-show="formData.how_found_us === 'other'" x-transition class="mt-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Comment nous avez-vous découvert ?</label>
                 <input type="text" name="how_found_us_other" x-model="formData.how_found_us_other"
-                    placeholder="Précisez comment vous avez découvert Brillio"
+                    placeholder="Précisez comment vous avez découvert {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}"
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
             </div>
 

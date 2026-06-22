@@ -14,7 +14,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="font-bold text-gray-900">Assistant Brillio</h2>
+                    <h2 class="font-bold text-gray-900">Assistant {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}</h2>
                     <p class="text-xs text-green-500 flex items-center gap-1">
                         <span class="w-2 h-2 bg-green-500 rounded-full"></span>
                         En ligne
@@ -207,7 +207,7 @@
                                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Salut ! Je suis ton assistant Brillio</h3>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Salut ! Je suis ton assistant {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}</h3>
                     <p class="text-gray-600 max-w-md mx-auto mb-8">
                         Je suis la pour t'aider dans ton orientation professionnelle. Pose-moi tes questions sur les
                         metiers, les formations ou ton avenir !
@@ -272,7 +272,7 @@
                                             <div class="flex items-center gap-2 mb-1.5">
                                                 <span class="text-[10px] font-bold uppercase tracking-wider" 
                                                     :class="message.is_from_human ? 'text-amber-700' : 'text-primary-700'" 
-                                                    x-text="message.is_from_human ? (message.sender_name || 'Coach Partner') : 'Assistant Brillio'"></span>
+                                                    x-text="message.is_from_human ? (message.sender_name || 'Coach Partner') : 'Assistant {{ isset($current_organization) ? str_replace("'", "\'", $current_organization->name) : 'Brillio' }}'"></span>
                                                 <template x-if="message.is_from_human">
                                                     <span class="bg-amber-100 text-amber-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-amber-200">CONSEILLER PÉDAGOGIQUE</span>
                                                 </template>
@@ -365,7 +365,7 @@
                                 'content' => $m->content,
                                 'is_from_human' => (bool)$m->is_from_human,
                                 'is_system_message' => (bool)$m->is_system_message,
-                                'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant Brillio'
+                                'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant ' . (isset($current_organization) ? $current_organization->name : 'Brillio')
                             ])->toArray()) !!};
                         @endif
 
@@ -419,7 +419,7 @@
                                          role: 'assistant', 
                                          content: data.message,
                                          is_from_human: data.is_from_human || false,
-                                         sender_name: data.sender_name || 'Assistant Brillio'
+                                         sender_name: data.sender_name || 'Assistant {{ isset($current_organization) ? str_replace("'", "\'", $current_organization->name) : 'Brillio' }}'
                                      });
                                  }
                                 if (data.conversation_id) {

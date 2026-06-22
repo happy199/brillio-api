@@ -206,4 +206,33 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Votre profil est maintenant visible par les mentors !');
     }
+
+    /**
+     * Rompre le lien avec l'organisation
+     */
+    public function unlinkOrganization()
+    {
+        $user = auth()->user();
+        $org = $user->sponsoringOrganization ?? $user->organizations()->first();
+
+        if (! $org) {
+            return back()->with('error', 'Aucune organisation liée.');
+        }
+
+        // Email to Organization
+        $orgEmail = $org->email ?? ($org->owner ? $org->owner->email : null);
+        if ($orgEmail) {
+            \Illuminate\Support\Facades\Mail::to($orgEmail)->send(new \App\Mail\OrganizationUnlinkedNotificationMail($user, 'Jeune'));
+        }
+
+        // Email to User
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\UserUnlinkedConfirmationMail($org));
+
+        // Detach
+        $user->sponsored_by_organization_id = null;
+        $user->save();
+        $user->organizations()->detach($org->id);
+
+        return back()->with('success', 'La relation de mentorat avec l\'organisation a été rompue avec succès.');
+    }
 }

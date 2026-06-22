@@ -72,7 +72,7 @@
             <div class="flex flex-col md:flex-row md:items-center gap-4 flex-1 justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Mon Portefeuille</h1>
-                    <p class="text-gray-600">Gérez vos crédits Brillio pour accéder aux contenus premium.</p>
+                    <p class="text-gray-600">Gérez vos crédits {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} pour accéder aux contenus premium.</p>
                 </div>
                 <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
                     <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>

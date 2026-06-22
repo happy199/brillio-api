@@ -750,4 +750,33 @@ class MentorDashboardController extends Controller
         // On arrondit au supérieur si on est proche (ex: 4.8 -> 5) ou à l'entier
         return (int) round($years);
     }
+
+    /**
+     * Rompre le lien avec l'organisation
+     */
+    public function unlinkOrganization()
+    {
+        $user = auth()->user();
+        $org = $user->organization ?? $user->organizations()->first();
+
+        if (! $org) {
+            return back()->with('error', 'Aucune organisation liée.');
+        }
+
+        // Email to Organization
+        $orgEmail = $org->email ?? ($org->owner ? $org->owner->email : null);
+        if ($orgEmail) {
+            \Illuminate\Support\Facades\Mail::to($orgEmail)->send(new \App\Mail\OrganizationUnlinkedNotificationMail($user, 'Mentor'));
+        }
+
+        // Email to User
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\UserUnlinkedConfirmationMail($org));
+
+        // Detach
+        $user->organization_id = null;
+        $user->save();
+        $user->organizations()->detach($org->id);
+
+        return back()->with('success', 'La relation de mentorat avec l\'organisation a été rompue avec succès.');
+    }
 }
