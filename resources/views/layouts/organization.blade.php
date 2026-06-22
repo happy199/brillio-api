@@ -99,10 +99,9 @@
                         <div class="flex items-center space-x-3">
                             <div
                                 class="w-8 h-8 bg-gradient-to-br from-organization-400 to-organization-600 rounded-lg flex items-center justify-center">
-                                <span class="text-white font-bold text-sm">B</span>
+                                <span class="text-white font-bold text-sm">{{ substr($org ? $org->name : 'Brillio', 0, 1) }}</span>
                             </div>
-                            <span class="text-xl font-bold text-gray-900">Brillio<span
-                                    class="text-organization-500">Partner</span></span>
+                            <span class="text-xl font-bold text-gray-900">{{ $org ? $org->name : 'BrillioPartner' }}</span>
                         </div>
                         @endif
                     </a>
