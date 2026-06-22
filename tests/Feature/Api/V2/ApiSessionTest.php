@@ -12,7 +12,7 @@ class ApiSessionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_mentor_can_accept_session()
+    private function setupSession(string $status = 'pending', $scheduledAt = null): array
     {
         $mentor = User::factory()->mentor()->create();
         $mentor->mentorProfile()->create([
@@ -32,10 +32,17 @@ class ApiSessionTest extends TestCase
 
         $session = MentoringSession::factory()->create([
             'mentor_id' => $mentor->id,
-            'status' => 'pending',
-            'scheduled_at' => now()->addDays(1),
+            'status' => $status,
+            'scheduled_at' => $scheduledAt ?? now()->addDays(1),
         ]);
         $session->mentees()->attach($jeune->id);
+
+        return [$mentor, $jeune, $session];
+    }
+
+    public function test_mentor_can_accept_session()
+    {
+        [$mentor, $jeune, $session] = $this->setupSession('pending', now()->addDays(1));
 
         $response = $this->actingAs($mentor)->postJson("/api/v2/sessions/{$session->id}/accept");
 
@@ -50,28 +57,7 @@ class ApiSessionTest extends TestCase
 
     public function test_mentor_can_report_session()
     {
-        $mentor = User::factory()->mentor()->create();
-        $mentor->mentorProfile()->create([
-            'is_published' => true,
-            'is_validated' => true,
-            'bio' => 'Mentor bio',
-            'current_position' => 'Senior Developer',
-            'specialization' => 'tech',
-        ]);
-        $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
-
-        Mentorship::factory()->create([
-            'mentor_id' => $mentor->id,
-            'mentee_id' => $jeune->id,
-            'status' => 'accepted',
-        ]);
-
-        $session = MentoringSession::factory()->create([
-            'mentor_id' => $mentor->id,
-            'status' => 'confirmed',
-            'scheduled_at' => now()->subDays(1),
-        ]);
-        $session->mentees()->attach($jeune->id);
+        [$mentor, $jeune, $session] = $this->setupSession('confirmed', now()->subDays(1));
 
         $response = $this->actingAs($mentor)->putJson("/api/v2/sessions/{$session->id}/report", [
             'report_content' => ['progress' => 'Très bonne séance, le jeune est motivé.'],

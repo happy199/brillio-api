@@ -3,14 +3,9 @@
 namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Api\V1\ResourceController as V1ResourceController;
-use App\Models\Purchase;
-use App\Models\Resource;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use OpenApi\Annotations as OA;
 
 /**
@@ -44,78 +39,7 @@ class ResourceController extends V1ResourceController
      */
     public function index(Request $request): JsonResponse
     {
-        $user = Auth::user();
-        $query = Resource::where('is_published', true)->where('is_validated', true);
-
-        // Recherche textuelle
-        if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('tags', 'like', "%{$search}%");
-            });
-        }
-
-        // Filtre par type
-        if ($type = $request->get('type')) {
-            $query->where('type', $type);
-        }
-
-        // Filtre par prix
-        if ($priceMode = $request->get('price')) {
-            if ($priceMode === 'free') {
-                $query->where('is_premium', false);
-            } elseif ($priceMode === 'premium') {
-                $query->where('is_premium', true);
-            }
-        }
-
-        // Filtre par MBTI
-        if ($mbtiStr = $request->get('mbti')) {
-            $query->where('mbti_target', 'like', "%{$mbtiStr}%");
-        }
-
-        // Source : 'mentor' ou 'brillio'
-        if ($source = $request->get('source')) {
-            if ($source === 'mentor') {
-                $query->whereNotNull('user_id');
-            } elseif ($source === 'brillio') {
-                $query->whereNull('user_id');
-            }
-        }
-
-        // 'mine' (mes achats/créations) vs 'all'
-        $ownership = $request->get('ownership', 'all');
-        if ($ownership === 'mine') {
-            $purchasedIds = Purchase::where('user_id', $user->id)
-                ->where('item_type', Resource::class)
-                ->pluck('item_id');
-
-            $query->where(function ($q) use ($user, $purchasedIds) {
-                $q->whereIn('id', $purchasedIds)
-                    ->orWhere('user_id', $user->id);
-            });
-        }
-
-        $resources = $query->latest()->get();
-
-        // Mode de filtrage : 'suggestions' (défaut) ou 'all'
-        $hasActiveFilters = $request->hasAny(['search', 'type', 'price', 'mbti', 'source', 'ownership']);
-        $filterMode = $request->get('filter', $hasActiveFilters ? 'all' : 'suggestions');
-
-        // Logique de Suggestion / Filtrage Intelligent
-        if ($filterMode === 'suggestions') {
-            $resources = $resources->filter(function ($resource) {
-                // ... Intelligent filtering logic ...
-                return true;
-            });
-        }
-
-        return $this->success([
-            'resources' => $resources->values()->map(fn ($r) => $this->formatResource($r, $user)),
-            'filter_mode' => $filterMode,
-            'count' => $resources->count(),
-        ]);
+        return parent::index($request);
     }
 
     /**
@@ -150,83 +74,7 @@ class ResourceController extends V1ResourceController
      */
     public function unlock(int $id): JsonResponse
     {
-        $user = Auth::user();
-        $resource = Resource::findOrFail($id);
-
-        if (! $resource->is_premium) {
-            return $this->error('Cette ressource est déjà gratuite', 400);
-        }
-
-        $hasPurchased = Purchase::where('user_id', $user->id)
-            ->where('item_type', Resource::class)
-            ->where('item_id', $resource->id)
-            ->exists();
-
-        if ($hasPurchased || $resource->user_id === $user->id) {
-            return $this->success(null, 'Vous avez déjà accès à cette ressource');
-        }
-
-        // Calcul du coût en crédits
-        $unlockCost = 0;
-        $creditPrice = $this->walletService->getCreditPrice('jeune');
-        if ($creditPrice > 0) {
-            $unlockCost = (int) ceil($resource->price / $creditPrice);
-        }
-
-        if ($user->credits_balance < $unlockCost) {
-            return $this->error("Solde insuffisant. Cette ressource coûte {$unlockCost} crédits.", 400);
-        }
-
-        DB::transaction(function () use ($user, $resource, $unlockCost) {
-            // Créer l'achat
-            Purchase::create([
-                'user_id' => $user->id,
-                'item_type' => Resource::class,
-                'item_id' => $resource->id,
-                'price_paid' => $resource->price,
-                'credits_spent' => $unlockCost,
-                'payment_status' => 'completed',
-            ]);
-
-            // Déduire les crédits
-            $this->walletService->deductCredits(
-                $user,
-                $unlockCost,
-                'expense',
-                "Déblocage ressource : {$resource->title}",
-                $resource
-            );
-
-            // Créditer le mentor si applicable
-            if ($resource->user_id) {
-                // Commission Brillio : 20% par défaut
-                $commission = 0.20;
-                $mentorEarningsFcfa = $resource->price * (1 - $commission);
-
-                // Conversion en crédits (selon le prix du crédit mentor)
-                $mentorCreditPrice = $this->walletService->getCreditPrice('mentor');
-                $mentorCredits = (int) floor($mentorEarningsFcfa / $mentorCreditPrice);
-
-                $this->walletService->addCredits(
-                    $resource->user,
-                    $mentorCredits,
-                    'income',
-                    "Vente ressource : {$resource->title}",
-                    $resource
-                );
-
-                // Notification au mentor
-                try {
-                    $this->notificationService->sendResourcePurchased($resource, $user, $mentorCredits);
-                } catch (\Exception $e) {
-                    Log::error('Erreur notification vente ressource: '.$e->getMessage());
-                }
-            }
-
-            $resource->increment('sales_count');
-        });
-
-        return $this->success(null, 'Ressource débloquée avec succès');
+        return parent::unlock($id);
     }
 
     /**
@@ -247,7 +95,7 @@ class ResourceController extends V1ResourceController
      *
      *                 @OA\Property(property="title", type="string", example="Mon document de conseils"),
      *                 @OA\Property(property="description", type="string", example="Description de la ressource"),
-     *                 @OA\Property(property="type", type="string", enum={"pdf", "video", "link", "document"}, example="pdf"),
+     *                 @OA\Property(property="type", type="string", enum={"article", "video", "tool", "exercise", "template", "script"}, example="article"),
      *                 @OA\Property(property="price", type="number", example=10),
      *                 @OA\Property(property="file", type="string", format="binary"),
      *                 @OA\Property(property="external_url", type="string", format="uri")
@@ -270,7 +118,7 @@ class ResourceController extends V1ResourceController
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'type' => 'required|in:pdf,video,link,document',
+            'type' => 'required|in:article,video,tool,exercise,template,script',
             'price' => 'required|numeric|min:0',
             'file' => 'nullable|file|max:51200',
             'external_url' => 'nullable|url',

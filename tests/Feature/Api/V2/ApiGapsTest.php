@@ -285,4 +285,143 @@ class ApiGapsTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonPath('success', true);
     }
+
+    public function test_api_resources_index()
+    {
+        $user = User::factory()->create(['user_type' => 'jeune']);
+        $mentor = User::factory()->create(['user_type' => 'mentor']);
+        $resource = \App\Models\Resource::create([
+            'user_id' => $mentor->id,
+            'title' => 'Test Resource',
+            'description' => 'Test Description',
+            'type' => 'article',
+            'price' => 0,
+            'is_premium' => false,
+            'is_published' => true,
+            'is_validated' => true,
+        ]);
+
+        $response = $this->actingAs($user)->getJson('/api/v2/resources');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonFragment(['title' => 'Test Resource']);
+    }
+
+    public function test_api_resources_show()
+    {
+        $user = User::factory()->create(['user_type' => 'jeune']);
+        $mentor = User::factory()->create(['user_type' => 'mentor']);
+        $resource = \App\Models\Resource::create([
+            'user_id' => $mentor->id,
+            'title' => 'Test Resource Show',
+            'description' => 'Test Description Show',
+            'type' => 'article',
+            'price' => 0,
+            'is_premium' => false,
+            'is_published' => true,
+            'is_validated' => true,
+        ]);
+
+        $response = $this->actingAs($user)->getJson("/api/v2/resources/{$resource->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.resource.title', 'Test Resource Show');
+    }
+
+    public function test_api_resources_unlock()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'credits_balance' => 15,
+        ]);
+        $mentor = User::factory()->create(['user_type' => 'mentor']);
+        $resource = \App\Models\Resource::create([
+            'user_id' => $mentor->id,
+            'title' => 'Premium Resource',
+            'description' => 'Premium Description',
+            'type' => 'article',
+            'price' => 500, // 500 FCFA = 5 credits (100 FCFA per credit)
+            'is_premium' => true,
+            'is_published' => true,
+            'is_validated' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson("/api/v2/resources/{$resource->id}/unlock");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+
+        $this->assertEquals(5, $user->fresh()->credits_balance);
+        $this->assertTrue(\App\Models\Purchase::where('user_id', $user->id)->where('item_id', $resource->id)->exists());
+    }
+
+    public function test_api_resources_create_mentor()
+    {
+        $mentor = User::factory()->create(['user_type' => 'mentor']);
+
+        $response = $this->actingAs($mentor)->postJson('/api/v2/resources', [
+            'title' => 'New API Resource',
+            'description' => 'New Description',
+            'type' => 'article',
+            'price' => 0,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.title', 'New API Resource');
+
+        $this->assertDatabaseHas('resources', [
+            'title' => 'New API Resource',
+            'user_id' => $mentor->id,
+        ]);
+    }
+
+    public function test_api_resources_update_mentor()
+    {
+        $mentor = User::factory()->create(['user_type' => 'mentor']);
+        $resource = \App\Models\Resource::create([
+            'user_id' => $mentor->id,
+            'title' => 'Old Title',
+            'description' => 'Old Description',
+            'type' => 'article',
+            'price' => 0,
+            'is_premium' => false,
+            'is_published' => true,
+            'is_validated' => true,
+        ]);
+
+        $response = $this->actingAs($mentor)->putJson("/api/v2/resources/{$resource->id}", [
+            'title' => 'Updated Title',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.title', 'Updated Title');
+
+        $this->assertEquals('Updated Title', $resource->fresh()->title);
+    }
+
+    public function test_api_resources_delete_mentor()
+    {
+        $mentor = User::factory()->create(['user_type' => 'mentor']);
+        $resource = \App\Models\Resource::create([
+            'user_id' => $mentor->id,
+            'title' => 'ToDelete Title',
+            'description' => 'ToDelete Description',
+            'type' => 'article',
+            'price' => 0,
+            'is_premium' => false,
+            'is_published' => true,
+            'is_validated' => true,
+        ]);
+
+        $response = $this->actingAs($mentor)->deleteJson("/api/v2/resources/{$resource->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true);
+
+        $this->assertFalse((bool) $resource->fresh()->is_active);
+    }
 }

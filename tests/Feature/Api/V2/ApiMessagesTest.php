@@ -18,7 +18,7 @@ class ApiMessagesTest extends TestCase
 
     private const MENTOR_BIO = 'Mentor bio';
 
-    public function test_user_can_list_messages()
+    private function setupMentorship(string $status = 'accepted'): array
     {
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
         $mentor = User::factory()->mentor()->create();
@@ -33,8 +33,15 @@ class ApiMessagesTest extends TestCase
         $mentorship = Mentorship::factory()->create([
             'mentor_id' => $mentor->id,
             'mentee_id' => $jeune->id,
-            'status' => 'accepted',
+            'status' => $status,
         ]);
+
+        return [$jeune, $mentor, $mentorship];
+    }
+
+    public function test_user_can_list_messages()
+    {
+        [$jeune, $mentor, $mentorship] = $this->setupMentorship('accepted');
 
         Message::create([
             'mentorship_id' => $mentorship->id,
@@ -50,21 +57,7 @@ class ApiMessagesTest extends TestCase
 
     public function test_user_can_send_message()
     {
-        $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
-        $mentor = User::factory()->mentor()->create();
-        $mentor->mentorProfile()->create([
-            'is_published' => true,
-            'is_validated' => true,
-            'bio' => self::MENTOR_BIO,
-            'current_position' => self::POSITION_SENIOR_DEV,
-            'specialization' => 'tech',
-        ]);
-
-        $mentorship = Mentorship::factory()->create([
-            'mentor_id' => $mentor->id,
-            'mentee_id' => $jeune->id,
-            'status' => 'accepted',
-        ]);
+        [$jeune, $mentor, $mentorship] = $this->setupMentorship('accepted');
 
         $response = $this->actingAs($jeune)->postJson("/api/v2/messages/{$mentorship->id}", [
             'body' => self::TEST_MESSAGE_BODY,
@@ -81,21 +74,7 @@ class ApiMessagesTest extends TestCase
 
     public function test_user_cannot_send_message_if_not_accepted()
     {
-        $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
-        $mentor = User::factory()->mentor()->create();
-        $mentor->mentorProfile()->create([
-            'is_published' => true,
-            'is_validated' => true,
-            'bio' => self::MENTOR_BIO,
-            'current_position' => self::POSITION_SENIOR_DEV,
-            'specialization' => 'tech',
-        ]);
-
-        $mentorship = Mentorship::factory()->create([
-            'mentor_id' => $mentor->id,
-            'mentee_id' => $jeune->id,
-            'status' => 'pending',
-        ]);
+        [$jeune, $mentor, $mentorship] = $this->setupMentorship('pending');
 
         $response = $this->actingAs($jeune)->postJson("/api/v2/messages/{$mentorship->id}", [
             'body' => self::TEST_MESSAGE_BODY,

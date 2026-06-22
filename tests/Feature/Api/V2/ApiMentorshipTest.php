@@ -15,7 +15,7 @@ class ApiMentorshipTest extends TestCase
 
     private const POSITION_SENIOR_DEV = 'Senior Developer';
 
-    public function test_mentor_can_accept_mentorship()
+    private function setupMentorship(string $status = 'pending'): array
     {
         $mentor = User::factory()->mentor()->create();
         $mentor->mentorProfile()->create([
@@ -30,8 +30,15 @@ class ApiMentorshipTest extends TestCase
         $mentorship = Mentorship::factory()->create([
             'mentor_id' => $mentor->id,
             'mentee_id' => $jeune->id,
-            'status' => 'pending',
+            'status' => $status,
         ]);
+
+        return [$mentor, $jeune, $mentorship];
+    }
+
+    public function test_mentor_can_accept_mentorship()
+    {
+        [$mentor, $jeune, $mentorship] = $this->setupMentorship('pending');
 
         $response = $this->actingAs($mentor)->postJson("/api/v2/mentorships/{$mentorship->id}/accept");
 
@@ -46,21 +53,7 @@ class ApiMentorshipTest extends TestCase
 
     public function test_mentor_can_refuse_mentorship()
     {
-        $mentor = User::factory()->mentor()->create();
-        $mentor->mentorProfile()->create([
-            'is_published' => true,
-            'is_validated' => true,
-            'bio' => self::MENTOR_BIO,
-            'current_position' => self::POSITION_SENIOR_DEV,
-            'specialization' => 'tech',
-        ]);
-        $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
-
-        $mentorship = Mentorship::factory()->create([
-            'mentor_id' => $mentor->id,
-            'mentee_id' => $jeune->id,
-            'status' => 'pending',
-        ]);
+        [$mentor, $jeune, $mentorship] = $this->setupMentorship('pending');
 
         $response = $this->actingAs($mentor)->postJson("/api/v2/mentorships/{$mentorship->id}/refuse", [
             'refusal_reason' => 'Pas dispo',
@@ -72,21 +65,7 @@ class ApiMentorshipTest extends TestCase
 
     public function test_user_can_disconnect_mentorship()
     {
-        $mentor = User::factory()->mentor()->create();
-        $mentor->mentorProfile()->create([
-            'is_published' => true,
-            'is_validated' => true,
-            'bio' => self::MENTOR_BIO,
-            'current_position' => self::POSITION_SENIOR_DEV,
-            'specialization' => 'tech',
-        ]);
-        $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
-
-        $mentorship = Mentorship::factory()->create([
-            'mentor_id' => $mentor->id,
-            'mentee_id' => $jeune->id,
-            'status' => 'accepted',
-        ]);
+        [$mentor, $jeune, $mentorship] = $this->setupMentorship('accepted');
 
         $response = $this->actingAs($jeune)->postJson("/api/v2/mentorships/{$mentorship->id}/disconnect", [
             'diction_reason' => 'Objectif atteint',

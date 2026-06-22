@@ -2282,12 +2282,14 @@
                                     "type": {
                                         "type": "string",
                                         "enum": [
-                                            "pdf",
+                                            "article",
                                             "video",
-                                            "link",
-                                            "document"
+                                            "tool",
+                                            "exercise",
+                                            "template",
+                                            "script"
                                         ],
-                                        "example": "pdf"
+                                        "example": "article"
                                     },
                                     "price": {
                                         "type": "number",

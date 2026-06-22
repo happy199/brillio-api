@@ -43,11 +43,6 @@ class ResourceController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $userEducation = $user->education_level;
-        $userSituation = $user->situation;
-        $userInterests = $user->interests ?? [];
-        $userCountry = $user->country;
-        $userMbti = $user->personalityTest?->personality_type;
 
         $query = Resource::where('is_published', true)->where('is_validated', true);
 
@@ -82,9 +77,9 @@ class ResourceController extends Controller
         // Source : 'mentor' ou 'brillio'
         if ($source = $request->get('source')) {
             if ($source === 'mentor') {
-                $query->whereNotNull('mentor_id');
+                $query->whereNotNull('user_id');
             } elseif ($source === 'brillio') {
-                $query->whereNull('mentor_id');
+                $query->whereNull('user_id');
             }
         }
 
@@ -97,7 +92,7 @@ class ResourceController extends Controller
 
             $query->where(function ($q) use ($user, $purchasedIds) {
                 $q->whereIn('id', $purchasedIds)
-                    ->orWhere('mentor_id', $user->id);
+                    ->orWhere('user_id', $user->id);
             });
         }
 
@@ -188,7 +183,7 @@ class ResourceController extends Controller
             ->where('item_id', $resource->id)
             ->exists();
 
-        if ($hasPurchased || $resource->mentor_id === $user->id) {
+        if ($hasPurchased || $resource->user_id === $user->id) {
             return $this->success(null, 'Vous avez déjà accès à cette ressource');
         }
 
@@ -209,9 +204,9 @@ class ResourceController extends Controller
                 'user_id' => $user->id,
                 'item_type' => Resource::class,
                 'item_id' => $resource->id,
-                'price_paid' => $resource->price,
-                'credits_spent' => $unlockCost,
-                'payment_status' => 'completed',
+                'original_price_fcfa' => $resource->price,
+                'cost_credits' => $unlockCost,
+                'purchased_at' => now(),
             ]);
 
             // Déduire les crédits
@@ -224,7 +219,7 @@ class ResourceController extends Controller
             );
 
             // Créditer le mentor si applicable
-            if ($resource->mentor_id) {
+            if ($resource->user_id) {
                 // Commission Brillio : 20% par défaut
                 $commission = 0.20;
                 $mentorEarningsFcfa = $resource->price * (1 - $commission);
