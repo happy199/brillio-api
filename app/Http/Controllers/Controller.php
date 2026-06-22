@@ -12,8 +12,9 @@ use OpenApi\Annotations as OA;
  *     title="Brillio API",
  *     version="1.0.0",
  *     description="API Backend for Brillio Orientation System",
- *
- *     @OA\Contact(email="contact@brillio.africa")
+ *     @OA\Contact(
+ *         email="contact@brillio.africa"
+ *     )
  * )
  *
  * @OA\Server(
