@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 class PersonalityController extends Controller
 {
     public function __construct(
-        private PersonalityService $personalityService
+        protected PersonalityService $personalityService
     ) {}
 
     /**

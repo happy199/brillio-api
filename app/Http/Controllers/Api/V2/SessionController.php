@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V2;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\SessionController as V1SessionController;
 use App\Models\MentoringSession;
 use App\Models\MentorProfile;
 use App\Models\Mentorship;
@@ -10,19 +10,20 @@ use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use OpenApi\Annotations as OA;
 
 /**
  * Controller pour la gestion des séances de mentorat via API
  */
-class SessionController extends Controller
+class SessionController extends V1SessionController
 {
     public function __construct(
         private WalletService $walletService,
         private \App\Services\MentorshipNotificationService $notificationService
-    ) {}
+    ) {
+        parent::__construct($walletService, $notificationService);
+    }
 
     /**
      * @OA\Get(
@@ -190,60 +191,7 @@ class SessionController extends Controller
      */
     public function pay(int $id, Request $request): JsonResponse
     {
-        $user = Auth::user();
-        $session = $user->mentoringSessionsAsMentee()->where('mentoring_sessions.id', $id)->first();
-
-        if (! $session) {
-            return $this->notFound('Session non trouvée');
-        }
-
-        $userPivot = $session->pivot;
-        if (! $session->is_paid || $userPivot->status === 'accepted') {
-            return $this->success(['meeting_id' => $session->meeting_id], 'Déjà payé ou gratuit.');
-        }
-
-        $price = $session->credit_cost;
-        if ($user->credits_balance < $price) {
-            return $this->error("Solde insuffisant ($price crédits requis).", 402);
-        }
-
-        try {
-            DB::transaction(function () use ($user, $session, $price) {
-                $this->walletService->deductCredits($user, $price, 'expense', "Paiement séance (Escrow) : {$session->title}", $session);
-                $session->update(['status' => 'confirmed']);
-                $session->mentees()->updateExistingPivot($user->id, ['status' => 'accepted']);
-
-                $this->notificationService->sendSessionConfirmed($session);
-                $this->notificationService->sendSessionPayment($session, $user, $price);
-                if ($session->mentor) {
-                    $this->notificationService->sendPaymentReceived($session, $session->mentor, $session->price);
-                }
-            });
-
-            return $this->success(['meeting_id' => $session->meeting_id], 'Paiement effectué avec succès.');
-        } catch (\Exception $e) {
-            return $this->error('Erreur lors du paiement : '.$e->getMessage(), 500);
-        }
-    }
-
-    private function formatSession(MentoringSession $session): array
-    {
-        return [
-            'id' => $session->id,
-            'title' => $session->title,
-            'description' => $session->description,
-            'scheduled_at' => $session->scheduled_at->toISOString(),
-            'duration_minutes' => $session->duration_minutes,
-            'status' => $session->status,
-            'is_paid' => $session->is_paid,
-            'credit_cost' => $session->credit_cost,
-            'meeting_id' => $session->meeting_id,
-            'mentor' => [
-                'id' => $session->mentor->id,
-                'name' => $session->mentor->name,
-                'avatar' => $session->mentor->avatar_url,
-            ],
-        ];
+        return parent::pay($id, $request);
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V2;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\ResourceController as V1ResourceController;
 use App\Models\Purchase;
 use App\Models\Resource;
 use App\Services\WalletService;
@@ -16,12 +16,14 @@ use OpenApi\Annotations as OA;
 /**
  * Controller pour la gestion des ressources d'orientation via API
  */
-class ResourceController extends Controller
+class ResourceController extends V1ResourceController
 {
     public function __construct(
         private WalletService $walletService,
         private \App\Services\MentorshipNotificationService $notificationService
-    ) {}
+    ) {
+        parent::__construct($walletService, $notificationService);
+    }
 
     /**
      * @OA\Get(
@@ -130,29 +132,7 @@ class ResourceController extends Controller
      */
     public function show(int $id, Request $request): JsonResponse
     {
-        $resource = Resource::where('id', $id)
-            ->where('is_published', true)
-            ->where('is_validated', true)
-            ->first();
-
-        if (! $resource) {
-            return $this->notFound('Ressource non trouvée');
-        }
-
-        $user = $request->user();
-
-        // Enregistrer la vue
-        $resource->increment('views_count');
-        if (! $resource->is_premium) {
-            \App\Models\ResourceView::firstOrCreate([
-                'user_id' => $user->id,
-                'resource_id' => $resource->id,
-            ]);
-        }
-
-        return $this->success([
-            'resource' => $this->formatResourceDetail($resource, $user),
-        ]);
+        return parent::show($id, $request);
     }
 
     /**
@@ -247,57 +227,6 @@ class ResourceController extends Controller
         });
 
         return $this->success(null, 'Ressource débloquée avec succès');
-    }
-
-    private function formatResource(Resource $resource, $user): array
-    {
-        $hasAccess = ! $resource->is_premium || Purchase::where('user_id', $user->id)
-            ->where('item_type', Resource::class)
-            ->where('item_id', $resource->id)
-            ->exists();
-
-        return [
-            'id' => $resource->id,
-            'title' => $resource->title,
-            'description' => str($resource->description)->limit(150),
-            'type' => $resource->type,
-            'thumbnail_url' => $resource->thumbnail_url,
-            'is_premium' => $resource->is_premium,
-            'price_fcfa' => $resource->price,
-            'has_access' => $hasAccess,
-            'author' => $resource->user->name,
-            'created_at' => $resource->created_at->toISOString(),
-        ];
-    }
-
-    private function formatResourceDetail(Resource $resource, $user): array
-    {
-        $hasAccess = ! $resource->is_premium || Purchase::where('user_id', $user->id)
-            ->where('item_type', Resource::class)
-            ->where('item_id', $resource->id)
-            ->exists();
-
-        $creditPrice = $this->walletService->getCreditPrice('jeune');
-        $costInCredits = (int) ceil($resource->price / $creditPrice);
-
-        return [
-            'id' => $resource->id,
-            'title' => $resource->title,
-            'description' => $resource->description,
-            'content' => $hasAccess ? $resource->content : null,
-            'file_url' => $hasAccess && $resource->file_path ? asset('storage/'.$resource->file_path) : null,
-            'type' => $resource->type,
-            'thumbnail_url' => $resource->thumbnail_url,
-            'is_premium' => $resource->is_premium,
-            'price_fcfa' => $resource->price,
-            'cost_in_credits' => $costInCredits,
-            'has_access' => $hasAccess,
-            'tags' => $resource->tags_array,
-            'author' => [
-                'id' => $resource->user->id,
-                'name' => $resource->user->name,
-            ],
-        ];
     }
 
     /**

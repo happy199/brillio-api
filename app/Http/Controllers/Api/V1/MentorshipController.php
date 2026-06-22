@@ -171,7 +171,7 @@ class MentorshipController extends Controller
         return $this->success(null, 'Demande annulée avec succès.');
     }
 
-    private function formatMentorship(Mentorship $mentorship): array
+    protected function formatMentorship(Mentorship $mentorship): array
     {
         return [
             'id' => $mentorship->id,

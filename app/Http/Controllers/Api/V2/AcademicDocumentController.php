@@ -2,122 +2,69 @@
 
 namespace App\Http\Controllers\Api\V2;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\AcademicDocumentController as V1AcademicDocumentController;
 use App\Http\Requests\Academic\UploadDocumentRequest;
-use App\Models\AcademicDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use OpenApi\Annotations as OA;
 
 /**
  * Controller pour la gestion des documents académiques
  */
-class AcademicDocumentController extends Controller
+class AcademicDocumentController extends V1AcademicDocumentController
 {
     private const MSG_DOCUMENT_NOT_FOUND = 'Document non trouvé';
 
     /**
-     * Taille maximale en bytes (5 Mo par défaut)
-     */
-    private const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-    /**
-     * Types MIME autorisés
-     */
-    private const ALLOWED_MIMES = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
-
-    /**
      * @OA\Get(
-     * path="/api/v2/documents",
-     * summary= "Liste les documents de l'utilisateur",
-     * tags={"Documents"},
+     *     path="/api/v2/documents",
+     *     summary="Liste les documents académiques de l'utilisateur",
+     *     tags={"Documents"},
+     *     security={{"bearerAuth": {}}},
      *
-     * @OA\Response(response= 200, description="Liste des documents"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des documents récupérée avec succès"
+     *     )
      * )
      */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        $documents = $user->academicDocuments()
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return $this->success([
-            'documents' => $documents->map(fn ($doc) => $this->formatDocument($doc)),
-            'total_count' => $documents->count(),
-        ]);
+        return parent::index($request);
     }
 
     /**
      * @OA\Post(
-     * path="/api/v2/documents",
-     * summary="Upload un nouveau document",
-     * tags={"Documents"},
+     *     path="/api/v2/documents",
+     *     summary="Téléverse un nouveau document académique",
+     *     tags={"Documents"},
+     *     security={{"bearerAuth": {}}},
      *
-     * @OA\RequestBody(
-     * required= true,
+     *     @OA\RequestBody(
+     *         required=true,
      *
-     * @OA\MediaType(
-     * mediaType="multipart/form-data",
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
      *
-     * @OA\Schema(
-     * required={"file", "document_type"},
+     *             @OA\Schema(
+     *                 required={"file", "type"},
      *
-     * @OA\Property(property="file", type="string", format="binary"),
-     * @OA\Property(property="document_type", type="string", example="bulletin"),
-     * @OA\Property(property="academic_year", type="string", example="2023-2024"),
-     * @OA\Property(property="grade_level", type="string", example="Terminale"),
-     * )
-     * )
-     * ),
+     *                 @OA\Property(property="file", type="string", format="binary", description="Fichier du document (PDF, JPG, PNG, DOC, DOCX, max 5Mo)"),
+     *                 @OA\Property(property="type", type="string", description="Type de document (ex: diplome, bulletin, cv, autre)")
+     *             )
+     *         )
+     *     ),
      *
-     * @OA\Response(response= 201, description="Document uploadé"),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Document téléversé avec succès"
+     *     ),
+     *     @OA\Response(response=422, description="Erreur de validation ou fichier invalide")
      * )
      */
     public function upload(UploadDocumentRequest $request): JsonResponse
     {
-        $user = $request->user();
-        $validated = $request->validated();
-        $file = $request->file('file');
-
-        // Validation de la taille
-        if ($file->getSize() > self::MAX_FILE_SIZE) {
-            return $this->error('Le fichier dépasse la taille maximale autorisée (5 Mo)', 422);
-        }
-
-        // Validation du type MIME
-        $mimeType = $file->getMimeType();
-        if (! in_array($mimeType, self::ALLOWED_MIMES)) {
-            return $this->error('Type de fichier non autorisé', 422);
-        }
-
-        // Stocker le fichier dans un dossier sécurisé (hors public)
-        $path = $file->store("academic_documents/{$user->id}", 'local');
-
-        $document = AcademicDocument::create([
-            'user_id' => $user->id,
-            'document_type' => $validated['document_type'],
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'file_size' => $file->getSize(),
-            'mime_type' => $mimeType,
-            'academic_year' => $validated['academic_year'] ?? null,
-            'grade_level' => $validated['grade_level'] ?? null,
-            'uploaded_at' => now(),
-        ]);
-
-        return $this->created([
-            'document' => $this->formatDocument($document),
-        ], 'Document uploadé avec succès');
+        return parent::upload($request);
     }
 
     /**
@@ -145,17 +92,7 @@ class AcademicDocumentController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-
-        $document = $user->academicDocuments()->find($id);
-
-        if (! $document) {
-            return $this->notFound(self::MSG_DOCUMENT_NOT_FOUND);
-        }
-
-        return $this->success([
-            'document' => $this->formatDocument($document),
-        ]);
+        return parent::show($request, $id);
     }
 
     /**
@@ -186,27 +123,7 @@ class AcademicDocumentController extends Controller
      */
     public function download(Request $request, int $id)
     {
-        $user = $request->user();
-
-        // Les admins peuvent télécharger tous les documents
-        if ($user->isAdmin()) {
-            $document = AcademicDocument::find($id);
-        } else {
-            $document = $user->academicDocuments()->find($id);
-        }
-
-        if (! $document) {
-            return $this->notFound(self::MSG_DOCUMENT_NOT_FOUND);
-        }
-
-        if (! Storage::disk('local')->exists($document->file_path)) {
-            return $this->error('Fichier introuvable sur le serveur', 500);
-        }
-
-        return Storage::disk('local')->download(
-            $document->file_path,
-            $document->file_name
-        );
+        return parent::download($request, $id);
     }
 
     /**
@@ -234,57 +151,24 @@ class AcademicDocumentController extends Controller
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $user = $request->user();
-
-        $document = $user->academicDocuments()->find($id);
-
-        if (! $document) {
-            return $this->notFound(self::MSG_DOCUMENT_NOT_FOUND);
-        }
-
-        // Le modèle supprime automatiquement le fichier via l'event deleting
-        $document->delete();
-
-        return $this->success(null, 'Document supprimé avec succès');
+        return parent::destroy($request, $id);
     }
 
     /**
      * @OA\Get(
      *     path="/api/v2/document-types",
-     *     summary="Liste les types de documents autorisés",
+     *     summary="Récupère les types de documents acceptés",
      *     tags={"Documents"},
      *     security={{"bearerAuth": {}}},
      *
      *     @OA\Response(
      *         response=200,
-     *         description="Liste des types autorisés récupérée avec succès"
+     *         description="Liste des types récupérée avec succès"
      *     )
      * )
      */
     public function types(): JsonResponse
     {
-        return $this->success([
-            'document_types' => AcademicDocument::DOCUMENT_TYPES,
-        ]);
-    }
-
-    /**
-     * Formate un document pour la réponse API
-     */
-    private function formatDocument(AcademicDocument $document): array
-    {
-        return [
-            'id' => $document->id,
-            'document_type' => $document->document_type,
-            'document_type_label' => $document->document_type_label,
-            'file_name' => $document->file_name,
-            'file_size' => $document->file_size,
-            'formatted_size' => $document->formatted_size,
-            'mime_type' => $document->mime_type,
-            'academic_year' => $document->academic_year,
-            'grade_level' => $document->grade_level,
-            'uploaded_at' => $document->uploaded_at?->toISOString(),
-            'created_at' => $document->created_at->toISOString(),
-        ];
+        return parent::types();
     }
 }

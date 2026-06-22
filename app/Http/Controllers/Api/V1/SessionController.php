@@ -226,7 +226,7 @@ class SessionController extends Controller
         }
     }
 
-    private function formatSession(MentoringSession $session): array
+    protected function formatSession(MentoringSession $session): array
     {
         return [
             'id' => $session->id,

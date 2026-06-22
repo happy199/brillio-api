@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Api\V2;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\PersonalityController as V1PersonalityController;
 use App\Http\Requests\Personality\SubmitTestRequest;
-use App\Services\PersonalityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -12,24 +11,14 @@ use OpenApi\Annotations as OA;
 /**
  * Controller pour la gestion des tests de personnalité via API
  */
-class PersonalityController extends Controller
+class PersonalityController extends V1PersonalityController
 {
-    public function __construct(
-        private PersonalityService $personalityService
-    ) {}
-
     /**
      * Récupère les questions du test de personnalité
      */
     public function questions(Request $request): JsonResponse
     {
-        $locale = $request->get('locale', 'fr');
-        $questions = $this->personalityService->getQuestions($locale);
-
-        return $this->success([
-            'total_questions' => count($questions),
-            'questions' => $questions,
-        ]);
+        return parent::questions($request);
     }
 
     /**
@@ -37,25 +26,7 @@ class PersonalityController extends Controller
      */
     public function submit(SubmitTestRequest $request): JsonResponse
     {
-        $user = $request->user();
-        $validated = $request->validated();
-
-        $personalityTest = $this->personalityService->savePreCalculatedResult(
-            $user,
-            $validated['personality_type'],
-            $validated['personality_label'],
-            $validated['personality_description'],
-            $validated['traits_scores'],
-            $validated['responses']
-        );
-
-        return $this->success([
-            'personality_type' => $personalityTest->personality_type,
-            'personality_label' => $personalityTest->personality_label,
-            'personality_description' => $personalityTest->personality_description,
-            'traits_scores' => $personalityTest->traits_scores,
-            'completed_at' => $personalityTest->completed_at->toISOString(),
-        ], 'Test de personnalité complété avec succès');
+        return parent::submit($request);
     }
 
     /**
@@ -63,36 +34,7 @@ class PersonalityController extends Controller
      */
     public function result(Request $request, ?int $userId = null): JsonResponse
     {
-        // Si pas d'userId fourni, utiliser l'utilisateur connecté
-        if ($userId === null) {
-            $user = $request->user();
-        } else {
-            // Vérifier que l'utilisateur demande ses propres résultats ou est admin
-            if ($userId !== $request->user()->id && ! $request->user()->isAdmin()) {
-                return $this->forbidden('Vous ne pouvez pas voir les résultats d\'autres utilisateurs');
-            }
-            $user = \App\Models\User::find($userId);
-        }
-
-        if (! $user) {
-            return $this->notFound('Utilisateur non trouvé');
-        }
-
-        $result = $this->personalityService->getResult($user);
-
-        if (! $result || ! $result->isCompleted()) {
-            return $this->notFound('Aucun test de personnalité complété');
-        }
-
-        return $this->success([
-            'user_id' => $user->id,
-            'user_name' => $user->name,
-            'personality_type' => $result->personality_type,
-            'personality_label' => $result->personality_label,
-            'personality_description' => $result->personality_description,
-            'traits_scores' => $result->traits_scores,
-            'completed_at' => $result->completed_at->toISOString(),
-        ]);
+        return parent::result($request, $userId);
     }
 
     /**
@@ -100,21 +42,7 @@ class PersonalityController extends Controller
      */
     public function status(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $hasCompleted = $this->personalityService->hasCompletedTest($user);
-
-        $data = [
-            'has_completed' => $hasCompleted,
-        ];
-
-        if ($hasCompleted) {
-            $result = $user->personalityTest;
-            $data['personality_type'] = $result->personality_type;
-            $data['personality_label'] = $result->personality_label;
-            $data['completed_at'] = $result->completed_at->toISOString();
-        }
-
-        return $this->success($data);
+        return parent::status($request);
     }
 
     /**

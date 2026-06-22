@@ -20,19 +20,24 @@
                 "tags": [
                     "Documents"
                 ],
-                "summary": "Liste les documents de l'utilisateur",
+                "summary": "Liste les documents académiques de l'utilisateur",
                 "operationId": "624cdba0820f51c85c8f63232aadc3fb",
                 "responses": {
                     "200": {
-                        "description": "Liste des documents"
+                        "description": "Liste des documents récupérée avec succès"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
                     "Documents"
                 ],
-                "summary": "Upload un nouveau document",
+                "summary": "Téléverse un nouveau document académique",
                 "operationId": "f90f073c125bd3404d14f04107797f53",
                 "requestBody": {
                     "required": true,
@@ -41,24 +46,17 @@
                             "schema": {
                                 "required": [
                                     "file",
-                                    "document_type"
+                                    "type"
                                 ],
                                 "properties": {
                                     "file": {
+                                        "description": "Fichier du document (PDF, JPG, PNG, DOC, DOCX, max 5Mo)",
                                         "type": "string",
                                         "format": "binary"
                                     },
-                                    "document_type": {
-                                        "type": "string",
-                                        "example": "bulletin"
-                                    },
-                                    "academic_year": {
-                                        "type": "string",
-                                        "example": "2023-2024"
-                                    },
-                                    "grade_level": {
-                                        "type": "string",
-                                        "example": "Terminale"
+                                    "type": {
+                                        "description": "Type de document (ex: diplome, bulletin, cv, autre)",
+                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -68,9 +66,17 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Document uploadé"
+                        "description": "Document téléversé avec succès"
+                    },
+                    "422": {
+                        "description": "Erreur de validation ou fichier invalide"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v2/documents/{id}": {
@@ -178,11 +184,11 @@
                 "tags": [
                     "Documents"
                 ],
-                "summary": "Liste les types de documents autorisés",
+                "summary": "Récupère les types de documents acceptés",
                 "operationId": "4dd6721d94478834a97049e032f11f2e",
                 "responses": {
                     "200": {
-                        "description": "Liste des types autorisés récupérée avec succès"
+                        "description": "Liste des types récupérée avec succès"
                     }
                 },
                 "security": [
@@ -753,14 +759,14 @@
                 "summary": "Crée une nouvelle conversation d'orientation",
                 "operationId": "25713776d2d08602b0b47d76edfe598f",
                 "requestBody": {
-                    "required": true,
+                    "required": false,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
                                     "title": {
                                         "type": "string",
-                                        "example": "Nouvelle discussion d'orientation"
+                                        "example": "Mon projet d'orientation"
                                     }
                                 },
                                 "type": "object"
@@ -770,37 +776,9 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Conversation créée avec succès",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Conversation créée"
-                                        },
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "402": {
-                        "description": "Solde insuffisant"
+                        "description": "Conversation créée avec succès"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/v2/chat/conversations/{id}": {
@@ -814,7 +792,6 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID de la conversation",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -823,10 +800,8 @@
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Nombre de messages à récupérer",
                         "schema": {
-                            "type": "integer",
-                            "default": 50
+                            "type": "integer"
                         }
                     }
                 ],
@@ -837,12 +812,7 @@
                     "404": {
                         "description": "Conversation non trouvée"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             },
             "delete": {
                 "tags": [
@@ -954,7 +924,7 @@
                 "tags": [
                     "Chat"
                 ],
-                "summary": "Annule une demande d'intervention humaine en attente",
+                "summary": "Annule une demande d'aide humaine",
                 "operationId": "a39761e1de2072f5b6bfc75d2b92a547",
                 "parameters": [
                     {
@@ -969,10 +939,10 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Demande annulée avec succès. Retour à l'orientation IA."
+                        "description": "Demande de support humain annulée"
                     },
                     "400": {
-                        "description": "Impossible d'annuler car un conseiller a déjà pris en charge la conversation"
+                        "description": "Impossible d'annuler (conseiller déjà actif)"
                     },
                     "404": {
                         "description": "Conversation non trouvée"
@@ -3174,7 +3144,7 @@
                 "tags": [
                     "Portefeuille"
                 ],
-                "summary": "Initialise l'achat d'un pack de crédits via Moneroo",
+                "summary": "Initialise un achat de pack de crédits (Mobile App WebView Checkout)",
                 "operationId": "ece187d835841f269c282130629159fd",
                 "requestBody": {
                     "required": true,
@@ -3211,7 +3181,8 @@
                                             "example": "https://checkout.moneroo.io/..."
                                         },
                                         "transaction_id": {
-                                            "type": "integer"
+                                            "type": "string",
+                                            "example": "tx_123456"
                                         }
                                     },
                                     "type": "object"
@@ -3220,7 +3191,7 @@
                         }
                     },
                     "422": {
-                        "description": "Erreur de validation ou pack indisponible"
+                        "description": "Erreur de validation ou pack inexistant"
                     }
                 },
                 "security": [

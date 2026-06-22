@@ -255,7 +255,7 @@ class ResourceController extends Controller
         return $this->success(null, 'Ressource débloquée avec succès');
     }
 
-    private function formatResource(Resource $resource, $user): array
+    protected function formatResource(Resource $resource, $user): array
     {
         $hasAccess = ! $resource->is_premium || Purchase::where('user_id', $user->id)
             ->where('item_type', Resource::class)
@@ -276,7 +276,7 @@ class ResourceController extends Controller
         ];
     }
 
-    private function formatResourceDetail(Resource $resource, $user): array
+    protected function formatResourceDetail(Resource $resource, $user): array
     {
         $hasAccess = ! $resource->is_premium || Purchase::where('user_id', $user->id)
             ->where('item_type', Resource::class)

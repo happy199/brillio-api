@@ -128,7 +128,7 @@ class WalletController extends Controller
     /**
      * Formate une transaction pour l'API
      */
-    private function formatTransaction($transaction): array
+    protected function formatTransaction($transaction): array
     {
         return [
             'id' => $transaction->id,
