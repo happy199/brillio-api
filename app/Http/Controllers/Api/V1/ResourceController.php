@@ -8,6 +8,7 @@ use App\Models\Resource;
 use App\Models\ResourceView;
 use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
+use App\Traits\HasCreditValidation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,10 +21,14 @@ use OpenApi\Annotations as OA;
  */
 class ResourceController extends Controller
 {
+    use HasCreditValidation;
+
     public function __construct(
         private WalletService $walletService,
         private MentorshipNotificationService $notificationService
-    ) {}
+    ) {
+        $this->walletService = $walletService;
+    }
 
     /**
      * @OA\Get(
