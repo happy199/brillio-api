@@ -147,8 +147,22 @@ class MessagesController extends Controller
 
         $request->validate([
             'body' => 'nullable|string|max:5000',
-            'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,zip,txt',
         ]);
+
+        if ($request->hasFile('attachment')) {
+            $attachment = $request->file('attachment');
+            if (! $attachment->isValid()) {
+                return $this->error('Fichier joint invalide.', 422);
+            }
+            if ($attachment->getSize() > 10240 * 1024) {
+                return $this->error('Le fichier joint dépasse la limite autorisée de 10 Mo.', 422);
+            }
+            $allowedMimes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'txt'];
+            $extension = strtolower($attachment->getClientOriginalExtension());
+            if (! in_array($extension, $allowedMimes)) {
+                return $this->error('Format de fichier non autorisé.', 422);
+            }
+        }
 
         if (! $request->filled('body') && ! $request->hasFile('attachment')) {
             return $this->error('Veuillez écrire un message ou joindre un fichier.', 422);

@@ -120,9 +120,18 @@ class ResourceController extends V1ResourceController
             'description' => 'required|string',
             'type' => 'required|in:article,video,tool,exercise,template,script',
             'price' => 'required|numeric|min:0',
-            'file' => 'nullable|file|max:51200',
             'external_url' => 'nullable|url',
         ]);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            if (! $file->isValid()) {
+                return $this->error('Fichier invalide.', 422);
+            }
+            if ($file->getSize() > 51200 * 1024) {
+                return $this->error('Le fichier dépasse la limite autorisée de 50 Mo.', 422);
+            }
+        }
 
         $resourceData = $request->only(['title', 'description', 'type', 'price', 'external_url']);
         $resourceData['user_id'] = $mentor->id;
