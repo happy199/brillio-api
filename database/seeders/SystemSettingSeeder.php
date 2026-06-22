@@ -96,7 +96,24 @@ class SystemSettingSeeder extends Seeder
                 'type' => 'integer',
                 'description' => 'Commission Retrait Mentor (%)',
             ],
+
         ];
+
+        // Génération dynamique pour éviter la duplication de code détectée par SonarQube
+        $bonusPlans = [
+            'pro' => ['val' => '25', 'label' => 'Pro'],
+            'enterprise' => ['val' => '50', 'label' => 'Enterprise'],
+            'establishment' => ['val' => '50', 'label' => 'Établissement'],
+        ];
+
+        foreach ($bonusPlans as $key => $data) {
+            $settings[] = [
+                'key' => "credit_bonus_{$key}",
+                'value' => $data['val'],
+                'type' => 'integer',
+                'description' => "Crédits offerts mensuellement aux organisations {$data['label']}",
+            ];
+        }
 
         foreach ($settings as $setting) {
             SystemSetting::updateOrCreate(
