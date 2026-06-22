@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Academic\UploadDocumentRequest;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use OpenApi\Annotations as OA;
 
 /**
- * Controller pour la gestion des documents académiques (V1)
+ * Controller pour la gestion des documents académiques
  */
 class AcademicDocumentController extends Controller
 {
@@ -34,7 +34,7 @@ class AcademicDocumentController extends Controller
 
     /**
      * @OA\Get(
-     * path="/api/v1/documents",
+     * path="/api/v2/documents",
      * summary= "Liste les documents de l'utilisateur",
      * tags={"Documents"},
      *
@@ -57,7 +57,7 @@ class AcademicDocumentController extends Controller
 
     /**
      * @OA\Post(
-     * path="/api/v1/documents",
+     * path="/api/v2/documents",
      * summary="Upload un nouveau document",
      * tags={"Documents"},
      *
@@ -119,7 +119,27 @@ class AcademicDocumentController extends Controller
     }
 
     /**
-     * Récupère les détails d'un document
+     * @OA\Get(
+     *     path="/api/v2/documents/{id}",
+     *     summary="Récupère les détails d'un document académique",
+     *     tags={"Documents"},
+     *     security={{"bearerAuth": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID du document",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détails du document récupérés avec succès"
+     *     ),
+     *     @OA\Response(response=404, description="Document non trouvé")
+     * )
      */
     public function show(Request $request, int $id): JsonResponse
     {
@@ -137,9 +157,30 @@ class AcademicDocumentController extends Controller
     }
 
     /**
-     * Télécharge un document
+     * @OA\Get(
+     *     path="/api/v2/documents/{id}/download",
+     *     summary="Télécharge le fichier d'un document académique",
+     *     tags={"Documents"},
+     *     security={{"bearerAuth": {}}},
      *
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|JsonResponse
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID du document",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Téléchargement du fichier démarré",
+     *
+     *         @OA\MediaType(mediaType="application/octet-stream")
+     *     ),
+     *
+     *     @OA\Response(response=404, description="Document ou fichier non trouvé")
+     * )
      */
     public function download(Request $request, int $id)
     {
@@ -167,7 +208,27 @@ class AcademicDocumentController extends Controller
     }
 
     /**
-     * Supprime un document
+     * @OA\Delete(
+     *     path="/api/v2/documents/{id}",
+     *     summary="Supprime un document académique",
+     *     tags={"Documents"},
+     *     security={{"bearerAuth": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID du document",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Document supprimé avec succès"
+     *     ),
+     *     @OA\Response(response=404, description="Document non trouvé")
+     * )
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
@@ -186,7 +247,17 @@ class AcademicDocumentController extends Controller
     }
 
     /**
-     * Liste les types de documents disponibles
+     * @OA\Get(
+     *     path="/api/v2/document-types",
+     *     summary="Liste les types de documents autorisés",
+     *     tags={"Documents"},
+     *     security={{"bearerAuth": {}}},
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des types autorisés récupérée avec succès"
+     *     )
+     * )
      */
     public function types(): JsonResponse
     {

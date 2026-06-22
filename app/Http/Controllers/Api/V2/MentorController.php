@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Mentor\CreateProfileRequest;
@@ -13,13 +13,13 @@ use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
 
 /**
- * Controller pour la recherche et consultation des mentors via API (V1)
+ * Controller pour la recherche et consultation des mentors via API
  */
 class MentorController extends Controller
 {
     /**
      * @OA\Get(
-     * path="/api/v1/mentors",
+     * path="/api/v2/mentors",
      * summary="Liste des mentors publiés",
      * tags={"Mentors"},
      *
@@ -71,7 +71,7 @@ class MentorController extends Controller
 
     /**
      * @OA\Get(
-     * path="/api/v1/mentors/{id}",
+     * path="/api/v2/mentors/{id}",
      * summary= "Détail d'un mentor",
      * tags={"Mentors"},
      *
@@ -99,7 +99,7 @@ class MentorController extends Controller
 
     /**
      * @OA\Post(
-     * path="/api/v1/mentor/profile",
+     * path="/api/v2/mentor/profile",
      * summary="Crée ou met à jour le profil mentor",
      * tags={"Mentors"},
      *
@@ -300,7 +300,7 @@ class MentorController extends Controller
 
     /**
      * @OA\Get(
-     * path="/api/v1/specializations",
+     * path="/api/v2/specializations",
      * summary="Liste des spécialisations disponibles",
      * tags={"Mentors"},
      *

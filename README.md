@@ -127,59 +127,101 @@ brillio-api/
 
 ## Endpoints API
 
-Tous les endpoints sont préfixés par `/api/v1/`
+Tous les endpoints sont préfixés par `/api/v1/` ou `/api/` selon le cas.
 
 ### Authentification
 
 | Méthode | Endpoint | Description | Auth |
 |---------|----------|-------------|------|
-| POST | `/auth/register` | Inscription | Non |
-| POST | `/auth/login` | Connexion | Non |
-| POST | `/auth/logout` | Déconnexion | Oui |
-| GET | `/auth/user` | Profil utilisateur | Oui |
-| PUT | `/auth/profile` | Mise à jour profil | Oui |
-| POST | `/auth/upload-photo` | Upload photo profil | Oui |
+| POST | `/api/register` | Inscription | Non |
+| POST | `/api/login` | Connexion | Non |
+| POST | `/api/logout` | Déconnexion | Oui |
+| GET | `/api/user` | Profil utilisateur | Oui |
+| PUT | `/api/user/profile` | Mise à jour profil | Oui |
+| POST | `/api/user/photo` | Upload photo profil | Oui |
 
-### Test de personnalité
+### Test de personnalité (MBTI)
 
 | Méthode | Endpoint | Description | Auth |
 |---------|----------|-------------|------|
-| GET | `/personality/questions` | Questions du test | Oui |
-| POST | `/personality/submit` | Soumettre réponses | Oui |
-| GET | `/personality/status` | Statut du test | Oui |
-| GET | `/personality/result` | Résultat complet | Oui |
+| GET | `/api/v1/personality/questions` | Questions du test | Oui |
+| POST | `/api/v1/personality/submit` | Soumettre réponses | Oui |
+| GET | `/api/v1/personality/status` | Statut du test | Oui |
+| GET | `/api/v1/personality/result/{userId?}` | Résultat complet | Oui |
 
 ### Chatbot IA
 
 | Méthode | Endpoint | Description | Auth |
 |---------|----------|-------------|------|
-| GET | `/chat/conversations` | Liste conversations | Oui |
-| POST | `/chat/conversations` | Nouvelle conversation | Oui |
-| GET | `/chat/conversations/{id}/messages` | Messages | Oui |
-| POST | `/chat/send` | Envoyer message | Oui |
-| DELETE | `/chat/conversations/{id}` | Supprimer conversation | Oui |
+| GET | `/api/v1/chat/conversations` | Liste conversations | Oui |
+| POST | `/api/v1/chat/conversations` | Nouvelle conversation | Oui |
+| GET | `/api/v1/chat/conversations/{id}/messages` | Messages | Oui |
+| POST | `/api/v1/chat/send` | Envoyer message | Oui |
+| DELETE| `/api/v1/chat/conversations/{id}` | Supprimer conversation | Oui |
 
-### Mentors
-
-| Méthode | Endpoint | Description | Auth |
-|---------|----------|-------------|------|
-| GET | `/mentors` | Liste mentors publiés | Non |
-| GET | `/mentors/{id}` | Détail mentor | Non |
-| GET | `/mentor/profile` | Mon profil mentor | Oui |
-| POST | `/mentor/profile` | Créer/MAJ profil | Oui |
-| PUT | `/mentor/publish` | Publier profil | Oui |
-| POST | `/mentor/roadmap/step` | Ajouter étape | Oui |
-| PUT | `/mentor/roadmap/step/{id}` | Modifier étape | Oui |
-| DELETE | `/mentor/roadmap/step/{id}` | Supprimer étape | Oui |
-
-### Documents académiques
+### Mentors & Roadmap
 
 | Méthode | Endpoint | Description | Auth |
 |---------|----------|-------------|------|
-| GET | `/academic/documents` | Liste documents | Oui |
-| POST | `/academic/upload` | Upload document | Oui |
-| GET | `/academic/documents/{id}` | Détail document | Oui |
-| DELETE | `/academic/documents/{id}` | Supprimer document | Oui |
+| GET | `/api/v1/mentors` | Liste mentors publiés | Oui |
+| GET | `/api/v1/mentors/specializations` | Liste des spécialisations | Oui |
+| GET | `/api/v1/mentors/{id}` | Détail mentor | Oui |
+| GET | `/api/v1/mentor/profile` | Mon profil mentor | Oui |
+| POST | `/api/v1/mentor/profile` | Créer/MAJ profil | Oui |
+| PUT | `/api/v1/mentor/publish` | Publier profil | Oui |
+| POST | `/api/v1/mentor/roadmap/step` | Ajouter étape roadmap | Oui |
+| PUT | `/api/v1/mentor/roadmap/step/{id}` | Modifier étape | Oui |
+| DELETE| `/api/v1/mentor/roadmap/step/{id}` | Supprimer étape | Oui |
+| POST | `/api/v1/mentor/roadmap/reorder` | Réorganiser les étapes | Oui |
+
+### Payouts (Reversements Conseillers)
+
+| Méthode | Endpoint | Description | Auth |
+|---------|----------|-------------|------|
+| GET | `/api/mentor/balance` | Solde actuel | Oui |
+| GET | `/api/mentor/payout-methods` | Moyens de paiement | Oui |
+| POST | `/api/mentor/payout/request` | Demander reversement | Oui |
+| GET | `/api/mentor/payout-requests` | Historique paiements | Oui |
+| POST | `/api/mentor/payout/{id}/cancel` | Annuler reversement | Oui |
+
+### Portefeuille & Crédits (Jeune)
+
+| Méthode | Endpoint | Description | Auth |
+|---------|----------|-------------|------|
+| GET | `/api/v1/wallet` | Solde et transactions | Oui |
+| GET | `/api/v1/wallet/packs` | Liste packs crédits | Oui |
+| POST | `/api/v1/wallet/redeem` | Utiliser un coupon | Oui |
+
+### Séances de Mentorat
+
+| Méthode | Endpoint | Description | Auth |
+|---------|----------|-------------|------|
+| GET | `/api/v1/sessions` | Liste des séances | Oui |
+| POST | `/api/v1/sessions` | Réserver une séance | Oui |
+| POST | `/api/v1/sessions/{id}/cancel` | Annuler une séance | Oui |
+| POST | `/api/v1/sessions/{id}/pay` | Payer une séance | Oui |
+| GET | `/api/v1/mentorships` | Liste des mentorats | Oui |
+| POST | `/api/v1/mentorships` | Demande de mentorat | Oui |
+| POST | `/api/v1/mentorships/{id}/cancel` | Annuler mentorat | Oui |
+
+### Ressources Pédagogiques Premium
+
+| Méthode | Endpoint | Description | Auth |
+|---------|----------|-------------|------|
+| GET | `/api/v1/resources` | Liste des ressources | Oui |
+| GET | `/api/v1/resources/{id}` | Détail ressource | Oui |
+| POST | `/api/v1/resources/{id}/unlock` | Débloquer ressource | Oui |
+
+### Documents Académiques
+
+| Méthode | Endpoint | Description | Auth |
+|---------|----------|-------------|------|
+| GET | `/api/v1/documents` | Liste documents | Oui |
+| POST | `/api/v1/documents` | Upload document | Oui |
+| GET | `/api/v1/documents/{id}` | Détail document | Oui |
+| GET | `/api/v1/documents/{id}/download` | Télécharger doc | Oui |
+| DELETE| `/api/v1/documents/{id}` | Supprimer document | Oui |
+| GET | `/api/v1/document-types` | Types de documents | Oui |
 
 ## Dashboard Admin
 

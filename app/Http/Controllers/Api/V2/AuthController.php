@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use OpenApi\Annotations as OA;
 
 /**
- * Controller pour l'authentification API (V1)
+ * Controller pour l'authentification API
  */
 class AuthController extends Controller
 {
@@ -27,7 +27,7 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     * path="/api/v1/register",
+     * path="/api/v2/register",
      * summary= "Inscription d'un nouvel utilisateur",
      * tags={"Authentification"},
      *
@@ -102,7 +102,7 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     * path="/api/v1/login",
+     * path="/api/v2/login",
      * summary= "Connexion d'un utilisateur existant",
      * tags={"Authentification"},
      *
@@ -164,7 +164,7 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     * path="/api/v1/logout",
+     * path="/api/v2/logout",
      * summary= "Déconnexion de l'utilisateur",
      * tags={"Authentification"},
      *
@@ -181,8 +181,142 @@ class AuthController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/v2/password/email",
+     *     summary="Demander un lien de réinitialisation de mot de passe",
+     *     tags={"Authentification"},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *
+     *             @OA\Property(property="email", type="string", format="email", example="jean@example.com")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lien envoyé par e-mail avec succès",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Un lien de réinitialisation vous a été envoyé par email.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=422, description="Adresse e-mail invalide ou non trouvée")
+     * )
+     */
+    public function sendResetLinkEmail(Request $request): JsonResponse
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user) {
+            return $this->error('Aucun utilisateur trouvé avec cette adresse email.', 422);
+        }
+
+        $token = \Illuminate\Support\Str::random(60);
+
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]
+        );
+
+        try {
+            $this->notificationService->sendPasswordResetEmail($user, $token);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur envoi email reset password: '.$e->getMessage());
+
+            return $this->error('Une erreur est survenue lors de l\'envoi de l\'email.', 500);
+        }
+
+        return $this->success(null, 'Un lien de réinitialisation vous a été envoyé par email.');
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v2/password/reset",
+     *     summary="Réinitialiser le mot de passe avec le token reçu",
+     *     tags={"Authentification"},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"token", "email", "password", "password_confirmation"},
+     *
+     *             @OA\Property(property="token", type="string", example="token_received_in_email"),
+     *             @OA\Property(property="email", type="string", format="email", example="jean@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="NewPassword123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="NewPassword123")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mot de passe réinitialisé avec succès",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Votre mot de passe a été réinitialisé avec succès.")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=422, description="Erreur de validation ou token expiré/invalide")
+     * )
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caracteres.',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+        ]);
+
+        $resetRecord = \Illuminate\Support\Facades\DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (! $resetRecord || ! Hash::check($request->token, $resetRecord->token)) {
+            \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+            return $this->error('Ce lien de réinitialisation est invalide ou a expiré.', 422);
+        }
+
+        if (now()->subMinutes(60)->gt($resetRecord->created_at)) {
+            \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+            return $this->error('Ce lien de réinitialisation a expiré.', 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (! $user) {
+            return $this->error('Aucun utilisateur trouvé avec cette adresse email.', 422);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return $this->success(null, 'Votre mot de passe a été réinitialisé avec succès.');
+    }
+
+    /**
      * @OA\Get(
-     * path="/api/v1/user",
+     * path="/api/v2/user",
      * summary= "Récupère le profil de l'utilisateur connecté",
      * tags={"Profil"},
      *
@@ -214,7 +348,7 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     * path="/api/v1/user/profile",
+     * path="/api/v2/user/profile",
      * summary= "Met à jour le profil de l'utilisateur",
      * tags={"Profil"},
      *
@@ -256,7 +390,7 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     * path="/api/v1/user/photo",
+     * path="/api/v2/user/photo",
      * summary="Upload de la photo de profil",
      * tags={"Profil"},
      *
@@ -303,7 +437,7 @@ class AuthController extends Controller
 
     /**
      * @OA\Delete(
-     * path="/api/v1/user/photo",
+     * path="/api/v2/user/photo",
      * summary="Supprime la photo de profil",
      * tags={"Profil"},
      *

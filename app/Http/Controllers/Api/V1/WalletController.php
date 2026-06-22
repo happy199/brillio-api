@@ -8,10 +8,10 @@ use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use OpenApi\Attributes as OA;
+use OpenApi\Annotations as OA;
 
 /**
- * Controller pour la gestion du portefeuille via API
+ * Controller pour la gestion du portefeuille via API (V1)
  */
 class WalletController extends Controller
 {
@@ -20,17 +20,14 @@ class WalletController extends Controller
     ) {}
 
     /**
-     * Récupère le solde et l'historique des transactions
+     * @OA\Get(
+     * path="/api/v1/wallet",
+     * summary="Récupère le solde et les transactions du portefeuille",
+     * tags={"Portefeuille"},
+     *
+     * @OA\Response(response= 200, description="Détails du portefeuille"),
+     * )
      */
-    #[OA\Get(
-        path: '/api/v1/wallet',
-        summary: 'Récupère le solde et les transactions du portefeuille',
-        tags: ['Portefeuille'],
-        security: [['bearerAuth' => []]],
-        responses: [
-            new OA\Response(response: 200, description: 'Détails du portefeuille'),
-        ]
-    )]
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -49,17 +46,14 @@ class WalletController extends Controller
     }
 
     /**
-     * Liste les packs de crédits disponibles
+     * @OA\Get(
+     * path="/api/v1/wallet/packs",
+     * summary="Liste les packs de crédits disponibles",
+     * tags={"Portefeuille"},
+     *
+     * @OA\Response(response= 200, description="Liste des packs"),
+     * )
      */
-    #[OA\Get(
-        path: '/api/v1/wallet/packs',
-        summary: 'Liste les packs de crédits disponibles',
-        tags: ['Portefeuille'],
-        security: [['bearerAuth' => []]],
-        responses: [
-            new OA\Response(response: 200, description: 'Liste des packs'),
-        ]
-    )]
     public function packs(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -80,28 +74,26 @@ class WalletController extends Controller
     }
 
     /**
-     * Utiliser un coupon
+     * @OA\Post(
+     * path="/api/v1/wallet/redeem-coupon",
+     * summary="Utiliser un coupon pour obtenir des crédits",
+     * tags={"Portefeuille"},
+     *
+     * @OA\RequestBody(
+     * required= true,
+     *
+     * @OA\JsonContent(
+     * required={"code"},
+     *
+     * @OA\Property(property="code", type="string", example="MONCOUPON"),
+     * )
+     * ),
+     *
+     * @OA\Response(response= 200, description="Coupon validé avec succès"),
+     * @OA\Response(response= 400, description="Coupon invalide ou déjà utilisé"),
+     * @OA\Response(response= 500, description="Erreur serveur"),
+     * )
      */
-    #[OA\Post(
-        path: '/api/v1/wallet/redeem-coupon',
-        summary: 'Utiliser un coupon pour obtenir des crédits',
-        tags: ['Portefeuille'],
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['code'],
-                properties: [
-                    new OA\Property(property: 'code', type: 'string', example: 'MONCOUPON'),
-                ]
-            )
-        ),
-        responses: [
-            new OA\Response(response: 200, description: 'Coupon validé avec succès'),
-            new OA\Response(response: 400, description: 'Coupon invalide ou déjà utilisé'),
-            new OA\Response(response: 500, description: 'Erreur serveur'),
-        ]
-    )]
     public function redeemCoupon(Request $request): JsonResponse
     {
         $validated = $request->validate([

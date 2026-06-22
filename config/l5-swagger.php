@@ -5,47 +5,67 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'L5 Swagger UI',
+                'title' => 'Brillio API Documentation',
             ],
-
             'routes' => [
-                /*
-                 * Route for accessing api documentation interface
-                 */
                 'api' => 'api/documentation',
+                'docs' => 'docs/default',
+                'oauth2_callback' => 'api/oauth2-callback/default',
             ],
             'paths' => [
-                /*
-                 * Edit to include full URL in ui for assets
-                 */
                 'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
-
-                /*
-                 * Edit to set path where swagger ui assets should be stored
-                 */
                 'swagger_ui_assets_path' => env('L5_SWAGGER_UI_ASSETS_PATH', 'vendor/swagger-api/swagger-ui/dist/'),
-
-                /*
-                 * File name of the generated json documentation file
-                 */
                 'docs_json' => 'api-docs.json',
-
-                /*
-                 * File name of the generated YAML documentation file
-                 */
                 'docs_yaml' => 'api-docs.yaml',
-
-                /*
-                 * Set this to `json` or `yaml` to determine which documentation file to use in UI
-                 */
                 'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
-
-                /*
-                 * Absolute paths to directory containing the swagger annotations are stored.
-                 */
                 'annotations' => [
-                    base_path('app'),
-                    base_path('app/Http/Controllers'),
+                    base_path('app/Http/Controllers/Api/V2'),
+                    base_path('app/Models'),
+                    base_path('app/Http/Controllers/Controller.php'),
+                ],
+            ],
+        ],
+        'v1' => [
+            'api' => [
+                'title' => 'Brillio API V1',
+            ],
+            'routes' => [
+                'api' => 'api/v1/documentation',
+                'docs' => 'docs/v1',
+                'oauth2_callback' => 'api/oauth2-callback/v1',
+            ],
+            'paths' => [
+                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
+                'swagger_ui_assets_path' => env('L5_SWAGGER_UI_ASSETS_PATH', 'vendor/swagger-api/swagger-ui/dist/'),
+                'docs_json' => 'v1-api-docs.json',
+                'docs_yaml' => 'v1-api-docs.yaml',
+                'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
+                'annotations' => [
+                    base_path('app/Http/Controllers/Api/V1'),
+                    base_path('app/Models'),
+                    base_path('app/Http/Controllers/Controller.php'),
+                ],
+            ],
+        ],
+        'v2' => [
+            'api' => [
+                'title' => 'Brillio API V2',
+            ],
+            'routes' => [
+                'api' => 'api/v2/documentation',
+                'docs' => 'docs/v2',
+                'oauth2_callback' => 'api/oauth2-callback/v2',
+            ],
+            'paths' => [
+                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
+                'swagger_ui_assets_path' => env('L5_SWAGGER_UI_ASSETS_PATH', 'vendor/swagger-api/swagger-ui/dist/'),
+                'docs_json' => 'v2-api-docs.json',
+                'docs_yaml' => 'v2-api-docs.yaml',
+                'format_to_use_for_docs' => env('L5_FORMAT_TO_USE_FOR_DOCS', 'json'),
+                'annotations' => [
+                    base_path('app/Http/Controllers/Api/V2'),
+                    base_path('app/Models'),
+                    base_path('app/Http/Controllers/Controller.php'),
                 ],
             ],
         ],
@@ -66,9 +86,9 @@ return [
              * Middleware allows to prevent unexpected access to API documentation
              */
             'middleware' => [
-                'api' => [],
+                'api' => ['web', 'swagger_secure'],
                 'asset' => [],
-                'docs' => [],
+                'docs' => ['web', 'swagger_secure'],
                 'oauth2_callback' => [],
             ],
 
@@ -126,7 +146,10 @@ return [
              *
              * @see \OpenApi\scan
              */
-            'analyser' => null,
+            'analyser' => new \OpenApi\Analysers\ReflectionAnalyser([
+                new \OpenApi\Analysers\AttributeAnnotationFactory,
+                new \OpenApi\Analysers\DocBlockAnnotationFactory,
+            ]),
 
             /**
              * analysis: defaults to a new \OpenApi\Analysis .

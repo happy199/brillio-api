@@ -1,0 +1,1161 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Brillio API",
+        "description": "API Backend for Brillio Orientation System",
+        "contact": {
+            "email": "contact@brillio.africa"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Brillio API Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/documents": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Liste les documents de l'utilisateur",
+                "operationId": "0c1e3b97e652a66ebc9a10f2c8e396b6",
+                "responses": {
+                    "200": {
+                        "description": "Liste des documents"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Upload un nouveau document",
+                "operationId": "18599a56c18823dbad2aa5984f13e865",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file",
+                                    "document_type"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "document_type": {
+                                        "type": "string",
+                                        "example": "bulletin"
+                                    },
+                                    "academic_year": {
+                                        "type": "string",
+                                        "example": "2023-2024"
+                                    },
+                                    "grade_level": {
+                                        "type": "string",
+                                        "example": "Terminale"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Document uploadé"
+                    }
+                }
+            }
+        },
+        "/api/v1/register": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Inscription d'un nouvel utilisateur",
+                "operationId": "ad77fe138bcb384ad65d167d5c8d1cc0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "user_type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jean Dupont"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123"
+                                    },
+                                    "user_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "jeune",
+                                            "mentor"
+                                        ],
+                                        "example": "jeune"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+2250102030405"
+                                    },
+                                    "date_of_birth": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2000-01-01"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "Côte d'Ivoire"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Abidjan"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Utilisateur créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Inscription réussie"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/v1/login": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Connexion d'un utilisateur existant",
+                "operationId": "bae68d1c55329ecb6e41f48285840c8f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123"
+                                    },
+                                    "logout_other_devices": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Connexion réussie"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Email ou mot de passe incorrect"
+                    }
+                }
+            }
+        },
+        "/api/v1/logout": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Déconnexion de l'utilisateur",
+                "operationId": "c5cdd87fdbf9d0f95dede875bd023dec",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                }
+            }
+        },
+        "/api/v1/user": {
+            "get": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Récupère le profil de l'utilisateur connecté",
+                "operationId": "27c4109efca3524555b126614192feb8",
+                "responses": {
+                    "200": {
+                        "description": "Profil utilisateur récupéré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                }
+            }
+        },
+        "/api/v1/user/profile": {
+            "post": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Met à jour le profil de l'utilisateur",
+                "operationId": "5e9f522f496cd27dd9df11c6af07fe8c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jean Dupont"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+2250102030405"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/v1/user/photo": {
+            "post": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Upload de la photo de profil",
+                "operationId": "7c688733d7e1e3cb82d981ff50364c5d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "photo": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Photo mise à jour"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Supprime la photo de profil",
+                "operationId": "7a754f2630bbdb0bcc7328fc9eb62245",
+                "responses": {
+                    "200": {
+                        "description": "Photo supprimée"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                }
+            }
+        },
+        "/api/v1/chat/conversations": {
+            "get": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Liste les conversations de l'utilisateur",
+                "operationId": "138e2a1df6b54b81fe76fd334c35543e",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des conversations"
+                    }
+                }
+            }
+        },
+        "/api/v1/chat/send": {
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Envoie un message à l'IA ou à un humain",
+                "operationId": "164f8f6d74b033a04724dbf22778f777",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message"
+                                ],
+                                "properties": {
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Bonjour, j'ai besoin d'aide pour mon orientation."
+                                    },
+                                    "conversation_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Réponse du chatbot ou confirmation d'envoi"
+                    }
+                }
+            }
+        },
+        "/api/v1/mentors": {
+            "get": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Liste des mentors publiés",
+                "operationId": "81f1fc66103439da925d92c6439f299f",
+                "parameters": [
+                    {
+                        "name": "specialization",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "country",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des mentors"
+                    }
+                }
+            }
+        },
+        "/api/v1/mentors/{id}": {
+            "get": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Détail d'un mentor",
+                "operationId": "44522252a8039f9e9ce1f739093f38bc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détail du mentor"
+                    },
+                    "404": {
+                        "description": "Mentor non trouvé"
+                    }
+                }
+            }
+        },
+        "/api/v1/mentor/profile": {
+            "post": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Crée ou met à jour le profil mentor",
+                "operationId": "c5099c3fe056b94424130b3849f755a0",
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour"
+                    }
+                }
+            }
+        },
+        "/api/v1/specializations": {
+            "get": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Liste des spécialisations disponibles",
+                "operationId": "fabb1063bf74c20cad0139634b746f45",
+                "responses": {
+                    "200": {
+                        "description": "Liste des spécialisations"
+                    }
+                }
+            }
+        },
+        "/api/v1/mentorships": {
+            "get": {
+                "tags": [
+                    "Mentorat"
+                ],
+                "summary": "Liste les relations de mentorat de l'utilisateur",
+                "operationId": "90f67f3ed0ba318157b27706cedfaf78",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "accepted",
+                                "rejected",
+                                "canceled",
+                                "completed"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des mentorats"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Mentorat"
+                ],
+                "summary": "Demander un mentorat",
+                "operationId": "b02bea004b3172bbb7ba2e64aebafde9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mentor_id",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "mentor_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Bonjour, j'aimerais que vous soyez mon mentor."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Demande envoyée"
+                    },
+                    "400": {
+                        "description": "Demande déjà existante"
+                    }
+                }
+            }
+        },
+        "/api/v1/mentorships/{id}/cancel": {
+            "delete": {
+                "tags": [
+                    "Mentorat"
+                ],
+                "summary": "Annuler une demande de mentorat",
+                "operationId": "19c7f0beb18a0fab070ded69f2bca522",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "cancellation_reason"
+                                ],
+                                "properties": {
+                                    "cancellation_reason": {
+                                        "type": "string",
+                                        "example": "Je n'ai plus besoin de mentorat."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Demande annulée"
+                    },
+                    "400": {
+                        "description": "Impossible d'annuler la demande"
+                    },
+                    "404": {
+                        "description": "Demande non trouvée"
+                    }
+                }
+            }
+        },
+        "/api/v1/resources": {
+            "get": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Liste les ressources pédagogiques",
+                "operationId": "4c92c0d663d242a3627dac9352423210",
+                "parameters": [
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "suggestions",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "price",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "free",
+                                "premium"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "mbti",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "source",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "mentor",
+                                "brillio"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "ownership",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "mine",
+                                "all"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des ressources"
+                    }
+                }
+            }
+        },
+        "/api/v1/resources/{id}": {
+            "get": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Détails d'une ressource pédagogique",
+                "operationId": "d2021c7416586849b6e82d0a752ebbe2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de la ressource"
+                    },
+                    "404": {
+                        "description": "Ressource non trouvée"
+                    }
+                }
+            }
+        },
+        "/api/v1/resources/{id}/unlock": {
+            "post": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Débloquer une ressource premium",
+                "operationId": "2435eb1ab84cf704d1b230629a82df01",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ressource débloquée"
+                    },
+                    "400": {
+                        "description": "Crédits insuffisants"
+                    },
+                    "404": {
+                        "description": "Ressource non trouvée"
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions": {
+            "get": {
+                "tags": [
+                    "Séances"
+                ],
+                "summary": "Liste les séances de mentorat",
+                "operationId": "19c9217adc8bc543a89b2b721a4576d4",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "upcoming",
+                                "past"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des séances"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Séances"
+                ],
+                "summary": "Réserver une séance de mentorat",
+                "operationId": "9cc41a4a8e734c44c83827632537a2c8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mentor_id",
+                                    "scheduled_at",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "mentor_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "scheduled_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Session d'orientation"
+                                    },
+                                    "duration_minutes": {
+                                        "type": "integer",
+                                        "example": 60
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Séance réservée"
+                    }
+                }
+            }
+        },
+        "/api/v1/wallet": {
+            "get": {
+                "tags": [
+                    "Portefeuille"
+                ],
+                "summary": "Récupère le solde et les transactions du portefeuille",
+                "operationId": "ebc7f1bada3c7e13d41a18c0a3240dd0",
+                "responses": {
+                    "200": {
+                        "description": "Détails du portefeuille"
+                    }
+                }
+            }
+        },
+        "/api/v1/wallet/packs": {
+            "get": {
+                "tags": [
+                    "Portefeuille"
+                ],
+                "summary": "Liste les packs de crédits disponibles",
+                "operationId": "369c29ab3341ca5b9814f3ee90497d7d",
+                "responses": {
+                    "200": {
+                        "description": "Liste des packs"
+                    }
+                }
+            }
+        },
+        "/api/v1/wallet/redeem-coupon": {
+            "post": {
+                "tags": [
+                    "Portefeuille"
+                ],
+                "summary": "Utiliser un coupon pour obtenir des crédits",
+                "operationId": "ceb997728c79c6fb614e52269848c68f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "example": "MONCOUPON"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Coupon validé avec succès"
+                    },
+                    "400": {
+                        "description": "Coupon invalide ou déjà utilisé"
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
+                }
+            }
+        },
+        "/api/health": {
+            "get": {
+                "tags": [
+                    "Système"
+                ],
+                "summary": "Porte de santé de l'API",
+                "operationId": "a1dd1f4ddb17ebda7dbe6cb095703f15",
+                "responses": {
+                    "200": {
+                        "description": "L'API est opérationnelle",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "timestamp": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Organization": {
+                "title": "Organization",
+                "description": "Organization model schema",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Brillio Org"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "brillio-org"
+                    },
+                    "logo_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "primary_color": {
+                        "type": "string",
+                        "example": "#f43f5e"
+                    },
+                    "secondary_color": {
+                        "type": "string",
+                        "example": "#e11d48"
+                    },
+                    "accent_color": {
+                        "type": "string",
+                        "example": "#fb7185"
+                    },
+                    "subscription_plan": {
+                        "type": "string",
+                        "example": "enterprise"
+                    },
+                    "credits_balance": {
+                        "type": "integer",
+                        "example": 1000
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "User",
+                "description": "User model schema",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Jean Dupont"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "jean@example.com"
+                    },
+                    "user_type": {
+                        "type": "string",
+                        "example": "jeune"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "country": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "city": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "profile_photo_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "organization_id": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "organization_role": {
+                        "type": "string",
+                        "example": "admin",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Documents",
+            "description": "Documents"
+        },
+        {
+            "name": "Authentification",
+            "description": "Authentification"
+        },
+        {
+            "name": "Profil",
+            "description": "Profil"
+        },
+        {
+            "name": "Chat",
+            "description": "Chat"
+        },
+        {
+            "name": "Mentors",
+            "description": "Mentors"
+        },
+        {
+            "name": "Mentorat",
+            "description": "Mentorat"
+        },
+        {
+            "name": "Ressources",
+            "description": "Ressources"
+        },
+        {
+            "name": "Séances",
+            "description": "Séances"
+        },
+        {
+            "name": "Portefeuille",
+            "description": "Portefeuille"
+        },
+        {
+            "name": "Système",
+            "description": "Système"
+        }
+    ]
+}

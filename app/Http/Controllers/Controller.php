@@ -5,26 +5,28 @@ namespace App\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use OpenApi\Attributes as OA;
+use OpenApi\Annotations as OA;
 
-#[OA\Info(
-    title: 'Brillio API',
-    version: '1.0.0',
-    description: 'API Backend for Brillio Orientation System',
-    contact: new OA\Contact(email: 'contact@brillio.africa')
-)]
-#[OA\Server(
-    url: L5_SWAGGER_CONST_HOST,
-    description: 'Brillio API Server'
-)]
-#[OA\SecurityScheme(
-    securityScheme: 'bearerAuth',
-    type: 'http',
-    scheme: 'bearer',
-    bearerFormat: 'JWT'
-)]
 /**
- * Controller de base avec méthodes utilitaires pour les réponses API
+ * @OA\Info(
+ *     title="Brillio API",
+ *     version="1.0.0",
+ *     description="API Backend for Brillio Orientation System",
+ *
+ *     @OA\Contact(email="contact@brillio.africa")
+ * )
+ *
+ * @OA\Server(
+ *     url=L5_SWAGGER_CONST_HOST,
+ *     description="Brillio API Server"
+ * )
+ *
+ * @OA\SecurityScheme(
+ *     securityScheme="bearerAuth",
+ *     type="http",
+ *     scheme="bearer",
+ *     bearerFormat="JWT"
+ * )
  */
 class Controller extends BaseController
 {
@@ -47,7 +49,13 @@ class Controller extends BaseController
      *         )
      *     )
      * )
-     *
+     */
+    public function health()
+    {
+        return response()->json(['status' => 'ok', 'timestamp' => now()]);
+    }
+
+    /**
      * Réponse de succès standardisée
      */
     protected function success($data = null, string $message = 'Success', int $code = 200)

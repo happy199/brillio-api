@@ -8,10 +8,10 @@ use App\Models\Mentorship;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use OpenApi\Attributes as OA;
+use OpenApi\Annotations as OA;
 
 /**
- * Controller pour la gestion des relations de mentorat via API
+ * Controller pour la gestion des relations de mentorat via API (V1)
  */
 class MentorshipController extends Controller
 {
@@ -23,20 +23,16 @@ class MentorshipController extends Controller
     }
 
     /**
-     * Liste les mentorats de l'utilisateur (Jeune)
+     * @OA\Get(
+     * path="/api/v1/mentorships",
+     * summary= "Liste les relations de mentorat de l'utilisateur",
+     * tags={"Mentorat"},
+     *
+     * @OA\Parameter(name="status", in="query", @OA\Schema(type="string", enum={"pending", "accepted", "rejected", "canceled", "completed"})),
+     *
+     * @OA\Response(response= 200, description="Liste des mentorats"),
+     * )
      */
-    #[OA\Get(
-        path: '/api/v1/mentorships',
-        summary: "Liste les relations de mentorat de l'utilisateur",
-        tags: ['Mentorat'],
-        security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'status', in: 'query', schema: new OA\Schema(type: 'string', enum: ['pending', 'accepted', 'rejected', 'canceled', 'completed'])),
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Liste des mentorats'),
-        ]
-    )]
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -60,28 +56,26 @@ class MentorshipController extends Controller
     }
 
     /**
-     * Envoyer une demande de mentorat
+     * @OA\Post(
+     * path="/api/v1/mentorships",
+     * summary="Demander un mentorat",
+     * tags={"Mentorat"},
+     *
+     * @OA\RequestBody(
+     * required= true,
+     *
+     * @OA\JsonContent(
+     * required={"mentor_id", "message"},
+     *
+     * @OA\Property(property="mentor_id", type="integer", example= 1),
+     * @OA\Property(property="message", type="string", example= "Bonjour, j'aimerais que vous soyez mon mentor."),
+     * )
+     * ),
+     *
+     * @OA\Response(response= 201, description="Demande envoyée"),
+     * @OA\Response(response= 400, description="Demande déjà existante"),
+     * )
      */
-    #[OA\Post(
-        path: '/api/v1/mentorships',
-        summary: 'Demander un mentorat',
-        tags: ['Mentorat'],
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['mentor_id', 'message'],
-                properties: [
-                    new OA\Property(property: 'mentor_id', type: 'integer', example: 1),
-                    new OA\Property(property: 'message', type: 'string', example: "Bonjour, j'aimerais que vous soyez mon mentor."),
-                ]
-            )
-        ),
-        responses: [
-            new OA\Response(response: 201, description: 'Demande envoyée'),
-            new OA\Response(response: 400, description: 'Demande déjà existante'),
-        ]
-    )]
     public function store(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -130,31 +124,28 @@ class MentorshipController extends Controller
     }
 
     /**
-     * Annuler une demande de mentorat
+     * @OA\Delete(
+     * path="/api/v1/mentorships/{id}/cancel",
+     * summary="Annuler une demande de mentorat",
+     * tags={"Mentorat"},
+     *
+     * @OA\Parameter(name="id", in="path", required= true, @OA\Schema(type="integer")),
+     *
+     * @OA\RequestBody(
+     * required= true,
+     *
+     * @OA\JsonContent(
+     * required={"cancellation_reason"},
+     *
+     * @OA\Property(property="cancellation_reason", type="string", example= "Je n'ai plus besoin de mentorat."),
+     * )
+     * ),
+     *
+     * @OA\Response(response= 200, description="Demande annulée"),
+     * @OA\Response(response= 400, description= "Impossible d'annuler la demande"),
+     * @OA\Response(response= 404, description="Demande non trouvée"),
+     * )
      */
-    #[OA\Delete(
-        path: '/api/v1/mentorships/{id}/cancel',
-        summary: 'Annuler une demande de mentorat',
-        tags: ['Mentorat'],
-        security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-        ],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['cancellation_reason'],
-                properties: [
-                    new OA\Property(property: 'cancellation_reason', type: 'string', example: "Je n'ai plus besoin de mentorat."),
-                ]
-            )
-        ),
-        responses: [
-            new OA\Response(response: 200, description: 'Demande annulée'),
-            new OA\Response(response: 400, description: "Impossible d'annuler la demande"),
-            new OA\Response(response: 404, description: 'Demande non trouvée'),
-        ]
-    )]
     public function cancel(int $id, Request $request): JsonResponse
     {
         $user = $request->user();

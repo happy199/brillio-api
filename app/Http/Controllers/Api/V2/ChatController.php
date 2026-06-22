@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Chat\SendMessageRequest;
@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
 
 /**
- * Controller pour le chatbot d'orientation via API (V1)
+ * Controller pour le chatbot d'orientation via API
  */
 class ChatController extends Controller
 {
@@ -23,7 +23,7 @@ class ChatController extends Controller
 
     /**
      * @OA\Get(
-     * path="/api/v1/chat/conversations",
+     * path="/api/v2/chat/conversations",
      * summary= "Liste les conversations de l'utilisateur",
      * tags={"Chat"},
      *
@@ -55,7 +55,35 @@ class ChatController extends Controller
     }
 
     /**
-     * Crée une nouvelle conversation
+     * @OA\Post(
+     *     path="/api/v2/chat/conversations",
+     *     summary="Crée une nouvelle conversation d'orientation",
+     *     tags={"Chat"},
+     *     security={{"bearerAuth": {}}},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="title", type="string", example="Nouvelle discussion d'orientation")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=201,
+     *         description="Conversation créée avec succès",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Conversation créée"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=402, description="Solde insuffisant")
+     * )
      */
     public function createConversation(Request $request): JsonResponse
     {
@@ -88,7 +116,35 @@ class ChatController extends Controller
     }
 
     /**
-     * Récupère les messages d'une conversation
+     * @OA\Get(
+     *     path="/api/v2/chat/conversations/{id}",
+     *     summary="Récupère les messages d'une conversation d'orientation",
+     *     tags={"Chat"},
+     *     security={{"bearerAuth": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la conversation",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         description="Nombre de messages à récupérer",
+     *
+     *         @OA\Schema(type="integer", default=50)
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Messages récupérés avec succès"
+     *     ),
+     *     @OA\Response(response=404, description="Conversation non trouvée")
+     * )
      */
     public function messages(Request $request, int $conversationId): JsonResponse
     {
@@ -124,7 +180,7 @@ class ChatController extends Controller
 
     /**
      * @OA\Post(
-     * path="/api/v1/chat/send",
+     * path="/api/v2/chat/send",
      * summary= "Envoie un message à l'IA ou à un humain",
      * tags={"Chat"},
      *
@@ -223,7 +279,27 @@ class ChatController extends Controller
     }
 
     /**
-     * Supprime une conversation
+     * @OA\Delete(
+     *     path="/api/v2/chat/conversations/{id}",
+     *     summary="Supprime une conversation d'orientation",
+     *     tags={"Chat"},
+     *     security={{"bearerAuth": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la conversation",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Conversation supprimée avec succès"
+     *     ),
+     *     @OA\Response(response=404, description="Conversation non trouvée")
+     * )
      */
     public function deleteConversation(Request $request, int $conversationId): JsonResponse
     {
@@ -242,7 +318,28 @@ class ChatController extends Controller
     }
 
     /**
-     * Demande un support humain pour une conversation
+     * @OA\Post(
+     *     path="/api/v2/chat/conversations/{id}/request-human",
+     *     summary="Demande l'intervention d'un conseiller humain sur la conversation",
+     *     tags={"Chat"},
+     *     security={{"bearerAuth": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la conversation",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Demande de support humain enregistrée"
+     *     ),
+     *     @OA\Response(response=402, description="Solde insuffisant"),
+     *     @OA\Response(response=404, description="Conversation non trouvée")
+     * )
      */
     public function requestHumanSupport(Request $request, int $conversationId): JsonResponse
     {
@@ -304,7 +401,28 @@ class ChatController extends Controller
     }
 
     /**
-     * Annule une demande de support humain
+     * @OA\Post(
+     *     path="/api/v2/chat/conversations/{id}/cancel-human",
+     *     summary="Annule une demande d'intervention humaine en attente",
+     *     tags={"Chat"},
+     *     security={{"bearerAuth": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la conversation",
+     *
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Demande annulée avec succès. Retour à l'orientation IA."
+     *     ),
+     *     @OA\Response(response=400, description="Impossible d'annuler car un conseiller a déjà pris en charge la conversation"),
+     *     @OA\Response(response=404, description="Conversation non trouvée")
+     * )
      */
     public function cancelHumanSupport(Request $request, int $conversationId): JsonResponse
     {
