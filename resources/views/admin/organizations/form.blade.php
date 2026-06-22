@@ -245,5 +245,64 @@
             </form>
         </div>
     </div>
+
+    @if(isset($organization))
+    <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100 mt-8">
+        <div class="p-8">
+            <h3 class="text-lg font-bold text-gray-800 border-b border-gray-50 pb-2 mb-6">Gestion des Crédits</h3>
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <span class="text-sm text-gray-500">Solde actuel</span>
+                    <div class="text-3xl font-black text-gray-900 mt-1">{{ number_format($organization->credits_balance, 0, ',', ' ') }} <span class="text-lg text-gray-500 font-normal">crédits</span></div>
+                </div>
+            </div>
+
+            <form action="{{ route('organizations.credits', $organization) }}" method="POST">
+                @csrf
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
+                    <div class="sm:col-span-1">
+                        <label for="credit_action" class="block text-sm font-semibold text-gray-700 mb-2">Action</label>
+                        <select name="credit_action" id="credit_action" class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full transition-all" required onchange="toggleCreditAmount(this.value)">
+                            <option value="add">Ajouter des crédits</option>
+                            <option value="deduct">Diminuer des crédits</option>
+                            <option value="reset">Vider le solde</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-1" id="credit_amount_container">
+                        <label for="amount" class="block text-sm font-semibold text-gray-700 mb-2">Montant (crédits)</label>
+                        <input type="number" name="amount" id="amount" min="1" class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full transition-all" placeholder="Ex: 100">
+                    </div>
+                    <div class="sm:col-span-1">
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all uppercase tracking-wider text-sm flex items-center justify-center gap-2 h-[46px]" onclick="return confirm('Êtes-vous sûr de vouloir appliquer cette modification de crédit ?')">
+                            Appliquer
+                        </button>
+                    </div>
+                </div>
+                <p class="text-[11px] text-gray-500 mt-4 font-medium"><i class="fas fa-info-circle mr-1 text-indigo-500"></i> Cette action apparaîtra dans l'historique du portefeuille de l'organisation sous le libellé <strong>Réévaluation de crédit par Brillio</strong>.</p>
+            </form>
+        </div>
+    </div>
+    
+    @push('scripts')
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        function toggleCreditAmount(action) {
+            var container = document.getElementById('credit_amount_container');
+            var input = document.getElementById('amount');
+            if (action === 'reset') {
+                container.classList.add('hidden');
+                input.required = false;
+                input.value = '';
+            } else {
+                container.classList.remove('hidden');
+                input.required = true;
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            var select = document.getElementById('credit_action');
+            if (select) toggleCreditAmount(select.value);
+        });
+    </script>
+    @endpush
+    @endif
 </div>
 @endsection

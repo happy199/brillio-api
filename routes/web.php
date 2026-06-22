@@ -655,6 +655,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
         // Gestion des organisations
         Route::resource('organizations', \App\Http\Controllers\Admin\OrganizationController::class);
+        Route::post('organizations/{organization}/credits', [\App\Http\Controllers\Admin\OrganizationController::class, 'updateCredits'])->name('organizations.credits');
 
         // Gestion des recommandations (Établissements)
         Route::resource('establishments', \App\Http\Controllers\Admin\EstablishmentController::class);
