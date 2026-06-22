@@ -144,4 +144,53 @@ class OrganizationController extends Controller
         return redirect()->route('admin.organizations.index')
             ->with('success', 'Organisation supprimée avec succès.');
     }
+
+    /**
+     * Update the credit balance of the specified organization.
+     */
+    public function updateCredits(Request $request, Organization $organization, \App\Services\WalletService $walletService)
+    {
+        $validated = $request->validate([
+            'credit_action' => 'required|in:add,deduct,reset',
+            'amount' => 'required_if:credit_action,add,deduct|nullable|integer|min:1',
+        ]);
+
+        $action = $validated['credit_action'];
+        $amount = (int) ($validated['amount'] ?? 0);
+
+        try {
+            if ($action === 'add') {
+                $walletService->addCredits(
+                    $organization,
+                    $amount,
+                    'adjustment',
+                    'Réévaluation de crédit par Brillio'
+                );
+                $message = "Solde de l'organisation augmenté de {$amount} crédits.";
+            } elseif ($action === 'deduct') {
+                $walletService->deductCredits(
+                    $organization,
+                    $amount,
+                    'adjustment',
+                    'Réévaluation de crédit par Brillio'
+                );
+                $message = "Solde de l'organisation diminué de {$amount} crédits.";
+            } elseif ($action === 'reset') {
+                $currentBalance = $organization->credits_balance;
+                if ($currentBalance > 0) {
+                    $walletService->deductCredits(
+                        $organization,
+                        $currentBalance,
+                        'adjustment',
+                        'Réévaluation de crédit par Brillio (Remise à zéro)'
+                    );
+                }
+                $message = "Le solde de crédits de l'organisation a été vidé.";
+            }
+
+            return back()->with('success', $message ?? 'Aucune action effectuée.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de la réévaluation des crédits : '.$e->getMessage());
+        }
+    }
 }
