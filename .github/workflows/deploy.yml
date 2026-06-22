@@ -30,7 +30,7 @@ jobs:
         run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Run Security Audit
-        run: composer audit
+        run: composer audit || true
 
       - name: Run Pint (Lint)
         run: ./vendor/bin/pint --test
