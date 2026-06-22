@@ -15,6 +15,8 @@ use OpenApi\Annotations as OA;
  */
 class AcademicDocumentController extends Controller
 {
+    private const MSG_DOCUMENT_NOT_FOUND = 'Document non trouvé';
+
     /**
      * Taille maximale en bytes (5 Mo par défaut)
      */
@@ -148,7 +150,7 @@ class AcademicDocumentController extends Controller
         $document = $user->academicDocuments()->find($id);
 
         if (! $document) {
-            return $this->notFound('Document non trouvé');
+            return $this->notFound(self::MSG_DOCUMENT_NOT_FOUND);
         }
 
         return $this->success([
@@ -194,7 +196,7 @@ class AcademicDocumentController extends Controller
         }
 
         if (! $document) {
-            return $this->notFound('Document non trouvé');
+            return $this->notFound(self::MSG_DOCUMENT_NOT_FOUND);
         }
 
         if (! Storage::disk('local')->exists($document->file_path)) {
@@ -237,7 +239,7 @@ class AcademicDocumentController extends Controller
         $document = $user->academicDocuments()->find($id);
 
         if (! $document) {
-            return $this->notFound('Document non trouvé');
+            return $this->notFound(self::MSG_DOCUMENT_NOT_FOUND);
         }
 
         // Le modèle supprime automatiquement le fichier via l'event deleting

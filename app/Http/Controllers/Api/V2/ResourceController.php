@@ -43,12 +43,6 @@ class ResourceController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $userEducation = $user->education_level;
-        $userSituation = $user->situation;
-        $userInterests = $user->interests ?? [];
-        $userCountry = $user->country;
-        $userMbti = $user->personalityTest?->personality_type;
-
         $query = Resource::where('is_published', true)->where('is_validated', true);
 
         // Recherche textuelle

@@ -24,7 +24,7 @@ class ApiSessionTest extends TestCase
         ]);
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
 
-        $mentorship = Mentorship::factory()->create([
+        Mentorship::factory()->create([
             'mentor_id' => $mentor->id,
             'mentee_id' => $jeune->id,
             'status' => 'accepted',
@@ -60,7 +60,7 @@ class ApiSessionTest extends TestCase
         ]);
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
 
-        $mentorship = Mentorship::factory()->create([
+        Mentorship::factory()->create([
             'mentor_id' => $mentor->id,
             'mentee_id' => $jeune->id,
             'status' => 'accepted',
@@ -94,7 +94,7 @@ class ApiSessionTest extends TestCase
         $mentor2 = User::factory()->mentor()->create();
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
 
-        $mentorship = Mentorship::factory()->create([
+        Mentorship::factory()->create([
             'mentor_id' => $mentor1->id,
             'mentee_id' => $jeune->id,
             'status' => 'accepted',

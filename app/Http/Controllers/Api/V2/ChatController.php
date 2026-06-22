@@ -16,6 +16,8 @@ use OpenApi\Annotations as OA;
  */
 class ChatController extends Controller
 {
+    private const MSG_CONVERSATION_NOT_FOUND = 'Conversation non trouvée';
+
     public function __construct(
         private BrillioIAService $brillioIAService,
         private WalletService $walletService
@@ -154,7 +156,7 @@ class ChatController extends Controller
             ->first();
 
         if (! $conversation) {
-            return $this->notFound('Conversation non trouvée');
+            return $this->notFound(self::MSG_CONVERSATION_NOT_FOUND);
         }
 
         $limit = $request->integer('limit', 50);
@@ -212,7 +214,7 @@ class ChatController extends Controller
                 ->first();
 
             if (! $conversation) {
-                return $this->notFound('Conversation non trouvée');
+                return $this->notFound(self::MSG_CONVERSATION_NOT_FOUND);
             }
         } else {
             // Créer une nouvelle conversation
@@ -309,7 +311,7 @@ class ChatController extends Controller
             ->first();
 
         if (! $conversation) {
-            return $this->notFound('Conversation non trouvée');
+            return $this->notFound(self::MSG_CONVERSATION_NOT_FOUND);
         }
 
         $this->brillioIAService->deleteConversation($conversation);
@@ -349,21 +351,24 @@ class ChatController extends Controller
             ->first();
 
         if (! $conversation) {
-            return $this->notFound('Conversation non trouvée');
+            return $this->notFound(self::MSG_CONVERSATION_NOT_FOUND);
         }
 
-        // Vérifier si déjà en support humain
+        $cost = $this->walletService->getFeatureCost('contact_advisor', 10);
+        $errorResponse = null;
+
         if ($conversation->human_support_active) {
-            return $this->success([
+            $errorResponse = $this->success([
                 'conversation_id' => $conversation->id,
                 'needs_human_support' => true,
                 'human_support_active' => true,
             ], 'Un conseiller est déjà en train de vous aider.');
+        } elseif ($user->credits_balance < $cost) {
+            $errorResponse = $this->error("Solde insuffisant pour contacter un conseiller ($cost crédits requis).", 402);
         }
 
-        $cost = $this->walletService->getFeatureCost('contact_advisor', 10);
-        if ($user->credits_balance < $cost) {
-            return $this->error("Solde insuffisant pour contacter un conseiller ($cost crédits requis).", 402);
+        if ($errorResponse) {
+            return $errorResponse;
         }
 
         // Demander le support humain

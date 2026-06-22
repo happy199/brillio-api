@@ -17,6 +17,8 @@ use OpenApi\Annotations as OA;
  */
 class MentorController extends Controller
 {
+    private const MENTOR_PROFILE_NOT_FOUND = 'Profil mentor non trouvé';
+
     /**
      * @OA\Get(
      * path="/api/v2/mentors",
@@ -200,7 +202,7 @@ class MentorController extends Controller
         $profile = $user->mentorProfile;
 
         if (! $profile) {
-            return $this->notFound('Profil mentor non trouvé');
+            return $this->notFound(self::MENTOR_PROFILE_NOT_FOUND);
         }
 
         $step = $profile->roadmapSteps()->where('id', $stepId)->first();
@@ -225,7 +227,7 @@ class MentorController extends Controller
         $profile = $user->mentorProfile;
 
         if (! $profile) {
-            return $this->notFound('Profil mentor non trouvé');
+            return $this->notFound(self::MENTOR_PROFILE_NOT_FOUND);
         }
 
         $step = $profile->roadmapSteps()->where('id', $stepId)->first();
@@ -254,7 +256,7 @@ class MentorController extends Controller
         $profile = $user->mentorProfile;
 
         if (! $profile) {
-            return $this->notFound('Profil mentor non trouvé');
+            return $this->notFound(self::MENTOR_PROFILE_NOT_FOUND);
         }
 
         foreach ($validated['steps'] as $stepData) {

@@ -15,6 +15,8 @@ class ApiGapsTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const UPDATED_NAME = 'Updated Name';
+
     public function test_api_get_user_profile()
     {
         $user = User::factory()->create();
@@ -34,15 +36,15 @@ class ApiGapsTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->postJson('/api/v2/user/profile', [
-            'name' => 'Updated Name',
+            'name' => self::UPDATED_NAME,
             'phone' => '+22991111111',
         ]);
 
         $response->assertStatus(200)
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.user.name', 'Updated Name');
+            ->assertJsonPath('data.user.name', self::UPDATED_NAME);
 
-        $this->assertEquals('Updated Name', $user->fresh()->name);
+        $this->assertEquals(self::UPDATED_NAME, $user->fresh()->name);
     }
 
     public function test_api_get_onboarding_options()

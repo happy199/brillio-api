@@ -11,12 +11,14 @@ class SwaggerSecurityTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const TEST_ROUTE = '/_test_swagger_route';
+
     protected function setUp(): void
     {
         parent::setUp();
 
         // Enregistrer une route temporaire protégée par le middleware swagger_secure pour faciliter le test
-        Route::middleware(['web', 'swagger_secure'])->get('/_test_swagger_route', function () {
+        Route::middleware(['web', 'swagger_secure'])->get(self::TEST_ROUTE, function () {
             return response()->json(['allowed' => true]);
         });
     }
@@ -29,7 +31,7 @@ class SwaggerSecurityTest extends TestCase
         $this->artisan('config:clear');
         $this->app->detectEnvironment(fn () => 'local');
 
-        $response = $this->getJson('/_test_swagger_route');
+        $response = $this->getJson(self::TEST_ROUTE);
 
         $response->assertStatus(200);
         $response->assertJson(['allowed' => true]);
@@ -43,12 +45,12 @@ class SwaggerSecurityTest extends TestCase
         $this->app->detectEnvironment(fn () => 'production');
 
         // Requête JSON -> Doit retourner une erreur 403
-        $response = $this->getJson('/_test_swagger_route');
+        $response = $this->getJson(self::TEST_ROUTE);
         $response->assertStatus(403);
         $response->assertJson(['success' => false]);
 
         // Requête standard -> Doit rediriger vers la page de login admin
-        $response = $this->get('/_test_swagger_route');
+        $response = $this->get(self::TEST_ROUTE);
         $response->assertRedirect(route('admin.login'));
     }
 
@@ -64,7 +66,7 @@ class SwaggerSecurityTest extends TestCase
         ]);
 
         $response = $this->actingAs($jeune)
-            ->getJson('/_test_swagger_route');
+            ->getJson(self::TEST_ROUTE);
 
         $response->assertStatus(403);
     }
@@ -81,7 +83,7 @@ class SwaggerSecurityTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)
-            ->getJson('/_test_swagger_route');
+            ->getJson(self::TEST_ROUTE);
 
         $response->assertStatus(200);
         $response->assertJson(['allowed' => true]);

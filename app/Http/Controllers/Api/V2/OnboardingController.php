@@ -13,6 +13,8 @@ use OpenApi\Annotations as OA;
  */
 class OnboardingController extends Controller
 {
+    private const COTE_D_IVOIRE = "Cote d'Ivoire";
+
     /**
      * @OA\Get(
      *     path="/api/v2/onboarding",
@@ -104,7 +106,7 @@ class OnboardingController extends Controller
                         return;
                     }
                     if (! $this->isValidAfricanPhoneNumber($country, $value)) {
-                        $fail("Le numéro de téléphone n'est pas valide pour le pays sélectionné.");
+                        $fail("Le champ $attribute n'est pas un numéro de téléphone valide pour le pays sélectionné.");
                     }
                 },
             ],
@@ -175,7 +177,7 @@ class OnboardingController extends Controller
             $local = $clean;
         }
 
-        if ($country === 'Cote d\'Ivoire' && strlen($local) === 9 && in_array($local[0], ['1', '5', '7'])) {
+        if ($country === self::COTE_D_IVOIRE && strlen($local) === 9 && in_array($local[0], ['1', '5', '7'])) {
             $local = '0'.$local;
         }
         if ($country === 'Benin' && strlen($local) === 9 && in_array($local[0], ['1', '4', '5', '6', '9'])) {
@@ -214,7 +216,7 @@ class OnboardingController extends Controller
             $local = $clean;
         }
 
-        if ($country === 'Cote d\'Ivoire' && strlen($local) === 9 && in_array($local[0], ['1', '5', '7'])) {
+        if ($country === self::COTE_D_IVOIRE && strlen($local) === 9 && in_array($local[0], ['1', '5', '7'])) {
             $local = '0'.$local;
         }
         if ($country === 'Benin' && strlen($local) === 9 && in_array($local[0], ['1', '4', '5', '6', '9'])) {
@@ -258,7 +260,7 @@ class OnboardingController extends Controller
             'Ghana' => ['code' => '+233', 'lengths' => [9]],
             'Guinee' => ['code' => '+224', 'lengths' => [9]],
             'Guinee-Bissau' => ['code' => '+245', 'lengths' => [7, 9]],
-            'Cote d\'Ivoire' => ['code' => '+225', 'lengths' => [10]],
+            self::COTE_D_IVOIRE => ['code' => '+225', 'lengths' => [10]],
             'Kenya' => ['code' => '+254', 'lengths' => [9]],
             'Lesotho' => ['code' => '+266', 'lengths' => [8]],
             'Liberia' => ['code' => '+231', 'lengths' => [7, 9]],
@@ -318,7 +320,7 @@ class OnboardingController extends Controller
             'GH' => 'Ghana',
             'GN' => 'Guinee',
             'GW' => 'Guinee-Bissau',
-            'CI' => 'Cote d\'Ivoire',
+            'CI' => self::COTE_D_IVOIRE,
             'KE' => 'Kenya',
             'LS' => 'Lesotho',
             'LR' => 'Liberia',

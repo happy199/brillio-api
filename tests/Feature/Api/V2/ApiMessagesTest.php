@@ -12,6 +12,12 @@ class ApiMessagesTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const POSITION_SENIOR_DEV = 'Senior Developer';
+
+    private const TEST_MESSAGE_BODY = 'Test message';
+
+    private const MENTOR_BIO = 'Mentor bio';
+
     public function test_user_can_list_messages()
     {
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
@@ -19,8 +25,8 @@ class ApiMessagesTest extends TestCase
         $mentor->mentorProfile()->create([
             'is_published' => true,
             'is_validated' => true,
-            'bio' => 'Mentor bio',
-            'current_position' => 'Senior Developer',
+            'bio' => self::MENTOR_BIO,
+            'current_position' => self::POSITION_SENIOR_DEV,
             'specialization' => 'tech',
         ]);
 
@@ -49,8 +55,8 @@ class ApiMessagesTest extends TestCase
         $mentor->mentorProfile()->create([
             'is_published' => true,
             'is_validated' => true,
-            'bio' => 'Mentor bio',
-            'current_position' => 'Senior Developer',
+            'bio' => self::MENTOR_BIO,
+            'current_position' => self::POSITION_SENIOR_DEV,
             'specialization' => 'tech',
         ]);
 
@@ -61,15 +67,15 @@ class ApiMessagesTest extends TestCase
         ]);
 
         $response = $this->actingAs($jeune)->postJson("/api/v2/messages/{$mentorship->id}", [
-            'body' => 'Test message',
+            'body' => self::TEST_MESSAGE_BODY,
         ]);
 
         $response->assertStatus(201)
-            ->assertJsonFragment(['body' => 'Test message']);
+            ->assertJsonFragment(['body' => self::TEST_MESSAGE_BODY]);
 
         $this->assertDatabaseHas('messages', [
             'mentorship_id' => $mentorship->id,
-            'body' => 'Test message',
+            'body' => self::TEST_MESSAGE_BODY,
         ]);
     }
 
@@ -80,8 +86,8 @@ class ApiMessagesTest extends TestCase
         $mentor->mentorProfile()->create([
             'is_published' => true,
             'is_validated' => true,
-            'bio' => 'Mentor bio',
-            'current_position' => 'Senior Developer',
+            'bio' => self::MENTOR_BIO,
+            'current_position' => self::POSITION_SENIOR_DEV,
             'specialization' => 'tech',
         ]);
 
@@ -92,7 +98,7 @@ class ApiMessagesTest extends TestCase
         ]);
 
         $response = $this->actingAs($jeune)->postJson("/api/v2/messages/{$mentorship->id}", [
-            'body' => 'Test message',
+            'body' => self::TEST_MESSAGE_BODY,
         ]);
 
         $response->assertStatus(403);

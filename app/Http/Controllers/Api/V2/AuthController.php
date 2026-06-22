@@ -289,27 +289,28 @@ class AuthController extends Controller
             ->where('email', $request->email)
             ->first();
 
+        $errorMsg = null;
+
         if (! $resetRecord || ! Hash::check($request->token, $resetRecord->token)) {
             \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-
-            return $this->error('Ce lien de réinitialisation est invalide ou a expiré.', 422);
-        }
-
-        if (now()->subMinutes(60)->gt($resetRecord->created_at)) {
+            $errorMsg = 'Ce lien de réinitialisation est invalide ou a expiré.';
+        } elseif (now()->subMinutes(60)->gt($resetRecord->created_at)) {
             \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-
-            return $this->error('Ce lien de réinitialisation a expiré.', 422);
+            $errorMsg = 'Ce lien de réinitialisation a expiré.';
+        } else {
+            $user = User::where('email', $request->email)->first();
+            if (! $user) {
+                $errorMsg = 'Aucun utilisateur trouvé avec cette adresse email.';
+            } else {
+                $user->password = Hash::make($request->password);
+                $user->save();
+                \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            }
         }
 
-        $user = User::where('email', $request->email)->first();
-        if (! $user) {
-            return $this->error('Aucun utilisateur trouvé avec cette adresse email.', 422);
+        if ($errorMsg) {
+            return $this->error($errorMsg, 422);
         }
-
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        \Illuminate\Support\Facades\DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
         return $this->success(null, 'Votre mot de passe a été réinitialisé avec succès.');
     }

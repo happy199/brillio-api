@@ -475,21 +475,26 @@ class SessionController extends Controller
             return $this->error('Aucune transcription disponible.', 404);
         }
 
+        $errorResponse = null;
         // Credit Check & Deduction for youths
         if ($user->user_type === 'jeune') {
             $cost = $this->walletService->getFeatureCost('transcription_download', 5);
 
             if ($user->credits_balance < $cost) {
-                return $this->error("Votre solde de crédits est insuffisant ($cost crédits requis).", 402);
+                $errorResponse = $this->error("Votre solde de crédits est insuffisant ($cost crédits requis).", 402);
+            } else {
+                $this->walletService->deductCredits(
+                    $user,
+                    $cost,
+                    'feature_use',
+                    "Téléchargement de la transcription de la séance : {$session->title}",
+                    $session
+                );
             }
+        }
 
-            $this->walletService->deductCredits(
-                $user,
-                $cost,
-                'feature_use',
-                "Téléchargement de la transcription de la séance : {$session->title}",
-                $session
-            );
+        if ($errorResponse) {
+            return $errorResponse;
         }
 
         $pdf = \PDF::loadView('common.reports.transcription_pdf', compact('session', 'user'));

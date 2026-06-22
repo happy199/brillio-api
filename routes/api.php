@@ -4,6 +4,16 @@ use App\Http\Controllers\Api\V2\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+if (! defined('ROUTE_REGISTER')) {
+    define('ROUTE_REGISTER', '/register');
+}
+if (! defined('ROUTE_MENTORSHIPS')) {
+    define('ROUTE_MENTORSHIPS', '/mentorships');
+}
+if (! defined('ROUTE_CHAT_CONVERSATIONS')) {
+    define('ROUTE_CHAT_CONVERSATIONS', '/chat/conversations');
+}
+
 /*
  |--------------------------------------------------------------------------
  | API Routes
@@ -26,7 +36,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // V2 Authentication (Guest)
 Route::prefix('v2')->group(function () {
-    Route::post('/register', [\App\Http\Controllers\Api\V2\AuthController::class, 'register']);
+    Route::post(ROUTE_REGISTER, [\App\Http\Controllers\Api\V2\AuthController::class, 'register']);
     Route::post('/login', [\App\Http\Controllers\Api\V2\AuthController::class, 'login']);
     Route::post('/password/email', [\App\Http\Controllers\Api\V2\AuthController::class, 'sendResetLinkEmail']);
     Route::post('/password/reset', [\App\Http\Controllers\Api\V2\AuthController::class, 'resetPassword']);
@@ -34,12 +44,12 @@ Route::prefix('v2')->group(function () {
 
 // V1 Authentication (Guest)
 Route::prefix('v1')->group(function () {
-    Route::post('/register', [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
+    Route::post(ROUTE_REGISTER, [\App\Http\Controllers\Api\V1\AuthController::class, 'register']);
     Route::post('/login', [\App\Http\Controllers\Api\V1\AuthController::class, 'login']);
 });
 
 // Default Fallback Authentication (pointed to V2 by import)
-Route::post('/register', [AuthController::class, 'register']);
+Route::post(ROUTE_REGISTER, [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -62,8 +72,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/resources/{id}/unlock', [\App\Http\Controllers\Api\V1\ResourceController::class, 'unlock']);
 
         // Mentorship
-        Route::get('/mentorships', [\App\Http\Controllers\Api\V1\MentorshipController::class, 'index']);
-        Route::post('/mentorships', [\App\Http\Controllers\Api\V1\MentorshipController::class, 'store']);
+        Route::get(ROUTE_MENTORSHIPS, [\App\Http\Controllers\Api\V1\MentorshipController::class, 'index']);
+        Route::post(ROUTE_MENTORSHIPS, [\App\Http\Controllers\Api\V1\MentorshipController::class, 'store']);
         Route::post('/mentorships/{id}/cancel', [\App\Http\Controllers\Api\V1\MentorshipController::class, 'cancel']);
 
         // Sessions
@@ -99,7 +109,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/organizations/{id}/track-click', [\App\Http\Controllers\Api\V1\OrganizationController::class, 'trackClick']);
 
         // Chat
-        Route::get('/chat/conversations', [\App\Http\Controllers\Api\V1\ChatController::class, 'conversations']);
+        Route::get(ROUTE_CHAT_CONVERSATIONS, [\App\Http\Controllers\Api\V1\ChatController::class, 'conversations']);
         Route::post('/chat/send', [\App\Http\Controllers\Api\V1\ChatController::class, 'send']);
     });
 
@@ -114,8 +124,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/resources/{id}/unlock', [\App\Http\Controllers\Api\V2\ResourceController::class, 'unlock']);
 
         // Mentorship
-        Route::get('/mentorships', [\App\Http\Controllers\Api\V2\MentorshipController::class, 'index']);
-        Route::post('/mentorships', [\App\Http\Controllers\Api\V2\MentorshipController::class, 'store']);
+        Route::get(ROUTE_MENTORSHIPS, [\App\Http\Controllers\Api\V2\MentorshipController::class, 'index']);
+        Route::post(ROUTE_MENTORSHIPS, [\App\Http\Controllers\Api\V2\MentorshipController::class, 'store']);
         Route::post('/mentorships/{id}/cancel', [\App\Http\Controllers\Api\V2\MentorshipController::class, 'cancel']);
         Route::post('/mentorships/{id}/disconnect', [\App\Http\Controllers\Api\V2\MentorshipController::class, 'disconnect']);
         Route::post('/mentorships/{id}/accept', [\App\Http\Controllers\Api\V2\MentorshipController::class, 'accept']);
@@ -174,8 +184,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/organizations/{id}/track-click', [\App\Http\Controllers\Api\V2\OrganizationController::class, 'trackClick']);
 
         // Chat (orientation & conseiller)
-        Route::get('/chat/conversations', [\App\Http\Controllers\Api\V2\ChatController::class, 'conversations']);
-        Route::post('/chat/conversations', [\App\Http\Controllers\Api\V2\ChatController::class, 'createConversation']);
+        Route::get(ROUTE_CHAT_CONVERSATIONS, [\App\Http\Controllers\Api\V2\ChatController::class, 'conversations']);
+        Route::post(ROUTE_CHAT_CONVERSATIONS, [\App\Http\Controllers\Api\V2\ChatController::class, 'createConversation']);
         Route::get('/chat/conversations/{id}', [\App\Http\Controllers\Api\V2\ChatController::class, 'messages']);
         Route::delete('/chat/conversations/{id}', [\App\Http\Controllers\Api\V2\ChatController::class, 'deleteConversation']);
         Route::post('/chat/conversations/{id}/request-human', [\App\Http\Controllers\Api\V2\ChatController::class, 'requestHumanSupport']);

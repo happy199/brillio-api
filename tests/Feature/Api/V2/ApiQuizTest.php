@@ -43,7 +43,7 @@ class ApiQuizTest extends TestCase
             'is_correct' => true,
         ]);
 
-        $optionIncorrect = QuizOption::create([
+        QuizOption::create([
             'quiz_question_id' => $question->id,
             'option_text' => '5',
             'is_correct' => false,

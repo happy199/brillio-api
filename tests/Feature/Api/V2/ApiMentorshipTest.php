@@ -11,14 +11,18 @@ class ApiMentorshipTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const MENTOR_BIO = 'Mentor bio';
+
+    private const POSITION_SENIOR_DEV = 'Senior Developer';
+
     public function test_mentor_can_accept_mentorship()
     {
         $mentor = User::factory()->mentor()->create();
         $mentor->mentorProfile()->create([
             'is_published' => true,
             'is_validated' => true,
-            'bio' => 'Mentor bio',
-            'current_position' => 'Senior Developer',
+            'bio' => self::MENTOR_BIO,
+            'current_position' => self::POSITION_SENIOR_DEV,
             'specialization' => 'tech',
         ]);
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
@@ -46,8 +50,8 @@ class ApiMentorshipTest extends TestCase
         $mentor->mentorProfile()->create([
             'is_published' => true,
             'is_validated' => true,
-            'bio' => 'Mentor bio',
-            'current_position' => 'Senior Developer',
+            'bio' => self::MENTOR_BIO,
+            'current_position' => self::POSITION_SENIOR_DEV,
             'specialization' => 'tech',
         ]);
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
@@ -72,8 +76,8 @@ class ApiMentorshipTest extends TestCase
         $mentor->mentorProfile()->create([
             'is_published' => true,
             'is_validated' => true,
-            'bio' => 'Mentor bio',
-            'current_position' => 'Senior Developer',
+            'bio' => self::MENTOR_BIO,
+            'current_position' => self::POSITION_SENIOR_DEV,
             'specialization' => 'tech',
         ]);
         $jeune = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
