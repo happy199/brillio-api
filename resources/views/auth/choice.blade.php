@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 
-@section('title', 'Rejoignez Brillio')
-@section('heading', 'Rejoignez la communauté Brillio')
+@section('title', 'Rejoignez ' . (isset($current_organization) ? $current_organization->name : 'Brillio'))
+@section('heading', 'Rejoignez la communauté ' . (isset($current_organization) ? $current_organization->name : 'Brillio'))
 @section('subheading', 'Choisissez votre profil pour commencer')
 
 @section('content')

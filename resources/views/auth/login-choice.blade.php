@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Connexion - Brillio')
+@section('title', 'Connexion - ' . (isset($current_organization) ? $current_organization->name : 'Brillio'))
 @section('heading', 'Bon retour parmi nous !')
 @section('subheading', 'Choisissez votre type de compte pour vous connecter')
 

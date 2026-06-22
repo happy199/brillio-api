@@ -49,6 +49,13 @@ class ResolveOrganizationByDomain
 
             // Share with all Blade views directly
             View::share('current_organization', $organization);
+
+            // Override SEO Configs for whitelabeling
+            config(['seo.site.name' => $organization->name]);
+            if ($organization->logo_url) {
+                config(['seo.organization.logo' => $organization->logo_url]);
+                config(['seo.default.image' => $organization->logo_url]);
+            }
         }
 
         return $next($request);

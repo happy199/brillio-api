@@ -198,11 +198,18 @@
     <div class="relative z-10 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <!-- Logo -->
         <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+            @php
+                $siteName = $org ? $org->name : 'Brillio';
+            @endphp
             <a href="{{ route('home') }}" class="inline-flex items-center gap-2">
-                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                    <span class="text-2xl font-bold text-primary-600">B</span>
-                </div>
-                <span class="text-3xl font-bold text-white">Brillio</span>
+                @if($org && $org->logo_url)
+                    <img src="{{ $org->logo_url }}" alt="{{ $siteName }}" class="h-12 w-auto object-contain rounded-xl shadow-lg bg-white p-1">
+                @else
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                        <span class="text-2xl font-bold text-primary-600">{{ substr($siteName, 0, 1) }}</span>
+                    </div>
+                @endif
+                <span class="text-3xl font-bold text-white">{{ $siteName }}</span>
             </a>
             <h2 class="mt-6 text-2xl font-bold text-white">
                 @yield('heading')
