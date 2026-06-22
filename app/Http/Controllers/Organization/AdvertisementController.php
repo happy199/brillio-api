@@ -7,6 +7,7 @@ use App\Models\Advertisement;
 use App\Traits\HasAdvertisementForm;
 use App\Traits\HasWebpUpload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AdvertisementController extends Controller
 {
@@ -116,7 +117,7 @@ class AdvertisementController extends Controller
         abort_unless($advertisement->organization_id === $organizationId, 403);
 
         if ($advertisement->image_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($advertisement->image_path);
+            Storage::disk('public')->delete($advertisement->image_path);
         }
 
         $advertisement->delete();

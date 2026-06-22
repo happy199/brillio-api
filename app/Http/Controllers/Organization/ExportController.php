@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
+use App\Models\Organization;
+use App\Models\OrganizationInvitation;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
@@ -94,7 +97,7 @@ class ExportController extends Controller
 
             $query = User::where('sponsored_by_organization_id', $organizationId);
 
-            $totalInvited = \App\Models\OrganizationInvitation::where('organization_id', $organizationId)
+            $totalInvited = OrganizationInvitation::where('organization_id', $organizationId)
                 ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
                 ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
                 ->count();
@@ -123,7 +126,7 @@ class ExportController extends Controller
             fputcsv($file, ['Sessions réalisées', $sessionsCount, 'Nombre total de sessions de mentorat terminées']);
 
             // Mentor Metrics
-            $organization = \App\Models\Organization::find($organizationId);
+            $organization = Organization::find($organizationId);
             $internalMentorsIds = $organization->mentors()->pluck('users.id');
 
             $activeMentorsIds = MentoringSession::whereHas('mentees', function ($q) use ($organizationId) {
@@ -241,7 +244,7 @@ class ExportController extends Controller
     private function exportGeneralPdf($organization, $startDate, $endDate, $fileName)
     {
         $organizationId = $organization->id;
-        $totalInvited = \App\Models\OrganizationInvitation::where('organization_id', $organizationId)
+        $totalInvited = OrganizationInvitation::where('organization_id', $organizationId)
             ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
             ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
             ->count();
@@ -292,7 +295,7 @@ class ExportController extends Controller
             ->get();
         $ageStats = ['18-24' => 0, '25-30' => 0, '30+' => 0];
         foreach ($usersForAge as $user) {
-            $age = \Carbon\Carbon::parse($user->date_of_birth)->age;
+            $age = Carbon::parse($user->date_of_birth)->age;
             if ($age >= 18 && $age <= 24) {
                 $ageStats['18-24']++;
             } elseif ($age >= 25 && $age <= 30) {

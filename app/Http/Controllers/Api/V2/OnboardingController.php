@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\UserResource;
+use App\Traits\HandlesAfricanPhoneNumbers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -13,7 +14,7 @@ use OpenApi\Annotations as OA;
  */
 class OnboardingController extends Controller
 {
-    use \App\Traits\HandlesAfricanPhoneNumbers;
+    use HandlesAfricanPhoneNumbers;
 
     private const COTE_D_IVOIRE = "Cote d'Ivoire";
 

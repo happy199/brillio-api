@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Str;
 use OpenApi\Attributes as OA;
 
@@ -117,7 +119,7 @@ class Organization extends Model
     /**
      * Get all users linked to this organization via the pivot table.
      */
-    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'organization_user')
             ->withPivot(['role', 'referral_code_used'])
@@ -127,7 +129,7 @@ class Organization extends Model
     /**
      * Get all mentors linked to this organization via the pivot table.
      */
-    public function mentors(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function mentors(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'organization_user')
             ->where('users.user_type', 'mentor')
@@ -152,7 +154,7 @@ class Organization extends Model
         return $this->hasMany(Establishment::class);
     }
 
-    public function establishmentClicks(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function establishmentClicks(): HasManyThrough
     {
         return $this->hasManyThrough(EstablishmentClick::class, Establishment::class);
     }
@@ -160,7 +162,7 @@ class Organization extends Model
     /**
      * Get all interests for this organization's establishments.
      */
-    public function establishmentInterests(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function establishmentInterests(): HasManyThrough
     {
         return $this->hasManyThrough(EstablishmentInterest::class, Establishment::class);
     }

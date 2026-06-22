@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Advertisement;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,7 +13,7 @@ trait HasAdvertisementForm
      * Abort with a validation error when PHP's upload_max_filesize is exceeded.
      * Must be called before request()->validate() because the file is lost at that point.
      */
-    protected function abortIfFileTooLarge(): ?\Illuminate\Http\RedirectResponse
+    protected function abortIfFileTooLarge(): ?RedirectResponse
     {
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_INI_SIZE) {
             return back()->withInput()->withErrors([

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Establishment;
 use App\Models\Organization;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -148,7 +149,7 @@ class OrganizationController extends Controller
     /**
      * Update the credit balance of the specified organization.
      */
-    public function updateCredits(Request $request, Organization $organization, \App\Services\WalletService $walletService)
+    public function updateCredits(Request $request, Organization $organization, WalletService $walletService)
     {
         $validated = $request->validate([
             'credit_action' => 'required|in:add,deduct,reset',

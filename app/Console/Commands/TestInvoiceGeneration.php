@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\Billing\AdminPaymentNotificationMail;
 use App\Mail\Billing\PaymentReceiptMail;
 use App\Models\MonerooTransaction;
 use App\Models\Organization;
@@ -72,7 +73,7 @@ class TestInvoiceGeneration extends Command
             Mail::to($receiverEmail)->send(new PaymentReceiptMail($transaction, $entity));
             $this->info("Facture {$entity->name} envoyée avec succès à {$receiverEmail} !");
 
-            Mail::to($receiverEmail)->send(new \App\Mail\Billing\AdminPaymentNotificationMail($transaction, $entity));
+            Mail::to($receiverEmail)->send(new AdminPaymentNotificationMail($transaction, $entity));
             $this->info("Notification admin {$entity->name} envoyée avec succès à {$receiverEmail} !");
         } catch (\Exception $e) {
             $this->error('Erreur : '.$e->getMessage());

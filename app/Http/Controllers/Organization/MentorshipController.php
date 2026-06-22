@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class MentorshipController extends Controller
@@ -18,7 +20,7 @@ class MentorshipController extends Controller
         $organization = $this->getCurrentOrganization();
 
         if (! $organization->isPro()) {
-            $mentorships = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+            $mentorships = new LengthAwarePaginator([], 0, 12);
             $orgMentorIds = [];
         } else {
             $query = Mentorship::query()
@@ -41,7 +43,7 @@ class MentorshipController extends Controller
 
     protected $notificationService;
 
-    public function __construct(\App\Services\MentorshipNotificationService $notificationService)
+    public function __construct(MentorshipNotificationService $notificationService)
     {
         $this->notificationService = $notificationService;
     }

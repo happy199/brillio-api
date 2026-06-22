@@ -30,6 +30,7 @@ use App\Mail\Wallet\PayoutRequested;
 use App\Mail\Wallet\SessionPaid;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
+use App\Models\PayoutRequest;
 use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Models\User;
@@ -547,7 +548,7 @@ class TestEmails extends Command
         $mentorProfile = (object) [
             'user' => $mentor,
         ];
-        $payout = new \App\Models\PayoutRequest([
+        $payout = new PayoutRequest([
             'amount' => 10000,
             'fee' => 500,
             'net_amount' => 9500,
@@ -567,26 +568,26 @@ class TestEmails extends Command
         ];
 
         // Test Success
-        $payoutSuccess = new \App\Models\PayoutRequest([
+        $payoutSuccess = new PayoutRequest([
             'amount' => 10000,
             'fee' => 500,
             'net_amount' => 9500,
             'payment_method' => 'Orange Money',
             'phone_number' => '+225 0707070707',
-            'status' => \App\Models\PayoutRequest::STATUS_COMPLETED,
+            'status' => PayoutRequest::STATUS_COMPLETED,
         ]);
         $payoutSuccess->setRelation('mentorProfile', $mentorProfile);
         Mail::to($recipient)->send(new PayoutProcessed($payoutSuccess));
 
         $this->line('⚠️ Envoi Payout Processed (Failed)...');
         // Test Fail
-        $payoutFail = new \App\Models\PayoutRequest([
+        $payoutFail = new PayoutRequest([
             'amount' => 10000,
             'fee' => 500,
             'net_amount' => 9500,
             'payment_method' => 'Orange Money',
             'phone_number' => '+225 0707070707',
-            'status' => \App\Models\PayoutRequest::STATUS_FAILED,
+            'status' => PayoutRequest::STATUS_FAILED,
             'error_message' => 'Numéro de téléphone invalide ou solde insuffisant sur le compte émetteur.',
         ]);
         $payoutFail->setRelation('mentorProfile', $mentorProfile);

@@ -1,5 +1,7 @@
 <?php
 
+use Monolog\Handler\NullHandler;
+
 return [
 
     /*
@@ -70,7 +72,7 @@ return [
 
         'null' => [
             'driver' => 'monolog',
-            'handler' => Monolog\Handler\NullHandler::class,
+            'handler' => NullHandler::class,
         ],
 
         'emergency' => [

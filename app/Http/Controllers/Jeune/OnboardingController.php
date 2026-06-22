@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
+use App\Traits\HandlesAfricanPhoneNumbers;
 use Illuminate\Http\Request;
 
 class OnboardingController extends Controller
 {
-    use \App\Traits\HandlesAfricanPhoneNumbers;
+    use HandlesAfricanPhoneNumbers;
 
     /**
      * Affiche le formulaire d'onboarding

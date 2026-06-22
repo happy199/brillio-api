@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\MentoringSession;
+use App\Models\User;
 
 trait GeneratesCalendarLinks
 {
@@ -25,7 +26,7 @@ trait GeneratesCalendarLinks
     /**
      * Generate ICS file content for a session
      */
-    public function generateIcsContent(MentoringSession $session, \App\Models\User $recipient): string
+    public function generateIcsContent(MentoringSession $session, User $recipient): string
     {
         $timezone = $session->timezone ?: 'UTC';
 

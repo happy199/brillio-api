@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\MentorProfile;
 use App\Models\Mentorship;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,7 @@ class MentorshipController extends Controller
 {
     protected $notificationService;
 
-    public function __construct(\App\Services\MentorshipNotificationService $notificationService)
+    public function __construct(MentorshipNotificationService $notificationService)
     {
         $this->notificationService = $notificationService;
     }

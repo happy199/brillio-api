@@ -9,6 +9,7 @@ use App\Models\Organization;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Response;
 
 class MentorsController extends Controller
@@ -58,7 +59,7 @@ class MentorsController extends Controller
         }
 
         if (! $organization->isPro()) {
-            $mentors = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 12);
+            $mentors = new LengthAwarePaginator([], 0, 12);
         } else {
             $mentors = $query->latest()->paginate(12)->withQueryString();
         }

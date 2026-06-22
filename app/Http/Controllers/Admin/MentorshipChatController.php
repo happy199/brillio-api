@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
+use App\Models\Message;
 use Illuminate\Http\Request;
 
 class MentorshipChatController extends Controller
@@ -65,7 +66,7 @@ class MentorshipChatController extends Controller
     /**
      * Lever le signalement d'un message
      */
-    public function unflagMessage(\App\Models\Message $message)
+    public function unflagMessage(Message $message)
     {
         if ($message->is_flagged) {
             $message->update([

@@ -36,7 +36,7 @@ class ApiAccountTest extends TestCase
 
         $response->assertStatus(200);
 
-        $archivedUser = \App\Models\User::find($user->id);
+        $archivedUser = User::find($user->id);
         $this->assertTrue((bool) $archivedUser->is_archived);
     }
 }

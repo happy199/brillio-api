@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Mail\Engagement\ReengagementMail;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Mail\Mailable;
 
 class SendInactivityReminders extends EngagementReminderJob
 {
@@ -24,7 +25,7 @@ class SendInactivityReminders extends EngagementReminderJob
             });
     }
 
-    protected function buildMailable(User $user): \Illuminate\Mail\Mailable
+    protected function buildMailable(User $user): Mailable
     {
         return new ReengagementMail($user);
     }

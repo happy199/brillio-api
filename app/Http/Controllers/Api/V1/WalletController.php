@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
+use App\Models\CreditPack;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -57,7 +58,7 @@ class WalletController extends Controller
     public function packs(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $packs = \App\Models\CreditPack::where('user_type', $user->user_type ?? 'jeune')
+        $packs = CreditPack::where('user_type', $user->user_type ?? 'jeune')
             ->where('is_active', true)
             ->orderBy('display_order')
             ->get();

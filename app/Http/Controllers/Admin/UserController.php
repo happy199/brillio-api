@@ -3,11 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\Admin\AccountBlockedMail;
+use App\Mail\Admin\AccountDeletedMail;
+use App\Mail\Admin\PromotionProposalMail;
+use App\Models\JeuneProfile;
 use App\Models\MentorProfile;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 /**
@@ -113,7 +120,7 @@ class UserController extends Controller
             ]);
         } elseif ($userType === 'jeune') {
             if (class_exists('App\Models\JeuneProfile')) {
-                \App\Models\JeuneProfile::create([
+                JeuneProfile::create([
                     'user_id' => $user->id,
                     'bio' => 'Compte de démonstration.',
                 ]);
@@ -191,10 +198,10 @@ class UserController extends Controller
         }
 
         try {
-            \Illuminate\Support\Facades\Mail::to($user->email)
-                ->send(new \App\Mail\Admin\AccountDeletedMail($user->name));
+            Mail::to($user->email)
+                ->send(new AccountDeletedMail($user->name));
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur envoi notification suppression compte: '.$e->getMessage());
+            Log::error('Erreur envoi notification suppression compte: '.$e->getMessage());
         }
 
         $user->delete();
@@ -284,14 +291,14 @@ class UserController extends Controller
             'archived_reason' => 'Promotion administrative initiée vers le statut Mentor.',
         ]);
 
-        $acceptUrl = \Illuminate\Support\Facades\URL::signedRoute('auth.accept-promotion', ['user' => $user->id]);
+        $acceptUrl = URL::signedRoute('auth.accept-promotion', ['user' => $user->id]);
 
         try {
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\Admin\PromotionProposalMail($user, $acceptUrl));
+            Mail::to($user->email)->send(new PromotionProposalMail($user, $acceptUrl));
 
             return back()->with('success', "Le compte de {$user->name} a été archivé et la proposition de promotion a été envoyée.");
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur envoi proposition promotion: '.$e->getMessage());
+            Log::error('Erreur envoi proposition promotion: '.$e->getMessage());
 
             return back()->with('error', "Le compte a été archivé mais une erreur est survenue lors de l'envoi de l'e-mail.");
         }
@@ -315,10 +322,10 @@ class UserController extends Controller
         ]);
 
         try {
-            \Illuminate\Support\Facades\Mail::to($user->email)
-                ->send(new \App\Mail\Admin\AccountBlockedMail($user->name, $reason));
+            Mail::to($user->email)
+                ->send(new AccountBlockedMail($user->name, $reason));
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erreur envoi notification blocage compte: '.$e->getMessage());
+            Log::error('Erreur envoi notification blocage compte: '.$e->getMessage());
         }
 
         return back()->with('success', "L'utilisateur {$user->name} a été bloqué.");

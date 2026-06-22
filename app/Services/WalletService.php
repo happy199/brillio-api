@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Coupon;
+use App\Models\MentoringSession;
+use App\Models\Organization;
 use App\Models\SystemSetting;
 use App\Models\User;
 use App\Models\WalletTransaction;
@@ -20,7 +23,7 @@ class WalletService
 
         return DB::transaction(function () use ($entity, $amount, $type, $description, $related) {
             $isUser = $entity instanceof User;
-            $isOrg = $entity instanceof \App\Models\Organization;
+            $isOrg = $entity instanceof Organization;
 
             if (! $isUser && ! $isOrg) {
                 throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
@@ -75,7 +78,7 @@ class WalletService
 
         return DB::transaction(function () use ($entity, $cost, $type, $description, $related) {
             $isUser = $entity instanceof User;
-            $isOrg = $entity instanceof \App\Models\Organization;
+            $isOrg = $entity instanceof Organization;
 
             if (! $isUser && ! $isOrg) {
                 throw new \Exception("L'entité doit être un utilisateur ou une organisation.");
@@ -85,7 +88,7 @@ class WalletService
             if ($isUser) {
                 $entity = User::where('id', $entity->id)->lockForUpdate()->first();
             } else {
-                $entity = \App\Models\Organization::where('id', $entity->id)->lockForUpdate()->first();
+                $entity = Organization::where('id', $entity->id)->lockForUpdate()->first();
             }
 
             if ($entity->credits_balance < $cost) {
@@ -203,7 +206,7 @@ class WalletService
     /**
      * Effectue le paiement différé au mentor après la séance (Une fois le compte rendu soumis)
      */
-    public function payoutMentor(\App\Models\MentoringSession $session)
+    public function payoutMentor(MentoringSession $session)
     {
         if (! $session->is_paid || $session->status !== 'completed') {
             return;
@@ -211,7 +214,7 @@ class WalletService
 
         // Vérifier si déjà payé pour éviter les doublons
         $alreadyPaid = WalletTransaction::where('user_id', $session->mentor_id)
-            ->where('related_type', \App\Models\MentoringSession::class)
+            ->where('related_type', MentoringSession::class)
             ->where('related_id', $session->id)
             ->where('type', 'income')
             ->exists();
@@ -244,7 +247,7 @@ class WalletService
             );
 
             // Notification au mentor que l'argent est libéré
-            app(\App\Services\MentorshipNotificationService::class)->sendIncomeReleased($session, $mentor, $mentorCredits);
+            app(MentorshipNotificationService::class)->sendIncomeReleased($session, $mentor, $mentorCredits);
         });
     }
 
@@ -253,7 +256,7 @@ class WalletService
      *
      * @param  float  $ratio  Facteur de remboursement (0.75 ou 1.0)
      */
-    public function refundJeune(\App\Models\MentoringSession $session, User $user, float $ratio = 1.0)
+    public function refundJeune(MentoringSession $session, User $user, float $ratio = 1.0)
     {
         if (! $session->is_paid) {
             return;
@@ -261,7 +264,7 @@ class WalletService
 
         // On cherche la transaction de débit initiale pour cette séance
         $debitTransaction = WalletTransaction::where('user_id', $user->id)
-            ->where('related_type', \App\Models\MentoringSession::class)
+            ->where('related_type', MentoringSession::class)
             ->where('related_id', $session->id)
             ->where('amount', '<', 0)
             ->first();
@@ -293,13 +296,13 @@ class WalletService
     /**
      * Utilise un coupon de manière atomique
      */
-    public function redeemCoupon(User $user, string $code): \App\Models\Coupon
+    public function redeemCoupon(User $user, string $code): Coupon
     {
         $code = strtoupper($code);
 
         return DB::transaction(function () use ($user, $code) {
             // Verrouillage pessimiste du coupon pour éviter les double rechargements concurrents
-            $coupon = \App\Models\Coupon::where('code', $code)->lockForUpdate()->first();
+            $coupon = Coupon::where('code', $code)->lockForUpdate()->first();
 
             if (! $coupon) {
                 throw new \Exception("Ce coupon n'existe pas.");

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Purchase;
 use App\Models\Resource;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -239,7 +240,7 @@ class ResourceController extends Controller
 
                     // Notification par email au jeune
                     DB::afterCommit(function () use ($jeune, $resource, $organization) {
-                        app(\App\Services\MentorshipNotificationService::class)->sendResourceGiftedNotification($jeune, $resource, $organization);
+                        app(MentorshipNotificationService::class)->sendResourceGiftedNotification($jeune, $resource, $organization);
                     }
                     );
                 }

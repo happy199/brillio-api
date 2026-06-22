@@ -7,8 +7,10 @@ use App\Http\Requests\Chat\SendMessageRequest;
 use App\Models\ChatConversation;
 use App\Services\BrillioIAService;
 use App\Services\WalletService;
+use App\Traits\HasCreditValidation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Annotations as OA;
 
 /**
@@ -16,10 +18,14 @@ use OpenApi\Annotations as OA;
  */
 class ChatController extends Controller
 {
+    use HasCreditValidation;
+
     public function __construct(
         private BrillioIAService $brillioIAService,
-        private WalletService $walletService
-    ) {}
+        WalletService $walletService
+    ) {
+        $this->walletService = $walletService;
+    }
 
     /**
      * @OA\Get(
@@ -62,12 +68,12 @@ class ChatController extends Controller
         $user = $request->user();
         $title = $request->input('title');
 
-        $cost = $this->walletService->getFeatureCost('new_chat', 10);
-        if ($user->credits_balance < $cost) {
-            return $this->error("Solde insuffisant pour créer une nouvelle conversation ($cost crédits requis).", 402);
+        $cost = $this->getFeatureCost('new_chat', 10);
+        if (! $this->hasSufficientCredits($user, 'new_chat', 10)) {
+            return $this->insufficientCreditsError($cost);
         }
 
-        $conversation = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $title, $cost) {
+        $conversation = DB::transaction(function () use ($user, $title, $cost) {
             $this->walletService->deductCredits(
                 $user,
                 $cost,
@@ -160,12 +166,12 @@ class ChatController extends Controller
             }
         } else {
             // Créer une nouvelle conversation
-            $cost = $this->walletService->getFeatureCost('new_chat', 10);
-            if ($user->credits_balance < $cost) {
-                return $this->error("Solde insuffisant pour créer une nouvelle conversation ($cost crédits requis).", 402);
+            $cost = $this->getFeatureCost('new_chat', 10);
+            if (! $this->hasSufficientCredits($user, 'new_chat', 10)) {
+                return $this->insufficientCreditsError($cost);
             }
 
-            $conversation = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $cost) {
+            $conversation = DB::transaction(function () use ($user, $cost) {
                 $this->walletService->deductCredits(
                     $user,
                     $cost,
@@ -264,13 +270,13 @@ class ChatController extends Controller
             ], 'Un conseiller est déjà en train de vous aider.');
         }
 
-        $cost = $this->walletService->getFeatureCost('contact_advisor', 10);
-        if ($user->credits_balance < $cost) {
-            return $this->error("Solde insuffisant pour contacter un conseiller ($cost crédits requis).", 402);
+        $cost = $this->getFeatureCost('contact_advisor', 10);
+        if (! $this->hasSufficientCredits($user, 'contact_advisor', 10)) {
+            return $this->insufficientCreditsError($cost);
         }
 
         // Demander le support humain
-        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $conversation, $cost) {
+        DB::transaction(function () use ($user, $conversation, $cost) {
             $this->walletService->deductCredits(
                 $user,
                 $cost,

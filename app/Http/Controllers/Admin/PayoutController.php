@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PayoutRequest;
+use App\Services\MentorshipNotificationService;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 
 class PayoutController extends Controller
@@ -69,7 +71,7 @@ class PayoutController extends Controller
         $payout->mentorProfile->increment('total_withdrawn', $payout->amount);
 
         // Notification email
-        app(\App\Services\MentorshipNotificationService::class)->sendPayoutCompleted($payout);
+        app(MentorshipNotificationService::class)->sendPayoutCompleted($payout);
 
         return back()->with('success', 'Le retrait a été marqué comme complété avec succès.');
     }
@@ -97,7 +99,7 @@ class PayoutController extends Controller
 
         // Rembourser les crédits
         try {
-            $walletService = app(\App\Services\WalletService::class);
+            $walletService = app(WalletService::class);
             $creditPrice = $walletService->getCreditPrice('mentor');
             $creditsRefund = intval($payout->amount / $creditPrice);
 
@@ -113,7 +115,7 @@ class PayoutController extends Controller
         }
 
         // Notification email
-        app(\App\Services\MentorshipNotificationService::class)->sendPayoutFailed($payout);
+        app(MentorshipNotificationService::class)->sendPayoutFailed($payout);
 
         return back()->with('success', 'Le retrait a été rejeté et le mentor a été remboursé.');
     }

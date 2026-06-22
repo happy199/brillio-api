@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Jeune;
 use App\Http\Controllers\Controller;
 use App\Models\Mentorship;
 use App\Models\Message;
+use App\Services\ContentModerator;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -94,7 +96,7 @@ class MessagesController extends Controller
 
         // Modération du contenu
         if ($request->filled('body')) {
-            $moderator = new \App\Services\ContentModerator;
+            $moderator = new ContentModerator;
             $moderationResult = $moderator->moderate($request->body, $mentorship);
 
             if ($moderationResult['is_flagged']) {
@@ -108,7 +110,7 @@ class MessagesController extends Controller
         $message = Message::create($data);
 
         // Envoyer une notification par email (immédiate)
-        app(\App\Services\MentorshipNotificationService::class)->sendNewMessageNotification($message);
+        app(MentorshipNotificationService::class)->sendNewMessageNotification($message);
 
         return back()->with('success', 'Message envoyé.');
     }
@@ -144,7 +146,7 @@ class MessagesController extends Controller
         $data = ['body' => $request->body];
 
         // Modération du contenu
-        $moderator = new \App\Services\ContentModerator;
+        $moderator = new ContentModerator;
         $moderationResult = $moderator->moderate($request->body, $message->mentorship);
 
         if ($moderationResult['is_flagged']) {

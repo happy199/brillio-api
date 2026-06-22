@@ -4,6 +4,12 @@ namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
 use App\Models\CreditPack;
+use App\Models\MonerooTransaction;
+use App\Models\WalletTransaction;
+use App\Services\CurrencyService;
+use App\Services\MonerooService;
+use App\Services\WalletService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class WalletController extends Controller
@@ -21,12 +27,12 @@ class WalletController extends Controller
             ->orderBy('price')
             ->get();
 
-        $recentTransactions = \App\Models\WalletTransaction::where('organization_id', $organization->id)
+        $recentTransactions = WalletTransaction::where('organization_id', $organization->id)
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
 
-        $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
+        $creditPrice = app(WalletService::class)->getCreditPrice('organization');
 
         return view('organization.wallet.index', compact('creditPacks', 'recentTransactions', 'creditPrice', 'organization'));
     }
@@ -51,11 +57,11 @@ class WalletController extends Controller
 
         $returnUrl = route('organization.payment.callback');
 
-        $monerooService = app(\App\Services\MonerooService::class);
+        $monerooService = app(MonerooService::class);
         $user = auth()->user();
 
         // Create pending transaction record
-        $localTransaction = \App\Models\MonerooTransaction::create([
+        $localTransaction = MonerooTransaction::create([
             'user_id' => $user->id,
             'user_type' => get_class($user),
             'amount' => $amount,
@@ -107,7 +113,7 @@ class WalletController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        $query = \App\Models\WalletTransaction::where('organization_id', $organization->id)
+        $query = WalletTransaction::where('organization_id', $organization->id)
             ->orderByDesc('created_at');
 
         if ($request->filled('date_from')) {
@@ -119,7 +125,7 @@ class WalletController extends Controller
 
         $transactions = $query->paginate(15)->withQueryString();
 
-        $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
+        $creditPrice = app(WalletService::class)->getCreditPrice('organization');
 
         return view('organization.wallet.history', compact('transactions', 'creditPrice', 'organization'));
     }
@@ -131,7 +137,7 @@ class WalletController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        $query = \App\Models\WalletTransaction::where('organization_id', $organization->id)
+        $query = WalletTransaction::where('organization_id', $organization->id)
             ->orderByDesc('created_at');
 
         if ($request->filled('date_from')) {
@@ -142,9 +148,9 @@ class WalletController extends Controller
         }
 
         $transactions = $query->get();
-        $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
+        $creditPrice = app(WalletService::class)->getCreditPrice('organization');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('organization.wallet.export-pdf', [
+        $pdf = Pdf::loadView('organization.wallet.export-pdf', [
             'transactions' => $transactions,
             'creditPrice' => $creditPrice,
             'organization' => $organization,
@@ -162,7 +168,7 @@ class WalletController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        $query = \App\Models\WalletTransaction::where('organization_id', $organization->id)
+        $query = WalletTransaction::where('organization_id', $organization->id)
             ->orderByDesc('created_at');
 
         if ($request->filled('date_from')) {
@@ -173,7 +179,7 @@ class WalletController extends Controller
         }
 
         $transactions = $query->get();
-        $creditPrice = app(\App\Services\WalletService::class)->getCreditPrice('organization');
+        $creditPrice = app(WalletService::class)->getCreditPrice('organization');
 
         $filename = 'transactions-brillio-'.now()->format('Y-m-d').'.csv';
 
@@ -184,12 +190,12 @@ class WalletController extends Controller
 
         $callback = function () use ($transactions, $creditPrice) {
             $file = fopen('php://output', 'w');
-            $currency = \App\Services\CurrencyService::getCurrentCurrency();
+            $currency = CurrencyService::getCurrentCurrency();
             fputcsv($file, ['Date', 'Type', 'Description', 'Crédits', "Valeur ({$currency})"]);
 
             foreach ($transactions as $t) {
                 $fcfaAmount = $t->amount * $creditPrice;
-                $convertedAmount = \App\Services\CurrencyService::convert($fcfaAmount, 'XOF', $currency);
+                $convertedAmount = CurrencyService::convert($fcfaAmount, 'XOF', $currency);
                 fputcsv($file, [
                     $t->created_at->format('d/m/Y H:i'),
                     match (strtolower($t->type)) {

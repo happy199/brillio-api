@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -23,12 +24,12 @@ return new class extends Migration
 
         // Data Migration: Link existing sponsored users to their organizations
         // Use DB facade to avoid dependency on models during migration
-        $users = \Illuminate\Support\Facades\DB::table('users')
+        $users = DB::table('users')
             ->whereNotNull('sponsored_by_organization_id')
             ->get();
 
         foreach ($users as $user) {
-            \Illuminate\Support\Facades\DB::table('organization_user')->insert([
+            DB::table('organization_user')->insert([
                 'user_id' => $user->id,
                 'organization_id' => $user->sponsored_by_organization_id,
                 'referral_code_used' => $user->referral_code_used,

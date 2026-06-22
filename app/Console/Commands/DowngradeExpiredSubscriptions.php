@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Organization;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -54,7 +55,7 @@ class DowngradeExpiredSubscriptions extends Command
             ]);
 
             try {
-                app(\App\Services\MentorshipNotificationService::class)->sendSubscriptionDowngradedNotification($organization, $newPlan);
+                app(MentorshipNotificationService::class)->sendSubscriptionDowngradedNotification($organization, $newPlan);
             } catch (\Exception $e) {
                 Log::error("Failed to send subscription downgrade notification for organization {$organization->id}: ".$e->getMessage());
             }

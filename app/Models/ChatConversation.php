@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,7 +59,7 @@ class ChatConversation extends Model
     /**
      * Retourne les N derniers messages pour le contexte IA
      */
-    public function getLastMessages(int $count = 10): \Illuminate\Database\Eloquent\Collection
+    public function getLastMessages(int $count = 10): Collection
     {
         return $this->messages()
             ->orderBy('created_at', 'desc')

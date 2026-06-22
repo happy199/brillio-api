@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Purchase;
 use App\Models\Resource;
+use App\Models\ResourceView;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
+use App\Traits\HasCreditValidation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,10 +21,14 @@ use OpenApi\Annotations as OA;
  */
 class ResourceController extends Controller
 {
+    use HasCreditValidation;
+
     public function __construct(
         private WalletService $walletService,
-        private \App\Services\MentorshipNotificationService $notificationService
-    ) {}
+        private MentorshipNotificationService $notificationService
+    ) {
+        $this->walletService = $walletService;
+    }
 
     /**
      * @OA\Get(
@@ -145,7 +152,7 @@ class ResourceController extends Controller
         // Enregistrer la vue
         $resource->increment('views_count');
         if (! $resource->is_premium) {
-            \App\Models\ResourceView::firstOrCreate([
+            ResourceView::firstOrCreate([
                 'user_id' => $user->id,
                 'resource_id' => $resource->id,
             ]);
@@ -195,7 +202,7 @@ class ResourceController extends Controller
         }
 
         if ($user->credits_balance < $unlockCost) {
-            return $this->error("Solde insuffisant. Cette ressource coûte {$unlockCost} crédits.", 400);
+            return $this->insufficientCreditsError($unlockCost);
         }
 
         DB::transaction(function () use ($user, $resource, $unlockCost) {

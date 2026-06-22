@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Mentorship;
+
 class ContentModerator
 {
     /**
@@ -17,7 +19,7 @@ class ContentModerator
      * Moderate content: detect PII and keywords.
      * Returns an array with is_flagged, redacted, and reason.
      */
-    public function moderate(string $content, ?\App\Models\Mentorship $mentorship = null): array
+    public function moderate(string $content, ?Mentorship $mentorship = null): array
     {
         $isFlagged = false;
         $reasons = [];

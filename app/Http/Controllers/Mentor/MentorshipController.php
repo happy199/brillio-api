@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateMentorshipKeywords;
 use App\Models\Mentorship;
+use App\Services\MentorshipNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -58,10 +60,10 @@ class MentorshipController extends Controller
         ]);
 
         // Notification email au jeune
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipAccepted($mentorship);
+        app(MentorshipNotificationService::class)->sendMentorshipAccepted($mentorship);
 
         // Lancer la génération de mots-clés par IA en tâche de fond
-        \App\Jobs\GenerateMentorshipKeywords::dispatch($mentorship);
+        GenerateMentorshipKeywords::dispatch($mentorship);
 
         return redirect()->back()->with('success', 'Demande de mentorat acceptée avec succès.');
     }
@@ -86,7 +88,7 @@ class MentorshipController extends Controller
         ]);
 
         // Notification email au jeune
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipRefused($mentorship, $request->refusal_reason);
+        app(MentorshipNotificationService::class)->sendMentorshipRefused($mentorship, $request->refusal_reason);
 
         return redirect()->back()->with('success', 'Demande refusée.');
     }
@@ -111,7 +113,7 @@ class MentorshipController extends Controller
         ]);
 
         // Notification (Mentor, Jeune, Org)
-        app(\App\Services\MentorshipNotificationService::class)->sendMentorshipTerminated($mentorship, Auth::user(), $request->diction_reason);
+        app(MentorshipNotificationService::class)->sendMentorshipTerminated($mentorship, Auth::user(), $request->diction_reason);
 
         return redirect()->back()->with('success', 'Mentorat terminé.');
     }

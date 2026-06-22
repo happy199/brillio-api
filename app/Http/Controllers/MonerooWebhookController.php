@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Mail\Billing\AdminPaymentNotificationMail;
 use App\Mail\Billing\PaymentReceiptMail;
+use App\Models\CreditPack;
 use App\Models\MonerooTransaction;
+use App\Models\Organization;
 use App\Models\PayoutRequest;
 use App\Services\MentorshipNotificationService;
 use App\Services\MonerooService;
 use App\Services\WalletService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -96,7 +99,7 @@ class MonerooWebhookController extends Controller
     /**
      * Handle successful payment
      */
-    protected function handlePaymentSuccess(array $paymentData): \Illuminate\Http\JsonResponse
+    protected function handlePaymentSuccess(array $paymentData): JsonResponse
     {
         $monerooTransactionId = $paymentData['id'];
         $transaction = MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
@@ -195,7 +198,7 @@ class MonerooWebhookController extends Controller
     /**
      * Handle failed payment
      */
-    protected function handlePaymentFailed(array $paymentData): \Illuminate\Http\JsonResponse
+    protected function handlePaymentFailed(array $paymentData): JsonResponse
     {
         $monerooTransactionId = $paymentData['id'];
         $transaction = MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
@@ -211,7 +214,7 @@ class MonerooWebhookController extends Controller
     /**
      * Handle cancelled payment
      */
-    protected function handlePaymentCancelled(array $paymentData): \Illuminate\Http\JsonResponse
+    protected function handlePaymentCancelled(array $paymentData): JsonResponse
     {
         $monerooTransactionId = $paymentData['id'];
         $transaction = MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
@@ -227,7 +230,7 @@ class MonerooWebhookController extends Controller
     /**
      * Handle successful payout
      */
-    protected function handlePayoutSuccess(array $payoutData): \Illuminate\Http\JsonResponse
+    protected function handlePayoutSuccess(array $payoutData): JsonResponse
     {
         $monerooPayoutId = $payoutData['id'];
         $payoutRequest = PayoutRequest::where('moneroo_payout_id', $monerooPayoutId)->first();
@@ -279,7 +282,7 @@ class MonerooWebhookController extends Controller
     /**
      * Handle failed payout
      */
-    protected function handlePayoutFailed(array $payoutData): \Illuminate\Http\JsonResponse
+    protected function handlePayoutFailed(array $payoutData): JsonResponse
     {
         $monerooPayoutId = $payoutData['id'];
         $payoutRequest = PayoutRequest::where('moneroo_payout_id', $monerooPayoutId)->first();
@@ -347,7 +350,7 @@ class MonerooWebhookController extends Controller
      */
     protected function handleSubscriptionActivation($transaction, $entity): void
     {
-        if (! ($entity instanceof \App\Models\Organization)) {
+        if (! ($entity instanceof Organization)) {
             Log::warning('Subscription payment received but entity is not an organization', [
                 'transaction_id' => $transaction->id,
                 'entity_type' => get_class($entity),
@@ -366,7 +369,7 @@ class MonerooWebhookController extends Controller
             return;
         }
 
-        $plan = \App\Models\CreditPack::find($planId);
+        $plan = CreditPack::find($planId);
         if (! $plan) {
             Log::error('Subscription plan not found', ['plan_id' => $planId, 'transaction_id' => $transaction->id]);
 

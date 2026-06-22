@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPasswordMail;
+use App\Models\AccountTypeMigration;
 use App\Models\MentorProfile;
+use App\Models\OrganizationInvitation;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
 use App\Services\SupabaseAuthService;
+use App\Services\UserAvatarService;
+use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
@@ -16,6 +21,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 
 /**
  * Controller pour l'authentification web (jeunes et mentors)
@@ -25,7 +31,7 @@ class WebAuthController extends Controller
 {
     public function __construct(
         private SupabaseAuthService $supabase,
-        private \App\Services\UserAvatarService $avatarService,
+        private UserAvatarService $avatarService,
         private MentorshipNotificationService $notificationService
     ) {}
 
@@ -121,7 +127,7 @@ class WebAuthController extends Controller
         // --- NEW: Mentor Auto-linking via Invitations ---
         $referralCode = session('referral_code');
         if ($referralCode) {
-            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+            $invitation = OrganizationInvitation::where('referral_code', $referralCode)
                 ->where('status', 'pending')
                 ->whereDate('expires_at', '>=', now())
                 ->first();
@@ -182,7 +188,7 @@ class WebAuthController extends Controller
             $referralCode = $request->get('ref');
 
             // Validate that the invitation exists
-            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
+            $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
 
             if ($invitation) {
                 if ($invitation->isValid()) {
@@ -248,7 +254,7 @@ class WebAuthController extends Controller
             $referralCode = $request->get('ref');
 
             // Validate that the invitation exists
-            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
+            $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
 
             if ($invitation) {
                 if ($invitation->isValid()) {
@@ -286,7 +292,7 @@ class WebAuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email:rfc,dns|unique:users,email',
-            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)->letters()->numbers()],
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ], [
             'name.required' => 'Le nom complet est obligatoire.',
             'email.required' => 'L\'adresse email est obligatoire.',
@@ -316,7 +322,7 @@ class WebAuthController extends Controller
         ]);
 
         if ($referralCode) {
-            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+            $invitation = OrganizationInvitation::where('referral_code', $referralCode)
                 ->where('status', 'pending')
                 ->whereDate('expires_at', '>=', now()) // Only if NOT expired
                 ->first();
@@ -424,7 +430,7 @@ class WebAuthController extends Controller
             // Check for referral code in session (existing user logging in via link)
             $referralCode = session('referral_code');
             if ($referralCode) {
-                $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                $invitation = OrganizationInvitation::where('referral_code', $referralCode)
                     ->where('status', 'pending')
                     ->whereDate('expires_at', '>=', now())
                     ->first();
@@ -745,7 +751,7 @@ class WebAuthController extends Controller
             // Check for referral code in session (existing user logging in via link)
             $referralCode = session('referral_code');
             if ($referralCode) {
-                $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                $invitation = OrganizationInvitation::where('referral_code', $referralCode)
                     ->where('status', 'pending')
                     ->whereDate('expires_at', '>=', now())
                     ->first();
@@ -769,7 +775,7 @@ class WebAuthController extends Controller
             $organizationId = null;
 
             if ($referralCode) {
-                $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)
+                $invitation = OrganizationInvitation::where('referral_code', $referralCode)
                     ->where('status', 'pending')
                     ->whereDate('expires_at', '>=', now())
                     ->first();
@@ -847,7 +853,7 @@ class WebAuthController extends Controller
             $referralCode = $request->get('ref');
 
             // Validate that the invitation exists
-            $invitation = \App\Models\OrganizationInvitation::where('referral_code', $referralCode)->first();
+            $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
 
             if ($invitation) {
                 if ($invitation->isValid()) {
@@ -1095,7 +1101,7 @@ class WebAuthController extends Controller
 
         // Envoyer l'email
         try {
-            Mail::to($user)->send(new \App\Mail\ResetPasswordMail($user, $token));
+            Mail::to($user)->send(new ResetPasswordMail($user, $token));
         } catch (\Exception $e) {
             Log::error('Erreur envoi email reset password: '.$e->getMessage());
 
@@ -1140,7 +1146,7 @@ class WebAuthController extends Controller
         }
 
         // Vérifier que le token n'a pas expiré (10 minutes)
-        $createdAt = \Carbon\Carbon::parse($resetRecord->created_at);
+        $createdAt = Carbon::parse($resetRecord->created_at);
         if ($createdAt->addMinutes(10)->isPast()) {
             \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
@@ -1199,7 +1205,7 @@ class WebAuthController extends Controller
         }
 
         // Compte archivé → Créer un token de migration temporaire
-        $migration = \App\Models\AccountTypeMigration::create([
+        $migration = AccountTypeMigration::create([
             'user_id' => $user->id,
             'old_type' => $user->user_type,
             'new_type' => $newType,
@@ -1226,7 +1232,7 @@ class WebAuthController extends Controller
      */
     public function showConfirmTypeChange(Request $request)
     {
-        $migration = \App\Models\AccountTypeMigration::where('token', $request->token)
+        $migration = AccountTypeMigration::where('token', $request->token)
             ->where('expires_at', '>', now())
             ->firstOrFail();
 
@@ -1244,7 +1250,7 @@ class WebAuthController extends Controller
      */
     public function confirmTypeChange(Request $request)
     {
-        $migration = \App\Models\AccountTypeMigration::where('token', $request->token)
+        $migration = AccountTypeMigration::where('token', $request->token)
             ->where('expires_at', '>', now())
             ->firstOrFail();
 
@@ -1266,7 +1272,7 @@ class WebAuthController extends Controller
     /**
      * Migre le compte vers le nouveau type
      */
-    protected function migrateAccountType(User $user, \App\Models\AccountTypeMigration $migration)
+    protected function migrateAccountType(User $user, AccountTypeMigration $migration)
     {
         // Réactiver si archivé
         if ($user->is_archived) {
@@ -1320,7 +1326,7 @@ class WebAuthController extends Controller
     /**
      * Garde le type actuel et redirige vers la bonne page de connexion
      */
-    protected function keepCurrentType(User $user, \App\Models\AccountTypeMigration $migration)
+    protected function keepCurrentType(User $user, AccountTypeMigration $migration)
     {
         // Supprimer le token de migration
         $migration->delete();

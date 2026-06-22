@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
+use App\Models\PersonalityTest;
 use App\Models\Purchase;
 use App\Models\Resource;
 use App\Models\ResourceView;
 use App\Models\User;
+use App\Models\WalletTransaction;
 use App\Services\BrillioIAService;
 use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
@@ -176,7 +178,7 @@ class ResourceController extends Controller
         }
 
         // Personality Types (MBTI) - Alignement sur TOUS les jeunes
-        $mbtiStats = \App\Models\PersonalityTest::query()
+        $mbtiStats = PersonalityTest::query()
             ->join('users', 'personality_tests.user_id', '=', 'users.id')
             ->where('users.user_type', 'jeune')
             ->where('personality_tests.is_current', true)
@@ -575,7 +577,7 @@ class ResourceController extends Controller
             ! empty($validated['targeting']['interests'])
         );
 
-        $alreadyPaid = \App\Models\WalletTransaction::where('related_type', Resource::class)
+        $alreadyPaid = WalletTransaction::where('related_type', Resource::class)
             ->where('related_id', $resource->id)
             ->where('type', 'service_fee')
             ->exists();

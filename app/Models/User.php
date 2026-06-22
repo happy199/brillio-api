@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Notifications\VerifyEmail;
+use App\Notifications\VerifyOrganizationEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -164,9 +167,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification(): void
     {
         if ($this->isOrganization()) {
-            $this->notify(new \App\Notifications\VerifyOrganizationEmail);
+            $this->notify(new VerifyOrganizationEmail);
         } else {
-            $this->notify(new \App\Notifications\VerifyEmail);
+            $this->notify(new VerifyEmail);
         }
     }
 
@@ -237,7 +240,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Relation vers les messages de chat (Assistant IA)
      */
-    public function chatMessages(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function chatMessages(): HasManyThrough
     {
         return $this->hasManyThrough(ChatMessage::class, ChatConversation::class, 'user_id', 'conversation_id');
     }
@@ -524,7 +527,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Relation vers toutes les organisations auxquelles appartient l'utilisateur
      */
-    public function organizations(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function organizations(): BelongsToMany
     {
         return $this->belongsToMany(Organization::class, 'organization_user')
             ->withPivot(['role', 'referral_code_used'])

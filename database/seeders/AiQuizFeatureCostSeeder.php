@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\SystemSetting;
 use Illuminate\Database\Seeder;
 
 class AiQuizFeatureCostSeeder extends Seeder
@@ -11,7 +12,7 @@ class AiQuizFeatureCostSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\SystemSetting::updateOrCreate(
+        SystemSetting::updateOrCreate(
             ['key' => 'feature_cost_ai_generation'],
             ['value' => '5', 'type' => 'integer']
         );

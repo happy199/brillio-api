@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
+use App\Models\CreditPack;
+use App\Models\MonerooTransaction;
+use App\Services\MonerooService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +32,7 @@ class WalletController extends Controller
         $creditPrice = $this->walletService->getCreditPrice('jeune');
 
         // Packs dynamiques depuis la DB
-        $packs = \App\Models\CreditPack::where('user_type', 'jeune')
+        $packs = CreditPack::where('user_type', 'jeune')
             ->where('is_active', true)
             ->orderBy('display_order')
             ->get();
@@ -46,7 +49,7 @@ class WalletController extends Controller
             'pack_id' => 'required|exists:credit_packs,id',
         ]);
 
-        $pack = \App\Models\CreditPack::findOrFail($validated['pack_id']);
+        $pack = CreditPack::findOrFail($validated['pack_id']);
 
         // Security check
         if ($pack->user_type !== 'jeune') {
@@ -58,10 +61,10 @@ class WalletController extends Controller
         $user = Auth::user();
 
         try {
-            $monerooService = app(\App\Services\MonerooService::class);
+            $monerooService = app(MonerooService::class);
 
             // Create pending transaction record
-            $transaction = \App\Models\MonerooTransaction::create([
+            $transaction = MonerooTransaction::create([
                 'user_id' => $user->id,
                 'user_type' => get_class($user),
                 'amount' => $amountXOF,

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Models\MentorProfile;
 use App\Models\Mentorship;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
+use App\Traits\HasCreditValidation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,10 +21,14 @@ use OpenApi\Annotations as OA;
  */
 class SessionController extends Controller
 {
+    use HasCreditValidation;
+
     public function __construct(
-        private WalletService $walletService,
-        private \App\Services\MentorshipNotificationService $notificationService
-    ) {}
+        WalletService $walletService,
+        private MentorshipNotificationService $notificationService
+    ) {
+        $this->walletService = $walletService;
+    }
 
     /**
      * @OA\Get(
@@ -203,8 +209,8 @@ class SessionController extends Controller
         }
 
         $price = $session->credit_cost;
-        if ($user->credits_balance < $price) {
-            return $this->error("Solde insuffisant ($price crédits requis).", 402);
+        if (! $this->hasSufficientCredits($user, 'session_payment', $price)) {
+            return $this->insufficientCreditsError($price);
         }
 
         try {

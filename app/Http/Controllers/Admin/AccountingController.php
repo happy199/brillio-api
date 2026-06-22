@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\Billing\PaymentReceiptMail;
 use App\Models\MonerooTransaction;
+use App\Models\Organization;
 use App\Models\PayoutRequest;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
@@ -164,7 +165,7 @@ class AccountingController extends Controller
             $entity = $user->organization;
         }
 
-        $recipientEmail = ($entity instanceof \App\Models\Organization)
+        $recipientEmail = ($entity instanceof Organization)
             ? ($entity->contact_email ?: $user->email)
             : $entity->email;
 

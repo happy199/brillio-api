@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
@@ -12,6 +13,7 @@ use OpenApi\Annotations as OA;
  *     title="Brillio API",
  *     version="1.0.0",
  *     description="API Backend for Brillio Orientation System",
+ *
  *     @OA\Contact(
  *         email="contact@brillio.africa"
  *     )
@@ -128,7 +130,7 @@ class Controller extends BaseController
     /**
      * Get current organization for authenticated user
      */
-    protected function getCurrentOrganization(): \App\Models\Organization
+    protected function getCurrentOrganization(): Organization
     {
         $user = auth()->user();
 
@@ -147,7 +149,7 @@ class Controller extends BaseController
         }
 
         // 2. Legacy / Owner check (Matching contact email)
-        $organization = \App\Models\Organization::where('contact_email', $user->email)->first();
+        $organization = Organization::where('contact_email', $user->email)->first();
         if ($organization) {
             // Auto-fix: link user to organization with admin role
             $user->organizations()->syncWithoutDetaching([

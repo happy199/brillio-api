@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Exceptions\OpenRouterException;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
+use App\Models\PersonalityTest;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Service pour l'integration du chatbot DeepSeek via OpenRouter
@@ -309,11 +312,11 @@ class BrillioIAService
                     if ($content) {
                         $result = $this->cleanResponse($content, $formatting);
                     } else {
-                        throw new \App\Exceptions\OpenRouterException('Réponse API sans contenu', $response->status());
+                        throw new OpenRouterException('Réponse API sans contenu', $response->status());
                     }
                 } else {
                     $error = json_decode($response->body(), true)['error']['message'] ?? 'Erreur inconnue';
-                    throw new \App\Exceptions\OpenRouterException("OpenRouter Error: {$error}", $response->status());
+                    throw new OpenRouterException("OpenRouter Error: {$error}", $response->status());
                 }
             }
         } catch (\Exception $e) {
@@ -441,7 +444,7 @@ class BrillioIAService
             '- Le texte doit être concis et professionnel.';
 
         // Limiter la taille de la transcription pour éviter de dépasser le contexte
-        $truncatedTranscription = \Illuminate\Support\Str::limit($transcriptionText, 15000);
+        $truncatedTranscription = Str::limit($transcriptionText, 15000);
 
         $prompt = "Voici la transcription de la séance :\n\n".$truncatedTranscription;
 
@@ -572,7 +575,7 @@ class BrillioIAService
      */
     public function generateEstablishments(array $existingNames = [])
     {
-        $mbtiProfiles = array_keys(\App\Models\PersonalityTest::PERSONALITY_TYPES);
+        $mbtiProfiles = array_keys(PersonalityTest::PERSONALITY_TYPES);
         $mbtiProfilesStr = implode(', ', $mbtiProfiles);
 
         $systemPrompt = "Tu es un expert en enseignement supérieur et en formation professionnelle en Afrique.\n".
@@ -670,7 +673,7 @@ class BrillioIAService
 
         // Nettoyer les balises HTML du contenu pour le prompt
         $cleanContent = strip_tags($content ?? '');
-        $cleanContent = \Illuminate\Support\Str::limit($cleanContent, 10000); // Limiter à 10k caractères
+        $cleanContent = Str::limit($cleanContent, 10000); // Limiter à 10k caractères
 
         $prompt = "Voici les informations de la ressource :\n\n".
                   "TITRE: {$title}\n".

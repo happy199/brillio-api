@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
+use App\Services\ContentModerator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -150,7 +151,7 @@ class ChatController extends Controller
         ]);
 
         // Modération du contenu
-        $moderator = new \App\Services\ContentModerator;
+        $moderator = new ContentModerator;
         $moderationResult = $moderator->moderate($request->content);
 
         // Créer le message du conseiller

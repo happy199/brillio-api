@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class MentoringSession extends Model
@@ -69,7 +70,7 @@ class MentoringSession extends Model
     /**
      * Get the organization that scheduled this session.
      */
-    public function organization(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'scheduled_by_organization_id');
     }
@@ -137,7 +138,7 @@ class MentoringSession extends Model
         static $jeuneCreditPrice = null;
 
         if ($jeuneCreditPrice === null) {
-            $jeuneCreditPrice = \App\Models\SystemSetting::where('key', 'credit_price_jeune')->value('value') ?? 50;
+            $jeuneCreditPrice = SystemSetting::where('key', 'credit_price_jeune')->value('value') ?? 50;
         }
 
         // Avoid division by zero

@@ -3,8 +3,13 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
+use App\Models\Advertisement;
+use App\Models\JeuneProfile;
 use App\Models\MentorProfile;
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controller pour les pages publiques du site vitrine
@@ -18,12 +23,12 @@ class PageController extends Controller
     {
         // Statistiques dynamiques avec résilience
         try {
-            $jeunesCount = \App\Models\User::where('user_type', 'jeune')->count();
-            $mentorsCount = \App\Models\User::where('user_type', 'mentor')->count();
-            $countriesCount = \App\Models\User::distinct('country')->whereNotNull('country')->count('country');
+            $jeunesCount = User::where('user_type', 'jeune')->count();
+            $mentorsCount = User::where('user_type', 'mentor')->count();
+            $countriesCount = User::distinct('country')->whereNotNull('country')->count('country');
         } catch (\Exception $e) {
             // Fallback en cas d'erreur DB pour ne pas casser la home
-            \Illuminate\Support\Facades\Log::error('Erreur récupération stats home: '.$e->getMessage());
+            Log::error('Erreur récupération stats home: '.$e->getMessage());
             $jeunesCount = 10000;
             $mentorsCount = 500;
             $countriesCount = 15;
@@ -37,7 +42,7 @@ class PageController extends Controller
      */
     public function about()
     {
-        $partners = \App\Models\Organization::active()
+        $partners = Organization::active()
             ->whereNotNull('logo_url')
             ->where('private_circle_plus_enabled', false)
             ->get();
@@ -157,7 +162,7 @@ class PageController extends Controller
      */
     public function jeuneProfile($slug)
     {
-        $profile = \App\Models\JeuneProfile::where('public_slug', $slug)
+        $profile = JeuneProfile::where('public_slug', $slug)
             ->where('is_public', true)
             ->firstOrFail();
 
@@ -197,7 +202,7 @@ class PageController extends Controller
      */
     public function advertisements()
     {
-        $advertisements = \App\Models\Advertisement::where('status', \App\Models\Advertisement::STATUS_APPROVED)
+        $advertisements = Advertisement::where('status', Advertisement::STATUS_APPROVED)
             ->inRandomOrder()
             ->get();
 
@@ -207,7 +212,7 @@ class PageController extends Controller
     /**
      * Increment the click counter for an advertisement
      */
-    public function trackAdvertisementClick(\App\Models\Advertisement $advertisement)
+    public function trackAdvertisementClick(Advertisement $advertisement)
     {
         $advertisement->increment('clicks');
 

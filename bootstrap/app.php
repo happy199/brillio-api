@@ -1,8 +1,24 @@
 <?php
 
+use App\Http\Middleware\CheckOrganizationSubscription;
+use App\Http\Middleware\CheckUserType;
+use App\Http\Middleware\EnsureJeuneProfilePublished;
+use App\Http\Middleware\EnsureMentorProfilePublished;
+use App\Http\Middleware\EnsureOrganizationIsActive;
+use App\Http\Middleware\EnsureOrganizationRole;
+use App\Http\Middleware\EnsureUserIsOrganization;
+use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\IsCoach;
+use App\Http\Middleware\ResolveOrganizationByDomain;
+use App\Http\Middleware\RestrictSwaggerAccess;
+use App\Http\Middleware\SecurityHeadersMiddleware;
+use App\Http\Middleware\UpdateLastLogin;
+use App\Http\Middleware\VerifyAdminTwoFactor;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Support\Facades\Route;
 use Sentry\Laravel\Integration;
 
@@ -21,24 +37,24 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
-            \App\Http\Middleware\UpdateLastLogin::class,
-            \App\Http\Middleware\ResolveOrganizationByDomain::class,
-            \App\Http\Middleware\SecurityHeadersMiddleware::class,
+            UpdateLastLogin::class,
+            ResolveOrganizationByDomain::class,
+            SecurityHeadersMiddleware::class,
         ]);
 
         // Alias pour les middlewares personnalisés
         $middleware->alias([
-            'is_admin' => \App\Http\Middleware\IsAdmin::class,
-            'user_type' => \App\Http\Middleware\CheckUserType::class,
-            'organization' => \App\Http\Middleware\EnsureUserIsOrganization::class,
-            'mentor_published' => \App\Http\Middleware\EnsureMentorProfilePublished::class,
-            'organization_active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
-            'organization_subscription' => \App\Http\Middleware\CheckOrganizationSubscription::class,
-            'organization_role' => \App\Http\Middleware\EnsureOrganizationRole::class,
-            'jeune_published' => \App\Http\Middleware\EnsureJeuneProfilePublished::class,
-            'is_coach' => \App\Http\Middleware\IsCoach::class,
-            'admin_2fa' => \App\Http\Middleware\VerifyAdminTwoFactor::class,
-            'swagger_secure' => \App\Http\Middleware\RestrictSwaggerAccess::class,
+            'is_admin' => IsAdmin::class,
+            'user_type' => CheckUserType::class,
+            'organization' => EnsureUserIsOrganization::class,
+            'mentor_published' => EnsureMentorProfilePublished::class,
+            'organization_active' => EnsureOrganizationIsActive::class,
+            'organization_subscription' => CheckOrganizationSubscription::class,
+            'organization_role' => EnsureOrganizationRole::class,
+            'jeune_published' => EnsureJeuneProfilePublished::class,
+            'is_coach' => IsCoach::class,
+            'admin_2fa' => VerifyAdminTwoFactor::class,
+            'swagger_secure' => RestrictSwaggerAccess::class,
         ]);
 
         // Redirection pour les non-authentifiés
@@ -49,7 +65,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Configuration CORS
         $middleware->api(prepend: [
-            \Illuminate\Http\Middleware\HandleCors::class,
+            HandleCors::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -60,7 +76,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         Integration::handles($exceptions);
     })
-    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule) {
+    ->withSchedule(function (Schedule $schedule) {
         $schedule->command('campaigns:process-recurring')->everyMinute();
     })
     ->create();

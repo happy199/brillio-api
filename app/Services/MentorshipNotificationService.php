@@ -5,14 +5,20 @@ namespace App\Services;
 use App\Mail\Account\AccountArchivedByUser;
 use App\Mail\Account\AccountDeleted;
 use App\Mail\Mentorship\MentorshipAccepted;
+use App\Mail\Mentorship\MentorshipCreatedByOrg;
 use App\Mail\Mentorship\MentorshipRefused;
 use App\Mail\Mentorship\MentorshipRequested;
+use App\Mail\Mentorship\MentorshipTerminatedConfirmation;
+use App\Mail\Mentorship\MentorshipTerminatedNotification;
+use App\Mail\Mentorship\MentorshipTerminatedOrgNotification;
+use App\Mail\Messages\NewMessageNotification;
 use App\Mail\Onboarding\WelcomeJeune;
 use App\Mail\Onboarding\WelcomeMentor;
 use App\Mail\Resource\ResourceGiftedMail;
 use App\Mail\Resource\ResourcePurchased;
 use App\Mail\Resource\ResourceRejected;
 use App\Mail\Resource\ResourceValidated;
+use App\Mail\Session\GuestInvitation;
 use App\Mail\Session\ReportAvailableMail;
 use App\Mail\Session\ReportReminder;
 use App\Mail\Session\SessionCancelled;
@@ -20,6 +26,7 @@ use App\Mail\Session\SessionCompleted;
 use App\Mail\Session\SessionConfirmed;
 use App\Mail\Session\SessionProposed;
 use App\Mail\Session\SessionRefused;
+use App\Mail\Session\SessionUpdated;
 use App\Mail\Support\ContactConfirmation;
 use App\Mail\Wallet\CreditGiftedMail;
 use App\Mail\Wallet\CreditPackPurchasedMail;
@@ -32,8 +39,12 @@ use App\Mail\Wallet\SessionPaid;
 use App\Mail\Wallet\SubscriptionActivatedMail;
 use App\Mail\Wallet\SubscriptionDowngradedMail;
 use App\Mail\Wallet\SubscriptionExpiringMail;
+use App\Models\CreditPack;
 use App\Models\MentoringSession;
 use App\Models\Mentorship;
+use App\Models\Message;
+use App\Models\Organization;
+use App\Models\PayoutRequest;
 use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Models\User;
@@ -112,7 +123,7 @@ class MentorshipNotificationService
         foreach ($allMentors as $mentor) {
             if ($mentor->is_guest) {
                 // Pour les invités, on utilise le Magic Link
-                Mail::to($mentor->email)->send(new \App\Mail\Session\GuestInvitation($session, $mentor));
+                Mail::to($mentor->email)->send(new GuestInvitation($session, $mentor));
             } else {
                 // Pour les mentors classiques
                 Mail::to($mentor->email)->send(new SessionConfirmed($session, $mentor, $mentees));
@@ -136,14 +147,14 @@ class MentorshipNotificationService
         // Notifier les mentors (incluant invités)
         foreach ($allMentors as $mentor) {
             if ($mentor->id !== $updatedBy->id) {
-                Mail::to($mentor->email)->send(new \App\Mail\Session\SessionUpdated($session, $mentor, $updatedBy, $mentees));
+                Mail::to($mentor->email)->send(new SessionUpdated($session, $mentor, $updatedBy, $mentees));
             }
         }
 
         // Notifier les jeunes
         foreach ($mentees as $mentee) {
             if ($mentee->id !== $updatedBy->id) {
-                Mail::to($mentee->email)->send(new \App\Mail\Session\SessionUpdated($session, $mentee, $updatedBy, $mentees));
+                Mail::to($mentee->email)->send(new SessionUpdated($session, $mentee, $updatedBy, $mentees));
             }
         }
     }
@@ -154,7 +165,7 @@ class MentorshipNotificationService
     public function sendGuestInvitation(MentoringSession $session)
     {
         if ($session->mentor && $session->mentor->is_guest) {
-            Mail::to($session->mentor->email)->send(new \App\Mail\Session\GuestInvitation($session, $session->mentor));
+            Mail::to($session->mentor->email)->send(new GuestInvitation($session, $session->mentor));
         }
     }
 
@@ -262,7 +273,7 @@ class MentorshipNotificationService
     /**
      * Envoyer une notification de demande de retrait soumise (au mentor)
      */
-    public function sendPayoutRequested(\App\Models\PayoutRequest $payout)
+    public function sendPayoutRequested(PayoutRequest $payout)
     {
         Mail::to($payout->mentorProfile->user->email)->send(new PayoutRequested($payout));
     }
@@ -270,7 +281,7 @@ class MentorshipNotificationService
     /**
      * Envoyer une notification de retrait traité (succès ou échec) (au mentor)
      */
-    public function sendPayoutProcessed(\App\Models\PayoutRequest $payout)
+    public function sendPayoutProcessed(PayoutRequest $payout)
     {
         Mail::to($payout->mentorProfile->user->email)->send(new PayoutProcessed($payout));
     }
@@ -362,7 +373,7 @@ class MentorshipNotificationService
     /**
      * Notifier un jeune lorsqu'il reçoit des crédits via une distribution d'organisation
      */
-    public function sendCreditGiftedNotification(User $user, \App\Models\Organization $organization, int $amount)
+    public function sendCreditGiftedNotification(User $user, Organization $organization, int $amount)
     {
         Mail::to($user->email)->send(new CreditGiftedMail($user, $organization, $amount, $user->credits_balance));
     }
@@ -370,7 +381,7 @@ class MentorshipNotificationService
     /**
      * Notifier une organisation de l'activation de son abonnement
      */
-    public function sendSubscriptionActivatedNotification(\App\Models\Organization $organization, \App\Models\CreditPack $plan)
+    public function sendSubscriptionActivatedNotification(Organization $organization, CreditPack $plan)
     {
         if ($organization->contact_email) {
             Mail::to($organization->contact_email)->send(new SubscriptionActivatedMail($organization, $plan));
@@ -380,7 +391,7 @@ class MentorshipNotificationService
     /**
      * Notifier une organisation de l'achat d'un pack de crédits
      */
-    public function sendCreditPackPurchasedNotification(\App\Models\Organization $organization, \App\Models\CreditPack $pack)
+    public function sendCreditPackPurchasedNotification(Organization $organization, CreditPack $pack)
     {
         if ($organization->contact_email) {
             Mail::to($organization->contact_email)->send(new CreditPackPurchasedMail($organization, $pack, $organization->credits_balance));
@@ -390,7 +401,7 @@ class MentorshipNotificationService
     /**
      * Notifier un jeune d'une ressource offerte par son organisation
      */
-    public function sendResourceGiftedNotification(User $user, \App\Models\Resource $resource, \App\Models\Organization $organization)
+    public function sendResourceGiftedNotification(User $user, \App\Models\Resource $resource, Organization $organization)
     {
         Mail::to($user->email)->send(new ResourceGiftedMail($user, $resource, $organization));
     }
@@ -441,7 +452,7 @@ class MentorshipNotificationService
     /**
      * Notifier une organisation que son abonnement expire bientôt
      */
-    public function sendSubscriptionExpiringNotification(\App\Models\Organization $organization, string $timeLeft)
+    public function sendSubscriptionExpiringNotification(Organization $organization, string $timeLeft)
     {
         if ($organization->contact_email) {
             $renewUrl = route('organization.subscriptions.index');
@@ -452,7 +463,7 @@ class MentorshipNotificationService
     /**
      * Notifier une organisation qu'elle a été rétrogradée
      */
-    public function sendSubscriptionDowngradedNotification(\App\Models\Organization $organization, string $targetPlan = 'free')
+    public function sendSubscriptionDowngradedNotification(Organization $organization, string $targetPlan = 'free')
     {
         if ($organization->contact_email) {
             $renewUrl = route('organization.subscriptions.index');
@@ -463,17 +474,17 @@ class MentorshipNotificationService
     /**
      * Notifier le mentor que son retrait a été complété
      */
-    public function sendPayoutCompleted(\App\Models\PayoutRequest $payout)
+    public function sendPayoutCompleted(PayoutRequest $payout)
     {
-        Mail::to($payout->mentorProfile->user->email)->send(new \App\Mail\Wallet\PayoutProcessed($payout));
+        Mail::to($payout->mentorProfile->user->email)->send(new PayoutProcessed($payout));
     }
 
     /**
      * Notifier le mentor que son retrait a été rejeté
      */
-    public function sendPayoutFailed(\App\Models\PayoutRequest $payout)
+    public function sendPayoutFailed(PayoutRequest $payout)
     {
-        Mail::to($payout->mentorProfile->user->email)->send(new \App\Mail\Wallet\PayoutProcessed($payout));
+        Mail::to($payout->mentorProfile->user->email)->send(new PayoutProcessed($payout));
     }
 
     /**
@@ -500,26 +511,26 @@ class MentorshipNotificationService
             $otherPartyName = "{$mentee->name} et {$mentor->name}";
         }
 
-        Mail::to($actor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedConfirmation($mentorship, $actor, $otherPartyName, $reason));
+        Mail::to($actor->email)->send(new MentorshipTerminatedConfirmation($mentorship, $actor, $otherPartyName, $reason));
 
         // 2. Mail à l'autre partie (Notification)
         if ($actor->id === $mentee->id) {
             // Le jeune a rompu -> Notifier le mentor
-            Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentor, $mentee->name, $reason));
+            Mail::to($mentor->email)->send(new MentorshipTerminatedNotification($mentorship, $mentor, $mentee->name, $reason));
         } elseif ($actor->id === $mentor->id) {
             // Le mentor a rompu -> Notifier le jeune
-            Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentee, $mentor->name, $reason));
+            Mail::to($mentee->email)->send(new MentorshipTerminatedNotification($mentorship, $mentee, $mentor->name, $reason));
         } else {
             // L'organisation a rompu -> Notifier les deux
-            Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentee, "votre organisation ({$organization->name})", $reason));
-            Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipTerminatedNotification($mentorship, $mentor, "l'organisation ({$organization->name})", $reason));
+            Mail::to($mentee->email)->send(new MentorshipTerminatedNotification($mentorship, $mentee, "votre organisation ({$organization->name})", $reason));
+            Mail::to($mentor->email)->send(new MentorshipTerminatedNotification($mentorship, $mentor, "l'organisation ({$organization->name})", $reason));
         }
 
         // 3. Mail à l'organisation (si elle n'est pas l'acteur)
         if (! $isOrgActor && $organization) {
             $adminEmail = $organization->users()->wherePivot('role', 'admin')->first()?->email ?? $organization->contact_email;
             if ($adminEmail) {
-                Mail::to($adminEmail)->send(new \App\Mail\Mentorship\MentorshipTerminatedOrgNotification($mentorship, $actor->name, $reason, $mentee->name, $mentor->name));
+                Mail::to($adminEmail)->send(new MentorshipTerminatedOrgNotification($mentorship, $actor->name, $reason, $mentee->name, $mentor->name));
             }
         }
     }
@@ -536,7 +547,7 @@ class MentorshipNotificationService
 
         // 1. Mail au Jeune
         $jeuneUrl = route('jeune.mentorship.index');
-        Mail::to($mentee->email)->send(new \App\Mail\Mentorship\MentorshipCreatedByOrg(
+        Mail::to($mentee->email)->send(new MentorshipCreatedByOrg(
             $mentorship,
             $mentee,
             $mentor->name,
@@ -546,7 +557,7 @@ class MentorshipNotificationService
 
         // 2. Mail au Mentor
         $mentorUrl = route('mentor.mentorship.index');
-        Mail::to($mentor->email)->send(new \App\Mail\Mentorship\MentorshipCreatedByOrg(
+        Mail::to($mentor->email)->send(new MentorshipCreatedByOrg(
             $mentorship,
             $mentor,
             $mentee->name,
@@ -558,7 +569,7 @@ class MentorshipNotificationService
     /**
      * Notifier le destinataire d'un nouveau message
      */
-    public function sendNewMessageNotification(\App\Models\Message $message)
+    public function sendNewMessageNotification(Message $message)
     {
         $mentorship = $message->mentorship;
         $sender = $message->sender;
@@ -571,7 +582,7 @@ class MentorshipNotificationService
             $conversationUrl = route('jeune.messages.show', $mentorship);
         }
 
-        Mail::to($recipient->email)->send(new \App\Mail\Messages\NewMessageNotification(
+        Mail::to($recipient->email)->send(new NewMessageNotification(
             $recipient,
             $sender->name,
             $conversationUrl

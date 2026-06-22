@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Personality\SubmitTestRequest;
+use App\Models\User;
 use App\Services\PersonalityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,7 +71,7 @@ class PersonalityController extends Controller
             if ($userId !== $request->user()->id && ! $request->user()->isAdmin()) {
                 return $this->forbidden('Vous ne pouvez pas voir les résultats d\'autres utilisateurs');
             }
-            $user = \App\Models\User::find($userId);
+            $user = User::find($userId);
         }
 
         if (! $user) {

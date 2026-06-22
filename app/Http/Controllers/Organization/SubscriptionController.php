@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Organization;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContactMessage;
 use App\Models\CreditPack;
+use App\Models\MonerooTransaction;
+use App\Models\Organization;
+use App\Services\MonerooService;
 use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
@@ -20,7 +24,7 @@ class SubscriptionController extends Controller
             ->orderBy('display_order')
             ->get();
 
-        $freePlan = $allPlans->where('target_plan', \App\Models\Organization::PLAN_FREE)->first();
+        $freePlan = $allPlans->where('target_plan', Organization::PLAN_FREE)->first();
         $proPlans = $allPlans->where('target_plan', 'pro')->keyBy('duration_days');
         $enterprisePlans = $allPlans->where('target_plan', 'enterprise')->keyBy('duration_days');
         $establishmentPlans = $allPlans->where('target_plan', 'establishment')->keyBy('duration_days');
@@ -37,7 +41,7 @@ class SubscriptionController extends Controller
         $user = auth()->user();
 
         // Log the request (or send email)
-        \App\Models\ContactMessage::create([
+        ContactMessage::create([
             'name' => $user->name,
             'email' => $user->email,
             'subject' => "Demande de Plan Établissement - {$organization->name}",
@@ -67,11 +71,11 @@ class SubscriptionController extends Controller
         $returnUrl = route('organization.dashboard');
 
         // Initiate Payment
-        $monerooService = app(\App\Services\MonerooService::class);
+        $monerooService = app(MonerooService::class);
         $user = auth()->user();
 
         // Create pending transaction record (stores plan_id for the callback)
-        $localTransaction = \App\Models\MonerooTransaction::create([
+        $localTransaction = MonerooTransaction::create([
             'user_id' => $user->id,
             'user_type' => get_class($user),
             'amount' => $amount,

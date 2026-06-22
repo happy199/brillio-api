@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Mail\Engagement\MentorEngagementMail;
 use App\Mail\Engagement\ProfileCompletionReminder;
 use App\Models\User;
 use App\Services\EmailDeliveryService;
@@ -53,7 +54,7 @@ class SendProfileCompletionReminders implements ShouldQueue
             if ($user->isMentor()) {
                 if ($user->mentorProfile && $user->mentorProfile->is_published) {
                     try {
-                        Mail::to($user->email)->send(new \App\Mail\Engagement\MentorEngagementMail($user));
+                        Mail::to($user->email)->send(new MentorEngagementMail($user));
                         $user->update([
                             'onboarding_completed' => true,
                             'last_engagement_email_sent_at' => now(),

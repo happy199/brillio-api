@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MentoringSession;
 use App\Models\User;
+use App\Services\JitsiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,7 @@ class MeetingController extends Controller
      */
     protected $jitsiService;
 
-    public function __construct(\App\Services\JitsiService $jitsiService)
+    public function __construct(JitsiService $jitsiService)
     {
         $this->jitsiService = $jitsiService;
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organization;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +92,7 @@ class CreditDistributionController extends Controller
 
                     // Notification par email
                     DB::afterCommit(function () use ($targetUser, $organization, $amountPerUser) {
-                        app(\App\Services\MentorshipNotificationService::class)->sendCreditGiftedNotification($targetUser, $organization, $amountPerUser);
+                        app(MentorshipNotificationService::class)->sendCreditGiftedNotification($targetUser, $organization, $amountPerUser);
                     }
                     );
                 }
