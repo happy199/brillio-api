@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 
 trait HasCreditValidation
