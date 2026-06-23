@@ -179,6 +179,9 @@ class ApiGapsTest extends TestCase
             'is_active' => true,
         ]);
 
+        // Set Moneroo config for test
+        config(['services.moneroo.secret_key' => 'test_key']);
+
         Http::fake([
             '*/payments/initialize' => Http::response([
                 'success' => true,
