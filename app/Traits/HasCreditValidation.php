@@ -7,8 +7,6 @@ use Illuminate\Http\JsonResponse;
 
 trait HasCreditValidation
 {
-    protected WalletService $walletService;
-
     /**
      * Check if user has sufficient credits for a feature
      */

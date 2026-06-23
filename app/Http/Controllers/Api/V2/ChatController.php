@@ -21,7 +21,7 @@ class ChatController extends V1ChatController
 
     public function __construct(
         private BrillioIAService $brillioIAService,
-        private WalletService $walletService
+        WalletService $walletService
     ) {
         parent::__construct($brillioIAService, $walletService);
     }

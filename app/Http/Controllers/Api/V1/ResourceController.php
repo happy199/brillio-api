@@ -23,8 +23,10 @@ class ResourceController extends Controller
 {
     use HasCreditValidation;
 
+    protected WalletService $walletService;
+
     public function __construct(
-        private WalletService $walletService,
+        WalletService $walletService,
         private MentorshipNotificationService $notificationService
     ) {
         $this->walletService = $walletService;

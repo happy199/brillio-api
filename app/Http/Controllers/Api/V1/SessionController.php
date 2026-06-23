@@ -23,6 +23,8 @@ class SessionController extends Controller
 {
     use HasCreditValidation;
 
+    protected WalletService $walletService;
+
     public function __construct(
         WalletService $walletService,
         private MentorshipNotificationService $notificationService
