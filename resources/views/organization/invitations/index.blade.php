@@ -183,7 +183,7 @@
                     <div class="flex items-center space-x-2">
                         @if(!$invitation->isExpired())
                         <button
-                            @click="copyToClipboard('{{ $invitation->role === 'jeune' ? route('auth.jeune.register', ['ref' => $invitation->referral_code]) : route('organization.register', ['ref' => $invitation->referral_code]) }}')"
+                            @click="copyToClipboard('{{ $invitation->role === 'admin' || $invitation->role === 'viewer' ? route('organization.register', ['ref' => $invitation->referral_code]) : route('auth.choice', ['ref' => $invitation->referral_code]) }}')"
                             class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
