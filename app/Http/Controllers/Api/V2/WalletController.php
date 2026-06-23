@@ -16,7 +16,7 @@ use OpenApi\Annotations as OA;
 class WalletController extends V1WalletController
 {
     public function __construct(
-        private WalletService $walletService
+        WalletService $walletService
     ) {
         parent::__construct($walletService);
     }
