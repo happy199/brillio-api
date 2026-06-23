@@ -19,6 +19,8 @@ class WalletController extends Controller
 {
     use HasCreditValidation;
 
+    protected WalletService $walletService;
+
     public function __construct(
         WalletService $walletService
     ) {
