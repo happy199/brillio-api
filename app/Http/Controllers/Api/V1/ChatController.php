@@ -20,6 +20,8 @@ class ChatController extends Controller
 {
     use HasCreditValidation;
 
+    protected WalletService $walletService;
+
     public function __construct(
         private BrillioIAService $brillioIAService,
         WalletService $walletService
