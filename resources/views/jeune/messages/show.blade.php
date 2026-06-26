@@ -299,7 +299,7 @@
                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p class="text-[10px] leading-normal text-indigo-600/70 italic">
-                    Pour assurer la sécurité et le respect des échanges, l'équipe Brillio peut avoir accès aux
+                    Pour assurer la sécurité et le respect des échanges, l'équipe {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} peut avoir accès aux
                     discussions.
                     Merci de maintenir des échanges cordiaux et professionnels et éviter de transmettre des informations
                     personnelles.
@@ -332,7 +332,7 @@
                     @csrf
                     <h2 class="text-lg font-medium text-gray-900">Signaler cette conversation</h2>
                     <p class="mt-1 text-sm text-gray-600">
-                        Veuillez expliquer pourquoi vous signalez cet échange. Un administrateur Brillio examinera la
+                        Veuillez expliquer pourquoi vous signalez cet échange. Un administrateur {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} examinera la
                         conversation pour garantir votre sécurité.
                     </p>
                     <div class="mt-6">

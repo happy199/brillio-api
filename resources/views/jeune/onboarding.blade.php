@@ -139,7 +139,7 @@
                                     clip-rule="evenodd" />
                             </svg>
                             <div>
-                                <p class="text-sm font-medium text-red-800">Tu es trop jeune pour utiliser Brillio</p>
+                                <p class="text-sm font-medium text-red-800">Tu es trop jeune pour utiliser {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}</p>
                                 <p class="text-sm text-red-700 mt-1">Cette application est réservée aux personnes de 10
                                     ans et plus. Merci de te rapprocher d'un adulte pour obtenir de l'aide.</p>
                             </div>
@@ -740,7 +740,7 @@
                                 return false;
                             }
                             if (this.ageError) {
-                                this.errors.step0 = 'Vous devez avoir au moins 10 ans pour utiliser Brillio';
+                                this.errors.step0 = 'Vous devez avoir au moins 10 ans pour utiliser {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }}';
                                 return false;
                             }
                             return true;
@@ -780,11 +780,11 @@
 
                         case 4:
                             if (!this.formData.how_found_us) {
-                                this.errors.step4 = 'Veuillez indiquer comment vous avez découvert Brillio';
+                                this.errors.step4 = 'Veuillez indiquer comment vous avez découvert {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }}';
                                 return false;
                             }
                             if (this.formData.how_found_us === 'other' && !this.formData.how_found_us_other?.trim()) {
-                                this.errors.step4 = 'Veuillez préciser comment vous avez découvert Brillio';
+                                this.errors.step4 = 'Veuillez préciser comment vous avez découvert {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }}';
                                 return false;
                             }
                             return true;

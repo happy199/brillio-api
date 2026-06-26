@@ -16,7 +16,7 @@
         <h2 class="text-3xl font-bold text-gray-900 mb-4">Partagez votre expertise</h2>
         <p class="text-lg text-gray-600 mb-8 leading-relaxed">
             La section Ressources est une opportunité unique de monétiser votre savoir. Vous pouvez vendre des
-            documents, vidéos, outils ou exercices pratiques à la communauté des jeunes talents Brillio.
+            documents, vidéos, outils ou exercices pratiques à la communauté des jeunes talents {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}.
         </p>
 
         <!-- Message spécifique si le mentor a déjà des ressources mais a dépublié son profil -->

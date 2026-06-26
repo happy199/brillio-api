@@ -19,7 +19,7 @@
     <!-- Header Sécurisé -->
     <header class="bg-black/50 text-white p-3 flex items-center justify-between border-b border-gray-700">
         <div class="flex items-center gap-3">
-            <span class="font-bold text-lg tracking-tight">Brillio<span class="text-indigo-500">Live</span></span>
+            <span class="font-bold text-lg tracking-tight">{{ isset($current_organization) ? $current_organization->name : 'Brillio' }}<span class="text-indigo-500">Live</span></span>
             <div class="h-4 w-px bg-gray-600"></div>
             <div>
                 <h1 class="font-bold text-sm leading-tight">{{ $session->title }}</h1>

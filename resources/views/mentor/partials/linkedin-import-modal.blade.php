@@ -79,7 +79,7 @@
                 </h4>
 
                 <p class="text-xs text-blue-700 mb-4 leading-relaxed">
-                    Pour que l’équipe Brillio et les jeunes voient clairement votre parcours, merci d’exporter votre
+                    Pour que l’équipe {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} et les jeunes voient clairement votre parcours, merci d’exporter votre
                     profil LinkedIn en PDF depuis le <strong>site web</strong> (pas l’application mobile).
                 </p>
 

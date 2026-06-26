@@ -1,7 +1,10 @@
 @extends('layouts.public')
-@php $forceScrolled = true; @endphp
+@php 
+    $forceScrolled = true; 
+    $displayOrg = $current_organization ?? ($user->sponsoringOrganization ?? $user->organizations->first());
+@endphp
 
-@section('title', $user->name . ' - Profil Brillio')
+@section('title', $user->name . ' - Profil ' . ($displayOrg ? $displayOrg->name : 'Brillio'))
 
 @section('content')
 <div class="min-h-screen bg-gray-50 pt-24 pb-12">
@@ -96,8 +99,8 @@
             function shareProfile() {
                 if (navigator.share) {
                     navigator.share({
-                        title: '{{ $user->name }} - Profil Brillio',
-                        text: 'Découvrez mon profil professionnel sur Brillio !',
+                        title: '{{ $user->name }} - Profil {{ $displayOrg ? addslashes($displayOrg->name) : \'Brillio\' }}',
+                        text: 'Découvrez mon profil professionnel sur {{ $displayOrg ? addslashes($displayOrg->name) : \'Brillio\' }} !',
                         url: window.location.href
                     }).catch(console.error);
                 } else {
@@ -245,14 +248,14 @@
                                 d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </div>
-                    <h2 class="text-xl font-bold mb-2">Talent Brillio</h2>
+                    <h2 class="text-xl font-bold mb-2">Talent {{ $displayOrg ? $displayOrg->name : 'Brillio' }}</h2>
                     <p class="text-white/80 text-sm mb-6">Ce profil est vérifié et actif sur la plateforme d'orientation
                         n°1 en Afrique.</p>
 
                     <div class="border-t border-white/20 pt-4 mt-4">
                         <a href="{{ route('home') }}"
                             class="inline-block px-4 py-2 bg-white text-indigo-600 rounded-lg text-sm font-bold shadow-sm hover:bg-indigo-50 transition">
-                            Découvrir Brillio
+                            Découvrir {{ $displayOrg ? $displayOrg->name : 'Brillio' }}
                         </a>
                     </div>
                 </div>

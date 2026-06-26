@@ -1,13 +1,16 @@
+@php 
+    $displayOrg = $current_organization ?? ($mentor->user->organization ?? $mentor->user->organizations->first());
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $publicData['name'] }} - Mentor Brillio</title>
+    <title>{{ $publicData['name'] }} - Mentor {{ $displayOrg ? $displayOrg->name : 'Brillio' }}</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="{{ Str::limit($publicData['bio'] ?? 'Mentor professionnel sur Brillio', 160) }}">
+    <meta name="description" content="{{ Str::limit($publicData['bio'] ?? 'Mentor professionnel sur ' . ($displayOrg ? $displayOrg->name : 'Brillio'), 160) }}">
     <meta name="keywords" content="mentor, {{ $publicData['specialization'] }}, carrière, orientation professionnelle">
 
     <!-- Open Graph / Facebook -->
@@ -20,11 +23,11 @@
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ url()->current() }}">
-    <meta property="twitter:title" content="{{ $publicData['name'] }} - Mentor Brillio">
+    <meta property="twitter:title" content="{{ $publicData['name'] }} - Mentor {{ $displayOrg ? $displayOrg->name : 'Brillio' }}">
     <meta property="twitter:description" content="{{ Str::limit($publicData['bio'] ?? 'Mentor professionnel', 200) }}">
 
     <!-- LinkedIn -->
-    <meta property="og:site_name" content="Brillio">
+    <meta property="og:site_name" content="{{ $displayOrg ? $displayOrg->name : 'Brillio' }}">
 
     <!-- Google tag (gtag.js) -->
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" async src="https://www.googletagmanager.com/gtag/js?id=G-PPX01GY0R9"></script>
@@ -48,7 +51,7 @@
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <a href="{{ route('auth.login') }}" class="flex items-center gap-2 hover:opacity-80 transition">
-                <span class="text-2xl font-bold text-orange-600">Brillio</span>
+                <span class="text-2xl font-bold text-orange-600">{{ $displayOrg ? $displayOrg->name : 'Brillio' }}</span>
             </a>
             <a href="{{ route('home') }}"
                 class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
@@ -231,7 +234,7 @@
         <!-- CTA -->
         <div class="bg-gradient-to-r from-orange-600 to-pink-600 rounded-2xl shadow-lg p-8 text-center text-white">
             <h2 class="text-3xl font-bold mb-4">Inspiré par ce parcours ?</h2>
-            <p class="text-lg mb-6 opacity-90">Rejoignez Brillio pour découvrir des centaines de mentors et construire
+            <p class="text-lg mb-6 opacity-90">Rejoignez {{ $displayOrg ? $displayOrg->name : 'Brillio' }} pour découvrir des centaines de mentors et construire
                 votre propre parcours professionnel</p>
             <a href="{{ route('home') }}"
                 class="inline-block px-8 py-4 bg-white text-orange-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
@@ -243,7 +246,7 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-white mt-16 py-8">
         <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-gray-400">© {{ date('Y') }} Brillio - Plateforme d'orientation professionnelle</p>
+            <p class="text-gray-400">© {{ date('Y') }} {{ $displayOrg ? $displayOrg->name : 'Brillio' }} - Plateforme d'orientation professionnelle</p>
             <div class="mt-4 flex justify-center gap-6">
                 <a href="{{ url('/politique-de-confidentialite') }}"
                     class="text-gray-400 hover:text-white">Confidentialité</a>
@@ -257,7 +260,7 @@
         function shareProfile() {
             if (navigator.share) {
                 navigator.share({
-                    title: '{{ $publicData["name"] }} - Mentor Brillio',
+                    title: '{{ $publicData["name"] }} - Mentor {{ $displayOrg ? addslashes($displayOrg->name) : \'Brillio\' }}',
                     text: 'Découvrez le parcours de {{ $publicData["name"] }}, mentor en {{ $publicData["specialization"] }}',
                     url: window.location.href
                 }).catch(err => console.log('Erreur de partage:', err));

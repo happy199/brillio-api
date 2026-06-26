@@ -86,7 +86,7 @@ Route::middleware(['auth'])->post('/export-data', [DataExportController::class, 
 // Page d'accueil
 Route::get('/', function () {
     if (app()->bound('current_organization')) {
-        return redirect()->route('organization.login');
+        return redirect()->route('auth.choice');
     }
 
     return app(PageController::class)->home();

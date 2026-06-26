@@ -279,7 +279,7 @@
                             <div>
                                 <p class="text-[11px] text-orange-800 font-medium">
                                     Attention : Pour les retraits hors-Bénin, le transfert sera mis en attente le temps
-                                    que l'équipe Brillio effectue manuellement l'opération.
+                                    que l'équipe {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} effectue manuellement l'opération.
                                 </p>
                             </div>
                         </div>
