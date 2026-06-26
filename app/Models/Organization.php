@@ -54,6 +54,7 @@ class Organization extends Model
         'pending_downgrade_to',
         'private_circle_enabled',
         'private_circle_plus_enabled',
+        'disable_onboarding_steps',
     ];
 
     /**
@@ -76,6 +77,7 @@ class Organization extends Model
         'auto_renew' => 'boolean',
         'private_circle_enabled' => 'boolean',
         'private_circle_plus_enabled' => 'boolean',
+        'disable_onboarding_steps' => 'boolean',
     ];
 
     /**

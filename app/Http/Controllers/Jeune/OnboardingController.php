@@ -33,7 +33,9 @@ class OnboardingController extends Controller
      */
     public function complete(Request $request)
     {
-        $validated = $request->validate([
+        $skipExtra = $request->input('skip_extra') == '1';
+
+        $rules = [
             'birth_date' => 'required|date|before:today',
             'country' => 'required|string|max:100',
             'city' => 'required|string|max:100',
@@ -50,36 +52,52 @@ class OnboardingController extends Controller
                     }
                 },
             ],
-            'education_level' => 'required|string|in:college,lycee,bac,licence,master,doctorat',
-            'current_situation' => 'required|string|in:etudiant,recherche_emploi,emploi,entrepreneur,autre',
-            'current_situation_other' => 'nullable|string|max:255',
-            'interests' => 'required|array|size:5',
-            'interests.*' => 'string',
-            'goals' => 'required|array|min:1|max:3',
-            'goals.*' => 'string',
-            'how_found_us' => 'required|string',
-            'how_found_us_other' => 'nullable|string|max:255',
-        ]);
+        ];
+
+        if (! $skipExtra) {
+            $rules['education_level'] = 'required|string|in:college,lycee,bac,licence,master,doctorat';
+            $rules['current_situation'] = 'required|string|in:etudiant,recherche_emploi,emploi,entrepreneur,autre';
+            $rules['current_situation_other'] = 'nullable|string|max:255';
+            $rules['interests'] = 'required|array|size:5';
+            $rules['interests.*'] = 'string';
+            $rules['goals'] = 'required|array|min:1|max:3';
+            $rules['goals.*'] = 'string';
+            $rules['how_found_us'] = 'required|string';
+            $rules['how_found_us_other'] = 'nullable|string|max:255';
+        }
+
+        $validated = $request->validate($rules);
 
         $user = auth()->user();
 
         // Préparer les données d'onboarding
-        $onboardingData = [
-            'education_level' => $validated['education_level'],
-            'current_situation' => $validated['current_situation'],
-            'interests' => $validated['interests'],
-            'goals' => $validated['goals'],
-            'how_found_us' => $validated['how_found_us'],
-            'completed_at' => now()->toISOString(),
-        ];
+        if ($skipExtra) {
+            $onboardingData = [
+                'education_level' => 'non_renseigne',
+                'current_situation' => 'non_renseigne',
+                'interests' => [],
+                'goals' => [],
+                'how_found_us' => 'organisation',
+                'completed_at' => now()->toISOString(),
+            ];
+        } else {
+            $onboardingData = [
+                'education_level' => $validated['education_level'],
+                'current_situation' => $validated['current_situation'],
+                'interests' => $validated['interests'],
+                'goals' => $validated['goals'],
+                'how_found_us' => $validated['how_found_us'],
+                'completed_at' => now()->toISOString(),
+            ];
 
-        // Ajouter les champs personnalisés si présents
-        if ($validated['current_situation'] === 'autre' && ! empty($validated['current_situation_other'])) {
-            $onboardingData['current_situation_other'] = $validated['current_situation_other'];
-        }
+            // Ajouter les champs personnalisés si présents
+            if ($validated['current_situation'] === 'autre' && ! empty($validated['current_situation_other'])) {
+                $onboardingData['current_situation_other'] = $validated['current_situation_other'];
+            }
 
-        if ($validated['how_found_us'] === 'other' && ! empty($validated['how_found_us_other'])) {
-            $onboardingData['how_found_us_other'] = $validated['how_found_us_other'];
+            if ($validated['how_found_us'] === 'other' && ! empty($validated['how_found_us_other'])) {
+                $onboardingData['how_found_us_other'] = $validated['how_found_us_other'];
+            }
         }
 
         // Formater le numéro de téléphone au format E.164

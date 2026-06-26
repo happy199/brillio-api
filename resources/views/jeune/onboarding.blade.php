@@ -205,11 +205,20 @@
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button type="button" @click="nextStep()" :disabled="!canProceedStep0"
-                    :class="!canProceedStep0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'"
-                    class="px-6 py-3 text-white font-semibold rounded-xl transition">
-                    Continuer
-                </button>
+                @if(isset($current_organization) && $current_organization->disable_onboarding_steps)
+                    <input type="hidden" name="skip_extra" value="1">
+                    <button type="submit" :disabled="!canProceedStep0"
+                        :class="!canProceedStep0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-gradient-to-r from-primary-600 to-purple-600 hover:opacity-90'"
+                        class="px-8 py-3 text-white font-semibold rounded-xl transition shadow-lg">
+                        Commencer l'aventure !
+                    </button>
+                @else
+                    <button type="button" @click="nextStep()" :disabled="!canProceedStep0"
+                        :class="!canProceedStep0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'"
+                        class="px-6 py-3 text-white font-semibold rounded-xl transition">
+                        Continuer
+                    </button>
+                @endif
             </div>
         </div>
 
@@ -449,8 +458,9 @@
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function onboarding() {
             return {
+                skipExtraSteps: {{ (isset($current_organization) && $current_organization->disable_onboarding_steps) ? 'true' : 'false' }},
                 currentStep: 0,
-                steps: ['Profil', 'Situation', 'Interets', 'Objectifs', 'Source'],
+                steps: {!! (isset($current_organization) && $current_organization->disable_onboarding_steps) ? "['Profil']" : "['Profil', 'Situation', 'Interets', 'Objectifs', 'Source']" !!},
                 errors: {
                     step0: '',
                     step1: '',
