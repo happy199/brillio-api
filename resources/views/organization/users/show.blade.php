@@ -302,7 +302,7 @@
 
                     @if($user->jeuneProfile)
                     <div class="pt-4 border-t border-gray-100 space-y-4">
-                        @if($user->jeuneProfile->bio)
+                        @if($user->jeuneProfile && $user->jeuneProfile->bio)
                         <div>
                             <p class="text-sm font-medium text-gray-500">Bio / À propos</p>
                             <p class="mt-1 text-sm text-gray-600 text-justify">{{ $user->jeuneProfile->bio }}</p>
@@ -310,7 +310,7 @@
                         @endif
 
                         <div class="flex flex-wrap gap-4">
-                            @if($user->jeuneProfile->portfolio_url)
+                            @if($user->jeuneProfile && $user->jeuneProfile->portfolio_url)
                             <a href="{{ $user->jeuneProfile->portfolio_url }}" target="_blank"
                                 class="text-sm text-organization-600 hover:text-organization-500 flex items-center">
                                 <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,7 +321,7 @@
                             </a>
                             @endif
 
-                            @if($user->jeuneProfile->cv_path)
+                            @if($user->jeuneProfile && $user->jeuneProfile->cv_path)
                             <a href="{{ asset('storage/' . $user->jeuneProfile->cv_path) }}" target="_blank"
                                 class="text-sm text-organization-600 hover:text-organization-500 flex items-center">
                                 <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

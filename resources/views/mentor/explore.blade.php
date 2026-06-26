@@ -146,13 +146,19 @@
                     @endif
 
                     <p class="text-sm text-gray-600 mb-6 line-clamp-2">
-                        {{ $jeune->jeuneProfile->bio ?? 'Aucune bio renseignée.' }}
+                        {{ optional($jeune->jeuneProfile)->bio ?? 'Aucune bio renseignée.' }}
                     </p>
 
+                    @if($jeune->jeuneProfile && $jeune->jeuneProfile->public_slug)
                     <a href="{{ route('jeune.public.show', $jeune->jeuneProfile->public_slug) }}" target="_blank"
                         class="w-full py-2 border-2 border-purple-600 text-purple-600 font-bold rounded-xl hover:bg-purple-50 transition text-sm">
                         Voir le profil
                     </a>
+                    @else
+                    <button disabled class="w-full py-2 border-2 border-gray-300 text-gray-400 font-bold rounded-xl cursor-not-allowed text-sm">
+                        Profil indisponible
+                    </button>
+                    @endif
                 </div>
                 @endforeach
             </div>

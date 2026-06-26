@@ -63,8 +63,14 @@
     <!-- Header -->
     <div class="gradient-bg py-8 text-white text-center">
         <div class="max-w-2xl mx-auto px-4">
-            <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-                <span class="text-3xl font-bold text-primary-600">B</span>
+            <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-lg overflow-hidden">
+                @if(isset($current_organization) && $current_organization->logo_url)
+                    <img src="{{ $current_organization->logo_url }}" alt="{{ $current_organization->name }}" class="w-full h-full object-cover">
+                @elseif(isset($current_organization))
+                    <span class="text-3xl font-bold text-primary-600">{{ strtoupper(substr($current_organization->name, 0, 1)) }}</span>
+                @else
+                    <span class="text-3xl font-bold text-primary-600">B</span>
+                @endif
             </div>
             <h1 class="text-3xl font-bold mt-4">Bienvenue, {{ $user->name }} !</h1>
             <p class="text-white/80 mt-2">Aidez-nous a mieux vous connaitre pour personnaliser votre experience</p>
@@ -72,9 +78,9 @@
     </div>
 
     <!-- Progress Steps -->
-    <div class="max-w-2xl mx-auto px-4 -mt-4">
+    <div class="max-w-2xl mx-auto px-4 -mt-4" x-show="steps.length > 1" x-cloak>
         <div class="bg-white rounded-2xl shadow-lg p-3 sm:p-4 overflow-x-auto">
-            <div class="flex items-center justify-between min-w-max sm:min-w-0">
+            <div :class="['flex items-center min-w-max sm:min-w-0', steps.length === 1 ? 'justify-center w-full' : 'justify-between']">
                 <template x-for="(step, index) in steps" :key="index">
                     <div class="flex items-center">
                         <div class="flex flex-col items-center">
@@ -750,7 +756,7 @@
                                 return false;
                             }
                             if (this.ageError) {
-                                this.errors.step0 = 'Vous devez avoir au moins 10 ans pour utiliser {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }}';
+                                this.errors.step0 = 'Vous devez avoir au moins 10 ans pour utiliser {{ isset($current_organization) ? addslashes($current_organization->name) : "Brillio" }}';
                                 return false;
                             }
                             return true;
@@ -790,11 +796,11 @@
 
                         case 4:
                             if (!this.formData.how_found_us) {
-                                this.errors.step4 = 'Veuillez indiquer comment vous avez découvert {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }}';
+                                this.errors.step4 = 'Veuillez indiquer comment vous avez découvert {{ isset($current_organization) ? addslashes($current_organization->name) : "Brillio" }}';
                                 return false;
                             }
                             if (this.formData.how_found_us === 'other' && !this.formData.how_found_us_other?.trim()) {
-                                this.errors.step4 = 'Veuillez préciser comment vous avez découvert {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }}';
+                                this.errors.step4 = 'Veuillez préciser comment vous avez découvert {{ isset($current_organization) ? addslashes($current_organization->name) : "Brillio" }}';
                                 return false;
                             }
                             return true;

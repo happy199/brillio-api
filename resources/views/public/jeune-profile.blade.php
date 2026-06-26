@@ -49,7 +49,7 @@
                     <!-- Action Buttons - Stack on mobile, inline on desktop -->
                     <div class="flex flex-wrap items-center gap-3">
                         <!-- Website / Portfolio -->
-                        @if($profile->portfolio_url)
+                        @if($profile && $profile->portfolio_url)
                         <a href="{{ $profile->portfolio_url }}" target="_blank"
                             class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition"
                             title="Site web / Portfolio">
@@ -87,7 +87,7 @@
                 </div>
 
 
-                @if($profile->bio)
+                @if($profile && $profile->bio)
                 <div class="prose max-w-none text-gray-600">
                     {{ $profile->bio }}
                 </div>
@@ -99,8 +99,8 @@
             function shareProfile() {
                 if (navigator.share) {
                     navigator.share({
-                        title: '{{ $user->name }} - Profil {{ $displayOrg ? addslashes($displayOrg->name) : \'Brillio\' }}',
-                        text: 'Découvrez mon profil professionnel sur {{ $displayOrg ? addslashes($displayOrg->name) : \'Brillio\' }} !',
+                        title: '{{ $user->name }} - Profil {{ $displayOrg ? addslashes($displayOrg->name) : "Brillio" }}',
+                        text: 'Découvrez mon profil professionnel sur {{ $displayOrg ? addslashes($displayOrg->name) : "Brillio" }} !',
                         url: window.location.href
                     }).catch(console.error);
                 } else {
@@ -191,7 +191,7 @@
                 @endif
 
                 <!-- Portfolio -->
-                @if($profile->portfolio_url)
+                @if($profile && $profile->portfolio_url)
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                     <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +214,7 @@
                 @endif
 
                 <!-- CV -->
-                @if($profile->cv_path)
+                @if($profile && $profile->cv_path)
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                     <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
