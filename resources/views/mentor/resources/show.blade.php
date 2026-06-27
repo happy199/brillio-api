@@ -382,8 +382,8 @@
 
         if (navigator.share) {
             navigator.share({
-                title: '{{ addslashes($resource->title) }} - Ressource Mentor Brillio',
-                text: 'Découvre cette ressource pédagogique sur Brillio !',
+                title: '{{ addslashes($resource->title) }} - Ressource Mentor {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }}',
+                text: 'Découvre cette ressource pédagogique sur {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }} !',
                 url: shareUrl
             }).catch((err) => {
                 // Si l'utilisateur annule ou si navigator.share échoue, on copie dans le presse-papier

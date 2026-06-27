@@ -53,7 +53,7 @@
         </div>
 
         <div class="footer">
-            Généré par Brillio le {{ now()->format('d/m/Y à H:i') }} - Séance {{ $index + 1 }} sur {{ $sessions->count() }}
+            Généré par {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} le {{ now()->format('d/m/Y à H:i') }} - Séance {{ $index + 1 }} sur {{ $sessions->count() }}
         </div>
         
         @if(!$loop->last)

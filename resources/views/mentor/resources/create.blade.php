@@ -321,7 +321,7 @@
                                                         stroke-width="2"
                                                         d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                                                 </svg>
-                                                Analyse de la Demande Jeunes Brillio
+                                                Analyse de la Demande Jeunes {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}
                                             </h3>
                                             <button @click="isOpen = false" class="text-gray-400 hover:text-gray-500">
                                                 <svg class="w-6 h-6" fill="none" stroke="currentColor"
@@ -973,7 +973,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Brillio se réserve le droit de valider ou invalider toutes les ressources proposées afin d'en
+                    {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} se réserve le droit de valider ou invalider toutes les ressources proposées afin d'en
                     garantir la qualité. Cette vérification se fait généralement dans les 4H après soumission.
                 </p>
             </div>
@@ -1007,7 +1007,7 @@
 
                                         <div class="space-y-6 text-gray-600 leading-relaxed text-sm">
                                             <p class="text-base font-medium text-gray-800">
-                                                L'outil de ciblage permet à l'algorithme de Brillio de recommander votre ressource uniquement aux jeunes les plus pertinents. Plus votre ciblage est précis, meilleur sera le taux d'engagement.
+                                                L'outil de ciblage permet à l'algorithme de {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} de recommander votre ressource uniquement aux jeunes les plus pertinents. Plus votre ciblage est précis, meilleur sera le taux d'engagement.
                                             </p>
 
                                             <!-- Section MBTI -->
@@ -1015,7 +1015,7 @@
                                                 <h4 class="font-bold text-gray-900 flex items-center gap-2 text-base">
                                                     <span class="text-xl">💡</span> Les 16 Personnalités (MBTI)
                                                 </h4>
-                                                <p>Brillio utilise le test des 16 personnalités pour comprendre le fonctionnement cognitif des jeunes.</p>
+                                                <p>{{ isset($current_organization) ? $current_organization->name : 'Brillio' }} utilise le test des 16 personnalités pour comprendre le fonctionnement cognitif des jeunes.</p>
                                                 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                                     <!-- Analystes -->

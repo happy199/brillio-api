@@ -51,7 +51,7 @@
                         </a>
                         <a href="{{ route('jeune.resources.index', array_merge(request()->except(['filter', 'page']), ['filter' => 'all', 'source' => 'brillio'])) }}"
                             class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ request('source') === 'brillio' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
-                            Brillio
+                            {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}
                         </a>
                     </div>
                 </div>
@@ -267,7 +267,7 @@
                                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                             clip-rule="evenodd"></path>
                                     </svg>
-                                    Team Brillio
+                                    Team {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}
                                 </span>
                                 @elseif($resource->user->isMentor())
                                 <span class="text-[10px] font-bold text-purple-600 flex items-center gap-1">

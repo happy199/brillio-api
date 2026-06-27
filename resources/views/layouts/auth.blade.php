@@ -255,6 +255,24 @@
             </a>
         </div>
     </div>
+
+    <!-- Supabase OAuth Redirect Fix -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        (function () {
+            if (window.location.hash && window.location.hash.includes('access_token=')) {
+                const pendingProvider = "{{ session('oauth_provider', 'google') }}";
+                const pendingType = "{{ session('oauth_type', 'jeune') }}";
+
+                console.log("[Auth] Hash detected on auth page. Provider:", pendingProvider, "Type:", pendingType);
+
+                if (pendingProvider && pendingType === 'jeune') {
+                    window.location.href = "/jeune/oauth/" + pendingProvider + "/callback" + window.location.hash;
+                } else if (pendingType === 'mentor') {
+                    window.location.href = "/mentor/linkedin/callback" + window.location.hash;
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>

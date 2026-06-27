@@ -63,8 +63,14 @@
     <!-- Header -->
     <div class="gradient-bg py-8 text-white text-center">
         <div class="max-w-2xl mx-auto px-4">
-            <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-                <span class="text-3xl font-bold text-primary-600">B</span>
+            <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-lg overflow-hidden">
+                @if(isset($current_organization) && $current_organization->logo_url)
+                    <img src="{{ $current_organization->logo_url }}" alt="{{ $current_organization->name }}" class="w-full h-full object-cover">
+                @elseif(isset($current_organization))
+                    <span class="text-3xl font-bold text-primary-600">{{ strtoupper(substr($current_organization->name, 0, 1)) }}</span>
+                @else
+                    <span class="text-3xl font-bold text-primary-600">B</span>
+                @endif
             </div>
             <h1 class="text-3xl font-bold mt-4">Bienvenue, {{ $user->name }} !</h1>
             <p class="text-white/80 mt-2">Aidez-nous a mieux vous connaitre pour personnaliser votre experience</p>
@@ -72,9 +78,9 @@
     </div>
 
     <!-- Progress Steps -->
-    <div class="max-w-2xl mx-auto px-4 -mt-4">
+    <div class="max-w-2xl mx-auto px-4 -mt-4" x-show="steps.length > 1" x-cloak>
         <div class="bg-white rounded-2xl shadow-lg p-3 sm:p-4 overflow-x-auto">
-            <div class="flex items-center justify-between min-w-max sm:min-w-0">
+            <div :class="['flex items-center min-w-max sm:min-w-0', steps.length === 1 ? 'justify-center w-full' : 'justify-between']">
                 <template x-for="(step, index) in steps" :key="index">
                     <div class="flex items-center">
                         <div class="flex flex-col items-center">
@@ -139,7 +145,7 @@
                                     clip-rule="evenodd" />
                             </svg>
                             <div>
-                                <p class="text-sm font-medium text-red-800">Tu es trop jeune pour utiliser Brillio</p>
+                                <p class="text-sm font-medium text-red-800">Tu es trop jeune pour utiliser {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}</p>
                                 <p class="text-sm text-red-700 mt-1">Cette application est réservée aux personnes de 10
                                     ans et plus. Merci de te rapprocher d'un adulte pour obtenir de l'aide.</p>
                             </div>
@@ -205,11 +211,20 @@
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button type="button" @click="nextStep()" :disabled="!canProceedStep0"
-                    :class="!canProceedStep0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'"
-                    class="px-6 py-3 text-white font-semibold rounded-xl transition">
-                    Continuer
-                </button>
+                @if(isset($current_organization) && $current_organization->disable_onboarding_steps)
+                    <input type="hidden" name="skip_extra" value="1">
+                    <button type="submit" :disabled="!canProceedStep0"
+                        :class="!canProceedStep0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-gradient-to-r from-primary-600 to-purple-600 hover:opacity-90'"
+                        class="px-8 py-3 text-white font-semibold rounded-xl transition shadow-lg">
+                        Commencer l'aventure !
+                    </button>
+                @else
+                    <button type="button" @click="nextStep()" :disabled="!canProceedStep0"
+                        :class="!canProceedStep0 ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-primary-600 hover:bg-primary-700'"
+                        class="px-6 py-3 text-white font-semibold rounded-xl transition">
+                        Continuer
+                    </button>
+                @endif
             </div>
         </div>
 
@@ -449,8 +464,9 @@
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         function onboarding() {
             return {
+                skipExtraSteps: {{ (isset($current_organization) && $current_organization->disable_onboarding_steps) ? 'true' : 'false' }},
                 currentStep: 0,
-                steps: ['Profil', 'Situation', 'Interets', 'Objectifs', 'Source'],
+                steps: {!! (isset($current_organization) && $current_organization->disable_onboarding_steps) ? "['Profil']" : "['Profil', 'Situation', 'Interets', 'Objectifs', 'Source']" !!},
                 errors: {
                     step0: '',
                     step1: '',
@@ -740,7 +756,7 @@
                                 return false;
                             }
                             if (this.ageError) {
-                                this.errors.step0 = 'Vous devez avoir au moins 10 ans pour utiliser Brillio';
+                                this.errors.step0 = 'Vous devez avoir au moins 10 ans pour utiliser {{ isset($current_organization) ? addslashes($current_organization->name) : "Brillio" }}';
                                 return false;
                             }
                             return true;
@@ -780,11 +796,11 @@
 
                         case 4:
                             if (!this.formData.how_found_us) {
-                                this.errors.step4 = 'Veuillez indiquer comment vous avez découvert Brillio';
+                                this.errors.step4 = 'Veuillez indiquer comment vous avez découvert {{ isset($current_organization) ? addslashes($current_organization->name) : "Brillio" }}';
                                 return false;
                             }
                             if (this.formData.how_found_us === 'other' && !this.formData.how_found_us_other?.trim()) {
-                                this.errors.step4 = 'Veuillez préciser comment vous avez découvert Brillio';
+                                this.errors.step4 = 'Veuillez préciser comment vous avez découvert {{ isset($current_organization) ? addslashes($current_organization->name) : "Brillio" }}';
                                 return false;
                             }
                             return true;

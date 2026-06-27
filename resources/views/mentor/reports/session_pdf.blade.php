@@ -52,7 +52,7 @@
     </div>
 
     <div class="footer">
-        Généré par Brillio le {{ now()->format('d/m/Y à H:i') }}
+        Généré par {{ isset($current_organization) ? $current_organization->name : 'Brillio' }} le {{ now()->format('d/m/Y à H:i') }}
     </div>
 </body>
 </html>

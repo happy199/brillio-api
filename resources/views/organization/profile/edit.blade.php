@@ -216,6 +216,39 @@
                         </div>
                         @endif
 
+                        @if($organization->isEnterprise())
+                        <!-- Mode Désactivation Onboarding -->
+                        <div
+                            class="mb-8 p-4 rounded-lg border {{ $organization->disable_onboarding_steps ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200' }}">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h4
+                                        class="text-sm font-bold {{ $organization->disable_onboarding_steps ? 'text-orange-900' : 'text-gray-900' }} flex items-center">
+                                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                        Désactiver les étapes 2 à 5 de l'onboarding {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}
+                                    </h4>
+                                    <p
+                                        class="mt-1 text-xs {{ $organization->disable_onboarding_steps ? 'text-orange-700' : 'text-gray-500' }}">
+                                        Permet d'accélérer l'inscription de vos membres en ignorant les étapes facultatives (niveau d'études, situation, intérêts). Seule l'étape 1 sera exigée.
+                                    </p>
+                                </div>
+                                <div class="ml-4 flex-shrink-0">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="disable_onboarding_steps" value="1"
+                                            class="sr-only peer" {{ $organization->disable_onboarding_steps ? 'checked' :
+                                        '' }}>
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600">
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Branding & Customization Section -->
                         <div class="pt-6 border-t border-gray-200">
                             <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4 flex items-center">

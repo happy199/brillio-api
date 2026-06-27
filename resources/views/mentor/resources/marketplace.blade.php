@@ -75,7 +75,7 @@
                 <!-- Author -->
                 <select name="author" onchange="this.form.submit()" class="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-lg shadow-sm">
                     <option value="">Tous les auteurs</option>
-                    <option value="brillio" {{ request('author') == 'brillio' ? 'selected' : '' }}>Brillio Team</option>
+                    <option value="brillio" {{ request('author') == 'brillio' ? 'selected' : '' }}>Équipe {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}</option>
                     <option value="mentors" {{ request('author') == 'mentors' ? 'selected' : '' }}>Mes Confrères</option>
                 </select>
 
@@ -96,7 +96,7 @@
         </svg>
         <div>
             <p class="text-sm text-indigo-700">
-                Vous voyez ici les ressources publiées par vos confrères et l'équipe Brillio. Utilisez cet espace pour ne pas créer de doublons et identifier les besoins non couverts.
+                Vous voyez ici les ressources publiées par vos confrères et l'équipe {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}. Utilisez cet espace pour ne pas créer de doublons et identifier les besoins non couverts.
             </p>
         </div>
     </div>
