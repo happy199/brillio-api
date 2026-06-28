@@ -408,8 +408,8 @@
     function shareResource() {
         if (navigator.share) {
             navigator.share({
-                title: '{{ addslashes($resource->title) }} - Ressource {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }}',
-                text: 'Découvre cette ressource pédagogique sur {{ isset($current_organization) ? addslashes($current_organization->name) : \'Brillio\' }} !',
+                title: '{{ addslashes($resource->title) }} - Ressource {{ isset($current_organization) ? addslashes($current_organization->name) : "Brillio" }}',
+                text: 'Découvre cette ressource pédagogique sur {{ isset($current_organization) ? addslashes($current_organization->name) : "Brillio" }} !',
                 url: window.location.href
             }).catch(console.error);
         } else if (navigator.clipboard && window.isSecureContext) {
