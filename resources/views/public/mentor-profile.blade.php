@@ -260,7 +260,7 @@
         function shareProfile() {
             if (navigator.share) {
                 navigator.share({
-                    title: '{{ $publicData["name"] }} - Mentor {{ $displayOrg ? addslashes($displayOrg->name) : \'Brillio\' }}',
+                    title: '{{ $publicData["name"] }} - Mentor {{ $displayOrg ? addslashes($displayOrg->name) : "Brillio" }}',
                     text: 'Découvrez le parcours de {{ $publicData["name"] }}, mentor en {{ $publicData["specialization"] }}',
                     url: window.location.href
                 }).catch(err => console.log('Erreur de partage:', err));
