@@ -65,6 +65,19 @@ class PageController extends Controller
     }
 
     /**
+     * Page Ressources
+     */
+    public function resources()
+    {
+        $resources = \App\Models\Resource::where('is_published', true)
+            ->where('is_validated', true)
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
+
+        return view('public.resources', compact('resources'));
+    }
+
+    /**
      * Traitement du formulaire de contact
      */
     public function submitContact(Request $request)
