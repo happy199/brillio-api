@@ -249,7 +249,7 @@
         </div>
 
         <!-- Mobile Navigation -->
-        <div class="md:hidden border-t border-gray-100 px-4 py-3 flex flex-wrap gap-2">
+        <div class="md:hidden border-t border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
             <a href="{{ route('jeune.dashboard') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.dashboard') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Accueil
