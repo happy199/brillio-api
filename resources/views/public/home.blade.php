@@ -1142,6 +1142,8 @@
                                 activeSlide: 0,
                                 slides: {{ isset($verifiedMentors) ? $verifiedMentors->count() : 0 }},
                                 autoplayInterval: null,
+                                touchstartX: 0,
+                                touchendX: 0,
                                 startAutoplay() {
                                     this.autoplayInterval = setInterval(() => { this.next() }, 5000);
                                 },
@@ -1157,7 +1159,9 @@
                             }"
                             x-init="if(slides > 1) startAutoplay()"
                             @mouseenter="stopAutoplay()"
-                            @mouseleave="if(slides > 1) startAutoplay()">
+                            @mouseleave="if(slides > 1) startAutoplay()"
+                            @touchstart="touchstartX = $event.changedTouches[0].screenX; stopAutoplay()"
+                            @touchend="touchendX = $event.changedTouches[0].screenX; if(slides > 1) { if(touchendX < touchstartX - 50) next(); if(touchendX > touchstartX + 50) prev(); startAutoplay(); }">
                             
                             @if(isset($verifiedMentors) && $verifiedMentors->count() > 0)
                                 <!-- Carousel Track -->
