@@ -867,7 +867,7 @@
                                 </button>
                             </div>
 
-                            <p class="text-[10px] text-gray-500 mt-1">Format : JPG, PNG (Max 5 Mo)</p>
+                            <p class="text-[10px] text-gray-500 mt-1">Format : JPG, PNG (Max 5 Mo). Dimensions rec.: 1280x720px (16:9)</p>
 
                             <input id="preview_image_input" type="file" name="preview_image" accept="image/*"
                                 @change="handleFileSelect($event)" class="hidden" />

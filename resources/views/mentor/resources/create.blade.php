@@ -893,7 +893,7 @@
                                 <input id="preview_image_input" type="file" name="preview_image" accept="image/*"
                                     class="hidden" @change="handleCoverChange" />
                             </label>
-                            <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG. Taille max : 5 Mo.</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG. Dimensions rec.: 1280x720px (16:9). Taille max : 5 Mo.</p>
                             @error('preview_image') <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
                             @enderror
                         </div>
