@@ -101,6 +101,7 @@ trait ManagesQuizzes
                                     $option->update([
                                         'option_text' => $optionData['option_text'],
                                         'is_correct' => ! empty($optionData['is_correct']),
+                                        'explanation' => $optionData['explanation'] ?? null,
                                     ]);
                                     $incomingOptionIds[] = $option->id;
                                 } else {
@@ -111,6 +112,7 @@ trait ManagesQuizzes
                                     'quiz_question_id' => $question->id,
                                     'option_text' => $optionData['option_text'],
                                     'is_correct' => ! empty($optionData['is_correct']),
+                                    'explanation' => $optionData['explanation'] ?? null,
                                 ]);
                                 $incomingOptionIds[] = $option->id;
                             }

@@ -185,18 +185,24 @@
                                                     </div>
                                                     
                                                     <!-- Options -->
-                                                    <div class="pl-4 space-y-2 border-l-2 border-gray-100">
+                                                    <div class="pl-4 space-y-4 border-l-2 border-gray-100">
+                                                        <p class="text-xs text-gray-500 italic mb-2">Cochez la case ou le bouton radio à côté de l'option pour indiquer qu'il s'agit de la bonne réponse.</p>
                                                         <template x-for="(option, optIndex) in question.options" :key="optIndex">
-                                                            <div class="flex items-center gap-2 group">
-                                                                <input type="hidden" x-model="option.id">
-                                                                <template x-if="question.type === 'multiple'">
-                                                                    <input type="checkbox" x-model="option.is_correct" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
-                                                                </template>
-                                                                <template x-if="question.type === 'single' || !question.type">
-                                                                    <input type="radio" :name="'correct_'+qIndex+'_'+qsIndex" :checked="option.is_correct" @change="setCorrectOption(qIndex, qsIndex, optIndex)" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                                                </template>
-                                                                <input type="text" x-model="option.option_text" placeholder="Option de réponse" class="flex-1 bg-transparent border-b border-gray-200 focus:border-indigo-500 focus:ring-0 text-sm px-1 py-1 group-hover:bg-gray-50 transition rounded-t">
-                                                                <button type="button" @click="removeOption(qIndex, qsIndex, optIndex)" class="text-gray-300 hover:text-red-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                                            <div class="flex flex-col gap-1 group">
+                                                                <div class="flex items-center gap-2">
+                                                                    <input type="hidden" x-model="option.id">
+                                                                    <template x-if="question.type === 'multiple'">
+                                                                        <input type="checkbox" x-model="option.is_correct" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                                                    </template>
+                                                                    <template x-if="question.type === 'single' || !question.type">
+                                                                        <input type="radio" :name="'correct_'+qIndex+'_'+qsIndex" :checked="option.is_correct" @change="setCorrectOption(qIndex, qsIndex, optIndex)" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                                                                    </template>
+                                                                    <input type="text" x-model="option.option_text" placeholder="Option de réponse" class="flex-1 bg-transparent border-b border-gray-200 focus:border-indigo-500 focus:ring-0 text-sm px-1 py-1 group-hover:bg-gray-50 transition rounded-t">
+                                                                    <button type="button" @click="removeOption(qIndex, qsIndex, optIndex)" class="text-gray-300 hover:text-red-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                                                </div>
+                                                                <div class="pl-6 pr-8">
+                                                                    <input type="text" x-model="option.explanation" placeholder="Explication (optionnelle) : Pourquoi cette réponse est-elle vraie ou fausse ?" class="w-full text-xs bg-gray-50 border-gray-200 text-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-1.5 italic">
+                                                                </div>
                                                             </div>
                                                         </template>
                                                         <button type="button" @click="addOption(qIndex, qsIndex)" class="text-[10px] text-gray-500 hover:text-indigo-600 mt-2 uppercase font-bold tracking-wider inline-flex items-center gap-1">
@@ -1193,8 +1199,8 @@
                             type: 'single',
                             points: 1,
                             options: [
-                                { option_text: '', is_correct: true },
-                                { option_text: '', is_correct: false }
+                                { option_text: '', is_correct: true, explanation: '' },
+                                { option_text: '', is_correct: false, explanation: '' }
                             ]
                         }
                     ]
@@ -1222,8 +1228,8 @@
                     type: type,
                     points: 1,
                     options: [
-                        { option_text: '', is_correct: false },
-                        { option_text: '', is_correct: false }
+                        { option_text: '', is_correct: false, explanation: '' },
+                        { option_text: '', is_correct: false, explanation: '' }
                     ]
                 });
             },
@@ -1231,7 +1237,7 @@
                 this.quizzes[qIndex].questions.splice(qsIndex, 1);
             },
             addOption(qIndex, qsIndex) {
-                this.quizzes[qIndex].questions[qsIndex].options.push({ option_text: '', is_correct: false });
+                this.quizzes[qIndex].questions[qsIndex].options.push({ option_text: '', is_correct: false, explanation: '' });
             },
             removeOption(qIndex, qsIndex, optIndex) {
                 this.quizzes[qIndex].questions[qsIndex].options.splice(optIndex, 1);
@@ -1265,7 +1271,8 @@
                                 return [
                                     'id' => $opt->id,
                                     'option_text' => $opt->option_text,
-                                    'is_correct' => $opt->is_correct
+                                    'is_correct' => $opt->is_correct,
+                                    'explanation' => $opt->explanation ?? ''
                                 ];
                             })
                         ];
