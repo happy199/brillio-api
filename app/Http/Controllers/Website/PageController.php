@@ -151,9 +151,16 @@ class PageController extends Controller
             ] : null,
         ];
 
+        $resources = \App\Models\Resource::where('user_id', $mentor->user_id)
+            ->where('is_published', true)
+            ->where('is_validated', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('public.mentor-profile', [
             'mentor' => $mentor,
             'publicData' => $publicData,
+            'resources' => $resources,
         ]);
     }
 
