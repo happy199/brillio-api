@@ -612,4 +612,22 @@ class MentorshipNotificationService
             ]);
         }
     }
+
+    /**
+     * Notifier les mentees de la création d'une nouvelle ressource par leur mentor
+     */
+    public function sendNewResourceNotification(Resource $resource, User $mentor)
+    {
+        $mentees = Mentorship::where('mentor_id', $mentor->id)
+            ->where('status', 'accepted')
+            ->with('mentee')
+            ->get()
+            ->pluck('mentee');
+            
+        foreach ($mentees as $mentee) {
+            if ($mentee) {
+                $mentee->notify(new \App\Notifications\NewMentorResourceNotification($resource, $mentor));
+            }
+        }
+    }
 }
