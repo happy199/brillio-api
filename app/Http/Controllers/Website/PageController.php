@@ -34,7 +34,13 @@ class PageController extends Controller
             $countriesCount = 15;
         }
 
-        return view('public.home', compact('jeunesCount', 'mentorsCount', 'countriesCount'));
+        $verifiedMentors = MentorProfile::with(['user', 'specializationModel', 'roadmapSteps'])
+            ->where('is_validated', true)
+            ->inRandomOrder()
+            ->limit(10)
+            ->get();
+
+        return view('public.home', compact('jeunesCount', 'mentorsCount', 'countriesCount', 'verifiedMentors'));
     }
 
     /**
