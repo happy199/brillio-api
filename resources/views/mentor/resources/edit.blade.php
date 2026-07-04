@@ -724,13 +724,19 @@
                             <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Type</label>
                             <select name="type"
                                 class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
-                                @foreach(['article', 'video', 'tool', 'exercise', 'template', 'script', 'advertisement']
-                                as $type)
-                                <option value="{{ $type }}" {{ old('type', $resource->type) === $type ? 'selected' : ''
-                                    }}>
-                                    {{ $type === 'advertisement' ? 'Publicité / Partenariat' : ucfirst($type) }}
-                                </option>
-                                @endforeach
+                                <option value="article" {{ $resource->type === 'article' ? 'selected' : '' }}>Article</option>
+                                <option value="video" {{ $resource->type === 'video' ? 'selected' : '' }}>Vidéo</option>
+                                <option value="tool" {{ $resource->type === 'tool' ? 'selected' : '' }}>Outil</option>
+                                <option value="exercise" {{ $resource->type === 'exercise' ? 'selected' : '' }}>Exercice</option>
+                                <option value="template" {{ $resource->type === 'template' ? 'selected' : '' }}>Modèle</option>
+                                <option value="script" {{ $resource->type === 'script' ? 'selected' : '' }}>Script</option>
+                                <option value="book" {{ $resource->type === 'book' ? 'selected' : '' }}>Livre / Ebook</option>
+                                <option value="podcast" {{ $resource->type === 'podcast' ? 'selected' : '' }}>Podcast</option>
+                                <option value="webinar" {{ $resource->type === 'webinar' ? 'selected' : '' }}>Webinaire</option>
+                                <option value="guide" {{ $resource->type === 'guide' ? 'selected' : '' }}>Guide</option>
+                                <option value="case_study" {{ $resource->type === 'case_study' ? 'selected' : '' }}>Étude de cas</option>
+                                <option value="course" {{ $resource->type === 'course' ? 'selected' : '' }}>Formation</option>
+                                <option value="advertisement" {{ $resource->type === 'advertisement' ? 'selected' : '' }}>Publicité / Partenariat</option>
                             </select>
                         </div>
 

@@ -755,6 +755,12 @@
                                 <option value="exercise">Exercice</option>
                                 <option value="template">Modèle</option>
                                 <option value="script">Script</option>
+                                <option value="book">Livre / Ebook</option>
+                                <option value="podcast">Podcast</option>
+                                <option value="webinar">Webinaire</option>
+                                <option value="guide">Guide</option>
+                                <option value="case_study">Étude de cas</option>
+                                <option value="course">Formation</option>
                                 <option value="advertisement">Publicité / Partenariat</option>
                             </select>
                         </div>
