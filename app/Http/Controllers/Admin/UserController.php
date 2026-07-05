@@ -39,6 +39,15 @@ class UserController extends Controller
             $query->where('country', $country);
         }
 
+        // Filtre par numéro de téléphone
+        if ($phoneStatus = $request->get('phone_status')) {
+            if ($phoneStatus === 'with_phone') {
+                $query->whereNotNull('phone');
+            } elseif ($phoneStatus === 'without_phone') {
+                $query->whereNull('phone');
+            }
+        }
+
         // Recherche par nom ou email
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {

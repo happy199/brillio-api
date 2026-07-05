@@ -93,11 +93,20 @@
             </select>
         </div>
 
+        <div class="w-40">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+            <select name="phone_status" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">Tous</option>
+                <option value="with_phone" {{ request('phone_status')==='with_phone' ? 'selected' : '' }}>Avec numéro</option>
+                <option value="without_phone" {{ request('phone_status')==='without_phone' ? 'selected' : '' }}>Sans numéro</option>
+            </select>
+        </div>
+
         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
             Filtrer
         </button>
 
-        @if(request()->hasAny(['search', 'type', 'country']))
+        @if(request()->hasAny(['search', 'type', 'country', 'phone_status']))
         <a href="{{ route('admin.users.index', array_filter(['archived' => request('archived'), 'blocked' => request('blocked')])) }}"
             class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
             Réinitialiser
