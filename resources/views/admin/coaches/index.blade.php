@@ -5,7 +5,7 @@
 @section('header', 'Gestion des Coachs')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ showPromoteModal: false, showCreateModal: false }">
     <!-- Statuts/Stats Rapides -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
@@ -35,11 +35,11 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-            <button onclick="document.getElementById('modal-promote').classList.remove('hidden')"
+            <button @click="showPromoteModal = true"
                 class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center">
                 <i class="fas fa-plus mr-2"></i> Promouvoir un mentor
             </button>
-            <button onclick="document.getElementById('modal-create').classList.remove('hidden')"
+            <button @click="showCreateModal = true"
                 class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center">
                 <i class="fas fa-user-plus mr-2"></i> Créer Nouveau Coach
             </button>
@@ -162,9 +162,9 @@
 </div>
 
 <!-- Modal Promouvoir -->
-<div id="modal-promote"
-    class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-    <div
+<div id="modal-promote" x-show="showPromoteModal" x-cloak
+    class="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+    <div @click.outside="showPromoteModal = false"
         class="relative mx-auto p-0 border-0 w-full max-w-lg shadow-2xl rounded-2xl bg-white overflow-hidden transition-all transform animate-in fade-in zoom-in duration-200">
         <!-- Header -->
         <div class="bg-indigo-600 px-6 py-4 flex items-center justify-between">
@@ -172,7 +172,7 @@
                 <i class="fas fa-user-plus mr-3 text-indigo-200"></i>
                 Promouvoir des mentors
             </h3>
-            <button onclick="document.getElementById('modal-promote').classList.add('hidden')"
+            <button @click="showPromoteModal = false"
                 class="text-indigo-200 hover:text-white transition">
                 <i class="fas fa-times fa-lg"></i>
             </button>
@@ -244,7 +244,7 @@
                     class="bg-indigo-600 text-white px-6 py-2.5 rounded-xl hover:bg-indigo-700 transition font-bold shadow-lg shadow-indigo-200 flex items-center opacity-50 cursor-not-allowed">
                     Confirmer la promotion
                 </button>
-                <button type="button" onclick="document.getElementById('modal-promote').classList.add('hidden')"
+                <button type="button" @click="showPromoteModal = false"
                     class="bg-white text-gray-700 px-6 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 transition font-medium">
                     Annuler
                 </button>
@@ -254,9 +254,9 @@
 </div>
 
 <!-- Modal Créer -->
-<div id="modal-create"
-    class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-    <div
+<div id="modal-create" x-show="showCreateModal" x-cloak
+    class="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+    <div @click.outside="showCreateModal = false"
         class="relative mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-2xl bg-white overflow-hidden animate-in fade-in zoom-in duration-200">
         <!-- Header -->
         <div class="bg-green-600 px-6 py-4 flex items-center justify-between">
@@ -264,7 +264,7 @@
                 <i class="fas fa-user-plus mr-3 text-green-200"></i>
                 Nouveau Coach
             </h3>
-            <button onclick="document.getElementById('modal-create').classList.add('hidden')"
+            <button @click="showCreateModal = false"
                 class="text-green-200 hover:text-white transition">
                 <i class="fas fa-times fa-lg"></i>
             </button>
@@ -298,7 +298,7 @@
                     class="bg-green-600 text-white px-6 py-2.5 rounded-xl hover:bg-green-700 transition font-bold shadow-lg shadow-green-200">
                     Créer le compte
                 </button>
-                <button type="button" onclick="document.getElementById('modal-create').classList.add('hidden')"
+                <button type="button" @click="showCreateModal = false"
                     class="bg-white text-gray-700 px-6 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 transition font-medium">
                     Annuler
                 </button>

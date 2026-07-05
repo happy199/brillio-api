@@ -66,10 +66,10 @@
                                 @endif
                             </div>
                         </td>
-                        <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap" x-data="{ showModal: false }">
                             @if($log->output || $log->status === 'failed')
                             <div class="text-center">
-                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-slate-200 text-sm font-medium rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.remove('hidden')">
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-slate-200 text-sm font-medium rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm" @click="showModal = true">
                                     <svg class="w-4 h-4 mr-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
@@ -78,14 +78,14 @@
                             </div>
 
                             <!-- Modal -->
-                            <div id="modal-cron-{{ $log->id }}" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-                                <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-4xl max-h-[90vh] flex flex-col border border-slate-200">
+                            <div id="modal-cron-{{ $log->id }}" x-show="showModal" x-cloak class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                                <div @click.outside="showModal = false" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-4xl max-h-[90vh] flex flex-col border border-slate-200">
                                     <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                         <div class="flex items-center gap-2">
                                             <div class="w-2 h-2 rounded-full {{ $log->status === 'success' ? 'bg-emerald-500' : 'bg-rose-500' }}"></div>
                                             <div class="font-bold text-slate-800">Détails de l'exécution : {{ $log->command }}</div>
                                         </div>
-                                        <button class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 transition-colors" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.add('hidden')">&times;</button>
+                                        <button class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 transition-colors" @click="showModal = false">&times;</button>
                                     </div>
                                     <div class="px-6 py-6 overflow-y-auto flex-1 bg-slate-950">
                                         @if($log->output || $log->status === 'failed')
@@ -107,7 +107,7 @@
                                         @endif
                                     </div>
                                     <div class="px-6 py-4 border-t border-slate-100 flex justify-end bg-slate-50">
-                                        <button class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-bold transition-all shadow-sm" onclick="document.getElementById('modal-cron-{{ $log->id }}').classList.add('hidden')">Fermer</button>
+                                        <button class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-bold transition-all shadow-sm" @click="showModal = false">Fermer</button>
                                     </div>
                                 </div>
                             </div>
