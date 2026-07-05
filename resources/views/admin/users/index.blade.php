@@ -20,12 +20,14 @@
     </a>
 </div>
 
+@if(auth()->user()->isAdmin())
 <div class="mb-6 flex justify-end">
     <a href="{{ route('admin.users.create') }}"
         class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
         <i class="fas fa-plus mr-2"></i> Créer un utilisateur
     </a>
 </div>
+@endif
 
 @if(session('generated_password'))
 <div class="mb-6 p-6 bg-green-50 border-2 border-green-200 rounded-2xl shadow-sm">
@@ -203,85 +205,129 @@
                         Voir
                     </a>
 
-                    @if(request('blocked'))
-                    <form action="{{ route('admin.users.unblock', $user) }}" method="POST" class="inline"
-                        onsubmit="return confirm('Débloquer cet utilisateur ? Il sera déplacé vers les comptes archivés.')">
-                        @csrf
-                        <button type="submit" class="text-indigo-600 hover:text-indigo-900 mr-3 font-medium">
-                            Débloquer
+                    @if(auth()->user()->isCommercial() || auth()->user()->isAdmin())
+                        @php
+                            $activeActivity = \App\Models\CommercialActivity::where('assignable_type', \App\Models\User::class)
+                                ->where('assignable_id', $user->id)
+                                ->where('status', 'active')
+                                ->first();
+                        @endphp
+                        @if(!$activeActivity)
+                        <form action="{{ route('admin.commercials.take_charge') }}" method="POST" class="inline">
+                            @csrf
+                            <input type="hidden" name="type" value="user">
+                            <input type="hidden" name="id" value="{{ $user->id }}">
+                            <button type="submit" class="text-indigo-600 hover:text-indigo-900 mr-3 text-sm font-medium">
+                                Prendre en charge
+                            </button>
+                        </form>
+                        @elseif($activeActivity->commercial_id === auth()->id() || auth()->user()->isAdmin())
+                        <button type="button" 
+                                @click="$dispatch('open-close-activity-modal', { url: '{{ route('admin.commercials.end_charge', $activeActivity) }}' })"
+                                class="text-green-600 hover:text-green-900 mr-3 text-sm font-medium">
+                            Clôturer
                         </button>
-                    </form>
-                    @if($user->id !== auth()->id())
-                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
-                        onsubmit="return confirm('Supprimer définitivement cet utilisateur ?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-700 hover:text-red-900 font-bold">
-                            Supprimer
-                        </button>
-                    </form>
+                        @else
+                        <span class="text-gray-500 mr-3 text-sm italic">
+                            Géré par {{ $activeActivity->commercial->name }}
+                        </span>
+                        @endif
                     @endif
 
-                    @elseif($user->is_archived)
-                    <form action="{{ route('admin.users.reactivate', $user) }}" method="POST" class="inline"
-                        onsubmit="return confirm('Réactiver ce compte ?')">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="text-green-600 hover:text-green-900 mr-3 font-medium">
-                            Réactiver
-                        </button>
-                    </form>
+                    @if(auth()->user()->isAdmin())
+                        @if(request('blocked'))
+                        <form action="{{ route('admin.users.unblock', $user) }}" method="POST" class="inline"
+                            onsubmit="return confirm('Débloquer cet utilisateur ? Il sera déplacé vers les comptes archivés.')">
+                            @csrf
+                            <button type="submit" class="text-indigo-600 hover:text-indigo-900 mr-3 font-medium">
+                                Débloquer
+                            </button>
+                        </form>
+                        @if($user->id !== auth()->id())
+                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
+                            onsubmit="return confirm('Supprimer définitivement cet utilisateur ?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-700 hover:text-red-900 font-bold">
+                                Supprimer
+                            </button>
+                        </form>
+                        @endif
 
-                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
-                        onsubmit="return confirm('ATTENTION : Supprimer définitivement cet utilisateur et TOUTES ses données ? Cette action est irréversible.')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-700 hover:text-red-900 font-bold">
-                            Supprimer (Définitif)
-                        </button>
-                    </form>
+                        @elseif(request('archived') || $user->is_archived)
+                        <form action="{{ route('admin.users.reactivate', $user) }}" method="POST" class="inline"
+                            onsubmit="return confirm('Réactiver ce compte ?')">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="text-green-600 hover:text-green-900 mr-3 font-medium">
+                                Réactiver
+                            </button>
+                        </form>
 
-                    @elseif($user->id !== auth()->id())
-                    @if($user->isJeune())
-                    <form action="{{ route('admin.users.propose-promotion', $user) }}" method="POST" class="inline"
-                        onsubmit="return confirm('Proposer à cet étudiant de devenir Mentor ? Un mail lui sera envoyé.')">
-                        @csrf
-                        <button type="submit" class="text-purple-600 hover:text-purple-900 mr-3">
-                            Promouvoir
-                        </button>
-                    </form>
+                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
+                            onsubmit="return confirm('ATTENTION : Supprimer définitivement cet utilisateur et TOUTES ses données ? Cette action est irréversible.')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-700 hover:text-red-900 font-bold">
+                                Supprimer (Définitif)
+                            </button>
+                        </form>
+
+                        @else
+                        @if($user->id !== auth()->id())
+                        @if($user->isJeune())
+                        <form action="{{ route('admin.users.propose-promotion', $user) }}" method="POST" class="inline"
+                            onsubmit="return confirm('Proposer à cet étudiant de devenir Mentor ? Un mail lui sera envoyé.')">
+                            @csrf
+                            <button type="submit" class="text-purple-600 hover:text-purple-900 mr-3">
+                                Promouvoir
+                            </button>
+                        </form>
+                        @endif
+                        <form action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="inline">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="text-yellow-600 hover:text-yellow-900 mr-3">
+                                {{ $user->is_admin ? 'Retirer admin' : 'Rendre admin' }}
+                            </button>
+                        </form>
+
+                        @if(!$user->is_blocked)
+                        <form action="{{ route('admin.users.archive', $user) }}" method="POST" class="inline"
+                            onsubmit="let reason = prompt('Motif de l\'archivage (optionnel) :', 'Archivé par un administrateur.'); if (reason !== null) { this.reason.value = reason; return true; } return false;">
+                            @csrf
+                            <input type="hidden" name="reason" value="">
+                            <button type="submit" class="text-orange-600 hover:text-orange-900 mr-3">
+                                Archiver
+                            </button>
+                        </form>
+                        <form action="{{ route('admin.users.block', $user) }}" method="POST" class="inline"
+                            onsubmit="let reason = prompt('Motif du blocage :', 'Non-respect des règles de la plateforme.'); if (reason) { this.reason.value = reason; return true; } return false;">
+                            @csrf
+                            <input type="hidden" name="reason" value="">
+                            <button type="submit" class="text-red-600 hover:text-red-900 mr-3">
+                                Bloquer
+                            </button>
+                        </form>
+                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
+                            onsubmit="return confirm('Supprimer définitivement cet utilisateur ?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-700 hover:text-red-900 font-bold">
+                                Supprimer
+                            </button>
+                        </form>
+                        @endif
+                        @endif
+                        @endif
                     @endif
-                    <form action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="inline">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit" class="text-yellow-600 hover:text-yellow-900 mr-3">
-                            {{ $user->is_admin ? 'Retirer admin' : 'Rendre admin' }}
-                        </button>
-                    </form>
-                    @if(!$user->is_blocked)
-                    <form action="{{ route('admin.users.archive', $user) }}" method="POST" class="inline"
-                        onsubmit="let reason = prompt('Motif de l\'archivage (optionnel) :', 'Archivé par un administrateur.'); if (reason !== null) { this.reason.value = reason; return true; } return false;">
-                        @csrf
-                        <input type="hidden" name="reason" value="">
-                        <button type="submit" class="text-orange-600 hover:text-orange-900 mr-3">
-                            Archiver
-                        </button>
-                    </form>
-                    <form action="{{ route('admin.users.block', $user) }}" method="POST" class="inline"
-                        onsubmit="let reason = prompt('Motif du blocage :', 'Non-respect des règles de la plateforme.'); if (reason) { this.reason.value = reason; return true; } return false;">
-                        @csrf
-                        <input type="hidden" name="reason" value="">
-                        <button type="submit" class="text-red-600 hover:text-red-900 mr-3">
-                            Bloquer
-                        </button>
-                    </form>
-                    @endif
+                    @if(auth()->user()->isAdmin())
                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
                         onsubmit="return confirm('Supprimer cet utilisateur ?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-red-600 hover:text-red-900">
-                            Supprimer
+                            <i class="fas fa-trash"></i>
                         </button>
                     </form>
                     @endif

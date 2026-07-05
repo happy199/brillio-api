@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Ressources Pédagogiques</h1>
             <p class="text-gray-600">Gérez les articles, vidéos et outils pour les jeunes</p>
         </div>
-        @if(!auth()->user()->isCoach())
+        @if(auth()->user()->isAdmin())
         <a href="{{ route('admin.resources.create') }}"
             class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@
     <!-- Filtres -->
     <div
         class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-center justify-between">
-        @if(!auth()->user()->isCoach())
+        @if(auth()->user()->isAdmin())
         <div class="flex gap-2">
             <a href="{{ route('admin.resources.index') }}"
                 class="px-4 py-2 rounded-lg text-sm font-medium {{ !request('status') ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
@@ -190,7 +190,7 @@
                     {{ $resource->user->name }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    @if(!auth()->user()->isCoach())
+                    @if(auth()->user()->isAdmin())
                     <a href="{{ route('admin.resources.edit', $resource) }}"
                         class="text-primary-600 hover:text-primary-900 mr-3">Éditer</a>
                     @endif

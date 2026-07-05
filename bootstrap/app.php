@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckAdminOrCommercial;
 use App\Http\Middleware\CheckOrganizationSubscription;
 use App\Http\Middleware\CheckUserType;
 use App\Http\Middleware\EnsureJeuneProfilePublished;
@@ -10,6 +11,7 @@ use App\Http\Middleware\EnsureUserIsOrganization;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsCoach;
 use App\Http\Middleware\ResolveOrganizationByDomain;
+use App\Http\Middleware\RestrictCommercialWrites;
 use App\Http\Middleware\RestrictSwaggerAccess;
 use App\Http\Middleware\SecurityHeadersMiddleware;
 use App\Http\Middleware\UpdateLastLogin;
@@ -45,6 +47,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Alias pour les middlewares personnalisés
         $middleware->alias([
             'is_admin' => IsAdmin::class,
+            'admin_or_commercial' => CheckAdminOrCommercial::class,
+            'restrict_commercial_writes' => RestrictCommercialWrites::class,
             'user_type' => CheckUserType::class,
             'organization' => EnsureUserIsOrganization::class,
             'mentor_published' => EnsureMentorProfilePublished::class,

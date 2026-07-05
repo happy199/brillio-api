@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\CareerController;
 use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\CoachActivityController;
 use App\Http\Controllers\Admin\CoachController;
+use App\Http\Controllers\Admin\CommercialActivityController;
+use App\Http\Controllers\Admin\CommercialController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CreditPackController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -53,6 +55,7 @@ use App\Http\Controllers\Mentor\WalletController;
 use App\Http\Controllers\MonerooWebhookController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\Public\CareerController as PublicCareerController;
+use App\Http\Controllers\SellerAuthController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Webhook\JitsiWebhookController;
 use App\Http\Controllers\Website\ContactController as WebsiteContactController;
@@ -516,6 +519,14 @@ Route::prefix('espace-coach')->name('coach.')->middleware(['auth', 'verified', '
  |
  */
 
+// === Authentification Commercial ===
+Route::prefix('brilliosecretteamseller')->name('seller.')->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('/', [SellerAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/', [SellerAuthController::class, 'login'])->name('login.post');
+    });
+});
+
 Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
     // === Authentification Admin ===
@@ -525,7 +536,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
     });
 
     // Étape de vérification 2FA (accessible après login mais avant middleware admin_2fa)
-    Route::middleware(['auth', 'is_admin'])->group(function () {
+    Route::middleware(['auth', 'admin_or_commercial'])->group(function () {
         Route::get('two-factor', [TwoFactorController::class, 'index'])->name('two_factor.index');
         Route::post('two-factor', [TwoFactorController::class, 'verify'])->name('two_factor.verify');
     });
@@ -549,15 +560,24 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
     }
     );
 
-    // === Routes Réservées aux Administrateurs ===
-    Route::middleware(['auth', 'is_admin', 'admin_2fa'])->group(function () {
-        // Configuration 2FA (dans le profil admin)
+    // === Routes Réservées aux Administrateurs et Commerciaux ===
+    Route::middleware(['auth', 'admin_or_commercial', 'admin_2fa', 'restrict_commercial_writes'])->group(function () {
+        // Configuration 2FA (dans le profil admin/commercial)
         Route::get('profile/two-factor', [TwoFactorController::class, 'setup'])->name('two_factor.setup');
         Route::post('profile/two-factor', [TwoFactorController::class, 'activate'])->name('two_factor.activate');
         Route::post('profile/two-factor/deactivate', [TwoFactorController::class, 'deactivate'])->name('two_factor.deactivate');
 
         // Dashboard principal
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Commerciaux & Activités
+        Route::get('commercials', [CommercialController::class, 'index'])->name('commercials.index');
+        Route::post('commercials', [CommercialController::class, 'store'])->name('commercials.store');
+        Route::post('commercials/{commercial}/reset-password', [CommercialController::class, 'resetPassword'])->name('commercials.reset-password');
+        Route::delete('commercials/{commercial}', [CommercialController::class, 'destroy'])->name('commercials.destroy');
+        Route::get('commercial-activities', [CommercialActivityController::class, 'index'])->name('commercial_activities.index');
+        Route::post('commercial-activities/take-charge', [CommercialActivityController::class, 'takeCharge'])->name('commercials.take_charge');
+        Route::post('commercial-activities/{activity}/end-charge', [CommercialActivityController::class, 'endCharge'])->name('commercials.end_charge');
 
         // Advertisements Management
         Route::prefix('advertisements')->name('advertisements.')->group(function () {

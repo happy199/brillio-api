@@ -113,6 +113,7 @@
         </div>
     </div>
 
+    @if(auth()->user()->isAdmin())
     <!-- Actions -->
     <div class="mb-4 flex justify-end">
         <button @click="openCreateModal(activeTab)"
@@ -120,6 +121,7 @@
             + Nouveau Plan
         </button>
     </div>
+    @endif
 
     <!-- Table -->
     <div class="bg-white shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
@@ -157,6 +159,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        @if(auth()->user()->isAdmin())
                         <button @click="openEditModal({{ json_encode($plan) }})"
                             class="text-indigo-600 hover:text-indigo-900 mr-3">Modifier</button>
                         <form action="{{ route('admin.subscription-plans.destroy', $plan) }}" method="POST"
@@ -165,6 +168,7 @@
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-900">Supprimer</button>
                         </form>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
