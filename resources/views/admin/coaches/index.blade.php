@@ -5,7 +5,8 @@
 @section('header', 'Gestion des Coachs')
 
 @section('content')
-<div class="space-y-6" x-data="{ showPromoteModal: false, showCreateModal: false }">
+<div x-data="{ showPromoteModal: false, showCreateModal: false }">
+<div class="space-y-6">
     <!-- Statuts/Stats Rapides -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
@@ -399,4 +400,5 @@
         }
     });
 </script>
+</div>
 @endsection
