@@ -48,6 +48,7 @@ use App\Models\PayoutRequest;
 use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Notifications\NewMentorResourceNotification;
 use Illuminate\Support\Facades\Mail;
 
 class MentorshipNotificationService
@@ -623,10 +624,10 @@ class MentorshipNotificationService
             ->with('mentee')
             ->get()
             ->pluck('mentee');
-            
+
         foreach ($mentees as $mentee) {
             if ($mentee) {
-                $mentee->notify(new \App\Notifications\NewMentorResourceNotification($resource, $mentor));
+                $mentee->notify(new NewMentorResourceNotification($resource, $mentor));
             }
         }
     }

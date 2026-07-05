@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,6 +11,7 @@ class NewMentorResourceNotification extends Notification
     use Queueable;
 
     public $resource;
+
     public $mentor;
 
     /**
@@ -39,10 +39,10 @@ class NewMentorResourceNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->subject('Nouvelle ressource de votre mentor')
-                    ->line('Votre mentor ' . $this->mentor->first_name . ' ' . $this->mentor->last_name . ' a publié une nouvelle ressource : ' . $this->resource->title)
-                    ->action('Voir la ressource', url('/ressources/' . $this->resource->slug))
-                    ->line('Bon apprentissage !');
+            ->subject('Nouvelle ressource de votre mentor')
+            ->line('Votre mentor '.$this->mentor->first_name.' '.$this->mentor->last_name.' a publié une nouvelle ressource : '.$this->resource->title)
+            ->action('Voir la ressource', url('/ressources/'.$this->resource->slug))
+            ->line('Bon apprentissage !');
     }
 
     /**
@@ -53,9 +53,9 @@ class NewMentorResourceNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => 'Nouvelle ressource : ' . $this->resource->title,
-            'message' => 'Votre mentor ' . $this->mentor->first_name . ' ' . $this->mentor->last_name . ' a publié une nouvelle ressource.',
-            'url' => url('/ressources/' . $this->resource->slug),
+            'title' => 'Nouvelle ressource : '.$this->resource->title,
+            'message' => 'Votre mentor '.$this->mentor->first_name.' '.$this->mentor->last_name.' a publié une nouvelle ressource.',
+            'url' => url('/ressources/'.$this->resource->slug),
             'resource_id' => $this->resource->id,
             'mentor_id' => $this->mentor->id,
         ];
