@@ -604,7 +604,7 @@ class JeuneDashboardController extends Controller
         }
 
         $mentors = $query->orderByDesc('is_validated')
-            ->orderBy('id')
+            ->inRandomOrder()
             ->paginate(12);
 
         $specializations = MentorProfile::SPECIALIZATIONS;
