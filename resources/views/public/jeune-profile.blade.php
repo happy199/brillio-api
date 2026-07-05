@@ -27,16 +27,18 @@
                 <div class="relative -mt-16 mb-6">
                     <!-- Avatar and Name - Always together -->
                     <div class="flex items-end gap-6 mb-4">
-                        <div class="w-24 h-24 rounded-2xl bg-white p-1 shadow-lg">
-                            @if($user->avatar_url)
-                            <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}"
-                                class="w-full h-full object-cover rounded-xl bg-gray-100">
-                            @else
-                            <div
-                                class="w-full h-full bg-gray-100 rounded-xl flex items-center justify-center text-3xl font-bold text-gray-400">
-                                {{ substr($user->name, 0, 1) }}
+                        <div class="w-24 h-24 rounded-2xl bg-white p-1 shadow-lg shrink-0">
+                            @php
+                                $initials = strtoupper(substr($user->first_name ?? $user->name ?? 'A', 0, 1) . substr($user->last_name ?? '', 0, 1));
+                                $colors = ['from-blue-400 to-blue-600', 'from-orange-400 to-red-500', 'from-purple-400 to-purple-600', 'from-green-400 to-green-600'];
+                                $color = $colors[crc32($user->id) % count($colors)];
+                            @endphp
+                            <div class="relative w-full h-full rounded-xl bg-gradient-to-br {{ $color }} flex items-center justify-center text-3xl font-bold text-white overflow-hidden">
+                                <span>{{ $initials }}</span>
+                                @if($user->avatar_url)
+                                <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="absolute inset-0 w-full h-full object-cover bg-white" onerror="this.style.display='none'">
+                                @endif
                             </div>
-                            @endif
                         </div>
                         <div class="mb-1">
                             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $user->name }}</h1>
