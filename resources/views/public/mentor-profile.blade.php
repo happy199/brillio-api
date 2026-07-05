@@ -65,15 +65,21 @@
         <!-- Profile Header -->
         <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
             <div class="flex flex-col md:flex-row gap-6 items-start">
-                @if($publicData['picture'])
-                <img src="{{ $publicData['picture'] }}" alt="{{ $publicData['name'] }}"
-                    class="w-24 h-24 rounded-full object-cover flex-shrink-0 border-4 border-orange-100">
-                @else
-                <div
-                    class="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white text-3xl font-bold flex-shrink-0">
-                    {{ strtoupper(substr($publicData['name'], 0, 2)) }}
+                @php
+                    $nameParts = explode(' ', $publicData['name']);
+                    $initials = strtoupper(substr($nameParts[0] ?? 'A', 0, 1) . substr($nameParts[1] ?? '', 0, 1));
+                    if (strlen($initials) < 2) {
+                        $initials = strtoupper(substr($publicData['name'] ?? 'A', 0, 2));
+                    }
+                    $colors = ['from-blue-400 to-blue-600', 'from-orange-400 to-red-500', 'from-purple-400 to-purple-600', 'from-green-400 to-green-600'];
+                    $color = $colors[crc32($mentor->user->id) % count($colors)];
+                @endphp
+                <div class="relative w-24 h-24 rounded-full bg-gradient-to-br {{ $color }} flex items-center justify-center text-white text-3xl font-bold flex-shrink-0 border-4 border-orange-100 overflow-hidden">
+                    <span>{{ $initials }}</span>
+                    @if($mentor->user->avatar_url)
+                    <img src="{{ $mentor->user->avatar_url }}" alt="{{ $publicData['name'] }}" class="absolute inset-0 w-full h-full object-cover bg-white" onerror="this.style.display='none'">
+                    @endif
                 </div>
-                @endif
 
                 <div class="flex-1">
                     <div class="flex items-center gap-2 mb-2">
