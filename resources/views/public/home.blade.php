@@ -1137,68 +1137,222 @@
                         <p class="text-sm text-gray-500 mt-3">Inscription rapide avec votre profil LinkedIn</p>
                     </div>
                     <div class="relative" data-aos="fade-left">
-                        <!-- Mentor cards illustration -->
-                        <div class="relative">
-                            <div
-                                class="bg-white rounded-2xl shadow-xl p-6 transform rotate-3 absolute top-0 right-0 w-64 opacity-60">
-                                <div class="flex items-center gap-3 mb-4">
+                        <!-- Verified Mentors Carousel -->
+                        <div class="relative w-full max-w-md mx-auto mt-8 md:mt-0" x-data="{
+                                activeSlide: 0,
+                                slides: {{ isset($verifiedMentors) ? $verifiedMentors->count() : 0 }},
+                                autoplayInterval: null,
+                                touchstartX: 0,
+                                touchendX: 0,
+                                startAutoplay() {
+                                    this.autoplayInterval = setInterval(() => { this.next() }, 5000);
+                                },
+                                stopAutoplay() {
+                                    clearInterval(this.autoplayInterval);
+                                },
+                                next() {
+                                    this.activeSlide = (this.activeSlide + 1) % this.slides;
+                                },
+                                prev() {
+                                    this.activeSlide = (this.activeSlide - 1 + this.slides) % this.slides;
+                                }
+                            }"
+                            x-init="if(slides > 1) startAutoplay()"
+                            @mouseenter="stopAutoplay()"
+                            @mouseleave="if(slides > 1) startAutoplay()"
+                            @touchstart="touchstartX = $event.changedTouches[0].screenX; stopAutoplay()"
+                            @touchend="touchendX = $event.changedTouches[0].screenX; if(slides > 1) { if(touchendX < touchstartX - 50) next(); if(touchendX > touchstartX + 50) prev(); startAutoplay(); }">
+                            
+                            @if(isset($verifiedMentors) && $verifiedMentors->count() > 0)
+                                <!-- Carousel Track -->
+                                <div class="relative h-64 sm:h-72 w-full">
+                                    @foreach($verifiedMentors as $index => $mentorInfo)
+                                    @php
+                                        $initials = strtoupper(substr($mentorInfo->user->first_name ?? 'M', 0, 1) . substr($mentorInfo->user->last_name ?? '', 0, 1));
+                                        $colors = ['from-blue-400 to-blue-600', 'from-orange-400 to-red-500', 'from-purple-400 to-purple-600', 'from-green-400 to-green-600'];
+                                        $color = $colors[$index % count($colors)];
+                                    @endphp
+                                    <div x-show="activeSlide === {{ $index }}"
+                                         x-transition:enter="transition ease-out duration-500"
+                                         x-transition:enter-start="opacity-0 translate-x-12 scale-95"
+                                         x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+                                         x-transition:leave="transition ease-in duration-300 absolute inset-0"
+                                         x-transition:leave-start="opacity-100 translate-x-0 scale-100"
+                                         x-transition:leave-end="opacity-0 -translate-x-12 scale-95"
+                                         class="bg-white rounded-3xl shadow-2xl p-8 absolute inset-0 m-auto w-full max-w-sm h-max border border-gray-100 z-10 flex flex-col"
+                                         style="display: none;">
+                                        
+                                        <div class="absolute -top-5 -right-5 w-24 h-24 bg-gradient-to-br from-orange-100 to-pink-50 rounded-full opacity-50 -z-10 blur-xl"></div>
+                                        <div class="absolute -bottom-5 -left-5 w-32 h-32 bg-gradient-to-tr from-blue-100 to-purple-50 rounded-full opacity-50 -z-10 blur-xl"></div>
+
+                                        <div class="flex items-center gap-4 mb-6 relative z-10">
+                                            <div class="relative">
+                                                <img src="{{ $mentorInfo->user->profile_photo_url }}" onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($mentorInfo->user->name) }}&color=7F9CF5&background=EBF4FF'" alt="{{ $mentorInfo->user->name }}" class="w-16 h-16 rounded-full object-cover shadow-md border-2 border-white bg-gray-50">
+                                                <div class="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white" title="Vérifié"></div>
+                                            </div>
+                                            
+                                            <div>
+                                                @php
+                                                    $nameParts = explode(' ', $mentorInfo->user->name);
+                                                    $firstName = $nameParts[0] ?? '';
+                                                    $lastNameInit = isset($nameParts[1]) ? substr($nameParts[1], 0, 1) . '.' : '';
+                                                @endphp
+                                                <p class="font-bold text-gray-900 text-lg leading-tight">{{ $firstName }} {{ $lastNameInit }}</p>
+                                                <p class="text-sm text-gray-500 mt-1 line-clamp-1 font-medium">
+                                                    {{ $mentorInfo->current_position ?? 'Mentor' }}
+                                                    @if($mentorInfo->current_company)
+                                                        chez <span class="text-gray-700">{{ $mentorInfo->current_company }}</span>
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        @if($mentorInfo->bio)
+                                        <div class="relative z-10 flex-1">
+                                            <svg class="w-8 h-8 text-orange-200 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
+                                            <p class="text-base text-gray-700 mb-6 italic line-clamp-3 leading-relaxed">
+                                                {{ Str::limit($mentorInfo->bio, 120) }}
+                                            </p>
+                                        </div>
+                                        @else
+                                        <div class="relative z-10 flex-1 mb-6 flex flex-col justify-center gap-4">
+                                            @php
+                                                $lastWork = $mentorInfo->roadmapSteps->where('step_type', 'work')->sortByDesc('start_date')->first();
+                                                $lastEdu = $mentorInfo->roadmapSteps->where('step_type', 'education')->sortByDesc('start_date')->first();
+                                            @endphp
+                                            
+                                            @if($lastWork)
+                                            <div class="flex items-start gap-3">
+                                                <div class="mt-0.5 bg-blue-50 text-blue-600 p-1.5 rounded-lg border border-blue-100">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-semibold text-gray-900 line-clamp-1">{{ $lastWork->title }}</p>
+                                                    <p class="text-xs text-gray-500 line-clamp-1">{{ $lastWork->institution_company }}</p>
+                                                </div>
+                                            </div>
+                                            @endif
+                                            
+                                            @if($lastEdu)
+                                            <div class="flex items-start gap-3">
+                                                <div class="mt-0.5 bg-purple-50 text-purple-600 p-1.5 rounded-lg border border-purple-100">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-semibold text-gray-900 line-clamp-1">{{ $lastEdu->title }}</p>
+                                                    <p class="text-xs text-gray-500 line-clamp-1">{{ $lastEdu->institution_company }}</p>
+                                                </div>
+                                            </div>
+                                            @endif
+                                        </div>
+                                        @endif
+                                        
+                                        <div class="mt-auto relative z-10">
+                                            <div class="flex gap-2 flex-wrap mb-5">
+                                                @if($mentorInfo->specialization_label && $mentorInfo->specialization_label !== 'Non définie')
+                                                    <span class="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-semibold rounded-lg border border-orange-200">{{ $mentorInfo->specialization_label }}</span>
+                                                @endif
+                                                @if($mentorInfo->years_of_experience)
+                                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-lg border border-blue-200">{{ $mentorInfo->years_of_experience }} ans d'expérience</span>
+                                                @endif
+                                                @if($mentorInfo->skills)
+                                                    @php
+                                                        $skills = is_string($mentorInfo->skills) ? json_decode($mentorInfo->skills, true) ?? [] : $mentorInfo->skills;
+                                                    @endphp
+                                                    @foreach(array_slice($skills, 0, 2) as $skill)
+                                                        <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg border border-gray-200">{{ $skill }}</span>
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                            
+                                            <a href="{{ route('public.mentor.profile', $mentorInfo->public_slug) }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition shadow-sm group">
+                                                Voir le profil
+                                                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                
+                                <!-- Controls -->
+                                <div class="flex justify-center gap-4 mt-4" x-show="slides > 1">
+                                    <button @click="prev()" class="p-2 rounded-full bg-white shadow hover:bg-gray-50 text-gray-600 transition focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                    </button>
+                                    <div class="flex items-center gap-2">
+                                        <template x-for="i in slides" :key="i">
+                                            <button @click="activeSlide = i - 1" class="w-2 h-2 rounded-full transition-all duration-300 focus:outline-none" :class="activeSlide === (i-1) ? 'bg-orange-500 w-6' : 'bg-gray-300 hover:bg-gray-400'"></button>
+                                        </template>
+                                    </div>
+                                    <button @click="next()" class="p-2 rounded-full bg-white shadow hover:bg-gray-50 text-gray-600 transition focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    </button>
+                                </div>
+                            @else
+                                <!-- Mentor cards illustration -->
+                                <div class="relative">
                                     <div
-                                        class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold">
-                                        SK
+                                        class="bg-white rounded-2xl shadow-xl p-6 transform rotate-3 absolute top-0 right-0 w-64 opacity-60">
+                                        <div class="flex items-center gap-3 mb-4">
+                                            <div
+                                                class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold">
+                                                SK
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold text-gray-900">Sophie K.</p>
+                                                <p class="text-xs text-gray-500">Directrice Marketing</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <span
+                                                class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Marketing</span>
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">12 ans
+                                                exp.</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900">Sophie K.</p>
-                                        <p class="text-xs text-gray-500">Directrice Marketing</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <span
-                                        class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">Marketing</span>
-                                    <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">12 ans
-                                        exp.</span>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white rounded-2xl shadow-xl p-6 transform -rotate-2 relative z-10 w-72 ml-8 mt-16">
-                                <div class="flex items-center gap-3 mb-4">
                                     <div
-                                        class="w-14 h-14 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                                        AM
+                                        class="bg-white rounded-2xl shadow-xl p-6 transform -rotate-2 relative z-10 w-72 ml-8 mt-16">
+                                        <div class="flex items-center gap-3 mb-4">
+                                            <div
+                                                class="w-14 h-14 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                                                AM
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold text-gray-900 text-lg">Adama M.</p>
+                                                <p class="text-sm text-gray-500">CEO, Tech Startup</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-4">"Partager mon parcours avec les jeunes est une
+                                            façon
+                                            de redonner à ma communauté..."</p>
+                                        <div class="flex gap-2 flex-wrap">
+                                            <span
+                                                class="px-3 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">Entrepreneuriat</span>
+                                            <span
+                                                class="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Senegal</span>
+                                            <span
+                                                class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Vérifié</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900 text-lg">Adama M.</p>
-                                        <p class="text-sm text-gray-500">CEO, Tech Startup</p>
-                                    </div>
-                                </div>
-                                <p class="text-sm text-gray-600 mb-4">"Partager mon parcours avec les jeunes est une
-                                    façon
-                                    de redonner à ma communauté..."</p>
-                                <div class="flex gap-2 flex-wrap">
-                                    <span
-                                        class="px-3 py-1 bg-orange-100 text-orange-700 text-xs rounded-full">Entrepreneuriat</span>
-                                    <span
-                                        class="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Senegal</span>
-                                    <span
-                                        class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Vérifié</span>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white rounded-2xl shadow-xl p-6 transform rotate-1 absolute bottom-0 left-0 w-56 opacity-70">
-                                <div class="flex items-center gap-3 mb-3">
                                     <div
-                                        class="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
-                                        FN
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900 text-sm">Fatou N.</p>
-                                        <p class="text-xs text-gray-500">Ingénieure Data</p>
+                                        class="bg-white rounded-2xl shadow-xl p-6 transform rotate-1 absolute bottom-0 left-0 w-56 opacity-70">
+                                        <div class="flex items-center gap-3 mb-3">
+                                            <div
+                                                class="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                                                FN
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold text-gray-900 text-sm">Fatou N.</p>
+                                                <p class="text-xs text-gray-500">Ingénieure Data</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <span
+                                                class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Tech</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="flex gap-2">
-                                    <span
-                                        class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Tech</span>
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>

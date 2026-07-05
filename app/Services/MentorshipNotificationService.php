@@ -48,6 +48,7 @@ use App\Models\PayoutRequest;
 use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Notifications\NewMentorResourceNotification;
 use Illuminate\Support\Facades\Mail;
 
 class MentorshipNotificationService
@@ -610,6 +611,24 @@ class MentorshipNotificationService
                     'status' => $session->status,
                 ],
             ]);
+        }
+    }
+
+    /**
+     * Notifier les mentees de la création d'une nouvelle ressource par leur mentor
+     */
+    public function sendNewResourceNotification(Resource $resource, User $mentor)
+    {
+        $mentees = Mentorship::where('mentor_id', $mentor->id)
+            ->where('status', 'accepted')
+            ->with('mentee')
+            ->get()
+            ->pluck('mentee');
+
+        foreach ($mentees as $mentee) {
+            if ($mentee) {
+                $mentee->notify(new NewMentorResourceNotification($resource, $mentor));
+            }
         }
     }
 }

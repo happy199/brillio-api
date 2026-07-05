@@ -179,6 +179,43 @@
         </div>
         @endif
 
+        <!-- Resources Section -->
+        @if(isset($resources) && $resources->count() > 0)
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Ressources publiées</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($resources as $resource)
+                    <a href="{{ route('auth.login') }}?redirect={{ urlencode(route('jeune.resources.show', $resource->slug)) }}" class="block group">
+                        <div class="border border-gray-200 rounded-2xl overflow-hidden hover:border-orange-300 hover:shadow-lg transition bg-white h-full flex flex-col relative">
+                            @if($resource->thumbnail_url)
+                                <div class="h-48 w-full overflow-hidden relative z-10">
+                                    <img src="{{ $resource->thumbnail_url }}" alt="{{ $resource->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                            @else
+                                <div class="h-48 w-full bg-gradient-to-br from-orange-50 to-pink-50 flex items-center justify-center relative z-10">
+                                    <svg class="w-16 h-16 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                </div>
+                            @endif
+                            
+                            <div class="p-5 flex flex-col flex-1 relative z-10 bg-white">
+                                <h3 class="font-bold text-lg text-gray-900 group-hover:text-orange-600 transition mb-2">{{ $resource->title }}</h3>
+                                <p class="text-sm text-gray-600 mb-4 line-clamp-3 flex-1">{{ Str::limit($resource->description ?? '', 100) }}</p>
+                            </div>
+                            
+                            <!-- Overlay CTA on Hover -->
+                            <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition flex items-center justify-center z-20">
+                                <span class="px-4 py-2 bg-orange-600 text-white font-bold rounded-lg shadow-md transform translate-y-4 group-hover:translate-y-0 transition flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    Connectez-vous pour lire
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         <!-- Roadmap -->
         @if($publicData['roadmap']->isNotEmpty())
         <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">

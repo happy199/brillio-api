@@ -34,7 +34,13 @@ class PageController extends Controller
             $countriesCount = 15;
         }
 
-        return view('public.home', compact('jeunesCount', 'mentorsCount', 'countriesCount'));
+        $verifiedMentors = MentorProfile::with(['user', 'specializationModel', 'roadmapSteps'])
+            ->where('is_validated', true)
+            ->inRandomOrder()
+            ->limit(10)
+            ->get();
+
+        return view('public.home', compact('jeunesCount', 'mentorsCount', 'countriesCount', 'verifiedMentors'));
     }
 
     /**
@@ -56,6 +62,19 @@ class PageController extends Controller
     public function contact()
     {
         return view('public.contact');
+    }
+
+    /**
+     * Page Ressources
+     */
+    public function resources()
+    {
+        $resources = \App\Models\Resource::where('is_published', true)
+            ->where('is_validated', true)
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
+
+        return view('public.resources', compact('resources'));
     }
 
     /**
@@ -151,9 +170,16 @@ class PageController extends Controller
             ] : null,
         ];
 
+        $resources = \App\Models\Resource::where('user_id', $mentor->user_id)
+            ->where('is_published', true)
+            ->where('is_validated', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('public.mentor-profile', [
             'mentor' => $mentor,
             'publicData' => $publicData,
+            'resources' => $resources,
         ]);
     }
 

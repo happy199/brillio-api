@@ -282,7 +282,24 @@
 
                     <!-- PDF Preview -->
                     <template x-if="previewType === 'application/pdf'">
-                        <iframe :src="previewUrl" class="w-full h-[70vh] rounded-lg shadow-lg"></iframe>
+                        <div class="w-full flex flex-col items-center justify-center">
+                            <!-- Desktop PDF viewer -->
+                            <iframe :src="previewUrl" :title="previewFileName || 'Document PDF'" class="hidden md:block w-full h-[70vh] rounded-lg shadow-lg"></iframe>
+                            
+                            <!-- Mobile fallback for PDF -->
+                            <div class="md:hidden w-full flex flex-col items-center justify-center py-10">
+                                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <h4 class="font-bold text-gray-900 mb-2">Document PDF</h4>
+                                <p class="text-sm text-gray-500 mb-4 text-center px-4">L'aperçu en direct n'est pas toujours supporté sur mobile.</p>
+                                <a :href="previewUrl" target="_blank" class="inline-block bg-primary-600 text-white font-medium py-2 px-6 rounded-lg hover:bg-primary-700 transition">
+                                    Ouvrir le fichier
+                                </a>
+                            </div>
+                        </div>
                     </template>
                 </div>
             </div>

@@ -124,7 +124,12 @@
                             @endphp
                             <div class="{{ $classes }}">
                                 {!! $icon !!}
-                                <span>{{ $option->option_text }}</span>
+                                <div class="flex-1">
+                                    <span>{{ $option->option_text }}</span>
+                                    @if($option->explanation)
+                                        <p class="mt-1 text-xs text-gray-600 italic bg-white/50 p-2 rounded border border-gray-100">{{ $option->explanation }}</p>
+                                    @endif
+                                </div>
                                 @if(!$isSelected && $isCorrect)
                                     <span class="ml-auto text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded">Bonne réponse</span>
                                 @endif

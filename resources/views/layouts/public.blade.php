@@ -325,16 +325,15 @@
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="{{ route('home') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Accueil</a>
-                    <a href="{{ route('home') }}#fonctionnalites" class="font-medium transition-colors"
-                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Fonctionnalités</a>
                     <a href="{{ route('about') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">À
                         propos</a>
-                    <a href="{{ route('contact') }}" class="font-medium transition-colors"
-                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Contact</a>
+                    <a href="{{ route('public.resources') }}" class="font-medium transition-colors"
+                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Ressources</a>
                     <a href="{{ route('public.advertisements') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Publicités</a>
-
+                    <a href="{{ route('contact') }}" class="font-medium transition-colors"
+                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Contact</a>
                 </div>
 
                 <!-- CTA Buttons -->
@@ -373,15 +372,14 @@
                 class="md:hidden bg-white rounded-2xl shadow-xl mt-2 p-4">
                 <a href="{{ route('home') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Accueil</a>
-                <a href="{{ route('home') }}#fonctionnalites"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Fonctionnalités</a>
                 <a href="{{ route('about') }}"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">A
-                    propos</a>
-                <a href="{{ route('contact') }}"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Contact</a>
+                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">À propos</a>
+                <a href="{{ route('public.resources') }}"
+                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Ressources</a>
                 <a href="{{ route('public.advertisements') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Publicités</a>
+                <a href="{{ route('contact') }}"
+                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Contact</a>
 
                 <div class="mt-4 space-y-2">
                     <a href="{{ route('auth.login') }}"
@@ -483,10 +481,11 @@
                     <ul class="space-y-4">
                         <li><a href="{{ route('home') }}"
                                 class="text-gray-400 hover:text-white transition-colors">Accueil</a></li>
-                        <li><a href="{{ route('about') }}" class="text-gray-400 hover:text-white transition-colors">À
-                                propos</a></li>
-                        <li><a href="{{ route('home') }}#fonctionnalites"
-                                class="text-gray-400 hover:text-white transition-colors">Fonctionnalités</a></li>
+                        <li><a href="{{ route('about') }}" class="text-gray-400 hover:text-white transition-colors">À propos</a></li>
+                        <li><a href="{{ route('public.resources') }}"
+                                class="text-gray-400 hover:text-white transition-colors">Ressources</a></li>
+                        <li><a href="{{ route('public.advertisements') }}"
+                                class="text-gray-400 hover:text-white transition-colors">Publicités</a></li>
                         <li><a href="{{ route('contact') }}"
                                 class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
                     </ul>

@@ -67,14 +67,14 @@
         @endif
 
         <div class="flex-1 min-w-[200px]">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Recherche</label>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom ou email..."
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Recherche</label>
+            <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Nom ou email..."
                 class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
         </div>
 
         <div class="w-40">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-            <select name="type" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+            <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <select id="type" name="type" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
                 <option value="">Tous</option>
                 <option value="jeune" {{ request('type')==='jeune' ? 'selected' : '' }}>Jeunes</option>
                 <option value="mentor" {{ request('type')==='mentor' ? 'selected' : '' }}>Mentors</option>
@@ -82,8 +82,8 @@
         </div>
 
         <div class="w-40">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Pays</label>
-            <select name="country" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+            <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Pays</label>
+            <select id="country" name="country" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
                 <option value="">Tous</option>
                 @foreach($countries as $country)
                 <option value="{{ $country }}" {{ request('country')===$country ? 'selected' : '' }}>
@@ -93,11 +93,20 @@
             </select>
         </div>
 
+        <div class="w-40">
+            <label for="phone_status" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+            <select id="phone_status" name="phone_status" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <option value="">Tous</option>
+                <option value="with_phone" {{ request('phone_status')==='with_phone' ? 'selected' : '' }}>Avec numéro</option>
+                <option value="without_phone" {{ request('phone_status')==='without_phone' ? 'selected' : '' }}>Sans numéro</option>
+            </select>
+        </div>
+
         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
             Filtrer
         </button>
 
-        @if(request()->hasAny(['search', 'type', 'country']))
+        @if(request()->hasAny(['search', 'type', 'country', 'phone_status']))
         <a href="{{ route('admin.users.index', array_filter(['archived' => request('archived'), 'blocked' => request('blocked')])) }}"
             class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
             Réinitialiser

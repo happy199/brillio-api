@@ -94,6 +94,7 @@ Route::get('/', function () {
 
 // Pages informatives
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
+Route::get('/ressources', [PageController::class, 'resources'])->name('public.resources');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::get('/publicite', [PageController::class, 'advertisements'])->name('public.advertisements');
 Route::post('/publicite/{advertisement}/click', [PageController::class, 'trackAdvertisementClick'])->name('public.advertisements.click');

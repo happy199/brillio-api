@@ -604,7 +604,7 @@ class JeuneDashboardController extends Controller
         }
 
         $mentors = $query->orderByDesc('is_validated')
-            ->orderBy('id')
+            ->inRandomOrder()
             ->paginate(12);
 
         $specializations = MentorProfile::SPECIALIZATIONS;
@@ -715,12 +715,19 @@ class JeuneDashboardController extends Controller
             $canRequestMentorship = ! empty(array_intersect($mentorPrivateOrgIds, $userOrgIds));
         }
 
+        $resources = \App\Models\Resource::where('user_id', $mentor->user_id)
+            ->where('is_published', true)
+            ->where('is_validated', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('jeune.mentor-show', [
             'mentor' => $mentor,
             'similarMentors' => $similarMentors,
             'existingMentorship' => $existingMentorship,
             'canRequestMentorship' => $canRequestMentorship,
             'isClosedByMentor' => $isClosedByMentor,
+            'resources' => $resources,
         ]);
     }
 

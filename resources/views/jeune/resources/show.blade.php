@@ -289,12 +289,26 @@
                         </video>
                     </div>
                 @elseif($extension === 'pdf')
-                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">
+                    <!-- Desktop PDF viewer -->
+                    <div class="hidden md:block rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">
                         <object data="{{ $fileUrl }}" type="application/pdf" width="100%" height="100%" title="Document PDF">
                             <iframe src="{{ $fileUrl }}" width="100%" height="100%" style="border: none;" title="Aperçu du document PDF">
                                 <p>Votre navigateur ne permet pas de prévisualiser les PDF. <a href="{{ $fileUrl }}">Téléchargez-le ici</a>.</p>
                             </iframe>
                         </object>
+                    </div>
+                    <!-- Mobile fallback for PDF -->
+                    <div class="md:hidden rounded-xl border border-gray-200 shadow-sm bg-gray-50 p-6 text-center">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Document PDF</h4>
+                        <p class="text-sm text-gray-500 mb-4">L'aperçu en direct n'est pas toujours supporté sur mobile.</p>
+                        <a href="{{ $fileUrl }}" target="_blank" class="inline-block bg-indigo-600 text-white font-medium py-2 px-6 rounded-lg hover:bg-indigo-700 transition">
+                            Ouvrir le fichier
+                        </a>
                     </div>
                 @elseif(in_array($extension, $documentExtensions))
                     <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm h-[600px] w-full bg-gray-50 relative">

@@ -3,7 +3,7 @@
 @section('title', 'Détail Ressource')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{ showUnpublishModal: false, showDeleteModal: false }">
     <!-- Header -->
     <div class="flex justify-between items-center">
         <div class="flex items-center gap-4">
@@ -25,8 +25,8 @@
             </a>
             @if($resource->is_published)
             {{-- Bouton dépublier → ouvre un modal avec un message --}}
-            <button onclick="document.getElementById('unpublish-modal').classList.remove('hidden')"
-                class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition">
+            <button @click="showUnpublishModal = true"
+                class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg hover:bg-orange-200 transition">
                 Dépublier
             </button>
             @else
@@ -40,13 +40,22 @@
                 </button>
             </form>
             @endif
+
+            {{-- Bouton supprimer --}}
+            <button @click="showDeleteModal = true"
+                class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Supprimer
+            </button>
         </div>
         @endif
     </div>
 
     {{-- Modal Dépublier avec Feedback --}}
-    <div id="unpublish-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div class="bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4">
+    <div x-show="showUnpublishModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" x-transition>
+        <div class="bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4" @click.outside="showUnpublishModal = false">
             <h3 class="text-lg font-bold text-gray-900 mb-2">Dépublier la ressource</h3>
             <p class="text-sm text-gray-500 mb-4">
                 Expliquez au mentor pourquoi vous dépubliez sa ressource. Ce message lui sera envoyé par email
@@ -61,16 +70,43 @@
                 <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                 @enderror
                 <div class="flex gap-3 mt-4 justify-end">
-                    <button type="button" onclick="document.getElementById('unpublish-modal').classList.add('hidden')"
+                    <button type="button" @click="showUnpublishModal = false"
                         class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
                         Annuler
                     </button>
                     <button type="submit"
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                        class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium">
                         Confirmer la dépublication
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    {{-- Modal Supprimer --}}
+    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" x-transition>
+        <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4 text-center" @click.outside="showDeleteModal = false">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Supprimer la ressource ?</h3>
+            <p class="text-sm text-gray-500 mb-6">
+                Êtes-vous sûr de vouloir supprimer définitivement cette ressource ? Cette action est irréversible.
+            </p>
+            <div class="flex gap-3 justify-center">
+                <button type="button" @click="showDeleteModal = false" class="px-4 py-2 flex-1 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium transition">
+                    Annuler
+                </button>
+                <form action="{{ route('admin.resources.destroy', $resource) }}" method="POST" class="flex-1">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition">
+                        Oui, supprimer
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

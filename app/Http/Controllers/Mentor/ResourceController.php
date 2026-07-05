@@ -381,7 +381,7 @@ class ResourceController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             'content' => 'nullable|string',
-            'type' => 'required|in:article,video,tool,exercise,template,script,advertisement',
+            'type' => 'required|in:article,video,tool,exercise,template,script,advertisement,book,podcast,webinar,guide,case_study,course',
 
             'price' => 'nullable|integer',
             'is_premium' => 'required|in:0,1',
@@ -500,6 +500,9 @@ class ResourceController extends Controller
                 );
             }
 
+            // Notifier les mentees de la nouvelle ressource
+            $this->notificationService->sendNewResourceNotification($resource, auth()->user());
+
             DB::commit();
 
         } catch (\Exception $e) {
@@ -556,7 +559,7 @@ class ResourceController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             'content' => 'nullable|string',
-            'type' => 'required|in:article,video,tool,exercise,template,script,advertisement',
+            'type' => 'required|in:article,video,tool,exercise,template,script,advertisement,book,podcast,webinar,guide,case_study,course',
 
             'price' => 'nullable|integer',
             'is_premium' => 'required|in:0,1',

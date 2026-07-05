@@ -75,10 +75,15 @@
                         <option value="article" {{ request('type')==='article' ? 'selected' : '' }}>📄 Article</option>
                         <option value="video" {{ request('type')==='video' ? 'selected' : '' }}>🎥 Vidéo</option>
                         <option value="tool" {{ request('type')==='tool' ? 'selected' : '' }}>🔧 Outils</option>
-                        <option value="exercise" {{ request('type')==='exercise' ? 'selected' : '' }}>📝 Exercice
-                        </option>
+                        <option value="exercise" {{ request('type')==='exercise' ? 'selected' : '' }}>📝 Exercice</option>
                         <option value="template" {{ request('type')==='template' ? 'selected' : '' }}>📋 Modèle</option>
                         <option value="script" {{ request('type')==='script' ? 'selected' : '' }}>📜 Script</option>
+                        <option value="book" {{ request('type')==='book' ? 'selected' : '' }}>📚 Livre / Ebook</option>
+                        <option value="podcast" {{ request('type')==='podcast' ? 'selected' : '' }}>🎧 Podcast</option>
+                        <option value="webinar" {{ request('type')==='webinar' ? 'selected' : '' }}>📺 Webinaire</option>
+                        <option value="guide" {{ request('type')==='guide' ? 'selected' : '' }}>🧭 Guide</option>
+                        <option value="case_study" {{ request('type')==='case_study' ? 'selected' : '' }}>📊 Étude de cas</option>
+                        <option value="course" {{ request('type')==='course' ? 'selected' : '' }}>🎓 Formation</option>
                         <option value="ad" {{ request('type')==='ad' ? 'selected' : '' }}>📢 Partenariat</option>
                     </select>
                 </div>
