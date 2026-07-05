@@ -57,7 +57,7 @@
                                                 {{ $initials }}
                                             </div>
                                             @if($resource->user->profile_photo_path || $resource->user->profile_photo_url)
-                                            <img src="{{ $resource->user->profile_photo_url }}" alt="{{ $resource->user->name }}" class="absolute inset-0 w-full h-full object-cover bg-white" onerror="this.style.display='none'">
+                                            <img src="{{ $resource->user->avatar_url }}" alt="{{ $resource->user->name }}" class="absolute inset-0 w-full h-full object-cover bg-white" onerror="this.style.display='none'">
                                             @endif
                                         </div>
                                         <span class="text-sm font-medium text-gray-700">{{ $resource->user->name }}</span>
