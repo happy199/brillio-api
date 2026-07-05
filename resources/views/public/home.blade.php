@@ -1187,8 +1187,16 @@
 
                                         <div class="flex items-center gap-4 mb-6 relative z-10">
                                             <div class="relative">
-                                                <img src="{{ $mentorInfo->user->profile_photo_url }}" onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($mentorInfo->user->name) }}&color=7F9CF5&background=EBF4FF'" alt="{{ $mentorInfo->user->name }}" class="w-16 h-16 rounded-full object-cover shadow-md border-2 border-white bg-gray-50">
-                                                <div class="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white" title="Vérifié"></div>
+                                                <div class="w-16 h-16 rounded-full shadow-md border-2 border-white flex items-center justify-center text-xl font-bold text-white bg-gradient-to-br {{ $color }} overflow-hidden relative">
+                                                    <span>{{ $initials }}</span>
+                                                    @if($mentorInfo->user->profile_photo_path || $mentorInfo->user->profile_photo_url)
+                                                    <img src="{{ $mentorInfo->user->profile_photo_url }}" 
+                                                         alt="{{ $mentorInfo->user->name }}" 
+                                                         class="absolute inset-0 w-full h-full object-cover z-10 bg-white"
+                                                         onerror="this.style.display='none'">
+                                                    @endif
+                                                </div>
+                                                <div class="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white z-20" title="Vérifié"></div>
                                             </div>
                                             
                                             <div>
