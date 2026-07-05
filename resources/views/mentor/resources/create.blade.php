@@ -228,7 +228,8 @@
                                                                     <button type="button" @click="removeOption(qIndex, qsIndex, optIndex)" class="text-gray-300 hover:text-red-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                                                 </div>
                                                                 <div class="pl-6 pr-8">
-                                                                    <input type="text" x-model="option.explanation" placeholder="Explication (optionnelle) : Pourquoi cette réponse est-elle vraie ou fausse ?" class="w-full text-xs bg-gray-50 border-gray-200 text-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-1.5 italic">
+                                                                    <label :for="'explanation_' + qIndex + '_' + qsIndex + '_' + optIndex" class="sr-only">Explication</label>
+                                                                    <input :id="'explanation_' + qIndex + '_' + qsIndex + '_' + optIndex" type="text" x-model="option.explanation" placeholder="Explication (optionnelle) : Pourquoi cette réponse est-elle vraie ou fausse ?" class="w-full text-xs bg-gray-50 border-gray-200 text-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-1.5 italic">
                                                                 </div>
                                                             </div>
                                                         </template>

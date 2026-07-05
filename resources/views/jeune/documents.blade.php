@@ -284,7 +284,7 @@
                     <template x-if="previewType === 'application/pdf'">
                         <div class="w-full flex flex-col items-center justify-center">
                             <!-- Desktop PDF viewer -->
-                            <iframe :src="previewUrl" class="hidden md:block w-full h-[70vh] rounded-lg shadow-lg"></iframe>
+                            <iframe :src="previewUrl" :title="previewFileName || 'Document PDF'" class="hidden md:block w-full h-[70vh] rounded-lg shadow-lg"></iframe>
                             
                             <!-- Mobile fallback for PDF -->
                             <div class="md:hidden w-full flex flex-col items-center justify-center py-10">
