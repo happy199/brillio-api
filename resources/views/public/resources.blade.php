@@ -47,7 +47,19 @@
                                 
                                 <div class="mt-auto pt-4 border-t border-gray-100 flex items-center gap-3">
                                     @if($resource->user)
-                                        <img src="{{ $resource->user->profile_photo_url }}" alt="{{ $resource->user->name }}" class="w-8 h-8 rounded-full object-cover">
+                                        @php
+                                            $initials = strtoupper(substr($resource->user->first_name ?? $resource->user->name ?? 'A', 0, 1) . substr($resource->user->last_name ?? '', 0, 1));
+                                            $colors = ['from-blue-400 to-blue-600', 'from-orange-400 to-red-500', 'from-purple-400 to-purple-600', 'from-green-400 to-green-600'];
+                                            $color = $colors[crc32($resource->user->id) % count($colors)];
+                                        @endphp
+                                        <div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
+                                            <div class="w-full h-full flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br {{ $color }}">
+                                                {{ $initials }}
+                                            </div>
+                                            @if($resource->user->profile_photo_path || $resource->user->profile_photo_url)
+                                            <img src="{{ $resource->user->avatar_url }}" alt="{{ $resource->user->name }}" class="absolute inset-0 w-full h-full object-cover bg-white" onerror="this.style.display='none'">
+                                            @endif
+                                        </div>
                                         <span class="text-sm font-medium text-gray-700">{{ $resource->user->name }}</span>
                                     @endif
                                 </div>
