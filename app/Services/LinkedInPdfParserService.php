@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\LinkedInPdfParsingException;
 use Illuminate\Support\Facades\Log;
 use Smalot\PdfParser\Parser;
 
@@ -36,12 +37,14 @@ class LinkedInPdfParserService
             ]);
 
             if (empty(trim($text))) {
-                throw new \Exception("Le PDF fourni ne contient aucun texte lisible. Veuillez utiliser le bouton 'Enregistrer au format PDF' natif de LinkedIn sur votre profil, et non la fonction 'Imprimer' du navigateur.");
+                throw new LinkedInPdfParsingException("Le PDF fourni ne contient aucun texte lisible. Veuillez utiliser le bouton 'Enregistrer au format PDF' natif de LinkedIn sur votre profil, et non la fonction 'Imprimer' du navigateur.");
             }
 
             // Tentative de parsing via IA
             return $this->parseWithAI($text);
 
+        } catch (LinkedInPdfParsingException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::warning('⚠️ AI Parsing failed, falling back to legacy regex parser', [
                 'error' => $e->getMessage(),
