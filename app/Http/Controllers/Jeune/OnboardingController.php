@@ -22,9 +22,12 @@ class OnboardingController extends Controller
             return redirect()->route('jeune.dashboard');
         }
 
+        $currentOrg = view()->shared('current_organization') ?? $user->organization;
+
         return view('jeune.onboarding', [
             'user' => $user,
             'countries' => $this->getAfricanCountries(),
+            'current_organization' => $currentOrg,
         ]);
     }
 
