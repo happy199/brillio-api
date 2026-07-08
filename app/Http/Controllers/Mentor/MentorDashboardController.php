@@ -680,7 +680,7 @@ class MentorDashboardController extends Controller
 
             return response()->json([
                 'success' => false,
-                'error' => 'Erreur critique lors du parsing : '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

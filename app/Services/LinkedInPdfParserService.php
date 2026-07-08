@@ -35,6 +35,10 @@ class LinkedInPdfParserService
                 'first_1000_chars' => substr($text, 0, 1000),
             ]);
 
+            if (empty(trim($text))) {
+                throw new \Exception("Le PDF fourni ne contient aucun texte lisible. Veuillez utiliser le bouton 'Enregistrer au format PDF' natif de LinkedIn sur votre profil, et non la fonction 'Imprimer' du navigateur.");
+            }
+
             // Tentative de parsing via IA
             return $this->parseWithAI($text);
 
