@@ -45,8 +45,11 @@ class MentorshipController extends Controller
             $query->where('mentee_id', $user->id);
         }
 
-        // nosemgrep
-        if ($status = $request->get('status')) {
+        $validated = $request->validate([
+            'status' => 'nullable|string|in:pending,accepted,rejected,canceled,completed',
+        ]);
+
+        if ($status = $validated['status'] ?? null) {
             $query->where('status', $status);
         }
 

@@ -54,8 +54,8 @@ class ResourceController extends Controller
         }
 
         // Recherche
-        // nosemgrep
-        if ($search = $request->get('search')) {
+        $validatedSearch = $request->validate(['search' => 'nullable|string|max:255']);
+        if ($search = $validatedSearch['search'] ?? null) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
@@ -126,15 +126,13 @@ class ResourceController extends Controller
 
         // Gestion des fichiers
         $filePath = null;
-        if ($request->hasFile('file')) {
-            // nosemgrep
-            $filePath = $request->file('file')->store('resources/files', 'public');
+        if (isset($validated['file'])) {
+            $filePath = $validated['file']->store('resources/files', 'public');
         }
 
         $previewPath = null;
-        if ($request->hasFile('preview_image')) {
-            // nosemgrep
-            $previewPath = $request->file('preview_image')->store('resources/previews', 'public');
+        if (isset($validated['preview_image'])) {
+            $previewPath = $validated['preview_image']->store('resources/previews', 'public');
         }
 
         // Custom validation: Must have at least content, file, or quizzes
@@ -256,20 +254,18 @@ class ResourceController extends Controller
             ]);
         }
 
-        if ($request->hasFile('file')) {
+        if (isset($validated['file'])) {
             if ($resource->file_path) {
                 Storage::disk('public')->delete($resource->file_path);
             }
-            // nosemgrep
-            $resource->file_path = $request->file('file')->store('resources/files', 'public');
+            $resource->file_path = $validated['file']->store('resources/files', 'public');
         }
 
-        if ($request->hasFile('preview_image')) {
+        if (isset($validated['preview_image'])) {
             if ($resource->preview_image_path) {
                 Storage::disk('public')->delete($resource->preview_image_path);
             }
-            // nosemgrep
-            $resource->preview_image_path = $request->file('preview_image')->store('resources/previews', 'public');
+            $resource->preview_image_path = $validated['preview_image']->store('resources/previews', 'public');
         }
 
         // Custom validation: Must have at least content, file, or quizzes

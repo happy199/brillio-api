@@ -279,7 +279,7 @@ class AuthController extends Controller
      */
     public function uploadPhoto(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
@@ -291,8 +291,7 @@ class AuthController extends Controller
         }
 
         // Stocker la nouvelle photo
-        // nosemgrep
-        $path = $request->file('photo')->store('profile-photos', 'public');
+        $path = $validated['photo']->store('profile-photos', 'public');
 
         $user->profile_photo_path = $path;
         $user->save();

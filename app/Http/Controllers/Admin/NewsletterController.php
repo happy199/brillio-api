@@ -107,11 +107,10 @@ class NewsletterController extends Controller
     public function sendEmail(Request $request, EmailDeliveryService $deliveryService)
     {
         // Fix pour le JS qui envoie du JSON stringifié au lieu d'un array
-        // nosemgrep
         if ($request->has('recipients') && is_string($request->input('recipients'))) {
+            $decoded = json_decode($request->input('recipients'), true);
             $request->merge([
-                // nosemgrep
-                'recipients' => json_decode($request->input('recipients'), true),
+                'recipients' => is_array($decoded) ? $decoded : [],
             ]);
         }
 
@@ -172,9 +171,12 @@ class NewsletterController extends Controller
 
         // Gestion des pièces jointes
         $attachmentPaths = [];
-        if ($request->hasFile('attachments')) {
-            // nosemgrep
-            foreach ($request->file('attachments') as $file) {
+        $validatedFiles = $request->validate([
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|max:10240|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif,zip,txt',
+        ]);
+        if (! empty($validatedFiles['attachments'])) {
+            foreach ($validatedFiles['attachments'] as $file) {
                 if ($file->isValid()) {
                     $path = $file->store('newsletters/attachments', 'public');
                     $attachmentPaths[] = [

@@ -104,7 +104,6 @@ class OnboardingController extends Controller
                 'required',
                 'string',
                 function ($attribute, $value, $fail) use ($request) {
-                    // nosemgrep
                     $country = $request->input('country');
                     if (empty($country)) {
                         return;

@@ -36,29 +36,33 @@ class MentorController extends Controller
         $query = MentorProfile::published()
             ->with(['user', 'roadmapSteps']);
 
+        $validated = $request->validate([
+            'specialization' => 'nullable|string|max:100',
+            'country'        => 'nullable|string|max:100',
+            'search'         => 'nullable|string|max:255',
+            'per_page'       => 'nullable|integer|min:1|max:100',
+        ]);
+
         // Filtres
-        // nosemgrep
-        if ($specialization = $request->get('specialization')) {
+        if ($specialization = $validated['specialization'] ?? null) {
             $query->bySpecialization($specialization);
         }
 
-        // nosemgrep
-        if ($country = $request->get('country')) {
+        if ($country = $validated['country'] ?? null) {
             $query->whereHas('user', function ($q) use ($country) {
                 $q->where('country', $country);
             });
         }
 
         // Recherche par nom
-        // nosemgrep
-        if ($search = $request->get('search')) {
+        if ($search = $validated['search'] ?? null) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");
             });
         }
 
         // Pagination
-        $perPage = $request->integer('per_page', 15);
+        $perPage = (int) ($validated['per_page'] ?? 15);
         $mentors = $query->paginate($perPage);
 
         return $this->success([

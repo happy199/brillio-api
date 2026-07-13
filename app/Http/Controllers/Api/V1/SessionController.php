@@ -46,10 +46,14 @@ class SessionController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $user = Auth::user();
-        // nosemgrep
-        $type = $request->get('type', 'upcoming'); // upcoming or past
+        $validated = $request->validate([
+            'type'   => 'nullable|string|in:upcoming,past',
+            'status' => 'nullable|string|in:pending,confirmed,cancelled,completed',
+        ]);
 
+        $type = $validated['type'] ?? 'upcoming'; // upcoming or past
+
+        $user = Auth::user();
         $query = $user->mentoringSessionsAsMentee();
 
         if ($type === 'upcoming') {
@@ -66,8 +70,7 @@ class SessionController extends Controller
             });
         }
 
-        // nosemgrep
-        if ($status = $request->get('status')) {
+        if ($status = $validated['status'] ?? null) {
             $query->where('mentoring_sessions.status', $status);
         }
 

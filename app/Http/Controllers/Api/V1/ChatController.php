@@ -68,8 +68,8 @@ class ChatController extends Controller
     public function createConversation(Request $request): JsonResponse
     {
         $user = $request->user();
-        // nosemgrep
-        $title = $request->input('title');
+        $validated = $request->validate(['title' => 'nullable|string|max:255']);
+        $title = $validated['title'] ?? null;
 
         $cost = $this->getFeatureCost('new_chat', 10);
         if (! $this->hasSufficientCredits($user, 'new_chat', 10)) {
