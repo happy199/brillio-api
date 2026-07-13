@@ -28,8 +28,8 @@ class GuestController extends Controller
             })
             ->with('mentorProfile');
 
-        // nosemgrep
-        if ($search = $request->get('search')) {
+        $searchValidated = $request->validate(['search' => 'nullable|string|max:255']);
+        if ($search = $searchValidated['search'] ?? null) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -68,8 +68,8 @@ class GuestController extends Controller
             // Gestion de la photo
             $photoPath = null;
             if ($request->hasFile('photo')) {
-                // nosemgrep
-                $photoPath = $request->file('photo')->store('profile-photos', 'public');
+                $photoValidated = $request->validate(['photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
+                $photoPath = $photoValidated['photo']->store('profile-photos', 'public');
             }
 
             // Créer l'utilisateur invité

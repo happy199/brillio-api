@@ -107,8 +107,9 @@ class NewsletterController extends Controller
     public function sendEmail(Request $request, EmailDeliveryService $deliveryService)
     {
         // Fix pour le JS qui envoie du JSON stringifié au lieu d'un array
-        if ($request->has('recipients') && is_string($request->input('recipients'))) {
-            $decoded = json_decode($request->input('recipients'), true);
+        $precheck = $request->validate(['recipients' => 'nullable']);
+        if (isset($precheck['recipients']) && is_string($precheck['recipients'])) {
+            $decoded = json_decode($precheck['recipients'], true);
             $request->merge([
                 'recipients' => is_array($decoded) ? $decoded : [],
             ]);

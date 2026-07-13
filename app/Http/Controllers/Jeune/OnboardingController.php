@@ -36,19 +36,18 @@ class OnboardingController extends Controller
      */
     public function complete(Request $request)
     {
-        // nosemgrep
-        $skipExtra = $request->input('skip_extra') == '1';
+        $skipExtraData = $request->validate(['skip_extra' => 'nullable|boolean']);
+        $skipExtra = (bool) ($skipExtraData['skip_extra'] ?? false);
 
         $rules = [
             'birth_date' => 'required|date|before:today',
-            'country' => 'required|string|max:100',
-            'city' => 'required|string|max:100',
+            'country'    => 'required|string|max:100',
+            'city'       => 'required|string|max:100',
             'phone' => [
                 'required',
                 'string',
                 function ($attribute, $value, $fail) use ($request) {
-                    // nosemgrep
-                    $country = $request->input('country');
+                    $country = $request->input('country'); // safe: already part of validate rules below
                     if (empty($country)) {
                         return;
                     }

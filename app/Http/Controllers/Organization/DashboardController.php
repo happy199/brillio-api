@@ -20,8 +20,12 @@ class DashboardController extends Controller
         $organization = $this->getCurrentOrganization();
 
         // --- FILTERING LOGIC ---
-        // nosemgrep
-        $period = $request->get('period', '30_days');
+        $filterParams = $request->validate([
+            'period'     => 'nullable|string|in:7_days,30_days,this_month,last_month,this_year,custom',
+            'start_date' => 'nullable|date',
+            'end_date'   => 'nullable|date',
+        ]);
+        $period = $filterParams['period'] ?? '30_days';
         $startDate = now()->subDays(30)->startOfDay();
         $endDate = now()->endOfDay();
 
@@ -40,13 +44,11 @@ class DashboardController extends Controller
                 $startDate = now()->startOfYear();
                 break;
             case 'custom':
-                if ($request->has('start_date')) {
-                    // nosemgrep
-                    $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
+                if (! empty($filterParams['start_date'])) {
+                    $startDate = Carbon::parse($filterParams['start_date'])->startOfDay();
                 }
-                if ($request->has('end_date')) {
-                    // nosemgrep
-                    $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
+                if (! empty($filterParams['end_date'])) {
+                    $endDate = Carbon::parse($filterParams['end_date'])->endOfDay();
                 }
                 break;
             case '30_days':

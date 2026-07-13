@@ -190,8 +190,8 @@ class WebAuthController extends Controller
     {
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
-            // nosemgrep
-            $referralCode = $request->get('ref');
+            $refValidated = $request->validate(['ref' => 'nullable|string|max:100|alpha_num']);
+            $referralCode = $refValidated['ref'] ?? null;
 
             // Validate that the invitation exists
             $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
@@ -257,8 +257,8 @@ class WebAuthController extends Controller
     {
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
-            // nosemgrep
-            $referralCode = $request->get('ref');
+            $refValidated = $request->validate(['ref' => 'nullable|string|max:100|alpha_num']);
+            $referralCode = $refValidated['ref'] ?? null;
 
             // Validate that the invitation exists
             $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
@@ -319,13 +319,12 @@ class WebAuthController extends Controller
         );
 
         // Check for referral code in request (hidden field) or session
-        // nosemgrep
-        $referralCode = $request->input('referral_code') ?? session('referral_code');
+        $refInput = $request->validate(['referral_code' => 'nullable|string|max:100|alpha_num']);
+        $referralCode = $refInput['referral_code'] ?? session('referral_code');
         $organizationId = null;
 
         Log::info('Jeune Registration Debug', [
-            // nosemgrep
-            'referral_code_input' => $request->input('referral_code'),
+            'referral_code_input' => $refInput['referral_code'] ?? null,
             'referral_code_session' => session('referral_code'),
             'resolved_code' => $referralCode,
         ]);
@@ -498,8 +497,8 @@ class WebAuthController extends Controller
     public function jeuneOAuthCallback(Request $request, string $provider)
     {
         // Verifier si on a un code (Authorization Code flow)
-        // nosemgrep
-        $code = $request->get('code');
+        $codeValidated = $request->validate(['code' => 'nullable|string|max:2048']);
+        $code = $codeValidated['code'] ?? null;
 
         if ($code) {
             // Traiter directement le code
@@ -544,8 +543,8 @@ class WebAuthController extends Controller
 
             // Verifier si on a un access_token (Implicit/PKCE flow)
             if ($request->has('access_token')) {
-                // nosemgrep
-                $accessToken = $request->input('access_token');
+                $tokenValidated = $request->validate(['access_token' => 'nullable|string|max:4096']);
+                $accessToken = $tokenValidated['access_token'];
 
                 Log::info('Getting user from Supabase with access token');
 
@@ -579,8 +578,8 @@ class WebAuthController extends Controller
 
             // Verifier si on a un code (Authorization Code flow)
             if ($request->has('code')) {
-                // nosemgrep
-                $code = $request->input('code');
+                $codeValidated = $request->validate(['code' => 'nullable|string|max:2048']);
+                $code = $codeValidated['code'];
 
                 Log::info('Exchanging code for session');
 
@@ -814,8 +813,8 @@ class WebAuthController extends Controller
     {
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
-            // nosemgrep
-            $referralCode = $request->get('ref');
+            $refValidated = $request->validate(['ref' => 'nullable|string|max:100|alpha_num']);
+            $referralCode = $refValidated['ref'] ?? null;
 
             // Validate that the invitation exists
             $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
@@ -860,8 +859,8 @@ class WebAuthController extends Controller
     public function mentorLinkedInCallback(Request $request)
     {
         // Verifier si on a un code (Authorization Code flow)
-        // nosemgrep
-        $code = $request->get('code');
+        $codeValidated = $request->validate(['code' => 'nullable|string|max:2048']);
+        $code = $codeValidated['code'] ?? null;
 
         if ($code) {
             return $this->processMentorLinkedInCode($code);
@@ -899,8 +898,8 @@ class WebAuthController extends Controller
         try {
             // Verifier si on a un access_token (Implicit/PKCE flow)
             if ($request->has('access_token')) {
-                // nosemgrep
-                $accessToken = $request->input('access_token');
+                $tokenValidated = $request->validate(['access_token' => 'nullable|string|max:4096']);
+                $accessToken = $tokenValidated['access_token'];
 
                 $userData = $this->supabase->getUser($accessToken);
 
@@ -936,8 +935,8 @@ class WebAuthController extends Controller
 
             // Verifier si on a un code (Authorization Code flow)
             if ($request->has('code')) {
-                // nosemgrep
-                $code = $request->input('code');
+                $codeValidated = $request->validate(['code' => 'nullable|string|max:2048']);
+                $code = $codeValidated['code'];
                 $session = $this->supabase->exchangeCodeForSession($code);
 
                 if (! $session || ! isset($session['access_token'])) {
