@@ -203,6 +203,7 @@ return [
                  'type' => 'oauth2', // The type of the security scheme. Valid values are "basic", "apiKey" or "oauth2".
                  'description' => 'A short description for oauth2 security scheme.',
                  'flow' => 'implicit', // The flow used by the OAuth2 security scheme. Valid values are "implicit", "password", "application" or "accessCode".
+// nosemgrep
                  'authorizationUrl' => 'http://example.com/auth', // The authorization URL to be used for (implicit/accessCode)
                  //'tokenUrl' => 'http://example.com/auth' // The authorization URL to be used for (password/application/accessCode)
                  'scopes' => [

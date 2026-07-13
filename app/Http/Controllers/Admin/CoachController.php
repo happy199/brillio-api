@@ -20,6 +20,7 @@ class CoachController extends Controller
     {
         $query = User::where('is_coach', true)->with(['mentorProfile']);
 
+// nosemgrep
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")

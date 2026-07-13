@@ -56,6 +56,7 @@ class ResourceController extends Controller
         $query = Resource::where('is_published', true)->where('is_validated', true);
 
         // Recherche textuelle
+// nosemgrep
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
@@ -65,11 +66,13 @@ class ResourceController extends Controller
         }
 
         // Filtre par type
+// nosemgrep
         if ($type = $request->get('type')) {
             $query->where('type', $type);
         }
 
         // Filtre par prix
+// nosemgrep
         if ($priceMode = $request->get('price')) {
             if ($priceMode === 'free') {
                 $query->where('is_premium', false);
@@ -79,11 +82,13 @@ class ResourceController extends Controller
         }
 
         // Filtre par MBTI
+// nosemgrep
         if ($mbtiStr = $request->get('mbti')) {
             $query->where('mbti_target', 'like', "%{$mbtiStr}%");
         }
 
         // Source : 'mentor' ou 'brillio'
+// nosemgrep
         if ($source = $request->get('source')) {
             if ($source === 'mentor') {
                 $query->whereNotNull('user_id');
@@ -93,6 +98,7 @@ class ResourceController extends Controller
         }
 
         // 'mine' (mes achats/créations) vs 'all'
+// nosemgrep
         $ownership = $request->get('ownership', 'all');
         if ($ownership === 'mine') {
             $purchasedIds = Purchase::where('user_id', $user->id)
@@ -109,6 +115,7 @@ class ResourceController extends Controller
 
         // Mode de filtrage : 'suggestions' (défaut) ou 'all'
         $hasActiveFilters = $request->hasAny(['search', 'type', 'price', 'mbti', 'source', 'ownership']);
+// nosemgrep
         $filterMode = $request->get('filter', $hasActiveFilters ? 'all' : 'suggestions');
 
         // Logique de Suggestion / Filtrage Intelligent

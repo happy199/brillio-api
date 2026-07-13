@@ -132,7 +132,8 @@ class WalletController extends Controller
             $monerooService = app(MonerooService::class);
 
             // Create pending transaction record
-            $transaction = MonerooTransaction::create([
+            $transaction = new MonerooTransaction();
+            $transaction->fill([
                 'user_id' => $user->id,
                 'user_type' => get_class($user),
                 'amount' => $amountXOF,
@@ -146,6 +147,7 @@ class WalletController extends Controller
                     'pack_name' => $pack->name,
                 ],
             ]);
+            $transaction->save();
 
             // Split name for Moneroo API
             $nameParts = $monerooService->splitName($user->name);

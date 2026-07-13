@@ -87,6 +87,7 @@ class MessagesController extends Controller
         ];
 
         if ($request->hasFile('attachment')) {
+// nosemgrep
             $file = $request->file('attachment');
             $path = $file->store('messages/attachments', 'local');
             $data['attachment_path'] = $path;

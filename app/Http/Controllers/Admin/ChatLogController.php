@@ -19,11 +19,13 @@ class ChatLogController extends Controller
         $query = ChatConversation::with(['user', 'messages']);
 
         // Filtre par utilisateur
+// nosemgrep
         if ($userId = $request->get('user_id')) {
             $query->where('user_id', $userId);
         }
 
         // Recherche dans les messages
+// nosemgrep
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")

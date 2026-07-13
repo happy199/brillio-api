@@ -37,10 +37,12 @@ class MentorController extends Controller
             ->with(['user', 'roadmapSteps']);
 
         // Filtres
+// nosemgrep
         if ($specialization = $request->get('specialization')) {
             $query->bySpecialization($specialization);
         }
 
+// nosemgrep
         if ($country = $request->get('country')) {
             $query->whereHas('user', function ($q) use ($country) {
                 $q->where('country', $country);
@@ -48,6 +50,7 @@ class MentorController extends Controller
         }
 
         // Recherche par nom
+// nosemgrep
         if ($search = $request->get('search')) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");

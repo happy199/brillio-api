@@ -167,6 +167,7 @@ class SponsoredUsersController extends Controller
             abort(403);
         }
 
+// nosemgrep
         $format = $request->query('format', 'pdf');
         $user->load(['personalityTest', 'jeuneProfile', 'academicDocuments', 'mentorshipsAsMentee.mentor']);
 

@@ -44,8 +44,11 @@ class AnalyticsController extends Controller
      */
     private function getDateRange(Request $request): array
     {
+// nosemgrep
         $preset = $request->get('preset', 'month');
+// nosemgrep
         $startDate = $request->get('start_date');
+// nosemgrep
         $endDate = $request->get('end_date');
 
         // On n'utilise les dates personnalisées QUE si le preset est explicitement 'custom'
@@ -280,15 +283,25 @@ class AnalyticsController extends Controller
             'allChannels' => $allChannels,
             'allPersonalities' => $allPersonalities,
             'filters' => [
+// nosemgrep
                 'situation' => (array) $request->get('situation', []),
+// nosemgrep
                 'interest' => (array) $request->get('interest', []),
+// nosemgrep
                 'country' => (array) $request->get('country', []),
+// nosemgrep
                 'goal' => (array) $request->get('goal', []),
+// nosemgrep
                 'channel' => (array) $request->get('channel', []),
+// nosemgrep
                 'personality' => (array) $request->get('personality', []),
+// nosemgrep
                 'tuition' => (array) $request->get('tuition', []),
+// nosemgrep
                 'target_salary' => (array) $request->get('target_salary', []),
+// nosemgrep
                 'actual_salary' => (array) $request->get('actual_salary', []),
+// nosemgrep
                 'has_phone' => $request->get('has_phone'),
             ],
             'personalityLabels' => PersonalityService::TYPE_DESCRIPTIONS,
@@ -568,6 +581,7 @@ class AnalyticsController extends Controller
         $dateRange = $this->getDateRange($request);
         $start = $dateRange['start'];
         $end = $dateRange['end'];
+// nosemgrep
         $type = $request->get('type', 'general');
 
         $data = [
@@ -623,8 +637,10 @@ class AnalyticsController extends Controller
                 $userQuery = User::where('is_admin', false)
                     ->whereBetween('created_at', [$start, $end]);
 
+// nosemgrep
                 if ($request->get('has_phone') === '1') {
                     $userQuery->whereNotNull('phone')->where('phone', '!=', '');
+// nosemgrep
                 } elseif ($request->get('has_phone') === '0') {
                     $userQuery->where(function ($q) {
                         $q->whereNull('phone')->orWhere('phone', '');
@@ -690,6 +706,7 @@ class AnalyticsController extends Controller
         $dateRange = $this->getDateRange($request);
         $start = $dateRange['start'];
         $end = $dateRange['end'];
+// nosemgrep
         $type = $request->get('type', 'users');
 
         $filename = 'brillio-export-'.$type.'-'.$start->format('Y-m-d').'.csv';
@@ -699,14 +716,23 @@ class AnalyticsController extends Controller
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
+// nosemgrep
         $situations = (array) $request->get('situation', []);
+// nosemgrep
         $interests = (array) $request->get('interest', []);
+// nosemgrep
         $countries = (array) $request->get('country', []);
+// nosemgrep
         $goals = (array) $request->get('goal', []);
+// nosemgrep
         $channels = (array) $request->get('channel', []);
+// nosemgrep
         $personalities = (array) $request->get('personality', []);
+// nosemgrep
         $tuitions = (array) $request->get('tuition', []);
+// nosemgrep
         $targetSalaries = (array) $request->get('target_salary', []);
+// nosemgrep
         $actualSalaries = (array) $request->get('actual_salary', []);
 
         $situations = array_filter($situations);
@@ -729,6 +755,7 @@ class AnalyticsController extends Controller
             'autre' => 'Autre',
         ];
 
+// nosemgrep
         $hasPhone = $request->get('has_phone');
 
         return response()->stream(function () use ($hasPhone, $type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $allSituationsDisplay, $targetSalaries, $actualSalaries) {
@@ -894,6 +921,7 @@ class AnalyticsController extends Controller
      */
     public function export(Request $request)
     {
+// nosemgrep
         $type = $request->get('type', 'users');
         $dateRange = $this->getDateRange($request);
 

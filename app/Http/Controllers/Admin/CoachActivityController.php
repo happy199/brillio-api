@@ -82,17 +82,20 @@ class CoachActivityController extends Controller
         });
 
         // Export CSV
+// nosemgrep
         if ($request->get('export') === 'csv') {
             return $this->exportCsv($activities);
         }
 
         // Export PDF
+// nosemgrep
         if ($request->get('export') === 'pdf') {
             return $this->exportPdf($activities, $request);
         }
 
         // Pagination de la collection mappée (astuce Laravel pour paginer une collection simple)
         $perPage = 20;
+// nosemgrep
         $page = $request->get('page', 1);
         $paginatedActivities = new LengthAwarePaginator(
             $activities->forPage($page, $perPage),

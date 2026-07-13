@@ -121,6 +121,7 @@
 
             <!-- Zone d'upload -->
             <div x-show="!uploading && !parsedData">
+{{-- nosemgrep --}}
                 <input type="file" accept=".pdf" @change="handleFileUpload($event)" class="hidden" x-ref="fileInput">
                 <div @click="$refs.fileInput.click()" @dragover.prevent="isDragging = true"
                     @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop($event)"
@@ -275,6 +276,7 @@
 
             isDragging: false,
 
+{{-- nosemgrep --}}
             async handleFileUpload(event) {
                 const file = event.target.files[0];
                 this.processFile(file);

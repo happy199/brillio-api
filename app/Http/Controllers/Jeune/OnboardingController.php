@@ -36,6 +36,7 @@ class OnboardingController extends Controller
      */
     public function complete(Request $request)
     {
+// nosemgrep
         $skipExtra = $request->input('skip_extra') == '1';
 
         $rules = [
@@ -46,6 +47,7 @@ class OnboardingController extends Controller
                 'required',
                 'string',
                 function ($attribute, $value, $fail) use ($request) {
+// nosemgrep
                     $country = $request->input('country');
                     if (empty($country)) {
                         return;

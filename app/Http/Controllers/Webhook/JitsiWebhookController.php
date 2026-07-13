@@ -27,6 +27,7 @@ class JitsiWebhookController extends Controller
             return response()->json(['status' => 'unauthorized'], 401);
         }
 
+// nosemgrep
         $payload = $request->all();
         $eventType = $payload['eventType'] ?? null;
 

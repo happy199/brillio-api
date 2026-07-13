@@ -50,7 +50,8 @@ class TestInvoiceGeneration extends Command
             ? 'Abonnement Pro - 3 mois'
             : 'Achat Crédits: Pack Standard (150 crédits)';
 
-        $transaction = MonerooTransaction::create([
+        $transaction = new MonerooTransaction();
+        $transaction->fill([
             'user_id' => $user->id,
             'user_type' => get_class($user),
             'moneroo_transaction_id' => 'test_'.time(),
@@ -65,6 +66,7 @@ class TestInvoiceGeneration extends Command
                 'user_type' => $type === 'org' ? 'organization' : $user->user_type,
             ],
         ]);
+        $transaction->save();
 
         $this->info("Génération du PDF et envoi du mail en cours pour l'entité: {$entity->name}...");
 

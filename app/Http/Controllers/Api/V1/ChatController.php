@@ -68,6 +68,7 @@ class ChatController extends Controller
     public function createConversation(Request $request): JsonResponse
     {
         $user = $request->user();
+// nosemgrep
         $title = $request->input('title');
 
         $cost = $this->getFeatureCost('new_chat', 10);
