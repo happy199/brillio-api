@@ -78,7 +78,7 @@ class MentorController extends Controller
         }
 
         // Recherche
-// nosemgrep
+        // nosemgrep
         if ($search = $request->get('search')) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -325,9 +325,9 @@ class MentorController extends Controller
 
         try {
             // Stocker le PDF
-// nosemgrep
+            // nosemgrep
             $finalPdfPath = $request->file('pdf')->store('linkedin-pdfs', 'local');
-// nosemgrep
+            // nosemgrep
             $originalName = $request->file('pdf')->getClientOriginalName();
 
             // Parser le PDF
@@ -596,7 +596,7 @@ class MentorController extends Controller
         ]);
 
         if ($request->hasFile('profile_photo')) {
-// nosemgrep
+            // nosemgrep
             $this->avatarService->upload($mentor->user, $request->file('profile_photo'));
 
             return back()->with('success', 'Photo de profil mise à jour avec succès.');

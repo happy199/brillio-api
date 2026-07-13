@@ -65,8 +65,7 @@ class CreditPackController extends Controller
             'display_order' => 'integer',
         ]);
 
-// nosemgrep
-        $entry = $request->all();
+        $entry = $validated;
         $entry['promo_percent'] = $entry['promo_percent'] ?? 0;
         $entry['is_popular'] = $request->has('is_popular');
         $entry['is_active'] = $request->has('is_active');

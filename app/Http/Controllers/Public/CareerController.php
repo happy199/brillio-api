@@ -13,7 +13,7 @@ class CareerController extends Controller
      */
     public function getDetailsByTitle(Request $request)
     {
-// nosemgrep
+        // nosemgrep
         $title = $request->query('title');
 
         if (! $title) {

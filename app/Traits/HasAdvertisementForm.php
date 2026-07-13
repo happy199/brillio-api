@@ -15,7 +15,7 @@ trait HasAdvertisementForm
      */
     protected function abortIfFileTooLarge(): ?RedirectResponse
     {
-// nosemgrep
+        // nosemgrep
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_INI_SIZE) {
             return back()->withInput()->withErrors([
                 'image' => 'Le fichier image est trop volumineux. La configuration actuelle limite les téléchargements à '.ini_get('upload_max_filesize').'. Veuillez utiliser une image plus petite.',
@@ -49,7 +49,7 @@ trait HasAdvertisementForm
             return null;
         }
 
-// nosemgrep
+        // nosemgrep
         $imagePath = $this->uploadAndConvertToWebp($request->file('image'), 'advertisements');
 
         if ($imagePath) {

@@ -45,7 +45,7 @@ class MentorshipController extends Controller
             $query->where('mentee_id', $user->id);
         }
 
-// nosemgrep
+        // nosemgrep
         if ($status = $request->get('status')) {
             $query->where('status', $status);
         }

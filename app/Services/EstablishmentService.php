@@ -46,14 +46,14 @@ class EstablishmentService
             if ($establishment->photo_path) {
                 Storage::disk('public')->delete($establishment->photo_path);
             }
-// nosemgrep
+            // nosemgrep
             $validated['photo_path'] = $request->file('photo')->store('establishments/photos', 'public');
         }
 
         // 2. Gallery
         $existingGallery = $establishment->gallery ?? [];
         if ($request->hasFile('gallery')) {
-// nosemgrep
+            // nosemgrep
             foreach ($request->file('gallery') as $file) {
                 $existingGallery[] = $file->store('establishments/gallery', 'public');
             }
@@ -63,7 +63,7 @@ class EstablishmentService
         // 3. Brochures
         $existingBrochures = $establishment->brochures ?? [];
         if ($request->hasFile('brochures')) {
-// nosemgrep
+            // nosemgrep
             foreach ($request->file('brochures') as $index => $file) {
                 if (isset($existingBrochures[$index])) {
                     Storage::disk('public')->delete($existingBrochures[$index]);
@@ -75,7 +75,7 @@ class EstablishmentService
 
         // 4. Videos
         if ($request->has('presentation_videos')) {
-// nosemgrep
+            // nosemgrep
             $validated['presentation_videos'] = array_values(array_filter($request->input('presentation_videos')));
         }
 
@@ -89,11 +89,11 @@ class EstablishmentService
 
         // 6. Social Links
         $validated['social_links'] = [
-// nosemgrep
+            // nosemgrep
             'linkedin' => $request->input('linkedin'),
-// nosemgrep
+            // nosemgrep
             'facebook' => $request->input('facebook'),
-// nosemgrep
+            // nosemgrep
             'instagram' => $request->input('instagram'),
         ];
 
@@ -108,13 +108,13 @@ class EstablishmentService
     public function store(array $validated, Request $request): Establishment
     {
         if ($request->hasFile('photo')) {
-// nosemgrep
+            // nosemgrep
             $validated['photo_path'] = $request->file('photo')->store('establishments/photos', 'public');
         }
 
         if ($request->hasFile('gallery')) {
             $galleryPaths = [];
-// nosemgrep
+            // nosemgrep
             foreach ($request->file('gallery') as $file) {
                 $galleryPaths[] = $file->store('establishments/gallery', 'public');
             }
@@ -123,7 +123,7 @@ class EstablishmentService
 
         if ($request->hasFile('brochures')) {
             $brochurePaths = [];
-// nosemgrep
+            // nosemgrep
             foreach ($request->file('brochures') as $file) {
                 $brochurePaths[] = $file->store('establishments/brochures', 'public');
             }
@@ -142,11 +142,11 @@ class EstablishmentService
             : null;
 
         $validated['social_links'] = [
-// nosemgrep
+            // nosemgrep
             'linkedin' => $request->input('linkedin'),
-// nosemgrep
+            // nosemgrep
             'facebook' => $request->input('facebook'),
-// nosemgrep
+            // nosemgrep
             'instagram' => $request->input('instagram'),
         ];
 

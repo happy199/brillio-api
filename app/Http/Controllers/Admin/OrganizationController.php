@@ -52,7 +52,7 @@ class OrganizationController extends Controller
         ]);
 
         if ($request->hasFile('logo')) {
-// nosemgrep
+            // nosemgrep
             $path = $request->file('logo')->store('organizations/logos', 'public');
             $validated['logo_url'] = $path;
         }
@@ -113,7 +113,7 @@ class OrganizationController extends Controller
                 Storage::disk('public')->delete($oldPath);
             }
 
-// nosemgrep
+            // nosemgrep
             $path = $request->file('logo')->store('organizations/logos', 'public');
             $validated['logo_url'] = $path;
         }

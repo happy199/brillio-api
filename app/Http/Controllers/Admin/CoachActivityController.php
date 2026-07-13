@@ -28,17 +28,25 @@ class CoachActivityController extends Controller
             ->with(['user', 'supportAdmin', 'messages'])
             ->whereNotNull('human_support_admin_id');
 
+        $validated = $request->validate([
+            'coach_id' => 'nullable|integer|exists:users,id',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+            'export' => 'nullable|string|in:csv,pdf',
+            'page' => 'nullable|integer|min:1',
+        ]);
+
         // Filtre par coach
-        if ($request->filled('coach_id')) {
-            $query->where('human_support_admin_id', $request->coach_id);
+        if ($coachId = $validated['coach_id'] ?? null) {
+            $query->where('human_support_admin_id', $coachId);
         }
 
         // Filtres par dates
-        if ($request->filled('date_from')) {
-            $query->whereDate('human_support_started_at', '>=', $request->date_from);
+        if ($dateFrom = $validated['date_from'] ?? null) {
+            $query->whereDate('human_support_started_at', '>=', $dateFrom);
         }
-        if ($request->filled('date_to')) {
-            $query->whereDate('human_support_started_at', '<=', $request->date_to);
+        if ($dateTo = $validated['date_to'] ?? null) {
+            $query->whereDate('human_support_started_at', '<=', $dateTo);
         }
 
         // Prépare les données
@@ -82,21 +90,18 @@ class CoachActivityController extends Controller
         });
 
         // Export CSV
-// nosemgrep
-        if ($request->get('export') === 'csv') {
+        if (($validated['export'] ?? null) === 'csv') {
             return $this->exportCsv($activities);
         }
 
         // Export PDF
-// nosemgrep
-        if ($request->get('export') === 'pdf') {
-            return $this->exportPdf($activities, $request);
+        if (($validated['export'] ?? null) === 'pdf') {
+            return $this->exportPdf($activities, $request, $validated);
         }
 
         // Pagination de la collection mappée (astuce Laravel pour paginer une collection simple)
         $perPage = 20;
-// nosemgrep
-        $page = $request->get('page', 1);
+        $page = $validated['page'] ?? 1;
         $paginatedActivities = new LengthAwarePaginator(
             $activities->forPage($page, $perPage),
             $activities->count(),
@@ -133,14 +138,14 @@ class CoachActivityController extends Controller
             : "{$hours}h";
     }
 
-    private function exportPdf($activities, Request $request)
+    private function exportPdf($activities, Request $request, array $validated = [])
     {
         $fileName = 'activite-coachs-'.date('Y-m-d').'.pdf';
 
         $filters = [
-            'coach' => $request->filled('coach_id') ? User::find($request->coach_id)->name ?? 'Tous' : 'Tous',
-            'date_from' => $request->date_from ? Carbon::parse($request->date_from)->format('d/m/Y') : 'Début',
-            'date_to' => $request->date_to ? Carbon::parse($request->date_to)->format('d/m/Y') : 'Aujourd\'hui',
+            'coach' => ! empty($validated['coach_id']) ? User::find($validated['coach_id'])->name ?? 'Tous' : 'Tous',
+            'date_from' => ! empty($validated['date_from']) ? Carbon::parse($validated['date_from'])->format('d/m/Y') : 'Début',
+            'date_to' => ! empty($validated['date_to']) ? Carbon::parse($validated['date_to'])->format('d/m/Y') : 'Aujourd\'hui',
         ];
 
         // Ensure stats are up to date for the PDF logic

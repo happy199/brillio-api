@@ -85,7 +85,7 @@ class ProfileController extends Controller
             if ($user->profile_photo_path) {
                 Storage::disk('public')->delete($user->profile_photo_path);
             }
-// nosemgrep
+            // nosemgrep
             $path = $request->file('photo')->store('profile-photos', 'public');
             $user->update(['profile_photo_path' => $path]);
         }
@@ -96,7 +96,7 @@ class ProfileController extends Controller
             if ($profile->cv_path) {
                 Storage::delete($profile->cv_path);
             }
-// nosemgrep
+            // nosemgrep
             $path = $request->file('cv')->store('cvs', 'public');
             $profile->cv_path = $path;
         }

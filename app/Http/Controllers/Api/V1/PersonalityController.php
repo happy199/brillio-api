@@ -23,7 +23,7 @@ class PersonalityController extends Controller
      */
     public function questions(Request $request): JsonResponse
     {
-// nosemgrep
+        // nosemgrep
         $locale = $request->get('locale', 'fr');
         $questions = $this->personalityService->getQuestions($locale);
 

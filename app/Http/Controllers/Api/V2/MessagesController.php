@@ -152,7 +152,7 @@ class MessagesController extends Controller
         ]);
 
         if ($request->hasFile('attachment')) {
-// nosemgrep
+            // nosemgrep
             $attachment = $request->file('attachment');
             if (! $attachment->isValid()) {
                 return $this->error('Fichier joint invalide.', 422);
@@ -178,7 +178,7 @@ class MessagesController extends Controller
         ];
 
         if ($request->hasFile('attachment')) {
-// nosemgrep
+            // nosemgrep
             $file = $request->file('attachment');
             $path = $file->store('messages/attachments', 'local');
             $data['attachment_path'] = $path;

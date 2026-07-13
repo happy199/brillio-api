@@ -47,7 +47,7 @@ class SessionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
-// nosemgrep
+        // nosemgrep
         $type = $request->get('type', 'upcoming'); // upcoming or past
 
         $query = $user->mentoringSessionsAsMentee();
@@ -66,7 +66,7 @@ class SessionController extends Controller
             });
         }
 
-// nosemgrep
+        // nosemgrep
         if ($status = $request->get('status')) {
             $query->where('mentoring_sessions.status', $status);
         }

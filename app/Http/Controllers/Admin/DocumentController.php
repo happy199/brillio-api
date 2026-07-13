@@ -19,21 +19,24 @@ class DocumentController extends Controller
     {
         $query = AcademicDocument::with('user');
 
+        $validated = $request->validate([
+            'type' => 'nullable|string|in:'.implode(',', array_keys(AcademicDocument::DOCUMENT_TYPES)),
+            'user_id' => 'nullable|integer',
+            'search' => 'nullable|string|max:255',
+        ]);
+
         // Filtre par type
-// nosemgrep
-        if ($type = $request->get('type')) {
+        if ($type = $validated['type'] ?? null) {
             $query->where('document_type', $type);
         }
 
         // Filtre par utilisateur
-// nosemgrep
-        if ($userId = $request->get('user_id')) {
+        if ($userId = $validated['user_id'] ?? null) {
             $query->where('user_id', $userId);
         }
 
         // Recherche par nom de fichier
-// nosemgrep
-        if ($search = $request->get('search')) {
+        if ($search = $validated['search'] ?? null) {
             $query->where('file_name', 'like', "%{$search}%");
         }
 

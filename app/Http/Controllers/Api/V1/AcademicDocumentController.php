@@ -86,7 +86,7 @@ class AcademicDocumentController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
-// nosemgrep
+        // nosemgrep
         $file = $request->file('file');
 
         // Validation de la taille

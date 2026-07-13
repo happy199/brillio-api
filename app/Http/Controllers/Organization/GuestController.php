@@ -28,7 +28,7 @@ class GuestController extends Controller
             })
             ->with('mentorProfile');
 
-// nosemgrep
+        // nosemgrep
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -68,7 +68,7 @@ class GuestController extends Controller
             // Gestion de la photo
             $photoPath = null;
             if ($request->hasFile('photo')) {
-// nosemgrep
+                // nosemgrep
                 $photoPath = $request->file('photo')->store('profile-photos', 'public');
             }
 
@@ -155,7 +155,7 @@ class GuestController extends Controller
                 if ($guest->profile_photo_path) {
                     Storage::disk('public')->delete($guest->profile_photo_path);
                 }
-// nosemgrep
+                // nosemgrep
                 $photoPath = $request->file('photo')->store('profile-photos', 'public');
                 $guest->profile_photo_path = $photoPath;
             }

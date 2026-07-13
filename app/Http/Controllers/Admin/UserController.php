@@ -30,19 +30,19 @@ class UserController extends Controller
         $query = User::with(['personalityTest', 'mentorProfile']);
 
         // Filtre par type
-// nosemgrep
+        // nosemgrep
         if ($type = $request->get('type')) {
             $query->where('user_type', $type);
         }
 
         // Filtre par pays
-// nosemgrep
+        // nosemgrep
         if ($country = $request->get('country')) {
             $query->where('country', $country);
         }
 
         // Filtre par numéro de téléphone
-// nosemgrep
+        // nosemgrep
         if ($phoneStatus = $request->get('phone_status')) {
             if ($phoneStatus === 'with_phone') {
                 $query->whereNotNull('phone');
@@ -52,7 +52,7 @@ class UserController extends Controller
         }
 
         // Recherche par nom ou email
-// nosemgrep
+        // nosemgrep
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -70,9 +70,9 @@ class UserController extends Controller
         }
 
         // Tri
-// nosemgrep
+        // nosemgrep
         $sortBy = $request->get('sort', 'created_at');
-// nosemgrep
+        // nosemgrep
         $sortOrder = $request->get('order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
@@ -242,7 +242,7 @@ class UserController extends Controller
             return back()->with('error', 'Débloquez d\'abord ce compte avant de l\'archiver.');
         }
 
-// nosemgrep
+        // nosemgrep
         $reason = $request->input('reason', 'Archivé par un administrateur.');
 
         $user->update([
@@ -329,7 +329,7 @@ class UserController extends Controller
             return back()->with('error', 'Vous ne pouvez pas vous bloquer vous-même.');
         }
 
-// nosemgrep
+        // nosemgrep
         $reason = $request->input('reason', 'Non-respect des règles de la plateforme.');
 
         $user->update([

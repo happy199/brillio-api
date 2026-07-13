@@ -69,7 +69,7 @@ class ResourceController extends Controller
         // Mode de filtrage : 'suggestions' (défaut) ou 'all'
         // Si l'utilisateur effectue une recherche ou applique des filtres spécifiques, on bascule en mode 'all' pour ne pas masquer les résultats
         $hasActiveFilters = $request->filled('search') || $request->filled('type') || $request->filled('price') || $request->filled('mbti') || $request->filled('source') || $request->filled('ownership');
-// nosemgrep
+        // nosemgrep
         $filterMode = $request->get('filter', $hasActiveFilters ? 'all' : 'suggestions');
 
         // IDs des ressources acquises ou consultées
@@ -98,7 +98,7 @@ class ResourceController extends Controller
         // Si ownership='mine', on ne garde QUE celles-ci.
         // Option 'all' pour tout voir (y compris déjà vu) si besoin, mais la demande est "continu de ne voir que nouvelles choses".
 
-// nosemgrep
+        // nosemgrep
         $ownership = $request->get('ownership', 'new'); // Default to 'new' if not specified
 
         if ($ownership === 'mine') {
@@ -275,7 +275,7 @@ class ResourceController extends Controller
 
         // Pagination manuelle après filtrage
         // Note: Pour de gros volumes, il faudrait faire le filtrage en SQL (JSON queries), mais pour MVP filtre PHP ok.
-// nosemgrep
+        // nosemgrep
         $page = $request->get('page', 1);
         $perPage = 12;
         $items = $resources instanceof Collection ? $resources : Collection::make($resources);
@@ -285,7 +285,7 @@ class ResourceController extends Controller
             $items->count(),
             $perPage,
             $page,
-// nosemgrep
+            // nosemgrep
             ['path' => $request->url(), 'query' => $request->query()]
         );
 

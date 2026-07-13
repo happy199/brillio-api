@@ -33,7 +33,7 @@ class MentorsController extends Controller
             ->pluck('mentor_id')
             ->unique();
 
-// nosemgrep
+        // nosemgrep
         $type = $request->get('type', 'internal'); // Default to internal
 
         if ($type === 'external') {

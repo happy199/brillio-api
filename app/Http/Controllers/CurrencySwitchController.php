@@ -12,7 +12,7 @@ class CurrencySwitchController extends Controller
      */
     public function switch(Request $request)
     {
-// nosemgrep
+        // nosemgrep
         $currency = strtoupper($request->get('currency', 'XOF'));
         $supported = array_keys(CurrencyService::getSupportedCurrencies());
 

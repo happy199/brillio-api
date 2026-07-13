@@ -743,7 +743,7 @@ class JeuneDashboardController extends Controller
             'description' => 'nullable|string|max:500',
         ]);
 
-// nosemgrep
+        // nosemgrep
         $file = $request->file('document');
         $path = $file->store('documents/'.auth()->id(), 'public');
 

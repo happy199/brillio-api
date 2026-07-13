@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $organization = $this->getCurrentOrganization();
 
         // --- FILTERING LOGIC ---
-// nosemgrep
+        // nosemgrep
         $period = $request->get('period', '30_days');
         $startDate = now()->subDays(30)->startOfDay();
         $endDate = now()->endOfDay();
@@ -41,11 +41,11 @@ class DashboardController extends Controller
                 break;
             case 'custom':
                 if ($request->has('start_date')) {
-// nosemgrep
+                    // nosemgrep
                     $startDate = Carbon::parse($request->get('start_date'))->startOfDay();
                 }
                 if ($request->has('end_date')) {
-// nosemgrep
+                    // nosemgrep
                     $endDate = Carbon::parse($request->get('end_date'))->endOfDay();
                 }
                 break;

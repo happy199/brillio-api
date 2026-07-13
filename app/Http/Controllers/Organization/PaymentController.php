@@ -30,15 +30,15 @@ class PaymentController extends Controller
     public function callback(Request $request)
     {
         // Moneroo typically sends 'paymentId' and 'paymentStatus' in redirect URL
-// nosemgrep
+        // nosemgrep
         $transactionId = $request->query('paymentId') ?? $request->query('payment_id') ?? $request->query('transaction_id');
-// nosemgrep
+        // nosemgrep
         $status = $request->query('paymentStatus') ?? $request->query('status');
 
         Log::info('Moneroo organization callback', [
             'paymentId' => $transactionId,
             'status' => $status,
-// nosemgrep
+            // nosemgrep
             'query' => $request->query(),
         ]);
 

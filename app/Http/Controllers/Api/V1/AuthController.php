@@ -291,7 +291,7 @@ class AuthController extends Controller
         }
 
         // Stocker la nouvelle photo
-// nosemgrep
+        // nosemgrep
         $path = $request->file('photo')->store('profile-photos', 'public');
 
         $user->profile_photo_path = $path;

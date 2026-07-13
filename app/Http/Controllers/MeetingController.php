@@ -92,7 +92,7 @@ class MeetingController extends Controller
      */
     public function showGuest(Request $request, $meetingId)
     {
-// nosemgrep
+        // nosemgrep
         $guestToken = $request->get('guestToken');
 
         try {

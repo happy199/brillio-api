@@ -197,11 +197,11 @@ class SessionController extends V1SessionController
 
         $session->update([
             'status' => 'cancelled',
-// nosemgrep
+            // nosemgrep
             'cancellation_reason' => $request->get('reason', 'Refusée par le mentor'),
         ]);
 
-// nosemgrep
+        // nosemgrep
         app(MentorshipNotificationService::class)->sendSessionCancelled($session, $request->get('reason'));
 
         return $this->success($session, 'Session refusée.');

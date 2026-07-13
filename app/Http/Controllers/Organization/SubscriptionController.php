@@ -75,7 +75,7 @@ class SubscriptionController extends Controller
         $user = auth()->user();
 
         // Create pending transaction record (stores plan_id for the callback)
-        $localTransaction = new MonerooTransaction();
+        $localTransaction = new MonerooTransaction;
         $localTransaction->fill([
             'user_id' => $user->id,
             'user_type' => get_class($user),
@@ -123,7 +123,7 @@ class SubscriptionController extends Controller
     public function downgrade(Request $request)
     {
         $organization = $this->getCurrentOrganization();
-// nosemgrep
+        // nosemgrep
 
         // Target plan can be 'free', 'pro', or 'enterprise'
         $targetPlan = $request->input('to', 'free');

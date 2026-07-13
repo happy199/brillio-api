@@ -50,7 +50,7 @@ class TestInvoiceGeneration extends Command
             ? 'Abonnement Pro - 3 mois'
             : 'Achat Crédits: Pack Standard (150 crédits)';
 
-        $transaction = new MonerooTransaction();
+        $transaction = new MonerooTransaction;
         $transaction->fill([
             'user_id' => $user->id,
             'user_type' => get_class($user),
