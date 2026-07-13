@@ -96,7 +96,7 @@ class CoachActivityController extends Controller
 
         // Export PDF
         if (($validated['export'] ?? null) === 'pdf') {
-            return $this->exportPdf($activities, $request, $validated);
+            return $this->exportPdf($activities, $validated);
         }
 
         // Pagination de la collection mappée (astuce Laravel pour paginer une collection simple)
@@ -138,7 +138,7 @@ class CoachActivityController extends Controller
             : "{$hours}h";
     }
 
-    private function exportPdf($activities, Request $request, array $validated = [])
+    private function exportPdf($activities, array $validated = [])
     {
         $fileName = 'activite-coachs-'.date('Y-m-d').'.pdf';
 

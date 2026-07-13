@@ -949,8 +949,8 @@ class AnalyticsController extends Controller
      */
     public function export(Request $request)
     {
-        // nosemgrep
-        $type = $request->get('type', 'users');
+        $validated = $request->validate(['type' => 'nullable|string|in:users,personality']);
+        $type = $validated['type'] ?? 'users';
         $dateRange = $this->getDateRange($request);
 
         switch ($type) {

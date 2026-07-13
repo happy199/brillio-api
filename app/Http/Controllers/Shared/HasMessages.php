@@ -124,11 +124,9 @@ trait HasMessages
 
         app(MentorshipNotificationService::class)->sendNewMessageNotification($message);
 
-        if (isset($config['is_api']) && $config['is_api']) {
-            return response()->json(['message' => 'Message envoyé.', 'data' => $message]);
-        }
-
-        return back()->with('success', 'Message envoyé.');
+        return (isset($config['is_api']) && $config['is_api'])
+            ? response()->json(['message' => 'Message envoyé.', 'data' => $message])
+            : back()->with('success', 'Message envoyé.');
     }
 
     public function download(Message $message)

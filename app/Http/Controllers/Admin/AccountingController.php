@@ -148,7 +148,7 @@ class AccountingController extends Controller
             $allTransactions->count(),
             $perPage,
             $page,
-            ['path' => $request->url(), 'query' => $request->query()]
+            ['path' => route('admin.accounting.history'), 'query' => $validated]
         );
 
         return view('admin.accounting.history', compact('transactions'));

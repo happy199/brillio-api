@@ -136,11 +136,12 @@ trait HasWallet
         $user = Auth::user();
 
         if (! $coupon || ! $coupon->isValid($user)) {
+            $message = 'Ce coupon est invalide ou expiré.';
             if ($coupon && $coupon->hasBeenUsedBy($user)) {
-                return back()->withErrors(['code' => 'Vous avez déjà utilisé ce coupon.']);
+                $message = 'Vous avez déjà utilisé ce coupon.';
             }
 
-            return back()->withErrors(['code' => 'Ce coupon est invalide ou expiré.']);
+            return back()->withErrors(['code' => $message]);
         }
 
         try {
