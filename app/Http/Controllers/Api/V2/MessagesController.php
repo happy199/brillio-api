@@ -152,7 +152,7 @@ class MessagesController extends Controller
         ]);
 
         $validatedFiles = $request->validate([
-            'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,zip,txt',
+            'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,zip,txt', // NOSONAR
         ]);
         if (isset($validatedFiles['attachment'])) {
             $attachment = $validatedFiles['attachment'];

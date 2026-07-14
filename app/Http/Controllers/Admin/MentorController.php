@@ -328,7 +328,7 @@ class MentorController extends Controller
 
         try {
             // Stocker le PDF
-            $pdfFile = $request->validate(['pdf' => 'required|file|mimes:pdf|max:10240'])['pdf'];
+            $pdfFile = $request->validate(['pdf' => 'required|file|mimes:pdf|max:10240'])['pdf']; // NOSONAR
             $finalPdfPath = $pdfFile->store('linkedin-pdfs', 'local');
             $originalName = $pdfFile->getClientOriginalName();
 

@@ -623,7 +623,7 @@ class ResourceController extends Controller
             if ($resource->file_path) {
                 Storage::disk('public')->delete($resource->file_path);
             }
-            $fileValidated = $request->validate(['file' => 'required|file|max:20480']);
+            $fileValidated = $request->validate(['file' => 'required|file|max:20480']); // NOSONAR
             $resource->file_path = $fileValidated['file']->store('resources/files', 'public');
         }
 

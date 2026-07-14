@@ -1362,7 +1362,10 @@
                         const description = @js($personalityTest->personality_description ?? '');
                         if (!personalityType) return alert('Aucun test trouvé.');
                         const message = `Bonjour ! Je viens de passer un test de personnalité MBTI et j'ai obtenu le type ${personalityType} (${personalityLabel}).\n\nVoici ma description : ${description}\n\nPeux-tu m'aider à mieux comprendre mon profil et me donner des conseils ?`;
-                        window.location.href = "/espace-jeune/chat?prefill=" + encodeURIComponent(message);
+                        const targetUrl = "{{ route('jeune.chat') }}";
+                        if (targetUrl && (targetUrl.startsWith('/') || targetUrl.startsWith(window.location.origin))) {
+                            window.location.href = targetUrl + "?prefill=" + encodeURIComponent(message);
+                        }
                     },
 
                     viewHistoryDetails(test) {

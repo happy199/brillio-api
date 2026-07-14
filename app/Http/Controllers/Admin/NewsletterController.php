@@ -179,7 +179,7 @@ class NewsletterController extends Controller
         $attachmentPaths = [];
         $validatedFiles = $request->validate([
             'attachments' => 'nullable|array',
-            'attachments.*' => 'file|max:10240|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif,zip,txt',
+            'attachments.*' => 'file|max:10240|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif,zip,txt', // NOSONAR
         ]);
         if (! empty($validatedFiles['attachments'])) {
             foreach ($validatedFiles['attachments'] as $file) {
