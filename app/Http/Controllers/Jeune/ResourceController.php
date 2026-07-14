@@ -66,12 +66,23 @@ class ResourceController extends Controller
         $rawMbti = $user->personalityTest?->type_code ?? $userProfile['mbti'] ?? null;
         $userMbti = $rawMbti ? explode(' ', $rawMbti)[0] : null;
 
+        $validated = $request->validate([
+            'filter' => 'nullable|string|in:suggestions,all',
+            'ownership' => 'nullable|string|in:new,mine,all',
+            'search' => 'nullable|string|max:255',
+            'type' => 'nullable|string|max:255',
+            'price' => 'nullable|string|in:free,premium',
+            'mbti' => 'nullable|string|max:10',
+            'has_quiz' => 'nullable|string|in:1,0',
+            'source' => 'nullable|string|in:mentor,brillio',
+            'page' => 'nullable|integer|min:1|max:1000',
+        ]);
+
         // Mode de filtrage : 'suggestions' (défaut) ou 'all'
         // Si l'utilisateur effectue une recherche ou applique des filtres spécifiques, on bascule en mode 'all' pour ne pas masquer les résultats
-        $hasActiveFilters = $request->filled('search') || $request->filled('type') || $request->filled('price') || $request->filled('mbti') || $request->filled('source') || $request->filled('ownership');
+        $hasActiveFilters = ! empty($validated['search']) || (! empty($validated['type']) && $validated['type'] !== 'all') || ! empty($validated['price']) || ! empty($validated['mbti']) || ! empty($validated['source']) || (! empty($validated['ownership']) && $validated['ownership'] !== 'new');
 
-        $filterValidated = $request->validate(['filter' => 'nullable|string|in:suggestions,all']);
-        $filterMode = $filterValidated['filter'] ?? ($hasActiveFilters ? 'all' : 'suggestions');
+        $filterMode = $validated['filter'] ?? ($hasActiveFilters ? 'all' : 'suggestions');
 
         // IDs des ressources acquises ou consultées
         $purchasedIds = Purchase::where('user_id', $user->id)->where('item_type', Resource::class)->pluck('item_id');
@@ -99,8 +110,7 @@ class ResourceController extends Controller
         // Si ownership='mine', on ne garde QUE celles-ci.
         // Option 'all' pour tout voir (y compris déjà vu) si besoin, mais la demande est "continu de ne voir que nouvelles choses".
 
-        $ownershipValidated = $request->validate(['ownership' => 'nullable|string|in:new,mine,all']);
-        $ownership = $ownershipValidated['ownership'] ?? 'new'; // Default to 'new' if not specified
+        $ownership = $validated['ownership'] ?? 'new'; // Default to 'new' if not specified
 
         if ($ownership === 'mine') {
             $query->whereIn('id', $myResourceIds);
@@ -110,8 +120,8 @@ class ResourceController extends Controller
         // else if ownership === 'all' -> do nothing (show everything)
 
         // 1. Recherche
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
@@ -120,41 +130,42 @@ class ResourceController extends Controller
         }
 
         // 2. Filtres basiques
-        if ($request->filled('type') && $request->type !== 'all') {
-            $query->where('type', $request->type);
+        if (! empty($validated['type']) && $validated['type'] !== 'all') {
+            $query->where('type', $validated['type']);
         }
 
         // 3. Prix (Gratuit / Payant)
-        if ($request->filled('price')) {
-            if ($request->price === 'free') {
+        if (! empty($validated['price'])) {
+            if ($validated['price'] === 'free') {
                 $query->where('is_premium', false);
-            } elseif ($request->price === 'premium') {
+            } elseif ($validated['price'] === 'premium') {
                 $query->where('is_premium', true);
             }
         }
 
         // 4. Personnalité (MBTI)
         // On suppose que le champ mbti_types contient un JSON array des types ciblés
-        if ($request->filled('mbti')) {
-            $query->where(function ($q) use ($request) {
-                $q->whereJsonContains('mbti_types', $request->mbti)
+        if (! empty($validated['mbti'])) {
+            $mbti = $validated['mbti'];
+            $query->where(function ($q) use ($mbti) {
+                $q->whereJsonContains('mbti_types', $mbti)
                     ->orWhereNull('mbti_types'); // On inclut ceux sans restrictions ? Non, restons strict si filtre.
             })->whereNotNull('mbti_types'); // On exclut ceux qui n'ont pas de mbti défini si on filtre par mbti
         }
 
         // 5. Entraînement (Has Quiz)
-        if ($request->filled('has_quiz') && $request->has_quiz === '1') {
+        if (! empty($validated['has_quiz']) && $validated['has_quiz'] === '1') {
             $query->has('quizzes');
         }
 
         // 6. Source (Mentor vs Brillio)
-        if ($request->filled('source')) {
-            if ($request->source === 'mentor') {
+        if (! empty($validated['source'])) {
+            if ($validated['source'] === 'mentor') {
                 $query->whereHas('user', function ($q) {
                     $q->where('user_type', 'mentor')
                         ->where('is_admin', false);
                 });
-            } elseif ($request->source === 'brillio') {
+            } elseif ($validated['source'] === 'brillio') {
                 $query->whereHas('user', function ($q) {
                     $q->where('is_admin', true);
                 });
@@ -275,8 +286,7 @@ class ResourceController extends Controller
         }
 
         // Pagination manuelle après filtrage
-        $pageValidated = $request->validate(['page' => 'nullable|integer|min:1|max:1000']);
-        $page = $pageValidated['page'] ?? 1;
+        $page = $validated['page'] ?? 1;
         $perPage = 12;
         $items = $resources instanceof Collection ? $resources : Collection::make($resources);
 
@@ -285,7 +295,7 @@ class ResourceController extends Controller
             $items->count(),
             $perPage,
             $page,
-            ['path' => $request->url(), 'query' => $request->query()]
+            ['path' => $request->url(), 'query' => $validated]
         );
 
         return view('jeune.resources.index', [

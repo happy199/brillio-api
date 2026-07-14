@@ -121,7 +121,6 @@
 
             <!-- Zone d'upload -->
             <div x-show="!uploading && !parsedData">
-{{-- nosemgrep --}}
                 <input type="file" accept=".pdf" @change="handleFileUpload($event)" class="hidden" x-ref="fileInput">
                 <div @click="$refs.fileInput.click()" @dragover.prevent="isDragging = true"
                     @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop($event)"
@@ -276,7 +275,6 @@
 
             isDragging: false,
 
-{{-- nosemgrep --}}
             async handleFileUpload(event) {
                 const file = event.target.files[0];
                 this.processFile(file);
@@ -299,8 +297,8 @@
                     return;
                 }
 
-                if (file.size > 10 * 1024 * 1024) { // Augmenté à 10MB car 10 pages peuvent être lourdes
-                    this.errorMessage = 'Le fichier est trop volumineux (maximum 10MB)';
+                if (file.size > 5 * 1024 * 1024) {
+                    this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
                     return;
                 }
 

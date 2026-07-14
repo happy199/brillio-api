@@ -160,21 +160,24 @@
             handleDrop(e) {
                 this.isDragging = false;
                 const file = e.dataTransfer.files[0];
-{{-- nosemgrep --}}
                 this.uploadFile(file);
             },
 
             handleFileSelect(e) {
                 const file = e.target.files[0];
-{{-- nosemgrep --}}
                 this.uploadFile(file);
             },
 
-{{-- nosemgrep --}}
             async uploadFile(file) {
                 if (!file || file.type !== 'application/pdf') {
                     this.status = 'error';
                     this.message = "Veuillez sélectionner un fichier PDF valide.";
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    this.status = 'error';
+                    this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
                     return;
                 }
 
