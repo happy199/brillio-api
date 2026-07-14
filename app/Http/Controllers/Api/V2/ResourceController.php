@@ -117,12 +117,12 @@ class ResourceController extends V1ResourceController
         }
 
         $validated = $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'required|string',
-            'type'         => 'required|in:article,video,tool,exercise,template,script',
-            'price'        => 'required|numeric|min:0',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'type' => 'required|in:article,video,tool,exercise,template,script',
+            'price' => 'required|numeric|min:0',
             'external_url' => 'nullable|url',
-            'file'         => 'nullable|file|max:51200',
+            'file' => 'nullable|file|max:51200',
         ]);
 
         if (isset($validated['file'])) {

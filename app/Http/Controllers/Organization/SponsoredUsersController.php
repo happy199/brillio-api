@@ -22,13 +22,19 @@ class SponsoredUsersController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'test_status' => 'nullable|string|in:completed,pending',
+            'status' => 'nullable|string|in:active,inactive',
+        ]);
+
         $query = $organization->users()
             ->where('users.user_type', User::TYPE_JEUNE)
             ->with(['personalityTest', 'jeuneProfile']);
 
         // Recherche textuelle
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -36,12 +42,12 @@ class SponsoredUsersController extends Controller
         }
 
         // Filtre par Test de Personnalité
-        if ($request->filled('test_status')) {
-            if ($request->test_status === 'completed') {
+        if (! empty($validated['test_status'])) {
+            if ($validated['test_status'] === 'completed') {
                 $query->whereHas('personalityTest', function ($q) {
                     $q->whereNotNull('completed_at');
                 });
-            } elseif ($request->test_status === 'pending') {
+            } elseif ($validated['test_status'] === 'pending') {
                 $query->whereDoesntHave('personalityTest', function ($q) {
                     $q->whereNotNull('completed_at');
                 });
@@ -49,12 +55,12 @@ class SponsoredUsersController extends Controller
         }
 
         // Filtre par Activité
-        if ($request->filled('status')) {
-            if ($request->status === 'active') {
+        if (! empty($validated['status'])) {
+            if ($validated['status'] === 'active') {
                 $query->where(function ($q) {
                     $q->where('last_login_at', '>=', now()->subDays(30));
                 });
-            } elseif ($request->status === 'inactive') {
+            } elseif ($validated['status'] === 'inactive') {
                 // Inactif = jamais connecté OU connecté il y a plus de 30 jours
                 $query->where(function ($q) {
                     $q->where('last_login_at', '<', now()->subDays(30))
@@ -167,8 +173,11 @@ class SponsoredUsersController extends Controller
             abort(403);
         }
 
-        // nosemgrep
-        $format = $request->query('format', 'pdf');
+        $validated = $request->validate([
+            'format' => 'nullable|string|in:pdf,csv',
+        ]);
+
+        $format = $validated['format'] ?? 'pdf';
         $user->load(['personalityTest', 'jeuneProfile', 'academicDocuments', 'mentorshipsAsMentee.mentor']);
 
         // Mentorship sessions

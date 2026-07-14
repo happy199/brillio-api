@@ -67,9 +67,8 @@ class GuestController extends Controller
 
             // Gestion de la photo
             $photoPath = null;
-            if ($request->hasFile('photo')) {
-                $photoValidated = $request->validate(['photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
-                $photoPath = $photoValidated['photo']->store('profile-photos', 'public');
+            if (isset($validated['photo'])) {
+                $photoPath = $validated['photo']->store('profile-photos', 'public');
             }
 
             // Créer l'utilisateur invité
@@ -151,12 +150,11 @@ class GuestController extends Controller
             $specId = $this->resolveSpecializationId($validated);
 
             // Gestion de la photo
-            if ($request->hasFile('photo')) {
+            if (isset($validated['photo'])) {
                 if ($guest->profile_photo_path) {
                     Storage::disk('public')->delete($guest->profile_photo_path);
                 }
-                // nosemgrep
-                $photoPath = $request->file('photo')->store('profile-photos', 'public');
+                $photoPath = $validated['photo']->store('profile-photos', 'public');
                 $guest->profile_photo_path = $photoPath;
             }
 

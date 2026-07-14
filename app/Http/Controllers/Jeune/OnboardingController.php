@@ -41,8 +41,8 @@ class OnboardingController extends Controller
 
         $rules = [
             'birth_date' => 'required|date|before:today',
-            'country'    => 'required|string|max:100',
-            'city'       => 'required|string|max:100',
+            'country' => 'required|string|max:100',
+            'city' => 'required|string|max:100',
             'phone' => [
                 'required',
                 'string',

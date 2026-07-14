@@ -21,9 +21,9 @@ class DashboardController extends Controller
 
         // --- FILTERING LOGIC ---
         $filterParams = $request->validate([
-            'period'     => 'nullable|string|in:7_days,30_days,this_month,last_month,this_year,custom',
+            'period' => 'nullable|string|in:7_days,30_days,this_month,last_month,this_year,custom',
             'start_date' => 'nullable|date',
-            'end_date'   => 'nullable|date',
+            'end_date' => 'nullable|date',
         ]);
         $period = $filterParams['period'] ?? '30_days';
         $startDate = now()->subDays(30)->startOfDay();

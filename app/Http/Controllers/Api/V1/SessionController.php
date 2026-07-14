@@ -47,7 +47,7 @@ class SessionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'type'   => 'nullable|string|in:upcoming,past',
+            'type' => 'nullable|string|in:upcoming,past',
             'status' => 'nullable|string|in:pending,confirmed,cancelled,completed',
         ]);
 

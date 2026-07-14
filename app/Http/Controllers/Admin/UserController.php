@@ -30,12 +30,12 @@ class UserController extends Controller
         $query = User::with(['personalityTest', 'mentorProfile']);
 
         $validated = $request->validate([
-            'type'         => 'nullable|string|in:jeune,mentor,organization',
-            'country'      => 'nullable|string|max:100',
+            'type' => 'nullable|string|in:jeune,mentor,organization',
+            'country' => 'nullable|string|max:100',
             'phone_status' => 'nullable|string|in:with_phone,without_phone',
-            'search'       => 'nullable|string|max:255',
-            'sort'         => 'nullable|string|in:created_at,name,email,user_type',
-            'order'        => 'nullable|string|in:asc,desc',
+            'search' => 'nullable|string|max:255',
+            'sort' => 'nullable|string|in:created_at,name,email,user_type',
+            'order' => 'nullable|string|in:asc,desc',
         ]);
 
         // Filtre par type

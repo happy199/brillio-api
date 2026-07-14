@@ -54,13 +54,13 @@ class ResourceController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'search'    => 'nullable|string|max:255',
-            'type'      => 'nullable|string|in:article,video,tool,exercise,template,script,advertisement',
-            'price'     => 'nullable|string|in:free,premium',
-            'mbti'      => 'nullable|string|max:10',
-            'source'    => 'nullable|string|in:mentor,brillio',
+            'search' => 'nullable|string|max:255',
+            'type' => 'nullable|string|in:article,video,tool,exercise,template,script,advertisement',
+            'price' => 'nullable|string|in:free,premium',
+            'mbti' => 'nullable|string|max:10',
+            'source' => 'nullable|string|in:mentor,brillio',
             'ownership' => 'nullable|string|in:mine,all',
-            'filter'    => 'nullable|string|in:suggestions,all',
+            'filter' => 'nullable|string|in:suggestions,all',
         ]);
 
         $query = Resource::where('is_published', true)->where('is_validated', true);

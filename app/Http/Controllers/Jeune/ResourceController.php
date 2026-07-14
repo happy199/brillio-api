@@ -69,7 +69,7 @@ class ResourceController extends Controller
         // Mode de filtrage : 'suggestions' (défaut) ou 'all'
         // Si l'utilisateur effectue une recherche ou applique des filtres spécifiques, on bascule en mode 'all' pour ne pas masquer les résultats
         $hasActiveFilters = $request->filled('search') || $request->filled('type') || $request->filled('price') || $request->filled('mbti') || $request->filled('source') || $request->filled('ownership');
-        
+
         $filterValidated = $request->validate(['filter' => 'nullable|string|in:suggestions,all']);
         $filterMode = $filterValidated['filter'] ?? ($hasActiveFilters ? 'all' : 'suggestions');
 

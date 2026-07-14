@@ -38,9 +38,9 @@ class MentorController extends Controller
 
         $validated = $request->validate([
             'specialization' => 'nullable|string|max:100',
-            'country'        => 'nullable|string|max:100',
-            'search'         => 'nullable|string|max:255',
-            'per_page'       => 'nullable|integer|min:1|max:100',
+            'country' => 'nullable|string|max:100',
+            'search' => 'nullable|string|max:255',
+            'per_page' => 'nullable|integer|min:1|max:100',
         ]);
 
         // Filtres

@@ -123,10 +123,12 @@ class SubscriptionController extends Controller
     public function downgrade(Request $request)
     {
         $organization = $this->getCurrentOrganization();
-        // nosemgrep
 
-        // Target plan can be 'free', 'pro', or 'enterprise'
-        $targetPlan = $request->input('to', 'free');
+        $validated = $request->validate([
+            'to' => 'nullable|string|in:free,pro,enterprise,establishment',
+        ]);
+
+        $targetPlan = $validated['to'] ?? 'free';
 
         if (! in_array($targetPlan, ['free', 'pro', 'enterprise'])) {
             return redirect()->back()->with('error', 'Plan de rétrogradation invalide.');

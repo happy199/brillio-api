@@ -76,7 +76,7 @@ trait HasMessages
         abort_if($mentorship->{$config['user_column']} !== $user->id, 403);
         abort_if($mentorship->status !== 'accepted', 403);
 
-        $request->validate([
+        $validated = $request->validate([
             'body' => 'nullable|string|max:5000',
             'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,zip,txt',
         ], [
@@ -85,7 +85,7 @@ trait HasMessages
             'attachment.uploaded' => 'Le fichier n\'a pas pu être téléchargé. Vérifiez sa taille ou votre connexion.',
         ]);
 
-        if (! $request->filled('body') && ! $request->hasFile('attachment')) {
+        if (empty($validated['body']) && ! isset($validated['attachment'])) {
             if (isset($config['is_api']) && $config['is_api']) {
                 return response()->json(['message' => 'Veuillez écrire un message ou joindre un fichier.'], 422);
             }
@@ -96,24 +96,23 @@ trait HasMessages
         $data = [
             'mentorship_id' => $mentorship->id,
             'sender_id' => $user->id,
-            'body' => $request->body,
+            'body' => $validated['body'] ?? null,
         ];
 
-        if ($request->hasFile('attachment')) {
-            // nosemgrep
-            $file = $request->file('attachment');
+        if (isset($validated['attachment'])) {
+            $file = $validated['attachment'];
             $path = $file->store('messages/attachments', 'local');
             $data['attachment_path'] = $path;
             $data['attachment_name'] = $file->getClientOriginalName();
             $data['attachment_mime'] = $file->getMimeType();
         }
 
-        if ($request->filled('body')) {
+        if (! empty($validated['body'])) {
             $moderator = new ContentModerator;
-            $moderationResult = $moderator->moderate($request->body, $mentorship);
+            $moderationResult = $moderator->moderate($validated['body'], $mentorship);
 
             if ($moderationResult['is_flagged']) {
-                $data['original_body'] = $request->body;
+                $data['original_body'] = $validated['body'];
                 $data['body'] = $moderationResult['redacted'];
                 $data['is_flagged'] = true;
                 $data['flag_reason'] = $moderationResult['reason'];

@@ -14,16 +14,18 @@ class PaymentCallbackController extends Controller
     public function handle(Request $request)
     {
         // Moneroo sends: ?paymentId=py_xxx&paymentStatus=success
-        // nosemgrep
-        $monerooPaymentId = $request->query('paymentId');
-        // nosemgrep
-        $status = $request->query('paymentStatus');
+        $validated = $request->validate([
+            'paymentId' => 'nullable|string|max:255',
+            'paymentStatus' => 'nullable|string|max:255',
+        ]);
+
+        $monerooPaymentId = $validated['paymentId'] ?? null;
+        $status = $validated['paymentStatus'] ?? null;
 
         Log::info('Payment callback received', [
             'moneroo_payment_id' => $monerooPaymentId,
             'status' => $status,
-            // nosemgrep
-            'query' => $request->query(),
+            'query' => $validated,
         ]);
 
         // Find the transaction by Moneroo payment ID
