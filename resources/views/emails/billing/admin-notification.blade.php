@@ -2,7 +2,7 @@
 
 @section('content')
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    
+
     <div style="text-align: center; margin-bottom: 30px;">
         <h1 style="color: #6B46C1; font-size: 24px; font-weight: bold; margin: 0;">Nouvelle Transaction ! 💰</h1>
     </div>
@@ -19,7 +19,7 @@
         <h3 style="color: #374151; font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
             Détails de l'Achat
         </h3>
-        
+
         <table role="presentation" style="width: 100%; border-collapse: collapse;">
             <tr>
                 <td style="padding: 8px 0; color: #6B7280; font-weight: 500; width: 40%;">Client :</td>

@@ -9,7 +9,7 @@
     $isGuest = $session->mentor->is_guest;
 @endphp
 
-<div class="max-w-4xl mx-auto" x-data="{ 
+<div class="max-w-4xl mx-auto" x-data="{
     instructorType: '{{ $isGuest ? 'guest' : 'mentor' }}',
     selectedMentors: {{ json_encode($allMentorIds) }},
     selectedMentees: {{ json_encode($menteeIds) }}
@@ -58,13 +58,13 @@
                 <div class="space-y-4">
                     <label class="block text-sm font-bold text-gray-700">Type d'intervenant <span class="text-red-500">*</span></label>
                     <div class="flex p-1 bg-gray-100 rounded-xl">
-                        <button type="button" 
+                        <button type="button"
                             @click="instructorType = 'mentor'"
                             :class="instructorType === 'mentor' ? 'bg-white shadow-sm text-organization-600' : 'text-gray-500 hover:text-gray-700'"
                             class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">
                             Mentors classiques
                         </button>
-                        <button type="button" 
+                        <button type="button"
                             @click="instructorType = 'guest'"
                             :class="instructorType === 'guest' ? 'bg-white shadow-sm text-organization-600' : 'text-gray-500 hover:text-gray-700'"
                             class="flex-1 py-2 text-sm font-bold rounded-lg transition-all">
@@ -112,13 +112,13 @@
                 <label class="block text-sm font-bold text-gray-700">
                     Sélectionner <span x-text="instructorType === 'mentor' ? 'les mentors' : 'les invités'"></span> <span class="text-red-500">*</span>
                 </label>
-                
+
                 <!-- Grille Mentors -->
                 <div x-show="instructorType === 'mentor'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-72 overflow-y-auto p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner">
                     @foreach($standardMentors as $mentor)
                         <label class="relative flex items-center p-4 bg-white rounded-xl border border-gray-200 cursor-pointer hover:border-organization-200 hover:bg-organization-50 transition-all group overflow-hidden">
-                            <input type="checkbox" name="mentor_ids[]" value="{{ $mentor->id }}" 
-                                x-model="selectedMentors" 
+                            <input type="checkbox" name="mentor_ids[]" value="{{ $mentor->id }}"
+                                x-model="selectedMentors"
                                 :checked="selectedMentors.includes({{ $mentor->id }})"
                                 class="h-5 w-5 text-organization-600 focus:ring-organization-500 border-gray-300 rounded transition-all">
                             <div class="ml-4 flex items-center">
@@ -139,8 +139,8 @@
                 <div x-show="instructorType === 'guest'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-72 overflow-y-auto p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner">
                     @foreach($guestMentors as $guest)
                         <label class="relative flex items-center p-4 bg-white rounded-xl border border-gray-200 cursor-pointer hover:border-indigo-200 hover:bg-indigo-50 transition-all group overflow-hidden">
-                            <input type="checkbox" name="mentor_ids[]" value="{{ $guest->id }}" 
-                                x-model="selectedMentors" 
+                            <input type="checkbox" name="mentor_ids[]" value="{{ $guest->id }}"
+                                x-model="selectedMentors"
                                 :checked="selectedMentors.includes({{ $guest->id }})"
                                 class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-all">
                             <div class="ml-4 flex items-center">
@@ -165,7 +165,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-72 overflow-y-auto p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-inner">
                     @foreach($mentees as $mentee)
                         <label class="relative flex items-center p-4 bg-white rounded-xl border border-gray-200 cursor-pointer hover:border-organization-200 hover:bg-organization-50 transition-all group overflow-hidden">
-                            <input type="checkbox" name="mentee_ids[]" value="{{ $mentee->id }}" 
+                            <input type="checkbox" name="mentee_ids[]" value="{{ $mentee->id }}"
                                 x-model="selectedMentees"
                                 :checked="selectedMentees.includes({{ $mentee->id }})"
                                 class="h-5 w-5 text-organization-600 focus:ring-organization-500 border-gray-300 rounded transition-all">
@@ -187,11 +187,11 @@
 
             <!-- Actions -->
             <div class="flex items-center justify-end space-x-4 pt-8 border-t border-gray-100">
-                <a href="{{ route('organization.sessions.show', $session) }}" 
+                <a href="{{ route('organization.sessions.show', $session) }}"
                     class="px-8 py-4 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">
                     Annuler
                 </a>
-                <button type="submit" 
+                <button type="submit"
                     class="px-10 py-4 bg-organization-600 text-white font-extrabold rounded-2xl hover:bg-organization-700 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0 active:scale-95 flex items-center">
                     Mettre à jour la séance
                 </button>

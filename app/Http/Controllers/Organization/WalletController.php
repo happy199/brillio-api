@@ -61,7 +61,8 @@ class WalletController extends Controller
         $user = auth()->user();
 
         // Create pending transaction record
-        $localTransaction = MonerooTransaction::create([
+        $localTransaction = new MonerooTransaction;
+        $localTransaction->fill([
             'user_id' => $user->id,
             'user_type' => get_class($user),
             'amount' => $amount,
@@ -75,6 +76,7 @@ class WalletController extends Controller
                 'description' => $description,
             ],
         ]);
+        $localTransaction->save();
 
         $customer = [
             'email' => $user->email,

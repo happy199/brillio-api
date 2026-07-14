@@ -96,18 +96,18 @@ class OnboardingController extends Controller
      */
     public function complete(Request $request): JsonResponse
     {
+        $validatedCountry = $request->validate([
+            'country' => 'required|string|max:100',
+        ]);
+        $country = $validatedCountry['country'];
+
         $validated = $request->validate([
             'birth_date' => 'required|date|before:today',
-            'country' => 'required|string|max:100',
             'city' => 'required|string|max:100',
             'phone' => [
                 'required',
                 'string',
-                function ($attribute, $value, $fail) use ($request) {
-                    $country = $request->input('country');
-                    if (empty($country)) {
-                        return;
-                    }
+                function ($attribute, $value, $fail) use ($country) {
                     if (! $this->isValidAfricanPhoneNumber($country, $value)) {
                         $fail("Le champ $attribute n'est pas un numéro de téléphone valide pour le pays sélectionné.");
                     }
@@ -123,6 +123,8 @@ class OnboardingController extends Controller
             'how_found_us' => 'required|string',
             'how_found_us_other' => 'nullable|string|max:255',
         ]);
+
+        $validated['country'] = $country;
 
         $user = $request->user();
 

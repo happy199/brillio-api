@@ -2,7 +2,7 @@
 
 @section('content')
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    
+
     <div style="text-align: center; margin-bottom: 30px;">
         <!-- Logo Branding -->
         <h1 style="color: #6B46C1; font-size: 24px; font-weight: bold; margin: 0;">Brillio Africa</h1>
@@ -20,7 +20,7 @@
         <h3 style="color: #374151; font-size: 16px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
             Récapitulatif de votre achat
         </h3>
-        
+
         <table role="presentation" style="width: 100%; border-collapse: collapse;">
             <tr>
                 <td style="padding: 8px 0; color: #6B7280; font-weight: 500; width: 40%;">Description :</td>
@@ -49,7 +49,7 @@
     </div>
 
     <p style="color: #4B5563; line-height: 1.6; margin-bottom: 25px;">
-        Vous trouverez <strong>votre facture officielle détaillée en pièce jointe (PDF)</strong> de cet email. 
+        Vous trouverez <strong>votre facture officielle détaillée en pièce jointe (PDF)</strong> de cet email.
         Vos services et crédits ont été automatiquement ajoutés à votre compte.
     </p>
 

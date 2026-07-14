@@ -106,10 +106,17 @@ class NewsletterController extends Controller
 
     public function sendEmail(Request $request, EmailDeliveryService $deliveryService)
     {
+        // Limiter la taille totale du payload (DoS protection)
+        if ($request->header('Content-Length') > 50 * 1024 * 1024) { // 50MB max
+            return back()->with('error', 'La taille totale des fichiers est trop volumineuse (max 50 Mo).');
+        }
+
         // Fix pour le JS qui envoie du JSON stringifié au lieu d'un array
-        if ($request->has('recipients') && is_string($request->input('recipients'))) {
+        $precheck = $request->validate(['recipients' => 'nullable']);
+        if (isset($precheck['recipients']) && is_string($precheck['recipients'])) {
+            $decoded = json_decode($precheck['recipients'], true);
             $request->merge([
-                'recipients' => json_decode($request->input('recipients'), true),
+                'recipients' => is_array($decoded) ? $decoded : [],
             ]);
         }
 
@@ -170,8 +177,12 @@ class NewsletterController extends Controller
 
         // Gestion des pièces jointes
         $attachmentPaths = [];
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
+        $validatedFiles = $request->validate([
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|max:10240|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif,zip,txt', // NOSONAR
+        ]);
+        if (! empty($validatedFiles['attachments'])) {
+            foreach ($validatedFiles['attachments'] as $file) {
                 if ($file->isValid()) {
                     $path = $file->store('newsletters/attachments', 'public');
                     $attachmentPaths[] = [
@@ -208,13 +219,12 @@ class NewsletterController extends Controller
         if (! $isRecurring) {
             // Dispatcher le Job dans la queue seulement si ce n'est pas récurrent
             SendNewsletterJob::dispatch($campaign);
-
-            return redirect()->route('admin.newsletter.index')
-                ->with('success', "La campagne a été mise en file d'attente. L'envoi se fera en arrière-plan.");
+            $message = "La campagne a été mise en file d'attente. L'envoi se fera en arrière-plan.";
+        } else {
+            $message = 'La campagne récurrente a été planifiée avec succès.';
         }
 
-        return redirect()->route('admin.newsletter.index')
-            ->with('success', 'La campagne récurrente a été planifiée avec succès.');
+        return redirect()->route('admin.newsletter.index')->with('success', $message);
     }
 
     /**

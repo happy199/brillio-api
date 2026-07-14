@@ -4,7 +4,7 @@
 @section('header', 'Gestion des Packs de Crédits')
 
 @section('content')
-<div x-data="{ 
+<div x-data="{
         activeTab: 'jeune',
         showModal: false,
         editMode: false,

@@ -29,18 +29,27 @@ class UserController extends Controller
     {
         $query = User::with(['personalityTest', 'mentorProfile']);
 
+        $validated = $request->validate([
+            'type' => 'nullable|string|in:jeune,mentor,organization',
+            'country' => 'nullable|string|max:100',
+            'phone_status' => 'nullable|string|in:with_phone,without_phone',
+            'search' => 'nullable|string|max:255',
+            'sort' => 'nullable|string|in:created_at,name,email,user_type',
+            'order' => 'nullable|string|in:asc,desc',
+        ]);
+
         // Filtre par type
-        if ($type = $request->get('type')) {
+        if ($type = $validated['type'] ?? null) {
             $query->where('user_type', $type);
         }
 
         // Filtre par pays
-        if ($country = $request->get('country')) {
+        if ($country = $validated['country'] ?? null) {
             $query->where('country', $country);
         }
 
         // Filtre par numéro de téléphone
-        if ($phoneStatus = $request->get('phone_status')) {
+        if ($phoneStatus = $validated['phone_status'] ?? null) {
             if ($phoneStatus === 'with_phone') {
                 $query->whereNotNull('phone');
             } elseif ($phoneStatus === 'without_phone') {
@@ -49,7 +58,7 @@ class UserController extends Controller
         }
 
         // Recherche par nom ou email
-        if ($search = $request->get('search')) {
+        if ($search = $validated['search'] ?? null) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -66,8 +75,8 @@ class UserController extends Controller
         }
 
         // Tri
-        $sortBy = $request->get('sort', 'created_at');
-        $sortOrder = $request->get('order', 'desc');
+        $sortBy = $validated['sort'] ?? 'created_at';
+        $sortOrder = $validated['order'] ?? 'desc';
         $query->orderBy($sortBy, $sortOrder);
 
         $users = $query->paginate(25);
@@ -236,7 +245,10 @@ class UserController extends Controller
             return back()->with('error', 'Débloquez d\'abord ce compte avant de l\'archiver.');
         }
 
-        $reason = $request->input('reason', 'Archivé par un administrateur.');
+        $validatedData = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+        $reason = $validatedData['reason'] ?? 'Archivé par un administrateur.';
 
         $user->update([
             'is_archived' => true,
@@ -322,7 +334,10 @@ class UserController extends Controller
             return back()->with('error', 'Vous ne pouvez pas vous bloquer vous-même.');
         }
 
-        $reason = $request->input('reason', 'Non-respect des règles de la plateforme.');
+        $validatedData = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+        $reason = $validatedData['reason'] ?? 'Non-respect des règles de la plateforme.';
 
         $user->update([
             'is_blocked' => true,

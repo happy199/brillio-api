@@ -129,7 +129,8 @@ class MentorDashboardController extends Controller
             }
 
             // Stocker la nouvelle photo
-            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $photoValidated = $request->validate(['profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
+            $path = $photoValidated['profile_photo']->store('profile-photos', 'public');
             $user->profile_photo_path = $path;
             $user->save();
         }
@@ -384,7 +385,8 @@ class MentorDashboardController extends Controller
             ]);
 
             // Stocker temporairement le PDF
-            $pdfPath = $request->file('pdf')->store('temp-linkedin-pdfs', 'local');
+            $pdfValidated = $request->validate(['pdf' => 'required|file|mimes:pdf|max:5120']);
+            $pdfPath = $pdfValidated['pdf']->store('temp-linkedin-pdfs', 'local');
             $fullPath = storage_path('app/'.$pdfPath);
 
             // Parser le PDF
@@ -450,8 +452,9 @@ class MentorDashboardController extends Controller
             }
 
             // Stocker le PDF définitivement
-            $finalPdfPath = $request->file('pdf')->store('linkedin-pdfs', 'local');
-            $originalName = $request->file('pdf')->getClientOriginalName();
+            $pdfFinalValidated = $request->validate(['pdf' => 'required|file|mimes:pdf|max:5120']);
+            $finalPdfPath = $pdfFinalValidated['pdf']->store('linkedin-pdfs', 'local');
+            $originalName = $pdfFinalValidated['pdf']->getClientOriginalName();
 
             // Supprimer le fichier temporaire
             \Storage::disk('local')->delete($pdfPath);

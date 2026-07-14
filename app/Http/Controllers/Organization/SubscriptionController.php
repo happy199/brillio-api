@@ -75,7 +75,8 @@ class SubscriptionController extends Controller
         $user = auth()->user();
 
         // Create pending transaction record (stores plan_id for the callback)
-        $localTransaction = MonerooTransaction::create([
+        $localTransaction = new MonerooTransaction;
+        $localTransaction->fill([
             'user_id' => $user->id,
             'user_type' => get_class($user),
             'amount' => $amount,
@@ -89,6 +90,7 @@ class SubscriptionController extends Controller
                 'description' => $description,
             ],
         ]);
+        $localTransaction->save();
 
         $customer = [
             'email' => $user->email,
@@ -122,8 +124,11 @@ class SubscriptionController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
-        // Target plan can be 'free', 'pro', or 'enterprise'
-        $targetPlan = $request->input('to', 'free');
+        $validated = $request->validate([
+            'to' => 'nullable|string|in:free,pro,enterprise,establishment',
+        ]);
+
+        $targetPlan = $validated['to'] ?? 'free';
 
         if (! in_array($targetPlan, ['free', 'pro', 'enterprise'])) {
             return redirect()->back()->with('error', 'Plan de rétrogradation invalide.');

@@ -45,7 +45,7 @@
                         {{ \Carbon\Carbon::parse($session->scheduled_at)->isoFormat('D MMM YYYY') }}
                     </span>
                     <span class="text-gray-500 text-sm font-medium">
-                        {{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} - 
+                        {{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} -
                         {{ \Carbon\Carbon::parse($session->scheduled_at)->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->addMinutes($session->duration_minutes)->format('H:i') }}
                         ({{ $session->gmt_offset }}) ({{ $session->duration_minutes }} min)
                     </span>
@@ -232,7 +232,7 @@
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Refusée</span>
                                 @elseif($session->status === 'completed')
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Terminée</span>
-                                @elseif($session->scheduled_at < now()) 
+                                @elseif($session->scheduled_at < now())
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Passée</span>
                                 @else
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{ $session->status }}</span>

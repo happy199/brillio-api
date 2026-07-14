@@ -2,7 +2,7 @@
 FROM php:8.4-fpm-alpine AS builder
 
 # Install extensions using the official installer script
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions pdo pdo_mysql zip gd pcntl excimer
 
@@ -45,7 +45,7 @@ RUN composer dump-autoload --optimize --no-dev
 FROM php:8.4-fpm-alpine
 
 # Install extensions using the official installer script (much faster and reliable)
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions pdo pdo_mysql zip gd pcntl excimer redis @composer
@@ -68,19 +68,18 @@ COPY docker/default.conf /etc/nginx/http.d/default.conf
 # Copy supervisor configuration
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+# Set permissions and prepare folders for non-root execution
+RUN mkdir -p /run/nginx /var/lib/nginx/tmp /var/log/nginx /var/log/supervisor && \
+    chown -R www-data:www-data /var/www/html /run/nginx /var/lib/nginx /var/log/nginx /var/log/supervisor && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Create directory for nginx
-RUN mkdir -p /run/nginx && \
-    mkdir -p /var/lib/nginx/tmp && \
-    chown -R nginx:nginx /var/lib/nginx
 
 WORKDIR /var/www/html
 
 # Create storage symlink
 RUN php artisan storage:link --no-interaction
+
+# Switch to non-root user
+USER www-data
 
 # Expose port 8080 (Cloud Run requirement)
 EXPOSE 8080

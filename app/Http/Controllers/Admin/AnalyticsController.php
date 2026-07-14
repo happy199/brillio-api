@@ -44,9 +44,15 @@ class AnalyticsController extends Controller
      */
     private function getDateRange(Request $request): array
     {
-        $preset = $request->get('preset', 'month');
-        $startDate = $request->get('start_date');
-        $endDate = $request->get('end_date');
+        $validated = $request->validate([
+            'preset' => 'nullable|string|in:today,3days,week,month,quarter,year,all,custom',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $preset = $validated['preset'] ?? 'month';
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
 
         // On n'utilise les dates personnalisées QUE si le preset est explicitement 'custom'
         // ou si on a des dates mais pas de preset.
@@ -269,6 +275,28 @@ class AnalyticsController extends Controller
         ];
         $allPersonalities = PersonalityTest::whereNotNull('personality_type')->distinct()->pluck('personality_type')->sort()->values();
 
+        $validatedFilters = $request->validate([
+            'situation' => 'nullable|array',
+            'situation.*' => 'string',
+            'interest' => 'nullable|array',
+            'interest.*' => 'string',
+            'country' => 'nullable|array',
+            'country.*' => 'string',
+            'goal' => 'nullable|array',
+            'goal.*' => 'string',
+            'channel' => 'nullable|array',
+            'channel.*' => 'string',
+            'personality' => 'nullable|array',
+            'personality.*' => 'string',
+            'tuition' => 'nullable|array',
+            'tuition.*' => 'string',
+            'target_salary' => 'nullable|array',
+            'target_salary.*' => 'string',
+            'actual_salary' => 'nullable|array',
+            'actual_salary.*' => 'string',
+            'has_phone' => 'nullable|string|in:0,1',
+        ]);
+
         return view('admin.analytics.index', [
             'stats' => $stats,
             'specializations' => $this->specializations,
@@ -280,16 +308,16 @@ class AnalyticsController extends Controller
             'allChannels' => $allChannels,
             'allPersonalities' => $allPersonalities,
             'filters' => [
-                'situation' => (array) $request->get('situation', []),
-                'interest' => (array) $request->get('interest', []),
-                'country' => (array) $request->get('country', []),
-                'goal' => (array) $request->get('goal', []),
-                'channel' => (array) $request->get('channel', []),
-                'personality' => (array) $request->get('personality', []),
-                'tuition' => (array) $request->get('tuition', []),
-                'target_salary' => (array) $request->get('target_salary', []),
-                'actual_salary' => (array) $request->get('actual_salary', []),
-                'has_phone' => $request->get('has_phone'),
+                'situation' => $validatedFilters['situation'] ?? [],
+                'interest' => $validatedFilters['interest'] ?? [],
+                'country' => $validatedFilters['country'] ?? [],
+                'goal' => $validatedFilters['goal'] ?? [],
+                'channel' => $validatedFilters['channel'] ?? [],
+                'personality' => $validatedFilters['personality'] ?? [],
+                'tuition' => $validatedFilters['tuition'] ?? [],
+                'target_salary' => $validatedFilters['target_salary'] ?? [],
+                'actual_salary' => $validatedFilters['actual_salary'] ?? [],
+                'has_phone' => $validatedFilters['has_phone'] ?? null,
             ],
             'personalityLabels' => PersonalityService::TYPE_DESCRIPTIONS,
         ]);
@@ -568,7 +596,11 @@ class AnalyticsController extends Controller
         $dateRange = $this->getDateRange($request);
         $start = $dateRange['start'];
         $end = $dateRange['end'];
-        $type = $request->get('type', 'general');
+        $validated = $request->validate([
+            'type' => 'nullable|string|in:general,personality,chat,users,mentors',
+            'has_phone' => 'nullable|string|in:0,1',
+        ]);
+        $type = $validated['type'] ?? 'general';
 
         $data = [
             'dateRange' => $dateRange,
@@ -623,9 +655,9 @@ class AnalyticsController extends Controller
                 $userQuery = User::where('is_admin', false)
                     ->whereBetween('created_at', [$start, $end]);
 
-                if ($request->get('has_phone') === '1') {
+                if (($validated['has_phone'] ?? null) === '1') {
                     $userQuery->whereNotNull('phone')->where('phone', '!=', '');
-                } elseif ($request->get('has_phone') === '0') {
+                } elseif (($validated['has_phone'] ?? null) === '0') {
                     $userQuery->where(function ($q) {
                         $q->whereNull('phone')->orWhere('phone', '');
                     });
@@ -690,7 +722,30 @@ class AnalyticsController extends Controller
         $dateRange = $this->getDateRange($request);
         $start = $dateRange['start'];
         $end = $dateRange['end'];
-        $type = $request->get('type', 'users');
+        $validated = $request->validate([
+            'type' => 'nullable|string|in:users,mentors', // assuming users and mentors are valid types here
+            'situation' => 'nullable|array',
+            'situation.*' => 'string',
+            'interest' => 'nullable|array',
+            'interest.*' => 'string',
+            'country' => 'nullable|array',
+            'country.*' => 'string',
+            'goal' => 'nullable|array',
+            'goal.*' => 'string',
+            'channel' => 'nullable|array',
+            'channel.*' => 'string',
+            'personality' => 'nullable|array',
+            'personality.*' => 'string',
+            'tuition' => 'nullable|array',
+            'tuition.*' => 'string',
+            'target_salary' => 'nullable|array',
+            'target_salary.*' => 'string',
+            'actual_salary' => 'nullable|array',
+            'actual_salary.*' => 'string',
+            'has_phone' => 'nullable|string|in:0,1',
+        ]);
+
+        $type = $validated['type'] ?? 'users';
 
         $filename = 'brillio-export-'.$type.'-'.$start->format('Y-m-d').'.csv';
 
@@ -699,15 +754,15 @@ class AnalyticsController extends Controller
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        $situations = (array) $request->get('situation', []);
-        $interests = (array) $request->get('interest', []);
-        $countries = (array) $request->get('country', []);
-        $goals = (array) $request->get('goal', []);
-        $channels = (array) $request->get('channel', []);
-        $personalities = (array) $request->get('personality', []);
-        $tuitions = (array) $request->get('tuition', []);
-        $targetSalaries = (array) $request->get('target_salary', []);
-        $actualSalaries = (array) $request->get('actual_salary', []);
+        $situations = $validated['situation'] ?? [];
+        $interests = $validated['interest'] ?? [];
+        $countries = $validated['country'] ?? [];
+        $goals = $validated['goal'] ?? [];
+        $channels = $validated['channel'] ?? [];
+        $personalities = $validated['personality'] ?? [];
+        $tuitions = $validated['tuition'] ?? [];
+        $targetSalaries = $validated['target_salary'] ?? [];
+        $actualSalaries = $validated['actual_salary'] ?? [];
 
         $situations = array_filter($situations);
         $interests = array_filter($interests);
@@ -729,7 +784,7 @@ class AnalyticsController extends Controller
             'autre' => 'Autre',
         ];
 
-        $hasPhone = $request->get('has_phone');
+        $hasPhone = $validated['has_phone'] ?? null;
 
         return response()->stream(function () use ($hasPhone, $type, $start, $end, $situations, $interests, $countries, $goals, $channels, $personalities, $tuitions, $allSituationsDisplay, $targetSalaries, $actualSalaries) {
             $handle = fopen('php://output', 'w');
@@ -894,7 +949,8 @@ class AnalyticsController extends Controller
      */
     public function export(Request $request)
     {
-        $type = $request->get('type', 'users');
+        $validated = $request->validate(['type' => 'nullable|string|in:users,personality']);
+        $type = $validated['type'] ?? 'users';
         $dateRange = $this->getDateRange($request);
 
         switch ($type) {

@@ -36,15 +36,17 @@ $currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
     {{-- Currency Switcher --}}
     <div class="flex justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
-            <select @change="window.location.href = '{{ route('currency.switch') }}?currency=' + $event.target.value" 
-                class="rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
-                @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
-                <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
-                    {{ $curr['name'] }} ({{ $curr['symbol'] }})
-                </option>
-                @endforeach
-            </select>
+            <label for="currency_selector" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</label>
+            <form action="{{ route('currency.switch') }}" method="GET" class="inline m-0 p-0">
+                <select id="currency_selector" name="currency" onchange="this.form.submit()"
+                    class="rounded-lg border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
+                    @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                    <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                        {{ $curr['name'] }} ({{ $curr['symbol'] }})
+                    </option>
+                    @endforeach
+                </select>
+            </form>
         </div>
     </div>
 
@@ -113,7 +115,7 @@ $currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
                 <h3 class="text-lg font-semibold leading-6 text-organization-600">Professionnel</h3>
                 <p class="mt-4 text-sm leading-6 text-gray-500">Suivez l'impact et boostez l'engagement.</p>
                 @foreach($periods as $days => $label)
-                @php 
+                @php
                     $proPlan = $proPlans->get($days);
                     $proPriceHtml = '—';
                     if ($proPlan) {
@@ -197,7 +199,7 @@ $currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
                 <h3 class="text-lg font-semibold leading-6 text-gray-900">Entreprise</h3>
                 <p class="mt-4 text-sm leading-6 text-gray-500">Accompagnement complet et impact max.</p>
                 @foreach($periods as $days => $label)
-                @php 
+                @php
                     $entPlan = $enterprisePlans->get($days);
                     $entPriceHtml = '—';
                     if ($entPlan) {
@@ -277,13 +279,13 @@ $currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
         {{-- Establishment - Premium Lite Design --}}
         <div
             class="relative flex flex-col lg:col-span-3 rounded-[2.5rem] border-2 border-organization-200 bg-white p-8 lg:p-12 shadow-xl hover:shadow-2xl transition-all duration-700 overflow-hidden group">
-            
+
             {{-- Subtle Background Accent --}}
             <div class="absolute -right-20 -top-20 w-96 h-96 bg-organization-50 rounded-full blur-[100px] group-hover:bg-organization-100/50 transition-colors duration-1000"></div>
             <div class="absolute left-0 top-0 w-2 h-full bg-organization-600"></div>
 
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-center gap-12">
-                
+
                 {{-- Left: Identity --}}
                 <div class="lg:w-1/3 text-center lg:text-left">
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-organization-50 text-organization-600 rounded-2xl mb-6 shadow-sm">
@@ -291,7 +293,7 @@ $currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
                     </div>
                     <h3 class="text-3xl font-black text-gray-900 tracking-tight mb-2">Plan Établissement</h3>
                     <p class="text-gray-500 font-medium italic mb-8">Universités & Hautes Écoles</p>
-                    
+
                     <div class="flex flex-col gap-1">
                         <span class="text-4xl font-black text-organization-600">Sur Devis</span>
                         <span class="text-[10px] uppercase tracking-[0.3em] text-gray-400 font-bold">Audit institutionnel inclus</span>
@@ -302,7 +304,7 @@ $currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
                 <div class="flex-1 lg:border-x lg:border-gray-100 lg:px-12">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                         @php $activeEstPlan = $establishmentPlans->first(); @endphp
-                        @php 
+                        @php
                             $features = ($activeEstPlan && $activeEstPlan->features) ? $activeEstPlan->features : [
                                 'Tout du plan Entreprise',
                                 'Fiche Établissement premium',

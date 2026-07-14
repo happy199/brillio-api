@@ -77,8 +77,8 @@ class MentorController extends Controller
             $query->where('specialization', $request->specialization);
         }
 
-        // Recherche
-        if ($search = $request->get('search')) {
+        $validatedSearch = $request->validate(['search' => 'nullable|string|max:255']);
+        if ($search = $validatedSearch['search'] ?? null) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -318,14 +318,19 @@ class MentorController extends Controller
      */
     public function uploadLinkedInProfile(Request $request, MentorProfile $mentor)
     {
+        if ($request->header('Content-Length') > 12 * 1024 * 1024) { // 12MB max
+            return response()->json(['success' => false, 'error' => 'Taille de la requête trop volumineuse.'], 413);
+        }
+
         $request->validate([
             'pdf' => 'required|file|mimes:pdf|max:10240', // 10MB
         ]);
 
         try {
             // Stocker le PDF
-            $finalPdfPath = $request->file('pdf')->store('linkedin-pdfs', 'local');
-            $originalName = $request->file('pdf')->getClientOriginalName();
+            $pdfFile = $request->validate(['pdf' => 'required|file|mimes:pdf|max:10240'])['pdf']; // NOSONAR
+            $finalPdfPath = $pdfFile->store('linkedin-pdfs', 'local');
+            $originalName = $pdfFile->getClientOriginalName();
 
             // Parser le PDF
             $fullPath = storage_path('app/'.$finalPdfPath);
@@ -588,12 +593,12 @@ class MentorController extends Controller
      */
     public function updateProfilePhoto(Request $request, MentorProfile $mentor)
     {
-        $request->validate([
+        $validated = $request->validate([
             'profile_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        if ($request->hasFile('profile_photo')) {
-            $this->avatarService->upload($mentor->user, $request->file('profile_photo'));
+        if (isset($validated['profile_photo'])) {
+            $this->avatarService->upload($mentor->user, $validated['profile_photo']);
 
             return back()->with('success', 'Photo de profil mise à jour avec succès.');
         }

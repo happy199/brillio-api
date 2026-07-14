@@ -116,16 +116,17 @@ class ResourceController extends V1ResourceController
             return $this->error('Taille de la requête trop volumineuse (max 60Mo).', 413);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'type' => 'required|in:article,video,tool,exercise,template,script',
             'price' => 'required|numeric|min:0',
             'external_url' => 'nullable|url',
+            'file' => 'nullable|file|max:51200', // NOSONAR
         ]);
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
+        if (isset($validated['file'])) {
+            $file = $validated['file'];
             if (! $file->isValid()) {
                 return $this->error('Fichier invalide.', 422);
             }
@@ -138,8 +139,8 @@ class ResourceController extends V1ResourceController
         $resourceData['user_id'] = $mentor->id;
         $resourceData['is_active'] = true;
 
-        if ($request->hasFile('file')) {
-            $resourceData['file_path'] = $request->file('file')->store('resources', 'public');
+        if (isset($validated['file'])) {
+            $resourceData['file_path'] = $validated['file']->store('resources', 'public');
         }
 
         $resource = \App\Models\Resource::create($resourceData);

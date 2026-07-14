@@ -20,7 +20,11 @@ class CoachController extends Controller
     {
         $query = User::where('is_coach', true)->with(['mentorProfile']);
 
-        if ($search = $request->get('search')) {
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+        ]);
+
+        if ($search = $validated['search'] ?? null) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");

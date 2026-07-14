@@ -69,12 +69,12 @@
     <div x-data="{ tab: 'interests' }">
         <!-- Tabs Navigation -->
         <div class="flex border-b border-gray-200 mb-6">
-            <button @click="tab = 'interests'" 
+            <button @click="tab = 'interests'"
                 :class="tab === 'interests' ? 'border-organization-500 text-organization-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                 class="whitespace-nowrap py-4 px-6 border-b-2 font-bold text-sm transition-colors">
                 Manifestations d'intérêt ({{ $totalInterests }})
             </button>
-            <button @click="tab = 'clicks'" 
+            <button @click="tab = 'clicks'"
                 :class="tab === 'clicks' ? 'border-organization-500 text-organization-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                 class="whitespace-nowrap py-4 px-6 border-b-2 font-bold text-sm transition-colors">
                 Clics & Vues ({{ $totalClicks }})
@@ -237,7 +237,7 @@
                                         $type = $prospect->personalityTest->personality_type;
                                         $info = $mbtiDescriptions[$type] ?? null;
                                     @endphp
-                                    <span class="mbti-tooltip inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 cursor-help border border-indigo-200" 
+                                    <span class="mbti-tooltip inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 cursor-help border border-indigo-200"
                                           data-tippy-content="<strong>{{ $info['label'] ?? $type }}</strong><br/><br/>{{ $info['description'] ?? 'Description non disponible.' }}">
                                         <i class="fas fa-brain mr-1.5 text-indigo-500"></i>
                                         {{ $info['label'] ?? $type }}
@@ -301,7 +301,7 @@
                     Prenez le contrôle de votre image sur Brillio. Mettez à jour les informations de votre établissement pour attirer les meilleurs profils ou utilisez vos crédits pour booster votre visibilité auprès des jeunes talents qui vous correspondent.
                 </p>
             </div>
-            
+
             <div class="flex flex-wrap gap-4">
                 <a href="{{ route('organization.establishments.edit') }}" class="bg-white text-rose-600 px-6 py-4 rounded-xl font-bold shadow-sm hover:bg-rose-50 transition-all inline-flex items-center">
                     <i class="fas fa-id-card mr-2"></i> Modifier la fiche affichée aux jeunes

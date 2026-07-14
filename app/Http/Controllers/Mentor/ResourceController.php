@@ -361,6 +361,10 @@ class ResourceController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->header('Content-Length') > 30 * 1024 * 1024) { // 30MB max
+            return back()->with('error', 'La taille de la requête est trop volumineuse (max 30 Mo).');
+        }
+
         $messages = [
             'required' => 'Ce champ est obligatoire.',
             'string' => 'Ce champ doit être une chaîne de caractères.',
@@ -428,13 +432,13 @@ class ResourceController extends Controller
 
         // Gestion des fichiers
         $filePath = null;
-        if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('resources/files', 'public');
+        if (isset($validated['file'])) {
+            $filePath = $validated['file']->store('resources/files', 'public');
         }
 
         $previewPath = null;
-        if ($request->hasFile('preview_image')) {
-            $previewPath = $request->file('preview_image')->store('resources/previews', 'public');
+        if (isset($validated['preview_image'])) {
+            $previewPath = $validated['preview_image']->store('resources/previews', 'public');
         }
 
         // Traitement des tags (string vers array)
@@ -531,11 +535,12 @@ class ResourceController extends Controller
         return view('mentor.resources.edit', compact('resource', 'targetingOptions', 'targetingCost', 'analysisCost', 'quizCost'));
     }
 
-    /**
-     * Mise à jour
-     */
     public function update(Request $request, $id)
     {
+        if ($request->header('Content-Length') > 30 * 1024 * 1024) { // 30MB max
+            return back()->with('error', 'La taille de la requête est trop volumineuse (max 30 Mo).');
+        }
+
         // $id contient le slug
         $resource = auth()->user()->resources()->where('slug', $id)->firstOrFail();
 
@@ -609,7 +614,8 @@ class ResourceController extends Controller
             if ($resource->preview_image_path) {
                 Storage::disk('public')->delete($resource->preview_image_path);
             }
-            $resource->preview_image_path = $request->file('preview_image')->store('resources/previews', 'public');
+            $previewValidated = $request->validate(['preview_image' => 'required|image|max:5120']);
+            $resource->preview_image_path = $previewValidated['preview_image']->store('resources/previews', 'public');
         }
 
         // Gérer le fichier principal si modifié
@@ -617,7 +623,8 @@ class ResourceController extends Controller
             if ($resource->file_path) {
                 Storage::disk('public')->delete($resource->file_path);
             }
-            $resource->file_path = $request->file('file')->store('resources/files', 'public');
+            $fileValidated = $request->validate(['file' => 'required|file|max:20480']); // NOSONAR
+            $resource->file_path = $fileValidated['file']->store('resources/files', 'public');
         }
 
         $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
@@ -836,10 +843,11 @@ class ResourceController extends Controller
 
         try {
             // Appeler l'IA pour générer le quiz
+            $contentValidated = $request->validate(['content' => 'nullable|string|max:50000']);
             $quizzes = $aiService->generateQuizFromResource(
                 $request->title,
                 $request->description ?? '',
-                $request->input('content', '')
+                $contentValidated['content'] ?? ''
             );
 
             if (! $quizzes) {

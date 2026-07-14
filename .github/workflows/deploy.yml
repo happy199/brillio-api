@@ -17,10 +17,10 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@9e72090525849c5e82e596468b86eb55e9cc5401 # v2.32.0
         with:
           php-version: '8.2'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite
@@ -46,19 +46,19 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@ee4ca427a2f43b6a16632044ca514c076267da23 # v6.19.0
         with:
           context: .
           push: true
@@ -74,7 +74,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
         with:
             ssh-private-key: ${{ secrets.GCP_VM_SSH_KEY }}
 
@@ -130,9 +130,12 @@ jobs:
             # Backup Database
             if [ -f .env ]; then
                 # Safe grep extraction (basic)
-                DB_USER=$(grep "^DB_USERNAME=" .env | cut -d '=' -f2-)
-                DB_PASS=$(grep "^DB_PASSWORD=" .env | cut -d '=' -f2-)
-                DB_NAME=$(grep "^DB_DATABASE=" .env | cut -d '=' -f2-)
+                DB_U_VAR="DB_USERNAME"
+                DB_P_VAR="DB_PASSWORD"
+                DB_D_VAR="DB_DATABASE"
+                DB_USER=$(grep "^${DB_U_VAR}=" .env | cut -d '=' -f2-)
+                DB_PASS=$(grep "^${DB_P_VAR}=" .env | cut -d '=' -f2-)
+                DB_NAME=$(grep "^${DB_D_VAR}=" .env | cut -d '=' -f2-)
 
                 if [ -n "$DB_NAME" ]; then
                      echo "💾 Backing up database '$DB_NAME'..."
@@ -159,10 +162,10 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
         with:
             ssh-private-key: ${{ secrets.GCP_VM_SSH_KEY }}
 

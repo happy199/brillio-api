@@ -44,17 +44,17 @@ class AdvertisementController extends Controller
             return $redirect;
         }
 
-        $request->validate($this->advertisementValidationRules(true));
+        $validated = $request->validate($this->advertisementValidationRules(true));
 
         $organizationId = auth()->user()->organization_id;
 
-        $imagePath = $this->handleAdvertisementImageUpload($request);
+        $imagePath = $this->handleAdvertisementImageUpload($validated);
 
         if ($imagePath) {
             Advertisement::create([
-                'title' => $request->title,
+                'title' => $validated['title'] ?? null,
                 'image_path' => $imagePath,
-                'link_url' => $request->link_url,
+                'link_url' => $validated['link_url'] ?? null,
                 'status' => Advertisement::STATUS_PENDING,
                 'organization_id' => $organizationId,
                 'created_by' => auth()->id(),
@@ -90,14 +90,14 @@ class AdvertisementController extends Controller
             return $redirect;
         }
 
-        $request->validate($this->advertisementValidationRules());
+        $validated = $request->validate($this->advertisementValidationRules());
 
         $data = [
-            'title' => $request->title,
-            'link_url' => $request->link_url,
+            'title' => $validated['title'] ?? null,
+            'link_url' => $validated['link_url'] ?? null,
         ];
 
-        $imagePath = $this->handleAdvertisementImageUpload($request, $advertisement);
+        $imagePath = $this->handleAdvertisementImageUpload($validated, $advertisement);
         if ($imagePath) {
             $data['image_path'] = $imagePath;
         }

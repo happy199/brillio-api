@@ -4,7 +4,7 @@
     <div style="background-color: #ffffff;">
         {!! $content !!}
     </div>
-    
+
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f3f4f6; color: #9ca3af; font-size: 11px; text-align: center; font-style: italic;">
         Vous recevez cet email car vous êtes inscrit à la newsletter Brillio.
         <br>

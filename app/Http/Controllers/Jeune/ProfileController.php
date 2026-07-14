@@ -81,21 +81,23 @@ class ProfileController extends Controller
 
         // Gestion de la photo de profil
         if ($request->hasFile('photo')) {
+            $photoValidated = $request->validate(['photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
             // Supprimer l'ancienne photo si existante
             if ($user->profile_photo_path) {
                 Storage::disk('public')->delete($user->profile_photo_path);
             }
-            $path = $request->file('photo')->store('profile-photos', 'public');
+            $path = $photoValidated['photo']->store('profile-photos', 'public');
             $user->update(['profile_photo_path' => $path]);
         }
 
         // Gestion du CV
         if ($request->hasFile('cv')) {
+            $cvValidated = $request->validate(['cv' => 'required|file|mimes:pdf,doc,docx|max:5120']);
             // Supprimer l'ancien CV si existant
             if ($profile->cv_path) {
                 Storage::delete($profile->cv_path);
             }
-            $path = $request->file('cv')->store('cvs', 'public');
+            $path = $cvValidated['cv']->store('cvs', 'public');
             $profile->cv_path = $path;
         }
 

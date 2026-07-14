@@ -166,7 +166,7 @@
                             <select name="establishment_id" id="establishment_id" class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full appearance-none transition-all">
                                 <option value="">Aucune fiche liée</option>
                                 @foreach($establishments as $est)
-                                    <option value="{{ $est->id }}" 
+                                    <option value="{{ $est->id }}"
                                         {{ old('establishment_id', isset($organization) ? $organization->establishmentClicks()->first()?->establishment_id ?? \App\Models\Establishment::where('organization_id', $organization->id)->first()?->id : '') == $est->id ? 'selected' : '' }}>
                                         {{ $est->name }}
                                     </option>

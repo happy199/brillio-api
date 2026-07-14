@@ -7,29 +7,29 @@
         body { font-family: sans-serif; font-size: 12px; color: #333; }
         h1 { color: #4338ca; font-size: 18px; margin-bottom: 5px; }
         .meta { margin-bottom: 20px; font-size: 11px; color: #666; }
-        
+
         .stats-grid { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         .stats-grid td { width: 25%; padding: 10px; border: 1px solid #e2e8f0; text-align: center; background-color: #f8fafc; }
         .stats-grid .stat-label { font-size: 10px; text-transform: uppercase; color: #64748b; margin-bottom: 5px; }
         .stats-grid .stat-value { font-size: 16px; font-weight: bold; color: #1e293b; }
-        
+
         table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         table.data-table th, table.data-table td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; }
         table.data-table th { background-color: #f1f5f9; font-weight: bold; font-size: 11px; color: #475569; }
         table.data-table td { font-size: 10px; }
-        
+
         .text-center { text-align: center; }
         .text-right { text-align: right; }
         .status-active { color: #d97706; font-weight: bold; }
         .status-done { color: #059669; font-weight: bold; }
-        
+
         @page { margin: 1cm; }
     </style>
 </head>
 <body>
 
     <h1>Activité de Prise en Charge (Chat d'Orientation)</h1>
-    
+
     <div class="meta">
         <strong>Filtres appliqués :</strong><br>
         Intervenant: {{ $filters['coach'] }}<br>
@@ -91,7 +91,7 @@
             @endforeach
         </tbody>
     </table>
-    
+
     <div style="font-size: 9px; color: #64748b; margin-top: 10px;">
         *PEC : Prise en charge. (Écart entre le clic sur la prise en charge et la clôture du chat par le coach).
     </div>

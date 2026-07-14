@@ -51,8 +51,8 @@ class OrganizationController extends Controller
             'establishment_id' => 'nullable|exists:establishments,id',
         ]);
 
-        if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('organizations/logos', 'public');
+        if (isset($validated['logo'])) {
+            $path = $validated['logo']->store('organizations/logos', 'public');
             $validated['logo_url'] = $path;
         }
 
@@ -105,14 +105,14 @@ class OrganizationController extends Controller
             'establishment_id' => 'nullable|exists:establishments,id',
         ]);
 
-        if ($request->hasFile('logo')) {
+        if (isset($validated['logo'])) {
             // Delete old logo if exists and not default
             if ($organization->logo_url && ! str_contains($organization->logo_url, 'placeholder')) {
                 $oldPath = str_replace('/storage/', '', $organization->logo_url);
                 Storage::disk('public')->delete($oldPath);
             }
 
-            $path = $request->file('logo')->store('organizations/logos', 'public');
+            $path = $validated['logo']->store('organizations/logos', 'public');
             $validated['logo_url'] = $path;
         }
 

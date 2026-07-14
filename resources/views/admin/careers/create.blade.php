@@ -54,7 +54,9 @@
                             <button type="button"
                                 class="h-12 px-4 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition flex items-center gap-2 font-bold text-sm whitespace-nowrap border border-indigo-100"
                                 id="btn-generate-ai">
-                                <i class="fas fa-magic"></i> ✨ IA
+                                <span id="btn-ai-icon"><i class="fas fa-magic"></i></span>
+                                <span id="btn-ai-spinner" class="hidden"><i class="fas fa-spinner fa-spin"></i></span>
+                                <span id="btn-ai-text">✨ IA</span>
                             </button>
                         </div>
                         <p class="text-[10px] text-gray-400 font-medium">Saisissez un titre puis cliquez sur ✨ IA pour
@@ -198,9 +200,12 @@
                 }
 
                 const btn = this;
-                const originalContent = btn.innerHTML;
+                const btnIcon = document.getElementById('btn-ai-icon');
+                const btnSpinner = document.getElementById('btn-ai-spinner');
+
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                if (btnIcon) btnIcon.classList.add('hidden');
+                if (btnSpinner) btnSpinner.classList.remove('hidden');
 
                 fetch('{{ route("admin.ai.generate-career") }}', {
                     method: 'POST',
@@ -236,7 +241,8 @@
                     })
                     .finally(() => {
                         btn.disabled = false;
-                        btn.innerHTML = originalContent;
+                        if (btnSpinner) btnSpinner.classList.add('hidden');
+                        if (btnIcon) btnIcon.classList.remove('hidden');
                     });
             });
         </script>

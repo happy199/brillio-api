@@ -23,7 +23,8 @@ class PersonalityController extends Controller
      */
     public function questions(Request $request): JsonResponse
     {
-        $locale = $request->get('locale', 'fr');
+        $validated = $request->validate(['locale' => 'nullable|string|in:fr,en']);
+        $locale = $validated['locale'] ?? 'fr';
         $questions = $this->personalityService->getQuestions($locale);
 
         return $this->success([

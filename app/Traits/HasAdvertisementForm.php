@@ -4,7 +4,7 @@ namespace App\Traits;
 
 use App\Models\Advertisement;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 trait HasAdvertisementForm
@@ -15,7 +15,9 @@ trait HasAdvertisementForm
      */
     protected function abortIfFileTooLarge(): ?RedirectResponse
     {
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_INI_SIZE) {
+        $file = request()->file('image');
+
+        if ($file instanceof UploadedFile && ! $file->isValid() && $file->getError() === UPLOAD_ERR_INI_SIZE) {
             return back()->withInput()->withErrors([
                 'image' => 'Le fichier image est trop volumineux. La configuration actuelle limite les téléchargements à '.ini_get('upload_max_filesize').'. Veuillez utiliser une image plus petite.',
             ]);
@@ -42,13 +44,13 @@ trait HasAdvertisementForm
      * Upload a new image for an advertisement and delete the previous one.
      * Returns the new image path, or null when no new file was uploaded.
      */
-    protected function handleAdvertisementImageUpload(Request $request, ?Advertisement $advertisement = null): ?string
+    protected function handleAdvertisementImageUpload(array $validated, ?Advertisement $advertisement = null): ?string
     {
-        if (! $request->hasFile('image')) {
+        if (! isset($validated['image'])) {
             return null;
         }
 
-        $imagePath = $this->uploadAndConvertToWebp($request->file('image'), 'advertisements');
+        $imagePath = $this->uploadAndConvertToWebp($validated['image'], 'advertisements');
 
         if ($imagePath) {
             // Delete the old image when updating an existing advertisement

@@ -18,10 +18,15 @@ class AccountingController extends Controller
 {
     public function index(Request $request)
     {
-        // Période par défaut : Ce mois-ci
-        $period = $request->get('period', 'month');
-        $customStart = $request->get('start_date');
-        $customEnd = $request->get('end_date');
+        $validated = $request->validate([
+            'period' => 'nullable|string|in:month,today,week,year,custom',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $period = $validated['period'] ?? 'month';
+        $customStart = $validated['start_date'] ?? null;
+        $customEnd = $validated['end_date'] ?? null;
 
         $startDate = Carbon::now()->startOfMonth();
         $endDate = Carbon::now()->endOfMonth();
@@ -129,7 +134,11 @@ class AccountingController extends Controller
 
         // Pagination manuelle
         $perPage = 20;
-        $page = $request->get('page', 1);
+        $validated = $request->validate([
+            'page' => 'nullable|integer|min:1',
+        ]);
+
+        $page = $validated['page'] ?? 1;
         $offset = ($page - 1) * $perPage;
 
         $paginatedItems = $allTransactions->slice($offset, $perPage)->values();
@@ -139,7 +148,7 @@ class AccountingController extends Controller
             $allTransactions->count(),
             $perPage,
             $page,
-            ['path' => $request->url(), 'query' => $request->query()]
+            ['path' => route('admin.accounting.history'), 'query' => $validated]
         );
 
         return view('admin.accounting.history', compact('transactions'));

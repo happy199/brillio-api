@@ -86,7 +86,7 @@ class AcademicDocumentController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
-        $file = $request->file('file');
+        $file = $validated['file'];
 
         // Validation de la taille
         if ($file->getSize() > self::MAX_FILE_SIZE) {

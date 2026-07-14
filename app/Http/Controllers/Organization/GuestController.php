@@ -28,7 +28,8 @@ class GuestController extends Controller
             })
             ->with('mentorProfile');
 
-        if ($search = $request->get('search')) {
+        $searchValidated = $request->validate(['search' => 'nullable|string|max:255']);
+        if ($search = $searchValidated['search'] ?? null) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
@@ -66,8 +67,8 @@ class GuestController extends Controller
 
             // Gestion de la photo
             $photoPath = null;
-            if ($request->hasFile('photo')) {
-                $photoPath = $request->file('photo')->store('profile-photos', 'public');
+            if (isset($validated['photo'])) {
+                $photoPath = $validated['photo']->store('profile-photos', 'public');
             }
 
             // Créer l'utilisateur invité
@@ -149,11 +150,11 @@ class GuestController extends Controller
             $specId = $this->resolveSpecializationId($validated);
 
             // Gestion de la photo
-            if ($request->hasFile('photo')) {
+            if (isset($validated['photo'])) {
                 if ($guest->profile_photo_path) {
                     Storage::disk('public')->delete($guest->profile_photo_path);
                 }
-                $photoPath = $request->file('photo')->store('profile-photos', 'public');
+                $photoPath = $validated['photo']->store('profile-photos', 'public');
                 $guest->profile_photo_path = $photoPath;
             }
 

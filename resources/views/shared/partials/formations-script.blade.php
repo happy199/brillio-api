@@ -33,7 +33,7 @@
                         setTimeout(() => { if (!this.sidebarOpen) this.estDetails = null; }, 550);
                     }
                 });
-                
+
                 fetch('{{ route("jeune.establishments.recommended") }}')
                     .then(res => res.json())
                     .then(data => {
@@ -85,10 +85,10 @@
                         est.user_has_interest = true;
                         this.userHasPhone = true;
                         this.activePhoneInput = null;
-                        
+
                         // Dispatch toast event
-                        window.dispatchEvent(new CustomEvent('toast', { 
-                            detail: { message: data.message, type: 'success' } 
+                        window.dispatchEvent(new CustomEvent('toast', {
+                            detail: { message: data.message, type: 'success' }
                         }));
                     } else {
                         alert(data.message);
@@ -129,9 +129,9 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         form_data: this.formData,
-                        phone: this.tempPhone 
+                        phone: this.tempPhone
                     })
                 })
                 .then(res => res.json())
@@ -140,8 +140,8 @@
                         this.estDetails.user_has_interest = true;
                         this.userHasPhone = true;
                         this.sidebarOpen = false;
-                        window.dispatchEvent(new CustomEvent('toast', { 
-                            detail: { message: data.message, type: 'success' } 
+                        window.dispatchEvent(new CustomEvent('toast', {
+                            detail: { message: data.message, type: 'success' }
                         }));
                     }
                 });

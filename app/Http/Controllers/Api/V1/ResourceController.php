@@ -53,10 +53,20 @@ class ResourceController extends Controller
     {
         $user = Auth::user();
 
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'type' => 'nullable|string|in:article,video,tool,exercise,template,script,advertisement',
+            'price' => 'nullable|string|in:free,premium',
+            'mbti' => 'nullable|string|max:10',
+            'source' => 'nullable|string|in:mentor,brillio',
+            'ownership' => 'nullable|string|in:mine,all',
+            'filter' => 'nullable|string|in:suggestions,all',
+        ]);
+
         $query = Resource::where('is_published', true)->where('is_validated', true);
 
         // Recherche textuelle
-        if ($search = $request->get('search')) {
+        if ($search = $validated['search'] ?? null) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
@@ -65,12 +75,12 @@ class ResourceController extends Controller
         }
 
         // Filtre par type
-        if ($type = $request->get('type')) {
+        if ($type = $validated['type'] ?? null) {
             $query->where('type', $type);
         }
 
         // Filtre par prix
-        if ($priceMode = $request->get('price')) {
+        if ($priceMode = $validated['price'] ?? null) {
             if ($priceMode === 'free') {
                 $query->where('is_premium', false);
             } elseif ($priceMode === 'premium') {
@@ -79,12 +89,12 @@ class ResourceController extends Controller
         }
 
         // Filtre par MBTI
-        if ($mbtiStr = $request->get('mbti')) {
+        if ($mbtiStr = $validated['mbti'] ?? null) {
             $query->where('mbti_target', 'like', "%{$mbtiStr}%");
         }
 
         // Source : 'mentor' ou 'brillio'
-        if ($source = $request->get('source')) {
+        if ($source = $validated['source'] ?? null) {
             if ($source === 'mentor') {
                 $query->whereNotNull('user_id');
             } elseif ($source === 'brillio') {
@@ -93,7 +103,7 @@ class ResourceController extends Controller
         }
 
         // 'mine' (mes achats/créations) vs 'all'
-        $ownership = $request->get('ownership', 'all');
+        $ownership = $validated['ownership'] ?? 'all';
         if ($ownership === 'mine') {
             $purchasedIds = Purchase::where('user_id', $user->id)
                 ->where('item_type', Resource::class)
@@ -109,7 +119,7 @@ class ResourceController extends Controller
 
         // Mode de filtrage : 'suggestions' (défaut) ou 'all'
         $hasActiveFilters = $request->hasAny(['search', 'type', 'price', 'mbti', 'source', 'ownership']);
-        $filterMode = $request->get('filter', $hasActiveFilters ? 'all' : 'suggestions');
+        $filterMode = $validated['filter'] ?? ($hasActiveFilters ? 'all' : 'suggestions');
 
         // Logique de Suggestion / Filtrage Intelligent
         if ($filterMode === 'suggestions') {

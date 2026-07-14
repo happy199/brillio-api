@@ -92,7 +92,8 @@ class MeetingController extends Controller
      */
     public function showGuest(Request $request, $meetingId)
     {
-        $guestToken = $request->get('guestToken');
+        $guestValidated = $request->validate(['guestToken' => 'nullable|string|max:500']);
+        $guestToken = $guestValidated['guestToken'] ?? null;
 
         try {
             // 1. Trouver la session par le room name (meetingId)

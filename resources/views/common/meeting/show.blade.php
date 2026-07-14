@@ -112,17 +112,18 @@
 
             // --- Système de Transcription Client-Side Gratuit ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
+
             if (SpeechRecognition) {
                 // Créer un indicateur visuel discret
                 const indicator = document.createElement('div');
                 indicator.id = 'transcription-status';
-                indicator.innerHTML = `
-                    <div class="flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-green-500/30">
-                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                        Transcription active pour {{ $user->name }}
-                    </div>
-                `;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-green-500/30';
+                const pulse = document.createElement('div');
+                pulse.className = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
+                wrapper.appendChild(pulse);
+                wrapper.appendChild(document.createTextNode('Transcription active pour {{ $user->name }}'));
+                indicator.appendChild(wrapper);
                 indicator.className = 'absolute bottom-20 left-4 z-50 pointer-events-none opacity-50 hover:opacity-100 transition-opacity';
                 document.body.appendChild(indicator);
 
@@ -153,12 +154,13 @@
                 recognition.onerror = (event) => {
                     console.error('Erreur reconnaissance vocale:', event.error);
                     if (event.error === 'not-allowed') {
-                        indicator.innerHTML = `
-                            <div class="flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-red-500/30">
-                                <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                Micro bloqué par le navigateur
-                            </div>
-                        `;
+                        const wrapperErr = document.createElement('div');
+                        wrapperErr.className = 'flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-red-500/30';
+                        const dot = document.createElement('div');
+                        dot.className = 'w-2 h-2 rounded-full bg-red-500';
+                        wrapperErr.appendChild(dot);
+                        wrapperErr.appendChild(document.createTextNode('Micro bloqué par le navigateur'));
+                        indicator.replaceChildren(wrapperErr);
                     }
                 };
 
@@ -202,12 +204,13 @@
                 console.warn('SpeechRecognition non supporté par ce navigateur.');
                 // Alerter l'utilisateur s'il n'est pas sur Chrome
                 const indicator = document.createElement('div');
-                indicator.innerHTML = `
-                    <div class="flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-yellow-500/30">
-                        <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                        Transcription non supportée (Utilisez Chrome)
-                    </div>
-                `;
+                const wrapperUnsupported = document.createElement('div');
+                wrapperUnsupported.className = 'flex items-center gap-2 bg-black/80 text-white px-3 py-1.5 rounded-full text-[10px] border border-yellow-500/30';
+                const yellowDot = document.createElement('div');
+                yellowDot.className = 'w-2 h-2 rounded-full bg-yellow-500';
+                wrapperUnsupported.appendChild(yellowDot);
+                wrapperUnsupported.appendChild(document.createTextNode('Transcription non supportée (Utilisez Chrome)'));
+                indicator.appendChild(wrapperUnsupported);
                 indicator.className = 'absolute bottom-20 left-4 z-50 pointer-events-none';
                 document.body.appendChild(indicator);
             }

@@ -12,7 +12,8 @@ class CurrencySwitchController extends Controller
      */
     public function switch(Request $request)
     {
-        $currency = strtoupper($request->get('currency', 'XOF'));
+        $validated = $request->validate(['currency' => 'nullable|string|max:10|alpha']);
+        $currency = strtoupper($validated['currency'] ?? 'XOF');
         $supported = array_keys(CurrencyService::getSupportedCurrencies());
 
         if (in_array($currency, $supported)) {

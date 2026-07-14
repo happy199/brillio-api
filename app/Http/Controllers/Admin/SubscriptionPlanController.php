@@ -65,7 +65,7 @@ class SubscriptionPlanController extends Controller
         $data = $validated;
         $data['is_popular'] = $request->has('is_popular');
         $data['is_active'] = $request->has('is_active');
-        $data['features'] = $request->input('features', []); // Ensure features are included
+        $data['features'] = $validated['features'] ?? []; // Ensure features are included
 
         $subscriptionPlan->update($data);
 

@@ -285,7 +285,7 @@
                         <div class="w-full flex flex-col items-center justify-center">
                             <!-- Desktop PDF viewer -->
                             <iframe :src="previewUrl" :title="previewFileName || 'Document PDF'" class="hidden md:block w-full h-[70vh] rounded-lg shadow-lg"></iframe>
-                            
+
                             <!-- Mobile fallback for PDF -->
                             <div class="md:hidden w-full flex flex-col items-center justify-center py-10">
                                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">

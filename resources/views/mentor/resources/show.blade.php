@@ -294,7 +294,7 @@
             @if($isSupportedPreview)
             <div class="mb-8 space-y-4">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Aperçu du fichier</h3>
-                
+
                 @if(in_array($extension, $imageExtensions))
                     <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 flex justify-center p-4">
                         <img src="{{ $fileUrl }}" alt="Aperçu" class="max-w-full h-auto max-h-[600px] object-contain rounded-lg">

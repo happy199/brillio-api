@@ -23,7 +23,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Card 2 -->
         <div class="flex flex-col bg-white shadow-sm rounded-xl border border-slate-200">
             <div class="p-5">
@@ -70,13 +70,13 @@
                     @endforeach
                 </select>
             </div>
-            
+
             <!-- Dates -->
             <div class="w-full md:w-1/4">
                 <label class="block text-sm font-medium mb-1">Du :</label>
                 <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-input w-full bg-slate-100 border-transparent focus:bg-white focus:border-slate-300">
             </div>
-            
+
             <div class="w-full md:w-1/4">
                 <label class="block text-sm font-medium mb-1">Au :</label>
                 <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-input w-full bg-slate-100 border-transparent focus:bg-white focus:border-slate-300">

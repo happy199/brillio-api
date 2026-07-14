@@ -34,7 +34,7 @@
         <h4 style="color: #111827; font-size: 16px; font-weight: 700; margin: 0 0 16px 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px;">
             💼 Ce que tu reçois instantanément sur WhatsApp :
         </h4>
-        
+
         <div style="font-size: 14px; color: #4b5563; line-height: 1.5;">
             <div style="display: table; width: 100%; margin-bottom: 12px;">
                 <div style="display: table-cell; vertical-align: top; width: 40px; font-size: 20px; padding: 10px 0;">🎓</div>

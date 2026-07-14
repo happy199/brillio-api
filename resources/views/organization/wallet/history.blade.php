@@ -13,15 +13,17 @@
         </div>
         <div class="flex gap-3 items-center">
             <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-300 shadow-sm">
-                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
-                <select @change="window.location.href = '{{ route('currency.switch') }}?currency=' + $event.target.value" 
-                    class="rounded-md border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-xs font-semibold text-gray-700 bg-gray-50 py-0.5 cursor-pointer">
-                    @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
-                    <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
-                        {{ $curr['symbol'] }}
-                    </option>
-                    @endforeach
-                </select>
+                <label for="currency_selector" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</label>
+                <form action="{{ route('currency.switch') }}" method="GET" class="inline m-0 p-0">
+                    <select id="currency_selector" name="currency" onchange="this.form.submit()"
+                        class="rounded-md border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-xs font-semibold text-gray-700 bg-gray-50 py-0.5 cursor-pointer">
+                        @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                        <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                            {{ $curr['symbol'] }}
+                        </option>
+                        @endforeach
+                    </select>
+                </form>
             </div>
             <a href="{{ route('organization.wallet.export-csv', request()->all()) }}"
                 class="inline-flex items-center justify-center min-w-[80px] px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">

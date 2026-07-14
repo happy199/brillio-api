@@ -30,13 +30,21 @@ class PaymentController extends Controller
     public function callback(Request $request)
     {
         // Moneroo typically sends 'paymentId' and 'paymentStatus' in redirect URL
-        $transactionId = $request->query('paymentId') ?? $request->query('payment_id') ?? $request->query('transaction_id');
-        $status = $request->query('paymentStatus') ?? $request->query('status');
+        $validated = $request->validate([
+            'paymentId' => 'nullable|string|max:255',
+            'payment_id' => 'nullable|string|max:255',
+            'transaction_id' => 'nullable|string|max:255',
+            'paymentStatus' => 'nullable|string|max:255',
+            'status' => 'nullable|string|max:255',
+        ]);
+
+        $transactionId = $validated['paymentId'] ?? $validated['payment_id'] ?? $validated['transaction_id'] ?? null;
+        $status = $validated['paymentStatus'] ?? $validated['status'] ?? null;
 
         Log::info('Moneroo organization callback', [
             'paymentId' => $transactionId,
             'status' => $status,
-            'query' => $request->query(),
+            'query' => $validated,
         ]);
 
         if (! $transactionId) {

@@ -27,7 +27,14 @@ class JitsiWebhookController extends Controller
             return response()->json(['status' => 'unauthorized'], 401);
         }
 
-        $payload = $request->all();
+        $validated = $request->validate([
+            'eventType' => 'nullable|string|max:255',
+            'fqn' => 'nullable|string|max:255',
+            'data' => 'nullable|array',
+            'data.preAuthenicatedLink' => 'nullable|url|max:2048',
+        ]);
+
+        $payload = $validated;
         $eventType = $payload['eventType'] ?? null;
 
         Log::info('Jitsi Webhook Received', ['type' => $eventType, 'fqn' => $payload['fqn'] ?? 'N/A']);

@@ -11,7 +11,7 @@
      @keydown.escape.window="close()"
      @keydown.left.window="prev()"
      @keydown.right.window="next()">
-    
+
     <!-- Background elements -->
     <div class="absolute inset-y-0 right-0 -z-10 w-full overflow-hidden ring-1 ring-gray-100 lg:row-span-4 lg:row-start-1 lg:bg-gray-100/10">
         <div class="absolute -right-40 -top-40 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-primary-200 to-secondary-200 opacity-20 blur-3xl"></div>
@@ -41,13 +41,13 @@
                 @foreach($advertisements as $ad)
                     <div class="break-inside-avoid group relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                          @click="openAd({{ $loop->index }})">
-                        
+
                         <!-- Image Wrapper -->
                         <div class="relative overflow-hidden bg-gray-50">
                              <img src="{{ asset('storage/' . $ad->image_path) }}"
                                   alt="{{ $ad->title ?? 'Publicité' }}"
                                   class="w-full h-auto block group-hover:scale-103 transition-transform duration-500 ease-out">
-                            
+
                             <!-- Overlay on hover -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
                                 @if($ad->title)
@@ -81,7 +81,7 @@
          x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-4 backdrop-blur-md"
          style="display: none;">
-        
+
         <!-- Close Button (Top Right) -->
         <button @click.stop="close()" class="absolute top-6 right-6 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-3 rounded-full transition-all duration-200 z-50 focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,11 +114,11 @@
         <!-- Image Container -->
         <div class="relative max-w-4xl w-full flex flex-col items-center" @click.away="close()">
             <img :src="activeAd ? activeAd.image : ''" :alt="activeAd ? activeAd.title : ''" class="max-h-[75vh] w-auto max-w-full rounded-lg shadow-2xl border border-white/10 object-contain">
-            
+
             <!-- Metadata & Action -->
             <div class="w-full mt-6 text-center px-4">
                 <h3 class="text-xl font-bold text-white mb-3" x-text="activeAd ? activeAd.title : ''">Annonce</h3>
-                
+
                 <template x-if="activeAd && activeAd.url">
                     <a :href="activeAd.url" target="_blank"
                        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-bold rounded-full shadow-lg hover:shadow-primary-500/20 hover:scale-105 transition-all duration-300">
@@ -145,11 +145,11 @@
                 ];
             })->values(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!},
             activeIndex: null,
-            
+
             get activeAd() {
                 return this.activeIndex !== null ? this.ads[this.activeIndex] : null;
             },
-            
+
             openAd(index) {
                 this.activeIndex = index;
                 const ad = this.ads[index];
@@ -163,11 +163,11 @@
                     }).catch(err => console.error('Failed to track click:', err));
                 }
             },
-            
+
             close() {
                 this.activeIndex = null;
             },
-            
+
             prev() {
                 if (this.activeIndex > 0) {
                     this.activeIndex--;
@@ -183,7 +183,7 @@
                     }
                 }
             },
-            
+
             next() {
                 if (this.ads.length - 1 > this.activeIndex) {
                     this.activeIndex++;

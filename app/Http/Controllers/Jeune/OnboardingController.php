@@ -36,20 +36,21 @@ class OnboardingController extends Controller
      */
     public function complete(Request $request)
     {
-        $skipExtra = $request->input('skip_extra') == '1';
+        $skipExtraData = $request->validate(['skip_extra' => 'nullable|boolean']);
+        $skipExtra = (bool) ($skipExtraData['skip_extra'] ?? false);
+
+        $validatedCountry = $request->validate([
+            'country' => 'required|string|max:100',
+        ]);
+        $country = $validatedCountry['country'];
 
         $rules = [
             'birth_date' => 'required|date|before:today',
-            'country' => 'required|string|max:100',
             'city' => 'required|string|max:100',
             'phone' => [
                 'required',
                 'string',
-                function ($attribute, $value, $fail) use ($request) {
-                    $country = $request->input('country');
-                    if (empty($country)) {
-                        return;
-                    }
+                function ($attribute, $value, $fail) use ($country) { // NOSONAR
                     if (! $this->isValidAfricanPhoneNumber($country, $value)) {
                         $fail("Le numéro de téléphone n'est pas valide pour le pays sélectionné.");
                     }
@@ -70,6 +71,7 @@ class OnboardingController extends Controller
         }
 
         $validated = $request->validate($rules);
+        $validated['country'] = $country;
 
         $user = auth()->user();
 

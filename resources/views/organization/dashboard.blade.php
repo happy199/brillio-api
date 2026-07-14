@@ -454,7 +454,7 @@ $isBranded = $organization && $organization->isPro();
                     {
                         label: 'Inscriptions',
                         data: @json($activityData['signups']),
-                        borderColor: '{{ $primary }}', 
+                        borderColor: '{{ $primary }}',
                         backgroundColor: '{{ $primary }}1a',
                         tension: 0.4,
                         fill: true

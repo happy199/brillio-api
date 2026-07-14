@@ -195,12 +195,17 @@ class SessionController extends V1SessionController
             return $this->forbidden();
         }
 
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+        $reason = $validated['reason'] ?? 'Refusée par le mentor';
+
         $session->update([
             'status' => 'cancelled',
-            'cancellation_reason' => $request->get('reason', 'Refusée par le mentor'),
+            'cancellation_reason' => $reason,
         ]);
 
-        app(MentorshipNotificationService::class)->sendSessionCancelled($session, $request->get('reason'));
+        app(MentorshipNotificationService::class)->sendSessionCancelled($session, $reason);
 
         return $this->success($session, 'Session refusée.');
     }

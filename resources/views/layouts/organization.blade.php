@@ -60,7 +60,7 @@
         [x-cloak] {
             display: none !important;
         }
-        
+
         button:not(:disabled),
         [role="button"]:not(:disabled),
         .cursor-pointer {
@@ -294,9 +294,9 @@
     @stack('scripts')
 
     <!-- Toast Notification -->
-    <div x-data="{ 
-        showToast: false, 
-        toastMessage: '', 
+    <div x-data="{
+        showToast: false,
+        toastMessage: '',
         toastType: 'success',
         show(message, type = 'success') {
             this.toastMessage = message;

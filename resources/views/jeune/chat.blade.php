@@ -244,13 +244,13 @@
                     <!-- Standard Message -->
                     <template x-if="!message.is_system_message">
                         <div :class="message.role === 'user' ? 'flex justify-end' : 'flex justify-start'" class="mb-4">
-                            <div :class="message.role === 'user' 
-                                    ? 'bg-primary-500 text-white rounded-2xl rounded-br-md shadow-md' 
-                                    : (message.is_from_human 
-                                        ? 'bg-amber-50 border-amber-200 border rounded-2xl rounded-bl-md shadow-sm' 
+                            <div :class="message.role === 'user'
+                                    ? 'bg-primary-500 text-white rounded-2xl rounded-br-md shadow-md'
+                                    : (message.is_from_human
+                                        ? 'bg-amber-50 border-amber-200 border rounded-2xl rounded-bl-md shadow-sm'
                                         : 'bg-white border rounded-2xl rounded-bl-md shadow-sm')"
                                 class="max-w-[85%] sm:max-w-[80%] p-4 transition-all duration-300">
-                                
+
                                 <template x-if="message.role === 'assistant'">
                                     <div class="flex items-start gap-3">
                                         <div :class="message.is_from_human ? 'bg-amber-500' : 'bg-primary-600'"
@@ -263,15 +263,15 @@
                                             </template>
                                             <template x-if="message.is_from_human">
                                                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                 </svg>
                                             </template>
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2 mb-1.5">
-                                                <span class="text-[10px] font-bold uppercase tracking-wider" 
-                                                    :class="message.is_from_human ? 'text-amber-700' : 'text-primary-700'" 
+                                                <span class="text-[10px] font-bold uppercase tracking-wider"
+                                                    :class="message.is_from_human ? 'text-amber-700' : 'text-primary-700'"
                                                     x-text="message.is_from_human ? (message.sender_name || 'Coach Partner') : 'Assistant {{ isset($current_organization) ? str_replace("'", "\'", $current_organization->name) : 'Brillio' }}'"></span>
                                                 <template x-if="message.is_from_human">
                                                     <span class="bg-amber-100 text-amber-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold border border-amber-200">CONSEILLER PÉDAGOGIQUE</span>
@@ -281,7 +281,7 @@
                                         </div>
                                     </div>
                                 </template>
-                                
+
                                 <template x-if="message.role === 'user'">
                                     <p class="text-[15px] leading-relaxed" x-text="message.content"></p>
                                 </template>
@@ -324,7 +324,7 @@
                     </svg>
                 </button>
                 <div class="flex-1 relative">
-                    <textarea x-model="newMessage" 
+                    <textarea x-model="newMessage"
                         @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                         @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
                         x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' })"
@@ -361,7 +361,7 @@
                         // Load current conversation messages if exists
                         @if(isset($currentConversation) && $currentConversation->messages)
                             this.messages = {!! json_encode($currentConversation->messages->map(fn($m) => [
-                                'role' => $m->role, 
+                                'role' => $m->role,
                                 'content' => $m->content,
                                 'is_from_human' => (bool)$m->is_from_human,
                                 'is_system_message' => (bool)$m->is_system_message,
@@ -387,7 +387,7 @@
                         const userMessage = this.newMessage.trim();
                         this.messages.push({ role: 'user', content: userMessage });
                         this.newMessage = '';
-                        
+
                         // Reset textarea height
                         const textarea = document.querySelector('textarea[x-model="newMessage"]');
                         if (textarea) {
@@ -415,8 +415,8 @@
 
                              if (data.success) {
                                  if (data.message) {
-                                     this.messages.push({ 
-                                         role: 'assistant', 
+                                     this.messages.push({
+                                         role: 'assistant',
                                          content: data.message,
                                          is_from_human: data.is_from_human || false,
                                          sender_name: data.sender_name || 'Assistant {{ isset($current_organization) ? str_replace("'", "\'", $current_organization->name) : 'Brillio' }}'
@@ -433,7 +433,7 @@
                                     }
                                     this.currentConversationId = data.conversation_id;
                                 }
-                                
+
                                 // Update support status if provided
                                 if (data.needs_human_support !== undefined) {
                                     this.needsHumanSupport = data.needs_human_support;
@@ -444,7 +444,12 @@
                             } else {
                                 if (data.redirect_to_wallet) {
                                     if (confirm(data.error + "\n\nVoulez-vous être redirigé vers votre portefeuille pour recharger ?")) {
-                                        window.location.href = data.wallet_url;
+                                        const target = data.wallet_url;
+                                        if (target && (target.startsWith('/') || target.startsWith(window.location.origin))) {
+                                            window.location.href = target;
+                                        } else {
+                                            window.location.href = '/jeune/portefeuille';
+                                        }
                                         return;
                                     }
                                 }
@@ -476,7 +481,7 @@
                             if (data.success && data.messages) {
                                 this.messages = data.messages;
                                 this.currentConversationId = id;
-                                
+
                                 // Sync support flags
                                 if (data.needs_human_support !== undefined) {
                                     this.needsHumanSupport = data.needs_human_support;
@@ -484,7 +489,7 @@
                                 if (data.is_human_support_active !== undefined) {
                                     this.isHumanSupportActive = data.is_human_support_active;
                                 }
-                                
+
                                 this.scrollToBottom();
                             }
                         } catch (error) {
@@ -541,8 +546,13 @@
                              if (data.success) {
                                  this.needsHumanSupport = true;
                                  await this.loadConversation(this.currentConversationId);
-                             } else if (data.redirect_to_wallet) {
-                                 window.location.href = data.wallet_url;
+                              } else if (data.redirect_to_wallet) {
+                                  const target = data.wallet_url;
+                                  if (target && (target.startsWith('/') || target.startsWith(window.location.origin))) {
+                                      window.location.href = target;
+                                  } else {
+                                      window.location.href = '/jeune/portefeuille';
+                                  }
                              } else {
                                  alert(data.error || 'Une erreur est survenue.');
                              }
@@ -575,7 +585,7 @@
 
                     formatMessage(content) {
                         if (!content) return '';
-                        
+
                         // Nettoyage final des balises résiduelles au cas où
                         let formatted = content.replace(/<\/?[^>]+(>|$)/g, "");
 

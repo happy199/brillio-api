@@ -11,15 +11,17 @@
             <p class="text-gray-600">Gérez vos revenus et vos crédits {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}.</p>
         </div>
         <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</span>
-            <select @change="window.location.href = '{{ route('currency.switch') }}?currency=' + $event.target.value" 
-                class="rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
-                @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
-                <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
-                    {{ $curr['name'] }} ({{ $curr['symbol'] }})
-                </option>
-                @endforeach
-            </select>
+            <label for="currency_selector" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</label>
+            <form action="{{ route('currency.switch') }}" method="GET" class="inline m-0 p-0">
+                <select id="currency_selector" name="currency" onchange="this.form.submit()"
+                    class="rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-gray-700 bg-gray-50 py-1 pl-2 pr-8 cursor-pointer">
+                    @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
+                    <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>
+                        {{ $curr['name'] }} ({{ $curr['symbol'] }})
+                    </option>
+                    @endforeach
+                </select>
+            </form>
         </div>
     </div>
 
@@ -50,7 +52,7 @@
     <!-- Section 1: Revenus (Earnings) -->
     <div x-show="activeTab === 'earnings'" class="space-y-6">
         <!-- Stats Revenus avec Payout -->
-        <div x-data="{ 
+        <div x-data="{
                                                             showPayoutModal: false,
                                                             payoutMethods: [],
                                                             payoutForm: {

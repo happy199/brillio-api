@@ -42,7 +42,7 @@
                     <!-- Image Preview -->
                     <div class="relative aspect-video w-full bg-gray-100 overflow-hidden border-b border-gray-200">
                         <img src="{{ asset('storage/' . $ad->image_path) }}" alt="{{ $ad->title ?? 'Visuel' }}" class="w-full h-full object-cover">
-                        
+
                         <!-- Status Badge -->
                         <div class="absolute top-3 right-3">
                             @if($ad->status === \App\Models\Advertisement::STATUS_APPROVED)
@@ -67,7 +67,7 @@
                             <h3 class="text-lg font-bold text-gray-900 truncate mb-1">
                                 {{ $ad->title ?? 'Sans titre' }}
                             </h3>
-                            
+
                             @if($ad->link_url)
                                 <a href="{{ $ad->link_url }}" target="_blank" class="inline-flex items-center text-xs font-medium text-organization-600 hover:text-organization-800 mb-4 transition-colors">
                                     <i class="fas fa-external-link-alt mr-1"></i> Lien cible
@@ -88,7 +88,7 @@
                                     {{ $ad->clicks }} {{ $ad->clicks > 1 ? 'clics' : 'clic' }}
                                 </span>
                             </div>
-                            
+
                             <div class="flex items-center space-x-4">
                                 <!-- Edit Link -->
                                 <a href="{{ route('organization.advertisements.edit', $ad) }}" class="text-sm font-semibold text-organization-600 hover:text-organization-800 transition-colors">

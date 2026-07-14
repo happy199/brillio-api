@@ -177,8 +177,8 @@
             </div>
         </div>
         <form action="{{ route('admin.newsletter.send-email') }}" method="POST" class="p-6 space-y-6" id="emailForm" enctype="multipart/form-data"
-            x-data="{ 
-                tags: [], 
+            x-data="{
+                tags: [],
                 inputValue: '',
                 emailBody: '',
                 format: 'html',
@@ -305,8 +305,8 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-heading mr-1"></i>Sujet de l'email *
                 </label>
-                <input type="text" name="subject" required 
-                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                <input type="text" name="subject" required
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="Ex: Newsletter de Printemps - Brillio">
             </div>
 
@@ -365,7 +365,7 @@
           &lt;tr&gt;
             &lt;td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 30px; text-align: center;"&gt;
               &lt;div style="margin-bottom: 15px;"&gt;
-                &lt;img src="{{ config('app.url') }}/android-chrome-512x512.png" 
+                &lt;img src="{{ config('app.url') }}/android-chrome-512x512.png"
                      style="width: 70px; height: 70px; border-radius: 50%; background: white; padding: 3px;"&gt;
               &lt;/div&gt;
               &lt;h1 style="color: #ffffff; margin: 0; font-size: 24px;"&gt;Brillio&lt;/h1&gt;
@@ -377,7 +377,7 @@
               &lt;h2 style="color: #6366f1; margin-top: 0;"&gt;Bonjour ! 👋&lt;/h2&gt;
               &lt;p&gt;Votre message ici...&lt;/p&gt;
               &lt;div style="text-align: center; margin-top: 30px;"&gt;
-                &lt;a href="https://brillio.africa" 
+                &lt;a href="https://brillio.africa"
                    style="background: #6366f1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block;"&gt;
                    Découvrir maintenant
                 &lt;/a&gt;
@@ -412,13 +412,13 @@
                         <div x-show="emailBody.length > 0" class="h-full">
                             <!-- HTML Preview -->
                             <template x-if="format === 'html'">
-                                <iframe title="Aperçu de l'email" class="w-full min-h-[400px] border-0" 
+                                <iframe title="Aperçu de l'email" class="w-full min-h-[400px] border-0"
                                     x-init="$watch('emailBody', value => {
                                         const doc = $el.contentDocument;
                                         doc.open();
                                         doc.write(value);
                                         doc.close();
-                                    }); 
+                                    });
                                     // Initial load
                                     setTimeout(() => {
                                         const doc = $el.contentDocument;
@@ -436,7 +436,7 @@
                     </div>
                 </details>
             </div>
-            
+
             <div class="border-t pt-6 space-y-6">
                 <label class="flex items-center space-x-3 cursor-pointer">
                     <input type="checkbox" name="is_recurring" id="isRecurringCheckbox" class="rounded text-blue-600">
@@ -571,30 +571,42 @@
     // Toggle entre Mode Riche et Mode HTML
     toggleHtmlBtn.addEventListener('click', function() {
         isHtmlMode = !isHtmlMode;
-        
+
         if (isHtmlMode) {
             const html = quill.root.innerHTML;
             htmlEditor.value = html;
             editorContainer.classList.add('hidden');
             htmlEditor.classList.remove('hidden');
-            toggleHtmlBtn.innerHTML = '<i class="fas fa-edit mr-1"></i>Mode Texte Riche';
+
+            toggleHtmlBtn.replaceChildren();
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-edit mr-1';
+            toggleHtmlBtn.appendChild(icon);
+            toggleHtmlBtn.appendChild(document.createTextNode('Mode Texte Riche'));
+
             toggleHtmlBtn.classList.add('bg-indigo-600', 'text-white');
         } else {
             const html = htmlEditor.value;
-            quill.root.innerHTML = html;
+            quill.clipboard.dangerouslyPasteHTML(html);
             htmlEditor.classList.add('hidden');
             editorContainer.classList.remove('hidden');
-            toggleHtmlBtn.innerHTML = '<i class="fas fa-code mr-1"></i>Mode HTML / Source';
+
+            toggleHtmlBtn.replaceChildren();
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-code mr-1';
+            toggleHtmlBtn.appendChild(icon);
+            toggleHtmlBtn.appendChild(document.createTextNode('Mode HTML / Source'));
+
             toggleHtmlBtn.classList.remove('bg-indigo-600', 'text-white');
         }
     });
     // Synchronisation avec Alpine.js et le champ caché
     function syncContent(html) {
         document.getElementById('bodyInput').value = html;
-        
+
         // Dispatch d'un événement personnalisé pour Alpine.js (pour l'aperçu)
-        window.dispatchEvent(new CustomEvent('body-updated', { 
-            detail: { html: html } 
+        window.dispatchEvent(new CustomEvent('body-updated', {
+            detail: { html: html }
         }));
     }
 
@@ -615,15 +627,26 @@
 
     if (attachmentsInput) {
         attachmentsInput.addEventListener('change', function() {
-            fileList.innerHTML = '';
+            fileList.replaceChildren();
             Array.from(this.files).forEach((file) => {
                 const div = document.createElement('div');
                 div.className = 'flex items-center space-x-2 px-3 py-1 bg-white border rounded text-xs text-indigo-700';
-                div.innerHTML = `
-                    <i class="fas fa-file-alt text-indigo-400"></i>
-                    <span class="truncate max-w-[150px] font-medium">${file.name}</span>
-                    <span class="text-gray-400">(${(file.size / 1024).toFixed(0)} KB)</span>
-                `;
+
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-file-alt text-indigo-400';
+
+                const spanName = document.createElement('span');
+                spanName.className = 'truncate max-w-[150px] font-medium';
+                spanName.textContent = file.name;
+
+                const spanSize = document.createElement('span');
+                spanSize.className = 'text-gray-400';
+                spanSize.textContent = ` (${(file.size / 1024).toFixed(0)} KB)`;
+
+                div.appendChild(icon);
+                div.appendChild(spanName);
+                div.appendChild(spanSize);
+
                 fileList.appendChild(div);
             });
         });
@@ -649,13 +672,13 @@
             const id = editBtn.dataset.id;
             const email = editBtn.dataset.email;
             const status = editBtn.dataset.status;
-            
+
             document.getElementById('editEmail').value = email;
             document.getElementById('editStatus').value = status;
-            
+
             let url = "{{ route('admin.newsletter.update', ':id') }}";
             document.getElementById('editForm').action = url.replace(':id', id);
-            
+
             document.getElementById('editModal').classList.remove('hidden');
         }
     });

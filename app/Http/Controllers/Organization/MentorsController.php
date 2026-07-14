@@ -25,6 +25,14 @@ class MentorsController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
+        $validated = $request->validate([
+            'type' => 'nullable|string|in:internal,external',
+            'search' => 'nullable|string|max:255',
+        ]);
+
+        $type = $validated['type'] ?? 'internal';
+        $search = $validated['search'] ?? null;
+
         // Mentors who have sessions with organization's sponsored youths
         $activeMentorsIds = MentoringSession::whereHas('mentees', function ($q) use ($organization) {
             $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
@@ -32,8 +40,6 @@ class MentorsController extends Controller
         })
             ->pluck('mentor_id')
             ->unique();
-
-        $type = $request->get('type', 'internal'); // Default to internal
 
         if ($type === 'external') {
             // External mentors: Not linked to organization BUT have sessions with organization's sponsored youths
@@ -50,8 +56,7 @@ class MentorsController extends Controller
         }
 
         // Search
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");

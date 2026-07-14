@@ -460,9 +460,9 @@
                         </div>
                         @endif
                     </div>
-                    
+
                     <h3 class="font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-indigo-600 transition-colors text-sm">{{ $resource->title }}</h3>
-                    
+
                     <div class="mt-auto pt-4 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             @if($resource->user->avatar_url)
@@ -506,7 +506,7 @@
         (function() {
             const prewarmMBTI = async () => {
                 const cacheKey = 'mbti_questions_cache';
-                
+
                 // Si on a déjà les questions en cache local, on ne fait rien
                 if (localStorage.getItem(cacheKey)) {
                     console.log('%c[Brillio Opti] Questions MBTI déjà présentes en cache local.', 'color: #6366f1; font-weight: bold;');
@@ -519,16 +519,16 @@
                     try {
                         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
                         const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '{{ csrf_token() }}';
-                        
+
                         const response = await fetch('{{ route("jeune.personality.questions.dynamic") }}', {
-                            headers: { 
+                            headers: {
                                 'Accept': 'application/json',
                                 'X-CSRF-TOKEN': csrfToken
                             }
                         });
-                        
+
                         const data = await response.json();
-                        
+
                         if (data.success && data.questions) {
                             localStorage.setItem(cacheKey, JSON.stringify({
                                 questions: data.questions,

@@ -18,13 +18,18 @@ class ChatLogController extends Controller
     {
         $query = ChatConversation::with(['user', 'messages']);
 
+        $validated = $request->validate([
+            'user_id' => 'nullable|integer',
+            'search' => 'nullable|string|max:255',
+        ]);
+
         // Filtre par utilisateur
-        if ($userId = $request->get('user_id')) {
+        if ($userId = $validated['user_id'] ?? null) {
             $query->where('user_id', $userId);
         }
 
         // Recherche dans les messages
-        if ($search = $request->get('search')) {
+        if ($search = $validated['search'] ?? null) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhereHas('messages', function ($mq) use ($search) {

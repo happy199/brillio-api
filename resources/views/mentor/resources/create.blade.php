@@ -120,10 +120,10 @@
                                             ]
                                         }
                                     });
-                                    
+
                                     // Set initial content
                                     if ($refs.contentInput.value) {
-                                        quill.root.innerHTML = $refs.contentInput.value;
+                                        quill.clipboard.dangerouslyPasteHTML($refs.contentInput.value);
                                     }
 
                                     // Sync content
@@ -171,7 +171,7 @@
                                 <button type="button" @click="confirmDeleteQuizPrompt(qIndex)" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
-                                
+
                                 <div class="space-y-4 pr-8">
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-700 mb-1">Nom du Quiz</label>
@@ -181,7 +181,7 @@
                                         <label class="block text-xs font-semibold text-gray-700 mb-1">Description courte (Optionnelle)</label>
                                         <input type="text" x-model="quiz.description" placeholder="Objectif de ce quiz..." class="bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
                                     </div>
-                                    
+
                                     <!-- Questions -->
                                     <div class="mt-4 border-t border-indigo-100 pt-4">
                                         <div class="flex justify-between items-center mb-3">
@@ -195,14 +195,14 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="space-y-4">
                                             <template x-for="(question, qsIndex) in quiz.questions" :key="qsIndex">
                                                 <div class="bg-white border border-gray-200 rounded-lg p-3 relative shadow-sm">
                                                     <button type="button" @click="removeQuestion(qIndex, qsIndex)" class="absolute top-3 right-3 text-gray-400 hover:text-red-500">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                                     </button>
-                                                    
+
                                                     <div class="mb-3 pr-8 flex gap-2 items-start">
                                                         <div class="flex-1">
                                                             <input type="text" x-model="question.question_text" placeholder="Posez votre question ici..." class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2">
@@ -211,7 +211,7 @@
                                                             <input type="number" x-model="question.points" min="1" placeholder="Pts" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2">
                                                         </div>
                                                     </div>
-                                                    
+
                                                     <!-- Options -->
                                                     <div class="pl-4 space-y-4 border-l-2 border-gray-100">
                                                         <p class="text-xs text-gray-500 italic mb-2">Cochez la case ou le bouton radio à côté de l'option pour indiquer qu'il s'agit de la bonne réponse.</p>
@@ -478,8 +478,8 @@
                 </div>
             </div>
 
-                
-                
+
+
                 @php
                 $mbtiGroups = [
                 'Analystes' => [
@@ -705,7 +705,7 @@
                     @endif
 
                     <!-- Tags -->
-                    <div x-data="{ 
+                    <div x-data="{
                                         tags: [],
                                         newTag: '',
                                         addTag() {
@@ -831,7 +831,7 @@
                                     this.uploadError = null;
                                     this.isUploading = true;
                                     this.uploadSuccess = false;
-                                    
+
                                     // Simulation d'upload
                                     setTimeout(() => {
                                         this.isUploading = false;
@@ -1029,7 +1029,7 @@
                                                     <span class="text-xl">💡</span> Les 16 Personnalités (MBTI)
                                                 </h4>
                                                 <p>{{ isset($current_organization) ? $current_organization->name : 'Brillio' }} utilise le test des 16 personnalités pour comprendre le fonctionnement cognitif des jeunes.</p>
-                                                
+
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                                     <!-- Analystes -->
                                                     <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
@@ -1120,11 +1120,11 @@
             async fetchStats() {
                 this.loading = true;
                 this.isOpen = true;
-                
+
                 try {
                     const response = await fetch('{{ route('mentor.resources.stats') }}');
                     const data = await response.json();
-                    
+
                     if (response.ok) {
                         this.stats = data.stats;
                         if (window.showToast) window.showToast('Données récupérées ! {{ $analysisCost ?? 5 }} crédits débités.');
@@ -1132,7 +1132,7 @@
                         this.isOpen = false;
                         if (window.showToast) window.showToast(data.error || 'Erreur lors de la récupération', 'error');
                         if (response.status === 402 && confirm('Crédits insuffisants. Voulez-vous recharger votre compte ?')) {
-                            window.location.href = "{{ route('mentor.wallet.index') }}";
+                            window.location.href = "/espace-mentor/portefeuille";
                         }
                     }
                 } catch (error) {
@@ -1181,7 +1181,7 @@
                 const title = titleInput ? titleInput.value : '';
                 const descInput = document.querySelector('textarea[name="description"]');
                 const description = descInput ? descInput.value : '';
-                
+
                 // Get Quill content if available, else try standard input
                 let content = '';
                 const quillEditor = document.querySelector('.ql-editor');
@@ -1226,7 +1226,7 @@
                             alert("Crédits insuffisants. Redirection vers le portefeuille...");
                         }
                         setTimeout(() => {
-                            window.location.href = "{{ route('mentor.wallet.index') }}";
+                            window.location.href = "/espace-mentor/portefeuille";
                         }, 1500);
                         return;
                     }
@@ -1318,7 +1318,7 @@
             }
         }
     }
-    
+
     const oldQuizzes = {!! old('quizzes_data') ?: 'null' !!};
 </script>
 @endpush

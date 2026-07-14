@@ -743,7 +743,7 @@ class JeuneDashboardController extends Controller
             'description' => 'nullable|string|max:500',
         ]);
 
-        $file = $request->file('document');
+        $file = $validated['document'];
         $path = $file->store('documents/'.auth()->id(), 'public');
 
         auth()->user()->academicDocuments()->create([

@@ -36,6 +36,47 @@ class WebAuthController extends Controller
     ) {}
 
     /**
+     * Process organization invitation linking for a user
+     */
+    protected function processOrganizationInvitation(User $user): void
+    {
+        $referralCode = session('referral_code');
+        if (! $referralCode) {
+            return;
+        }
+
+        $invitation = OrganizationInvitation::where('referral_code', $referralCode)
+            ->where('status', 'pending')
+            ->whereDate('expires_at', '>=', now())
+            ->first();
+
+        if ($invitation) {
+            $user->organizations()->syncWithoutDetaching([
+                $invitation->organization_id => [
+                    'referral_code_used' => $referralCode,
+                    'role' => $invitation->role ?? 'jeune',
+                ],
+            ]);
+
+            if (in_array($invitation->role, ['admin', 'viewer'])) {
+                $user->update([
+                    'organization_id' => $invitation->organization_id,
+                    'organization_role' => $invitation->role,
+                ]);
+            }
+
+            $invitation->markAsAccepted();
+            session()->forget(['referral_code', 'organization_name']);
+
+            Log::info('User auto-linked to organization via invitation', [
+                'user_id' => $user->id,
+                'organization_id' => $invitation->organization_id,
+                'referral_code' => $referralCode,
+            ]);
+        }
+    }
+
+    /**
      * Cree ou met a jour un utilisateur mentor
      */
     protected function createOrUpdateMentorUser(array $userData): array
@@ -125,43 +166,7 @@ class WebAuthController extends Controller
         }
 
         // --- NEW: Mentor Auto-linking via Invitations ---
-        $referralCode = session('referral_code');
-        if ($referralCode) {
-            $invitation = OrganizationInvitation::where('referral_code', $referralCode)
-                ->where('status', 'pending')
-                ->whereDate('expires_at', '>=', now())
-                ->first();
-
-            if ($invitation) {
-                // Link mentor to organization in pivot table with specific role
-                $user->organizations()->syncWithoutDetaching([
-                    $invitation->organization_id => [
-                        'referral_code_used' => $referralCode,
-                        'role' => $invitation->role ?? 'jeune',
-                    ],
-                ]);
-
-                // Also update the user model's primary organization_id and role if it's an admin/viewer
-                if (in_array($invitation->role, ['admin', 'viewer'])) {
-                    $user->update([
-                        'organization_id' => $invitation->organization_id,
-                        'organization_role' => $invitation->role,
-                    ]);
-                }
-
-                // Mark invitation as used
-                $invitation->markAsAccepted();
-
-                // Clear referral code from session
-                session()->forget(['referral_code', 'organization_name']);
-
-                Log::info('Mentor auto-linked to organization via invitation', [
-                    'user_id' => $user->id,
-                    'organization_id' => $invitation->organization_id,
-                    'referral_code' => $referralCode,
-                ]);
-            }
-        }
+        $this->processOrganizationInvitation($user);
 
         Auth::login($user, true);
 
@@ -185,7 +190,8 @@ class WebAuthController extends Controller
     {
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
-            $referralCode = $request->get('ref');
+            $refValidated = $request->validate(['ref' => 'nullable|string|max:100|alpha_num']);
+            $referralCode = $refValidated['ref'] ?? null;
 
             // Validate that the invitation exists
             $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
@@ -251,7 +257,8 @@ class WebAuthController extends Controller
     {
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
-            $referralCode = $request->get('ref');
+            $refValidated = $request->validate(['ref' => 'nullable|string|max:100|alpha_num']);
+            $referralCode = $refValidated['ref'] ?? null;
 
             // Validate that the invitation exists
             $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
@@ -312,11 +319,12 @@ class WebAuthController extends Controller
         );
 
         // Check for referral code in request (hidden field) or session
-        $referralCode = $request->input('referral_code') ?? session('referral_code');
+        $refInput = $request->validate(['referral_code' => 'nullable|string|max:100|alpha_num']);
+        $referralCode = $refInput['referral_code'] ?? session('referral_code');
         $organizationId = null;
 
         Log::info('Jeune Registration Debug', [
-            'referral_code_input' => $request->input('referral_code'),
+            'referral_code_input' => $refInput['referral_code'] ?? null,
             'referral_code_session' => session('referral_code'),
             'resolved_code' => $referralCode,
         ]);
@@ -428,37 +436,7 @@ class WebAuthController extends Controller
             $user->update(['last_login_at' => now()]);
 
             // Check for referral code in session (existing user logging in via link)
-            $referralCode = session('referral_code');
-            if ($referralCode) {
-                $invitation = OrganizationInvitation::where('referral_code', $referralCode)
-                    ->where('status', 'pending')
-                    ->whereDate('expires_at', '>=', now())
-                    ->first();
-
-                if ($invitation) {
-                    // Link existing user to organization in pivot table
-                    $user->organizations()->syncWithoutDetaching([
-                        $invitation->organization_id => [
-                            'referral_code_used' => $referralCode,
-                            'role' => $invitation->role ?? 'jeune',
-                        ],
-                    ]);
-
-                    // Also update the user model's primary organization_id and role if it's an admin/viewer
-                    if (in_array($invitation->role, ['admin', 'viewer'])) {
-                        $user->update([
-                            'organization_id' => $invitation->organization_id,
-                            'organization_role' => $invitation->role,
-                        ]);
-                    }
-
-                    // Mark invitation as used
-                    $invitation->markAsAccepted();
-
-                    // Clear referral code from session
-                    session()->forget(['referral_code', 'organization_name']);
-                }
-            }
+            $this->processOrganizationInvitation($user);
 
             // Reactivate archived account automatically
             if ($user->is_archived) {
@@ -519,7 +497,8 @@ class WebAuthController extends Controller
     public function jeuneOAuthCallback(Request $request, string $provider)
     {
         // Verifier si on a un code (Authorization Code flow)
-        $code = $request->get('code');
+        $codeValidated = $request->validate(['code' => 'nullable|string|max:2048']);
+        $code = $codeValidated['code'] ?? null;
 
         if ($code) {
             // Traiter directement le code
@@ -564,7 +543,8 @@ class WebAuthController extends Controller
 
             // Verifier si on a un access_token (Implicit/PKCE flow)
             if ($request->has('access_token')) {
-                $accessToken = $request->input('access_token');
+                $tokenValidated = $request->validate(['access_token' => 'nullable|string|max:4096']);
+                $accessToken = $tokenValidated['access_token'];
 
                 Log::info('Getting user from Supabase with access token');
 
@@ -598,7 +578,8 @@ class WebAuthController extends Controller
 
             // Verifier si on a un code (Authorization Code flow)
             if ($request->has('code')) {
-                $code = $request->input('code');
+                $codeValidated = $request->validate(['code' => 'nullable|string|max:2048']);
+                $code = $codeValidated['code'];
 
                 Log::info('Exchanging code for session');
 
@@ -749,26 +730,8 @@ class WebAuthController extends Controller
             }
 
             // Check for referral code in session (existing user logging in via link)
-            $referralCode = session('referral_code');
-            if ($referralCode) {
-                $invitation = OrganizationInvitation::where('referral_code', $referralCode)
-                    ->where('status', 'pending')
-                    ->whereDate('expires_at', '>=', now())
-                    ->first();
+            $this->processOrganizationInvitation($user);
 
-                if ($invitation) {
-                    // Link existing user to organization in pivot table
-                    $user->organizations()->syncWithoutDetaching([
-                        $invitation->organization_id => ['referral_code_used' => $referralCode],
-                    ]);
-
-                    // Mark invitation as used
-                    $invitation->markAsAccepted();
-
-                    // Clear referral code from session
-                    session()->forget(['referral_code', 'organization_name']);
-                }
-            }
         } else {
             // Check for referral code in session (for OAuth)
             $referralCode = session('referral_code');
@@ -850,7 +813,8 @@ class WebAuthController extends Controller
     {
         // Detect referral code from URL (?ref=CODE)
         if ($request->has('ref')) {
-            $referralCode = $request->get('ref');
+            $refValidated = $request->validate(['ref' => 'nullable|string|max:100|alpha_num']);
+            $referralCode = $refValidated['ref'] ?? null;
 
             // Validate that the invitation exists
             $invitation = OrganizationInvitation::where('referral_code', $referralCode)->first();
@@ -895,7 +859,8 @@ class WebAuthController extends Controller
     public function mentorLinkedInCallback(Request $request)
     {
         // Verifier si on a un code (Authorization Code flow)
-        $code = $request->get('code');
+        $codeValidated = $request->validate(['code' => 'nullable|string|max:2048']);
+        $code = $codeValidated['code'] ?? null;
 
         if ($code) {
             return $this->processMentorLinkedInCode($code);
@@ -933,7 +898,8 @@ class WebAuthController extends Controller
         try {
             // Verifier si on a un access_token (Implicit/PKCE flow)
             if ($request->has('access_token')) {
-                $accessToken = $request->input('access_token');
+                $tokenValidated = $request->validate(['access_token' => 'nullable|string|max:4096']);
+                $accessToken = $tokenValidated['access_token'];
 
                 $userData = $this->supabase->getUser($accessToken);
 
@@ -969,7 +935,8 @@ class WebAuthController extends Controller
 
             // Verifier si on a un code (Authorization Code flow)
             if ($request->has('code')) {
-                $code = $request->input('code');
+                $codeValidated = $request->validate(['code' => 'nullable|string|max:2048']);
+                $code = $codeValidated['code'];
                 $session = $this->supabase->exchangeCodeForSession($code);
 
                 if (! $session || ! isset($session['access_token'])) {

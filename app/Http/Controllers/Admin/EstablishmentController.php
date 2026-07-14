@@ -34,7 +34,7 @@ class EstablishmentController extends Controller
     {
         $validated = $request->validate($this->establishmentService::validationRules());
 
-        $this->establishmentService->store($validated, $request);
+        $this->establishmentService->store($validated);
 
         return redirect()->route('admin.establishments.index')->with('success', 'Établissement créé avec succès.');
     }
@@ -50,7 +50,7 @@ class EstablishmentController extends Controller
     {
         $validated = $request->validate($this->establishmentService::validationRules());
 
-        $this->establishmentService->update($establishment, $validated, $request);
+        $this->establishmentService->update($establishment, $validated);
 
         return redirect()->route('admin.establishments.index')->with('success', 'Établissement mis à jour.');
     }

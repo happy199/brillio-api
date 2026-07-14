@@ -244,7 +244,7 @@
                             </div>
                             <div class="flex-1 flex justify-between items-center">
                                 <h3 class="font-bold text-gray-900">Profil Onboarding</h3>
-                                <button @click="editOnboarding = true" 
+                                <button @click="editOnboarding = true"
                                     class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -576,8 +576,8 @@
                                 <button type="button" @click="onboardingData.current_situation = sit.value"
                                     :class="[
                                         'px-4 py-2 text-sm rounded-xl border-2 transition text-left',
-                                        onboardingData.current_situation === sit.value 
-                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
+                                        onboardingData.current_situation === sit.value
+                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold'
                                             : 'border-gray-100 hover:border-gray-200 text-gray-600'
                                     ]">
                                     <span x-text="sit.label"></span>
@@ -594,8 +594,8 @@
                                 <button type="button" @click="onboardingData.education_level = edu.value"
                                     :class="[
                                         'px-4 py-2 text-sm rounded-xl border-2 transition text-left',
-                                        onboardingData.education_level === edu.value 
-                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
+                                        onboardingData.education_level === edu.value
+                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold'
                                             : 'border-gray-100 hover:border-gray-200 text-gray-600'
                                     ]">
                                     <span x-text="edu.label"></span>
@@ -625,8 +625,8 @@
                                 <button type="button" @click="toggleInterest(interest)"
                                     :class="[
                                         'px-3 py-1.5 text-xs rounded-full border-2 transition font-medium',
-                                        onboardingData.interests.includes(interest) 
-                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold' 
+                                        onboardingData.interests.includes(interest)
+                                            ? 'border-green-500 bg-green-50 text-green-700 font-bold'
                                             : 'border-gray-100 hover:border-gray-200 text-gray-600'
                                     ]">
                                     <span x-text="interest"></span>

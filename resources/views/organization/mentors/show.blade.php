@@ -110,7 +110,7 @@
                             </div>
                             <span class="truncate">{{ $mentor->email }}</span>
                         </div>
-                        
+
                         <div class="flex items-center text-sm text-gray-600 group">
                             <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center mr-3 group-hover:bg-organization-50 transition-colors">
                                 <svg class="h-4 w-4 text-gray-400 group-hover:text-organization-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

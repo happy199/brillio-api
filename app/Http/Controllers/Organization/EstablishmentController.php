@@ -51,7 +51,7 @@ class EstablishmentController extends Controller
 
         $validated = $request->validate($this->establishmentService::validationRules());
 
-        $this->establishmentService->update($establishment, $validated, $request);
+        $this->establishmentService->update($establishment, $validated);
 
         return redirect()->route('organization.promotion.index')->with('success', 'La fiche de votre établissement a été mise à jour avec succès.');
     }

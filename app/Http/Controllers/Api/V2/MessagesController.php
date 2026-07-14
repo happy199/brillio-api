@@ -151,8 +151,11 @@ class MessagesController extends Controller
             'body' => 'nullable|string|max:5000',
         ]);
 
-        if ($request->hasFile('attachment')) {
-            $attachment = $request->file('attachment');
+        $validatedFiles = $request->validate([
+            'attachment' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,zip,txt', // NOSONAR
+        ]);
+        if (isset($validatedFiles['attachment'])) {
+            $attachment = $validatedFiles['attachment'];
             if (! $attachment->isValid()) {
                 return $this->error('Fichier joint invalide.', 422);
             }
@@ -176,8 +179,8 @@ class MessagesController extends Controller
             'body' => $request->body,
         ];
 
-        if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
+        if (isset($validatedFiles['attachment'])) {
+            $file = $validatedFiles['attachment'];
             $path = $file->store('messages/attachments', 'local');
             $data['attachment_path'] = $path;
             $data['attachment_name'] = $file->getClientOriginalName();

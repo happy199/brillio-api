@@ -7,14 +7,14 @@
         @page {
             margin: 100px 50px;
         }
-        body { 
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
-            color: #1f2937; 
-            line-height: 1.6; 
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #1f2937;
+            line-height: 1.6;
             margin: 0;
             padding: 0;
         }
-        .header { 
+        .header {
             position: fixed;
             top: -80px;
             left: 0;
@@ -34,25 +34,25 @@
         .logo span {
             color: #111827;
         }
-        .footer { 
-            position: fixed; 
-            bottom: -60px; 
-            left: 0; 
-            right: 0; 
+        .footer {
+            position: fixed;
+            bottom: -60px;
+            left: 0;
+            right: 0;
             height: 30px;
-            font-size: 10px; 
-            color: #9ca3af; 
-            text-align: center; 
+            font-size: 10px;
+            color: #9ca3af;
+            text-align: center;
             border-top: 1px solid #e5e7eb;
             padding-top: 10px;
         }
         .content {
             margin-top: 20px;
         }
-        .meeting-title { 
-            font-size: 22px; 
-            font-weight: 800; 
-            color: #111827; 
+        .meeting-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #111827;
             margin: 0 0 15px 0;
             text-align: center;
         }
@@ -95,7 +95,7 @@
         }
         .badge-mentor { background-color: #e0e7ff; color: #4338ca; }
         .badge-jeune { background-color: #fef3c7; color: #92400e; }
-        
+
         .transcription-section {
             margin-top: 30px;
         }
@@ -184,7 +184,7 @@
 
         <div class="transcription-section">
             <h2 style="font-size: 18px; color: #111827; border-left: 4px solid #4f46e5; padding-left: 10px; margin-bottom: 20px;">Fil de la Discussion</h2>
-            
+
             @php
                 $transcription = $session->transcription_raw;
             @endphp

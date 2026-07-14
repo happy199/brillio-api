@@ -13,11 +13,11 @@ class CareerController extends Controller
      */
     public function getDetailsByTitle(Request $request)
     {
-        $title = $request->query('title');
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
 
-        if (! $title) {
-            return response()->json(['error' => 'Titre requis'], 400);
-        }
+        $title = $validated['title'];
 
         $career = Career::where('title', $title)->first();
 

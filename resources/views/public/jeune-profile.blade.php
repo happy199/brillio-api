@@ -1,6 +1,6 @@
 @extends('layouts.public')
-@php 
-    $forceScrolled = true; 
+@php
+    $forceScrolled = true;
     $displayOrg = $current_organization ?? ($user->sponsoringOrganization ?? $user->organizations->first());
 @endphp
 

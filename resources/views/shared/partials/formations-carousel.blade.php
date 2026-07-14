@@ -28,7 +28,7 @@
                                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition duration-500 group flex flex-col h-full bg-gradient-to-br from-white to-gray-50/50">
                                     <!-- Photo -->
                                     <div class="relative h-48 overflow-hidden cursor-pointer" @click="$dispatch('open-details', { est })">
-                                        <img :src="est.photo_path ? '/storage/'+est.photo_path : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=800'" 
+                                        <img :src="est.photo_path ? '/storage/'+est.photo_path : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=800'"
                                             class="w-full h-full object-cover group-hover:scale-110 transition duration-1000">
                                         <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                         <div class="absolute top-4 left-4">
@@ -43,17 +43,17 @@
                                             <i class="fas fa-map-marker-alt text-rose-500 text-xs"></i>
                                             <span class="text-xs font-bold text-gray-500 uppercase tracking-tighter" x-text="(est.city ? est.city + ', ' : '') + est.country"></span>
                                         </div>
-                                        
+
                                         <!-- Clic rapide / Collecte Tel -->
                                         <div class="mt-auto space-y-3">
                                             <!-- Widget Saisie Tel if missing -->
-                                            <div x-show="!userHasPhone && activePhoneInput === est.id" 
+                                            <div x-show="!userHasPhone && activePhoneInput === est.id"
                                                 x-transition:enter="transition ease-out duration-300"
                                                 x-transition:enter-start="opacity-0 translate-y-4"
                                                 class="p-4 bg-rose-50 rounded-2xl border border-rose-100">
                                                 <p class="text-xs font-black text-rose-600 uppercase mb-2">Il manque ton numéro :</p>
                                                 <div class="flex gap-2">
-                                                    <input type="tel" x-model="tempPhone" placeholder="ex: 97000000" 
+                                                    <input type="tel" x-model="tempPhone" placeholder="ex: 97000000"
                                                         class="flex-1 text-sm border-white rounded-xl py-2 px-3 focus:ring-rose-500 focus:border-rose-500 shadow-inner">
                                                     <button @click="handleInterest(est)" class="p-2 bg-rose-600 text-white rounded-xl hover:bg-rose-700 shadow-md">
                                                         <i class="fas fa-arrow-right"></i>
@@ -61,7 +61,7 @@
                                                 </div>
                                             </div>
 
-                                            <button @click="handleInterest(est)" 
+                                            <button @click="handleInterest(est)"
                                                 class="w-full py-4 rounded-2xl font-black text-sm transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden relative group"
                                                 :class="est.user_has_interest ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gray-900 text-white hover:bg-indigo-600 shadow-xl shadow-gray-200'">
                                                 <span x-show="!est.user_has_interest" class="flex items-center gap-2">
