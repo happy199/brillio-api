@@ -23,7 +23,7 @@
                     <p class="text-sm text-gray-500">Créée le {{ $mentorship->created_at->format('d/m/Y à H:i') }}</p>
                 </div>
                 <span
-                    class="px-3 py-1 text-sm font-bold rounded-full 
+                    class="px-3 py-1 text-sm font-bold rounded-full
                     {{ $mentorship->status === 'accepted' ? 'bg-green-100 text-green-800' :
         ($mentorship->status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
                     {{ ucfirst($mentorship->status) }}

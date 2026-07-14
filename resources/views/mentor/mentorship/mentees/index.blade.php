@@ -20,13 +20,13 @@
                     {{ $acceptsRequests ? 'Ouvertes aux jeunes' : 'Fermées (Cercle privé)' }}
                 </span>
             </div>
-            
+
             <form action="{{ route('mentor.mentorship.toggle-availability') }}" method="POST">
                 @csrf
-                <button type="submit" 
+                <button type="submit"
                     class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $acceptsRequests ? 'bg-green-500' : 'bg-gray-300' }}">
                     <span class="sr-only">Modifier la disponibilité</span>
-                    <span aria-hidden="true" 
+                    <span aria-hidden="true"
                         class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $acceptsRequests ? 'translate-x-5' : 'translate-x-0' }}">
                     </span>
                 </button>

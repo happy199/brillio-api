@@ -36,9 +36,9 @@
             Fichier visuel publicitaire (Image) <span class="text-red-500">*</span>
         @endif
     </label>
-    
+
     <div class="mt-1 flex flex-col items-center justify-center p-6 border-2 border-gray-300 border-dashed rounded-md hover:border-{{ $themeColor }}-400 transition-colors">
-        
+
         <!-- Default State (Create mode, no file selected yet) -->
         @if(!$existingImage)
             <div class="space-y-1 text-center" x-show="!imageUrl">
@@ -60,7 +60,7 @@
         <div x-show="imageUrl" class="space-y-4 w-full flex flex-col items-center justify-center" @if(!$existingImage) x-cloak @endif>
             <div class="relative max-w-xs md:max-w-md rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-gray-50">
                 <img :src="imageUrl" class="max-h-64 object-contain mx-auto" alt="Aperçu du visuel">
-                
+
                 <!-- Cancel / Delete button -->
                 <button type="button" x-show="hasNewImage || (imageUrl && !'{{ $existingImage }}')" @click="resetImage()" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 shadow focus:outline-none transition-colors" title="Annuler le changement">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

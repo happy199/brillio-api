@@ -1162,7 +1162,7 @@
                             @mouseleave="if(slides > 1) startAutoplay()"
                             @touchstart="touchstartX = $event.changedTouches[0].screenX; stopAutoplay()"
                             @touchend="touchendX = $event.changedTouches[0].screenX; if(slides > 1) { if(touchendX < touchstartX - 50) next(); if(touchendX > touchstartX + 50) prev(); startAutoplay(); }">
-                            
+
                             @if(isset($verifiedMentors) && $verifiedMentors->count() > 0)
                                 <!-- Carousel Track -->
                                 <div class="relative h-64 sm:h-72 w-full">
@@ -1181,7 +1181,7 @@
                                          x-transition:leave-end="opacity-0 -translate-x-12 scale-95"
                                          class="bg-white rounded-3xl shadow-2xl p-8 absolute inset-0 m-auto w-full max-w-sm h-max border border-gray-100 z-10 flex flex-col"
                                          style="display: none;">
-                                        
+
                                         <div class="absolute -top-5 -right-5 w-24 h-24 bg-gradient-to-br from-orange-100 to-pink-50 rounded-full opacity-50 -z-10 blur-xl"></div>
                                         <div class="absolute -bottom-5 -left-5 w-32 h-32 bg-gradient-to-tr from-blue-100 to-purple-50 rounded-full opacity-50 -z-10 blur-xl"></div>
 
@@ -1190,15 +1190,15 @@
                                                 <div class="w-16 h-16 rounded-full shadow-md border-2 border-white flex items-center justify-center text-xl font-bold text-white bg-gradient-to-br {{ $color }} overflow-hidden relative">
                                                     <span>{{ $initials }}</span>
                                                     @if($mentorInfo->user->profile_photo_path || $mentorInfo->user->profile_photo_url)
-                                                    <img src="{{ $mentorInfo->user->avatar_url }}" 
-                                                         alt="{{ $mentorInfo->user->name }}" 
+                                                    <img src="{{ $mentorInfo->user->avatar_url }}"
+                                                         alt="{{ $mentorInfo->user->name }}"
                                                          class="absolute inset-0 w-full h-full object-cover z-10 bg-white"
                                                          onerror="this.style.display='none'">
                                                     @endif
                                                 </div>
                                                 <div class="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white z-20" title="Vérifié"></div>
                                             </div>
-                                            
+
                                             <div>
                                                 @php
                                                     $nameParts = explode(' ', $mentorInfo->user->name);
@@ -1214,7 +1214,7 @@
                                                 </p>
                                             </div>
                                         </div>
-                                        
+
                                         @if($mentorInfo->bio)
                                         <div class="relative z-10 flex-1">
                                             <svg class="w-8 h-8 text-orange-200 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
@@ -1228,7 +1228,7 @@
                                                 $lastWork = $mentorInfo->roadmapSteps->where('step_type', 'work')->sortByDesc('start_date')->first();
                                                 $lastEdu = $mentorInfo->roadmapSteps->where('step_type', 'education')->sortByDesc('start_date')->first();
                                             @endphp
-                                            
+
                                             @if($lastWork)
                                             <div class="flex items-start gap-3">
                                                 <div class="mt-0.5 bg-blue-50 text-blue-600 p-1.5 rounded-lg border border-blue-100">
@@ -1240,7 +1240,7 @@
                                                 </div>
                                             </div>
                                             @endif
-                                            
+
                                             @if($lastEdu)
                                             <div class="flex items-start gap-3">
                                                 <div class="mt-0.5 bg-purple-50 text-purple-600 p-1.5 rounded-lg border border-purple-100">
@@ -1254,7 +1254,7 @@
                                             @endif
                                         </div>
                                         @endif
-                                        
+
                                         <div class="mt-auto relative z-10">
                                             <div class="flex gap-2 flex-wrap mb-5">
                                                 @if($mentorInfo->specialization_label && $mentorInfo->specialization_label !== 'Non définie')
@@ -1272,7 +1272,7 @@
                                                     @endforeach
                                                 @endif
                                             </div>
-                                            
+
                                             <a href="{{ route('public.mentor.profile', $mentorInfo->public_slug) }}" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition shadow-sm group">
                                                 Voir le profil
                                                 <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -1281,7 +1281,7 @@
                                     </div>
                                     @endforeach
                                 </div>
-                                
+
                                 <!-- Controls -->
                                 <div class="flex justify-center gap-4 mt-4" x-show="slides > 1">
                                     <button @click="prev()" class="p-2 rounded-full bg-white shadow hover:bg-gray-50 text-gray-600 transition focus:outline-none focus:ring-2 focus:ring-orange-500">

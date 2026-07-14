@@ -219,13 +219,12 @@ class NewsletterController extends Controller
         if (! $isRecurring) {
             // Dispatcher le Job dans la queue seulement si ce n'est pas récurrent
             SendNewsletterJob::dispatch($campaign);
-
-            return redirect()->route('admin.newsletter.index')
-                ->with('success', "La campagne a été mise en file d'attente. L'envoi se fera en arrière-plan.");
+            $message = "La campagne a été mise en file d'attente. L'envoi se fera en arrière-plan.";
+        } else {
+            $message = 'La campagne récurrente a été planifiée avec succès.';
         }
 
-        return redirect()->route('admin.newsletter.index')
-            ->with('success', 'La campagne récurrente a été planifiée avec succès.');
+        return redirect()->route('admin.newsletter.index')->with('success', $message);
     }
 
     /**

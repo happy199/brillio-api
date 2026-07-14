@@ -54,8 +54,8 @@
                     </div>
                     <div class="mt-4 pt-4 border-t flex items-center text-xs text-gray-500">
                         <span>{{ $rc->children()->count() }} envois effectués</span>
-                        <button type="button" 
-                            data-id="{{ $rc->id }}" 
+                        <button type="button"
+                            data-id="{{ $rc->id }}"
                             class="ml-auto show-campaign-btn text-purple-600 hover:underline font-medium">
                             Voir les détails
                         </button>
@@ -95,7 +95,7 @@
                                 @else
                                     <span class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">{{ $campaign->status }}</span>
                                 @endif
-                                
+
                                 @if($campaign->parent_id)
                                     <span class="block mt-1 text-[10px] text-purple-600 font-medium italic">
                                         <i class="fas fa-redo mr-1"></i>Auto
@@ -166,7 +166,7 @@
                     <i class="fas fa-times text-2xl"></i>
                 </button>
             </div>
-            
+
             <div class="flex-1 overflow-y-auto p-6 space-y-6">
                 <!-- Recurrence Info if applicable -->
                 <div id="modalRecurrenceBox" class="hidden p-4 bg-purple-50 border border-purple-100 rounded-lg">
@@ -235,7 +235,7 @@
             });
 
             const detailModal = document.getElementById('detailModal');
-            
+
             // Show details logic
             document.addEventListener('click', function(e) {
                 const btn = e.target.closest('.show-campaign-btn');
@@ -270,7 +270,7 @@
                 document.getElementById('modalSubject').textContent = data.subject;
                 document.getElementById('modalMeta').textContent = `Envoyé par ${data.sent_by} • ${data.recipients_count} destinataires`;
                 document.getElementById('modalDate').textContent = `Le ${data.created_at}`;
-                
+
                 const container = document.getElementById('modalBodyContainer');
                 const isFullHtml = data.body.toLowerCase().includes('<!doctype') || data.body.toLowerCase().includes('<html');
 
@@ -314,7 +314,7 @@
                 const attachBox = document.getElementById('modalAttachmentsBox');
                 const attachList = document.getElementById('modalAttachmentsList');
                 attachList.replaceChildren();
-                
+
                 if (data.attachments && data.attachments.length > 0) {
                     attachBox.classList.remove('hidden');
                     data.attachments.forEach(file => {
@@ -322,12 +322,12 @@
                         link.href = `/storage/${file.path}`;
                         link.target = '_blank';
                         link.className = 'inline-flex items-center px-3 py-1 bg-white border rounded text-xs text-indigo-700 hover:bg-indigo-50 transition';
-                        
+
                         const icon = document.createElement('i');
                         icon.className = 'fas fa-file-alt mr-2';
                         link.appendChild(icon);
                         link.appendChild(document.createTextNode(' ' + file.name));
-                        
+
                         attachList.appendChild(link);
                     });
                 } else {

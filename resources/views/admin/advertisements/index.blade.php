@@ -58,11 +58,11 @@
                 <div x-show="tab === 'all' || tab === '{{ $ad->status }}'"
                      x-transition
                      class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
-                    
+
                     <!-- Preview Visuel -->
                     <div class="relative aspect-video w-full bg-gray-50 overflow-hidden border-b border-gray-100">
                         <img src="{{ asset('storage/' . $ad->image_path) }}" alt="{{ $ad->title ?? 'Visuel' }}" class="w-full h-full object-cover">
-                        
+
                         <!-- Status tag overlay -->
                         <div class="absolute top-3 right-3">
                             @if($ad->status === 'approved')
@@ -87,7 +87,7 @@
                             <h3 class="text-lg font-bold text-gray-900 truncate mb-1">
                                 {{ $ad->title ?? 'Sans titre' }}
                             </h3>
-                            
+
                             <!-- Origin Info -->
                             <div class="flex items-center space-x-2 mb-3">
                                 @if($ad->organization)

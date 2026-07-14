@@ -33,7 +33,7 @@
                 <h1 class="text-2xl font-bold text-gray-900">Boutique de Ressources</h1>
                 <p class="text-gray-600">Explorez les contenus partagés par la communauté pour vous inspirer</p>
             </div>
-            
+
             <div class="text-right">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
                     {{ $totalCount }} {{ Str::plural('ressource', $totalCount) }} {{ Str::plural('disponible', $totalCount) }}
@@ -45,7 +45,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <!-- Search -->
                 <div class="relative md:col-span-1">
-                    <input type="text" name="search" value="{{ request('search') }}" 
+                    <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Titre ou tag..."
                         class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm text-sm">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -127,19 +127,19 @@
                     </span>
                 </div>
             </a>
-            
+
             <div class="p-4 space-y-3">
                 <div class="flex items-center gap-2 mb-1">
                     <img src="{{ $resource->user->avatar_url }}" alt="" class="w-5 h-5 rounded-full border border-gray-200">
                     <span class="text-xs text-gray-500 font-medium truncate">Par {{ $resource->user->name }}</span>
                 </div>
-                
+
                 <h3 class="font-bold text-gray-900 leading-tight" title="{{ $resource->title }}">
                     <a href="{{ route('mentor.resources.show', $resource) }}" class="hover:text-indigo-600 transition">
                         {{ $resource->title }}
                     </a>
                 </h3>
-                
+
                 <p class="text-xs text-gray-500 line-clamp-2">
                     {{ Str::limit($resource->description, 100) }}
                 </p>
@@ -160,7 +160,7 @@
                             <span class="text-xs font-bold text-gray-900">{{ ceil($resource->price / $mentorCreditPrice) }} Crédits</span>
                         @endif
                     </div>
-                    
+
                     <a href="{{ route('mentor.resources.show', $resource) }}"
                         class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
                         Consulter

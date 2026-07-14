@@ -3,8 +3,8 @@
 @section('title', 'Nos Mentors')
 
 @section('content')
-<div x-data="creditDistribution({ 
-    totalUsers: {{ (int)$mentors->total() }}, 
+<div x-data="creditDistribution({
+    totalUsers: {{ (int)$mentors->total() }},
     balance: {{ (int)$organization->credits_balance }},
     distributeUrl: '{{ route('organization.credits.distribute') }}',
     csrfToken: '{{ csrf_token() }}'

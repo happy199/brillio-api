@@ -47,8 +47,8 @@
                     <div class="px-6 py-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center flex-wrap gap-4">
                         <h3 class="text-lg font-medium text-gray-900">{{ $session->title }}</h3>
                         <div class="flex items-center gap-3">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold 
-                                @if($session->status === 'confirmed') bg-organization-100 text-organization-800 
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                @if($session->status === 'confirmed') bg-organization-100 text-organization-800
                                 @elseif($session->status === 'completed') bg-indigo-100 text-indigo-800
                                 @elseif($session->status === 'cancelled') bg-red-100 text-red-800
                                 @elseif($session->status === 'pending_payment') bg-yellow-100 text-yellow-800
@@ -74,11 +74,11 @@
 
                             @if($session->scheduled_by_organization_id === (auth()->user()->organization_id ?? auth()->user()->scheduled_by_organization_id) && $session->status !== 'cancelled' && $session->status !== 'completed')
                             <div class="flex items-center space-x-2 ml-4" x-data="{ showCancelModal: false }">
-                                <a href="{{ route('organization.sessions.edit', $session) }}" 
+                                <a href="{{ route('organization.sessions.edit', $session) }}"
                                     class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-bold rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all shadow-sm">
                                     Modifier
                                 </a>
-                                
+
                                 <button @click="showCancelModal = true"
                                     class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-all">
                                     Annuler la séance
@@ -86,16 +86,16 @@
 
                                 <!-- Modal d'annulation -->
                                 <template x-teleport="body">
-                                    <div x-show="showCancelModal" 
+                                    <div x-show="showCancelModal"
                                         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50"
                                         x-cloak>
-                                        <div @click.away="showCancelModal = false" 
+                                        <div @click.away="showCancelModal = false"
                                             class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 transform transition-all">
                                             <h3 class="text-2xl font-bold text-gray-900 mb-4">Annuler la séance</h3>
                                             <p class="text-gray-600 mb-6">
                                                 Veuillez indiquer la raison de l'annulation. Celle-ci sera envoyée par email à tous les participants.
                                             </p>
-                                            
+
                                             <form action="{{ route('organization.sessions.cancel', $session) }}" method="POST">
                                                 @csrf
                                                 <div class="mb-6">
@@ -104,13 +104,13 @@
                                                         placeholder="Ex: Imprévu, Séance reportée..."
                                                         class="w-full bg-gray-50 border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500 p-4"></textarea>
                                                 </div>
-                                                
+
                                                 <div class="flex justify-end space-x-4">
                                                     <button type="button" @click="showCancelModal = false"
                                                         class="px-6 py-3 text-sm font-bold text-gray-500 hover:text-gray-700">
                                                         Retour
                                                     </button>
-                                                    <button type="submit" 
+                                                    <button type="submit"
                                                         class="px-8 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-lg active:scale-95 transition-all">
                                                         Confirmer l'annulation
                                                     </button>
@@ -160,7 +160,7 @@
                             $progress = $prefilled['progress'] ?? ($session->report_content['progress'] ?? '');
                             $obstacles = $prefilled['obstacles'] ?? ($session->report_content['obstacles'] ?? '');
                             $smart_goals = $prefilled['smart_goals'] ?? ($session->report_content['smart_goals'] ?? '');
-                            
+
                             $isOwner = $session->scheduled_by_organization_id === $organization->id;
                             $isPast = $session->scheduled_at->isPast() || $session->status === 'completed';
                             $canEdit = $isOwner && $isPast;
@@ -311,7 +311,7 @@
                         @if($session->has_transcription)
                         <div class="pt-6 border-t border-gray-100 space-y-3">
                             <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Options IA & Transcription</h4>
-                            
+
                             <a href="{{ route('organization.sessions.download-transcription', $session) }}"
                                 class="w-full inline-flex justify-center items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-100 transition shadow-sm">
                                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

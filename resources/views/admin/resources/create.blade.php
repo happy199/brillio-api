@@ -91,7 +91,7 @@
                                             ]
                                         }
                                     });
-                                    
+
                                     // Set initial content
                                     if ($refs.contentInput.value) {
                                         quill.clipboard.dangerouslyPasteHTML($refs.contentInput.value);
@@ -133,7 +133,7 @@
                                 <button type="button" @click="confirmDeleteQuizPrompt(qIndex)" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
-                                
+
                                 <div class="space-y-4 pr-8">
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-700 mb-1">Nom du Quiz</label>
@@ -143,7 +143,7 @@
                                         <label class="block text-xs font-semibold text-gray-700 mb-1">Description courte (Optionnelle)</label>
                                         <input type="text" x-model="quiz.description" placeholder="Objectif de ce quiz..." class="bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
                                     </div>
-                                    
+
                                     <!-- Questions -->
                                     <div class="mt-4 border-t border-indigo-100 pt-4">
                                         <div class="flex justify-between items-center mb-3">
@@ -157,14 +157,14 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="space-y-4">
                                             <template x-for="(question, qsIndex) in quiz.questions" :key="qsIndex">
                                                 <div class="bg-white border border-gray-200 rounded-lg p-3 relative shadow-sm">
                                                     <button type="button" @click="removeQuestion(qIndex, qsIndex)" class="absolute top-3 right-3 text-gray-400 hover:text-red-500">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                                     </button>
-                                                    
+
                                                     <div class="mb-3 pr-8 flex gap-2 items-start">
                                                         <div class="flex-1">
                                                             <input type="text" x-model="question.question_text" placeholder="Posez votre question ici..." class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2">
@@ -173,7 +173,7 @@
                                                             <input type="number" x-model="question.points" min="1" placeholder="Pts" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2">
                                                         </div>
                                                     </div>
-                                                    
+
                                                     <!-- Options -->
                                                     <div class="pl-4 space-y-2 border-l-2 border-gray-100">
                                                         <template x-for="(option, optIndex) in question.options" :key="optIndex">
@@ -464,7 +464,7 @@
                     @endif
 
                     <!-- Tags (Toujours dispo car manuel) -->
-                    <div x-data="{ 
+                    <div x-data="{
                                     tags: [],
                                     newTag: '',
                                     addTag() {
@@ -581,7 +581,7 @@
                                         event.target.value = ''; // Reset input
                                         return;
                                     }
-                                    
+
                                     // Validation Taille (ex: 20MB)
                                     if (file.size > 20 * 1024 * 1024) {
                                         this.uploadError = 'Le fichier est trop volumineux (Max 20MB).';
@@ -594,7 +594,7 @@
                                     this.uploadError = null;
                                     this.isUploading = true;
                                     this.uploadSuccess = false;
-                                    
+
                                     // Simulation d'upload
                                     setTimeout(() => {
                                         this.isUploading = false;

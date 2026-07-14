@@ -85,10 +85,10 @@
                                 <input type="checkbox" name="mentee_ids[]" value="{{ $mentee->id }}"
                                     {{ $session->mentees->contains($mentee->id) ? 'checked' : '' }}
                                     class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300">
-                                
-                                <img src="{{ $mentee->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($mentee->name) }}" 
+
+                                <img src="{{ $mentee->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($mentee->name) }}"
                                      alt="" class="w-8 h-8 rounded-full bg-gray-200">
-                                
+
                                 <div>
                                     <p class="text-sm font-bold text-gray-900">{{ $mentee->name }}</p>
                                     <p class="text-xs text-gray-500">{{ $mentee->email }}</p>

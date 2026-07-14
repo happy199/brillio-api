@@ -6,7 +6,7 @@
     gtag('js', new Date());
     gtag('config', 'G-PPX01GY0R9');
 </script>
- 
+
 @if(config('services.clarity.id'))
 <!-- Microsoft Clarity -->
 <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="text/javascript">
@@ -17,7 +17,7 @@
     })(window, document, "clarity", "script", "{{ config('services.clarity.id') }}");
 </script>
 @endif
- 
+
 @if(config('services.mixpanel.token'))
 <!-- Mixpanel -->
 <script nonce="{{ request()->attributes->get('csp_nonce') }}" type="text/javascript">
@@ -30,14 +30,14 @@
                 e.location.protocol && "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//) ? "https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js" : "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"; e = e.getElementsByTagName("script")[0]; e.parentNode.insertBefore(k, e)
         }
     })(document, window.mixpanel || []);
- 
+
     mixpanel.init("{{ config('services.mixpanel.token') }}", {
         batch_requests: true,
         autocapture: true,
         record_sessions_percent: 100,
         api_host: 'https://api-eu.mixpanel.com'
     });
- 
+
     @auth
     mixpanel.identify("{{ auth()->id() }}");
     mixpanel.people.set({
@@ -50,7 +50,7 @@
                 @endif
         });
     @endauth
- 
+
     mixpanel.track_pageview();
 </script>
 @endif

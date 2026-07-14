@@ -15,7 +15,7 @@
             <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-300 shadow-sm">
                 <label for="currency_selector" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Devise :</label>
                 <form action="{{ route('currency.switch') }}" method="GET" class="inline m-0 p-0">
-                    <select id="currency_selector" name="currency" onchange="this.form.submit()" 
+                    <select id="currency_selector" name="currency" onchange="this.form.submit()"
                         class="rounded-md border-gray-300 shadow-sm focus:border-organization-500 focus:ring-organization-500 text-xs font-semibold text-gray-700 bg-gray-50 py-0.5 cursor-pointer">
                         @foreach(App\Services\CurrencyService::getSupportedCurrencies() as $code => $curr)
                         <option value="{{ $code }}" {{ App\Services\CurrencyService::getCurrentCurrency() === $code ? 'selected' : '' }}>

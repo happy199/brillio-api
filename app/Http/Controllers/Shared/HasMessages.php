@@ -74,11 +74,11 @@ trait HasMessages
         $config = $this->getMessageConfig();
 
         if ($request->header('Content-Length') > 15 * 1024 * 1024) { // 15MB max
-            if (isset($config['is_api']) && $config['is_api']) {
-                return response()->json(['message' => 'Taille de la requête trop volumineuse (max 15 Mo).'], 413);
-            }
+            $msg = 'Taille de la requête trop volumineuse (max 15 Mo).';
 
-            return back()->withErrors(['attachment' => 'Taille de la requête trop volumineuse (max 15 Mo).']);
+            return (isset($config['is_api']) && $config['is_api'])
+                ? response()->json(['message' => $msg], 413)
+                : back()->withErrors(['attachment' => $msg]);
         }
 
         abort_if($mentorship->{$config['user_column']} !== $user->id, 403);
@@ -94,11 +94,11 @@ trait HasMessages
         ]);
 
         if (empty($validated['body']) && ! isset($validated['attachment'])) {
-            if (isset($config['is_api']) && $config['is_api']) {
-                return response()->json(['message' => 'Veuillez écrire un message ou joindre un fichier.'], 422);
-            }
+            $msg = 'Veuillez écrire un message ou joindre un fichier.';
 
-            return back()->withErrors(['body' => 'Veuillez écrire un message ou joindre un fichier.']);
+            return (isset($config['is_api']) && $config['is_api'])
+                ? response()->json(['message' => $msg], 422)
+                : back()->withErrors(['body' => $msg]);
         }
 
         $data = [

@@ -76,8 +76,8 @@
                 <div class="p-6 space-y-4">
                     <div>
                         <span class="block text-sm font-medium text-gray-500">Statut</span>
-                        <span class="mt-1 px-2.5 py-0.5 rounded-full text-sm font-semibold 
-                            @if($mentorship->status === 'accepted') bg-organization-100 text-organization-800 
+                        <span class="mt-1 px-2.5 py-0.5 rounded-full text-sm font-semibold
+                            @if($mentorship->status === 'accepted') bg-organization-100 text-organization-800
                             @elseif($mentorship->status === 'pending') bg-yellow-100 text-yellow-800
                             @elseif($mentorship->status === 'refused') bg-red-100 text-red-800
                             @else bg-gray-100 text-gray-800 @endif">

@@ -3,9 +3,9 @@
 @section('title', 'Mes Mentors')
 
 @section('content')
-<div x-data="{ 
+<div x-data="{
         activeTab: 'active',
-        showCancelModal: false, 
+        showCancelModal: false,
         cancelUrl: '',
         openCancelModal(url) {
             this.cancelUrl = url;

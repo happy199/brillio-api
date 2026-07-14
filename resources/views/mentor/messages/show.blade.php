@@ -139,7 +139,7 @@
 
                         <!-- Native-free Delete Confirmation Modal -->
                         <template x-teleport="body">
-                            <div x-show="showDeleteModal" 
+                            <div x-show="showDeleteModal"
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0"
                                  x-transition:enter-end="opacity-100"
@@ -148,7 +148,7 @@
                                  x-transition:leave-end="opacity-0"
                                  class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm"
                                  x-cloak>
-                                <div @click.away="showDeleteModal = false" 
+                                <div @click.away="showDeleteModal = false"
                                      x-show="showDeleteModal"
                                      x-transition:enter="transition ease-out duration-300"
                                      x-transition:enter-start="opacity-0 scale-95 translate-y-4"
@@ -202,7 +202,7 @@
 
                                     @if($message->type === 'session_proposal' && isset($message->metadata['session_id']))
                                         <div class="mt-3 pt-3 border-t {{ $isMine ? 'border-orange-400' : 'border-gray-200' }}">
-                                            <a href="{{ route('mentor.mentorship.sessions.show', $message->metadata['session_id']) }}" 
+                                            <a href="{{ route('mentor.mentorship.sessions.show', $message->metadata['session_id']) }}"
                                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition {{ $isMine ? 'bg-white text-orange-600 hover:bg-orange-50' : 'bg-orange-500 text-white hover:bg-orange-600' }}">
                                                 <i class="fas fa-calendar-check"></i>
                                                 Voir les détails

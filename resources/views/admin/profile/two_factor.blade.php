@@ -22,7 +22,7 @@
                             </svg>
                             <span class="font-bold">La double authentification est activée.</span>
                         </div>
-                        
+
                         <p class="text-sm text-gray-600 mb-6">
                             Votre compte est protégé par un code de sécurité généré par votre application d'authentification.
                         </p>
@@ -37,12 +37,12 @@
                         <div class="text-gray-800 font-bold mb-4">
                             Configurez votre application d'authentification
                         </div>
-                        
+
                         <div class="flex flex-col md:flex-row items-center gap-8">
                             <div class="bg-white p-4 border rounded-lg shadow-inner">
                                 {!! $qrCodeSvg !!}
                             </div>
-                            
+
                             <div class="flex-1">
                                 <p class="text-sm text-gray-600 mb-4">
                                     1. Scannez ce QR Code avec une application comme <strong>Google Authenticator</strong> ou <strong>Microsoft Authenticator</strong>.

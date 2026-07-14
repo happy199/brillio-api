@@ -11,7 +11,7 @@
         expérience, toute l'équipe est là pour vous accompagner.
     </p>
     <div style="text-align: center; margin: 30px 0;">
-        <a href="{{ route('login') }}" style="background: #6366f1; color: white; padding: 12px 24px; 
+        <a href="{{ route('login') }}" style="background: #6366f1; color: white; padding: 12px 24px;
                 text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
             Accéder à mon espace
         </a>

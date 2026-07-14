@@ -21,10 +21,10 @@
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                     Nom du domaine <span class="text-red-500">*</span>
                 </label>
-                <input 
-                    type="text" 
-                    id="name" 
-                    name="name" 
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
                     value="{{ old('name') }}"
                     class="w-full border-gray-300 rounded-lg @error('name') border-red-500 @enderror"
                     required
@@ -39,9 +39,9 @@
                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
                     Description
                 </label>
-                <textarea 
-                    id="description" 
-                    name="description" 
+                <textarea
+                    id="description"
+                    name="description"
                     rows="3"
                     class="w-full border-gray-300 rounded-lg @error('description') border-red-500 @enderror"
                     placeholder="Décrivez ce domaine d'expertise..."
@@ -56,9 +56,9 @@
                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
                     Statut <span class="text-red-500">*</span>
                 </label>
-                <select 
-                    id="status" 
-                    name="status" 
+                <select
+                    id="status"
+                    name="status"
                     class="w-full border-gray-300 rounded-lg @error('status') border-red-500 @enderror"
                     required
                 >
@@ -79,9 +79,9 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     @foreach($mbtiSectors as $code => $label)
                         <label class="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50 cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                name="mbti_types[]" 
+                            <input
+                                type="checkbox"
+                                name="mbti_types[]"
                                 value="{{ $code }}"
                                 {{ in_array($code, old('mbti_types', [])) ? 'checked' : '' }}
                                 class="rounded border-gray-300 text-orange-600 focus:ring-orange-500"

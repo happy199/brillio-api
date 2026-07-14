@@ -112,7 +112,7 @@
 
             // --- Système de Transcription Client-Side Gratuit ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
+
             if (SpeechRecognition) {
                 // Créer un indicateur visuel discret
                 const indicator = document.createElement('div');

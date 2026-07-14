@@ -77,7 +77,7 @@
             </button>
         </nav>
     </div>
-    
+
     <!-- Info Plan Établissement -->
     <div x-show="activeTab === 'establishment'" class="mb-6 p-6 bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl text-white shadow-lg overflow-hidden relative">
         <div class="absolute top-0 right-0 p-4 opacity-10">

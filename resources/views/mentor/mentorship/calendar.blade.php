@@ -38,17 +38,17 @@
                         <div class="flex items-center gap-4">
                             <h2 class="text-lg font-bold text-gray-900 capitalize" x-text="calendarTitle"></h2>
                             <div class="flex bg-gray-100 rounded-lg p-1">
-                                <button @click="changeView('month')" 
+                                <button @click="changeView('month')"
                                     class="px-3 py-1 text-xs font-medium rounded-md transition"
                                     :class="view === 'month' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
                                     Mois
                                 </button>
-                                <button @click="changeView('week')" 
+                                <button @click="changeView('week')"
                                     class="px-3 py-1 text-xs font-medium rounded-md transition"
                                     :class="view === 'week' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
                                     Semaine
                                 </button>
-                                <button @click="changeView('day')" 
+                                <button @click="changeView('day')"
                                     class="px-3 py-1 text-xs font-medium rounded-md transition"
                                     :class="view === 'day' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'">
                                     Jour
@@ -83,7 +83,7 @@
                                 <div class="min-h-[6rem] border border-gray-100 rounded-lg p-1 relative hover:border-indigo-200 transition bg-white flex flex-col"
                                     :class="{'bg-indigo-50 border-indigo-200': isToday(date)}">
                                     <span class="text-sm font-medium text-gray-700 ml-1" :class="{'text-indigo-600 font-bold': isToday(date)}" x-text="date"></span>
-                                    
+
                                     <!-- Events Points -->
                                      <div class="mt-1 flex flex-col gap-1 overflow-y-auto max-h-[60px]">
                                         <!-- Sessions -->
@@ -139,7 +139,7 @@
                                                 <span x-text="'Dispo'"></span>
                                             </div>
                                         </template>
-                                        
+
                                         <!-- Sessions Overlay -->
                                         <template x-for="session in getSessionsForFullDate(day.date)">
                                             <a :href="'/espace-mentor/sessions/' + session.id"
@@ -168,7 +168,7 @@
                                     </div>
                                 </div>
                             </template>
-                            
+
                             <!-- Day View Overlays Container (since grid rows are fixed height, we ideally use absolute positioning based on time) -->
                             <div class="absolute top-0 left-16 right-0 bottom-0 pointer-events-none">
                                  <!-- Availabilities -->
@@ -203,7 +203,7 @@
                 <!-- Upcoming Sessions List -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h3 class="font-bold text-gray-900 mb-4">Prochaines Séances</h3>
-                    
+
                     @php
                         $pendingRequests = $upcomingSessions->where('status', 'proposed');
                         $confirmedSessions = $upcomingSessions->whereIn('status', ['confirmed', 'accepted']);
@@ -225,7 +225,7 @@
                                                 <span class="px-2 py-0.5 text-[10px] font-bold bg-yellow-200 text-yellow-800 rounded-full">DEMANDE</span>
                                             </div>
                                             <p class="text-sm text-gray-600">
-                                                {{ $session->scheduled_at->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} - 
+                                                {{ $session->scheduled_at->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->format('H:i') }} -
                                                 {{ $session->scheduled_at->setTimezone($session->timezone ?: 'Africa/Porto-Novo')->addMinutes($session->duration_minutes)->format('H:i') }}
                                                 ({{ $session->gmt_offset }})
                                             </p>
@@ -233,12 +233,12 @@
                                         </div>
                                         <div class="flex items-center gap-1" x-data="{ openAcceptModal: false }">
                                             <!-- Buttons Triggering Modals -->
-                                            <button @click="$dispatch('open-accept-modal', { id: '{{ $session->id }}', title: '{{ addslashes($session->title) }}', mentee: '{{ addslashes($session->mentees->pluck('name')->join(', ')) }}' })" 
+                                            <button @click="$dispatch('open-accept-modal', { id: '{{ $session->id }}', title: '{{ addslashes($session->title) }}', mentee: '{{ addslashes($session->mentees->pluck('name')->join(', ')) }}' })"
                                                 class="text-green-600 hover:text-green-800 p-2 hover:bg-green-100 rounded-full transition" title="Accepter">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                             </button>
-                                            
-                                            <button @click="$dispatch('open-refuse-modal', { id: '{{ $session->id }}', title: '{{ addslashes($session->title) }}' })" 
+
+                                            <button @click="$dispatch('open-refuse-modal', { id: '{{ $session->id }}', title: '{{ addslashes($session->title) }}' })"
                                                 class="text-red-600 hover:text-red-800 p-2 hover:bg-red-100 rounded-full transition" title="Refuser">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                             </button>
@@ -254,15 +254,15 @@
 
                         <!-- ACCEPT MODAL -->
                         <dialog id="accept-session-modal" class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50" x-ref="acceptModal">
-                            <div class="p-6" x-data="{ isPaid: false, sessionId: '', sessionTitle: '', sessionMentee: '' }" 
+                            <div class="p-6" x-data="{ isPaid: false, sessionId: '', sessionTitle: '', sessionMentee: '' }"
                                 @open-accept-modal.window="sessionId = $event.detail.id; sessionTitle = $event.detail.title; sessionMentee = $event.detail.mentee; $refs.acceptModal.showModal()">
-                                
+
                                 <h3 class="font-bold text-lg mb-2 text-gray-900">Accepter la séance ?</h3>
                                 <p class="text-gray-600 mb-4 text-sm">Vous allez accepter la demande <strong x-text="sessionTitle"></strong> avec <span x-text="sessionMentee"></span>.</p>
-                                
+
                                 <form :action="'/espace-mentor/sessions/' + sessionId + '/accept'" method="POST">
                                     @csrf
-                                    
+
                                     <!-- Free/Paid Toggle -->
                                     <div class="mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
                                         <label class="flex items-center cursor-pointer justify-between">
@@ -295,16 +295,16 @@
 
                         <!-- REFUSE MODAL -->
                         <dialog id="refuse-session-modal" class="modal bg-white rounded-xl shadow-xl p-0 w-full max-w-md backdrop:bg-gray-900/50" x-ref="refuseModal">
-                            <div class="p-6" x-data="{ sessionId: '', sessionTitle: '' }" 
+                            <div class="p-6" x-data="{ sessionId: '', sessionTitle: '' }"
                                 @open-refuse-modal.window="sessionId = $event.detail.id; sessionTitle = $event.detail.title; $refs.refuseModal.showModal()">
-                                
+
                                 <h3 class="font-bold text-lg mb-2 text-gray-900">Refuser la séance ?</h3>
                                 <p class="text-gray-600 mb-4 text-sm">Vous allez refuser la demande <strong x-text="sessionTitle"></strong>. Veuillez indiquer la raison (obligatoire).</p>
-                                
+
                                 <form :action="'/espace-mentor/sessions/' + sessionId + '/refuse'" method="POST">
                                     @csrf
                                     <textarea name="refusal_reason" rows="3" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-red-500 focus:ring-red-500 mb-4 text-sm p-3" placeholder="Indisponibilité, contenu inadapté..." required></textarea>
-                                    
+
                                     <div class="flex justify-end gap-3">
                                         <button type="button" @click="$refs.refuseModal.close()" class="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2">Annuler</button>
                                         <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Refuser</button>
@@ -352,7 +352,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6" x-data="{ selectedSessions: [] }">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-gray-900">Historique des séances</h3>
-                        
+
                         <!-- Compiled Report Button -->
                         <form x-show="selectedSessions.length >= 2" action="{{ route('mentor.mentorship.sessions.download-compiled-reports') }}" method="POST" class="inline" style="display: none;" x-transition>
                             @csrf
@@ -363,7 +363,7 @@
                             </button>
                         </form>
                     </div>
-                    
+
                     @if($pastSessions->isEmpty())
                         <p class="text-gray-500 text-sm">Aucun historique disponible.</p>
                     @else
@@ -419,7 +419,7 @@
                                 </div>
                             @endforeach
                         </div>
-                        
+
                         <div class="mt-6 pt-4 border-t border-gray-100">
                             @if($hasUnlockedHistory)
                                 <div class="mt-4">
@@ -517,7 +517,7 @@
                         </button>
                     </form>
                 </div>
-                
+
                 <!-- Legend -->
                 <div class="flex flex-wrap gap-4 text-xs text-gray-600 px-2">
                      <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full border border-purple-500 bg-purple-100"></span> Disponibilité</div>
@@ -556,10 +556,10 @@
             // Default if empty
             if ($availabilitiesMapped->isEmpty()) {
                 $availabilitiesMapped = collect([[
-                    'is_recurring' => true, 
-                    'day_of_week' => 1, 
+                    'is_recurring' => true,
+                    'day_of_week' => 1,
                     'specific_date' => null,
-                    'start_time' => '09:00', 
+                    'start_time' => '09:00',
                     'end_time' => '17:00'
                 ]]);
             }
@@ -578,7 +578,7 @@
                 hours: Array.from({length: 24}, (_, i) => i), // 0 to 23
 
                 sessions: @json($sessionsJson),
-                
+
                 // Form data
                 localAvailabilities: @json($availabilitiesMapped),
 
@@ -593,7 +593,7 @@
                         const start = this.getStartOfWeek(this.currentDate);
                         const end = new Date(start);
                         end.setDate(end.getDate() + 6);
-                        
+
                         // Si même mois
                         if (start.getMonth() === end.getMonth()) {
                             return start.getDate() + ' - ' + end.getDate() + ' ' + this.monthNames[start.getMonth()] + ' ' + start.getFullYear();
@@ -713,7 +713,7 @@
                 getNoOfDays() {
                     let daysInMonth = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0).getDate();
                     let dayOfWeek = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1).getDay();
-                    
+
                     let blankDaysArray = [];
                     for (var i = 1; i <= dayOfWeek; i++) { // start from 1 not 0 if week starts Sunday? JS getDay 0=Sunday.
                         // Standard calendar starts Sunday=0. If we want Monday start, logic changes.
@@ -771,7 +771,7 @@
                     // Convert HH:MM to percentage or pixel position
                     // Height of day container is fixed (e.g. 600px for 24h? or 1h=Height)
                     // Grid has 1h = 48px or similar (h-12 is 3rem = 48px)
-                    const rowHeight = 48; 
+                    const rowHeight = 48;
                     const startH = parseInt(startTime.split(':')[0]);
                     const startM = parseInt(startTime.split(':')[1]);
                     const endH = parseInt(endTime.split(':')[0]);
@@ -786,7 +786,7 @@
 
                 getStyleForDayView(startTime, endTime) {
                     // Similar to week view but day view items are 80px high (h-20)
-                    // Wait, day view implementation above uses a list of hours. 
+                    // Wait, day view implementation above uses a list of hours.
                     // To place absolute items correctly, we need to map to that list.
                     const rowHeight = 80;
                     const startH = parseInt(startTime.split(':')[0]);
@@ -797,19 +797,19 @@
                     const top = (startH * rowHeight) + ((startM / 60) * rowHeight);
                     const durationMins = ((endH * 60) + endM) - ((startH * 60) + startM);
                     const height = (durationMins / 60) * rowHeight;
-                    
+
                     return `top: ${top}px; height: ${height}px;`;
                 },
 
                 // --- Form Helpers ---
 
                 addSlot() {
-                    this.localAvailabilities.push({ 
-                        is_recurring: true, 
-                        day_of_week: 1, 
+                    this.localAvailabilities.push({
+                        is_recurring: true,
+                        day_of_week: 1,
                         specific_date: new Date().toISOString().split('T')[0],
-                        start_time: '09:00', 
-                        end_time: '17:00' 
+                        start_time: '09:00',
+                        end_time: '17:00'
                     });
                 },
 

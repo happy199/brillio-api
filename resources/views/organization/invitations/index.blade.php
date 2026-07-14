@@ -3,18 +3,18 @@
 @section('title', 'Invitations')
 
 @section('content')
-<div class="space-y-6" x-data="{ 
+<div class="space-y-6" x-data="{
     showDeleteModal: false,
     invitationToDelete: null,
     copyToClipboard(url) {
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(url).then(() => {
-                window.dispatchEvent(new CustomEvent('copy-notification', { 
-                    detail: { message: 'Lien copié dans le presse-papiers !', type: 'success' } 
+                window.dispatchEvent(new CustomEvent('copy-notification', {
+                    detail: { message: 'Lien copié dans le presse-papiers !', type: 'success' }
                 }));
             }).catch(err => {
-                window.dispatchEvent(new CustomEvent('copy-notification', { 
-                    detail: { message: 'Erreur lors de la copie.', type: 'error' } 
+                window.dispatchEvent(new CustomEvent('copy-notification', {
+                    detail: { message: 'Erreur lors de la copie.', type: 'error' }
                 }));
             });
         } else {
@@ -27,12 +27,12 @@
             ta.select();
             try {
                 document.execCommand('copy');
-                window.dispatchEvent(new CustomEvent('copy-notification', { 
-                    detail: { message: 'Lien copié dans le presse-papiers !', type: 'success' } 
+                window.dispatchEvent(new CustomEvent('copy-notification', {
+                    detail: { message: 'Lien copié dans le presse-papiers !', type: 'success' }
                 }));
             } catch (err) {
-                window.dispatchEvent(new CustomEvent('copy-notification', { 
-                    detail: { message: 'Erreur lors de la copie.', type: 'error' } 
+                window.dispatchEvent(new CustomEvent('copy-notification', {
+                    detail: { message: 'Erreur lors de la copie.', type: 'error' }
                 }));
             }
             ta.remove();

@@ -71,8 +71,8 @@
             <div class="lg:col-span-2 space-y-1">
                 <label for="search" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Rechercher</label>
                 <div class="relative">
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                        placeholder="Titre du métier..." 
+                    <input type="text" name="search" id="search" value="{{ request('search') }}"
+                        placeholder="Titre du métier..."
                         class="w-full rounded-lg border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm h-11 pl-10">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                         <i class="fas fa-search text-xs"></i>
@@ -213,7 +213,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         @if($careers->hasPages())
             <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-100">
                 {{ $careers->appends(request()->query())->links() }}
@@ -233,15 +233,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const countText = document.getElementById('audit-count-text');
     const progressBar = document.getElementById('audit-progress-bar');
     const currentJobBox = document.getElementById('audit-current-job');
-    
+
     let isCancelled = false;
 
     btnAudit.addEventListener('click', async function() {
         if (!confirm('Cette action va analyser tout le référentiel et compléter les champs manquants via l\'IA. Continuer ?')) return;
-        
+
         modal.classList.remove('hidden');
         isCancelled = false;
-        
+
         try {
             // Step 1: Get incomplete IDs
             statusText.innerText = "Identification des métiers incomplets...";
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
             });
             const data = await response.json();
-            
+
             if (data.count === 0) {
                 statusText.innerText = "Tout est à jour ! Aucune donnée manquante.";
                 setTimeout(() => modal.classList.add('hidden'), 2000);
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const id = ids[i];
                 statusText.innerText = `Complétion automatique en cours...`;
-                
+
                 // Update progress
                 const progress = Math.round(((i) / total) * 100);
                 progressBar.style.width = `${progress}%`;
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
                 });
                 const resData = await res.json();
-                
+
                 if (resData.title) {
                     currentJobBox.innerText = `Dernier traité : ${resData.title}`;
                 }

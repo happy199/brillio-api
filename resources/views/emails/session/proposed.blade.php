@@ -57,7 +57,7 @@
                     ✓ Accepter
                 </a>
             @endif
-            
+
             <a href="{{ $refuseUrl }}"
                 style="display: inline-block; background-color: #f3f4f6; color: #6b7280; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
                 {{ $session->created_by === 'mentor' ? 'Refuser / Annuler' : 'Refuser' }}

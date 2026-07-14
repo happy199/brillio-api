@@ -673,20 +673,20 @@
                 validatePhone() {
                     const country = this.formData.country;
                     const phone = this.formData.phone;
-                    
+
                     if (!country) {
                         this.phoneError = 'Veuillez sélectionner un pays d\'abord';
                         return false;
                     }
-                    
+
                     if (!phone) {
                         this.phoneError = 'Le numéro de téléphone est obligatoire';
                         return false;
                     }
-                    
+
                     const config = this.countryConfigs[country];
                     let clean = phone.replace(/\D/g, '');
-                    
+
                     if (!config) {
                         if (clean.length >= 7 && clean.length <= 12) {
                             this.phoneError = '';
@@ -696,7 +696,7 @@
                             return false;
                         }
                     }
-                    
+
                     // Auto-prepend 0 for Cote d'Ivoire if 9 digits and starts with 1, 5, 7
                     if (country === 'Cote d\'Ivoire' && clean.length === 9 && ['1', '5', '7'].includes(clean[0])) {
                         clean = '0' + clean;
@@ -707,7 +707,7 @@
                         clean = '0' + clean;
                         this.formData.phone = clean;
                     }
-                    
+
                     let isValid = false;
                     for (let len of config.lengths) {
                         if (clean.length === len) {
@@ -719,7 +719,7 @@
                             break;
                         }
                     }
-                    
+
                     if (isValid) {
                         this.phoneError = '';
                         return true;
@@ -832,11 +832,11 @@
                     // Réinitialiser la ville quand le pays change
                     this.formData.city = '';
                     this.filteredCities = [];
-                    
+
                     // Réinitialiser le téléphone
                     this.formData.phone = '';
                     this.phoneError = '';
-                    
+
                     // Mettre à jour l'indicatif
                     const config = this.countryConfigs[this.formData.country];
                     if (config) {

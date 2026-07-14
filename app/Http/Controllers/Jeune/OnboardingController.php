@@ -50,7 +50,7 @@ class OnboardingController extends Controller
             'phone' => [
                 'required',
                 'string',
-                function ($attribute, $value, $fail) use ($country) {
+                function ($attribute, $value, $fail) use ($country) { // NOSONAR
                     if (! $this->isValidAfricanPhoneNumber($country, $value)) {
                         $fail("Le numéro de téléphone n'est pas valide pour le pays sélectionné.");
                     }

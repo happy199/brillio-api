@@ -53,7 +53,7 @@
                 @csrf
                 <div>
                     <label for="email" class="sr-only">Adresse email</label>
-                    <input id="email" name="email" type="email" autocomplete="email" required 
+                    <input id="email" name="email" type="email" autocomplete="email" required
                         placeholder="votre@email.com"
                         class="block w-full px-5 py-4 rounded-2xl border-none bg-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 transition-all text-slate-900 font-medium @error('email') ring-2 ring-red-500 @enderror">
                     @if(session('error'))

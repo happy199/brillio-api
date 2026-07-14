@@ -255,7 +255,7 @@
                                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition duration-500 group flex flex-col h-full bg-gradient-to-br from-white to-gray-50/50">
                                     <!-- Photo -->
                                     <div class="relative h-48 overflow-hidden cursor-pointer" @click="openDetails(est)">
-                                        <img :src="est.photo_path ? '/storage/'+est.photo_path : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=800'" 
+                                        <img :src="est.photo_path ? '/storage/'+est.photo_path : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?q=80&w=800'"
                                             class="w-full h-full object-cover group-hover:scale-110 transition duration-1000">
                                         <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                         <div class="absolute top-4 left-4">
@@ -270,17 +270,17 @@
                                             <i class="fas fa-map-marker-alt text-rose-500 text-xs"></i>
                                             <span class="text-xs font-bold text-gray-500 uppercase tracking-tighter" x-text="(est.city ? est.city + ', ' : '') + est.country"></span>
                                         </div>
-                                        
+
                                         <!-- Clic rapide / Collecte Tel -->
                                         <div class="mt-auto space-y-3">
                                             <!-- Widget Saisie Tel if missing -->
-                                            <div x-show="!userHasPhone && activePhoneInput === est.id" 
+                                            <div x-show="!userHasPhone && activePhoneInput === est.id"
                                                 x-transition:enter="transition ease-out duration-300"
                                                 x-transition:enter-start="opacity-0 translate-y-4"
                                                 class="p-4 bg-rose-50 rounded-2xl border border-rose-100">
                                                 <p class="text-xs font-black text-rose-600 uppercase mb-2">Il manque ton numéro :</p>
                                                 <div class="flex gap-2">
-                                                    <input type="tel" x-model="tempPhone" placeholder="ex: 97000000" 
+                                                    <input type="tel" x-model="tempPhone" placeholder="ex: 97000000"
                                                         class="flex-1 text-sm border-white rounded-xl py-2 px-3 focus:ring-rose-500 focus:border-rose-500 shadow-inner">
                                                     <button @click="handleInterest(est)" class="p-2 bg-rose-600 text-white rounded-xl hover:bg-rose-700 shadow-md">
                                                         <i class="fas fa-arrow-right"></i>
@@ -288,7 +288,7 @@
                                                 </div>
                                             </div>
 
-                                            <button @click="handleInterest(est)" 
+                                            <button @click="handleInterest(est)"
                                                 class="w-full py-4 rounded-2xl font-black text-sm transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden relative group"
                                                 :class="est.user_has_interest ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gray-900 text-white hover:bg-indigo-600 shadow-xl shadow-gray-200'">
                                                 <span x-show="!est.user_has_interest" class="flex items-center gap-2">
@@ -328,15 +328,15 @@
 
                 <!-- SIDE PANEL (DRAWER) -->
                 <div x-show="sidebarOpen" class="fixed inset-0 z-[100] overflow-hidden" x-cloak>
-                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" 
-                        x-show="sidebarOpen" x-transition:enter="duration-500 ease-out" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"
+                        x-show="sidebarOpen" x-transition:enter="duration-500 ease-out" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                         x-transition:leave="duration-500 ease-in" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                         @click="sidebarOpen = false"></div>
 
                     <div class="absolute inset-y-0 right-0 max-w-full flex">
                         <div class="w-screen max-w-xl transform transition ease-in-out duration-700"
                             x-show="sidebarOpen" x-transition:enter="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="translate-x-full">
-                            
+
                             <div class="h-full flex flex-col bg-white shadow-2xl rounded-l-[3rem] overflow-hidden">
                                 <!-- Banner Details -->
                                 <div class="relative h-80 flex-none group">
@@ -364,7 +364,7 @@
                                             <span class="w-8 h-[2px] bg-indigo-600"></span> Présentation
                                         </h3>
                                         <p class="text-xl text-gray-700 leading-relaxed font-medium" x-text="estDetails?.description"></p>
-                                        
+
                                         <template x-if="estDetails?.google_maps_url">
                                             <div class="mt-6">
                                                 <a :href="estDetails?.google_maps_url" target="_blank" class="inline-flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-100 transition">
@@ -455,12 +455,12 @@
                                             <div class="relative">
                                                 <h3 class="text-3xl font-black mb-2">Postuler maintenant</h3>
                                                 <p class="text-indigo-200 mb-8 font-medium">Laisse tes coordonnées pour être contacté en priorité.</p>
-                                                
+
                                                 <form @submit.prevent="submitPreciseInterest" class="space-y-5">
                                                     <template x-for="(field, idx) in estDetails?.precise_form_config" :key="idx">
                                                         <div>
                                                             <label class="block text-xs font-black text-indigo-100 uppercase tracking-widest mb-2 ml-1" x-text="field.label"></label>
-                                                            
+
                                                             <template x-if="field.type === 'text'">
                                                                 <input type="text" x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white placeholder-white/40 focus:bg-white/20 focus:ring-0 backdrop-blur-md transition-all">
                                                             </template>
@@ -475,7 +475,7 @@
                                                             </template>
                                                         </div>
                                                     </template>
-                                                    
+
                                                     <!-- Champ téléphone manquant rouge -->
                                                     <template x-if="!userHasPhone">
                                                         <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100 mt-2 mb-4 shadow-sm">
@@ -759,16 +759,16 @@
                     <button @click.stop="closeTest()"
                         class="relative overflow-hidden group transition-all duration-300 rounded-xl flex items-center justify-center min-w-[40px] h-10 px-2"
                         :class="confirmClose ? 'bg-red-50 border border-red-100 shadow-sm' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'">
-                        
+
                         <div class="flex items-center gap-2">
-                            <span x-show="confirmClose" 
+                            <span x-show="confirmClose"
                                   x-transition:enter="transition ease-out duration-200"
                                   x-transition:enter-start="opacity-0 -translate-x-2"
                                   x-transition:enter-end="opacity-100 translate-x-0"
                                   class="text-sm font-bold text-red-600 whitespace-nowrap">
                                 Quitter ?
                             </span>
-                            <svg class="w-6 h-6 transition-transform duration-300" 
+                            <svg class="w-6 h-6 transition-transform duration-300"
                                  :class="confirmClose ? 'text-red-600 scale-90' : 'group-hover:rotate-90'"
                                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

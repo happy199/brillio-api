@@ -1,13 +1,13 @@
                 <div x-data="recommendationsSystem()" @open-details.window="openDetails($event.detail.est)" x-show="sidebarOpen" class="fixed inset-0 z-[100] overflow-hidden" x-cloak>
-                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" 
-                        x-show="sidebarOpen" x-transition:enter="duration-500 ease-out" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"
+                        x-show="sidebarOpen" x-transition:enter="duration-500 ease-out" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                         x-transition:leave="duration-500 ease-in" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                         @click="sidebarOpen = false"></div>
 
                     <div class="absolute inset-y-0 right-0 max-w-full flex">
                         <div class="w-screen max-w-xl transform transition ease-in-out duration-700"
                             x-show="sidebarOpen" x-transition:enter="translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="translate-x-full">
-                            
+
                             <div class="h-full flex flex-col bg-white shadow-2xl rounded-l-[3rem] overflow-hidden">
                                 <!-- Banner Details -->
                                 <div class="relative h-80 flex-none group">
@@ -35,7 +35,7 @@
                                             <span class="w-8 h-[2px] bg-indigo-600"></span> Présentation
                                         </h3>
                                         <p class="text-xl text-gray-700 leading-relaxed font-medium" x-text="estDetails?.description"></p>
-                                        
+
                                         <template x-if="estDetails?.google_maps_url">
                                             <div class="mt-6 flex flex-wrap gap-3">
                                                 <a :href="estDetails?.google_maps_url" target="_blank" class="inline-flex items-center gap-2 bg-rose-50 text-rose-600 px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-rose-100 transition shadow-sm border border-rose-100">
@@ -156,13 +156,13 @@
                                             <div class="relative">
                                                 <h3 class="text-3xl font-black mb-2">Postuler maintenant</h3>
                                                 <p class="text-indigo-200 mb-8 font-medium">Laisse tes coordonnées pour être contacté en priorité.</p>
-                                                
+
                                                 <form @submit.prevent="submitPreciseInterest" class="space-y-6">
                                                     <div class="space-y-5">
                                                         <template x-for="(field, idx) in estDetails?.precise_form_config" :key="idx">
                                                             <div>
                                                                 <label class="block text-xs font-black text-indigo-100 uppercase tracking-widest mb-2 ml-1" x-text="field.label"></label>
-                                                                
+
                                                                 <!-- TEXTE COURT -->
                                                                 <template x-if="field.type === 'text'">
                                                                     <input type="text" x-model="formData[field.label]" required class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 px-5 text-white placeholder-white/40 focus:bg-white/20 focus:ring-0 backdrop-blur-md transition-all">
@@ -219,7 +219,7 @@
                                                             </div>
                                                         </template>
                                                     </div>
-                                                    
+
                                                     <!-- Champ téléphone manquant rouge -->
                                                     <template x-if="!userHasPhone">
                                                         <div class="p-5 bg-rose-500/20 border-2 border-rose-500/30 rounded-3xl backdrop-blur-xl">
@@ -231,7 +231,7 @@
                                                                     Il manque ton numéro :
                                                                 </p>
                                                             </div>
-                                                            <input type="tel" x-model="tempPhone" placeholder="ex: 97000000" 
+                                                            <input type="tel" x-model="tempPhone" placeholder="ex: 97000000"
                                                                 class="w-full bg-white/10 border border-rose-500/20 rounded-2xl text-lg px-5 py-4 font-black placeholder-rose-200/50 focus:bg-white/20 focus:ring-2 focus:ring-rose-500 transition-all text-white" required>
                                                         </div>
                                                     </template>
@@ -243,7 +243,7 @@
                                             </div>
                                         </section>
                                     </template>
-                                    
+
                                     <!-- Spacer final pour le scroll -->
                                     <div class="h-10"></div>
                                 </div>

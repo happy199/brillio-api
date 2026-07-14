@@ -80,7 +80,7 @@
                     <label class="block text-sm font-bold text-gray-700 mb-1">Logo de l'établissement</label>
                     <input type="file" name="photo" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                 </div>
-                
+
                 <div class="mt-4 border-t border-gray-100 pt-4">
                     <label class="block text-sm font-bold text-gray-700 mb-1"><i class="fas fa-images text-gray-400 mr-1"></i> Galerie Photos additionnelles (Illimité)</label>
                     <input type="file" name="gallery[]" multiple accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
@@ -97,7 +97,7 @@
                             @endfor
                         </div>
                     </div>
-                    
+
                     <!-- Youtube Videos -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-3"><i class="fab fa-youtube text-red-600 mr-1"></i> Vidéos de présentation (Max 3)</label>
@@ -179,7 +179,7 @@
             </div>
             <div class="p-6 space-y-4" x-show="has_precise_form" x-transition>
                 <p class="text-sm text-gray-500">Définissez les champs que le jeune devra remplir pour cet établissement.</p>
-                
+
                 <div class="space-y-3">
                     <template x-for="(field, index) in precise_form_config" :key="index">
                         <div class="flex items-start gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
@@ -239,7 +239,7 @@
             mbti_types: [],
             has_precise_form: false,
             precise_form_config: [],
-            
+
             addField() {
                 this.precise_form_config.push({
                     label: '',
@@ -248,7 +248,7 @@
                     required: true
                 });
             },
-            
+
             removeField(index) {
                 this.precise_form_config.splice(index, 1);
             }

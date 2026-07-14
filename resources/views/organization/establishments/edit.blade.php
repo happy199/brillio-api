@@ -82,12 +82,12 @@
                         <input type="file" name="photo" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-organization-50 file:text-organization-700 hover:file:bg-organization-100">
                     </div>
                 </div>
-                
+
                 <div class="mt-4 border-t border-gray-100 pt-4">
                     <label class="block text-sm font-bold text-gray-700 mb-1"><i class="fas fa-images text-gray-400 mr-1"></i> Galerie Photos additionnelles (Illimité)</label>
                     <input type="file" name="gallery[]" multiple accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
                     <p class="text-xs text-gray-400 mt-1">Maintenez Maj ou Ctrl pour ajouter plusieurs images. Les nouvelles s'ajouteront à la galerie existante.</p>
-                    
+
                     @if(is_array($establishment->gallery) && count($establishment->gallery) > 0)
                         <div class="mt-4 flex flex-wrap gap-3">
                             @foreach($establishment->gallery as $img)
@@ -115,7 +115,7 @@
                             @endfor
                         </div>
                     </div>
-                    
+
                     <!-- Youtube Videos -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-3"><i class="fab fa-youtube text-red-600 mr-1"></i> Vidéos de présentation (Max 3)</label>
@@ -257,7 +257,7 @@
                 ...f,
                 options_string: f.options || ''
             })),
-            
+
             addField() {
                 this.precise_form_config.push({
                     label: '',
@@ -266,7 +266,7 @@
                     required: true
                 });
             },
-            
+
             removeField(index) {
                 this.precise_form_config.splice(index, 1);
             }

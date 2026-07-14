@@ -32,7 +32,7 @@
         <div class="content">
             <h2>Bonjour {{ $recipient->name }},</h2>
             <p>L'organisation <strong>{{ $session->organization->name }}</strong> vous a invité à animer une séance d'expertise sur la plateforme Brillio.</p>
-            
+
             <p>Votre expertise est précieuse pour accompagner les jeunes talents de notre plateforme. Voici les détails de votre intervention :</p>
 
             <div class="info-box">

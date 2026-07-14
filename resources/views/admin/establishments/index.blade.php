@@ -10,11 +10,11 @@
         <h1 class="text-2xl font-bold text-gray-900">Établissements & Centres de formation</h1>
         <div class="flex flex-wrap gap-3">
             <!-- Bouton IA -->
-            <button x-data @click="$dispatch('open-ai-modal')" 
+            <button x-data @click="$dispatch('open-ai-modal')"
                 class="inline-flex items-center px-4 py-2 bg-indigo-100 border border-indigo-300 rounded-lg font-semibold text-xs text-indigo-700 uppercase tracking-widest hover:bg-indigo-200 transition shadow-sm">
                 <i class="fas fa-magic mr-2"></i> Auto-générer (IA)
             </button>
-            <a href="{{ route('admin.establishments.create') }}" 
+            <a href="{{ route('admin.establishments.create') }}"
                 class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 transition shadow-sm">
                 <i class="fas fa-plus mr-2"></i> Ajouter manuellement
             </a>
@@ -131,7 +131,7 @@
 </div>
 
 <!-- Modal IA -->
-<div x-data="{ show: false, mbti: 'INTJ', loading: false }" 
+<div x-data="{ show: false, mbti: 'INTJ', loading: false }"
     @open-ai-modal.window="show = true"
     x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
     <div class="fixed inset-0 bg-black/50" @click="show = false"></div>

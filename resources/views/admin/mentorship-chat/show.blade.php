@@ -118,7 +118,7 @@
                     <!-- Message Body -->
                     <div
                         class="p-4 rounded-2xl shadow-sm {{ $message->sender_id == $mentorship->mentor_id ? 'bg-white text-gray-800' : 'bg-indigo-600 text-white' }} {{ $message->is_flagged ? 'border-2 border-red-500 ring-2 ring-red-200' : '' }} {{ $message->is_deleted ? 'opacity-50' : '' }}">
-                        
+
                         @if($message->is_deleted)
                             <div class="mb-2 p-2 bg-gray-100 text-gray-500 text-xs rounded italic">
                                 <i class="fas fa-trash-alt mr-1"></i> MESSAGE SUPPRIMÉ PAR L'UTILISATEUR

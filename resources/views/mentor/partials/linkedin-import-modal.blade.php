@@ -1,10 +1,10 @@
 <!-- Modal Import LinkedIn -->
-<div id="linkedinImportModal" 
+<div id="linkedinImportModal"
     class="fixed inset-0 z-[60] flex sm:items-center items-start justify-center p-4 bg-black/50 overflow-y-auto"
     style="display: none;"
-    x-data="linkedInImporter()" 
-    x-show="show" 
-    x-cloak 
+    x-data="linkedInImporter()"
+    x-show="show"
+    x-cloak
     x-on:open-linkedin-import.window="show = true"
     x-transition>
     <style>

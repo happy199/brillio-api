@@ -34,7 +34,7 @@
 
             <form action="{{ route('jeune.quizzes.submit', $quiz) }}" method="POST" class="space-y-10">
                 @csrf
-                
+
                 @foreach($quiz->questions as $index => $question)
                 <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 md:p-8">
                     <div class="flex items-start justify-between gap-4 mb-6">
@@ -52,7 +52,7 @@
                             {{ $question->points }} {{ $question->points > 1 ? 'pts' : 'pt' }}
                         </span>
                     </div>
-                    
+
                     <div class="space-y-3">
                         @foreach($question->options as $option)
                         <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer bg-white hover:bg-indigo-50 hover:border-indigo-200 transition group has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 has-[:checked]:ring-1 has-[:checked]:ring-indigo-500">
@@ -67,7 +67,7 @@
                     </div>
                 </div>
                 @endforeach
-                
+
                 <div class="pt-6 border-t border-gray-100 text-center">
                     <button type="submit" class="bg-indigo-600 text-white font-bold py-4 px-10 rounded-xl hover:bg-indigo-700 transition shadow-lg hover:shadow-indigo-200/50 hover:-translate-y-1 transform text-lg">
                         Soumettre mes réponses

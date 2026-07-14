@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
-    
+
     <!-- Page header -->
     <div class="sm:flex sm:justify-between sm:items-center mb-8">
         <div class="mb-4 sm:mb-0">
@@ -83,7 +83,7 @@
                                     <!-- Email Header Details -->
                                     <div class="px-8 py-6 border-b border-slate-100 bg-white">
                                         <h2 class="text-xl font-bold text-slate-800 mb-4">{{ $log->subject }}</h2>
-                                        
+
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             <div class="flex gap-2">
                                                 <span class="text-slate-400 font-medium min-w-[60px]">De :</span>
@@ -103,8 +103,8 @@
                                     <!-- Email Content Area -->
                                     <div class="flex-1 overflow-hidden flex flex-col bg-slate-100 p-4 sm:p-8">
                                         <div class="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden flex-1 flex flex-col mx-auto w-full max-w-[700px]">
-                                            <iframe 
-                                                srcdoc="{{ $log->body }}" 
+                                            <iframe
+                                                srcdoc="{{ $log->body }}"
                                                 class="w-full h-full border-none"
                                             ></iframe>
                                         </div>

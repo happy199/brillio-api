@@ -1,5 +1,5 @@
-<div x-data="{ 
-    show: {{ $user->needsProfilingNudge() ? 'true' : 'false' }}, 
+<div x-data="{
+    show: {{ $user->needsProfilingNudge() ? 'true' : 'false' }},
     step: 1,
     rating: 0,
     hoverRating: 0,
@@ -110,8 +110,8 @@
         this.step = 3;
         setTimeout(() => { this.show = false; }, 3000);
     }
-}" 
-x-show="show" 
+}"
+x-show="show"
 x-transition:enter="transition ease-out duration-300"
 x-transition:enter-start="opacity-0"
 x-transition:enter-end="opacity-100"
@@ -119,7 +119,7 @@ x-transition:leave="transition ease-in duration-200"
 x-transition:leave-start="opacity-100"
 x-transition:leave-end="opacity-0"
 x-on:open-profiling-modal.window="show = true; step = 2"
-class="fixed inset-0 z-[70] overflow-y-auto" 
+class="fixed inset-0 z-[70] overflow-y-auto"
 style="display: none;"
 x-cloak>
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -127,14 +127,14 @@ x-cloak>
         <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
 
         <!-- Modal Content -->
-        <div 
-            x-show="show" 
+        <div
+            x-show="show"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-95 translate-y-4"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
             class="relative bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all border border-gray-100 min-h-[350px] flex flex-col justify-center"
         >
-            
+
             <!-- Close Button -->
             <button @click="skip()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,9 +156,9 @@ x-cloak>
 
                 <div class="mt-8 flex justify-center gap-2">
                     <template x-for="i in 5">
-                        <button 
-                            @click="rating = i" 
-                            @mouseenter="hoverRating = i" 
+                        <button
+                            @click="rating = i"
+                            @mouseenter="hoverRating = i"
                             @mouseleave="hoverRating = 0"
                             class="transition-transform hover:scale-110 focus:outline-none"
                         >
@@ -171,17 +171,17 @@ x-cloak>
 
                 <div class="mt-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Un petit commentaire ? (Obligatoire)</label>
-                    <textarea 
-                        x-model="comment" 
-                        class="w-full rounded-2xl border-gray-200 focus:border-primary-500 focus:ring-primary-500 text-sm p-4" 
+                    <textarea
+                        x-model="comment"
+                        class="w-full rounded-2xl border-gray-200 focus:border-primary-500 focus:ring-primary-500 text-sm p-4"
                         placeholder="Qu'est-ce qu'on pourrait améliorer ou que penses-tu de la plateforme ?"
                         rows="3"
                         required
                     ></textarea>
                 </div>
 
-                <button 
-                    @click="submitFeedback" 
+                <button
+                    @click="submitFeedback"
                     :disabled="rating === 0 || comment.trim() === '' || loading"
                     class="w-full mt-8 py-4 bg-primary-600 text-white font-bold rounded-2xl shadow-lg shadow-primary-200 hover:bg-primary-700 transition disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
                 >
@@ -202,7 +202,7 @@ x-cloak>
 
                 <div class="space-y-4 max-h-[60vh] overflow-y-auto px-1">
                     <!-- Dynamic Form Sections -->
-                    
+
                     <!-- If School Level (College/Lycee combined) -->
                     <template x-if="isSchoolLevel">
                         <div class="space-y-4">
@@ -375,8 +375,8 @@ x-cloak>
 
                 <div class="mt-8 flex gap-3">
                     <button @click="skip()" class="flex-1 py-4 bg-gray-100 text-gray-600 font-bold rounded-2xl hover:bg-gray-200 transition">Plus tard</button>
-                    <button 
-                        @click="submitSituation" 
+                    <button
+                        @click="submitSituation"
                         :disabled="loading"
                         class="flex-[2] py-4 bg-primary-600 text-white font-bold rounded-2xl shadow-lg shadow-primary-200 hover:bg-primary-700 transition flex items-center justify-center gap-2"
                     >

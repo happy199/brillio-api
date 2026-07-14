@@ -15,7 +15,7 @@
             <p class="text-sm text-gray-500">Liste des jeunes ayant manifesté un intérêt via la plateforme.</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('admin.establishments.interests.export-csv', $establishment) }}" 
+            <a href="{{ route('admin.establishments.interests.export-csv', $establishment) }}"
                 class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 transition shadow-sm">
                 <i class="fas fa-file-excel mr-2"></i> Exporter CSV
             </a>
