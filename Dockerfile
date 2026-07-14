@@ -71,6 +71,9 @@ COPY docker/default.conf /etc/nginx/http.d/default.conf
 # Copy supervisor configuration
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Copy PHP configuration
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 # Set permissions and prepare folders for non-root execution
 RUN mkdir -p /run/nginx /var/lib/nginx/tmp /var/log/nginx /var/log/supervisor && \
     chown -R www-data:www-data /var/www/html /run/nginx /var/lib/nginx /var/log/nginx /var/log/supervisor && \
