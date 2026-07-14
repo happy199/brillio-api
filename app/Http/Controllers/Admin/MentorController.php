@@ -318,6 +318,10 @@ class MentorController extends Controller
      */
     public function uploadLinkedInProfile(Request $request, MentorProfile $mentor)
     {
+        if ($request->header('Content-Length') > 12 * 1024 * 1024) { // 12MB max
+            return response()->json(['success' => false, 'error' => 'Taille de la requête trop volumineuse.'], 413);
+        }
+
         $request->validate([
             'pdf' => 'required|file|mimes:pdf|max:10240', // 10MB
         ]);

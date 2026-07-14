@@ -361,6 +361,10 @@ class ResourceController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->header('Content-Length') > 30 * 1024 * 1024) { // 30MB max
+            return back()->with('error', 'La taille de la requête est trop volumineuse (max 30 Mo).');
+        }
+
         $messages = [
             'required' => 'Ce champ est obligatoire.',
             'string' => 'Ce champ doit être une chaîne de caractères.',
@@ -531,11 +535,12 @@ class ResourceController extends Controller
         return view('mentor.resources.edit', compact('resource', 'targetingOptions', 'targetingCost', 'analysisCost', 'quizCost'));
     }
 
-    /**
-     * Mise à jour
-     */
     public function update(Request $request, $id)
     {
+        if ($request->header('Content-Length') > 30 * 1024 * 1024) { // 30MB max
+            return back()->with('error', 'La taille de la requête est trop volumineuse (max 30 Mo).');
+        }
+
         // $id contient le slug
         $resource = auth()->user()->resources()->where('slug', $id)->firstOrFail();
 

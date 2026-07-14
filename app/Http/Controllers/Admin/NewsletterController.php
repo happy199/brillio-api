@@ -106,6 +106,11 @@ class NewsletterController extends Controller
 
     public function sendEmail(Request $request, EmailDeliveryService $deliveryService)
     {
+        // Limiter la taille totale du payload (DoS protection)
+        if ($request->header('Content-Length') > 50 * 1024 * 1024) { // 50MB max
+            return back()->with('error', 'La taille totale des fichiers est trop volumineuse (max 50 Mo).');
+        }
+
         // Fix pour le JS qui envoie du JSON stringifié au lieu d'un array
         $precheck = $request->validate(['recipients' => 'nullable']);
         if (isset($precheck['recipients']) && is_string($precheck['recipients'])) {

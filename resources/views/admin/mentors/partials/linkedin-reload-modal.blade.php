@@ -160,11 +160,21 @@
             handleDrop(e) {
                 this.isDragging = false;
                 const file = e.dataTransfer.files[0];
+                if (file && file.size > 10 * 1024 * 1024) {
+                    this.status = 'error';
+                    this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
+                    return;
+                }
                 this.uploadFile(file);
             },
 
             handleFileSelect(e) {
                 const file = e.target.files[0];
+                if (file && file.size > 10 * 1024 * 1024) {
+                    this.status = 'error';
+                    this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
+                    return;
+                }
                 this.uploadFile(file);
             },
 

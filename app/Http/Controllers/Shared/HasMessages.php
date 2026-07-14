@@ -73,6 +73,14 @@ trait HasMessages
         $user = auth()->user();
         $config = $this->getMessageConfig();
 
+        if ($request->header('Content-Length') > 15 * 1024 * 1024) { // 15MB max
+            if (isset($config['is_api']) && $config['is_api']) {
+                return response()->json(['message' => 'Taille de la requête trop volumineuse (max 15 Mo).'], 413);
+            }
+
+            return back()->withErrors(['attachment' => 'Taille de la requête trop volumineuse (max 15 Mo).']);
+        }
+
         abort_if($mentorship->{$config['user_column']} !== $user->id, 403);
         abort_if($mentorship->status !== 'accepted', 403);
 

@@ -277,12 +277,20 @@
 
             async handleFileUpload(event) {
                 const file = event.target.files[0];
+                if (file && file.size > 5 * 1024 * 1024) {
+                    this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
+                    return;
+                }
                 this.processFile(file);
             },
 
             async handleDrop(event) {
                 this.isDragging = false;
                 const file = event.dataTransfer.files[0];
+                if (file && file.size > 5 * 1024 * 1024) {
+                    this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
+                    return;
+                }
                 this.processFile(file);
             },
 
