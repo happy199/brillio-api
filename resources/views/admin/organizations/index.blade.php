@@ -103,6 +103,35 @@
                                 class="text-indigo-600 hover:text-indigo-900 mr-3" title="Voir">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            @if(auth()->user()->isCommercial() || auth()->user()->isAdmin())
+                                @php
+                                    $activeActivity = \App\Models\CommercialActivity::where('assignable_type', \App\Models\Organization::class)
+                                        ->where('assignable_id', $organization->id)
+                                        ->where('status', 'active')
+                                        ->first();
+                                @endphp
+                                @if(!$activeActivity)
+                                <form action="{{ route('admin.commercials.take_charge') }}" method="POST" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="type" value="organization">
+                                    <input type="hidden" name="id" value="{{ $organization->id }}">
+                                    <button type="submit" class="text-indigo-600 hover:text-indigo-900 mr-3 text-sm font-medium">
+                                        Prendre en charge
+                                    </button>
+                                </form>
+                                @elseif($activeActivity->commercial_id === auth()->id() || auth()->user()->isAdmin())
+                                <button type="button" 
+                                        @click="$dispatch('open-close-activity-modal', { url: '{{ route('admin.commercials.end_charge', $activeActivity) }}' })"
+                                        class="text-green-600 hover:text-green-900 mr-3 text-sm font-medium">
+                                    Clôturer
+                                </button>
+                                @else
+                                <span class="text-gray-500 mr-3 text-sm italic">
+                                    Géré par {{ $activeActivity->commercial->name }}
+                                </span>
+                                @endif
+                            @endif
+                            @if(auth()->user()->isAdmin())
                             <a href="{{ route('admin.organizations.edit', $organization) }}"
                                 class="text-yellow-600 hover:text-yellow-900 mr-3" title="Modifier">
                                 <i class="fas fa-edit"></i>
@@ -116,6 +145,7 @@
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

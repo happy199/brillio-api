@@ -10,6 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-900">Publicités & Annonces</h1>
             <p class="text-gray-600">Gérez les publicités publiques et validez les propositions des organisations.</p>
         </div>
+        @if(auth()->user()->isAdmin())
         <a href="{{ route('admin.advertisements.create') }}"
            class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 font-semibold shadow-sm">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,6 +18,7 @@
             </svg>
             Nouvelle Publicité
         </a>
+        @endif
     </div>
 
     <!-- Stats & Filters -->
@@ -125,6 +127,7 @@
                             </span>
                         </div>
 
+                        @if(auth()->user()->isAdmin())
                         <!-- Action buttons -->
                         <div class="pt-4 border-t border-gray-150 flex items-center justify-between">
                             <!-- Left: Approval buttons for pending items -->
@@ -169,6 +172,7 @@
                                 </form>
                             </div>
                         </div>
+                        @endif
                     </div>
                 </div>
             @endforeach

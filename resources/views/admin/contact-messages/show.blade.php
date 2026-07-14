@@ -55,7 +55,7 @@
         </div>
 
         <!-- Reply Form -->
-        @if($message->status != 'replied')
+        @if($message->status != 'replied' && auth()->user()->isAdmin())
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Répondre au message</h3>
                 <form action="{{ route('admin.contact-messages.reply', $message->id) }}" method="POST" class="space-y-4">

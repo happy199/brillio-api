@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="space-y-6">
+    @include('admin.commercials._take_charge', ['type' => 'mentor', 'id' => $mentor->id])
     <!-- Header -->
     <div class="flex justify-between items-center">
         <div class="flex items-center gap-4">

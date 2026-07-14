@@ -82,6 +82,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'linkedin_url',
         'is_admin',
         'is_coach',
+        'is_commercial',
         'auth_provider',
         'provider_id',
         'onboarding_completed',
@@ -129,6 +130,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'date_of_birth' => 'date',
             'is_admin' => 'boolean',
             'is_coach' => 'boolean',
+            'is_commercial' => 'boolean',
             'onboarding_completed' => 'boolean',
             'onboarding_data' => 'array',
             'last_login_at' => 'datetime',
@@ -198,6 +200,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Vérifie si l'utilisateur est commercial
+     */
+    public function isCommercial(): bool
+    {
+        return $this->is_commercial === true;
+    }
+
+    /**
      * Vérifie si l'utilisateur est un formateur invité
      */
     public function isGuestTrainer(): bool
@@ -243,6 +253,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function chatMessages(): HasManyThrough
     {
         return $this->hasManyThrough(ChatMessage::class, ChatConversation::class, 'user_id', 'conversation_id');
+    }
+
+    /**
+     * Relation vers les activités commerciales (si l'utilisateur est commercial)
+     */
+    public function commercialActivities(): HasMany
+    {
+        return $this->hasMany(CommercialActivity::class, 'commercial_id');
     }
 
     /**
