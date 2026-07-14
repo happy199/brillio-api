@@ -64,8 +64,9 @@
                     :class="isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'"
                     class="border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition relative">
 
-                    <input type="file" x-ref="fileInput" @change="handleFileSelect($event)" class="hidden"
-                        accept=".pdf">
+                    <form enctype="multipart/form-data" style="display:none;">
+                        <input type="file" name="pdf" x-ref="fileInput" @change="handleFileSelect($event)" accept=".pdf">
+                    </form>
 
                     <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
@@ -160,7 +161,7 @@
             handleDrop(e) {
                 this.isDragging = false;
                 const file = e.dataTransfer.files[0];
-                if (file && file.size > 10 * 1024 * 1024) {
+                if (file && file.size > 10485760) {
                     this.status = 'error';
                     this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
                     return;
@@ -170,7 +171,7 @@
 
             handleFileSelect(e) {
                 const file = e.target.files[0];
-                if (file && file.size > 10 * 1024 * 1024) {
+                if (file && file.size > 10485760) {
                     this.status = 'error';
                     this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
                     return;
@@ -185,7 +186,7 @@
                     return;
                 }
 
-                if (file.size > 10 * 1024 * 1024) {
+                if (file.size > 10485760) {
                     this.status = 'error';
                     this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
                     return;

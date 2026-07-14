@@ -121,7 +121,9 @@
 
             <!-- Zone d'upload -->
             <div x-show="!uploading && !parsedData">
-                <input type="file" accept=".pdf" @change="handleFileUpload($event)" class="hidden" x-ref="fileInput">
+                <form enctype="multipart/form-data" style="display:none;">
+                    <input type="file" name="pdf" accept=".pdf" @change="handleFileUpload($event)" x-ref="fileInput">
+                </form>
                 <div @click="$refs.fileInput.click()" @dragover.prevent="isDragging = true"
                     @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop($event)"
                     :class="{ 'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging }"
@@ -277,7 +279,7 @@
 
             async handleFileUpload(event) {
                 const file = event.target.files[0];
-                if (file && file.size > 5 * 1024 * 1024) {
+                if (file && file.size > 5242880) {
                     this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
                     return;
                 }
@@ -287,7 +289,7 @@
             async handleDrop(event) {
                 this.isDragging = false;
                 const file = event.dataTransfer.files[0];
-                if (file && file.size > 5 * 1024 * 1024) {
+                if (file && file.size > 5242880) {
                     this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
                     return;
                 }
@@ -305,7 +307,7 @@
                     return;
                 }
 
-                if (file.size > 5 * 1024 * 1024) {
+                if (file.size > 5242880) {
                     this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
                     return;
                 }
