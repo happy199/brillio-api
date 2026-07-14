@@ -36,7 +36,7 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 COPY . .
 
 # Install Node dependencies and build assets
-RUN npm ci && npm run build
+RUN npm ci --legacy-peer-deps && npm run build
 
 # Generate optimized autoload files
 RUN composer dump-autoload --optimize --no-dev
