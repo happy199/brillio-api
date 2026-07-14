@@ -25,7 +25,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
-USER www-data
 
 # Copy composer files
 COPY composer.json composer.lock ./
@@ -78,7 +77,6 @@ RUN mkdir -p /run/nginx /var/lib/nginx/tmp /var/log/nginx /var/log/supervisor &&
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 WORKDIR /var/www/html
-USER www-data
 
 # Create storage symlink
 RUN php artisan storage:link --no-interaction
