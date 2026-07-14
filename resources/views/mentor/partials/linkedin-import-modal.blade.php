@@ -122,7 +122,8 @@
             <!-- Zone d'upload -->
             <div x-show="!uploading && !parsedData">
                 <form enctype="multipart/form-data" style="display:none;">
-                    <input type="file" name="pdf" accept=".pdf" @change="handleFileUpload($event)" x-ref="fileInput">
+                    <label for="mentor_linkedin_pdf" class="sr-only">LinkedIn PDF</label>
+                    <input type="file" id="mentor_linkedin_pdf" name="pdf" accept=".pdf" @change="handleFileUpload($event)" x-ref="fileInput">
                 </form>
                 <div @click="$refs.fileInput.click()" @dragover.prevent="isDragging = true"
                     @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop($event)"

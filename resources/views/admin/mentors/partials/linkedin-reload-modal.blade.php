@@ -65,7 +65,8 @@
                     class="border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition relative">
 
                     <form enctype="multipart/form-data" style="display:none;">
-                        <input type="file" name="pdf" x-ref="fileInput" @change="handleFileSelect($event)" accept=".pdf">
+                        <label for="admin_linkedin_pdf" class="sr-only">LinkedIn PDF</label>
+                        <input type="file" id="admin_linkedin_pdf" name="pdf" x-ref="fileInput" @change="handleFileSelect($event)" accept=".pdf">
                     </form>
 
                     <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor"
