@@ -59,14 +59,15 @@
 
             <!-- Mode: Upload (Fallback si PDF manquant ou désiré) -->
             <div x-show="mode === 'upload'" class="space-y-4">
-                <div @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false"
-                    @drop.prevent="handleDrop($event)" @click="$refs.fileInput.click()"
+                <div x-ref="dropZone" @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false"
+                    @click="$refs.fileInput.click()"
                     :class="isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'"
                     class="border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition relative">
 
-                    <form enctype="multipart/form-data" style="display:none;">
+                    <form action="{{ route('admin.mentors.linkedin-upload', $mentor) }}" method="POST" enctype="multipart/form-data" style="display:none;">
+                        @csrf
                         <label for="admin_linkedin_pdf" class="sr-only">LinkedIn PDF</label>
-                        <input type="file" id="admin_linkedin_pdf" name="pdf" x-ref="fileInput" @change="handleFileSelect($event)" accept=".pdf">
+                        <input type="file" id="admin_linkedin_pdf" name="pdf" x-ref="fileInput" accept=".pdf">
                     </form>
 
                     <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor"
@@ -159,73 +160,78 @@
                 }
             },
 
-            handleDrop(e) {
-                this.isDragging = false;
-                const file = e.dataTransfer.files[0];
-                if (file && file.size > 10485760) {
-                    this.status = 'error';
-                    this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
-                    return;
-                }
-                this.uploadFile(file);
-            },
-
-            handleFileSelect(e) {
-                const file = e.target.files[0];
-                if (file && file.size > 10485760) {
-                    this.status = 'error';
-                    this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
-                    return;
-                }
-                this.uploadFile(file);
-            },
-
-            async uploadFile(file) {
-                if (!file || file.type !== 'application/pdf') {
-                    this.status = 'error';
-                    this.message = "Veuillez sélectionner un fichier PDF valide.";
-                    return;
-                }
-
-                if (file.size > 10485760) {
-                    this.status = 'error';
-                    this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
-                    return;
-                }
-
-                this.loading = true;
-                this.message = '';
-
-                const formData = new FormData();
-                formData.append('pdf', file);
-
-                try {
-                    const response = await fetch('{{ route('admin.mentors.linkedin-upload', $mentor) }}', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        this.status = 'success';
-                        this.message = data.message;
-                        setTimeout(() => window.location.reload(), 1500);
+            init() {
+                this.$refs.fileInput.addEventListener('change', (e) => {
+                    if (!e.target.files || e.target.files.length === 0) return;
+                    const file = e.target.files[0];
+                    if (file.size <= 10485760) {
+                        this.processReloadFile(file);
                     } else {
                         this.status = 'error';
-                        this.message = data.error;
+                        this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
                     }
-                } catch (e) {
+                });
+
+                this.$refs.dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.isDragging = false;
+                    if (!e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+                    const file = e.dataTransfer.files[0];
+                    if (file.size <= 10485760) {
+                        this.processReloadFile(file);
+                    } else {
+                        this.status = 'error';
+                        this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
+                    }
+                });
+            },
+
+            async processReloadFile(file) {
+                if (!file) return;
+                if (file.size <= 10485760) {
+                    if (file.type !== 'application/pdf') {
+                        this.status = 'error';
+                        this.message = "Veuillez sélectionner un fichier PDF valide.";
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.message = '';
+
+                    const formData = new FormData();
+                    formData.append('pdf', file);
+
+                    try {
+                        const response = await fetch('{{ route('admin.mentors.linkedin-upload', $mentor) }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.status = 'success';
+                            this.message = data.message;
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            this.status = 'error';
+                            this.message = data.error;
+                        }
+                    } catch (error) {
+                        this.status = 'error';
+                        this.message = "Une erreur est survenue lors de l'upload.";
+                    } finally {
+                        this.loading = false;
+                    }
+                } else {
                     this.status = 'error';
-                    this.message = "Une erreur est survenue lors de l'upload.";
-                } finally {
-                    this.loading = false;
+                    this.message = "Le fichier est trop volumineux (maximum 10 Mo).";
                 }
-            }
+            },
         }
     }
 </script>

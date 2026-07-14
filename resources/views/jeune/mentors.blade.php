@@ -272,7 +272,7 @@
         if (country) params.set('country', country);
         if (experience) params.set('experience', experience);
 
-        window.location.href = '{{ route('jeune.mentors') }}?' + params.toString();
+        window.location.href = '/espace-jeune/mentors?' + params.toString();
     }
 
     // Search on enter

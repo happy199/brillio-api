@@ -121,12 +121,13 @@
 
             <!-- Zone d'upload -->
             <div x-show="!uploading && !parsedData">
-                <form enctype="multipart/form-data" style="display:none;">
+                <form action="{{ route('mentor.profile.linkedin-import') }}" method="POST" enctype="multipart/form-data" style="display:none;">
+                    @csrf
                     <label for="mentor_linkedin_pdf" class="sr-only">LinkedIn PDF</label>
-                    <input type="file" id="mentor_linkedin_pdf" name="pdf" accept=".pdf" @change="handleFileUpload($event)" x-ref="fileInput">
+                    <input type="file" id="mentor_linkedin_pdf" name="pdf" accept=".pdf" x-ref="fileInput">
                 </form>
-                <div @click="$refs.fileInput.click()" @dragover.prevent="isDragging = true"
-                    @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop($event)"
+                <div x-ref="dropZone" @click="$refs.fileInput.click()" @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
                     :class="{ 'border-blue-500 bg-blue-50': isDragging, 'border-gray-300': !isDragging }"
                     class="border-2 border-dashed rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
                     <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" width="64" height="64" fill="none"
@@ -276,78 +277,81 @@
                 this.updateMessage();
             },
 
+            init() {
+                this.$refs.fileInput.addEventListener('change', (e) => {
+                    if (!e.target.files || e.target.files.length === 0) return;
+                    const file = e.target.files[0];
+                    if (file.size <= 5242880) {
+                        this.processFile(file);
+                    } else {
+                        this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
+                    }
+                });
+
+                this.$refs.dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.isDragging = false;
+                    if (!e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+                    const file = e.dataTransfer.files[0];
+                    if (file.size <= 5242880) {
+                        this.processFile(file);
+                    } else {
+                        this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
+                    }
+                });
+            },
+
             isDragging: false,
-
-            async handleFileUpload(event) {
-                const file = event.target.files[0];
-                if (file && file.size > 5242880) {
-                    this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
-                    return;
-                }
-                this.processFile(file);
-            },
-
-            async handleDrop(event) {
-                this.isDragging = false;
-                const file = event.dataTransfer.files[0];
-                if (file && file.size > 5242880) {
-                    this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
-                    return;
-                }
-                this.processFile(file);
-            },
 
             async processFile(file) {
                 if (!file) return;
+                if (file.size <= 5242880) {
+                    this.errorMessage = '';
+                    this.successMessage = '';
 
-                this.errorMessage = '';
-                this.successMessage = '';
-
-                if (!file.name.endsWith('.pdf')) {
-                    this.errorMessage = 'Veuillez sélectionner un fichier PDF';
-                    return;
-                }
-
-                if (file.size > 5242880) {
-                    this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
-                    return;
-                }
-
-                this.pdfFile = file;
-                this.uploading = true;
-                this.startProgress();
-
-                try {
-                    const formData = new FormData();
-                    formData.append('pdf', file);
-
-                    const response = await fetch('/espace-mentor/profil/linkedin-import', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        this.parsedData = result.data;
-                        this.successMessage = result.message || 'PDF analysé avec succès !';
-                    } else {
-                        this.errorMessage = result.error || 'Une erreur est survenue lors de l\'analyse du PDF';
-                        this.reset();
+                    if (!file.name.endsWith('.pdf')) {
+                        this.errorMessage = 'Veuillez sélectionner un fichier PDF';
+                        return;
                     }
-                } catch (error) {
-                    this.errorMessage = 'Erreur de connexion au serveur. Veuillez réessayer.';
-                    console.error('Upload error:', error);
-                    this.reset();
-                } finally {
-                    this.stopProgress();
-                    setTimeout(() => {
-                        this.uploading = false;
-                    }, 500);
+
+                    this.pdfFile = file;
+                    this.uploading = true;
+                    this.startProgress();
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('pdf', file);
+
+                        const response = await fetch('/espace-mentor/profil/linkedin-import', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.parsedData = result.data;
+                            this.successMessage = result.message || 'PDF analysé avec succès !';
+                        } else {
+                            this.errorMessage = result.error || 'Une erreur est survenue lors de l\'analyse du PDF';
+                            this.reset();
+                        }
+                    } catch (error) {
+                        this.errorMessage = 'Erreur de connexion au serveur. Veuillez réessayer.';
+                        console.error('Upload error:', error);
+                        this.reset();
+                    } finally {
+                        this.stopProgress();
+                        setTimeout(() => {
+                            this.uploading = false;
+                        }, 500);
+                    }
+                } else {
+                    this.errorMessage = 'Le fichier est trop volumineux (maximum 5 Mo)';
                 }
             },
 

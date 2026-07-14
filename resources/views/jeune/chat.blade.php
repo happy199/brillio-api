@@ -444,7 +444,12 @@
                             } else {
                                 if (data.redirect_to_wallet) {
                                     if (confirm(data.error + "\n\nVoulez-vous être redirigé vers votre portefeuille pour recharger ?")) {
-                                        window.location.href = data.wallet_url;
+                                        const target = data.wallet_url;
+                                        if (target && (target.startsWith('/') || target.startsWith(window.location.origin))) {
+                                            window.location.href = target;
+                                        } else {
+                                            window.location.href = '/jeune/portefeuille';
+                                        }
                                         return;
                                     }
                                 }
@@ -541,8 +546,13 @@
                              if (data.success) {
                                  this.needsHumanSupport = true;
                                  await this.loadConversation(this.currentConversationId);
-                             } else if (data.redirect_to_wallet) {
-                                 window.location.href = data.wallet_url;
+                              } else if (data.redirect_to_wallet) {
+                                  const target = data.wallet_url;
+                                  if (target && (target.startsWith('/') || target.startsWith(window.location.origin))) {
+                                      window.location.href = target;
+                                  } else {
+                                      window.location.href = '/jeune/portefeuille';
+                                  }
                              } else {
                                  alert(data.error || 'Une erreur est survenue.');
                              }

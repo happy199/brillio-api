@@ -275,16 +275,25 @@
                 const isFullHtml = data.body.toLowerCase().includes('<!doctype') || data.body.toLowerCase().includes('<html');
 
                 if (isFullHtml) {
-                    // Pour un HTML complet, on utilise une iframe pour l'isolation
-                    container.innerHTML = `<iframe id="previewIframe" title="Aperçu de la campagne" class="w-full min-h-[500px] border-0"></iframe>`;
-                    const iframe = document.getElementById('previewIframe');
+                    const iframe = document.createElement('iframe');
+                    iframe.id = 'previewIframe';
+                    iframe.title = 'Aperçu de la campagne';
+                    iframe.className = 'w-full min-h-[500px] border-0';
+                    container.replaceChildren(iframe);
+
                     const doc = iframe.contentDocument || iframe.contentWindow.document;
                     doc.open();
                     doc.write(data.body);
                     doc.close();
                 } else {
-                    // Sinon affichage standard
-                    container.innerHTML = `<div class="p-6 prose max-w-none">${data.body}</div>`;
+                    const parser = new DOMParser();
+                    const parsedDoc = parser.parseFromString(data.body, 'text/html');
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'p-6 prose max-w-none';
+                    while (parsedDoc.body.firstChild) {
+                        wrapper.appendChild(parsedDoc.body.firstChild);
+                    }
+                    container.replaceChildren(wrapper);
                 }
 
                 // Icons and colors
@@ -304,7 +313,7 @@
                 // Attachments
                 const attachBox = document.getElementById('modalAttachmentsBox');
                 const attachList = document.getElementById('modalAttachmentsList');
-                attachList.innerHTML = '';
+                attachList.replaceChildren();
                 
                 if (data.attachments && data.attachments.length > 0) {
                     attachBox.classList.remove('hidden');
@@ -313,7 +322,12 @@
                         link.href = `/storage/${file.path}`;
                         link.target = '_blank';
                         link.className = 'inline-flex items-center px-3 py-1 bg-white border rounded text-xs text-indigo-700 hover:bg-indigo-50 transition';
-                        link.innerHTML = `<i class="fas fa-file-alt mr-2"></i> ${file.name}`;
+                        
+                        const icon = document.createElement('i');
+                        icon.className = 'fas fa-file-alt mr-2';
+                        link.appendChild(icon);
+                        link.appendChild(document.createTextNode(' ' + file.name));
+                        
                         attachList.appendChild(link);
                     });
                 } else {

@@ -577,14 +577,26 @@
             htmlEditor.value = html;
             editorContainer.classList.add('hidden');
             htmlEditor.classList.remove('hidden');
-            toggleHtmlBtn.innerHTML = '<i class="fas fa-edit mr-1"></i>Mode Texte Riche';
+            
+            toggleHtmlBtn.replaceChildren();
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-edit mr-1';
+            toggleHtmlBtn.appendChild(icon);
+            toggleHtmlBtn.appendChild(document.createTextNode('Mode Texte Riche'));
+            
             toggleHtmlBtn.classList.add('bg-indigo-600', 'text-white');
         } else {
             const html = htmlEditor.value;
-            quill.root.innerHTML = html;
+            quill.clipboard.dangerouslyPasteHTML(html);
             htmlEditor.classList.add('hidden');
             editorContainer.classList.remove('hidden');
-            toggleHtmlBtn.innerHTML = '<i class="fas fa-code mr-1"></i>Mode HTML / Source';
+            
+            toggleHtmlBtn.replaceChildren();
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-code mr-1';
+            toggleHtmlBtn.appendChild(icon);
+            toggleHtmlBtn.appendChild(document.createTextNode('Mode HTML / Source'));
+            
             toggleHtmlBtn.classList.remove('bg-indigo-600', 'text-white');
         }
     });
@@ -615,15 +627,26 @@
 
     if (attachmentsInput) {
         attachmentsInput.addEventListener('change', function() {
-            fileList.innerHTML = '';
+            fileList.replaceChildren();
             Array.from(this.files).forEach((file) => {
                 const div = document.createElement('div');
                 div.className = 'flex items-center space-x-2 px-3 py-1 bg-white border rounded text-xs text-indigo-700';
-                div.innerHTML = `
-                    <i class="fas fa-file-alt text-indigo-400"></i>
-                    <span class="truncate max-w-[150px] font-medium">${file.name}</span>
-                    <span class="text-gray-400">(${(file.size / 1024).toFixed(0)} KB)</span>
-                `;
+                
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-file-alt text-indigo-400';
+                
+                const spanName = document.createElement('span');
+                spanName.className = 'truncate max-w-[150px] font-medium';
+                spanName.textContent = file.name;
+                
+                const spanSize = document.createElement('span');
+                spanSize.className = 'text-gray-400';
+                spanSize.textContent = ` (${(file.size / 1024).toFixed(0)} KB)`;
+                
+                div.appendChild(icon);
+                div.appendChild(spanName);
+                div.appendChild(spanSize);
+                
                 fileList.appendChild(div);
             });
         });

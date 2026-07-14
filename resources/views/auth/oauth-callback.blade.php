@@ -131,7 +131,12 @@
                         // Si on a une redirection (succès ou confirmation), rediriger
                         if (data.redirect) {
                             document.getElementById('status-message').textContent = 'Redirection...';
-                            window.location.href = data.redirect;
+                            const target = data.redirect;
+                            if (target && (target.startsWith('/') || target.startsWith(window.location.origin))) {
+                                window.location.href = target;
+                            } else {
+                                window.location.href = '/mentor/dashboard';
+                            }
                         } else if (data.success) {
                             // Succès mais pas de redirection spécifique
                             window.location.href = '/mentor/dashboard';
@@ -176,7 +181,12 @@
                         // Si on a une redirection (succès ou confirmation), rediriger
                         if (data.redirect) {
                             document.getElementById('status-message').textContent = 'Redirection...';
-                            window.location.href = data.redirect;
+                            const target = data.redirect;
+                            if (target && (target.startsWith('/') || target.startsWith(window.location.origin))) {
+                                window.location.href = target;
+                            } else {
+                                window.location.href = '/mentor/dashboard';
+                            }
                         } else if (data.success) {
                             // Succès mais pas de redirection spécifique
                             window.location.href = '/mentor/dashboard';
@@ -210,8 +220,7 @@
 
             function showError(message, redirectUrl) {
                 document.getElementById('status-message').textContent = 'Une erreur est survenue';
-                // Utiliser innerHTML pour afficher le HTML (br, strong, etc.)
-                document.getElementById('error-message').innerHTML = message;
+                document.getElementById('error-message').textContent = message;
                 document.getElementById('error-container').style.display = 'block';
 
                 // Masquer le loader
@@ -221,7 +230,11 @@
                 // Utiliser redirectUrl de la réponse si disponible, sinon errorUrl par défaut
                 const finalRedirectUrl = redirectUrl || errorUrl;
                 setTimeout(() => {
-                    window.location.href = finalRedirectUrl;
+                    if (finalRedirectUrl && (finalRedirectUrl.startsWith('/') || finalRedirectUrl.startsWith(window.location.origin))) {
+                        window.location.href = finalRedirectUrl;
+                    } else {
+                        window.location.href = '/login';
+                    }
                 }, 15000);
             }
 

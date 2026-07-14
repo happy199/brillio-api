@@ -94,7 +94,7 @@
                                     
                                     // Set initial content
                                     if ($refs.contentInput.value) {
-                                        quill.root.innerHTML = $refs.contentInput.value;
+                                        quill.clipboard.dangerouslyPasteHTML($refs.contentInput.value);
                                     }
 
                                     // Sync content

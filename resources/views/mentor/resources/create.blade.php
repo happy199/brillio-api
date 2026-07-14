@@ -123,7 +123,7 @@
                                     
                                     // Set initial content
                                     if ($refs.contentInput.value) {
-                                        quill.root.innerHTML = $refs.contentInput.value;
+                                        quill.clipboard.dangerouslyPasteHTML($refs.contentInput.value);
                                     }
 
                                     // Sync content
@@ -1132,7 +1132,7 @@
                         this.isOpen = false;
                         if (window.showToast) window.showToast(data.error || 'Erreur lors de la récupération', 'error');
                         if (response.status === 402 && confirm('Crédits insuffisants. Voulez-vous recharger votre compte ?')) {
-                            window.location.href = "{{ route('mentor.wallet.index') }}";
+                            window.location.href = "/espace-mentor/portefeuille";
                         }
                     }
                 } catch (error) {
@@ -1226,7 +1226,7 @@
                             alert("Crédits insuffisants. Redirection vers le portefeuille...");
                         }
                         setTimeout(() => {
-                            window.location.href = "{{ route('mentor.wallet.index') }}";
+                            window.location.href = "/espace-mentor/portefeuille";
                         }, 1500);
                         return;
                     }

@@ -63,7 +63,7 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($mentorships as $mentorship)
                         <tr class="hover:bg-gray-50 transition-colors cursor-pointer" @if($organization->isEnterprise())
-                            x-on:click="window.location.href='{{ route('organization.conversations.show', $mentorship, false) }}'"
+                             x-on:click="window.location.pathname='{{ route('organization.conversations.show', $mentorship, false) }}'"
                             @endif>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-4">
