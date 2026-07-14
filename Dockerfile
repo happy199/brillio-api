@@ -86,3 +86,5 @@ EXPOSE 8080
 
 # Start supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+ARG RUN_USER=root
+USER $RUN_USER
