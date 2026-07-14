@@ -79,7 +79,7 @@ WORKDIR /var/www/html
 RUN php artisan storage:link --no-interaction
 
 # Switch to non-root user
-USER www-data
+# (Removed because Nginx needs root to bind to 443 and read SSL certs)
 
 # Expose port 8080 (Cloud Run requirement)
 EXPOSE 8080
