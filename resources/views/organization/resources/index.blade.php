@@ -47,7 +47,7 @@
             </div>
 
             <!-- Type Filter -->
-            <select name="type" x-on:change="this.form.submit()"
+            <select name="type" onchange="this.form.submit()"
                 class="appearance-none pl-3 pr-8 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-organization-500 focus:border-organization-500 hover:bg-gray-50 cursor-pointer">
                 <option value="all">Tous les types</option>
                 <option value="article" {{ request('type')==='article' ? 'selected' : '' }}>📄 Article</option>
