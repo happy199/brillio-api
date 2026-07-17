@@ -387,7 +387,7 @@ class MentorDashboardController extends Controller
             // Stocker temporairement le PDF
             $pdfValidated = $request->validate(['pdf' => 'required|file|mimes:pdf|max:5120']);
             $pdfPath = $pdfValidated['pdf']->store('temp-linkedin-pdfs', 'local');
-            $fullPath = storage_path('app/'.$pdfPath);
+            $fullPath = Storage::disk('local')->path($pdfPath);
 
             // Parser le PDF
             $profileData = $parserService->parsePdf($fullPath);

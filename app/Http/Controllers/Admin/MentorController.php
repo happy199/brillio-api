@@ -291,7 +291,7 @@ class MentorController extends Controller
         }
 
         try {
-            $fullPath = storage_path('app/'.$mentor->linkedin_pdf_path);
+            $fullPath = Storage::disk('local')->path($mentor->linkedin_pdf_path);
             $profileData = $this->parserService->parsePdf($fullPath);
 
             $this->processLinkedInImport($mentor, $profileData);
@@ -333,7 +333,7 @@ class MentorController extends Controller
             $originalName = $pdfFile->getClientOriginalName();
 
             // Parser le PDF
-            $fullPath = storage_path('app/'.$finalPdfPath);
+            $fullPath = Storage::disk('local')->path($finalPdfPath);
             $profileData = $this->parserService->parsePdf($fullPath);
 
             // Mettre à jour les métadonnées de fichier
