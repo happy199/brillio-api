@@ -192,6 +192,7 @@ class LinkedInPdfParserService
             "- 'name' → Le NOM COMPLET de la personne. Il se trouve TOUJOURS au tout début du document (1ère ou 2ème ligne). Ne le confonds JAMAIS avec le début d'une phrase du résumé.\n".
             "- 'headline' → Titre/accroche sous le nom (ex: 'Data Product Manager | J'aligne vision produit...'). Ne JAMAIS mettre ici le contenu de la section Résumé.\n".
             "- 'summary' → Contenu COMPLET de la section 'Résumé' du profil LinkedIn PDF. Si cette section est absente ou vide, mettre une chaîne vide ''. NE PAS substituer par le headline.\n".
+            "- 'contact.linkedin' → Cherche l'URL 'linkedin.com/in/'. Dans les PDF, cette URL est souvent coupée sur 2 ou 3 lignes (ex: ligne 1: 'linkedin.com/in/', ligne 2: 'nom-prenom-', ligne 3: 'xyz (LinkedIn)'). Tu DOIS recoller tous ces morceaux pour former l'URL complète sans espaces et enlever la mention '(LinkedIn)'.\n".
             "   → 'phone' → Numéro de téléphone (ex: '+33 6 12 34 56 78').\n".
             "   → 'location' → Ville et pays du mentor (ex: 'Nantes, France'). Chercher SOUS le nom au début du PDF.\n\n".
             "STRUCTURE JSON ATTENDUE :\n".
