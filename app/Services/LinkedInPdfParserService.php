@@ -189,6 +189,7 @@ class LinkedInPdfParserService
             "Les PDFs LinkedIn génèrent parfois des erreurs d'extraction qui font disparaître des lettres accentuées ou des apostrophes (ex: 'systmes' au lieu de 'systèmes', 'dassurance' au lieu de 'd\\'assurance', 'quipes' au lieu d\\'équipes').\n".
             "→ Tu DOIS OBLIGATOIREMENT corriger ces mots. Le texte final dans le JSON doit être dans un français parfait, fluide, cohérent, sans fautes d'orthographe ou de grammaire. Si une lettre manque à cause du parsing PDF, déduis le mot correct et répare-le.\n\n".
             "RÈGLES DE MAPPING DES CHAMPS :\n".
+            "- 'name' → Le NOM COMPLET de la personne. Il se trouve TOUJOURS au tout début du document (1ère ou 2ème ligne). Ne le confonds JAMAIS avec le début d'une phrase du résumé.\n".
             "- 'headline' → Titre/accroche sous le nom (ex: 'Data Product Manager | J'aligne vision produit...'). Ne JAMAIS mettre ici le contenu de la section Résumé.\n".
             "- 'summary' → Contenu COMPLET de la section 'Résumé' du profil LinkedIn PDF. Si cette section est absente ou vide, mettre une chaîne vide ''. NE PAS substituer par le headline.\n".
             "   → 'phone' → Numéro de téléphone (ex: '+33 6 12 34 56 78').\n".

@@ -68,6 +68,12 @@ class MentorDashboardController extends Controller
      */
     public function updateProfile(Request $request)
     {
+        // Nettoyer les URLs avant validation (si non vides et sans protocole)
+        $request->merge([
+            'linkedin_url' => $this->formatUrl($request->linkedin_url),
+            'website_url' => $this->formatUrl($request->website_url),
+        ]);
+
         $validated = $request->validate([
             'bio' => 'required|string|max:2000',
             'current_position' => 'required|string|max:255',
@@ -80,18 +86,6 @@ class MentorDashboardController extends Controller
             'advice' => 'nullable|string|max:1000',
             'is_published' => 'nullable|boolean',
             'profile_photo' => 'nullable|image|max:5120', // 5MB max
-        ]);
-
-        // Nettoyer les URLs avant de continuer (si non vides et sans protocole)
-        $request->merge([
-            'linkedin_url' => $this->formatUrl($request->linkedin_url),
-            'website_url' => $this->formatUrl($request->website_url),
-        ]);
-
-        // Re-valider uniquement les URLs après formatage pour être sur qu'elles passent
-        $request->validate([
-            'linkedin_url' => 'nullable|url|max:255',
-            'website_url' => 'nullable|url|max:255',
         ]);
 
         // Mettre à jour les données validées avec les URLs formatées

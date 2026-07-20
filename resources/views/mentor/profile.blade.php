@@ -66,6 +66,17 @@
         @csrf
         @method('PUT')
 
+        @if ($errors->any())
+            <div class="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 mb-6">
+                <ul class="list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+
         <!-- Basic Info -->
         <div class="bg-white rounded-2xl p-6 shadow-sm">
             <h2 class="text-lg font-bold text-gray-900 mb-6">Informations de base</h2>
