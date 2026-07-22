@@ -299,7 +299,7 @@ class BrillioIAService
                 // 2. Gestion des erreurs et fallbacks
                 if ($response->status() === 429 || $response->status() >= 500) {
                     if (! $attemptedModel) {
-                        $fallbackModel = 'google/gemini-flash-1.5-8b';
+                        $fallbackModel = 'google/gemini-2.5-flash';
                         Log::warning("OpenRouter saturé sur {$currentModel}. Basculement sur {$fallbackModel}");
                         $result = $this->callOpenRouterApi($messages, $formatting, $fallbackModel);
                     } else {
