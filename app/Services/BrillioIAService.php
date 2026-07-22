@@ -208,13 +208,7 @@ class BrillioIAService
         return implode(', ', $context);
     }
 
-    /**
-     * Verifie si la cle API est configuree
-     */
-    public function isApiKeyConfigured()
-    {
-        return ! empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
-    }
+
 
     /**
      * Analyse un texte brut avec un prompt systeme specifique (sans historique de conversation)
@@ -273,16 +267,17 @@ class BrillioIAService
         }
 
         $result = '';
+        $apiKeyConfigured = ! empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
 
         Log::info('=== APPEL API OPENROUTER ===', [
             'api_url' => $this->apiUrl,
             'model' => $currentModel,
             'attempt' => $attemptedModel ? 'fallback' : 'primary',
-            'api_key_configured' => $this->isApiKeyConfigured(),
+            'api_key_configured' => $apiKeyConfigured,
         ]);
 
         try {
-            if (! $this->isApiKeyConfigured()) {
+            if (! $apiKeyConfigured) {
                 Log::warning('OpenRouter API key not configured');
                 $result = $this->getFallbackResponse($messages);
             } else {
@@ -730,10 +725,8 @@ class BrillioIAService
                     foreach ($models as $model) {
                         $id = $model['id'];
                         // On cherche les modèles stables de type gemini-X.X-flash (pas de lite, pas de preview)
-                        if (str_starts_with($id, 'google/gemini-') && str_contains($id, 'flash') && !str_contains($id, 'preview') && !str_contains($id, 'lite')) {
-                            if (preg_match('/gemini-(\d+\.\d+)-flash/', $id, $matches)) {
-                                $geminiFlashModels[$id] = (float) $matches[1];
-                            }
+                        if (preg_match('/^google\/gemini-(\d+\.\d+)-flash$/', $id, $matches)) {
+                            $geminiFlashModels[$id] = (float) $matches[1];
                         }
                     }
                     
