@@ -28,6 +28,7 @@ class SubscriptionPlanController extends Controller
             'promo_percent' => 'nullable|integer|min:0|max:100',
             'description' => 'nullable|string',
             'features' => 'nullable|array',
+            'member_limit' => 'nullable|integer|min:1',
             'display_order' => 'integer',
             'is_popular' => 'boolean',
             'is_active' => 'boolean',
@@ -59,6 +60,7 @@ class SubscriptionPlanController extends Controller
             'promo_percent' => 'nullable|integer|min:0|max:100',
             'description' => 'nullable|string',
             'features' => 'nullable|array',
+            'member_limit' => 'nullable|integer|min:1',
             'display_order' => 'integer',
         ]);
 

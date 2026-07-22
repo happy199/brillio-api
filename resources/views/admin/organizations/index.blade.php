@@ -27,7 +27,11 @@
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Utilisateurs
+                            Jeunes
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Mentors
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -74,9 +78,13 @@
                             <div class="text-sm text-gray-500">{{ $organization->phone }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                {{ $organization->sponsored_users_count }} Jeunes
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                {{ $organization->jeunes_count ?? 0 }} Jeune{{ ($organization->jeunes_count ?? 0) != 1 ? 's' : '' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                {{ $organization->mentors_count ?? 0 }} Mentor{{ ($organization->mentors_count ?? 0) != 1 ? 's' : '' }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -120,7 +128,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                        <td colspan="7" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                             Aucune organisation trouvée.
                         </td>
                     </tr>

@@ -27,7 +27,11 @@ class InvitationController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('organization.invitations.index', compact('organization', 'invitations'));
+        $memberCount    = $organization->getMemberCount();
+        $memberLimit    = $organization->getMemberLimit();
+        $remainingSlots = $organization->getRemainingSlots();
+
+        return view('organization.invitations.index', compact('organization', 'invitations', 'memberCount', 'memberLimit', 'remainingSlots'));
     }
 
     /**
@@ -46,6 +50,13 @@ class InvitationController extends Controller
     public function store(Request $request)
     {
         $organization = $this->getCurrentOrganization();
+
+        // --- VÉRIFICATION DU QUOTA D'INVITATION ---
+        if (! $organization->canInviteMore()) {
+            $limit = $organization->getMemberLimit();
+            return redirect()->back()
+                ->with('error', "Vous avez atteint la limite de {$limit} membres de votre plan {$organization->getSubscriptionStatusLabelAttribute()}. Passez à un plan supérieur pour inviter davantage de personnes.");
+        }
 
         $validated = $request->validate([
             'invited_emails' => ['nullable', 'string'],

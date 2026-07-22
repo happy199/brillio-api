@@ -295,4 +295,97 @@ class Organization extends Model
 
         return ucfirst($this->subscription_plan);
     }
+
+    // --- INVITATION / MEMBER LIMITS ---
+
+    /**
+     * Limites du nombre total de membres invités (jeunes + mentors) par plan.
+     * null = illimité (plan Établissement)
+     */
+    public const MEMBER_LIMITS = [
+        self::PLAN_FREE         => 10,
+        self::PLAN_PRO          => 20,
+        self::PLAN_ENTERPRISE   => 50,
+        self::PLAN_ESTABLISHMENT => null,
+    ];
+
+    /**
+     * Get the maximum number of members allowed for the current plan.
+     * Returns null if unlimited.
+     */
+    public function getMemberLimit(): ?int
+    {
+        // Priorité 1 : lire depuis le plan CreditPack en base (configurable via l'admin)
+        $pack = \App\Models\CreditPack::where('type', 'subscription')
+            ->where('target_plan', $this->subscription_plan)
+            ->where('is_active', true)
+            ->whereNotNull('member_limit')
+            // Pour les plans multi-durée, on prend la limite du plan mensuel comme référence
+            ->orderBy('duration_days')
+            ->first();
+
+        if ($pack && $pack->member_limit !== null) {
+            return (int) $pack->member_limit;
+        }
+
+        // Priorité 2 : fallback sur les constantes si la DB n'est pas encore mise à jour
+        // On utilise array_key_exists car ?? traite null comme "absent" et renverrait le fallback 10
+        // pour le plan Établissement dont la limite est explicitement null (illimité)
+        if (array_key_exists($this->subscription_plan, self::MEMBER_LIMITS)) {
+            return self::MEMBER_LIMITS[$this->subscription_plan];
+        }
+
+        return 10; // Fallback sécurisé pour tout plan inconnu
+    }
+
+    /**
+     * Get the current number of accepted members (jeunes + mentors).
+     */
+    public function getMemberCount(): int
+    {
+        return $this->users()
+            ->whereIn('users.user_type', [User::TYPE_JEUNE, User::TYPE_MENTOR])
+            ->count();
+    }
+
+    /**
+     * Check if the organization can still invite more members.
+     */
+    public function canInviteMore(): bool
+    {
+        $limit = $this->getMemberLimit();
+
+        // Unlimited plan
+        if ($limit === null) {
+            return true;
+        }
+
+        return $this->getMemberCount() < $limit;
+    }
+
+    /**
+     * Get the number of remaining invitation slots.
+     * Returns null if unlimited.
+     */
+    public function getRemainingSlots(): ?int
+    {
+        $limit = $this->getMemberLimit();
+
+        if ($limit === null) {
+            return null;
+        }
+
+        return max(0, $limit - $this->getMemberCount());
+    }
+
+    /**
+     * Get a human-readable label for the member limit.
+     */
+    public function getMemberLimitLabelAttribute(): string
+    {
+        $limit = $this->getMemberLimit();
+
+        return $limit === null ? 'Illimité' : (string) $limit;
+    }
 }
+

@@ -17,7 +17,11 @@ class OrganizationController extends Controller
      */
     public function index()
     {
-        $organizations = Organization::withCount('sponsoredUsers')->latest()->paginate(10);
+        $organizations = Organization::withCount([
+            'sponsoredUsers',
+            'users as jeunes_count' => fn ($q) => $q->where('users.user_type', 'jeune'),
+            'users as mentors_count' => fn ($q) => $q->where('users.user_type', 'mentor'),
+        ])->latest()->paginate(10);
 
         return view('admin.organizations.index', compact('organizations'));
     }

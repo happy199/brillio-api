@@ -139,12 +139,21 @@ $currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
                 @endforeach
             </div>
             <ul role="list" class="mb-8 space-y-3 text-sm leading-6 text-gray-600 flex-1 text-center">
-                <li><strong>Tout du plan Standard</strong></li>
-                <li>Gestion de liste des jeunes et mentors</li>
-                <li>Statistiques détaillées (Engagement)</li>
-                <li>Calendrier global des séances</li>
-                <li>Suivi des statuts de séances</li>
-                <li>Exports PDF &amp; CSV</li>
+                @php
+                    // On lit les features depuis le plan mensuel Pro (durée 30j)
+                    $proFeaturesDisplay = optional($proPlans->get(30))->features ?? [
+                        "Jusqu'\u00e0 20 membres (jeunes + mentors)",
+                        'Gestion de liste des jeunes et mentors',
+                        'Statistiques d\u00e9taill\u00e9es (Engagement)',
+                        'Calendrier global des s\u00e9ances',
+                        'Suivi des statuts de s\u00e9ances',
+                        'Exports PDF & CSV',
+                        'Support prioritaire',
+                    ];
+                @endphp
+                @foreach($proFeaturesDisplay as $feature)
+                <li>{{ $feature }}</li>
+                @endforeach
             </ul>
             @if($isPro)
             <div class="mt-8 text-center">
@@ -223,12 +232,23 @@ $currConfig = $currenciesConfigs[$currentCurrency] ?? $currenciesConfigs['XOF'];
                 @endforeach
             </div>
             <ul role="list" class="mb-8 space-y-3 text-sm leading-6 text-gray-600 flex-1 text-center">
-                <li><strong>Tout du plan Pro</strong></li>
-                <li>Marque Blanche (Logo &amp; Couleurs)</li>
-                <li>Sous-domaine personnalisé</li>
-                <li>Centre d'Export (PDF, Excel, CSV)</li>
-                <li>Support dédié prioritaire</li>
-                <li class="font-semibold text-gray-800">★ 50 Crédits/mois offerts automatiquement</li>
+                @php
+                    // On lit les features depuis le plan mensuel Entreprise (durée 30j)
+                    $entFeaturesDisplay = optional($enterprisePlans->get(30))->features ?? [
+                        "Jusqu'\u00e0 50 membres (jeunes + mentors)",
+                        'Tout du plan Pro',
+                        'Marque Blanche (Logo & Couleurs)',
+                        'Sous-domaine personnalis\u00e9',
+                        "Centre d'Export (PDF, Excel, CSV)",
+                        'Support d\u00e9di\u00e9 prioritaire',
+                        '\u2605 50 Cr\u00e9dits/mois offerts automatiquement',
+                    ];
+                @endphp
+                @foreach($entFeaturesDisplay as $feature)
+                <li @class(['font-semibold text-gray-800' => str_starts_with($feature, '★') || str_starts_with($feature, '\u2605')])>
+                    {{ $feature }}
+                </li>
+                @endforeach
             </ul>
             @if($isEnterprise)
             <div class="mt-8 text-center">
