@@ -13,9 +13,7 @@ class OrganizationSubscriptionSeeder extends Seeder
      */
     public function run(): void
     {
-        // ─────────────────────────────────────────────
         // 0. Plan Standard (Gratuit) — 10 membres max
-        // ─────────────────────────────────────────────
         CreditPack::updateOrCreate(
             [
                 'target_plan' => Organization::PLAN_FREE,
@@ -26,7 +24,7 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'name'          => 'Standard',
                 'price'         => 0,
                 'credits'       => 0,
-                'duration_days' => 0, // Indéfini
+                'duration_days' => 0,
                 'member_limit'  => 10,
                 'description'   => 'Pour démarrer et parrainer vos premiers membres.',
                 'features'      => [
@@ -41,248 +39,47 @@ class OrganizationSubscriptionSeeder extends Seeder
             ]
         );
 
-        // ─────────────────────────────────────────────
         // Plans PRO — 20 membres max
-        // ─────────────────────────────────────────────
-        $proFeatures = [
-            "Jusqu'à 20 membres (jeunes + mentors)",
-            'Gestion de liste des jeunes et mentors',
-            'Statistiques détaillées (Engagement)',
-            'Calendrier global des séances',
-            'Suivi des statuts de séances',
-            'Exports PDF & CSV',
-            'Support prioritaire',
-        ];
-
-        // 1. Pro Mensuel
-        CreditPack::updateOrCreate(
+        $this->createTieredPlans(
+            Organization::PLAN_PRO,
+            'Pro',
+            'Plan Professionnel',
+            20000,
+            0,
+            20,
             [
-                'target_plan'   => Organization::PLAN_PRO,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 30,
+                "Jusqu'à 20 membres (jeunes + mentors)",
+                'Gestion de liste des jeunes et mentors',
+                'Statistiques détaillées (Engagement)',
+                'Calendrier global des séances',
+                'Suivi des statuts de séances',
+                'Exports PDF & CSV',
+                'Support prioritaire',
             ],
-            [
-                'name'          => 'Pro Mensuel',
-                'price'         => 20000,
-                'credits'       => 0,
-                'member_limit'  => 20,
-                'description'   => 'Plan Professionnel — 1 mois',
-                'features'      => $proFeatures,
-                'is_active'     => true,
-                'is_popular'    => true,
-                'display_order' => 10,
-            ]
+            10
         );
 
-        // 2. Pro 3 Mois
-        CreditPack::updateOrCreate(
-            [
-                'target_plan'   => Organization::PLAN_PRO,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 90,
-            ],
-            [
-                'name'          => 'Pro 3 Mois',
-                'price'         => 60000,
-                'credits'       => 0,
-                'member_limit'  => 20,
-                'description'   => 'Plan Professionnel — 3 mois',
-                'features'      => $proFeatures,
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 11,
-            ]
-        );
-
-        $oneMonthOffered = '1 mois offert';
-        $twoMonthsOffered = '2 mois offerts';
-
-        // 3. Pro 6 Mois
-        CreditPack::updateOrCreate(
-            [
-                'target_plan'   => Organization::PLAN_PRO,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 180,
-            ],
-            [
-                'name'          => 'Pro 6 Mois',
-                'price'         => 100000,
-                'credits'       => 0,
-                'member_limit'  => 20,
-                'description'   => 'Plan Professionnel — 6 mois (' . $oneMonthOffered . ')',
-                'features'      => [...$proFeatures, $oneMonthOffered],
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 12,
-            ]
-        );
-
-        // 4. Pro 9 Mois
-        CreditPack::updateOrCreate(
-            [
-                'target_plan'   => Organization::PLAN_PRO,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 270,
-            ],
-            [
-                'name'          => 'Pro 9 Mois',
-                'price'         => 160000,
-                'credits'       => 0,
-                'member_limit'  => 20,
-                'description'   => 'Plan Professionnel — 9 mois (' . $oneMonthOffered . ')',
-                'features'      => [...$proFeatures, $oneMonthOffered],
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 13,
-            ]
-        );
-
-        // 5. Pro Annuel
-        CreditPack::updateOrCreate(
-            [
-                'target_plan'   => Organization::PLAN_PRO,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 365,
-            ],
-            [
-                'name'          => 'Pro Annuel',
-                'price'         => 200000,
-                'credits'       => 0,
-                'member_limit'  => 20,
-                'description'   => 'Plan Professionnel — 1 an (' . $twoMonthsOffered . ')',
-                'features'      => [...$proFeatures, $twoMonthsOffered],
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 14,
-            ]
-        );
-
-        // ─────────────────────────────────────────────
         // Plans ENTREPRISE — 50 membres max
-        // ─────────────────────────────────────────────
-        $enterpriseFeatures = [
-            "Jusqu'à 50 membres (jeunes + mentors)",
-            'Tout du plan Pro',
-            'Marque Blanche (Logo & Couleurs)',
-            'Sous-domaine personnalisé',
-            'Centre d\'Export de rapports',
-            'Support dédié prioritaire',
-            '★ 50 Crédits/mois offerts automatiquement',
-        ];
-
-        // 6. Entreprise Mensuel
-        CreditPack::updateOrCreate(
+        $this->createTieredPlans(
+            Organization::PLAN_ENTERPRISE,
+            'Entreprise',
+            'Plan Entreprise',
+            50000,
+            50,
+            50,
             [
-                'target_plan'   => Organization::PLAN_ENTERPRISE,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 30,
+                "Jusqu'à 50 membres (jeunes + mentors)",
+                'Tout du plan Pro',
+                'Marque Blanche (Logo & Couleurs)',
+                'Sous-domaine personnalisé',
+                'Centre d\'Export de rapports',
+                'Support dédié prioritaire',
+                '★ 50 Crédits/mois offerts automatiquement',
             ],
-            [
-                'name'          => 'Entreprise Mensuel',
-                'price'         => 50000,
-                'credits'       => 50,
-                'member_limit'  => 50,
-                'description'   => 'Plan Entreprise — 1 mois',
-                'features'      => $enterpriseFeatures,
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 20,
-            ]
+            20
         );
 
-        // 7. Entreprise 3 Mois
-        CreditPack::updateOrCreate(
-            [
-                'target_plan'   => Organization::PLAN_ENTERPRISE,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 90,
-            ],
-            [
-                'name'          => 'Entreprise 3 Mois',
-                'price'         => 150000,
-                'credits'       => 150,
-                'member_limit'  => 50,
-                'description'   => 'Plan Entreprise — 3 mois',
-                'features'      => $enterpriseFeatures,
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 21,
-            ]
-        );
-
-        // 8. Entreprise 6 Mois
-        CreditPack::updateOrCreate(
-            [
-                'target_plan'   => Organization::PLAN_ENTERPRISE,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 180,
-            ],
-            [
-                'name'          => 'Entreprise 6 Mois',
-                'price'         => 250000,
-                'credits'       => 300,
-                'member_limit'  => 50,
-                'description'   => 'Plan Entreprise — 6 mois (' . $oneMonthOffered . ')',
-                'features'      => [...$enterpriseFeatures, $oneMonthOffered],
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 22,
-            ]
-        );
-
-        // 9. Entreprise 9 Mois
-        CreditPack::updateOrCreate(
-            [
-                'target_plan'   => Organization::PLAN_ENTERPRISE,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 270,
-            ],
-            [
-                'name'          => 'Entreprise 9 Mois',
-                'price'         => 400000,
-                'credits'       => 450,
-                'member_limit'  => 50,
-                'description'   => 'Plan Entreprise — 9 mois (' . $oneMonthOffered . ')',
-                'features'      => [...$enterpriseFeatures, $oneMonthOffered],
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 23,
-            ]
-        );
-
-        // 10. Entreprise Annuel
-        CreditPack::updateOrCreate(
-            [
-                'target_plan'   => Organization::PLAN_ENTERPRISE,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
-                'duration_days' => 365,
-            ],
-            [
-                'name'          => 'Entreprise Annuel',
-                'price'         => 500000,
-                'credits'       => 600,
-                'member_limit'  => 50,
-                'description'   => 'Plan Entreprise — 1 an (' . $twoMonthsOffered . ')',
-                'features'      => [...$enterpriseFeatures, $twoMonthsOffered],
-                'is_active'     => true,
-                'is_popular'    => false,
-                'display_order' => 24,
-            ]
-        );
-
-        // ─────────────────────────────────────────────
-        // 11. Plan ÉTABLISSEMENT — Membres illimités
-        // ─────────────────────────────────────────────
+        // Plan ÉTABLISSEMENT — Membres illimités
         CreditPack::updateOrCreate(
             [
                 'target_plan'   => Organization::PLAN_ESTABLISHMENT,
@@ -294,7 +91,7 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'name'          => 'Établissement',
                 'price'         => 0,
                 'credits'       => 0,
-                'member_limit'  => null, // Illimité
+                'member_limit'  => null,
                 'description'   => 'Le plan ultime pour l\'éducation et les centres de formation.',
                 'features'      => [
                     'Membres illimités (jeunes + mentors)',
@@ -311,5 +108,57 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'display_order' => 30,
             ]
         );
+    }
+
+    /**
+     * Helper to create multi-duration tiered plans without code duplication.
+     */
+    private function createTieredPlans(
+        string $planCode,
+        string $label,
+        string $descriptionPrefix,
+        int $monthlyPrice,
+        int $monthlyCredits,
+        int $memberLimit,
+        array $baseFeatures,
+        int $baseOrder
+    ): void {
+        $durations = [
+            [30, 'Mensuel', 1, 1, null],
+            [90, '3 Mois', 3, 3, null],
+            [180, '6 Mois', 6, 5, '1 mois offert'],
+            [270, '9 Mois', 9, 8, '1 mois offert'],
+            [365, 'Annuel', 12, 10, '2 mois offerts'],
+        ];
+
+        foreach ($durations as $index => [$days, $periodName, $months, $multiplier, $bonus]) {
+            $desc = "$descriptionPrefix — " . ($days === 365 ? '1 an' : "$months mois");
+            $features = $baseFeatures;
+
+            if ($bonus !== null) {
+                $desc .= " ($bonus)";
+                $features[] = $bonus;
+            }
+
+            CreditPack::updateOrCreate(
+                [
+                    'target_plan'   => $planCode,
+                    'user_type'     => 'organization',
+                    'type'          => 'subscription',
+                    'duration_days' => $days,
+                ],
+                [
+                    'name'          => "$label $periodName",
+                    'price'         => $monthlyPrice * $multiplier,
+                    'credits'       => $monthlyCredits * $months,
+                    'member_limit'  => $memberLimit,
+                    'description'   => $desc,
+                    'features'      => $features,
+                    'is_active'     => true,
+                    'is_popular'    => ($planCode === Organization::PLAN_PRO && $days === 30),
+                    'display_order' => $baseOrder + $index,
+                ]
+            );
+        }
     }
 }
