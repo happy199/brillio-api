@@ -7,6 +7,7 @@ use App\Models\ChatConversation;
 use App\Models\ChatMessage;
 use App\Models\PersonalityTest;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -208,8 +209,6 @@ class BrillioIAService
         return implode(', ', $context);
     }
 
-
-
     /**
      * Analyse un texte brut avec un prompt systeme specifique (sans historique de conversation)
      * Utile pour des taches uniques comme le parsing de documents
@@ -260,7 +259,7 @@ class BrillioIAService
     private function callOpenRouterApi($messages, $formatting = true, $attemptedModel = null)
     {
         $currentModel = $attemptedModel ?? $this->model;
-        
+
         // Si le modèle est "auto", on trouve le meilleur modèle dynamiquement
         if ($currentModel === 'auto') {
             $currentModel = $this->getBestAvailableGeminiModel();
@@ -300,7 +299,7 @@ class BrillioIAService
                 // 2. Gestion des erreurs et fallbacks (inclut 404 si le modèle a été supprimé)
                 if ($response->status() === 429 || $response->status() >= 500 || $response->status() === 404) {
                     if ($response->status() === 404) {
-                        \Illuminate\Support\Facades\Cache::forget('openrouter_best_gemini_model'); // Vider le cache car le modèle n'existe plus
+                        Cache::forget('openrouter_best_gemini_model'); // Vider le cache car le modèle n'existe plus
                     }
                     if (! $attemptedModel) {
                         $fallbackModel = $this->getBestAvailableGeminiModel();
@@ -716,7 +715,7 @@ class BrillioIAService
      */
     private function getBestAvailableGeminiModel()
     {
-        return \Illuminate\Support\Facades\Cache::remember('openrouter_best_gemini_model', 3600 * 12, function () {
+        return Cache::remember('openrouter_best_gemini_model', 3600 * 12, function () {
             try {
                 $response = Http::timeout(5)->get('https://openrouter.ai/api/v1/models');
                 if ($response->successful()) {
@@ -729,16 +728,17 @@ class BrillioIAService
                             $geminiFlashModels[$id] = (float) $matches[1];
                         }
                     }
-                    
-                    if (!empty($geminiFlashModels)) {
+
+                    if (! empty($geminiFlashModels)) {
                         arsort($geminiFlashModels); // Trier par version décroissante (ex: 3.5, 2.5, 2.0)
+
                         return array_key_first($geminiFlashModels); // Retourner l'ID du modèle le plus récent
                     }
                 }
             } catch (\Exception $e) {
-                Log::warning('Impossible de récupérer la liste des modèles OpenRouter dynamiquement : ' . $e->getMessage());
+                Log::warning('Impossible de récupérer la liste des modèles OpenRouter dynamiquement : '.$e->getMessage());
             }
-            
+
             // Fallback en dur ultra-sécurisé si l'API modèles est injoignable
             return 'google/gemini-2.5-flash';
         });
