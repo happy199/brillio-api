@@ -263,12 +263,12 @@
 
                         {{-- Champ Limite de Membres --}}
                         <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                            <label class="block text-sm font-semibold text-amber-800 mb-1">
+                            <label for="member_limit" class="block text-sm font-semibold text-amber-800 mb-1">
                                 <i class="fas fa-users mr-1"></i>
                                 Limite de membres (jeunes + mentors)
                             </label>
                             <div class="flex items-center gap-3">
-                                <input type="number" name="member_limit" x-model="formData.member_limit"
+                                <input type="number" id="member_limit" name="member_limit" x-model="formData.member_limit"
                                     min="1" placeholder="Laisser vide = illimité (∞)"
                                     class="mt-1 block w-full border-amber-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
                             </div>

@@ -96,6 +96,9 @@ class OrganizationSubscriptionSeeder extends Seeder
             ]
         );
 
+        $oneMonthOffered = '1 mois offert';
+        $twoMonthsOffered = '2 mois offerts';
+
         // 3. Pro 6 Mois
         CreditPack::updateOrCreate(
             [
@@ -109,8 +112,8 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'price'         => 100000,
                 'credits'       => 0,
                 'member_limit'  => 20,
-                'description'   => 'Plan Professionnel — 6 mois (1 mois offert)',
-                'features'      => [...$proFeatures, '1 mois offert'],
+                'description'   => 'Plan Professionnel — 6 mois (' . $oneMonthOffered . ')',
+                'features'      => [...$proFeatures, $oneMonthOffered],
                 'is_active'     => true,
                 'is_popular'    => false,
                 'display_order' => 12,
@@ -130,8 +133,8 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'price'         => 160000,
                 'credits'       => 0,
                 'member_limit'  => 20,
-                'description'   => 'Plan Professionnel — 9 mois (1 mois offert)',
-                'features'      => [...$proFeatures, '1 mois offert'],
+                'description'   => 'Plan Professionnel — 9 mois (' . $oneMonthOffered . ')',
+                'features'      => [...$proFeatures, $oneMonthOffered],
                 'is_active'     => true,
                 'is_popular'    => false,
                 'display_order' => 13,
@@ -151,8 +154,8 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'price'         => 200000,
                 'credits'       => 0,
                 'member_limit'  => 20,
-                'description'   => 'Plan Professionnel — 1 an (2 mois offerts)',
-                'features'      => [...$proFeatures, '2 mois offerts'],
+                'description'   => 'Plan Professionnel — 1 an (' . $twoMonthsOffered . ')',
+                'features'      => [...$proFeatures, $twoMonthsOffered],
                 'is_active'     => true,
                 'is_popular'    => false,
                 'display_order' => 14,
@@ -167,7 +170,7 @@ class OrganizationSubscriptionSeeder extends Seeder
             'Tout du plan Pro',
             'Marque Blanche (Logo & Couleurs)',
             'Sous-domaine personnalisé',
-            'Centre d\'Export (PDF, Excel, CSV)',
+            'Centre d\'Export de rapports',
             'Support dédié prioritaire',
             '★ 50 Crédits/mois offerts automatiquement',
         ];
@@ -227,8 +230,8 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'price'         => 250000,
                 'credits'       => 300,
                 'member_limit'  => 50,
-                'description'   => 'Plan Entreprise — 6 mois (1 mois offert)',
-                'features'      => [...$enterpriseFeatures, '1 mois offert'],
+                'description'   => 'Plan Entreprise — 6 mois (' . $oneMonthOffered . ')',
+                'features'      => [...$enterpriseFeatures, $oneMonthOffered],
                 'is_active'     => true,
                 'is_popular'    => false,
                 'display_order' => 22,
@@ -248,8 +251,8 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'price'         => 400000,
                 'credits'       => 450,
                 'member_limit'  => 50,
-                'description'   => 'Plan Entreprise — 9 mois (1 mois offert)',
-                'features'      => [...$enterpriseFeatures, '1 mois offert'],
+                'description'   => 'Plan Entreprise — 9 mois (' . $oneMonthOffered . ')',
+                'features'      => [...$enterpriseFeatures, $oneMonthOffered],
                 'is_active'     => true,
                 'is_popular'    => false,
                 'display_order' => 23,
@@ -269,8 +272,8 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'price'         => 500000,
                 'credits'       => 600,
                 'member_limit'  => 50,
-                'description'   => 'Plan Entreprise — 1 an (2 mois offerts)',
-                'features'      => [...$enterpriseFeatures, '2 mois offerts'],
+                'description'   => 'Plan Entreprise — 1 an (' . $twoMonthsOffered . ')',
+                'features'      => [...$enterpriseFeatures, $twoMonthsOffered],
                 'is_active'     => true,
                 'is_popular'    => false,
                 'display_order' => 24,
