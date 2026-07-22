@@ -208,13 +208,7 @@ class BrillioIAService
         return implode(', ', $context);
     }
 
-    /**
-     * Verifie si la cle API est configuree
-     */
-    public function isApiKeyConfigured()
-    {
-        return ! empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
-    }
+
 
     /**
      * Analyse un texte brut avec un prompt systeme specifique (sans historique de conversation)
@@ -266,17 +260,24 @@ class BrillioIAService
     private function callOpenRouterApi($messages, $formatting = true, $attemptedModel = null)
     {
         $currentModel = $attemptedModel ?? $this->model;
+        
+        // Si le modèle est "auto", on trouve le meilleur modèle dynamiquement
+        if ($currentModel === 'auto') {
+            $currentModel = $this->getBestAvailableGeminiModel();
+        }
+
         $result = '';
+        $apiKeyConfigured = ! empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
 
         Log::info('=== APPEL API OPENROUTER ===', [
             'api_url' => $this->apiUrl,
             'model' => $currentModel,
             'attempt' => $attemptedModel ? 'fallback' : 'primary',
-            'api_key_configured' => $this->isApiKeyConfigured(),
+            'api_key_configured' => $apiKeyConfigured,
         ]);
 
         try {
-            if (! $this->isApiKeyConfigured()) {
+            if (! $apiKeyConfigured) {
                 Log::warning('OpenRouter API key not configured');
                 $result = $this->getFallbackResponse($messages);
             } else {
@@ -296,11 +297,17 @@ class BrillioIAService
                         'temperature' => $this->temperature,
                     ]);
 
-                // 2. Gestion des erreurs et fallbacks
-                if ($response->status() === 429 || $response->status() >= 500) {
+                // 2. Gestion des erreurs et fallbacks (inclut 404 si le modèle a été supprimé)
+                if ($response->status() === 429 || $response->status() >= 500 || $response->status() === 404) {
+                    if ($response->status() === 404) {
+                        \Illuminate\Support\Facades\Cache::forget('openrouter_best_gemini_model'); // Vider le cache car le modèle n'existe plus
+                    }
                     if (! $attemptedModel) {
-                        $fallbackModel = 'google/gemini-flash-1.5-8b';
-                        Log::warning("OpenRouter saturé sur {$currentModel}. Basculement sur {$fallbackModel}");
+                        $fallbackModel = $this->getBestAvailableGeminiModel();
+                        if ($fallbackModel === $currentModel) {
+                            $fallbackModel = 'google/gemini-2.5-flash'; // Hard fallback ultime
+                        }
+                        Log::warning("OpenRouter indisponible/supprimé sur {$currentModel} (Status: {$response->status()}). Basculement sur {$fallbackModel}");
                         $result = $this->callOpenRouterApi($messages, $formatting, $fallbackModel);
                     } else {
                         Log::error('Echec critique OpenRouter sur modèle de secours.');
@@ -702,5 +709,38 @@ class BrillioIAService
 
             return null;
         }
+    }
+
+    /**
+     * Récupère dynamiquement le meilleur modèle Gemini disponible sur OpenRouter (toujours en ligne)
+     */
+    private function getBestAvailableGeminiModel()
+    {
+        return \Illuminate\Support\Facades\Cache::remember('openrouter_best_gemini_model', 3600 * 12, function () {
+            try {
+                $response = Http::timeout(5)->get('https://openrouter.ai/api/v1/models');
+                if ($response->successful()) {
+                    $models = $response->json('data') ?? [];
+                    $geminiFlashModels = [];
+                    foreach ($models as $model) {
+                        $id = $model['id'];
+                        // On cherche les modèles stables de type gemini-X.X-flash (pas de lite, pas de preview)
+                        if (preg_match('/^google\/gemini-(\d+\.\d+)-flash$/', $id, $matches)) {
+                            $geminiFlashModels[$id] = (float) $matches[1];
+                        }
+                    }
+                    
+                    if (!empty($geminiFlashModels)) {
+                        arsort($geminiFlashModels); // Trier par version décroissante (ex: 3.5, 2.5, 2.0)
+                        return array_key_first($geminiFlashModels); // Retourner l'ID du modèle le plus récent
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('Impossible de récupérer la liste des modèles OpenRouter dynamiquement : ' . $e->getMessage());
+            }
+            
+            // Fallback en dur ultra-sécurisé si l'API modèles est injoignable
+            return 'google/gemini-2.5-flash';
+        });
     }
 }
