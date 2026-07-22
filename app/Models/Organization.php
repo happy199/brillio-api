@@ -315,7 +315,13 @@ class Organization extends Model
      */
     public function getMemberLimit(): ?int
     {
-        return self::MEMBER_LIMITS[$this->subscription_plan] ?? 10;
+        // On utilise array_key_exists car ?? traite null comme "absent" et renverrait le fallback 10
+        // pour le plan Établissement dont la limite est explicitement null (illimité)
+        if (array_key_exists($this->subscription_plan, self::MEMBER_LIMITS)) {
+            return self::MEMBER_LIMITS[$this->subscription_plan];
+        }
+
+        return 10; // Fallback sécurisé pour tout plan inconnu
     }
 
     /**

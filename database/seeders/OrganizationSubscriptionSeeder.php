@@ -25,11 +25,12 @@ class OrganizationSubscriptionSeeder extends Seeder
                 'price' => 0,
                 'credits' => 0,
                 'duration_days' => 0, // Indefinite
-                'description' => 'Pour démarrer et parrainer sans limite.',
+                'description' => 'Pour d\'marrer et parrainer vos premiers membres.',
                 'features' => [
-                    'Parrainage illimité de jeunes',
+                    'Jusqu\'à 10 membres (jeunes + mentors)',
                     'Tableau de bord standard',
                     'Offre de ressources (Gratuit)',
+                    'Liens d\'invitation partageable',
                 ],
                 'is_active' => true,
                 'is_popular' => false,
@@ -38,9 +39,12 @@ class OrganizationSubscriptionSeeder extends Seeder
         );
 
         $proFeatures = [
-            'Statistiques détaillées',
-            'Calendrier global',
-            'Suivi des séances',
+            'Jusqu\'à 20 membres (jeunes + mentors)',
+            'Gestion de liste des jeunes et mentors',
+            'Statistiques détaillées (Engagement)',
+            'Calendrier global des séances',
+            'Suivi des statuts de séances',
+            'Exports PDF & CSV',
             'Support prioritaire',
         ];
 
@@ -154,11 +158,13 @@ class OrganizationSubscriptionSeeder extends Seeder
         );
 
         $enterpriseFeatures = [
+            'Jusqu\'à 50 membres (jeunes + mentors)',
+            'Tout du plan Pro',
             'Marque Blanche (Logo & Couleurs)',
-            'Nom de domaine personnalisé',
-            'Centre d\'Export',
-            'Support dédié',
-            '50 Crédits/mois offerts',
+            'Sous-domaine personnalisé',
+            'Centre d\'Export (PDF, Excel, CSV)',
+            'Support dédié prioritaire',
+            '50 Crédits/mois offerts automatiquement',
         ];
 
         // 6. Enterprise Plan (Monthly)
