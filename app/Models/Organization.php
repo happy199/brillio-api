@@ -295,4 +295,77 @@ class Organization extends Model
 
         return ucfirst($this->subscription_plan);
     }
+
+    // --- INVITATION / MEMBER LIMITS ---
+
+    /**
+     * Limites du nombre total de membres invités (jeunes + mentors) par plan.
+     * null = illimité (plan Établissement)
+     */
+    public const MEMBER_LIMITS = [
+        self::PLAN_FREE         => 10,
+        self::PLAN_PRO          => 20,
+        self::PLAN_ENTERPRISE   => 50,
+        self::PLAN_ESTABLISHMENT => null,
+    ];
+
+    /**
+     * Get the maximum number of members allowed for the current plan.
+     * Returns null if unlimited.
+     */
+    public function getMemberLimit(): ?int
+    {
+        return self::MEMBER_LIMITS[$this->subscription_plan] ?? 10;
+    }
+
+    /**
+     * Get the current number of accepted members (jeunes + mentors).
+     */
+    public function getMemberCount(): int
+    {
+        return $this->users()
+            ->whereIn('users.user_type', [User::TYPE_JEUNE, User::TYPE_MENTOR])
+            ->count();
+    }
+
+    /**
+     * Check if the organization can still invite more members.
+     */
+    public function canInviteMore(): bool
+    {
+        $limit = $this->getMemberLimit();
+
+        // Unlimited plan
+        if ($limit === null) {
+            return true;
+        }
+
+        return $this->getMemberCount() < $limit;
+    }
+
+    /**
+     * Get the number of remaining invitation slots.
+     * Returns null if unlimited.
+     */
+    public function getRemainingSlots(): ?int
+    {
+        $limit = $this->getMemberLimit();
+
+        if ($limit === null) {
+            return null;
+        }
+
+        return max(0, $limit - $this->getMemberCount());
+    }
+
+    /**
+     * Get a human-readable label for the member limit.
+     */
+    public function getMemberLimitLabelAttribute(): string
+    {
+        $limit = $this->getMemberLimit();
+
+        return $limit === null ? 'Illimité' : (string) $limit;
+    }
 }
+

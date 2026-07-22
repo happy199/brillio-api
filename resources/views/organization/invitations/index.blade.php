@@ -59,7 +59,7 @@
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-4">
         <div class="bg-white overflow-hidden shadow rounded-lg">
             <div class="p-5">
                 <div class="flex items-center">
@@ -119,6 +119,47 @@
                         </dl>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        {{-- ✦ CARTE QUOTA MEMBRES --}}
+        @php
+            $isUnlimited = $memberLimit === null;
+            $percentage  = $isUnlimited ? 0 : ($memberLimit > 0 ? round(($memberCount / $memberLimit) * 100) : 100);
+            $barColor    = $percentage >= 90 ? 'bg-red-500' : ($percentage >= 70 ? 'bg-yellow-400' : 'bg-green-500');
+        @endphp
+        <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 {{ $percentage >= 90 ? 'border-red-500' : ($percentage >= 70 ? 'border-yellow-400' : 'border-green-500') }}">
+            <div class="p-5">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <dt class="text-sm font-medium text-gray-500">Membres (quota plan)</dt>
+                    </div>
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                        {{ $organization->subscription_status_label }}
+                    </span>
+                </div>
+                <div class="text-2xl font-bold text-gray-900 mb-1">
+                    {{ $memberCount }}
+                    <span class="text-base font-normal text-gray-400">/ {{ $isUnlimited ? '∞' : $memberLimit }}</span>
+                </div>
+                @if(! $isUnlimited)
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                        <div class="{{ $barColor }} h-2 rounded-full transition-all duration-500" style="width: {{ min($percentage, 100) }}%"></div>
+                    </div>
+                    <p class="text-xs {{ $remainingSlots === 0 ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
+                        @if($remainingSlots === 0)
+                            ⚠️ Limite atteinte — <a href="{{ route('organization.subscription.index') }}" class="underline hover:text-red-700">Passer à un plan supérieur</a>
+                        @else
+                            {{ $remainingSlots }} place{{ $remainingSlots > 1 ? 's' : '' }} restante{{ $remainingSlots > 1 ? 's' : '' }}
+                        @endif
+                    </p>
+                @else
+                    <p class="text-xs text-green-600 font-medium">✓ Membres illimités</p>
+                @endif
             </div>
         </div>
     </div>
