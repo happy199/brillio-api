@@ -17,24 +17,24 @@ class OrganizationSubscriptionSeeder extends Seeder
         CreditPack::updateOrCreate(
             [
                 'target_plan' => Organization::PLAN_FREE,
-                'user_type'   => 'organization',
-                'type'        => 'subscription',
+                'user_type' => 'organization',
+                'type' => 'subscription',
             ],
             [
-                'name'          => 'Standard',
-                'price'         => 0,
-                'credits'       => 0,
+                'name' => 'Standard',
+                'price' => 0,
+                'credits' => 0,
                 'duration_days' => 0,
-                'member_limit'  => 10,
-                'description'   => 'Pour démarrer et parrainer vos premiers membres.',
-                'features'      => [
+                'member_limit' => 10,
+                'description' => 'Pour démarrer et parrainer vos premiers membres.',
+                'features' => [
                     "Jusqu'à 10 membres (jeunes + mentors)",
                     'Tableau de bord standard',
                     'Offre de ressources (Gratuit)',
                     "Liens d'invitation partageable",
                 ],
-                'is_active'     => true,
-                'is_popular'    => false,
+                'is_active' => true,
+                'is_popular' => false,
                 'display_order' => 0,
             ]
         );
@@ -82,18 +82,18 @@ class OrganizationSubscriptionSeeder extends Seeder
         // Plan ÉTABLISSEMENT — Membres illimités
         CreditPack::updateOrCreate(
             [
-                'target_plan'   => Organization::PLAN_ESTABLISHMENT,
-                'user_type'     => 'organization',
-                'type'          => 'subscription',
+                'target_plan' => Organization::PLAN_ESTABLISHMENT,
+                'user_type' => 'organization',
+                'type' => 'subscription',
                 'duration_days' => 30,
             ],
             [
-                'name'          => 'Établissement',
-                'price'         => 0,
-                'credits'       => 0,
-                'member_limit'  => null,
-                'description'   => 'Le plan ultime pour l\'éducation et les centres de formation.',
-                'features'      => [
+                'name' => 'Établissement',
+                'price' => 0,
+                'credits' => 0,
+                'member_limit' => null,
+                'description' => 'Le plan ultime pour l\'éducation et les centres de formation.',
+                'features' => [
                     'Membres illimités (jeunes + mentors)',
                     'Tout du plan Entreprise',
                     'Fiche Établissement premium personnalisée',
@@ -103,8 +103,8 @@ class OrganizationSubscriptionSeeder extends Seeder
                     'Publication d\'événements à la communauté',
                     'Mise en avant prioritaire dans les recherches',
                 ],
-                'is_active'     => true,
-                'is_popular'    => false,
+                'is_active' => true,
+                'is_popular' => false,
                 'display_order' => 30,
             ]
         );
@@ -132,7 +132,7 @@ class OrganizationSubscriptionSeeder extends Seeder
         ];
 
         foreach ($durations as $index => [$days, $periodName, $months, $multiplier, $bonus]) {
-            $desc = "$descriptionPrefix — " . ($days === 365 ? '1 an' : "$months mois");
+            $desc = "$descriptionPrefix — ".($days === 365 ? '1 an' : "$months mois");
             $features = $baseFeatures;
 
             if ($bonus !== null) {
@@ -142,20 +142,20 @@ class OrganizationSubscriptionSeeder extends Seeder
 
             CreditPack::updateOrCreate(
                 [
-                    'target_plan'   => $planCode,
-                    'user_type'     => 'organization',
-                    'type'          => 'subscription',
+                    'target_plan' => $planCode,
+                    'user_type' => 'organization',
+                    'type' => 'subscription',
                     'duration_days' => $days,
                 ],
                 [
-                    'name'          => "$label $periodName",
-                    'price'         => $monthlyPrice * $multiplier,
-                    'credits'       => $monthlyCredits * $months,
-                    'member_limit'  => $memberLimit,
-                    'description'   => $desc,
-                    'features'      => $features,
-                    'is_active'     => true,
-                    'is_popular'    => ($planCode === Organization::PLAN_PRO && $days === 30),
+                    'name' => "$label $periodName",
+                    'price' => $monthlyPrice * $multiplier,
+                    'credits' => $monthlyCredits * $months,
+                    'member_limit' => $memberLimit,
+                    'description' => $desc,
+                    'features' => $features,
+                    'is_active' => true,
+                    'is_popular' => ($planCode === Organization::PLAN_PRO && $days === 30),
                     'display_order' => $baseOrder + $index,
                 ]
             );

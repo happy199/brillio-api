@@ -303,9 +303,9 @@ class Organization extends Model
      * null = illimité (plan Établissement)
      */
     public const MEMBER_LIMITS = [
-        self::PLAN_FREE         => 10,
-        self::PLAN_PRO          => 20,
-        self::PLAN_ENTERPRISE   => 50,
+        self::PLAN_FREE => 10,
+        self::PLAN_PRO => 20,
+        self::PLAN_ENTERPRISE => 50,
         self::PLAN_ESTABLISHMENT => null,
     ];
 
@@ -316,7 +316,7 @@ class Organization extends Model
     public function getMemberLimit(): ?int
     {
         // Priorité 1 : lire depuis le plan CreditPack en base (configurable via l'admin)
-        $pack = \App\Models\CreditPack::where('type', 'subscription')
+        $pack = CreditPack::where('type', 'subscription')
             ->where('target_plan', $this->subscription_plan)
             ->where('is_active', true)
             ->whereNotNull('member_limit')
@@ -388,4 +388,3 @@ class Organization extends Model
         return $limit === null ? 'Illimité' : (string) $limit;
     }
 }
-
