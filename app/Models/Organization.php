@@ -315,6 +315,20 @@ class Organization extends Model
      */
     public function getMemberLimit(): ?int
     {
+        // Priorité 1 : lire depuis le plan CreditPack en base (configurable via l'admin)
+        $pack = \App\Models\CreditPack::where('type', 'subscription')
+            ->where('target_plan', $this->subscription_plan)
+            ->where('is_active', true)
+            ->whereNotNull('member_limit')
+            // Pour les plans multi-durée, on prend la limite du plan mensuel comme référence
+            ->orderBy('duration_days')
+            ->first();
+
+        if ($pack && $pack->member_limit !== null) {
+            return (int) $pack->member_limit;
+        }
+
+        // Priorité 2 : fallback sur les constantes si la DB n'est pas encore mise à jour
         // On utilise array_key_exists car ?? traite null comme "absent" et renverrait le fallback 10
         // pour le plan Établissement dont la limite est explicitement null (illimité)
         if (array_key_exists($this->subscription_plan, self::MEMBER_LIMITS)) {

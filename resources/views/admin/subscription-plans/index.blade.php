@@ -21,6 +21,7 @@
         description: '',
         features: [],
         features_text: '',
+        member_limit: '',
         is_popular: false,
         is_active: true
     },
@@ -131,6 +132,8 @@
                         (jours)</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix
                         (FCFA)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Limite
+                        Membres</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut
                     </th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
@@ -149,6 +152,13 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">
                         {{ number_format($plan->price, 0, ',', ' ') }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @if($plan->member_limit === null)
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">∞ Illimité</span>
+                        @else
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{ $plan->member_limit }} membres</span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span
@@ -249,6 +259,22 @@
                                     </span>
                                 </template>
                             </div>
+                        </div>
+
+                        {{-- Champ Limite de Membres --}}
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                            <label class="block text-sm font-semibold text-amber-800 mb-1">
+                                <i class="fas fa-users mr-1"></i>
+                                Limite de membres (jeunes + mentors)
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <input type="number" name="member_limit" x-model="formData.member_limit"
+                                    min="1" placeholder="Laisser vide = illimité (∞)"
+                                    class="mt-1 block w-full border-amber-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                            </div>
+                            <p class="mt-1 text-xs text-amber-600">
+                                Laissez vide pour un accès illimité (plan Établissement). Exemple : 10 pour Gratuit, 20 pour Pro, 50 pour Entreprise.
+                            </p>
                         </div>
 
                         <div class="flex items-center space-x-6">

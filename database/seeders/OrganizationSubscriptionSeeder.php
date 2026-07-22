@@ -13,33 +13,39 @@ class OrganizationSubscriptionSeeder extends Seeder
      */
     public function run(): void
     {
-        // 0. Standard Plan (Free)
+        // ─────────────────────────────────────────────
+        // 0. Plan Standard (Gratuit) — 10 membres max
+        // ─────────────────────────────────────────────
         CreditPack::updateOrCreate(
             [
                 'target_plan' => Organization::PLAN_FREE,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'user_type'   => 'organization',
+                'type'        => 'subscription',
             ],
             [
-                'name' => 'Standard',
-                'price' => 0,
-                'credits' => 0,
-                'duration_days' => 0, // Indefinite
-                'description' => 'Pour d\'marrer et parrainer vos premiers membres.',
-                'features' => [
-                    'Jusqu\'à 10 membres (jeunes + mentors)',
+                'name'          => 'Standard',
+                'price'         => 0,
+                'credits'       => 0,
+                'duration_days' => 0, // Indéfini
+                'member_limit'  => 10,
+                'description'   => 'Pour démarrer et parrainer vos premiers membres.',
+                'features'      => [
+                    "Jusqu'à 10 membres (jeunes + mentors)",
                     'Tableau de bord standard',
                     'Offre de ressources (Gratuit)',
-                    'Liens d\'invitation partageable',
+                    "Liens d'invitation partageable",
                 ],
-                'is_active' => true,
-                'is_popular' => false,
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 0,
             ]
         );
 
+        // ─────────────────────────────────────────────
+        // Plans PRO — 20 membres max
+        // ─────────────────────────────────────────────
         $proFeatures = [
-            'Jusqu\'à 20 membres (jeunes + mentors)',
+            "Jusqu'à 20 membres (jeunes + mentors)",
             'Gestion de liste des jeunes et mentors',
             'Statistiques détaillées (Engagement)',
             'Calendrier global des séances',
@@ -48,248 +54,247 @@ class OrganizationSubscriptionSeeder extends Seeder
             'Support prioritaire',
         ];
 
-        // 1. Pro Plan (Monthly)
+        // 1. Pro Mensuel
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_PRO,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_PRO,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 30,
             ],
             [
-                'name' => 'Pro Mensuel',
-                'price' => 20000,
-                'credits' => 0,
-                'description' => 'Plan Professionnel — 1 mois',
-                'features' => $proFeatures,
-                'is_active' => true,
-                'is_popular' => true,
+                'name'          => 'Pro Mensuel',
+                'price'         => 20000,
+                'credits'       => 0,
+                'member_limit'  => 20,
+                'description'   => 'Plan Professionnel — 1 mois',
+                'features'      => $proFeatures,
+                'is_active'     => true,
+                'is_popular'    => true,
                 'display_order' => 10,
             ]
         );
 
-        // 2. Pro Plan (3 Months)
+        // 2. Pro 3 Mois
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_PRO,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_PRO,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 90,
             ],
             [
-                'name' => 'Pro 3 Mois',
-                'price' => 60000,
-                'credits' => 0,
-                'description' => 'Plan Professionnel — 3 mois',
-                'features' => $proFeatures,
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Pro 3 Mois',
+                'price'         => 60000,
+                'credits'       => 0,
+                'member_limit'  => 20,
+                'description'   => 'Plan Professionnel — 3 mois',
+                'features'      => $proFeatures,
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 11,
             ]
         );
 
-        // 3. Pro Plan (6 Months)
+        // 3. Pro 6 Mois
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_PRO,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_PRO,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 180,
             ],
             [
-                'name' => 'Pro 6 Mois',
-                'price' => 100000, // 1 month free
-                'credits' => 0,
-                'description' => 'Plan Professionnel — 6 mois (1 mois offert)',
-                'features' => [
-                    ...$proFeatures,
-                    '1 mois offert',
-                ],
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Pro 6 Mois',
+                'price'         => 100000,
+                'credits'       => 0,
+                'member_limit'  => 20,
+                'description'   => 'Plan Professionnel — 6 mois (1 mois offert)',
+                'features'      => [...$proFeatures, '1 mois offert'],
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 12,
             ]
         );
 
-        // 4. Pro Plan (9 Months)
+        // 4. Pro 9 Mois
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_PRO,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_PRO,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 270,
             ],
             [
-                'name' => 'Pro 9 Mois',
-                'price' => 160000, // 1 month free implicitly assuming 20k/mo
-                'credits' => 0,
-                'description' => 'Plan Professionnel — 9 mois (1 mois offert)',
-                'features' => [
-                    ...$proFeatures,
-                    '1 mois offert',
-                ],
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Pro 9 Mois',
+                'price'         => 160000,
+                'credits'       => 0,
+                'member_limit'  => 20,
+                'description'   => 'Plan Professionnel — 9 mois (1 mois offert)',
+                'features'      => [...$proFeatures, '1 mois offert'],
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 13,
             ]
         );
 
-        // 5. Pro Plan (Yearly)
+        // 5. Pro Annuel
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_PRO,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_PRO,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 365,
             ],
             [
-                'name' => 'Pro Annuel',
-                'price' => 200000, // 2 months free
-                'credits' => 0,
-                'description' => 'Plan Professionnel — 1 an (2 mois offerts)',
-                'features' => [
-                    ...$proFeatures,
-                    '2 mois offerts',
-                ],
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Pro Annuel',
+                'price'         => 200000,
+                'credits'       => 0,
+                'member_limit'  => 20,
+                'description'   => 'Plan Professionnel — 1 an (2 mois offerts)',
+                'features'      => [...$proFeatures, '2 mois offerts'],
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 14,
             ]
         );
 
+        // ─────────────────────────────────────────────
+        // Plans ENTREPRISE — 50 membres max
+        // ─────────────────────────────────────────────
         $enterpriseFeatures = [
-            'Jusqu\'à 50 membres (jeunes + mentors)',
+            "Jusqu'à 50 membres (jeunes + mentors)",
             'Tout du plan Pro',
             'Marque Blanche (Logo & Couleurs)',
             'Sous-domaine personnalisé',
             'Centre d\'Export (PDF, Excel, CSV)',
             'Support dédié prioritaire',
-            '50 Crédits/mois offerts automatiquement',
+            '★ 50 Crédits/mois offerts automatiquement',
         ];
 
-        // 6. Enterprise Plan (Monthly)
+        // 6. Entreprise Mensuel
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_ENTERPRISE,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_ENTERPRISE,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 30,
             ],
             [
-                'name' => 'Entreprise Mensuel',
-                'price' => 50000,
-                'credits' => 50,
-                'description' => 'Plan Entreprise — 1 mois',
-                'features' => $enterpriseFeatures,
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Entreprise Mensuel',
+                'price'         => 50000,
+                'credits'       => 50,
+                'member_limit'  => 50,
+                'description'   => 'Plan Entreprise — 1 mois',
+                'features'      => $enterpriseFeatures,
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 20,
             ]
         );
 
-        // 7. Enterprise Plan (3 Months)
+        // 7. Entreprise 3 Mois
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_ENTERPRISE,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_ENTERPRISE,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 90,
             ],
             [
-                'name' => 'Entreprise 3 Mois',
-                'price' => 150000,
-                'credits' => 150,
-                'description' => 'Plan Entreprise — 3 mois',
-                'features' => $enterpriseFeatures,
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Entreprise 3 Mois',
+                'price'         => 150000,
+                'credits'       => 150,
+                'member_limit'  => 50,
+                'description'   => 'Plan Entreprise — 3 mois',
+                'features'      => $enterpriseFeatures,
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 21,
             ]
         );
 
-        // 8. Enterprise Plan (6 Months)
+        // 8. Entreprise 6 Mois
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_ENTERPRISE,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_ENTERPRISE,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 180,
             ],
             [
-                'name' => 'Entreprise 6 Mois',
-                'price' => 250000, // 1 month free
-                'credits' => 300,
-                'description' => 'Plan Entreprise — 6 mois (1 mois offert)',
-                'features' => [
-                    ...$enterpriseFeatures,
-                    '1 mois offert',
-                ],
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Entreprise 6 Mois',
+                'price'         => 250000,
+                'credits'       => 300,
+                'member_limit'  => 50,
+                'description'   => 'Plan Entreprise — 6 mois (1 mois offert)',
+                'features'      => [...$enterpriseFeatures, '1 mois offert'],
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 22,
             ]
         );
 
-        // 9. Enterprise Plan (9 Months)
+        // 9. Entreprise 9 Mois
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_ENTERPRISE,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_ENTERPRISE,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 270,
             ],
             [
-                'name' => 'Entreprise 9 Mois',
-                'price' => 400000, // 1 month free
-                'credits' => 450,
-                'description' => 'Plan Entreprise — 9 mois (1 mois offert)',
-                'features' => [
-                    ...$enterpriseFeatures,
-                    '1 mois offert',
-                ],
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Entreprise 9 Mois',
+                'price'         => 400000,
+                'credits'       => 450,
+                'member_limit'  => 50,
+                'description'   => 'Plan Entreprise — 9 mois (1 mois offert)',
+                'features'      => [...$enterpriseFeatures, '1 mois offert'],
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 23,
             ]
         );
 
-        // 10. Enterprise Plan (Yearly)
+        // 10. Entreprise Annuel
         CreditPack::updateOrCreate(
             [
-                'target_plan' => Organization::PLAN_ENTERPRISE,
-                'user_type' => 'organization',
-                'type' => 'subscription',
+                'target_plan'   => Organization::PLAN_ENTERPRISE,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
                 'duration_days' => 365,
             ],
             [
-                'name' => 'Entreprise Annuel',
-                'price' => 500000, // 2 months free
-                'credits' => 600,
-                'description' => 'Plan Entreprise — 1 an (2 mois offerts)',
-                'features' => [
-                    ...$enterpriseFeatures,
-                    '2 mois offerts',
-                ],
-                'is_active' => true,
-                'is_popular' => false,
+                'name'          => 'Entreprise Annuel',
+                'price'         => 500000,
+                'credits'       => 600,
+                'member_limit'  => 50,
+                'description'   => 'Plan Entreprise — 1 an (2 mois offerts)',
+                'features'      => [...$enterpriseFeatures, '2 mois offerts'],
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 24,
             ]
         );
 
-        // 11. Establishment Plan (On Demand / Sur Devis)
+        // ─────────────────────────────────────────────
+        // 11. Plan ÉTABLISSEMENT — Membres illimités
+        // ─────────────────────────────────────────────
         CreditPack::updateOrCreate(
             [
-                'target_plan' => 'establishment',
-                'user_type' => 'organization',
-                'type' => 'subscription',
-                'duration_days' => 30, // Default period
+                'target_plan'   => Organization::PLAN_ESTABLISHMENT,
+                'user_type'     => 'organization',
+                'type'          => 'subscription',
+                'duration_days' => 30,
             ],
             [
-                'name' => 'Établissement',
-                'price' => 0,
-                'credits' => 0,
-                'description' => 'Le plan ultime pour l\'éducation et les centres de formation.',
-                'features' => [
+                'name'          => 'Établissement',
+                'price'         => 0,
+                'credits'       => 0,
+                'member_limit'  => null, // Illimité
+                'description'   => 'Le plan ultime pour l\'éducation et les centres de formation.',
+                'features'      => [
+                    'Membres illimités (jeunes + mentors)',
                     'Tout du plan Entreprise',
                     'Fiche Établissement premium personnalisée',
                     'Outils de prospection & ciblage MBTI',
@@ -298,8 +303,8 @@ class OrganizationSubscriptionSeeder extends Seeder
                     'Publication d\'événements à la communauté',
                     'Mise en avant prioritaire dans les recherches',
                 ],
-                'is_active' => true,
-                'is_popular' => false,
+                'is_active'     => true,
+                'is_popular'    => false,
                 'display_order' => 30,
             ]
         );

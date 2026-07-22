@@ -15,6 +15,7 @@ class CreditPack extends Model
         'credits',
         'duration_days',
         'target_plan', // pro, enterprise
+        'member_limit', // null = unlimited (establishment)
         'price',
         'promo_percent',
         'name',
