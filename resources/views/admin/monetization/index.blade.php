@@ -10,10 +10,12 @@
             <h1 class="text-2xl font-bold text-gray-900">Monétisation & Crédits</h1>
             <p class="text-gray-600">Gérez l'économie de la plateforme</p>
         </div>
+        @if(auth()->user()->isAdmin())
         <a href="{{ route('admin.monetization.coupons') }}"
             class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition">
             Gérer les Coupons
         </a>
+        @endif
     </div>
 
     <!-- Stats Rapides -->
@@ -351,10 +353,17 @@
                         </div>
                     </div>
 
+                    @if(auth()->user()->isAdmin())
                     <button type="submit"
                         class="w-full bg-gray-900 text-white font-bold py-2.5 rounded-lg hover:bg-black transition">
                         Enregistrer
                     </button>
+                    @else
+                    <button type="button" disabled
+                        class="w-full bg-gray-300 text-gray-500 font-bold py-2.5 rounded-lg cursor-not-allowed">
+                        Lecture seule (Commercial)
+                    </button>
+                    @endif
                 </form>
             </div>
         </div>

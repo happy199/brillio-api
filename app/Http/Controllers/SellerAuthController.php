@@ -1,27 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-/**
- * Controller pour l'authentification du dashboard admin
- */
-class AuthController extends Controller
+class SellerAuthController extends Controller
 {
-    /**
-     * Affiche le formulaire de connexion
-     */
     public function showLoginForm()
     {
-        return view('admin.auth.login');
+        return view('seller.auth.login');
     }
 
-    /**
-     * Traite la connexion admin
-     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -30,18 +20,16 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            // Vérifier si l'utilisateur est admin
-            if (! Auth::user()->isAdmin()) {
+            if (! Auth::user()->isCommercial()) {
                 Auth::logout();
 
                 return back()->withErrors([
-                    'email' => 'Accès réservé aux administrateurs.',
+                    'email' => 'Accès réservé aux commerciaux.',
                 ]);
             }
 
             $request->session()->regenerate();
 
-            // Si le 2FA est activé (confirmé), rediriger vers la vérification
             if ($request->user()->two_factor_confirmed_at) {
                 return redirect()->route('admin.two_factor.index');
             }
@@ -54,26 +42,12 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    /**
-     * Déconnexion
-     */
     public function logout(Request $request)
     {
-        $user = Auth::user();
-        $isCommercial = $user && $user->isCommercial();
-        $isCoach = $user && $user->isCoach();
-
         Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        if ($isCommercial) {
-            return redirect()->route('seller.login');
-        } elseif ($isCoach) {
-            return redirect()->route('coach.login');
-        }
-
-        return redirect()->route('admin.login');
+        return redirect()->route('seller.login');
     }
 }

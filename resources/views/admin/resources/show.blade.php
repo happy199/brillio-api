@@ -17,7 +17,7 @@
                 <p class="text-gray-600">Détail et Validation</p>
             </div>
         </div>
-        @if(!auth()->user()->isCoach())
+        @if(auth()->user()->isAdmin())
         <div class="flex gap-3">
             <a href="{{ route('admin.resources.edit', $resource) }}"
                 class="bg-white border text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">

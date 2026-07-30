@@ -110,6 +110,7 @@
                                     class="text-blue-600 hover:text-blue-900">
                                     <i class="fas fa-eye"></i> Voir
                                 </a>
+                                @if(auth()->user()->isAdmin())
                                 <form action="{{ route('admin.contact-messages.destroy', $message->id) }}" method="POST"
                                     class="inline" onsubmit="return confirm('Supprimer ce message ?')">
                                     @csrf
@@ -118,6 +119,7 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

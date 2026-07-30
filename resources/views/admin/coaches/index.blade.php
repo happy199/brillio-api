@@ -36,14 +36,22 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
+            @if(auth()->user()->isAdmin())
             <button @click="showPromoteModal = true"
                 class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center">
                 <i class="fas fa-plus mr-2"></i> Promouvoir un mentor
             </button>
-            <button @click="showCreateModal = true"
-                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center">
-                <i class="fas fa-user-plus mr-2"></i> Créer Nouveau Coach
+            @endif
+            @if(auth()->user()->isAdmin())
+            <button type="button" @click="showCreateModal = true"
+                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center shadow-sm">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                Créer Nouveau Coach
             </button>
+            @endif
         </div>
     </div>
 
@@ -116,6 +124,7 @@
                         {{ $coach->created_at->format('d/m/Y') }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                        @if(auth()->user()->isAdmin())
                         <!-- Reset Password -->
                         <form action="{{ route('admin.coaches.reset-password', $coach) }}" method="POST" class="inline"
                             onsubmit="return confirm('Réinitialiser le mot de passe et envoyer les nouveaux accès à ce coach ?')">
@@ -126,14 +135,17 @@
                                 <i class="fas fa-key mr-1"></i> Reset
                             </button>
                         </form>
+                        @endif
 
-                        <!-- Copy Credentials (JS) -->
-                        <button type="button" onclick="copyToClipboard('{{ $coach->email }}', 'Email copié !')"
+                        <!-- Copy Credentials (AlpineJS) -->
+                        <button type="button" 
+                            @click="navigator.clipboard.writeText('{{ $coach->email }}').then(() => alert('Email copié !'))"
                             class="text-gray-600 hover:text-gray-900 px-3 py-1 rounded bg-gray-100"
                             title="Copier l'email">
                             <i class="fas fa-copy mr-1"></i> Email
                         </button>
 
+                        @if(auth()->user()->isAdmin())
                         <!-- Revoke -->
                         <form action="{{ route('admin.coaches.destroy', $coach) }}" method="POST" class="inline"
                             onsubmit="return confirm('Révoquer le statut de coach pour cet utilisateur ?')">
@@ -143,6 +155,7 @@
                                 <i class="fas fa-user-minus mr-1"></i> Révoquer
                             </button>
                         </form>
+                        @endif
                     </td>
                 </tr>
                 @empty
@@ -333,12 +346,6 @@
 </style>
 
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-    function copyToClipboard(text, message) {
-        navigator.clipboard.writeText(text).then(() => {
-            alert(message);
-        });
-    }
-
     function filterMentors() {
         const input = document.getElementById('mentor-search');
         const filter = input.value.toLowerCase();

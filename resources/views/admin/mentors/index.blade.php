@@ -137,7 +137,7 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            @if(!auth()->user()->isCoach())
+                            @if(auth()->user()->isAdmin())
                             <a href="{{ route('admin.mentors.edit', $mentor) }}"
                                 class="text-indigo-600 hover:text-indigo-800" title="Modifier">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +153,35 @@
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </a>
-                            @if(!auth()->user()->isCoach())
+                            @if(auth()->user()->isCommercial() || auth()->user()->isAdmin())
+                                @php
+                                    $activeActivity = \App\Models\CommercialActivity::where('assignable_type', \App\Models\MentorProfile::class)
+                                        ->where('assignable_id', $mentor->id)
+                                        ->where('status', 'active')
+                                        ->first();
+                                @endphp
+                                @if(!$activeActivity)
+                                <form action="{{ route('admin.commercials.take_charge') }}" method="POST" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="type" value="mentor">
+                                    <input type="hidden" name="id" value="{{ $mentor->id }}">
+                                    <button type="submit" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+                                        Prendre en charge
+                                    </button>
+                                </form>
+                                @elseif($activeActivity->commercial_id === auth()->id() || auth()->user()->isAdmin())
+                                <button type="button" 
+                                        @click="$dispatch('open-close-activity-modal', { url: '{{ route('admin.commercials.end_charge', $activeActivity) }}' })"
+                                        class="text-green-600 hover:text-green-900 text-sm font-medium">
+                                    Clôturer
+                                </button>
+                                @else
+                                <span class="text-gray-500 text-sm italic">
+                                    Géré par {{ $activeActivity->commercial->name }}
+                                </span>
+                                @endif
+                            @endif
+                            @if(auth()->user()->isAdmin())
                             <form action="{{ route('admin.mentors.toggle-publish', $mentor) }}" method="POST"
                                 class="inline">
                                 @csrf

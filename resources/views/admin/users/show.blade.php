@@ -17,6 +17,7 @@
     </div>
 
     <!-- Profil principal -->
+    @include('admin.commercials._take_charge', ['type' => 'user', 'id' => $user->id])
     <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-8">
             <div class="flex items-center">

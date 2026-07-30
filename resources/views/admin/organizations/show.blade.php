@@ -10,6 +10,7 @@
 @endsection
 
 @section('content')
+@include('admin.commercials._take_charge', ['type' => 'organization', 'id' => $organization->id])
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Informations Générales -->
     <div class="md:col-span-1">
