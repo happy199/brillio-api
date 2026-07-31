@@ -325,6 +325,7 @@ jobs:
             sed -i '/^REDIS_/d' .env
             sed -i '/^SESSION_DRIVER=/d' .env
             sed -i '/^CACHE_DRIVER=/d' .env
+            sed -i '/^CACHE_STORE=/d' .env
             sed -i '/^QUEUE_CONNECTION=/d' .env
             echo "" >> .env
             echo "# Redis Cache & Sessions" >> .env
@@ -334,6 +335,7 @@ jobs:
             echo "REDIS_CLIENT=predis" >> .env
             echo "SESSION_DRIVER=${{ secrets.SESSION_DRIVER }}" >> .env
             echo "CACHE_DRIVER=${{ secrets.CACHE_DRIVER }}" >> .env
+            echo "CACHE_STORE=${{ secrets.CACHE_DRIVER }}" >> .env
             echo "QUEUE_CONNECTION=${{ secrets.QUEUE_CONNECTION }}" >> .env
             echo "✅ Redis configured"
             
