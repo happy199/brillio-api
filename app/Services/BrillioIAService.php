@@ -60,6 +60,14 @@ class BrillioIAService
     }
 
     /**
+     * Check if the OpenRouter API key is configured.
+     */
+    public function isApiKeyConfigured(): bool
+    {
+        return ! empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
+    }
+
+    /**
      * Nettoie la reponse de l'IA (supprime les balises <think> de DeepSeek R1 et extrait <answer>)
      */
     private function cleanResponse($content, $formatting = true)
@@ -262,7 +270,33 @@ class BrillioIAService
 
         // Si le modèle est "auto", on trouve le meilleur modèle dynamiquement
         if ($currentModel === 'auto') {
-            $currentModel = $this->getBestAvailableGeminiModel();
+            $currentModel = Cache::remember('openrouter_best_gemini_model', 3600 * 12, function () {
+                try {
+                    $response = Http::timeout(5)->get('https://openrouter.ai/api/v1/models');
+                    if ($response->successful()) {
+                        $models = $response->json('data') ?? [];
+                        $geminiFlashModels = [];
+                        foreach ($models as $model) {
+                            $id = $model['id'];
+                            // On cherche les modèles stables de type gemini-X.X-flash (pas de lite, pas de preview)
+                            if (preg_match('/^google\/gemini-(\d+\.\d+)-flash$/', $id, $matches)) {
+                                $geminiFlashModels[$id] = (float) $matches[1];
+                            }
+                        }
+
+                        if (! empty($geminiFlashModels)) {
+                            arsort($geminiFlashModels); // Trier par version décroissante (ex: 3.5, 2.5, 2.0)
+
+                            return array_key_first($geminiFlashModels); // Retourner l'ID du modèle le plus récent
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Impossible de récupérer la liste des modèles OpenRouter dynamiquement : '.$e->getMessage());
+                }
+
+                // Fallback en dur ultra-sécurisé si l'API modèles est injoignable
+                return 'google/gemini-2.5-flash';
+            });
         }
 
         $result = '';
@@ -710,37 +744,5 @@ class BrillioIAService
         }
     }
 
-    /**
-     * Récupère dynamiquement le meilleur modèle Gemini disponible sur OpenRouter (toujours en ligne)
-     */
-    private function getBestAvailableGeminiModel()
-    {
-        return Cache::remember('openrouter_best_gemini_model', 3600 * 12, function () {
-            try {
-                $response = Http::timeout(5)->get('https://openrouter.ai/api/v1/models');
-                if ($response->successful()) {
-                    $models = $response->json('data') ?? [];
-                    $geminiFlashModels = [];
-                    foreach ($models as $model) {
-                        $id = $model['id'];
-                        // On cherche les modèles stables de type gemini-X.X-flash (pas de lite, pas de preview)
-                        if (preg_match('/^google\/gemini-(\d+\.\d+)-flash$/', $id, $matches)) {
-                            $geminiFlashModels[$id] = (float) $matches[1];
-                        }
-                    }
 
-                    if (! empty($geminiFlashModels)) {
-                        arsort($geminiFlashModels); // Trier par version décroissante (ex: 3.5, 2.5, 2.0)
-
-                        return array_key_first($geminiFlashModels); // Retourner l'ID du modèle le plus récent
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::warning('Impossible de récupérer la liste des modèles OpenRouter dynamiquement : '.$e->getMessage());
-            }
-
-            // Fallback en dur ultra-sécurisé si l'API modèles est injoignable
-            return 'google/gemini-2.5-flash';
-        });
-    }
 }

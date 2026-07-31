@@ -24,19 +24,19 @@ class SecurityHeadersMiddleware
         $response = $next($request);
 
         // Content Security Policy (CSP)
+        // script-src: Uses strict-dynamic + nonces (Google's recommendation) to neutralize allowlist bypasses.
+        // object-src: Restricted to 'none' to block plugin exploits.
         $csp = "default-src 'self'; ";
-        // script-src: We use our nonce for inline scripts and allow HTTPS for external libraries.
-        // This maintains Score A (due to nonces and object-src:none) while ensuring stability.
-        $csp .= "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' https: cdn.jsdelivr.net *.google-analytics.com *.googletagmanager.com; ";
-        $csp .= "style-src 'self' 'unsafe-inline' https: cdn.jsdelivr.net fonts.googleapis.com; ";
-        $csp .= "img-src 'self' data: blob: https: cdn.jsdelivr.net *.google-analytics.com *.googletagmanager.com; ";
+        $csp .= "script-src 'nonce-{$nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval' https:; ";
+        $csp .= "style-src 'self' 'unsafe-inline' https:; ";
+        $csp .= "img-src 'self' data: blob: https:; ";
         $csp .= "font-src 'self' data: https: fonts.gstatic.com; ";
         $csp .= "frame-ancestors 'self'; ";
         $csp .= "form-action 'self' *.brillio.africa brillio.africa *.moneroo.io moneroo.io; ";
-        $csp .= "connect-src 'self' https: wss: cdn.jsdelivr.net *.google-analytics.com *.googletagmanager.com *.clarity.ms z.clarity.ms; ";
+        $csp .= "connect-src 'self' https: wss:; ";
         $csp .= "frame-src 'self' https:; ";
         $csp .= "base-uri 'self'; ";
-        $csp .= "object-src 'self';";
+        $csp .= "object-src 'none';";
 
         $response->headers->set('Content-Security-Policy', $csp);
 

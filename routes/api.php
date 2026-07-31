@@ -52,23 +52,23 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// V2 Authentication (Guest)
-Route::prefix('v2')->group(function () {
+// V2 Authentication (Guest) - rate limited to 10 requests per minute
+Route::prefix('v2')->middleware('throttle:10,1')->group(function () {
     Route::post(ROUTE_REGISTER, [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/password/email', [AuthController::class, 'sendResetLinkEmail']);
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
 });
 
-// V1 Authentication (Guest)
-Route::prefix('v1')->group(function () {
+// V1 Authentication (Guest) - rate limited to 10 requests per minute
+Route::prefix('v1')->middleware('throttle:10,1')->group(function () {
     Route::post(ROUTE_REGISTER, [App\Http\Controllers\Api\V1\AuthController::class, 'register']);
     Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login']);
 });
 
-// Default Fallback Authentication (pointed to V2 by import)
-Route::post(ROUTE_REGISTER, [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Default Fallback Authentication (pointed to V2 by import) - rate limited to 10 requests per minute
+Route::post(ROUTE_REGISTER, [AuthController::class, 'register'])->middleware('throttle:10,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -128,7 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Chat
         Route::get(ROUTE_CHAT_CONVERSATIONS, [ChatController::class, 'conversations']);
-        Route::post('/chat/send', [ChatController::class, 'send']);
+        Route::post('/chat/send', [ChatController::class, 'send'])->middleware('throttle:20,1');
     });
 
     // V2 Resources
@@ -208,12 +208,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/chat/conversations/{id}', [App\Http\Controllers\Api\V2\ChatController::class, 'deleteConversation']);
         Route::post('/chat/conversations/{id}/request-human', [App\Http\Controllers\Api\V2\ChatController::class, 'requestHumanSupport']);
         Route::post('/chat/conversations/{id}/cancel-human', [App\Http\Controllers\Api\V2\ChatController::class, 'cancelHumanSupport']);
-        Route::post('/chat/send', [App\Http\Controllers\Api\V2\ChatController::class, 'send']);
+        Route::post('/chat/send', [App\Http\Controllers\Api\V2\ChatController::class, 'send'])->middleware('throttle:15,1');
 
         // Messages (Chat entre Jeune et Mentor)
         Route::get('/messages', [MessagesController::class, 'index']);
         Route::get('/messages/{mentorship}', [MessagesController::class, 'show']);
-        Route::post('/messages/{mentorship}', [MessagesController::class, 'store']);
+        Route::post('/messages/{mentorship}', [MessagesController::class, 'store'])->middleware('throttle:30,1');
         Route::get('/messages/file/{message}/download', [MessagesController::class, 'download']);
         Route::patch('/messages/{message}/update', [MessagesController::class, 'update']);
         Route::delete('/messages/{message}', [MessagesController::class, 'destroy']);
