@@ -60,6 +60,14 @@ class BrillioIAService
     }
 
     /**
+     * Check if the OpenRouter API key is configured.
+     */
+    public function isApiKeyConfigured(): bool
+    {
+        return ! empty($this->apiKey) && $this->apiKey !== 'your_openrouter_api_key_here';
+    }
+
+    /**
      * Nettoie la reponse de l'IA (supprime les balises <think> de DeepSeek R1 et extrait <answer>)
      */
     private function cleanResponse($content, $formatting = true)
