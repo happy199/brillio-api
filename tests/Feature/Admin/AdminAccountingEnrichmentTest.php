@@ -11,6 +11,8 @@ class AdminAccountingEnrichmentTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const ACHAT_CREDITS_50 = 'Achat Crédits 50';
+
     protected $admin;
 
     protected $user;
@@ -85,7 +87,7 @@ class AdminAccountingEnrichmentTest extends TestCase
             'credits_amount' => 50,
             'completed_at' => now()->subDays(10),
             'metadata' => [
-                'description' => 'Achat Crédits 50',
+                'description' => self::ACHAT_CREDITS_50,
                 'user_type' => 'jeune',
             ],
         ]);
@@ -115,7 +117,7 @@ class AdminAccountingEnrichmentTest extends TestCase
             'status' => 'completed',
             'credits_amount' => 50,
             'completed_at' => now()->subDays(10),
-            'metadata' => ['description' => 'Achat Crédits 50', 'user_type' => 'jeune'],
+            'metadata' => ['description' => self::ACHAT_CREDITS_50, 'user_type' => 'jeune'],
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('admin.accounting.history', [
@@ -140,7 +142,7 @@ class AdminAccountingEnrichmentTest extends TestCase
             'status' => 'completed',
             'credits_amount' => 50,
             'completed_at' => now()->addDays(5),
-            'metadata' => ['description' => 'Achat Crédits 50', 'user_type' => 'jeune'],
+            'metadata' => ['description' => self::ACHAT_CREDITS_50, 'user_type' => 'jeune'],
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('admin.accounting.history', [

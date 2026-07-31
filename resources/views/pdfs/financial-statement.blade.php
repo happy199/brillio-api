@@ -179,56 +179,59 @@
 
 <body>
 
-    <!-- Header Table -->
-    <table role="presentation" class="header">
-        <tr>
-            <td style="width: 60%;">
-                <h1 class="logo">Brillio Africa</h1>
-                <div class="company-info">
-                    <strong>Brillio Africa SARL</strong><br>
-                    Fidjrossè-Kpota, Cotonou, Bénin<br>
-                    IFU : 3202653526854 | RCCM : RB/COT/26 B 42787
-                </div>
-            </td>
-            <td class="report-title" style="width: 40%;">
-                <h2>ÉTAT FINANCIER</h2>
-                <p>Période : {{ $startDate->format('d/m/Y') }} au {{ $endDate->format('d/m/Y') }}</p>
-                <p style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">Généré le {{ now()->format('d/m/Y H:i') }}</p>
-            </td>
-        </tr>
-    </table>
+    <!-- Header Block -->
+    <div class="header" style="overflow: hidden; width: 100%; border-bottom: 2px solid #4F46E5; padding-bottom: 15px; margin-bottom: 25px;">
+        <div style="float: left; width: 60%;">
+            <h1 class="logo" style="margin: 0; color: #4F46E5; font-size: 26px; font-weight: bold;">Brillio Africa</h1>
+            <div class="company-info" style="font-size: 11px; color: #6B7280; line-height: 1.4;">
+                <strong>Brillio Africa SARL</strong><br>
+                Fidjrossè-Kpota, Cotonou, Bénin<br>
+                IFU : 3202653526854 | RCCM : RB/COT/26 B 42787
+            </div>
+        </div>
+        <div class="report-title" style="float: right; width: 40%; text-align: right;">
+            <h2 style="margin: 0; color: #111827; font-size: 20px;">ÉTAT FINANCIER</h2>
+            <p style="margin: 5px 0 0 0; color: #4B5563; font-size: 12px;">Période : {{ $startDate->format('d/m/Y') }} au {{ $endDate->format('d/m/Y') }}</p>
+            <p style="font-size: 10px; color: #9CA3AF; margin-top: 2px;">Généré le {{ now()->format('d/m/Y H:i') }}</p>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
 
     <!-- Key Metrics Dashboard Grid -->
-    <table role="presentation" class="stats-grid">
-        <tr>
-            <td class="stats-card" style="width: 33%; border-left: 4px solid #10B981;">
+    <div class="stats-grid" style="overflow: hidden; width: 100%; margin-bottom: 25px;">
+        <!-- Row 1 -->
+        <div style="overflow: hidden; width: 100%; margin-bottom: 15px;">
+            <div class="stats-card" style="float: left; width: 31%; margin-right: 2%; border-left: 4px solid #10B981;">
                 <div class="stats-card-title">Recettes (Cash In)</div>
                 <div class="stats-card-value" style="color: #10B981;">+{{ number_format($revenue, 0, ',', ' ') }} FCFA</div>
                 <div class="stats-card-subtitle">Achats de packs crédits</div>
-            </td>
-            <td class="stats-card" style="width: 33%; border-left: 4px solid #EF4444;">
+            </div>
+            <div class="stats-card" style="float: left; width: 31%; margin-right: 2%; border-left: 4px solid #EF4444;">
                 <div class="stats-card-title">Dépenses (Cash Out)</div>
                 <div class="stats-card-value" style="color: #EF4444;">-{{ number_format($payouts, 0, ',', ' ') }} FCFA</div>
                 <div class="stats-card-subtitle">Retraits mentors validés</div>
-            </td>
-            <td class="stats-card" style="width: 33%; border-left: 4px solid #4F46E5;">
+            </div>
+            <div class="stats-card" style="float: left; width: 31%; border-left: 4px solid #4F46E5;">
                 <div class="stats-card-title">Solde Net (Cash Flow)</div>
                 <div class="stats-card-value" style="color: #4F46E5;">{{ ($netIncome >= 0 ? '+' : '') . number_format($netIncome, 0, ',', ' ') }} FCFA</div>
                 <div class="stats-card-subtitle">Flux net de trésorerie</div>
-            </td>
-        </tr>
-        <tr>
-            <td class="stats-card" style="border-left: 4px solid #8B5CF6;">
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        
+        <!-- Row 2 -->
+        <div style="overflow: hidden; width: 100%;">
+            <div class="stats-card" style="float: left; width: 31%; margin-right: 2%; border-left: 4px solid #8B5CF6;">
                 <div class="stats-card-title">Revenus Services</div>
                 <div class="stats-card-value" style="color: #8B5CF6;">{{ number_format($targetingRevenueCredits, 0, ',', ' ') }} Cr.</div>
                 <div class="stats-card-subtitle">≈ {{ number_format($estimatedTargetingRevenueFcfa, 0, ',', ' ') }} FCFA (Ciblage)</div>
-            </td>
-            <td class="stats-card" style="border-left: 4px solid #6366F1;">
+            </div>
+            <div class="stats-card" style="float: left; width: 31%; margin-right: 2%; border-left: 4px solid #6366F1;">
                 <div class="stats-card-title">Revenus Organisations</div>
                 <div class="stats-card-value" style="color: #6366F1;">{{ number_format($orgRevenue, 0, ',', ' ') }} FCFA</div>
                 <div class="stats-card-subtitle">Abonnements & packs orgs</div>
-            </td>
-            <td class="stats-card" style="background-color: #F3F4F6;">
+            </div>
+            <div class="stats-card" style="float: left; width: 31%; background-color: #F3F4F6;">
                 <div class="stats-card-title">Statut Période</div>
                 <div class="stats-card-value" style="font-size: 14px; margin-top: 4px;">
                     @if($netIncome > 0)
@@ -240,9 +243,10 @@
                     @endif
                 </div>
                 <div class="stats-card-subtitle">Indicateur de rentabilité</div>
-            </td>
-        </tr>
-    </table>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+    </div>
 
     <!-- Native SVG Chart Container -->
     @php

@@ -17,6 +17,20 @@ use Illuminate\Support\Facades\Mail;
 
 class AccountingController extends Controller
 {
+    private const TX_NOT_FOUND = 'Transaction introuvable.';
+
+    private const FCFA_SUFFIX = ' FCFA';
+
+    private const ACHAT_CREDITS = 'Achat Crédits';
+
+    private const CIBLAGE_PATTERN = '%Ciblage%';
+
+    private const RETRAIT_MENTOR = 'Retrait Mentor';
+
+    private const ABS_AMOUNT = 'ABS(amount)';
+
+    private const USER_MODEL = 'App\Models\User';
+
     public function index(Request $request)
     {
         [$startDate, $endDate, $period] = $this->getFilterDates($request);
@@ -141,7 +155,7 @@ class AccountingController extends Controller
                     'id' => $t->id,
                     'date' => $t->completed_at,
                     'type' => 'in', // Entrée
-                    'label' => 'Achat Crédits',
+                    'label' => self::ACHAT_CREDITS,
                     'amount' => $t->amount,
                     'user' => $t->user,
                     'reference' => 'MON-'.$t->id,
@@ -165,7 +179,7 @@ class AccountingController extends Controller
                     'id' => $p->id,
                     'date' => $p->completed_at,
                     'type' => 'out', // Sortie
-                    'label' => 'Retrait Mentor',
+                    'label' => self::RETRAIT_MENTOR,
                     'amount' => $p->amount,
                     'user' => $p->mentorProfile->user,
                     'reference' => 'PAY-'.$p->id,
@@ -198,7 +212,7 @@ class AccountingController extends Controller
         $transaction = MonerooTransaction::with(['user', 'user.organization'])->find($id);
 
         if (! $transaction) {
-            return redirect()->back()->with('error', 'Transaction introuvable.');
+            return redirect()->back()->with('error', self::TX_NOT_FOUND);
         }
 
         $user = $transaction->user;
@@ -313,87 +327,74 @@ class AccountingController extends Controller
     {
         [$startDate, $endDate, $period] = $this->getFilterDates($request);
 
-        $revenue = MonerooTransaction::where('status', 'completed')
-            ->whereBetween('completed_at', [$startDate, $endDate])
-            ->sum('amount');
-
-        $payouts = PayoutRequest::where('status', PayoutRequest::STATUS_COMPLETED)
-            ->whereBetween('completed_at', [$startDate, $endDate])
-            ->sum('amount');
-
-        $netIncome = $revenue - $payouts;
-
-        $targetingRevenueCredits = WalletTransaction::where('type', 'service_fee')
-            ->where('description', 'like', '%Ciblage%')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum(DB::raw('ABS(amount)'));
-
-        $estimatedTargetingRevenueFcfa = $targetingRevenueCredits * 100;
-
-        $orgRevenue = MonerooTransaction::where('status', 'completed')
-            ->where('user_type', 'App\Models\User')
-            ->whereHas('user', function ($q) {
-                $q->where('user_type', 'organization');
-            })
-            ->whereBetween('completed_at', [$startDate, $endDate])
-            ->sum('amount');
-
+        $data = $this->getFinancialData($startDate, $endDate);
         $chartData = $this->getChartData($startDate, $endDate);
 
-        // Get all transactions in period for the PDF table
-        $latestRevenue = MonerooTransaction::with(['user', 'user.organization'])->where('status', 'completed')
-            ->whereBetween('completed_at', [$startDate, $endDate])
-            ->orderBy('completed_at', 'desc')
-            ->get()
-            ->map(function ($t) {
-                return [
-                    'date' => $t->completed_at,
-                    'type' => 'in',
-                    'label' => 'Achat Crédits',
-                    'amount' => $t->amount,
-                    'user' => $t->user,
-                    'reference' => 'MON-'.$t->id,
-                ];
-            });
-
-        $latestPayouts = PayoutRequest::with(['mentorProfile.user', 'mentorProfile.user.organization'])->where('status', PayoutRequest::STATUS_COMPLETED)
-            ->whereBetween('completed_at', [$startDate, $endDate])
-            ->orderBy('completed_at', 'desc')
-            ->get()
-            ->map(function ($p) {
-                return [
-                    'date' => $p->completed_at,
-                    'type' => 'out',
-                    'label' => 'Retrait Mentor',
-                    'amount' => $p->amount,
-                    'user' => $p->mentorProfile->user,
-                    'reference' => 'PAY-'.$p->id,
-                ];
-            });
-
-        $transactions = $latestRevenue->concat($latestPayouts)->sortByDesc('date');
-
-        $pdf = Pdf::loadView('pdfs.financial-statement', compact(
-            'revenue',
-            'payouts',
-            'netIncome',
-            'orgRevenue',
-            'targetingRevenueCredits',
-            'estimatedTargetingRevenueFcfa',
-            'chartData',
-            'transactions',
-            'startDate',
-            'endDate',
-            'period'
-        ));
+        $pdf = Pdf::loadView('pdfs.financial-statement', array_merge($data, [
+            'chartData' => $chartData,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'period' => $period,
+        ]));
 
         return $pdf->download('Etat_Financier_'.$startDate->format('d-m-Y').'_au_'.$endDate->format('d-m-Y').'.pdf');
     }
 
     public function exportExcel(Request $request)
     {
-        [$startDate, $endDate, $period] = $this->getFilterDates($request);
+        [$startDate, $endDate] = $this->getFilterDates($request);
 
+        $data = $this->getFinancialData($startDate, $endDate);
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="Etat_Financier_'.$startDate->format('d-m-Y').'_au_'.$endDate->format('d-m-Y').'.csv"',
+        ];
+
+        $callback = function () use ($startDate, $endDate, $data) {
+            $file = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for Excel
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Title block
+            fputcsv($file, ['ÉTAT FINANCIER & TRÉSORERIE - BRILLIO AFRICA']);
+            fputcsv($file, ['Période', $startDate->format('d/m/Y').' au '.$endDate->format('d/m/Y')]);
+            fputcsv($file, []);
+
+            // Summary metrics
+            fputcsv($file, ['INDICATEURS CLÉS', 'VALEUR']);
+            fputcsv($file, ['Recettes (Cash In)', number_format($data['revenue'], 0, '', '').self::FCFA_SUFFIX]);
+            fputcsv($file, ['Dépenses (Cash Out)', number_format($data['payouts'], 0, '', '').self::FCFA_SUFFIX]);
+            fputcsv($file, ['Solde Net (Cash Flow)', number_format($data['netIncome'], 0, '', '').self::FCFA_SUFFIX]);
+            fputcsv($file, ['Revenus Services (Crédits)', number_format($data['targetingRevenueCredits'], 0, '', '').' Crédits']);
+            fputcsv($file, ['Revenus Services (Est. FCFA)', number_format($data['estimatedTargetingRevenueFcfa'], 0, '', '').self::FCFA_SUFFIX]);
+            fputcsv($file, ['Revenus Organisations', number_format($data['orgRevenue'], 0, '', '').self::FCFA_SUFFIX]);
+            fputcsv($file, []);
+
+            // Transaction details
+            fputcsv($file, ['DÉTAILS DES OPÉRATIONS DE LA PÉRIODE']);
+            fputcsv($file, ['Date', 'Référence', 'Type', 'Libellé', 'Utilisateur', 'Montant (FCFA)']);
+
+            foreach ($data['transactions'] as $t) {
+                fputcsv($file, [
+                    $t['date']->format('d/m/Y H:i'),
+                    $t['reference'],
+                    $t['type'] === 'in' ? 'Recette' : 'Dépense',
+                    $t['label'],
+                    $this->formatUserLabel($t['user']),
+                    ($t['type'] === 'in' ? '+' : '-').$t['amount'],
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    private function getFinancialData($startDate, $endDate)
+    {
         $revenue = MonerooTransaction::where('status', 'completed')
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->sum('amount');
@@ -405,14 +406,14 @@ class AccountingController extends Controller
         $netIncome = $revenue - $payouts;
 
         $targetingRevenueCredits = WalletTransaction::where('type', 'service_fee')
-            ->where('description', 'like', '%Ciblage%')
+            ->where('description', 'like', self::CIBLAGE_PATTERN)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum(DB::raw('ABS(amount)'));
+            ->sum(DB::raw(self::ABS_AMOUNT));
 
         $estimatedTargetingRevenueFcfa = $targetingRevenueCredits * 100;
 
         $orgRevenue = MonerooTransaction::where('status', 'completed')
-            ->where('user_type', 'App\Models\User')
+            ->where('user_type', self::USER_MODEL)
             ->whereHas('user', function ($q) {
                 $q->where('user_type', 'organization');
             })
@@ -428,7 +429,7 @@ class AccountingController extends Controller
                 return [
                     'date' => $t->completed_at,
                     'type' => 'in',
-                    'label' => 'Achat Crédits',
+                    'label' => self::ACHAT_CREDITS,
                     'amount' => $t->amount,
                     'user' => $t->user,
                     'reference' => 'MON-'.$t->id,
@@ -443,7 +444,7 @@ class AccountingController extends Controller
                 return [
                     'date' => $p->completed_at,
                     'type' => 'out',
-                    'label' => 'Retrait Mentor',
+                    'label' => self::RETRAIT_MENTOR,
                     'amount' => $p->amount,
                     'user' => $p->mentorProfile->user,
                     'reference' => 'PAY-'.$p->id,
@@ -452,63 +453,30 @@ class AccountingController extends Controller
 
         $transactions = $latestRevenue->concat($latestPayouts)->sortByDesc('date');
 
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="Etat_Financier_'.$startDate->format('d-m-Y').'_au_'.$endDate->format('d-m-Y').'.csv"',
-        ];
+        return compact(
+            'revenue',
+            'payouts',
+            'netIncome',
+            'targetingRevenueCredits',
+            'estimatedTargetingRevenueFcfa',
+            'orgRevenue',
+            'transactions'
+        );
+    }
 
-        $callback = function () use ($startDate, $endDate, $revenue, $payouts, $netIncome, $targetingRevenueCredits, $estimatedTargetingRevenueFcfa, $orgRevenue, $transactions) {
-            $file = fopen('php://output', 'w');
+    private function formatUserLabel($user)
+    {
+        if (! $user) {
+            return 'Utilisateur inconnu';
+        }
 
-            // Add UTF-8 BOM for Excel
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+        if (($user->user_type ?? '') === 'organization' && $user->organization) {
+            $label = $user->organization->name;
+        } else {
+            $label = $user->name ?? 'Utilisateur inconnu';
+        }
 
-            // Title block
-            fputcsv($file, ['ÉTAT FINANCIER & TRÉSORERIE - BRILLIO AFRICA']);
-            fputcsv($file, ['Période', $startDate->format('d/m/Y').' au '.$endDate->format('d/m/Y')]);
-            fputcsv($file, []);
-
-            // Summary metrics
-            fputcsv($file, ['INDICATEURS CLÉS', 'VALEUR']);
-            fputcsv($file, ['Recettes (Cash In)', number_format($revenue, 0, '', '').' FCFA']);
-            fputcsv($file, ['Dépenses (Cash Out)', number_format($payouts, 0, '', '').' FCFA']);
-            fputcsv($file, ['Solde Net (Cash Flow)', number_format($netIncome, 0, '', '').' FCFA']);
-            fputcsv($file, ['Revenus Services (Crédits)', number_format($targetingRevenueCredits, 0, '', '').' Crédits']);
-            fputcsv($file, ['Revenus Services (Est. FCFA)', number_format($estimatedTargetingRevenueFcfa, 0, '', '').' FCFA']);
-            fputcsv($file, ['Revenus Organisations', number_format($orgRevenue, 0, '', '').' FCFA']);
-            fputcsv($file, []);
-
-            // Transaction details
-            fputcsv($file, ['DÉTAILS DES OPÉRATIONS DE LA PÉRIODE']);
-            fputcsv($file, ['Date', 'Référence', 'Type', 'Libellé', 'Utilisateur', 'Montant (FCFA)']);
-
-            foreach ($transactions as $t) {
-                $userLabel = '';
-                if (isset($t['user'])) {
-                    if (($t['user']->user_type ?? '') === 'organization' && $t['user']->organization) {
-                        $userLabel = $t['user']->organization->name;
-                    } else {
-                        $userLabel = $t['user']->name ?? 'Utilisateur inconnu';
-                    }
-                    $userLabel .= ' ('.($t['user']->email ?? '').')';
-                } else {
-                    $userLabel = 'Utilisateur inconnu';
-                }
-
-                fputcsv($file, [
-                    $t['date']->format('d/m/Y H:i'),
-                    $t['reference'],
-                    $t['type'] === 'in' ? 'Recette' : 'Dépense',
-                    $t['label'],
-                    $userLabel,
-                    ($t['type'] === 'in' ? '+' : '-').$t['amount'],
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return $label.' ('.($user->email ?? '').')';
     }
 
     public function downloadInvoicesZip(Request $request)
@@ -573,7 +541,7 @@ class AccountingController extends Controller
         [$transaction, $entity] = $this->getTransactionAndEntity($id);
 
         if (! $transaction) {
-            abort(404, 'Transaction introuvable.');
+            abort(404, self::TX_NOT_FOUND);
         }
 
         if (! $entity) {
@@ -593,7 +561,7 @@ class AccountingController extends Controller
         [$transaction, $entity] = $this->getTransactionAndEntity($id);
 
         if (! $transaction) {
-            abort(404, 'Transaction introuvable.');
+            abort(404, self::TX_NOT_FOUND);
         }
 
         if (! $entity) {
