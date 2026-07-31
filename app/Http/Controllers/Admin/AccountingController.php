@@ -96,9 +96,17 @@ class AccountingController extends Controller
         } elseif ($period === 'year') {
             $startDate = Carbon::now()->startOfYear();
             $endDate = Carbon::now()->endOfYear();
-        } elseif ($period === 'custom' && $customStart && $customEnd) {
-            $startDate = Carbon::parse($customStart)->startOfDay();
-            $endDate = Carbon::parse($customEnd)->endOfDay();
+        } elseif ($period === 'custom') {
+            if (! empty($customStart)) {
+                $startDate = Carbon::parse($customStart)->startOfDay();
+            } else {
+                $startDate = Carbon::now()->startOfMonth();
+            }
+            if (! empty($customEnd)) {
+                $endDate = Carbon::parse($customEnd)->endOfDay();
+            } else {
+                $endDate = Carbon::now()->endOfMonth();
+            }
         }
 
         return [$startDate, $endDate, $period];
@@ -112,15 +120,18 @@ class AccountingController extends Controller
             'page' => 'nullable|integer|min:1',
         ]);
 
-        $startDate = isset($validated['start_date']) ? Carbon::parse($validated['start_date'])->startOfDay() : null;
-        $endDate = isset($validated['end_date']) ? Carbon::parse($validated['end_date'])->endOfDay() : null;
+        $startDate = ! empty($validated['start_date']) ? Carbon::parse($validated['start_date'])->startOfDay() : null;
+        $endDate = ! empty($validated['end_date']) ? Carbon::parse($validated['end_date'])->endOfDay() : null;
 
         // Récupérer les transactions filtrées
         $revenueQuery = MonerooTransaction::with(['user', 'user.organization'])
             ->where('status', 'completed');
 
-        if ($startDate && $endDate) {
-            $revenueQuery->whereBetween('completed_at', [$startDate, $endDate]);
+        if ($startDate) {
+            $revenueQuery->where('completed_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $revenueQuery->where('completed_at', '<=', $endDate);
         }
 
         $revenueTransactions = $revenueQuery->orderBy('completed_at', 'desc')
@@ -140,8 +151,11 @@ class AccountingController extends Controller
         $payoutQuery = PayoutRequest::with(['mentorProfile.user', 'mentorProfile.user.organization'])
             ->where('status', PayoutRequest::STATUS_COMPLETED);
 
-        if ($startDate && $endDate) {
-            $payoutQuery->whereBetween('completed_at', [$startDate, $endDate]);
+        if ($startDate) {
+            $payoutQuery->where('completed_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $payoutQuery->where('completed_at', '<=', $endDate);
         }
 
         $payoutTransactions = $payoutQuery->orderBy('completed_at', 'desc')
@@ -504,13 +518,16 @@ class AccountingController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        $startDate = isset($validated['start_date']) ? Carbon::parse($validated['start_date'])->startOfDay() : null;
-        $endDate = isset($validated['end_date']) ? Carbon::parse($validated['end_date'])->endOfDay() : null;
+        $startDate = ! empty($validated['start_date']) ? Carbon::parse($validated['start_date'])->startOfDay() : null;
+        $endDate = ! empty($validated['end_date']) ? Carbon::parse($validated['end_date'])->endOfDay() : null;
 
         $query = MonerooTransaction::with(['user', 'user.organization'])->where('status', 'completed');
 
-        if ($startDate && $endDate) {
-            $query->whereBetween('completed_at', [$startDate, $endDate]);
+        if ($startDate) {
+            $query->where('completed_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->where('completed_at', '<=', $endDate);
         }
 
         $transactions = $query->orderBy('completed_at', 'desc')->get();

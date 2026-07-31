@@ -104,6 +104,56 @@ class AdminAccountingEnrichmentTest extends TestCase
         $this->assertNotContains('MON-'.$oldTransaction->id, $references);
     }
 
+    public function test_admin_can_filter_history_with_only_start_date()
+    {
+        $oldTransaction = MonerooTransaction::create([
+            'user_id' => $this->user->id,
+            'user_type' => get_class($this->user),
+            'moneroo_transaction_id' => 'mon_test_old_start',
+            'amount' => 5000,
+            'currency' => 'XOF',
+            'status' => 'completed',
+            'credits_amount' => 50,
+            'completed_at' => now()->subDays(10),
+            'metadata' => ['description' => 'Achat Crédits 50', 'user_type' => 'jeune'],
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.accounting.history', [
+            'start_date' => now()->subDays(5)->format('Y-m-d'),
+        ]));
+
+        $response->assertStatus(200);
+        $transactions = $response->viewData('transactions');
+        $references = collect($transactions->items())->pluck('reference')->toArray();
+        $this->assertContains('MON-'.$this->transaction->id, $references);
+        $this->assertNotContains('MON-'.$oldTransaction->id, $references);
+    }
+
+    public function test_admin_can_filter_history_with_only_end_date()
+    {
+        $futureTransaction = MonerooTransaction::create([
+            'user_id' => $this->user->id,
+            'user_type' => get_class($this->user),
+            'moneroo_transaction_id' => 'mon_test_future',
+            'amount' => 5000,
+            'currency' => 'XOF',
+            'status' => 'completed',
+            'credits_amount' => 50,
+            'completed_at' => now()->addDays(5),
+            'metadata' => ['description' => 'Achat Crédits 50', 'user_type' => 'jeune'],
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.accounting.history', [
+            'end_date' => now()->format('Y-m-d'),
+        ]));
+
+        $response->assertStatus(200);
+        $transactions = $response->viewData('transactions');
+        $references = collect($transactions->items())->pluck('reference')->toArray();
+        $this->assertContains('MON-'.$this->transaction->id, $references);
+        $this->assertNotContains('MON-'.$futureTransaction->id, $references);
+    }
+
     public function test_admin_can_download_invoices_zip()
     {
         $response = $this->actingAs($this->admin)->get(route('admin.accounting.download-invoices-zip', [
