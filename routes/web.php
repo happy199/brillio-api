@@ -617,7 +617,12 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
         // Monétisation
         Route::post('comptabilite/transactions/{id}/renvoyer-facture', [AccountingController::class, 'resendInvoice'])->name('accounting.resend-invoice');
+        Route::get('comptabilite/transactions/{id}/view-invoice', [AccountingController::class, 'viewInvoice'])->name('accounting.view-invoice');
+        Route::get('comptabilite/transactions/{id}/download-invoice', [AccountingController::class, 'downloadInvoice'])->name('accounting.download-invoice');
+        Route::get('comptabilite/historique/invoices-zip', [AccountingController::class, 'downloadInvoicesZip'])->name('accounting.download-invoices-zip');
         Route::get('comptabilite/historique', [AccountingController::class, 'history'])->name('accounting.history');
+        Route::get('comptabilite/export-pdf', [AccountingController::class, 'exportPdf'])->name('accounting.export-pdf');
+        Route::get('comptabilite/export-excel', [AccountingController::class, 'exportExcel'])->name('accounting.export-excel');
         Route::get('comptabilite', [AccountingController::class, 'index'])->name('accounting.index');
         Route::get('monetisation', [MonetizationController::class, 'index'])->name('monetization.index');
         Route::post('monetisation/settings', [MonetizationController::class, 'updateSettings'])->name('monetization.settings.update');

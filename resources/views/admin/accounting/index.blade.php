@@ -29,17 +29,32 @@
             </a>
         </div>
 
-        <form action="{{ route('admin.accounting.index') }}" method="GET" class="flex items-center space-x-2">
-            <input type="hidden" name="period" value="custom">
-            <input type="date" name="start_date" value="{{ request('start_date', $startDate->format('Y-m-d')) }}"
-                class="border-gray-300 rounded-md shadow-sm text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
-            <span class="text-gray-400">-</span>
-            <input type="date" name="end_date" value="{{ request('end_date', $endDate->format('Y-m-d')) }}"
-                class="border-gray-300 rounded-md shadow-sm text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
-            <button type="submit" class="bg-gray-800 text-white px-3 py-1 rounded-md text-sm hover:bg-gray-700">
-                Filtrer
-            </button>
-        </form>
+        <div class="flex items-center space-x-4 flex-wrap">
+            <form action="{{ route('admin.accounting.index') }}" method="GET" class="flex items-center space-x-2">
+                <input type="hidden" name="period" value="custom">
+                <input type="date" name="start_date" value="{{ request('start_date', $startDate->format('Y-m-d')) }}"
+                    class="border-gray-300 rounded-md shadow-sm text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                <span class="text-gray-400">-</span>
+                <input type="date" name="end_date" value="{{ request('end_date', $endDate->format('Y-m-d')) }}"
+                    class="border-gray-300 rounded-md shadow-sm text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                <button type="submit" class="bg-gray-800 text-white px-3 py-1.5 rounded-md text-sm hover:bg-gray-700">
+                    Filtrer
+                </button>
+            </form>
+
+            <div class="flex items-center space-x-2 border-l pl-4 border-gray-200">
+                <a href="{{ route('admin.accounting.export-pdf', request()->all()) }}"
+                    class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-sm shadow-sm transition duration-150 ease-in-out font-medium"
+                    title="Exporter l'état financier en PDF">
+                    <i class="fas fa-file-pdf mr-1.5"></i> PDF
+                </a>
+                <a href="{{ route('admin.accounting.export-excel', request()->all()) }}"
+                    class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md text-sm shadow-sm transition duration-150 ease-in-out font-medium"
+                    title="Exporter l'état financier en Excel/CSV">
+                    <i class="fas fa-file-excel mr-1.5"></i> Excel
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Cartes Résumé -->
