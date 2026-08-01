@@ -33,7 +33,7 @@ class AdminAccountingEnrichmentTest extends TestCase
             'currency' => 'XOF',
             'status' => 'completed',
             'credits_amount' => 250,
-            'completed_at' => now()->subDays(2),
+            'completed_at' => now(),
             'metadata' => [
                 'description' => 'Achat Crédits 250',
                 'user_type' => 'jeune',
@@ -63,9 +63,7 @@ class AdminAccountingEnrichmentTest extends TestCase
     public function test_admin_can_export_excel_csv()
     {
         $response = $this->actingAs($this->admin)->get(route('admin.accounting.export-excel', [
-            'period' => 'custom',
-            'start_date' => now()->subDays(5)->format('Y-m-d'),
-            'end_date' => now()->format('Y-m-d'),
+            'period' => 'month',
         ]));
 
         $response->assertStatus(200);
@@ -76,7 +74,7 @@ class AdminAccountingEnrichmentTest extends TestCase
 
     public function test_admin_can_filter_transaction_history_by_date()
     {
-        // Another transaction out of range
+        // Another transaction out of range (2 months ago)
         $oldTransaction = MonerooTransaction::create([
             'user_id' => $this->user->id,
             'user_type' => get_class($this->user),
@@ -85,17 +83,17 @@ class AdminAccountingEnrichmentTest extends TestCase
             'currency' => 'XOF',
             'status' => 'completed',
             'credits_amount' => 50,
-            'completed_at' => now()->subDays(10),
+            'completed_at' => now()->subMonths(2),
             'metadata' => [
                 'description' => self::ACHAT_CREDITS_50,
                 'user_type' => 'jeune',
             ],
         ]);
 
-        // Filter range excluding the old transaction
+        // Filter range: current month (includes main transaction, excludes old)
         $response = $this->actingAs($this->admin)->get(route('admin.accounting.history', [
-            'start_date' => now()->subDays(5)->format('Y-m-d'),
-            'end_date' => now()->format('Y-m-d'),
+            'start_date' => now()->startOfMonth()->format('Y-m-d'),
+            'end_date' => now()->endOfMonth()->format('Y-m-d'),
         ]));
 
         $response->assertStatus(200);
@@ -116,12 +114,12 @@ class AdminAccountingEnrichmentTest extends TestCase
             'currency' => 'XOF',
             'status' => 'completed',
             'credits_amount' => 50,
-            'completed_at' => now()->subDays(10),
+            'completed_at' => now()->subMonths(2),
             'metadata' => ['description' => self::ACHAT_CREDITS_50, 'user_type' => 'jeune'],
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('admin.accounting.history', [
-            'start_date' => now()->subDays(5)->format('Y-m-d'),
+            'start_date' => now()->startOfMonth()->format('Y-m-d'),
         ]));
 
         $response->assertStatus(200);
@@ -141,12 +139,12 @@ class AdminAccountingEnrichmentTest extends TestCase
             'currency' => 'XOF',
             'status' => 'completed',
             'credits_amount' => 50,
-            'completed_at' => now()->addDays(5),
+            'completed_at' => now()->addMonths(2),
             'metadata' => ['description' => self::ACHAT_CREDITS_50, 'user_type' => 'jeune'],
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('admin.accounting.history', [
-            'end_date' => now()->format('Y-m-d'),
+            'end_date' => now()->endOfMonth()->format('Y-m-d'),
         ]));
 
         $response->assertStatus(200);
@@ -159,8 +157,8 @@ class AdminAccountingEnrichmentTest extends TestCase
     public function test_admin_can_download_invoices_zip()
     {
         $response = $this->actingAs($this->admin)->get(route('admin.accounting.download-invoices-zip', [
-            'start_date' => now()->subDays(5)->format('Y-m-d'),
-            'end_date' => now()->format('Y-m-d'),
+            'start_date' => now()->startOfMonth()->format('Y-m-d'),
+            'end_date' => now()->endOfMonth()->format('Y-m-d'),
         ]));
 
         $response->assertStatus(200);
