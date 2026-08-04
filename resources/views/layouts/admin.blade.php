@@ -52,6 +52,7 @@
 </head>
 
 <body class="bg-gray-100" x-data="{ sidebarOpen: false }">
+    <!--email_off-->
     <div class="min-h-screen flex">
         <!-- Sidebar -->
         <aside class="bg-indigo-700 text-white w-64 min-h-screen flex-shrink-0 hidden md:block">
@@ -530,6 +531,7 @@
     </div>
 
     @stack('scripts')
+    <!--/email_off-->
 </body>
 
 </html>

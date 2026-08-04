@@ -27,7 +27,7 @@ class SecurityHeadersMiddleware
         // script-src: Uses strict-dynamic + nonces (Google's recommendation) to neutralize allowlist bypasses.
         // object-src: Restricted to 'none' to block plugin exploits.
         $csp = "default-src 'self'; ";
-        $csp .= "script-src 'nonce-{$nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval' https:; ";
+        $csp .= "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' 'unsafe-eval' https:; ";
         $csp .= "style-src 'self' 'unsafe-inline' https:; ";
         $csp .= "img-src 'self' data: blob: https:; ";
         $csp .= "font-src 'self' data: https: fonts.gstatic.com; ";
