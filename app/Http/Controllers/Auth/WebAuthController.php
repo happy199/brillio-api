@@ -8,6 +8,7 @@ use App\Models\AccountTypeMigration;
 use App\Models\MentorProfile;
 use App\Models\OrganizationInvitation;
 use App\Models\User;
+use App\Rules\ValidEmailDomain;
 use App\Services\MentorshipNotificationService;
 use App\Services\SupabaseAuthService;
 use App\Services\UserAvatarService;
