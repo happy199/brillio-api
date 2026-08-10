@@ -336,10 +336,7 @@ class BrillioIAService
                         Cache::forget('openrouter_best_gemini_model'); // Vider le cache car le modèle n'existe plus
                     }
                     if (! $attemptedModel) {
-                        $fallbackModel = $this->getBestAvailableGeminiModel();
-                        if ($fallbackModel === $currentModel) {
-                            $fallbackModel = 'google/gemini-2.5-flash'; // Hard fallback ultime
-                        }
+                        $fallbackModel = ($currentModel === 'google/gemini-2.5-flash') ? 'deepseek/deepseek-chat' : 'google/gemini-2.5-flash';
                         Log::warning("OpenRouter indisponible/supprimé sur {$currentModel} (Status: {$response->status()}). Basculement sur {$fallbackModel}");
                         $result = $this->callOpenRouterApi($messages, $formatting, $fallbackModel);
                     } else {
