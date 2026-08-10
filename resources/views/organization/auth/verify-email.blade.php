@@ -40,12 +40,38 @@ cliquant sur le lien que nous venons de vous envoyer ?')
     </div>
     @endif
 
-    <div class="flex flex-col space-y-4">
+    <!-- Formulaire d'entrée manuelle de code à 6 chiffres -->
+    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center space-y-3">
+        <p class="text-sm font-semibold text-gray-800">
+            Le lien ne fonctionne pas ? Utilisez votre code à 6 chiffres
+        </p>
+        <label for="org_verification_code" class="text-xs text-gray-500 block">
+            Saisissez le code à 6 chiffres reçu dans votre boîte e-mail :
+        </label>
+
+        <form method="POST" action="{{ route('organization.verification.verify-code') }}" class="space-y-3">
+            @csrf
+            <div class="flex justify-center">
+                <input id="org_verification_code" type="text" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="123456" required
+                    class="w-44 text-center text-xl font-mono font-bold tracking-widest px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-white">
+            </div>
+            @error('code')
+                <p class="text-xs text-red-600 font-medium">{{ $message }}</p>
+            @enderror
+
+            <button type="submit"
+                class="w-full py-2.5 px-4 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow">
+                Valider le code
+            </button>
+        </form>
+    </div>
+
+    <div class="flex flex-col space-y-4 pt-2">
         <form method="POST" action="{{ route('organization.verification.resend') }}">
             @csrf
             <button type="submit"
-                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-accent-500 to-organization-600 hover:from-accent-600 hover:to-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 transition-all transform hover:scale-[1.02]">
-                Renvoyer l'e-mail de vérification
+                class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-accent-500 to-organization-600 hover:from-accent-600 hover:to-organization-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 transition-all transform hover:scale-[1.01]">
+                Renvoyer l'e-mail avec code
             </button>
         </form>
 

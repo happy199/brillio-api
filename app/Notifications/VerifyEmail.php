@@ -20,16 +20,24 @@ class VerifyEmail extends BaseVerifyEmail implements ShouldQueue
     public function toMail($notifiable)
     {
         $verificationUrl = $this->verificationUrl($notifiable);
+        $code = $notifiable->verification_code;
+
+        if (! $code) {
+            $code = $notifiable->generateVerificationCode();
+        }
 
         if (static::$toMailCallback) {
             return call_user_func(static::$toMailCallback, $notifiable, $verificationUrl);
         }
 
         return (new MailMessage)
-            ->subject('Vérification de votre adresse e-mail')
-            ->greeting('Bonjour !')
+            ->subject('Vérification de votre adresse e-mail - Brillio')
+            ->greeting('Bonjour '.$notifiable->name.' !')
             ->line('Veuillez cliquer sur le bouton ci-dessous pour vérifier votre adresse e-mail.')
             ->action('Vérifier l’adresse e-mail', $verificationUrl)
+            ->line('Si le bouton ci-dessus ne fonctionne pas ou si vous utilisez l’application mobile, vous pouvez entrer ce code de vérification à 6 chiffres :')
+            ->line('**'.$code.'**')
+            ->line('Ce code et ce lien sont valables pendant 15 minutes.')
             ->line('Si vous n’avez pas créé de compte, aucune autre action n’est requise.')
             ->salutation('Cordialement, Brillio');
     }

@@ -54,6 +54,10 @@ Route::middleware('auth')->prefix('email')->name('verification.')->group(functio
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verify');
 
+    Route::post('/verify-code', [VerifyEmailController::class, 'verifyCode'])
+        ->middleware('throttle:6,1')
+        ->name('verify-code');
+
     Route::post('/verification-notification', [VerifyEmailController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('resend');

@@ -31,6 +31,12 @@ if (! defined('ROUTE_MENTORSHIPS')) {
 if (! defined('ROUTE_CHAT_CONVERSATIONS')) {
     define('ROUTE_CHAT_CONVERSATIONS', '/chat/conversations');
 }
+if (! defined('ROUTE_VERIFY_EMAIL_CODE')) {
+    define('ROUTE_VERIFY_EMAIL_CODE', '/auth/verify-email-code');
+}
+if (! defined('ROUTE_RESEND_VERIFICATION_CODE')) {
+    define('ROUTE_RESEND_VERIFICATION_CODE', '/auth/resend-verification-code');
+}
 
 /*
  |--------------------------------------------------------------------------
@@ -58,17 +64,23 @@ Route::prefix('v2')->middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/password/email', [AuthController::class, 'sendResetLinkEmail']);
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+    Route::post(ROUTE_VERIFY_EMAIL_CODE, [AuthController::class, 'verifyEmailCode']);
+    Route::post(ROUTE_RESEND_VERIFICATION_CODE, [AuthController::class, 'resendVerificationCode']);
 });
 
 // V1 Authentication (Guest) - rate limited to 10 requests per minute
 Route::prefix('v1')->middleware('throttle:10,1')->group(function () {
     Route::post(ROUTE_REGISTER, [App\Http\Controllers\Api\V1\AuthController::class, 'register']);
     Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+    Route::post(ROUTE_VERIFY_EMAIL_CODE, [App\Http\Controllers\Api\V1\AuthController::class, 'verifyEmailCode']);
+    Route::post(ROUTE_RESEND_VERIFICATION_CODE, [App\Http\Controllers\Api\V1\AuthController::class, 'resendVerificationCode']);
 });
 
 // Default Fallback Authentication (pointed to V2 by import) - rate limited to 10 requests per minute
 Route::post(ROUTE_REGISTER, [AuthController::class, 'register'])->middleware('throttle:10,1');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post(ROUTE_VERIFY_EMAIL_CODE, [AuthController::class, 'verifyEmailCode'])->middleware('throttle:10,1');
+Route::post(ROUTE_RESEND_VERIFICATION_CODE, [AuthController::class, 'resendVerificationCode'])->middleware('throttle:10,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

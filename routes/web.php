@@ -188,6 +188,10 @@ Route::middleware('auth')->name('verification.')->group(function () {
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verify');
 
+    Route::post('/verify-email/code', [VerifyEmailController::class, 'verifyCode'])
+        ->middleware('throttle:6,1')
+        ->name('verify-code');
+
     Route::post('/email/verification-notification', [VerifyEmailController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('resend');
