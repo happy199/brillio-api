@@ -45,7 +45,7 @@ return [
     'openrouter' => [
         'api_key' => env('OPENROUTER_API_KEY'),
         'api_url' => env('OPENROUTER_API_URL', 'https://openrouter.ai/api/v1/chat/completions'),
-        'model' => env('OPENROUTER_MODEL', 'tngtech/deepseek-r1t-chimera:free'),
+        'model' => env('OPENROUTER_MODEL', 'google/gemini-2.5-flash'),
         'max_tokens' => env('OPENROUTER_MAX_TOKENS', 2000),
         'temperature' => env('OPENROUTER_TEMPERATURE', 0.7),
         'site_url' => env('OPENROUTER_SITE_URL', 'https://www.brillio.africa'),
