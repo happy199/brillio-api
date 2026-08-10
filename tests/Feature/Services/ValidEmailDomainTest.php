@@ -60,7 +60,7 @@ class ValidEmailDomainTest extends TestCase
             'created_at' => now()->subDays(10),
         ]);
 
-        $this->artisan('users:archive-unverified')
+        $this->artisan('app:archive-unverified')
             ->assertExitCode(0);
 
         $this->assertTrue((bool) $unverifiedOld->fresh()->is_archived);

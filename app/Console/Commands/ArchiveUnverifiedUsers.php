@@ -12,7 +12,7 @@ class ArchiveUnverifiedUsers extends Command
      *
      * @var string
      */
-    protected $signature = 'users:archive-unverified {--days=7 : Nombre de jours sans vérification}';
+    protected $signature = 'app:archive-unverified {--days=7 : Nombre de jours sans vérification}';
 
     /**
      * The console command description.
