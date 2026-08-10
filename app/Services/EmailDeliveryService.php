@@ -56,6 +56,7 @@ class EmailDeliveryService
         return User::query()
             ->where('is_archived', false)
             ->where('is_blocked', false)
+            ->whereNotNull('email_verified_at')
             ->when(! empty($excluded), fn (Builder $q) => $q->whereNotIn('email', $excluded));
     }
 

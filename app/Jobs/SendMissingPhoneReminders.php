@@ -18,6 +18,7 @@ class SendMissingPhoneReminders extends EngagementReminderJob
         return User::where('user_type', User::TYPE_JEUNE)
             ->where('is_archived', false)
             ->where('is_blocked', false)
+            ->whereNotNull('email_verified_at')
             ->where(function ($query) {
                 $query->whereNull('phone')
                     ->orWhere('phone', '');
