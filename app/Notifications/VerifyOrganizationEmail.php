@@ -37,7 +37,7 @@ class VerifyOrganizationEmail extends VerifyEmail implements ShouldQueue
             ->action('Vérifier l’adresse e-mail', $verificationUrl)
             ->line('Si le bouton ci-dessus ne fonctionne pas ou si vous utilisez l’application mobile, vous pouvez entrer ce code de vérification à 6 chiffres :')
             ->line('**'.$code.'**')
-            ->line('Ce code est valable pendant 60 minutes.')
+            ->line('Ce code et ce lien sont valables pendant 15 minutes.')
             ->line('Si vous n’avez pas créé de compte, aucune autre action n’est requise.')
             ->salutation('Cordialement, Brillio');
     }
