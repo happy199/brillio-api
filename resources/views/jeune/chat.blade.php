@@ -1,6 +1,6 @@
 @extends('layouts.jeune')
 
-@section('title', 'Assistant IA')
+@section('title', 'Orientation')
 
 @section('content')
     <div class="h-[calc(100vh-12rem)] flex flex-col" x-data="chatApp()">
