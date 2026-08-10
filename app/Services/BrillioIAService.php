@@ -24,6 +24,8 @@ use Illuminate\Support\Str;
  */
 class BrillioIAService
 {
+    private const DEFAULT_GEMINI_MODEL = 'google/gemini-2.5-flash';
+
     private $apiKey;
 
     private $apiUrl;
@@ -295,7 +297,7 @@ class BrillioIAService
                 }
 
                 // Fallback en dur ultra-sécurisé si l'API modèles est injoignable
-                return 'google/gemini-2.5-flash';
+                return self::DEFAULT_GEMINI_MODEL;
             });
         }
 
@@ -336,7 +338,7 @@ class BrillioIAService
                         Cache::forget('openrouter_best_gemini_model'); // Vider le cache car le modèle n'existe plus
                     }
                     if (! $attemptedModel) {
-                        $fallbackModel = ($currentModel === 'google/gemini-2.5-flash') ? 'deepseek/deepseek-chat' : 'google/gemini-2.5-flash';
+                        $fallbackModel = ($currentModel === self::DEFAULT_GEMINI_MODEL) ? 'deepseek/deepseek-chat' : self::DEFAULT_GEMINI_MODEL;
                         Log::warning("OpenRouter indisponible/supprimé sur {$currentModel} (Status: {$response->status()}). Basculement sur {$fallbackModel}");
                         $result = $this->callOpenRouterApi($messages, $formatting, $fallbackModel);
                     } else {
