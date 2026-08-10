@@ -52,10 +52,7 @@ class VerifyEmailController extends Controller
             'email' => 'nullable|email',
         ]);
 
-        $user = $request->user();
-        if (! $user && $request->filled('email')) {
-            $user = User::where('email', $request->email)->first();
-        }
+        $user = $request->user() ?? ($request->filled('email') ? User::where('email', $request->email)->first() : null);
 
         if (! $user) {
             return back()->withErrors(['code' => 'Utilisateur introuvable. Veuillez vous connecter.']);
@@ -66,21 +63,22 @@ class VerifyEmailController extends Controller
                 ->with('success', 'Votre adresse e-mail est déjà vérifiée.');
         }
 
-        if (! $user->verification_code || $user->verification_code !== trim($request->code) || ($user->verification_code_expires_at && now()->greaterThan($user->verification_code_expires_at))) {
-            return back()->withErrors(['code' => 'Le code de vérification saisi est invalide ou a expiré.']);
-        }
+        $code = trim($request->code);
+        $isValid = $user->verification_code && $user->verification_code === $code && (! $user->verification_code_expires_at || now()->lessThanOrEqualTo($user->verification_code_expires_at));
 
-        if ($user->markEmailAsVerified()) {
+        if ($isValid && $user->markEmailAsVerified()) {
             $user->forceFill([
                 'verification_code' => null,
                 'verification_code_expires_at' => null,
             ])->save();
 
             event(new Verified($user));
+
+            return redirect()->route($user->isJeune() ? 'jeune.dashboard' : 'home')
+                ->with('success', 'Votre adresse e-mail a été vérifiée avec succès !');
         }
 
-        return redirect()->route($user->isJeune() ? 'jeune.dashboard' : 'home')
-            ->with('success', 'Votre adresse e-mail a été vérifiée avec succès !');
+        return back()->withErrors(['code' => 'Le code de vérification saisi est invalide ou a expiré.']);
     }
 
     /**

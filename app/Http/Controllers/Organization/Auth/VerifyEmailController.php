@@ -60,21 +60,22 @@ class VerifyEmailController extends Controller
             return redirect()->route('organization.dashboard');
         }
 
-        if (! $user->verification_code || $user->verification_code !== trim($request->code) || ($user->verification_code_expires_at && now()->greaterThan($user->verification_code_expires_at))) {
-            return back()->withErrors(['code' => 'Le code de vérification saisi est invalide ou a expiré.']);
-        }
+        $code = trim($request->code);
+        $isValid = $user->verification_code && $user->verification_code === $code && (! $user->verification_code_expires_at || now()->lessThanOrEqualTo($user->verification_code_expires_at));
 
-        if ($user->markEmailAsVerified()) {
+        if ($isValid && $user->markEmailAsVerified()) {
             $user->forceFill([
                 'verification_code' => null,
                 'verification_code_expires_at' => null,
             ])->save();
 
             event(new Verified($user));
+
+            return redirect()->route('organization.dashboard')
+                ->with('success', 'Votre adresse e-mail a été vérifiée avec succès. Bienvenue !');
         }
 
-        return redirect()->route('organization.dashboard')
-            ->with('success', 'Votre adresse e-mail a été vérifiée avec succès. Bienvenue !');
+        return back()->withErrors(['code' => 'Le code de vérification saisi est invalide ou a expiré.']);
     }
 
     /**

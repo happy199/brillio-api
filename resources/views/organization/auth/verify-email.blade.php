@@ -45,14 +45,14 @@ cliquant sur le lien que nous venons de vous envoyer ?')
         <p class="text-sm font-semibold text-gray-800">
             Le lien ne fonctionne pas ? Utilisez votre code à 6 chiffres
         </p>
-        <p class="text-xs text-gray-500">
+        <label for="org_verification_code" class="text-xs text-gray-500 block">
             Saisissez le code à 6 chiffres reçu dans votre boîte e-mail :
-        </p>
+        </label>
 
         <form method="POST" action="{{ route('organization.verification.verify-code') }}" class="space-y-3">
             @csrf
             <div class="flex justify-center">
-                <input type="text" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="123456" required
+                <input id="org_verification_code" type="text" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="123456" required
                     class="w-44 text-center text-xl font-mono font-bold tracking-widest px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-white">
             </div>
             @error('code')

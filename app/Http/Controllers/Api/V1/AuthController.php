@@ -402,10 +402,7 @@ class AuthController extends Controller
             'email' => 'nullable|email',
         ]);
 
-        $user = $request->user();
-        if (! $user && ! empty($validated['email'])) {
-            $user = User::where('email', $validated['email'])->first();
-        }
+        $user = $request->user() ?? (! empty($validated['email']) ? User::where('email', $validated['email'])->first() : null);
 
         if (! $user) {
             return $this->error('Utilisateur introuvable.', 404);
@@ -418,22 +415,23 @@ class AuthController extends Controller
         }
 
         $code = trim($validated['code']);
+        $isValidCode = $user->verification_code && $user->verification_code === $code && (! $user->verification_code_expires_at || now()->lessThanOrEqualTo($user->verification_code_expires_at));
 
-        if (! $user->verification_code || $user->verification_code !== $code || ($user->verification_code_expires_at && now()->greaterThan($user->verification_code_expires_at))) {
-            return $this->error('Code de vérification invalide ou expiré.', 422);
+        if ($isValidCode) {
+            $user->markEmailAsVerified();
+            $user->forceFill([
+                'verification_code' => null,
+                'verification_code_expires_at' => null,
+            ])->save();
+
+            event(new Verified($user));
+
+            return $this->success([
+                'user' => new UserResource($user),
+            ], 'Adresse e-mail vérifiée avec succès !');
         }
 
-        $user->markEmailAsVerified();
-        $user->forceFill([
-            'verification_code' => null,
-            'verification_code_expires_at' => null,
-        ])->save();
-
-        event(new Verified($user));
-
-        return $this->success([
-            'user' => new UserResource($user),
-        ], 'Adresse e-mail vérifiée avec succès !');
+        return $this->error('Code de vérification invalide ou expiré.', 422);
     }
 
     /**
@@ -459,10 +457,7 @@ class AuthController extends Controller
             'email' => 'nullable|email',
         ]);
 
-        $user = $request->user();
-        if (! $user && ! empty($validated['email'])) {
-            $user = User::where('email', $validated['email'])->first();
-        }
+        $user = $request->user() ?? (! empty($validated['email']) ? User::where('email', $validated['email'])->first() : null);
 
         if (! $user) {
             return $this->error('Utilisateur introuvable.', 404);
@@ -474,12 +469,12 @@ class AuthController extends Controller
 
         try {
             $user->sendEmailVerificationNotification();
+
+            return $this->success(null, 'Un nouveau code de vérification a été envoyé par e-mail.');
         } catch (\Exception $e) {
             Log::error('Erreur renvoi code verification email API: '.$e->getMessage());
 
             return $this->error('Impossible d’envoyer le code de vérification pour le moment.', 500);
         }
-
-        return $this->success(null, 'Un nouveau code de vérification a été envoyé par e-mail.');
     }
 }
