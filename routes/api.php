@@ -58,17 +58,23 @@ Route::prefix('v2')->middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/password/email', [AuthController::class, 'sendResetLinkEmail']);
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+    Route::post('/auth/verify-email-code', [AuthController::class, 'verifyEmailCode']);
+    Route::post('/auth/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 });
 
 // V1 Authentication (Guest) - rate limited to 10 requests per minute
 Route::prefix('v1')->middleware('throttle:10,1')->group(function () {
     Route::post(ROUTE_REGISTER, [App\Http\Controllers\Api\V1\AuthController::class, 'register']);
     Route::post('/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+    Route::post('/auth/verify-email-code', [App\Http\Controllers\Api\V1\AuthController::class, 'verifyEmailCode']);
+    Route::post('/auth/resend-verification-code', [App\Http\Controllers\Api\V1\AuthController::class, 'resendVerificationCode']);
 });
 
 // Default Fallback Authentication (pointed to V2 by import) - rate limited to 10 requests per minute
 Route::post(ROUTE_REGISTER, [AuthController::class, 'register'])->middleware('throttle:10,1');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('/auth/verify-email-code', [AuthController::class, 'verifyEmailCode'])->middleware('throttle:10,1');
+Route::post('/auth/resend-verification-code', [AuthController::class, 'resendVerificationCode'])->middleware('throttle:10,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

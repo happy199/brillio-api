@@ -103,6 +103,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'blocked_at',
         'blocked_reason',
         'is_guest',
+        'verification_code',
+        'verification_code_expires_at',
     ];
 
     /**
@@ -125,6 +127,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'verification_code_expires_at' => 'datetime',
             'password' => 'hashed',
             'date_of_birth' => 'date',
             'is_admin' => 'boolean',
@@ -143,6 +146,20 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_confirmed_at' => 'datetime',
             'is_guest' => 'boolean',
         ];
+    }
+
+    /**
+     * Génère un code de vérification aléatoire à 6 chiffres
+     */
+    public function generateVerificationCode(): string
+    {
+        $code = sprintf('%06d', random_int(100000, 999999));
+        $this->forceFill([
+            'verification_code' => $code,
+            'verification_code_expires_at' => now()->addMinutes(60),
+        ])->save();
+
+        return $code;
     }
 
     /**
@@ -166,6 +183,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification(): void
     {
+        $this->generateVerificationCode();
+
         if ($this->isOrganization()) {
             $this->notify(new VerifyOrganizationEmail);
         } else {

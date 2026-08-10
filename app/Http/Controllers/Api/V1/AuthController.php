@@ -9,10 +9,12 @@ use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use OpenApi\Annotations as OA;
 
@@ -87,7 +89,14 @@ class AuthController extends Controller
         try {
             $this->notificationService->sendWelcomeEmail($user);
         } catch (\Exception $e) {
-            \Log::error('Erreur envoi email bienvenue API: '.$e->getMessage());
+            Log::error('Erreur envoi email bienvenue API: '.$e->getMessage());
+        }
+
+        // Envoyer l'email de vérification avec le code 6 chiffres
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi notification vérification email API: '.$e->getMessage());
         }
 
         // Créer le token d'accès
@@ -363,5 +372,114 @@ class AuthController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/verify-email-code",
+     *     summary="Vérifier l'adresse e-mail via code OTP à 6 chiffres",
+     *     tags={"Authentification"},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"code"},
+     *
+     *             @OA\Property(property="code", type="string", example="123456"),
+     *             @OA\Property(property="email", type="string", format="email", example="jean@example.com")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Email vérifié avec succès"),
+     *     @OA\Response(response=422, description="Code invalide ou expiré")
+     * )
+     */
+    public function verifyEmailCode(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'code' => 'required|string|size:6',
+            'email' => 'nullable|email',
+        ]);
+
+        $user = $request->user();
+        if (! $user && ! empty($validated['email'])) {
+            $user = User::where('email', $validated['email'])->first();
+        }
+
+        if (! $user) {
+            return $this->error('Utilisateur introuvable.', 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return $this->success([
+                'user' => new UserResource($user),
+            ], 'Adresse e-mail déjà vérifiée.');
+        }
+
+        $code = trim($validated['code']);
+
+        if (! $user->verification_code || $user->verification_code !== $code || ($user->verification_code_expires_at && now()->greaterThan($user->verification_code_expires_at))) {
+            return $this->error('Code de vérification invalide ou expiré.', 422);
+        }
+
+        $user->markEmailAsVerified();
+        $user->forceFill([
+            'verification_code' => null,
+            'verification_code_expires_at' => null,
+        ])->save();
+
+        event(new Verified($user));
+
+        return $this->success([
+            'user' => new UserResource($user),
+        ], 'Adresse e-mail vérifiée avec succès !');
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/resend-verification-code",
+     *     summary="Renvoyer le code OTP de vérification d'email",
+     *     tags={"Authentification"},
+     *
+     *     @OA\RequestBody(
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="email", type="string", format="email", example="jean@example.com")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=200, description="Code renvoyé avec succès")
+     * )
+     */
+    public function resendVerificationCode(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => 'nullable|email',
+        ]);
+
+        $user = $request->user();
+        if (! $user && ! empty($validated['email'])) {
+            $user = User::where('email', $validated['email'])->first();
+        }
+
+        if (! $user) {
+            return $this->error('Utilisateur introuvable.', 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return $this->success(null, 'Adresse e-mail déjà vérifiée.');
+        }
+
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Exception $e) {
+            Log::error('Erreur renvoi code verification email API: '.$e->getMessage());
+
+            return $this->error('Impossible d’envoyer le code de vérification pour le moment.', 500);
+        }
+
+        return $this->success(null, 'Un nouveau code de vérification a été envoyé par e-mail.');
     }
 }

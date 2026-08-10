@@ -29,7 +29,48 @@ class VerifyEmailController extends Controller
         }
 
         if ($request->user()->markEmailAsVerified()) {
+            $request->user()->forceFill([
+                'verification_code' => null,
+                'verification_code_expires_at' => null,
+            ])->save();
+
             event(new Verified($request->user()));
+        }
+
+        return redirect()->route('organization.dashboard')
+            ->with('success', 'Votre adresse e-mail a été vérifiée avec succès. Bienvenue !');
+    }
+
+    /**
+     * Traite la vérification manuelle par code à 6 chiffres pour les organisations
+     */
+    public function verifyCode(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string|size:6',
+        ]);
+
+        $user = $request->user();
+
+        if (! $user) {
+            return back()->withErrors(['code' => 'Session expirée. Veuillez vous reconnecter.']);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('organization.dashboard');
+        }
+
+        if (! $user->verification_code || $user->verification_code !== trim($request->code) || ($user->verification_code_expires_at && now()->greaterThan($user->verification_code_expires_at))) {
+            return back()->withErrors(['code' => 'Le code de vérification saisi est invalide ou a expiré.']);
+        }
+
+        if ($user->markEmailAsVerified()) {
+            $user->forceFill([
+                'verification_code' => null,
+                'verification_code_expires_at' => null,
+            ])->save();
+
+            event(new Verified($user));
         }
 
         return redirect()->route('organization.dashboard')
@@ -47,6 +88,6 @@ class VerifyEmailController extends Controller
 
         $request->user()->sendEmailVerificationNotification();
 
-        return back()->with('success', 'Un nouveau lien de vérification a été envoyé à votre adresse e-mail.');
+        return back()->with('success', 'Un nouveau lien de vérification et code OTP ont été envoyés à votre adresse e-mail.');
     }
 }
