@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\Rules\ValidEmailDomain;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -23,17 +24,7 @@ class RegisterRequest extends FormRequest
                 'email',
                 'max:255',
                 'unique:users',
-                function ($attribute, $value, $fail) {
-                    $typoDomains = [
-                        'icoud.com', 'icloude.com', 'gamail.com', 'gamil.com',
-                        'gmai.com', 'gmal.com', 'yaho.com', 'yhaoo.com',
-                        'outlok.com', 'hotmal.com', 'gmaill.com',
-                    ];
-                    $domain = strtolower(substr(strrchr($value, '@'), 1));
-                    if (in_array($domain, $typoDomains)) {
-                        $fail("Le domaine de l'email ($domain) semble contenir une faute de frappe. Veuillez vérifier votre adresse.");
-                    }
-                },
+                new ValidEmailDomain,
             ],
             'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
             'user_type' => ['required', 'string', 'in:'.User::TYPE_JEUNE.','.User::TYPE_MENTOR],

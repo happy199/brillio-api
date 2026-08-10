@@ -298,7 +298,7 @@ class WebAuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email:rfc,dns|unique:users,email',
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email', new ValidEmailDomain],
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ], [
             'name.required' => 'Le nom complet est obligatoire.',

@@ -57,7 +57,10 @@ Schedule::job(new SendInactivityReminders)
     ->hourly()
     ->timezone('Africa/Abidjan');
 
-// Rappel messages non lus : toutes les 4h
+// Archive unverified users older than 7 days daily at 2 AM
+Schedule::command('users:archive-unverified')
+    ->dailyAt('02:00')
+    ->timezone('Africa/Abidjan');
 Schedule::command('messages:send-unread-reminders')
     ->everyFourHours()
     ->timezone('Africa/Abidjan');

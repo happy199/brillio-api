@@ -91,6 +91,7 @@ class EmailDeliveryServiceTest extends TestCase
             'email' => 'active@example.com',
             'is_archived' => false,
             'is_blocked' => false,
+            'email_verified_at' => now(),
         ]);
         User::factory()->create([
             'email' => 'archived@example.com',
