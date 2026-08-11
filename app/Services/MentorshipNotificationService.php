@@ -54,6 +54,14 @@ use Illuminate\Support\Facades\Mail;
 class MentorshipNotificationService
 {
     /**
+     * Envoie un e-mail de façon sécurisée via EmailDeliveryService::safeSend pour éviter tout crash en cas d'erreur SMTP.
+     */
+    protected function sendMail(mixed $recipient, mixed $mailable): bool
+    {
+        return app(EmailDeliveryService::class)->safeSend($recipient, $mailable);
+    }
+
+    /**
      * Envoyer une notification pour une nouvelle demande de mentorat (au mentor)
      */
     public function sendMentorshipRequest(Mentorship $mentorship)
@@ -63,7 +71,7 @@ class MentorshipNotificationService
 
         $requestsUrl = route('mentor.mentorship.index');
 
-        Mail::to($mentor->email)->send(new MentorshipRequested($mentorship, $mentor, $mentee, $requestsUrl, $requestsUrl));
+        $this->sendMail($mentor, new MentorshipRequested($mentorship, $mentor, $mentee, $requestsUrl, $requestsUrl));
     }
 
     /**
@@ -76,7 +84,7 @@ class MentorshipNotificationService
 
         $bookingUrl = route('jeune.sessions.create', ['mentor' => $mentor->id]);
 
-        Mail::to($mentee->email)->send(new MentorshipAccepted($mentorship, $mentor, $mentee, $bookingUrl));
+        $this->sendMail($mentee, new MentorshipAccepted($mentorship, $mentor, $mentee, $bookingUrl));
     }
 
     /**
@@ -99,7 +107,7 @@ class MentorshipNotificationService
             // Pour une séance proposée, on redirige vers le détail de la séance dans l'espace jeune
             $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
 
-            Mail::to($mentee->email)->send(new SessionProposed(
+            $this->sendMail($mentee, new SessionProposed(
                 $session,
                 $mentor,
                 $mentee,
@@ -124,16 +132,16 @@ class MentorshipNotificationService
         foreach ($allMentors as $mentor) {
             if ($mentor->is_guest) {
                 // Pour les invités, on utilise le Magic Link
-                Mail::to($mentor->email)->send(new GuestInvitation($session, $mentor));
+                $this->sendMail($mentor, new GuestInvitation($session, $mentor));
             } else {
                 // Pour les mentors classiques
-                Mail::to($mentor->email)->send(new SessionConfirmed($session, $mentor, $mentees));
+                $this->sendMail($mentor, new SessionConfirmed($session, $mentor, $mentees));
             }
         }
 
         // Envoyer à chaque jeune
         foreach ($mentees as $mentee) {
-            Mail::to($mentee->email)->send(new SessionConfirmed($session, $mentee, $mentees));
+            $this->sendMail($mentee, new SessionConfirmed($session, $mentee, $mentees));
         }
     }
 
@@ -148,14 +156,14 @@ class MentorshipNotificationService
         // Notifier les mentors (incluant invités)
         foreach ($allMentors as $mentor) {
             if ($mentor->id !== $updatedBy->id) {
-                Mail::to($mentor->email)->send(new SessionUpdated($session, $mentor, $updatedBy, $mentees));
+                $this->sendMail($mentor, new SessionUpdated($session, $mentor, $updatedBy, $mentees));
             }
         }
 
         // Notifier les jeunes
         foreach ($mentees as $mentee) {
             if ($mentee->id !== $updatedBy->id) {
-                Mail::to($mentee->email)->send(new SessionUpdated($session, $mentee, $updatedBy, $mentees));
+                $this->sendMail($mentee, new SessionUpdated($session, $mentee, $updatedBy, $mentees));
             }
         }
     }
@@ -166,7 +174,7 @@ class MentorshipNotificationService
     public function sendGuestInvitation(MentoringSession $session)
     {
         if ($session->mentor && $session->mentor->is_guest) {
-            Mail::to($session->mentor->email)->send(new GuestInvitation($session, $session->mentor));
+            $this->sendMail($session->mentor, new GuestInvitation($session, $session->mentor));
         }
     }
 
@@ -182,7 +190,7 @@ class MentorshipNotificationService
         $bookingUrl = route('jeune.sessions.create', ['mentor' => $mentor->id]);
 
         // Envoyer au mentor
-        Mail::to($mentor->email)->send(new SessionCompleted(
+        $this->sendMail($mentor, new SessionCompleted(
             $session,
             $mentor,
             $mentees,
@@ -192,7 +200,7 @@ class MentorshipNotificationService
 
         // Envoyer à chaque jeune
         foreach ($mentees as $mentee) {
-            Mail::to($mentee->email)->send(new SessionCompleted(
+            $this->sendMail($mentee, new SessionCompleted(
                 $session,
                 $mentee,
                 $mentees,
@@ -210,7 +218,7 @@ class MentorshipNotificationService
         $mentor = $mentorship->mentor;
         $mentee = $mentorship->mentee;
 
-        Mail::to($mentee->email)->send(new MentorshipRefused($mentorship, $mentor, $mentee, $reason));
+        $this->sendMail($mentee, new MentorshipRefused($mentorship, $mentor, $mentee, $reason));
     }
 
     /**
@@ -220,7 +228,7 @@ class MentorshipNotificationService
     {
         $mentor = $session->mentor;
         foreach ($session->mentees as $mentee) {
-            Mail::to($mentee->email)->send(new SessionRefused($session, $mentor, $mentee, $reason));
+            $this->sendMail($mentee, new SessionRefused($session, $mentor, $mentee, $reason));
         }
     }
 
@@ -235,14 +243,14 @@ class MentorshipNotificationService
         // Notifier les mentors si ce n'est pas eux qui ont annulé
         foreach ($allMentors as $mentor) {
             if ($mentor->id !== $cancelledBy->id) {
-                Mail::to($mentor->email)->send(new SessionCancelled($session, $mentor, $cancelledBy, $mentees));
+                $this->sendMail($mentor, new SessionCancelled($session, $mentor, $cancelledBy, $mentees));
             }
         }
 
         // Notifier les jeunes qui n'ont pas annulé
         foreach ($mentees as $mentee) {
             if ($mentee->id !== $cancelledBy->id) {
-                Mail::to($mentee->email)->send(new SessionCancelled($session, $mentee, $cancelledBy, $mentees));
+                $this->sendMail($mentee, new SessionCancelled($session, $mentee, $cancelledBy, $mentees));
             }
         }
     }
@@ -252,7 +260,7 @@ class MentorshipNotificationService
      */
     public function sendCreditRecharge(User $user, int $amount)
     {
-        Mail::to($user->email)->send(new CreditRecharged($user, $amount, $user->credits_balance));
+        $this->sendMail($user, new CreditRecharged($user, $amount, $user->credits_balance));
     }
 
     /**
@@ -260,7 +268,7 @@ class MentorshipNotificationService
      */
     public function sendSessionPayment(MentoringSession $session, User $jeune, int $amount)
     {
-        Mail::to($jeune->email)->send(new SessionPaid($jeune, $session, $amount));
+        $this->sendMail($jeune, new SessionPaid($jeune, $session, $amount));
     }
 
     /**
@@ -268,7 +276,7 @@ class MentorshipNotificationService
      */
     public function sendPaymentReceived(MentoringSession $session, User $mentor, int $amount)
     {
-        Mail::to($mentor->email)->send(new PaymentReceived($mentor, $session, $amount));
+        $this->sendMail($mentor, new PaymentReceived($mentor, $session, $amount));
     }
 
     /**
@@ -276,7 +284,7 @@ class MentorshipNotificationService
      */
     public function sendPayoutRequested(PayoutRequest $payout)
     {
-        Mail::to($payout->mentorProfile->user->email)->send(new PayoutRequested($payout));
+        $this->sendMail($payout->mentorProfile->user, new PayoutRequested($payout));
     }
 
     /**
@@ -284,7 +292,7 @@ class MentorshipNotificationService
      */
     public function sendPayoutProcessed(PayoutRequest $payout)
     {
-        Mail::to($payout->mentorProfile->user->email)->send(new PayoutProcessed($payout));
+        $this->sendMail($payout->mentorProfile->user, new PayoutProcessed($payout));
     }
 
     /**
@@ -292,7 +300,7 @@ class MentorshipNotificationService
      */
     public function sendIncomeReleased(MentoringSession $session, User $mentor, int $amount)
     {
-        Mail::to($mentor->email)->send(new IncomeReleased($mentor, $session, $amount));
+        $this->sendMail($mentor, new IncomeReleased($mentor, $session, $amount));
     }
 
     /**
@@ -301,9 +309,9 @@ class MentorshipNotificationService
     public function sendWelcomeEmail(User $user)
     {
         if ($user->isMentor()) {
-            Mail::to($user->email)->send(new WelcomeMentor($user));
+            $this->sendMail($user, new WelcomeMentor($user));
         } else {
-            Mail::to($user->email)->send(new WelcomeJeune($user));
+            $this->sendMail($user, new WelcomeJeune($user));
         }
     }
 
@@ -313,7 +321,7 @@ class MentorshipNotificationService
     public function sendReportReminder(MentoringSession $session)
     {
         if ($session->mentor) {
-            Mail::to($session->mentor->email)->send(new ReportReminder($session));
+            $this->sendMail($session->mentor, new ReportReminder($session));
         }
     }
 
@@ -322,7 +330,7 @@ class MentorshipNotificationService
      */
     public function sendAccountDeleted(User $user, string $reason = '')
     {
-        Mail::to($user->email)->send(new AccountDeleted($user, $reason));
+        $this->sendMail($user, new AccountDeleted($user, $reason));
     }
 
     /**
@@ -330,7 +338,7 @@ class MentorshipNotificationService
      */
     public function sendAccountArchivedByUser(User $user)
     {
-        Mail::to($user->email)->send(new AccountArchivedByUser($user));
+        $this->sendMail($user, new AccountArchivedByUser($user));
     }
 
     /**
@@ -338,7 +346,7 @@ class MentorshipNotificationService
      */
     public function sendContactConfirmation(User $user, array $data)
     {
-        Mail::to($user->email)->send(new ContactConfirmation($user, $data));
+        $this->sendMail($user, new ContactConfirmation($user, $data));
     }
 
     /**
@@ -347,7 +355,7 @@ class MentorshipNotificationService
     public function sendResourceValidated(Resource $resource)
     {
         if ($resource->user) {
-            Mail::to($resource->user->email)->send(new ResourceValidated($resource));
+            $this->sendMail($resource->user, new ResourceValidated($resource));
         }
     }
 
@@ -357,7 +365,7 @@ class MentorshipNotificationService
     public function sendResourceRejected(Resource $resource)
     {
         if ($resource->user) {
-            Mail::to($resource->user->email)->send(new ResourceRejected($resource));
+            $this->sendMail($resource->user, new ResourceRejected($resource));
         }
     }
 
@@ -367,7 +375,7 @@ class MentorshipNotificationService
     public function sendResourcePurchased(Resource $resource, User $buyer, int $creditsEarned)
     {
         if ($resource->user) {
-            Mail::to($resource->user->email)->send(new ResourcePurchased($resource, $buyer, $creditsEarned));
+            $this->sendMail($resource->user, new ResourcePurchased($resource, $buyer, $creditsEarned));
         }
     }
 
@@ -376,7 +384,7 @@ class MentorshipNotificationService
      */
     public function sendCreditGiftedNotification(User $user, Organization $organization, int $amount)
     {
-        Mail::to($user->email)->send(new CreditGiftedMail($user, $organization, $amount, $user->credits_balance));
+        $this->sendMail($user, new CreditGiftedMail($user, $organization, $amount, $user->credits_balance));
     }
 
     /**
@@ -385,7 +393,7 @@ class MentorshipNotificationService
     public function sendSubscriptionActivatedNotification(Organization $organization, CreditPack $plan)
     {
         if ($organization->contact_email) {
-            Mail::to($organization->contact_email)->send(new SubscriptionActivatedMail($organization, $plan));
+            $this->sendMail($organization->contact_email, new SubscriptionActivatedMail($organization, $plan));
         }
     }
 
@@ -395,7 +403,7 @@ class MentorshipNotificationService
     public function sendCreditPackPurchasedNotification(Organization $organization, CreditPack $pack)
     {
         if ($organization->contact_email) {
-            Mail::to($organization->contact_email)->send(new CreditPackPurchasedMail($organization, $pack, $organization->credits_balance));
+            $this->sendMail($organization->contact_email, new CreditPackPurchasedMail($organization, $pack, $organization->credits_balance));
         }
     }
 
@@ -404,7 +412,7 @@ class MentorshipNotificationService
      */
     public function sendResourceGiftedNotification(User $user, \App\Models\Resource $resource, Organization $organization)
     {
-        Mail::to($user->email)->send(new ResourceGiftedMail($user, $resource, $organization));
+        $this->sendMail($user, new ResourceGiftedMail($user, $resource, $organization));
     }
 
     /**
@@ -418,7 +426,7 @@ class MentorshipNotificationService
             $isGuest = $mentor->is_guest;
             $sessionUrl = $isGuest ? '#' : route('mentor.mentorship.sessions.show', ['session' => $session->id]);
 
-            Mail::to($mentor->email)->send(new ReportAvailableMail(
+            $this->sendMail($mentor, new ReportAvailableMail(
                 $mentor,
                 $session,
                 $sessionUrl,
@@ -429,7 +437,7 @@ class MentorshipNotificationService
         // 2. Notifier chaque jeune participant
         foreach ($session->mentees as $mentee) {
             $sessionUrl = route('jeune.sessions.show', ['session' => $session->id]);
-            Mail::to($mentee->email)->send(new ReportAvailableMail($mentee, $session, $sessionUrl));
+            $this->sendMail($mentee, new ReportAvailableMail($mentee, $session, $sessionUrl));
 
             // 3. Notifier l'organisation parrain si le jeune est sponsorisé
             $org = $mentee->sponsoringOrganization;
@@ -445,7 +453,7 @@ class MentorshipNotificationService
                     ];
                 }
 
-                Mail::to($org->contact_email)->send(new ReportAvailableMail($recipient, $session, $orgSessionUrl));
+                $this->sendMail($org->contact_email, new ReportAvailableMail($recipient, $session, $orgSessionUrl));
             }
         }
     }
@@ -457,7 +465,7 @@ class MentorshipNotificationService
     {
         if ($organization->contact_email) {
             $renewUrl = route('organization.subscriptions.index');
-            Mail::to($organization->contact_email)->send(new SubscriptionExpiringMail($organization, $timeLeft, $renewUrl));
+            $this->sendMail($organization->contact_email, new SubscriptionExpiringMail($organization, $timeLeft, $renewUrl));
         }
     }
 
@@ -468,7 +476,7 @@ class MentorshipNotificationService
     {
         if ($organization->contact_email) {
             $renewUrl = route('organization.subscriptions.index');
-            Mail::to($organization->contact_email)->send(new SubscriptionDowngradedMail($organization, $renewUrl, $targetPlan));
+            $this->sendMail($organization->contact_email, new SubscriptionDowngradedMail($organization, $renewUrl, $targetPlan));
         }
     }
 
@@ -477,7 +485,7 @@ class MentorshipNotificationService
      */
     public function sendPayoutCompleted(PayoutRequest $payout)
     {
-        Mail::to($payout->mentorProfile->user->email)->send(new PayoutProcessed($payout));
+        $this->sendMail($payout->mentorProfile->user, new PayoutProcessed($payout));
     }
 
     /**
@@ -485,7 +493,7 @@ class MentorshipNotificationService
      */
     public function sendPayoutFailed(PayoutRequest $payout)
     {
-        Mail::to($payout->mentorProfile->user->email)->send(new PayoutProcessed($payout));
+        $this->sendMail($payout->mentorProfile->user, new PayoutProcessed($payout));
     }
 
     /**
@@ -512,26 +520,26 @@ class MentorshipNotificationService
             $otherPartyName = "{$mentee->name} et {$mentor->name}";
         }
 
-        Mail::to($actor->email)->send(new MentorshipTerminatedConfirmation($mentorship, $actor, $otherPartyName, $reason));
+        $this->sendMail($actor, new MentorshipTerminatedConfirmation($mentorship, $actor, $otherPartyName, $reason));
 
         // 2. Mail à l'autre partie (Notification)
         if ($actor->id === $mentee->id) {
             // Le jeune a rompu -> Notifier le mentor
-            Mail::to($mentor->email)->send(new MentorshipTerminatedNotification($mentorship, $mentor, $mentee->name, $reason));
+            $this->sendMail($mentor, new MentorshipTerminatedNotification($mentorship, $mentor, $mentee->name, $reason));
         } elseif ($actor->id === $mentor->id) {
             // Le mentor a rompu -> Notifier le jeune
-            Mail::to($mentee->email)->send(new MentorshipTerminatedNotification($mentorship, $mentee, $mentor->name, $reason));
+            $this->sendMail($mentee, new MentorshipTerminatedNotification($mentorship, $mentee, $mentor->name, $reason));
         } else {
             // L'organisation a rompu -> Notifier les deux
-            Mail::to($mentee->email)->send(new MentorshipTerminatedNotification($mentorship, $mentee, "votre organisation ({$organization->name})", $reason));
-            Mail::to($mentor->email)->send(new MentorshipTerminatedNotification($mentorship, $mentor, "l'organisation ({$organization->name})", $reason));
+            $this->sendMail($mentee, new MentorshipTerminatedNotification($mentorship, $mentee, "votre organisation ({$organization->name})", $reason));
+            $this->sendMail($mentor, new MentorshipTerminatedNotification($mentorship, $mentor, "l'organisation ({$organization->name})", $reason));
         }
 
         // 3. Mail à l'organisation (si elle n'est pas l'acteur)
         if (! $isOrgActor && $organization) {
             $adminEmail = $organization->users()->wherePivot('role', 'admin')->first()?->email ?? $organization->contact_email;
             if ($adminEmail) {
-                Mail::to($adminEmail)->send(new MentorshipTerminatedOrgNotification($mentorship, $actor->name, $reason, $mentee->name, $mentor->name));
+                $this->sendMail($adminEmail, new MentorshipTerminatedOrgNotification($mentorship, $actor->name, $reason, $mentee->name, $mentor->name));
             }
         }
     }
@@ -548,7 +556,7 @@ class MentorshipNotificationService
 
         // 1. Mail au Jeune
         $jeuneUrl = route('jeune.mentorship.index');
-        Mail::to($mentee->email)->send(new MentorshipCreatedByOrg(
+        $this->sendMail($mentee, new MentorshipCreatedByOrg(
             $mentorship,
             $mentee,
             $mentor->name,
@@ -558,7 +566,7 @@ class MentorshipNotificationService
 
         // 2. Mail au Mentor
         $mentorUrl = route('mentor.mentorship.index');
-        Mail::to($mentor->email)->send(new MentorshipCreatedByOrg(
+        $this->sendMail($mentor, new MentorshipCreatedByOrg(
             $mentorship,
             $mentor,
             $mentee->name,
@@ -583,7 +591,7 @@ class MentorshipNotificationService
             $conversationUrl = route('jeune.messages.show', $mentorship);
         }
 
-        Mail::to($recipient->email)->send(new NewMessageNotification(
+        $this->sendMail($recipient, new NewMessageNotification(
             $recipient,
             $sender->name,
             $conversationUrl

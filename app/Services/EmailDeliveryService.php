@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class EmailDeliveryService
 {
@@ -127,5 +128,36 @@ class EmailDeliveryService
             'email' => $email,
             'error' => $exception->getMessage(),
         ]);
+    }
+
+    /**
+     * Tente d'envoyer un e-mail de manière sécurisée en attrapant toute erreur SMTP pour éviter un crash 500.
+     */
+    public function safeSend(mixed $recipient, mixed $mailable): bool
+    {
+        try {
+            $email = is_string($recipient) ? $recipient : ($recipient->email ?? null);
+
+            if (! $email) {
+                return false;
+            }
+
+            if ($this->isExcludedEmail($email)) {
+                return false;
+            }
+
+            Mail::to($email)->send($mailable);
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->handleDeliveryFailure(is_string($recipient) ? $recipient : ($recipient->email ?? ''), $e);
+
+            Log::error('Erreur SMTP / Envoi e-mail intercepté (évite une erreur 500) : '.$e->getMessage(), [
+                'recipient' => is_string($recipient) ? $recipient : ($recipient->email ?? null),
+                'mailable' => is_object($mailable) ? get_class($mailable) : null,
+            ]);
+
+            return false;
+        }
     }
 }
