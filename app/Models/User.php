@@ -156,7 +156,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $code = sprintf('%06d', random_int(100000, 999999));
         $this->forceFill([
             'verification_code' => $code,
-            'verification_code_expires_at' => now()->addMinutes(config('auth.verification.expire', 15)),
+            'verification_code_expires_at' => now()->addMinutes((int) config('auth.verification.expire', 15)),
         ])->save();
 
         return $code;
