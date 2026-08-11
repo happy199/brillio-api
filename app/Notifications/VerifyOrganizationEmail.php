@@ -56,7 +56,7 @@ class VerifyOrganizationEmail extends VerifyEmail implements ShouldQueue
 
         return URL::temporarySignedRoute(
             'organization.verification.verify',
-            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
+            Carbon::now()->addMinutes((int) Config::get('auth.verification.expire', 15)),
             [
                 'id' => $notifiable->getKey(),
                 'hash' => sha1($notifiable->getEmailForVerification()),
