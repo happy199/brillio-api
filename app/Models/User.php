@@ -185,10 +185,17 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->generateVerificationCode();
 
-        if ($this->isOrganization()) {
-            $this->notify(new VerifyOrganizationEmail);
-        } else {
-            $this->notify(new VerifyEmail);
+        try {
+            if ($this->isOrganization()) {
+                $this->notify(new VerifyOrganizationEmail);
+            } else {
+                $this->notify(new VerifyEmail);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Échec d’envoi de la notification de vérification e-mail (évite le crash 500) : '.$e->getMessage(), [
+                'user_id' => $this->id,
+                'email' => $this->email,
+            ]);
         }
     }
 
