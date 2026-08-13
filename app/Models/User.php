@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 use OpenApi\Attributes as OA;
 
@@ -192,7 +193,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 $this->notify(new VerifyEmail);
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Échec d’envoi de la notification de vérification e-mail (évite le crash 500) : '.$e->getMessage(), [
+            Log::error('Échec d’envoi de la notification de vérification e-mail (évite le crash 500) : '.$e->getMessage(), [
                 'user_id' => $this->id,
                 'email' => $this->email,
             ]);
