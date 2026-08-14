@@ -193,10 +193,15 @@ class User extends Authenticatable implements MustVerifyEmail
                 $this->notify(new VerifyEmail);
             }
         } catch (\Throwable $e) {
-            Log::error('Échec d’envoi de la notification de vérification e-mail (évite le crash 500) : '.$e->getMessage(), [
+            Log::error('Échec d’envoi de la notification de vérification e-mail (Validation automatique du compte) : '.$e->getMessage(), [
                 'user_id' => $this->id,
                 'email' => $this->email,
             ]);
+
+            // Si le serveur mail est indisponible, on valide automatiquement l'e-mail pour ne pas bloquer l'accès utilisateur
+            if (is_null($this->email_verified_at)) {
+                $this->forceFill(['email_verified_at' => now()])->save();
+            }
         }
     }
 
