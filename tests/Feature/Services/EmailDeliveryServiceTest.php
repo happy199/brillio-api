@@ -36,7 +36,7 @@ class EmailDeliveryServiceTest extends TestCase
         $this->assertSame(['jeune@example.com'], $filtered);
     }
 
-    public function test_mailbox_full_error_archives_jeune_account(): void
+    public function test_mailbox_full_error_suppresses_email(): void
     {
         $jeune = User::factory()->create([
             'user_type' => 'jeune',
@@ -51,9 +51,11 @@ class EmailDeliveryServiceTest extends TestCase
         $this->service->handleDeliveryFailure($jeune->email, $exception);
 
         $jeune->refresh();
-        $this->assertTrue($jeune->is_archived);
-        $this->assertNotNull($jeune->archived_at);
-        $this->assertStringContainsString('boîte mail', $jeune->archived_reason);
+        $this->assertFalse($jeune->is_archived);
+        $this->assertDatabaseHas('email_suppressions', [
+            'email' => 'djegoulucresse@gmail.com',
+            'source' => 'system_auto',
+        ]);
     }
 
     public function test_non_mailbox_error_does_not_archive(): void

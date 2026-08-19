@@ -143,9 +143,9 @@ class EmailEngagementJobsTest extends TestCase
         $this->assertNotNull($campaign->sent_at);
     }
 
-    public function test_send_campaign_email_job_archives_jeune_on_mailbox_error(): void
+    public function test_send_campaign_email_job_suppresses_email_on_mailbox_error(): void
     {
-        $admin = User::factory()->create();
+        $admin = User::factory()->create(['user_type' => 'admin']);
         $jeune = User::factory()->create([
             'user_type' => 'jeune',
             'email' => 'mailbox-full@example.com',
@@ -175,7 +175,8 @@ class EmailEngagementJobsTest extends TestCase
         (new SendCampaignEmailJob($campaign, 'mailbox-full@example.com'))->handle(app(EmailDeliveryService::class));
 
         $jeune->refresh();
-        $this->assertTrue($jeune->is_archived);
+        $this->assertFalse($jeune->is_archived);
+        $this->assertDatabaseHas('email_suppressions', ['email' => 'mailbox-full@example.com']);
         $campaign->refresh();
         $this->assertEquals(1, $campaign->failed_count);
     }
