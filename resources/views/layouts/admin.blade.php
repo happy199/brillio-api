@@ -463,6 +463,10 @@
                             class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.audits.crons') ? 'text-white font-bold' : '' }}">
                             Chronologie CRONs
                         </a>
+                        <a href="{{ route('admin.audits.suppressions') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.audits.suppressions*') ? 'text-white font-bold' : '' }}">
+                            Exclusions Emails
+                        </a>
                     </div>
                 </div>
                 @endif

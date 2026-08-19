@@ -578,6 +578,9 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Audits System
         Route::get('/audits/emails', [AuditController::class, 'emails'])->name('audits.emails');
         Route::get('/audits/crons', [AuditController::class, 'crons'])->name('audits.crons');
+        Route::get('/audits/suppressions', [AuditController::class, 'suppressions'])->name('audits.suppressions');
+        Route::post('/audits/suppressions', [AuditController::class, 'storeSuppression'])->name('audits.suppressions.store');
+        Route::delete('/audits/suppressions/{suppression}', [AuditController::class, 'destroySuppression'])->name('audits.suppressions.destroy');
 
         // Gestion des utilisateurs (Actions admin uniquement)
         Route::get('users', [UserController::class, 'index'])->name('users.index');

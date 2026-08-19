@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\EmailSuppression;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +27,13 @@ class EmailDeliveryService
 
     public function isExcludedEmail(string $email): bool
     {
-        return in_array(strtolower(trim($email)), $this->excludedEmails(), true);
+        $normalized = strtolower(trim($email));
+
+        if (in_array($normalized, $this->excludedEmails(), true)) {
+            return true;
+        }
+
+        return EmailSuppression::where('email', $normalized)->exists();
     }
 
     /**
@@ -58,6 +65,7 @@ class EmailDeliveryService
             ->where('is_archived', false)
             ->where('is_blocked', false)
             ->whereNotNull('email_verified_at')
+            ->whereNotIn('email', EmailSuppression::pluck('email'))
             ->when(! empty($excluded), fn (Builder $q) => $q->whereNotIn('email', $excluded));
     }
 
@@ -101,7 +109,7 @@ class EmailDeliveryService
     }
 
     /**
-     * Archive automatiquement le compte jeune associé à une adresse en échec de livraison.
+     * Ajoute automatiquement une adresse e-mail en échec de livraison à la liste d'exclusion système.
      */
     public function handleDeliveryFailure(string $email, \Throwable $exception): void
     {
@@ -109,22 +117,23 @@ class EmailDeliveryService
             return;
         }
 
-        $user = User::where('email', $email)->first();
+        $email = strtolower(trim($email));
 
-        if (! $user || ! $user->isJeune() || $user->is_archived) {
+        if (! $email) {
             return;
         }
 
-        $reason = 'Archivé automatiquement : boîte mail injoignable ou pleine ('.class_basename($exception).').';
+        $reason = 'Ajouté automatiquement suite à une erreur SMTP : '.class_basename($exception).' ('.$exception->getMessage().')';
 
-        $user->update([
-            'is_archived' => true,
-            'archived_at' => now(),
-            'archived_reason' => $reason,
-        ]);
+        EmailSuppression::updateOrCreate(
+            ['email' => $email],
+            [
+                'reason' => mb_strimwidth($reason, 0, 250, '...'),
+                'source' => 'system_auto',
+            ]
+        );
 
-        Log::warning('Compte jeune archivé automatiquement suite à une erreur de livraison e-mail', [
-            'user_id' => $user->id,
+        Log::warning('Adresse email ajoutée automatiquement à la liste d\'exclusion suite à un échec SMTP', [
             'email' => $email,
             'error' => $exception->getMessage(),
         ]);
