@@ -56,10 +56,12 @@
     <div class="bg-white rounded-lg shadow-sm mb-6 p-4 border border-slate-200">
         <form method="GET" action="{{ route('admin.audits.suppressions') }}" class="flex flex-col sm:flex-row gap-4">
             <div class="flex-grow">
-                <input type="text" name="search" placeholder="Rechercher par adresse email ou raison" value="{{ request('search') }}" class="w-full form-input bg-slate-100 border-transparent focus:bg-white focus:border-slate-300">
+                <label for="suppression_search" class="sr-only">Rechercher une adresse e-mail ou raison</label>
+                <input id="suppression_search" type="text" name="search" placeholder="Rechercher par adresse email ou raison" value="{{ request('search') }}" class="w-full form-input bg-slate-100 border-transparent focus:bg-white focus:border-slate-300">
             </div>
             <div class="w-full sm:w-48">
-                <select name="source" class="w-full form-select bg-slate-100 border-transparent focus:bg-white focus:border-slate-300">
+                <label for="suppression_source_filter" class="sr-only">Filtrer par origine d'exclusion</label>
+                <select id="suppression_source_filter" name="source" class="w-full form-select bg-slate-100 border-transparent focus:bg-white focus:border-slate-300">
                     <option value="">Toutes les origines</option>
                     <option value="system_auto" {{ request('source') == 'system_auto' ? 'selected' : '' }}>Automatique (Système)</option>
                     <option value="admin_manual" {{ request('source') == 'admin_manual' ? 'selected' : '' }}>Manuel (Admin)</option>
@@ -154,12 +156,12 @@
             <form action="{{ route('admin.audits.suppressions.store') }}" method="POST" class="p-6">
                 @csrf
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Adresse E-mail <span class="text-rose-500">*</span></label>
-                    <input type="email" name="email" required placeholder="ex: utilisateur@example.com" class="w-full form-input bg-slate-50 border-slate-300 focus:bg-white focus:border-indigo-500 rounded-lg">
+                    <label for="suppression_email" class="block text-sm font-medium text-slate-700 mb-1">Adresse E-mail <span class="text-rose-500">*</span></label>
+                    <input id="suppression_email" type="email" name="email" required placeholder="ex: utilisateur@example.com" class="w-full form-input bg-slate-50 border-slate-300 focus:bg-white focus:border-indigo-500 rounded-lg">
                 </div>
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Motif / Raison d'exclusion <span class="text-rose-500">*</span></label>
-                    <input type="text" name="reason" required placeholder="ex: Boîte mail saturée / Demande d'unsubcribe" class="w-full form-input bg-slate-50 border-slate-300 focus:bg-white focus:border-indigo-500 rounded-lg">
+                    <label for="suppression_reason" class="block text-sm font-medium text-slate-700 mb-1">Motif / Raison d'exclusion <span class="text-rose-500">*</span></label>
+                    <input id="suppression_reason" type="text" name="reason" required placeholder="ex: Boîte mail saturée / Demande d'unsubcribe" class="w-full form-input bg-slate-50 border-slate-300 focus:bg-white focus:border-indigo-500 rounded-lg">
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" @click="showAddModal = false" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm font-medium">Annuler</button>

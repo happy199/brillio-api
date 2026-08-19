@@ -12,6 +12,8 @@ class EmailSuppressionTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const ACTIVE_USER_EMAIL = 'activeuser@example.com';
+
     private function createAdmin(): User
     {
         $admin = User::factory()->create([
@@ -92,7 +94,7 @@ class EmailSuppressionTest extends TestCase
     public function test_delivery_failure_adds_to_suppression_without_archiving_user(): void
     {
         $user = User::factory()->create([
-            'email' => 'activeuser@example.com',
+            'email' => self::ACTIVE_USER_EMAIL,
             'user_type' => 'jeune',
             'is_archived' => false,
         ]);
@@ -100,7 +102,7 @@ class EmailSuppressionTest extends TestCase
         $service = app(EmailDeliveryService::class);
         $exception = new \Exception('452 4.2.2 The recipient inbox is out of storage space');
 
-        $service->handleDeliveryFailure('activeuser@example.com', $exception);
+        $service->handleDeliveryFailure(self::ACTIVE_USER_EMAIL, $exception);
 
         // Account remains ACTIVE (is_archived = false)
         $user->refresh();
@@ -108,7 +110,7 @@ class EmailSuppressionTest extends TestCase
 
         // Email added to suppression list
         $this->assertDatabaseHas('email_suppressions', [
-            'email' => 'activeuser@example.com',
+            'email' => self::ACTIVE_USER_EMAIL,
             'source' => 'system_auto',
         ]);
     }
