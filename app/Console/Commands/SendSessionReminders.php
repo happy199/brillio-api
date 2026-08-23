@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Mail\Session\SessionReminder;
 use App\Models\MentoringSession;
+use App\Services\EmailDeliveryService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -53,16 +54,24 @@ class SendSessionReminders extends Command
         }
 
         $emailsSent = 0;
+        $deliveryService = app(EmailDeliveryService::class);
+
         foreach ($sessions as $session) {
             try {
-                // Send to mentor
-                Mail::to($session->mentor->email)->queue(
-                    new SessionReminder($session, $session->mentor, $session->mentees, $type)
-                );
-                $emailsSent++;
+                // Send to mentor if not excluded
+                if ($session->mentor && ! $deliveryService->isExcludedEmail($session->mentor->email)) {
+                    Mail::to($session->mentor->email)->queue(
+                        new SessionReminder($session, $session->mentor, $session->mentees, $type)
+                    );
+                    $emailsSent++;
+                }
 
-                // Send to each mentee
+                // Send to each mentee if not excluded
                 foreach ($session->mentees as $mentee) {
+                    if ($deliveryService->isExcludedEmail($mentee->email)) {
+                        continue;
+                    }
+
                     $otherParticipants = $session->mentees->reject(fn ($m) => $m->id === $mentee->id);
                     Mail::to($mentee->email)->queue(
                         new SessionReminder($session, $mentee, $otherParticipants, $type)

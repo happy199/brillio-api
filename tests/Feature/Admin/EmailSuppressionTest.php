@@ -6,6 +6,9 @@ use App\Models\EmailSuppression;
 use App\Models\User;
 use App\Services\EmailDeliveryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class EmailSuppressionTest extends TestCase
@@ -113,5 +116,32 @@ class EmailSuppressionTest extends TestCase
             'email' => self::ACTIVE_USER_EMAIL,
             'source' => 'system_auto',
         ]);
+    }
+
+    public function test_global_mail_sending_listener_cancels_sending_for_suppressed_email(): void
+    {
+        EmailSuppression::create([
+            'email' => 'armanceatchou1@gmail.com',
+            'reason' => 'Boîte mail pleine',
+            'source' => 'system_auto',
+        ]);
+
+        $sent = false;
+
+        Event::listen(MessageSent::class, function () use (&$sent) {
+            $sent = true;
+        });
+
+        // Tente un envoi direct via Mail::to()
+        try {
+            Mail::html('Test message', function ($message) {
+                $message->to('armanceatchou1@gmail.com')->subject('Test Subject');
+            });
+        } catch (\Throwable $e) {
+            // Ignoré
+        }
+
+        // L'e-mail ne doit PAS être envoyé (MessageSent ne doit pas se déclencher)
+        $this->assertFalse($sent);
     }
 }

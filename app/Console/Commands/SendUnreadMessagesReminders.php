@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Mail\Messages\UnreadMessagesReminder;
 use App\Models\Mentorship;
+use App\Services\EmailDeliveryService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 
 class SendUnreadMessagesReminders extends Command
 {
@@ -23,6 +23,8 @@ class SendUnreadMessagesReminders extends Command
 
         $sent = 0;
 
+        $deliveryService = app(EmailDeliveryService::class);
+
         foreach ($mentorships as $mentorship) {
             // Messages non lus du mentor → destinataire = jeune
             $unreadForMentee = $mentorship->messages
@@ -30,10 +32,11 @@ class SendUnreadMessagesReminders extends Command
                 ->whereNull('read_at')
                 ->count();
 
-            if ($unreadForMentee > 0 && ! $mentorship->mentee->is_archived && ! $mentorship->mentee->archived_at) {
+            if ($unreadForMentee > 0 && ! $mentorship->mentee->is_archived && ! $mentorship->mentee->archived_at && ! $deliveryService->isExcludedEmail($mentorship->mentee->email)) {
                 $conversationUrl = route('jeune.messages.show', $mentorship);
 
-                Mail::to($mentorship->mentee->email)->send(
+                $deliveryService->safeSend(
+                    $mentorship->mentee,
                     new UnreadMessagesReminder(
                         recipient: $mentorship->mentee,
                         senderName: $mentorship->mentor->name,
@@ -52,10 +55,11 @@ class SendUnreadMessagesReminders extends Command
                 ->whereNull('read_at')
                 ->count();
 
-            if ($unreadForMentor > 0 && ! $mentorship->mentor->is_archived && ! $mentorship->mentor->archived_at) {
+            if ($unreadForMentor > 0 && ! $mentorship->mentor->is_archived && ! $mentorship->mentor->archived_at && ! $deliveryService->isExcludedEmail($mentorship->mentor->email)) {
                 $conversationUrl = route('mentor.messages.show', $mentorship);
 
-                Mail::to($mentorship->mentor->email)->send(
+                $deliveryService->safeSend(
+                    $mentorship->mentor,
                     new UnreadMessagesReminder(
                         recipient: $mentorship->mentor,
                         senderName: $mentorship->mentee->name,

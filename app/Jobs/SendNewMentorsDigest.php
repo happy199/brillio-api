@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Mail\Engagement\NewMentorsWeekly;
 use App\Models\User;
+use App\Services\EmailDeliveryService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -44,8 +45,14 @@ class SendNewMentorsDigest implements ShouldQueue
             ->where('archived_at', null)
             ->get();
 
+        $deliveryService = app(EmailDeliveryService::class);
+
         // 3. Envoyer le digest à chaque jeune
         foreach ($jeunes as $jeune) {
+            if ($deliveryService->isExcludedEmail($jeune->email)) {
+                continue;
+            }
+
             Mail::to($jeune->email)->queue(new NewMentorsWeekly($jeune, $newMentors));
         }
     }

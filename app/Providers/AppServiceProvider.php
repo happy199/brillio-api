@@ -4,11 +4,14 @@ namespace App\Providers;
 
 use App\Models\EmailLog;
 use App\Models\ScheduledTaskLog;
+use App\Services\EmailDeliveryService;
 use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,9 +32,28 @@ class AppServiceProvider extends ServiceProvider
         // Configurer la pagination par défaut
         Paginator::defaultView('pagination.modern-pagination');
 
-        // === AUDIT LOGS EVENTS ===
+        // === AUDIT LOGS & MAIL SUPPRESSION EVENTS ===
 
-        // 1. Emails
+        // 0. Global Suppression Guard (MessageSending) - Annule instantanément tout envoi vers une adresse exclue
+        Event::listen(MessageSending::class, function (MessageSending $event) {
+            $message = $event->message;
+            $recipients = collect($message->getTo())->map(fn ($address) => strtolower(trim($address->getAddress())));
+
+            $deliveryService = app(EmailDeliveryService::class);
+
+            foreach ($recipients as $email) {
+                if ($deliveryService->isExcludedEmail($email)) {
+                    Log::info("Envoi d'e-mail intercepté et annulé (adresse dans la liste d'exclusion)", [
+                        'email' => $email,
+                        'subject' => $message->getSubject(),
+                    ]);
+
+                    return false;
+                }
+            }
+        });
+
+        // 1. Emails (MessageSent)
         Event::listen(MessageSent::class, function (MessageSent $event) {
             $message = $event->message;
             $to = collect($message->getTo())->map(fn ($address) => $address->getAddress())->implode(', ');
