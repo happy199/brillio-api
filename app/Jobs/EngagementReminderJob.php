@@ -12,7 +12,6 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 abstract class EngagementReminderJob implements ShouldQueue
 {
@@ -71,7 +70,7 @@ abstract class EngagementReminderJob implements ShouldQueue
                     }
 
                     try {
-                        Mail::to($user->email)->send($this->buildMailable($user));
+                        $deliveryService->safeSend($user, $this->buildMailable($user));
                         $user->update(['last_engagement_email_sent_at' => now()]);
                     } catch (\Exception $e) {
                         Log::error("Email d'engagement échoué pour l'utilisateur #{$user->id}: ".$e->getMessage());
