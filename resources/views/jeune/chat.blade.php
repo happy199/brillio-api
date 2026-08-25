@@ -424,6 +424,7 @@
                     newMessage: '',
                     isTyping: false,
                     showHistory: false,
+                    pollTimer: null,
 
                     init() {
                         // Load current conversation messages if exists
@@ -457,8 +458,8 @@
                             })->toArray()) !!};
                         @endif
 
-                                                            // Check for prefilled message from URL params
-                                                            const urlParams = new URLSearchParams(window.location.search);
+                        // Check for prefilled message from URL params
+                        const urlParams = new URLSearchParams(window.location.search);
                         const prefillMessage = urlParams.get('prefill') || urlParams.get('message');
                         if (prefillMessage) {
                             this.newMessage = decodeURIComponent(prefillMessage);
@@ -467,6 +468,43 @@
                         }
 
                         this.scrollToBottom();
+                        this.startPolling();
+
+                        document.addEventListener('visibilitychange', () => {
+                            if (document.visibilityState === 'visible') {
+                                this.pollMessages();
+                            }
+                        });
+                    },
+
+                    startPolling() {
+                        if (this.pollTimer) clearInterval(this.pollTimer);
+                        this.pollTimer = setInterval(() => {
+                            this.pollMessages();
+                        }, 2500);
+                    },
+
+                    async pollMessages() {
+                        if (!this.currentConversationId || this.isTyping) return;
+                        try {
+                            const response = await fetch(`/espace-jeune/chat/${this.currentConversationId}`);
+                            const data = await response.json();
+                            if (data.success && data.messages) {
+                                const currentSig = JSON.stringify(this.messages.map(m => ({ id: m.id, status: m.advisor_video_call?.status })));
+                                const newSig = JSON.stringify(data.messages.map(m => ({ id: m.id, status: m.advisor_video_call?.status })));
+                                if (currentSig !== newSig) {
+                                    const previousLength = this.messages.length;
+                                    this.messages = data.messages;
+                                    if (data.needs_human_support !== undefined) this.needsHumanSupport = data.needs_human_support;
+                                    if (data.is_human_support_active !== undefined) this.isHumanSupportActive = data.is_human_support_active;
+                                    if (data.messages.length > previousLength) {
+                                        this.scrollToBottom();
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Polling error:', e);
+                        }
                     },
 
                     async sendMessage() {
