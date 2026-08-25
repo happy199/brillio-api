@@ -41,6 +41,13 @@ return [
      |--------------------------------------------------------------------------
      */
 
+    'cloudinary' => [
+        'url' => env('CLOUDINARY_URL'),
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME', 'uysp6lxe'),
+        'api_key' => env('CLOUDINARY_API_KEY', '661744138524429'),
+        'upload_preset' => env('CLOUDINARY_UPLOAD_PRESET', 'ml_default'),
+    ],
+
     // OpenRouter API - Pour accéder à DeepSeek R1 et autres modèles IA
     'openrouter' => [
         'api_key' => env('OPENROUTER_API_KEY'),
