@@ -40,14 +40,20 @@
                 Ne partagez pas l'URL de cette page.
             </div>
 
-            <button type="button" onclick="finishCallAndExit()"
+            <button id="recording-btn" type="button" onclick="toggleVideoRecording()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer shadow">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                <span id="recording-btn-text">Démarrer l'enregistrement</span>
+            </button>
+
+            <button id="exit-btn" type="button" onclick="finishCallAndExit()"
                 class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
                     </path>
                 </svg>
-                Quitter la séance
+                <span id="exit-btn-text">Quitter la séance</span>
             </button>
         </div>
     </header>
@@ -61,12 +67,127 @@
     <script id="jitsi-api" nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://8x8.vc/{{ $appId }}/external_api.js" async></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
         let isExiting = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let recordingStartTime = null;
+        let recordingTimerInterval = null;
+        let isUploadingRecording = false;
+
+        async function toggleVideoRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                stopAndUploadVideoRecording();
+            } else {
+                startVideoRecording();
+            }
+        }
+
+        async function startVideoRecording() {
+            try {
+                let stream;
+                try {
+                    stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { mediaSource: 'screen' },
+                        audio: true
+                    });
+                } catch (e) {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                }
+
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus' });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach(track => track.stop());
+                    if (recordedChunks.length > 0) {
+                        await uploadRecordedVideo();
+                    }
+                };
+
+                mediaRecorder.start(1000);
+                recordingStartTime = Date.now();
+                updateRecordingButton(true);
+
+                recordingTimerInterval = setInterval(() => {
+                    const elapsedSeconds = Math.floor((Date.now() - recordingStartTime) / 1000);
+                    const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+                    const secs = String(elapsedSeconds % 60).padStart(2, '0');
+                    const btnText = document.getElementById('recording-btn-text');
+                    if (btnText) {
+                        btnText.innerText = `Arrêter l'enregistrement (${mins}:${secs})`;
+                    }
+                }, 1000);
+
+            } catch (err) {
+                console.error('Erreur démarrage enregistrement:', err);
+                alert("Impossible d'accéder au flux vidéo pour l'enregistrement. Vérifiez les autorisations de votre navigateur.");
+            }
+        }
+
+        function stopAndUploadVideoRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                clearInterval(recordingTimerInterval);
+                mediaRecorder.stop();
+                updateRecordingButton(false);
+            }
+        }
+
+        function updateRecordingButton(isRecording) {
+            const btn = document.getElementById('recording-btn');
+            const btnText = document.getElementById('recording-btn-text');
+            if (!btn || !btnText) return;
+
+            if (isRecording) {
+                btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                btn.classList.add('bg-amber-600', 'hover:bg-amber-700');
+                btnText.innerText = "Arrêter l'enregistrement (00:00)";
+            } else {
+                btn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
+                btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                btnText.innerText = "Démarrer l'enregistrement";
+            }
+        }
+
+        async function uploadRecordedVideo() {
+            if (isUploadingRecording || recordedChunks.length === 0) return;
+            isUploadingRecording = true;
+
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const formData = new FormData();
+            formData.append('video', blob, 'recording_{{ $session->id }}.webm');
+
+            try {
+                const response = await fetch('{{ route("meeting.upload-recording", $session) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                });
+                const data = await response.json();
+                console.log('Enregistrement vidéo envoyé:', data);
+            } catch (err) {
+                console.error('Erreur lors du téléversement vidéo:', err);
+            } finally {
+                isUploadingRecording = false;
+            }
+        }
 
         function finishCallAndExit() {
             if (isExiting) return;
             isExiting = true;
 
-            if (typeof stopAndUploadVideoRecording === 'function') {
+            const exitBtnText = document.getElementById('exit-btn-text');
+            if (exitBtnText) {
+                exitBtnText.innerText = "Fermeture...";
+            }
+
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                 try {
                     stopAndUploadVideoRecording();
                 } catch (e) {}
@@ -79,14 +200,8 @@
             }
 
             setTimeout(() => {
-                if (window.opener && !window.opener.closed) {
-                    try {
-                        window.close();
-                        return;
-                    } catch (e) {}
-                }
                 window.location.href = "{{ $exitUrl }}";
-            }, 300);
+            }, 400);
         }
 
         (function() {
