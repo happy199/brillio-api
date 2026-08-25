@@ -213,7 +213,7 @@
                                 @else
                                     bg-gray-100 text-gray-800
                                 @endif">
-                                <p class="text-sm whitespace-pre-wrap">{{ $message->content }}</p>
+                                <p class="text-sm whitespace-pre-wrap">{{ trim(preg_replace('/\[ADVISOR_VIDEO_CALL:\d+\]/', '', $message->content)) }}</p>
 
                                 @if($advisorCall)
                                     @if($advisorCall->isAccepted())

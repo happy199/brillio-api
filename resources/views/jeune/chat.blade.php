@@ -428,13 +428,33 @@
                     init() {
                         // Load current conversation messages if exists
                         @if(isset($currentConversation) && $currentConversation->messages)
-                            this.messages = {!! json_encode($currentConversation->messages->map(fn($m) => [
-                                'role' => $m->role,
-                                'content' => $m->content,
-                                'is_from_human' => (bool)$m->is_from_human,
-                                'is_system_message' => (bool)$m->is_system_message,
-                                'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant ' . (isset($current_organization) ? $current_organization->name : 'Brillio')
-                            ])->toArray()) !!};
+                            @php
+                                $advisorCallsMap = \App\Models\AdvisorVideoCall::where('conversation_id', $currentConversation->id)->get()->keyBy('id');
+                            @endphp
+                            this.messages = {!! json_encode($currentConversation->messages->map(function($m) use ($advisorCallsMap, $current_organization) {
+                                $callData = null;
+                                if (preg_match('/\[ADVISOR_VIDEO_CALL:(\d+)\]/', $m->content, $matches)) {
+                                    $c = $advisorCallsMap->get($matches[1]) ?? \App\Models\AdvisorVideoCall::find($matches[1]);
+                                    if ($c) {
+                                        $callData = [
+                                            'id' => $c->id,
+                                            'status' => $c->status,
+                                            'credits_cost' => $c->credits_cost,
+                                            'meeting_id' => $c->meeting_id,
+                                            'initiated_by' => $c->initiated_by,
+                                        ];
+                                    }
+                                }
+                                return [
+                                    'id' => $m->id,
+                                    'role' => $m->role,
+                                    'content' => $m->content,
+                                    'is_from_human' => (bool)$m->is_from_human,
+                                    'is_system_message' => (bool)$m->is_system_message,
+                                    'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant ' . (isset($current_organization) ? $current_organization->name : 'Brillio'),
+                                    'advisor_video_call' => $callData,
+                                ];
+                            })->toArray()) !!};
                         @endif
 
                                                             // Check for prefilled message from URL params
@@ -654,8 +674,11 @@
                     formatMessage(content) {
                         if (!content) return '';
 
+                        // Nettoyer la balise technique [ADVISOR_VIDEO_CALL:X] du texte affiché
+                        let cleanText = content.replace(/\[ADVISOR_VIDEO_CALL:\d+\]/g, '').trim();
+
                         // Nettoyage final des balises résiduelles au cas où
-                        let formatted = content.replace(/<\/?[^>]+(>|$)/g, "");
+                        let formatted = cleanText.replace(/<\/?[^>]+(>|$)/g, "");
 
                         // Rendu Markdown simplifié
                         formatted = formatted
