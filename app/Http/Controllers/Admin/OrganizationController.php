@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Establishment;
 use App\Models\Organization;
+use App\Models\User;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -52,6 +53,7 @@ class OrganizationController extends Controller
             'status' => 'required|in:active,inactive',
             'subscription_plan' => ['required', Rule::in(['free', 'pro', 'enterprise', 'establishment'])],
             'subscription_expires_at' => 'required_if:subscription_plan,pro,enterprise,establishment|nullable|date',
+            'custom_member_limit' => 'nullable|integer|min:0',
             'establishment_id' => 'nullable|exists:establishments,id',
         ]);
 
@@ -75,9 +77,18 @@ class OrganizationController extends Controller
      */
     public function show(Organization $organization)
     {
-        $organization->load(['sponsoredUsers']);
+        $organization->load(['sponsoredUsers', 'mentors']);
 
-        return view('admin.organizations.show', compact('organization'));
+        $linkedMentors = User::where('user_type', 'mentor')
+            ->where(function ($q) use ($organization) {
+                $q->whereHas('organizations', function ($sq) use ($organization) {
+                    $sq->where('organizations.id', $organization->id);
+                })->orWhere('sponsored_by_organization_id', $organization->id);
+            })
+            ->latest()
+            ->get();
+
+        return view('admin.organizations.show', compact('organization', 'linkedMentors'));
     }
 
     /**
@@ -106,6 +117,7 @@ class OrganizationController extends Controller
             'status' => 'required|in:active,inactive',
             'subscription_plan' => ['required', Rule::in(['free', 'pro', 'enterprise', 'establishment'])],
             'subscription_expires_at' => 'required_if:subscription_plan,pro,enterprise,establishment|nullable|date',
+            'custom_member_limit' => 'nullable|integer|min:0',
             'establishment_id' => 'nullable|exists:establishments,id',
         ]);
 

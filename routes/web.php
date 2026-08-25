@@ -650,6 +650,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Analytiques
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
         Route::prefix('analytics')->name('analytics.')->group(function () {
+            Route::get('comments', [AnalyticsController::class, 'comments'])->name('comments');
             Route::get('personality', [AnalyticsController::class, 'personality'])->name('personality');
             Route::get('chat', [AnalyticsController::class, 'chat'])->name('chat');
             Route::get('export', [AnalyticsController::class, 'export'])->name('export');
@@ -702,6 +703,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
         // Monitoring des chats de mentorat
         Route::get('mentorship-chat', [MentorshipChatController::class, 'index'])->name('mentorship-chat.index');
+        Route::post('mentorship-chat/clear-all', [MentorshipChatController::class, 'clearAll'])->name('mentorship-chat.clear-all');
         Route::get('mentorship-chat/{mentorship}', [MentorshipChatController::class, 'show'])->name('mentorship-chat.show');
         Route::post('mentorship-chat/{mentorship}/clear-report', [MentorshipChatController::class, 'clearReport'])->name('mentorship-chat.clear-report');
         Route::post('mentorship-chat/message/{message}/unflag', [MentorshipChatController::class, 'unflagMessage'])->name('mentorship-chat.unflag-message');

@@ -92,4 +92,29 @@ class MentorshipChatController extends Controller
 
         return back()->with('success', 'Le signalement de la conversation a été classé.');
     }
+
+    /**
+     * Lever TOUS les signalements et alertes PII de toutes les conversations
+     */
+    public function clearAll()
+    {
+        // 1. Reinitialiser les signalements globaux des mentorats
+        Mentorship::whereNotNull('reported_at')->update([
+            'reported_at' => null,
+            'reported_by_id' => null,
+            'report_reason' => null,
+        ]);
+
+        // 2. Lever tous les signalements de messages (PII & modération)
+        $flaggedMessages = Message::where('is_flagged', true)->get();
+        foreach ($flaggedMessages as $message) {
+            $message->update([
+                'body' => $message->original_body ?? $message->body,
+                'is_flagged' => false,
+                'flag_reason' => null,
+            ]);
+        }
+
+        return back()->with('success', 'Tous les signalements et alertes PII ont été levés avec succès.');
+    }
 }

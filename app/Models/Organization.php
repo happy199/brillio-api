@@ -55,6 +55,7 @@ class Organization extends Model
         'private_circle_enabled',
         'private_circle_plus_enabled',
         'disable_onboarding_steps',
+        'custom_member_limit',
     ];
 
     /**
@@ -78,6 +79,7 @@ class Organization extends Model
         'private_circle_enabled' => 'boolean',
         'private_circle_plus_enabled' => 'boolean',
         'disable_onboarding_steps' => 'boolean',
+        'custom_member_limit' => 'integer',
     ];
 
     /**
@@ -315,6 +317,11 @@ class Organization extends Model
      */
     public function getMemberLimit(): ?int
     {
+        // Priorité 0 : limite sur-mesure spécifiée directement sur l'organisation
+        if ($this->custom_member_limit !== null) {
+            return $this->custom_member_limit > 0 ? (int) $this->custom_member_limit : null;
+        }
+
         // Priorité 1 : lire depuis le plan CreditPack en base (configurable via l'admin)
         $pack = CreditPack::where('type', 'subscription')
             ->where('target_plan', $this->subscription_plan)

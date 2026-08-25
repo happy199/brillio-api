@@ -190,6 +190,22 @@
                         </div>
 
                         <div>
+                            <label for="custom_member_limit" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Limite de places / membres (Capacité)
+                            </label>
+                            <input type="number" name="custom_member_limit" id="custom_member_limit" min="0"
+                                value="{{ old('custom_member_limit', $organization->custom_member_limit ?? '') }}"
+                                class="p-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block w-full transition-all"
+                                placeholder="Illimité (par défaut pour Établissement) ou saisir un nombre (ex: 200)">
+                            @error('custom_member_limit')
+                            <p class="text-red-500 text-xs mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                            <p class="text-[11px] text-gray-500 mt-1.5 font-medium">
+                                Pour le plan Établissement, la capacité est par défaut <strong>illimitée</strong>. Vous pouvez saisir un nombre si une limite a été négociée. Laisser vide pour illimité.
+                            </p>
+                        </div>
+
+                        <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-3">Logo de l'organisation</label>
                             <div class="flex items-center gap-6">
                                 <div class="relative h-24 w-24 flex-shrink-0 group">
