@@ -68,19 +68,23 @@ class VideoRecordingService
      */
     public function storeRecording($file, string $filenamePrefix = 'video_meeting'): string
     {
-        $cloudinaryUrl = env('CLOUDINARY_URL');
-        $cloudName = env('CLOUDINARY_CLOUD_NAME');
+        $cloudinaryUrl = config('services.cloudinary.url') ?? env('CLOUDINARY_URL');
+        $cloudName = config('services.cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
 
         // Check if Cloudinary is configured
         if (! empty($cloudinaryUrl) || ! empty($cloudName)) {
             try {
                 $url = $this->uploadToCloudinary($file, $filenamePrefix);
                 if (! empty($url)) {
+                    Log::info("Video successfully uploaded to Cloudinary: {$url}");
+
                     return $url;
                 }
             } catch (\Throwable $e) {
                 Log::error('Cloudinary Video Upload Failed, falling back to local storage: '.$e->getMessage());
             }
+        } else {
+            Log::warning('Cloudinary credentials missing (CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME not found). Falling back to local storage.');
         }
 
         // Local storage fallback
@@ -92,18 +96,18 @@ class VideoRecordingService
      */
     private function uploadToCloudinary($file, string $prefix): ?string
     {
-        $cloudName = env('CLOUDINARY_CLOUD_NAME');
-        $uploadPreset = env('CLOUDINARY_UPLOAD_PRESET', 'ml_default');
+        $cloudinaryUrl = config('services.cloudinary.url') ?? env('CLOUDINARY_URL');
+        $cloudName = config('services.cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
+        $uploadPreset = config('services.cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET', 'ml_default');
 
-        if (empty($cloudName)) {
-            $url = env('CLOUDINARY_URL');
-            if (! empty($url) && str_contains($url, '@')) {
-                $parts = explode('@', $url);
-                $cloudName = end($parts);
-            }
+        if (empty($cloudName) && ! empty($cloudinaryUrl) && str_contains($cloudinaryUrl, '@')) {
+            $parts = explode('@', $cloudinaryUrl);
+            $cloudName = trim(end($parts));
         }
 
         if (empty($cloudName)) {
+            Log::warning('CloudName could not be determined for Cloudinary upload.');
+
             return null;
         }
 
@@ -112,7 +116,7 @@ class VideoRecordingService
             ? 'brillio_recordings/orientation'
             : 'brillio_recordings/mentoring';
 
-        $response = Http::timeout(120)
+        $response = Http::timeout(180)
             ->attach('file', file_get_contents($filePath), $prefix.'_'.time().'.webm')
             ->post("https://api.cloudinary.com/v1_1/{$cloudName}/video/upload", [
                 'upload_preset' => $uploadPreset,
@@ -123,7 +127,7 @@ class VideoRecordingService
             return $response->json('secure_url');
         }
 
-        Log::warning('Cloudinary response error: '.$response->body());
+        Log::warning('Cloudinary response error (Status '.$response->status().'): '.$response->body());
 
         return null;
     }

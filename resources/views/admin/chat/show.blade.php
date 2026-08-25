@@ -213,7 +213,46 @@
                                 @else
                                     bg-gray-100 text-gray-800
                                 @endif">
-                                <p class="text-sm whitespace-pre-wrap">{{ trim(preg_replace('/\[ADVISOR_VIDEO_CALL:\d+\]/', '', $message->content)) }}</p>
+                                @php
+                                    $cleanContent = trim(preg_replace('/\[ADVISOR_VIDEO_CALL:\d+\]/', '', $message->content));
+                                    $videoUrl = null;
+                                    if (preg_match('/(?:🎥\s*Enregistrement vidéo[^\n]*?\[[^\]]+\]\(([^\)]+)\)|https?:\/\/[^\s\)]+video_recordings[^\s\)]+|\/storage\/video_recordings[^\s\)]+|https?:\/\/res\.cloudinary\.com[^\s\)]+video[^\s\)]+)/i', $cleanContent, $vMatch)) {
+                                        $videoUrl = $vMatch[1] ?? $vMatch[0];
+                                        $cleanContent = trim(preg_replace('/🎥\s*Enregistrement vidéo[^\n]*?(\[[^\]]+\]\([^\)]+\)|\/storage[^\s]+|https?:\/\/[^\s]+)/i', '', $cleanContent));
+                                    }
+                                @endphp
+
+                                @if(!empty($cleanContent))
+                                    <p class="text-sm whitespace-pre-wrap">{{ $cleanContent }}</p>
+                                @endif
+
+                                @if($videoUrl)
+                                    <div class="mt-3 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white p-4 rounded-xl shadow-lg border border-indigo-500/30 space-y-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-400/30">
+                                                <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-xs text-indigo-200 uppercase tracking-wider">Enregistrement de l'Entretien Vidéo</h4>
+                                                <p class="text-[11px] text-gray-300">Vidéo disponible pour consultation</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2 pt-1">
+                                            <button type="button" onclick="window.openAdminVideoPlayer('{{ $videoUrl }}')"
+                                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition shadow cursor-pointer">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                Visionner la vidéo
+                                            </button>
+                                            <a href="{{ $videoUrl }}" download target="_blank"
+                                                class="inline-flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-gray-200 font-semibold rounded-lg text-xs transition cursor-pointer">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                Télécharger
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endif
 
                                 @if($advisorCall)
                                     @if($advisorCall->isAccepted())
@@ -307,8 +346,65 @@
     </div>
 </div>
 
+<!-- Modal Lecteur Vidéo Admin -->
+<dialog id="adminVideoPlayerModal" class="fixed inset-0 z-50 p-0 m-0 w-full h-full max-w-none max-h-none bg-transparent backdrop:bg-gray-900/80 hidden border-0 overflow-y-auto" aria-labelledby="admin-video-modal-title">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <button type="button" aria-label="Fermer le lecteur vidéo" class="fixed inset-0 w-full h-full bg-gray-900/80 backdrop-blur-sm transition-opacity border-0 cursor-default" onclick="window.closeAdminVideoPlayer()"></button>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="relative inline-block align-bottom bg-gray-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-800 z-10">
+            <div class="bg-gray-900 px-6 py-4 flex justify-between items-center border-b border-gray-800">
+                <h3 id="admin-video-modal-title" class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                    Visionnage d'Enregistrement Vidéo
+                </h3>
+                <button type="button" onclick="window.closeAdminVideoPlayer()" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-4 bg-black flex justify-center items-center">
+                <video id="adminModalVideoElement" controls autoplay class="w-full max-h-[75vh] rounded-lg shadow-2xl">
+                    <source id="adminModalVideoSource" src="" type="video/webm">
+                    <track kind="captions" src="" srclang="fr" label="Français">
+                </video>
+            </div>
+            <div class="bg-gray-900 px-6 py-3 flex justify-end">
+                <button type="button" onclick="window.closeAdminVideoPlayer()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xs font-bold transition">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</dialog>
+
 @push('scripts')
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+    window.openAdminVideoPlayer = function(url) {
+        const modal = document.getElementById('adminVideoPlayerModal');
+        const video = document.getElementById('adminModalVideoElement');
+        const source = document.getElementById('adminModalVideoSource');
+        if (modal && video && source) {
+            source.src = url;
+            video.load();
+            modal.classList.remove('hidden');
+            if (typeof modal.showModal === 'function' && !modal.open) {
+                modal.showModal();
+            }
+            video.play().catch(e => console.log('Autoplay handled:', e));
+        }
+    };
+
+    window.closeAdminVideoPlayer = function() {
+        const modal = document.getElementById('adminVideoPlayerModal');
+        const video = document.getElementById('adminModalVideoElement');
+        if (modal && video) {
+            video.pause();
+            modal.classList.add('hidden');
+            if (typeof modal.close === 'function' && modal.open) {
+                modal.close();
+            }
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('messages-container');
         if (container) {
