@@ -93,22 +93,22 @@
     </div>
 
     <!-- Description & Report -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" x-data="{ showTranscription: false }">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" x-data="{ showTranscription: false, showVideo: false }">
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="font-bold text-gray-900">Information & Compte Rendu</h3>
             <div class="flex items-center gap-2">
                 @if($session->video_recording_url)
-                    <a href="{{ $session->video_recording_url }}" target="_blank"
-                        class="inline-flex items-center px-3 py-1.5 border border-indigo-200 text-xs font-bold rounded-full shadow-sm text-indigo-700 bg-indigo-50 hover:bg-indigo-100">
-                        <svg class="w-4 h-4 mr-1.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button @click="showVideo = true"
+                        class="inline-flex items-center px-3.5 py-1.5 border border-transparent text-xs font-bold rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition">
+                        <svg class="w-4 h-4 mr-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
-                        Visionner la vidéo
-                    </a>
+                        Voir l'enregistrement
+                    </button>
                 @endif
                 @if($session->has_transcription)
                     <button @click="showTranscription = true"
-                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                        class="inline-flex items-center px-3 py-1.5 border border-indigo-200 text-xs font-medium rounded-full shadow-sm text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
@@ -151,6 +151,58 @@
                 @endif
             </div>
         </div>
+
+        <!-- Video Recording Modal -->
+        @if($session->video_recording_url)
+        <template x-if="showVideo">
+            <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="video-modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="showVideo = false"></div>
+
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                    <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                        <div class="bg-gray-900 px-6 py-4 flex justify-between items-center text-white">
+                            <h3 class="text-lg leading-6 font-bold flex items-center gap-2" id="video-modal-title">
+                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                Enregistrement Vidéo de la Séance : {{ $session->title }}
+                            </h3>
+                            <button @click="showVideo = false" class="text-gray-400 hover:text-white transition">
+                                <span class="sr-only">Fermer</span>
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="p-6 bg-black flex justify-center items-center">
+                            <video controls autoplay class="w-full max-h-[70vh] rounded-lg shadow-lg">
+                                <source src="{{ $session->video_recording_url }}" type="video/webm">
+                                <source src="{{ $session->video_recording_url }}" type="video/mp4">
+                                Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
+                            </video>
+                        </div>
+
+                        <div class="bg-gray-50 px-6 py-3 flex justify-between items-center border-t border-gray-200">
+                            <a href="{{ $session->video_recording_url }}" target="_blank" download
+                                class="inline-flex items-center text-xs font-semibold text-indigo-600 hover:text-indigo-800">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Télécharger la vidéo originale
+                            </a>
+                            <button type="button" @click="showVideo = false"
+                                class="rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        @endif
 
         <!-- Progress Modal (Transcription) -->
         <template x-if="showTranscription">
