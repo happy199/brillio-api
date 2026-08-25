@@ -108,7 +108,9 @@ class VideoRecordingService
         }
 
         if (empty($cloudName)) {
-            $cloudName = 'uysp6lxe';
+            Log::warning('CloudName could not be determined for Cloudinary upload.');
+
+            return null;
         }
 
         $filePath = $file instanceof UploadedFile ? $file->getRealPath() : $file;
