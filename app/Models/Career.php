@@ -48,4 +48,30 @@ class Career extends Model
             ->pluck('sector_code')
             ->toArray();
     }
+
+    /**
+     * Obtenir le libellé du niveau de demande traduit en français.
+     */
+    public function getDemandLevelLabelAttribute(): string
+    {
+        $raw = strtolower(trim($this->demand_level ?? ''));
+
+        if (empty($raw)) {
+            return '-';
+        }
+
+        if (str_contains($raw, 'high') || str_contains($raw, 'fort') || str_contains($raw, 'élév') || str_contains($raw, 'elev') || str_contains($raw, 'haut')) {
+            return 'Élevée';
+        }
+
+        if (str_contains($raw, 'medium') || str_contains($raw, 'moyen')) {
+            return 'Moyenne';
+        }
+
+        if (str_contains($raw, 'low') || str_contains($raw, 'faibl')) {
+            return 'Faible';
+        }
+
+        return ucfirst($this->demand_level);
+    }
 }

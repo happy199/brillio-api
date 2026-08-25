@@ -32,7 +32,7 @@ class CareerController extends Controller
                 'description' => $career->description,
                 'african_context' => $career->african_context,
                 'future_prospects' => $career->future_prospects,
-                'demand_level' => $career->demand_level,
+                'demand_level' => $career->demand_level_label,
                 'ai_impact_level' => $career->ai_impact_level,
                 'ai_impact_explanation' => $career->ai_impact_explanation,
             ],

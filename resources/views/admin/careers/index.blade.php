@@ -184,7 +184,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="text-sm font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">
-                                    {{ $career->demand_level ?: '-' }}
+                                    {{ $career->demand_level_label }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">

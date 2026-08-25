@@ -59,11 +59,13 @@ class CareerController extends Controller
 
         $careers = $query->orderBy('title')->paginate(20);
 
-        // Liste des niveaux de demande uniques pour le filtre
+        // Liste des niveaux de demande uniques pour le filtre (traduits)
         $demandLevels = Career::whereNotNull('demand_level')
             ->where('demand_level', '!=', '')
-            ->distinct()
-            ->pluck('demand_level');
+            ->get()
+            ->map(fn ($career) => $career->demand_level_label)
+            ->unique()
+            ->values();
 
         return view('admin.careers.index', compact('careers', 'demandLevels'));
     }
@@ -244,8 +246,8 @@ class CareerController extends Controller
             if (empty($career->demand_level)) {
                 $rawDemand = strtolower($data['demand_level'] ?? 'moyenne');
 
-                if (str_contains($rawDemand, 'high') || str_contains($rawDemand, 'fort') || str_contains($rawDemand, 'haut')) {
-                    $updates['demand_level'] = 'Forte';
+                if (str_contains($rawDemand, 'high') || str_contains($rawDemand, 'fort') || str_contains($rawDemand, 'haut') || str_contains($rawDemand, 'elev')) {
+                    $updates['demand_level'] = 'Élevée';
                 } elseif (str_contains($rawDemand, 'medi') || str_contains($rawDemand, 'moyen')) {
                     $updates['demand_level'] = 'Moyenne';
                 } elseif (str_contains($rawDemand, 'low') || str_contains($rawDemand, 'faibl')) {
