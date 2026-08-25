@@ -108,12 +108,15 @@ class VideoRecordingService
         }
 
         $filePath = $file instanceof UploadedFile ? $file->getRealPath() : $file;
+        $folder = str_contains($prefix, 'advisor_call')
+            ? 'brillio_recordings/orientation'
+            : 'brillio_recordings/mentoring';
 
         $response = Http::timeout(120)
             ->attach('file', file_get_contents($filePath), $prefix.'_'.time().'.webm')
             ->post("https://api.cloudinary.com/v1_1/{$cloudName}/video/upload", [
                 'upload_preset' => $uploadPreset,
-                'folder' => 'brillio_recordings',
+                'folder' => $folder,
             ]);
 
         if ($response->successful()) {
@@ -126,17 +129,21 @@ class VideoRecordingService
     }
 
     /**
-     * Upload to local public storage (storage/app/public/video_recordings)
+     * Upload to local public storage (storage/app/public/video_recordings/...)
      */
     private function uploadToLocalStorage($file, string $prefix): string
     {
+        $subfolder = str_contains($prefix, 'advisor_call')
+            ? 'video_recordings/orientation'
+            : 'video_recordings/mentoring';
+
         $filename = $prefix.'_'.Str::uuid()->toString().'.webm';
 
         if ($file instanceof UploadedFile) {
-            $path = $file->storeAs('video_recordings', $filename, 'public');
+            $path = $file->storeAs($subfolder, $filename, 'public');
         } else {
-            Storage::disk('public')->put('video_recordings/'.$filename, file_get_contents($file));
-            $path = 'video_recordings/'.$filename;
+            Storage::disk('public')->put($subfolder.'/'.$filename, file_get_contents($file));
+            $path = $subfolder.'/'.$filename;
         }
 
         return Storage::url($path);
