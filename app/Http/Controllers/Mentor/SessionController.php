@@ -548,6 +548,39 @@ class SessionController extends Controller
     }
 
     /**
+     * Télécharger la vidéo enregistrée d'une séance (crédits configurés)
+     */
+    public function downloadVideoRecording(MentoringSession $session)
+    {
+        if ($session->mentor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (empty($session->video_recording_url)) {
+            return redirect()->back()->with('error', "L'enregistrement vidéo n'est pas disponible pour cette séance.");
+        }
+
+        $mentor = Auth::user();
+        $cost = app(WalletService::class)->getFeatureCost('video_recording_download', 15);
+
+        if ($mentor->credits_balance < $cost) {
+            $missing = $cost - $mentor->credits_balance;
+
+            return redirect()->route('mentor.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cet enregistrement vidéo.");
+        }
+
+        app(WalletService::class)->deductCredits(
+            $mentor,
+            $cost,
+            'feature_use',
+            "Téléchargement de l'enregistrement vidéo de la séance : {$session->title}",
+            $session
+        );
+
+        return redirect()->away($session->video_recording_url);
+    }
+
+    /**
      * Pré-remplir le compte rendu avec l'IA (5 crédits)
      */
     public function prefillReport(MentoringSession $session)

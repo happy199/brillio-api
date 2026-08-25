@@ -40,15 +40,15 @@
                 Ne partagez pas l'URL de cette page.
             </div>
 
-            <a href="{{ $exitUrl }}"
-                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
+            <button type="button" onclick="finishCallAndExit()"
+                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
                     </path>
                 </svg>
                 Quitter la séance
-            </a>
+            </button>
         </div>
     </header>
 
@@ -60,6 +60,35 @@
     <!-- Jitsi External API -->
     <script id="jitsi-api" nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://8x8.vc/{{ $appId }}/external_api.js" async></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+        let isExiting = false;
+
+        function finishCallAndExit() {
+            if (isExiting) return;
+            isExiting = true;
+
+            if (typeof stopAndUploadVideoRecording === 'function') {
+                try {
+                    stopAndUploadVideoRecording();
+                } catch (e) {}
+            }
+
+            if (window.jitsiApi) {
+                try {
+                    window.jitsiApi.executeCommand('hangup');
+                } catch (e) {}
+            }
+
+            setTimeout(() => {
+                if (window.opener && !window.opener.closed) {
+                    try {
+                        window.close();
+                        return;
+                    } catch (e) {}
+                }
+                window.location.href = "{{ $exitUrl }}";
+            }, 300);
+        }
+
         (function() {
             const jitsiScript = document.getElementById('jitsi-api');
             if (window.JitsiMeetExternalAPI) {
@@ -102,11 +131,15 @@
             };
 
             const api = new JitsiMeetExternalAPI(domain, options);
+            window.jitsiApi = api;
 
             // Handle Hangup
             api.addEventListeners({
                 videoConferenceLeft: function () {
-                    window.location.href = "{{ $exitUrl }}";
+                    finishCallAndExit();
+                },
+                readyToClose: function () {
+                    finishCallAndExit();
                 }
             });
 

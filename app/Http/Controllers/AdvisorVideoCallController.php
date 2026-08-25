@@ -8,6 +8,7 @@ use App\Models\ChatMessage;
 use App\Models\SystemSetting;
 use App\Services\BrillioIAService;
 use App\Services\JitsiService;
+use App\Services\VideoRecordingService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -334,5 +335,40 @@ class AdvisorVideoCallController extends Controller
         ]);
 
         return response()->json(['status' => 'success', 'summary' => $summaryText]);
+    }
+
+    /**
+     * Enregistrer la vidéo de l'entretien et poster le lien dans la conversation
+     */
+    public function uploadRecording(Request $request, AdvisorVideoCall $call)
+    {
+        $request->validate([
+            'video' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:512000', // max 500MB
+            'file' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:512000',
+        ]);
+
+        $file = $request->file('video') ?: $request->file('file');
+
+        if (! $file) {
+            return response()->json(['error' => 'Aucun fichier vidéo transmis.'], 400);
+        }
+
+        $recordingService = app(VideoRecordingService::class);
+        $url = $recordingService->storeRecording($file, 'advisor_call_'.$call->id);
+
+        $call->update([
+            'video_recording_url' => $url,
+        ]);
+
+        // Injecter le message d'enregistrement vidéo dans la conversation
+        ChatMessage::create([
+            'conversation_id' => $call->conversation_id,
+            'role' => ChatMessage::ROLE_ASSISTANT,
+            'content' => "🎥 Enregistrement vidéo de l'entretien disponible : [Visionner l'entretien]({$url})",
+            'is_from_human' => true,
+            'admin_id' => $call->counselor_id,
+        ]);
+
+        return response()->json(['status' => 'success', 'url' => $url]);
     }
 }

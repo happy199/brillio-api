@@ -53,6 +53,12 @@
             if (isExiting) return;
             isExiting = true;
 
+            if (typeof stopAndUploadVideoRecording === 'function') {
+                try {
+                    stopAndUploadVideoRecording();
+                } catch (e) {}
+            }
+
             if (window.jitsiApi) {
                 try {
                     window.jitsiApi.executeCommand('hangup');

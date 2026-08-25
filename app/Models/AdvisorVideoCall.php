@@ -18,6 +18,7 @@ class AdvisorVideoCall extends Model
         'status',
         'credits_cost',
         'meeting_id',
+        'video_recording_url',
         'transcription_raw',
         'ai_summary',
         'started_at',

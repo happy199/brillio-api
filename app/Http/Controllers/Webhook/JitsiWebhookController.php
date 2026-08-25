@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Webhook;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
+use App\Services\VideoRecordingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -157,5 +158,31 @@ class JitsiWebhookController extends Controller
         ]);
 
         return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Enregistrer la vidéo de la séance de mentorat
+     */
+    public function uploadRecording(Request $request, MentoringSession $session)
+    {
+        $request->validate([
+            'video' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:512000',
+            'file' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:512000',
+        ]);
+
+        $file = $request->file('video') ?: $request->file('file');
+
+        if (! $file) {
+            return response()->json(['error' => 'Aucun fichier vidéo transmis.'], 400);
+        }
+
+        $recordingService = app(VideoRecordingService::class);
+        $url = $recordingService->storeRecording($file, 'mentoring_session_'.$session->id);
+
+        $session->update([
+            'video_recording_url' => $url,
+        ]);
+
+        return response()->json(['status' => 'success', 'url' => $url]);
     }
 }
