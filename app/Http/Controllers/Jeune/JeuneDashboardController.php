@@ -11,6 +11,7 @@ use App\Models\MentorProfileView;
 use App\Models\PersonalityQuestion;
 use App\Models\PersonalityTest;
 use App\Models\Resource;
+use App\Models\SystemSetting;
 use App\Services\BrillioIAService;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
@@ -502,12 +503,14 @@ class JeuneDashboardController extends Controller
 
         // Déterminer la localisation pour les suggestions
         $location = $this->getUserLocation($user);
+        $videoCallAdvisorCost = SystemSetting::get('feature_cost_video_call_advisor', 50);
 
         return view('jeune.chat', [
             'user' => $user,
             'conversations' => $conversations,
             'currentConversation' => $currentConversation,
             'location' => $location,
+            'videoCallAdvisorCost' => $videoCallAdvisorCost,
         ]);
     }
 
