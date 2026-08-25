@@ -10,16 +10,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $lowerDemandLevel = DB::raw('LOWER(demand_level)');
+
         DB::table('careers')
-            ->whereIn(DB::raw('LOWER(demand_level)'), ['high', 'high_demand', 'high demand', 'haute', 'forte'])
+            ->whereIn($lowerDemandLevel, ['high', 'high_demand', 'high demand', 'haute', 'forte'])
             ->update(['demand_level' => 'Élevée']);
 
         DB::table('careers')
-            ->whereIn(DB::raw('LOWER(demand_level)'), ['medium', 'medium_demand', 'medium demand'])
+            ->whereIn($lowerDemandLevel, ['medium', 'medium_demand', 'medium demand'])
             ->update(['demand_level' => 'Moyenne']);
 
         DB::table('careers')
-            ->whereIn(DB::raw('LOWER(demand_level)'), ['low', 'low_demand', 'low demand'])
+            ->whereIn($lowerDemandLevel, ['low', 'low_demand', 'low demand'])
             ->update(['demand_level' => 'Faible']);
     }
 

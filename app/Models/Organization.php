@@ -327,7 +327,6 @@ class Organization extends Model
             ->where('target_plan', $this->subscription_plan)
             ->where('is_active', true)
             ->whereNotNull('member_limit')
-            // Pour les plans multi-durée, on prend la limite du plan mensuel comme référence
             ->orderBy('duration_days')
             ->first();
 
@@ -336,13 +335,9 @@ class Organization extends Model
         }
 
         // Priorité 2 : fallback sur les constantes si la DB n'est pas encore mise à jour
-        // On utilise array_key_exists car ?? traite null comme "absent" et renverrait le fallback 10
-        // pour le plan Établissement dont la limite est explicitement null (illimité)
-        if (array_key_exists($this->subscription_plan, self::MEMBER_LIMITS)) {
-            return self::MEMBER_LIMITS[$this->subscription_plan];
-        }
-
-        return 10; // Fallback sécurisé pour tout plan inconnu
+        return array_key_exists($this->subscription_plan, self::MEMBER_LIMITS)
+            ? self::MEMBER_LIMITS[$this->subscription_plan]
+            : 10;
     }
 
     /**

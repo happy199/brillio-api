@@ -60,18 +60,15 @@ class Career extends Model
             return '-';
         }
 
+        $label = ucfirst($this->demand_level);
         if (str_contains($raw, 'high') || str_contains($raw, 'fort') || str_contains($raw, 'élév') || str_contains($raw, 'elev') || str_contains($raw, 'haut')) {
-            return 'Élevée';
+            $label = 'Élevée';
+        } elseif (str_contains($raw, 'medium') || str_contains($raw, 'moyen')) {
+            $label = 'Moyenne';
+        } elseif (str_contains($raw, 'low') || str_contains($raw, 'faibl')) {
+            $label = 'Faible';
         }
 
-        if (str_contains($raw, 'medium') || str_contains($raw, 'moyen')) {
-            return 'Moyenne';
-        }
-
-        if (str_contains($raw, 'low') || str_contains($raw, 'faibl')) {
-            return 'Faible';
-        }
-
-        return ucfirst($this->demand_level);
+        return $label;
     }
 }
