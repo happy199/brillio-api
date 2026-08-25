@@ -4,7 +4,20 @@
 @section('header', 'Gestion des documents')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{
+    showModal: false,
+    previewUrl: '',
+    fileName: '',
+    isImage: false,
+    isPdf: false,
+    openPreview(url, name, ext) {
+        this.previewUrl = url;
+        this.fileName = name;
+        this.isImage = ['jpg','jpeg','png','gif','webp','svg'].includes(ext);
+        this.isPdf = ext === 'pdf';
+        this.showModal = true;
+    }
+}">
     <!-- Stats rapides -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white rounded-xl p-4 shadow-sm">
@@ -141,8 +154,13 @@
                             {{ $document->created_at->format('d/m/Y H:i') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            <button type="button"
+                                    @click="openPreview('{{ route('admin.documents.preview', $document) }}', '{{ addslashes($document->file_name) }}', '{{ strtolower($extension) }}')"
+                                    class="text-indigo-600 hover:text-indigo-900 font-semibold mr-3 inline-flex items-center">
+                                Visualiser
+                            </button>
                             <a href="{{ route('admin.documents.download', $document) }}"
-                               class="text-indigo-600 hover:text-indigo-900 mr-3">
+                               class="text-gray-600 hover:text-gray-900 mr-3">
                                 Télécharger
                             </a>
                             <form action="{{ route('admin.documents.destroy', $document) }}"
@@ -175,6 +193,70 @@
                 {{ $documents->appends(request()->query())->links() }}
             </div>
         @endif
+    </div>
+
+    <!-- Modal de prévisualisation -->
+    <div x-show="showModal"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         aria-labelledby="modal-title"
+         role="dialog"
+         aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="showModal"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="showModal = false"
+                 class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75"
+                 aria-hidden="true"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div x-show="showModal"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="inline-block w-full max-w-5xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl">
+
+                <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-900 truncate max-w-xl" x-text="fileName"></h3>
+                    <div class="flex items-center gap-3">
+                        <a :href="previewUrl"
+                           target="_blank"
+                           rel="noopener"
+                           class="px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors inline-flex items-center">
+                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                            Ouvrir dans un nouvel onglet
+                        </a>
+                        <button @click="showModal = false"
+                                type="button"
+                                class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-4 bg-gray-100 rounded-xl overflow-hidden min-h-[550px] flex items-center justify-center p-2">
+                    <template x-if="isImage">
+                        <img :src="previewUrl" :alt="fileName" class="max-h-[70vh] object-contain mx-auto rounded-lg shadow-sm">
+                    </template>
+                    <template x-if="!isImage">
+                        <iframe :src="previewUrl" class="w-full h-[70vh] rounded-lg border-0 bg-white"></iframe>
+                    </template>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

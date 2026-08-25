@@ -692,6 +692,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('contact-messages/{contact_message}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
 
         // Gestion des documents
+        Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
         Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
         Route::resource('documents', DocumentController::class)->only(['index', 'destroy']);
 
