@@ -107,13 +107,13 @@
                                 <form :action="'/chat/conversations/' + currentConversationId + '/propose-video-call'" method="POST" class="inline">
                                     @csrf
                                     <button type="submit"
-                                        onclick="return confirm('Proposer et lancer un appel vidéo d\'orientation pour 50 crédits ?')"
+                                        onclick="return confirm('Proposer et lancer un appel vidéo d\'orientation pour {{ $videoCallAdvisorCost }} crédits ?')"
                                         class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold shadow-sm transition-all duration-300">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                         </svg>
                                         <span>Appel vidéo</span>
-                                        <span class="bg-indigo-800 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold">50C</span>
+                                        <span class="bg-indigo-800 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold">{{ $videoCallAdvisorCost }}C</span>
                                     </button>
                                 </form>
                             </div>
@@ -325,7 +325,7 @@
                                                         Proposition d'appel vidéo
                                                     </div>
                                                     <p class="text-xs text-amber-900 font-medium">
-                                                        Le conseiller vous propose de passer en appel vidéo pour approfondir votre orientation (<span x-text="message.advisor_video_call.credits_cost || 50"></span> crédits).
+                                                        Le conseiller vous propose de passer en appel vidéo pour approfondir votre orientation (<span x-text="message.advisor_video_call.credits_cost || {{ $videoCallAdvisorCost }}"></span> crédits).
                                                     </p>
                                                     <div class="flex flex-wrap items-center gap-2 pt-1">
                                                         <form :action="'/chat/video-calls/' + message.advisor_video_call.id + '/accept'" method="POST" class="inline">
@@ -333,7 +333,7 @@
                                                             <button type="submit"
                                                                 class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow transition-colors inline-flex items-center gap-1">
                                                                 <span>Accepter</span>
-                                                                <span class="bg-emerald-800 text-white px-1.5 py-0.5 rounded-full text-[9px]" x-text="(message.advisor_video_call.credits_cost || 50) + 'C'"></span>
+                                                                <span class="bg-emerald-800 text-white px-1.5 py-0.5 rounded-full text-[9px]" x-text="(message.advisor_video_call.credits_cost || {{ $videoCallAdvisorCost }}) + 'C'"></span>
                                                             </button>
                                                         </form>
                                                         <form :action="'/chat/video-calls/' + message.advisor_video_call.id + '/refuse'" method="POST" class="inline">

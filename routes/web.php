@@ -243,12 +243,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/advisor-meeting/{meetingId}', [AdvisorVideoCallController::class, 'showMeeting'])->name('advisor-meeting.show');
     Route::post('/advisor-meeting/{call}/transcribe', [AdvisorVideoCallController::class, 'appendTranscription'])->name('advisor-meeting.transcribe');
     Route::post('/advisor-meeting/{call}/finish', [AdvisorVideoCallController::class, 'finishMeeting'])->name('advisor-meeting.finish');
+    Route::post('/advisor-meeting/{call}/upload-recording', [AdvisorVideoCallController::class, 'uploadRecording'])->name('advisor-meeting.upload-recording');
 });
 
 // Route meeting accessible par les invités (bypass token)
 Route::get('/meeting/{meetingId}/guest', [MeetingController::class, 'showGuest'])->name('meeting.show.guest');
 
 Route::post('/meeting/append-transcription/{session}', [JitsiWebhookController::class, 'appendTranscription'])->name('meeting.append-transcription');
+Route::post('/meeting/upload-recording/{session}', [JitsiWebhookController::class, 'uploadRecording'])->name('meeting.upload-recording');
 
 /*
  |--------------------------------------------------------------------------
@@ -339,6 +341,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
         Route::get('/mentorat/seances/{session}', [SessionController::class, 'show'])->name('sessions.show');
         Route::get('/mentorat/seances/{session}/report', [SessionController::class, 'downloadReport'])->name('sessions.download-report');
         Route::get('/mentorat/seances/{session}/download-transcription', [SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
+        Route::get('/mentorat/seances/{session}/download-video-recording', [SessionController::class, 'downloadVideoRecording'])->name('sessions.download-video-recording');
         Route::post('/mentorat/seances/{session}/cancel', [SessionController::class, 'cancel'])->name('sessions.cancel');
         Route::post('/mentorat/seances/{session}/pay-join', [SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
     }
@@ -481,6 +484,7 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
             Route::get('/sessions/{session}', [App\Http\Controllers\Mentor\SessionController::class, 'show'])->name('sessions.show');
             Route::get('/sessions/{session}/download-report', [App\Http\Controllers\Mentor\SessionController::class, 'downloadReport'])->name('sessions.download-report');
             Route::get('/sessions/{session}/download-transcription', [App\Http\Controllers\Mentor\SessionController::class, 'downloadTranscription'])->name('sessions.download-transcription');
+            Route::get('/sessions/{session}/download-video-recording', [App\Http\Controllers\Mentor\SessionController::class, 'downloadVideoRecording'])->name('sessions.download-video-recording');
             Route::post('/sessions/{session}/prefill-report', [App\Http\Controllers\Mentor\SessionController::class, 'prefillReport'])->name('sessions.prefill-report');
             Route::put('/sessions/{session}/report', [App\Http\Controllers\Mentor\SessionController::class, 'updateReport'])->name('sessions.report.update');
             Route::post('/sessions/{session}/accept', [App\Http\Controllers\Mentor\SessionController::class, 'accept'])->name('sessions.accept');

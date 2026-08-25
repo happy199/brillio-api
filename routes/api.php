@@ -175,6 +175,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/sessions/{id}/report', [App\Http\Controllers\Api\V2\SessionController::class, 'report']);
         Route::get('/sessions/{id}/download-report', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadReport']);
         Route::get('/sessions/{id}/download-transcription', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadTranscription']);
+        Route::get('/sessions/{id}/download-video-recording', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadVideoRecording']);
 
         // Wallet
         Route::get('/wallet', [App\Http\Controllers\Api\V2\WalletController::class, 'index']);

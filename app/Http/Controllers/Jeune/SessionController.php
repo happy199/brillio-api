@@ -7,6 +7,7 @@ use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
+use App\Services\VideoRecordingService;
 use App\Services\WalletService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -422,5 +423,19 @@ class SessionController extends Controller
         $pdf = Pdf::loadView('common.reports.transcription_pdf', compact('session'));
 
         return $pdf->download('transcription_seance_'.$session->id.'.pdf');
+    }
+
+    /**
+     * Télécharger la vidéo enregistrée d'une séance (crédits configurés)
+     */
+    public function downloadVideoRecording(MentoringSession $session)
+    {
+        $user = auth()->user();
+
+        if (! $session->mentees->contains($user->id)) {
+            abort(403);
+        }
+
+        return app(VideoRecordingService::class)->handleSessionVideoDownload($user, $session, 'jeune.wallet.index');
     }
 }

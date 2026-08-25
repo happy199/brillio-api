@@ -46,6 +46,7 @@ class MentoringSession extends Model
         'transcription_summary',
         'has_transcription',
         'transcription_file_path',
+        'video_recording_url',
         'timezone',
         'guest_token',
         'scheduled_by_organization_id',

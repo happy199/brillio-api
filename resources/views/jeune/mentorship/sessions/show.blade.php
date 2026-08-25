@@ -171,16 +171,28 @@
                         @endif
                     @endif
 
-                    @if($session->has_transcription)
+                    @if($session->has_transcription || $session->video_recording_url)
                         <div class="mt-6 pt-6 border-t border-gray-100 space-y-3">
-                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">IA & Transcription</h4>
-                            <a href="{{ route('jeune.sessions.download-transcription', $session) }}"
-                                class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
-                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                </svg>
-                                Transcription PDF ({{ \App\Models\SystemSetting::getValue('feature_cost_transcription_download', 5) }} créd.)
-                            </a>
+                            <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">IA, Transcription & Médias</h4>
+                            @if($session->has_transcription)
+                                <a href="{{ route('jeune.sessions.download-transcription', $session) }}"
+                                    class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    Transcription PDF ({{ \App\Models\SystemSetting::getValue('feature_cost_transcription_download', 5) }} créd.)
+                                </a>
+                            @endif
+
+                            @if($session->video_recording_url)
+                                <a href="{{ route('jeune.sessions.download-video-recording', $session) }}"
+                                    class="w-full inline-flex justify-center items-center gap-2 px-4 py-2.5 bg-indigo-50 border border-indigo-200 rounded-lg text-sm font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    Vidéo Enregistrée ({{ \App\Models\SystemSetting::getValue('feature_cost_video_recording_download', 15) }} créd.)
+                                </a>
+                            @endif
                         </div>
                     @endif
                 </div>

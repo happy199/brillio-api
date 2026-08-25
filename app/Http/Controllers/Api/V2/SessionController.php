@@ -344,6 +344,40 @@ class SessionController extends V1SessionController
     }
 
     /**
+     * Télécharger l'enregistrement vidéo d'une séance (crédits configurés)
+     */
+    public function downloadVideoRecording(Request $request, $id)
+    {
+        $session = MentoringSession::findOrFail($id);
+        $user = $request->user();
+
+        if ($session->mentor_id !== $user->id && ! $session->mentees->contains('id', $user->id)) {
+            return $this->forbidden();
+        }
+
+        $cost = $this->walletService->getFeatureCost('video_recording_download', 15);
+
+        if (empty($session->video_recording_url) || $user->credits_balance < $cost) {
+            $msg = empty($session->video_recording_url)
+                ? 'Aucun enregistrement vidéo disponible.'
+                : "Votre solde de crédits est insuffisant ($cost crédits requis).";
+            $status = empty($session->video_recording_url) ? 404 : 402;
+
+            return $this->error($msg, $status);
+        }
+
+        $this->walletService->deductCredits(
+            $user,
+            $cost,
+            'feature_use',
+            "Téléchargement de l'enregistrement vidéo de la séance : {$session->title}",
+            $session
+        );
+
+        return $this->success(['url' => $session->video_recording_url], "Accès à l'enregistrement vidéo accordé.");
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/v2/sessions/unlock-history",
      *     summary="Débloque l'historique complet des séances (Coûte 5 crédits)",

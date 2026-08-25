@@ -7,6 +7,8 @@ use App\Models\ChatConversation;
 use App\Models\SystemSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdvisorVideoCallTest extends TestCase
@@ -151,6 +153,41 @@ class AdvisorVideoCallTest extends TestCase
 
         $this->assertEquals('completed', $call->fresh()->status);
         $this->assertNotNull($call->fresh()->ai_summary);
+
+        $this->assertDatabaseHas('chat_messages', [
+            'conversation_id' => $conversation->id,
+            'is_from_human' => true,
+        ]);
+    }
+
+    public function test_upload_recording_stores_video_and_posts_chat_message(): void
+    {
+        Storage::fake('public');
+
+        $conversation = $this->createTestConversation();
+
+        $call = AdvisorVideoCall::create([
+            'conversation_id' => $conversation->id,
+            'user_id' => $this->jeune->id,
+            'counselor_id' => $this->admin->id,
+            'initiated_by' => 'jeune',
+            'status' => 'accepted',
+            'credits_cost' => 50,
+            'meeting_id' => 'brillio_advisor_test_upload',
+        ]);
+
+        $file = UploadedFile::fake()->create('recording.webm', 100, 'video/webm');
+
+        $response = $this->actingAs($this->admin)
+            ->withSession(['admin_2fa_passed' => true])
+            ->post(route('advisor-meeting.upload-recording', $call), [
+                'video' => $file,
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonStructure(['status', 'url']);
+
+        $this->assertNotNull($call->fresh()->video_recording_url);
 
         $this->assertDatabaseHas('chat_messages', [
             'conversation_id' => $conversation->id,

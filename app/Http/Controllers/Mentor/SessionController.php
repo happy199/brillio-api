@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
 use App\Services\BrillioIAService;
 use App\Services\MentorshipNotificationService;
+use App\Services\VideoRecordingService;
 use App\Services\WalletService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -545,6 +546,20 @@ class SessionController extends Controller
         $pdf = Pdf::loadView('common.reports.transcription_pdf', compact('session'));
 
         return $pdf->download('transcription_seance_'.$session->id.'.pdf');
+    }
+
+    /**
+     * Télécharger la vidéo enregistrée d'une séance (crédits configurés)
+     */
+    public function downloadVideoRecording(MentoringSession $session)
+    {
+        $mentor = Auth::user();
+
+        if ($session->mentor_id !== $mentor->id) {
+            abort(403);
+        }
+
+        return app(VideoRecordingService::class)->handleSessionVideoDownload($mentor, $session, 'mentor.wallet.index');
     }
 
     /**
