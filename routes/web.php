@@ -632,8 +632,14 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::put('resources/{resource}/approve', [App\Http\Controllers\Admin\ResourceController::class, 'approve'])->name('resources.approve');
         Route::post('resources/{resource}/unpublish', [App\Http\Controllers\Admin\ResourceController::class, 'unpublish'])->name('resources.unpublish');
     });
+});
 
-    // === Monétisation, Analytics & Module Administration Suite ===
+/*
+ |--------------------------------------------------------------------------
+ | Routes Admin - Suite (Monétisation, Analytiques, Module Établissements)
+ |--------------------------------------------------------------------------
+ */
+Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
     Route::middleware(['auth', 'is_admin', 'admin_2fa'])->group(function () {
         // Monétisation
         Route::post('comptabilite/transactions/{id}/renvoyer-facture', [AccountingController::class, 'resendInvoice'])->name('accounting.resend-invoice');

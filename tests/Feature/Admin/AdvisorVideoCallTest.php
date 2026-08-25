@@ -37,15 +37,20 @@ class AdvisorVideoCallTest extends TestCase
         );
     }
 
-    public function test_jeune_can_propose_and_start_video_call_debiting_credits(): void
+    private function createTestConversation(): ChatConversation
     {
-        $conversation = ChatConversation::create([
+        return ChatConversation::create([
             'user_id' => $this->jeune->id,
             'title' => 'Orientation test',
             'needs_human_support' => true,
             'human_support_active' => true,
             'human_support_admin_id' => $this->admin->id,
         ]);
+    }
+
+    public function test_jeune_can_propose_and_start_video_call_debiting_credits(): void
+    {
+        $conversation = $this->createTestConversation();
 
         $response = $this->actingAs($this->jeune)
             ->post(route('chat.video-call.propose-jeune', $conversation));
@@ -64,13 +69,7 @@ class AdvisorVideoCallTest extends TestCase
 
     public function test_counselor_can_propose_video_call_and_jeune_can_accept(): void
     {
-        $conversation = ChatConversation::create([
-            'user_id' => $this->jeune->id,
-            'title' => 'Orientation test',
-            'needs_human_support' => true,
-            'human_support_active' => true,
-            'human_support_admin_id' => $this->admin->id,
-        ]);
+        $conversation = $this->createTestConversation();
 
         $response = $this->actingAs($this->admin)
             ->withSession(['admin_2fa_passed' => true])
@@ -97,13 +96,7 @@ class AdvisorVideoCallTest extends TestCase
 
     public function test_jeune_can_refuse_counselor_video_call_proposal(): void
     {
-        $conversation = ChatConversation::create([
-            'user_id' => $this->jeune->id,
-            'title' => 'Orientation test',
-            'needs_human_support' => true,
-            'human_support_active' => true,
-            'human_support_admin_id' => $this->admin->id,
-        ]);
+        $conversation = $this->createTestConversation();
 
         $call = AdvisorVideoCall::create([
             'conversation_id' => $conversation->id,
@@ -133,13 +126,7 @@ class AdvisorVideoCallTest extends TestCase
 
     public function test_finish_meeting_generates_ai_summary_in_chat(): void
     {
-        $conversation = ChatConversation::create([
-            'user_id' => $this->jeune->id,
-            'title' => 'Orientation test',
-            'needs_human_support' => true,
-            'human_support_active' => true,
-            'human_support_admin_id' => $this->admin->id,
-        ]);
+        $conversation = $this->createTestConversation();
 
         $call = AdvisorVideoCall::create([
             'conversation_id' => $conversation->id,

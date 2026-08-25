@@ -38,15 +38,16 @@ class AdvisorVideoCallController extends Controller
             abort(403, 'Accès non autorisé à cette conversation.');
         }
 
-        if (! $conversation->human_support_active) {
-            return back()->with('error', 'Le conseiller doit être présent dans la conversation pour lancer un appel vidéo.');
-        }
-
-        // Récupérer le coût configuré (défaut 50 crédits)
         $cost = (int) (SystemSetting::where('key', 'feature_cost_video_call_advisor')->value('value') ?? 50);
 
-        if ($user->credits_balance < $cost) {
-            return back()->with('error', "Solde insuffisant pour un appel vidéo avec le conseiller ({$cost} crédits requis).");
+        if (! $conversation->human_support_active) {
+            $error = 'Le conseiller doit être présent dans la conversation pour lancer un appel vidéo.';
+        } elseif ($user->credits_balance < $cost) {
+            $error = "Solde insuffisant pour un appel vidéo avec le conseiller ({$cost} crédits requis).";
+        }
+
+        if (isset($error)) {
+            return back()->with('error', $error);
         }
 
         DB::beginTransaction();
@@ -141,14 +142,16 @@ class AdvisorVideoCallController extends Controller
             abort(403, 'Accès non autorisé.');
         }
 
-        if ($call->status !== 'pending_acceptance') {
-            return back()->with('error', 'Cette proposition n\'est plus en attente.');
-        }
-
         $cost = $call->credits_cost;
 
-        if ($user->credits_balance < $cost) {
-            return back()->with('error', "Solde insuffisant ({$cost} crédits requis). Veuillez recharger votre solde.");
+        if ($call->status !== 'pending_acceptance') {
+            $error = 'Cette proposition n\'est plus en attente.';
+        } elseif ($user->credits_balance < $cost) {
+            $error = "Solde insuffisant ({$cost} crédits requis). Veuillez recharger votre solde.";
+        }
+
+        if (isset($error)) {
+            return back()->with('error', $error);
         }
 
         DB::beginTransaction();
