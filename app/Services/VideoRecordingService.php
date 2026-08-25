@@ -96,32 +96,23 @@ class VideoRecordingService
      */
     private function uploadToCloudinary($file, string $prefix): ?string
     {
-        $cloudinaryUrl = config('services.cloudinary.url') ?? env('CLOUDINARY_URL');
-        $cloudName = config('services.cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
-        $uploadPreset = config('services.cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET', 'ml_default');
-
-        if (empty($cloudName) && ! empty($cloudinaryUrl) && str_contains($cloudinaryUrl, '@')) {
-            $parts = explode('@', $cloudinaryUrl);
-            $cloudName = trim(end($parts));
-        }
-
-        if (empty($cloudName)) {
+        $creds = $this->getCloudinaryCredentials();
+        if (empty($creds['cloudName'])) {
             Log::warning('CloudName could not be determined for Cloudinary upload.');
 
             return null;
         }
 
-        $filePath = $file instanceof UploadedFile ? $file->getRealPath() : $file;
         $folder = str_contains($prefix, 'advisor_call')
             ? 'brillio_recordings/orientation'
             : 'brillio_recordings/mentoring';
 
+        $postData = $this->buildCloudinaryPostData($folder, $creds);
+        $filePath = $file instanceof UploadedFile ? $file->getRealPath() : $file;
+
         $response = Http::timeout(180)
             ->attach('file', file_get_contents($filePath), $prefix.'_'.time().'.webm')
-            ->post("https://api.cloudinary.com/v1_1/{$cloudName}/video/upload", [
-                'upload_preset' => $uploadPreset,
-                'folder' => $folder,
-            ]);
+            ->post("https://api.cloudinary.com/v1_1/{$creds['cloudName']}/video/upload", $postData);
 
         if ($response->successful()) {
             return $response->json('secure_url');
@@ -130,6 +121,52 @@ class VideoRecordingService
         Log::warning('Cloudinary response error (Status '.$response->status().'): '.$response->body());
 
         return null;
+    }
+
+    /**
+     * Parse and resolve Cloudinary credentials
+     */
+    private function getCloudinaryCredentials(): array
+    {
+        $url = config('services.cloudinary.url') ?? env('CLOUDINARY_URL');
+        $cloudName = config('services.cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = config('services.cloudinary.api_key') ?? env('CLOUDINARY_API_KEY');
+        $apiSecret = config('services.cloudinary.api_secret') ?? env('CLOUDINARY_API_SECRET');
+        $uploadPreset = config('services.cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET', 'ml_default');
+
+        if (! empty($url) && str_contains($url, 'cloudinary://')) {
+            $parsed = parse_url($url);
+            $cloudName = $cloudName ?: ($parsed['host'] ?? null);
+            $apiKey = $apiKey ?: ($parsed['user'] ?? null);
+            $apiSecret = $apiSecret ?: ($parsed['pass'] ?? null);
+        }
+
+        return compact('cloudName', 'apiKey', 'apiSecret', 'uploadPreset');
+    }
+
+    /**
+     * Build signed or unsigned payload for Cloudinary API
+     */
+    private function buildCloudinaryPostData(string $folder, array $creds): array
+    {
+        $params = ['folder' => $folder];
+
+        if (! empty($creds['apiKey']) && ! empty($creds['apiSecret'])) {
+            $timestamp = time();
+            $params['timestamp'] = $timestamp;
+            ksort($params);
+            $stringToSign = http_build_query($params, '', '&').$creds['apiSecret'];
+            $signature = sha1($stringToSign); // NOSONAR - SHA-1 is required by Cloudinary API signature protocol
+
+            return array_merge($params, [
+                'api_key' => $creds['apiKey'],
+                'signature' => $signature,
+            ]);
+        }
+
+        return array_merge($params, [
+            'upload_preset' => $creds['uploadPreset'],
+        ]);
     }
 
     /**

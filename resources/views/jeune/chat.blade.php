@@ -740,7 +740,7 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2 pt-1">
-                                        <button type="button" onclick="window.openVideoPlayerModal('${videoUrl}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition shadow cursor-pointer">
+                                        <button type="button" data-video-url="${videoUrl}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition shadow cursor-pointer">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                             Visionner la vidéo
                                         </button>
@@ -793,7 +793,7 @@
         <!-- Modal Lecteur Vidéo Global -->
         <dialog id="videoPlayerModal" class="fixed inset-0 z-50 p-0 m-0 w-full h-full max-w-none max-h-none bg-transparent backdrop:bg-gray-900/80 hidden border-0 overflow-y-auto" aria-labelledby="jeune-video-modal-title">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <button type="button" aria-label="Fermer le lecteur vidéo" class="fixed inset-0 w-full h-full bg-gray-900/80 backdrop-blur-sm transition-opacity border-0 cursor-default" onclick="window.closeVideoPlayerModal()"></button>
+                <button type="button" aria-label="Fermer le lecteur vidéo" data-close-video-modal="true" class="fixed inset-0 w-full h-full bg-gray-900/80 backdrop-blur-sm transition-opacity border-0 cursor-default"></button>
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
                 <div class="relative inline-block align-bottom bg-gray-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-800 z-10">
                     <div class="bg-gray-900 px-6 py-4 flex justify-between items-center border-b border-gray-800">
@@ -801,7 +801,7 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
                             Lecture de l'Enregistrement Vidéo
                         </h3>
-                        <button type="button" onclick="window.closeVideoPlayerModal()" class="text-gray-400 hover:text-white transition">
+                        <button type="button" data-close-video-modal="true" class="text-gray-400 hover:text-white transition">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -812,7 +812,7 @@
                         </video>
                     </div>
                     <div class="bg-gray-900 px-6 py-3 flex justify-end">
-                        <button type="button" onclick="window.closeVideoPlayerModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xs font-bold transition">
+                        <button type="button" data-close-video-modal="true" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-xs font-bold transition">
                             Fermer
                         </button>
                     </div>
@@ -820,7 +820,7 @@
             </div>
         </dialog>
 
-        <script>
+        <script nonce="{{ request()->attributes->get('csp_nonce') }}">
             window.openVideoPlayerModal = function(url) {
                 const modal = document.getElementById('videoPlayerModal');
                 const video = document.getElementById('modalVideoElement');
@@ -847,6 +847,20 @@
                     }
                 }
             };
+
+            document.addEventListener('click', function(e) {
+                const videoBtn = e.target.closest('[data-video-url]');
+                if (videoBtn) {
+                    e.preventDefault();
+                    const url = videoBtn.getAttribute('data-video-url');
+                    if (url) window.openVideoPlayerModal(url);
+                }
+                const closeBtn = e.target.closest('[data-close-video-modal]');
+                if (closeBtn) {
+                    e.preventDefault();
+                    window.closeVideoPlayerModal();
+                }
+            });
         </script>
     @endpush
 @endsection
