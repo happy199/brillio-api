@@ -7,6 +7,7 @@ use App\Models\MentoringSession;
 use App\Models\Mentorship;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
+use App\Services\VideoRecordingService;
 use App\Services\WalletService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -435,26 +436,6 @@ class SessionController extends Controller
             abort(403);
         }
 
-        if (empty($session->video_recording_url)) {
-            return redirect()->back()->with('error', "L'enregistrement vidéo n'est pas disponible pour cette séance.");
-        }
-
-        $cost = app(WalletService::class)->getFeatureCost('video_recording_download', 15);
-
-        if ($user->credits_balance < $cost) {
-            $missing = $cost - $user->credits_balance;
-
-            return redirect()->route('jeune.wallet.index')->with('warning', "Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour télécharger cet enregistrement vidéo.");
-        }
-
-        app(WalletService::class)->deductCredits(
-            $user,
-            $cost,
-            'feature_use',
-            "Téléchargement de l'enregistrement vidéo de la séance : {$session->title}",
-            $session
-        );
-
-        return redirect()->away($session->video_recording_url);
+        return app(VideoRecordingService::class)->handleSessionVideoDownload($user, $session, 'jeune.wallet.index');
     }
 }
