@@ -298,7 +298,9 @@ class AdvisorVideoCallController extends Controller
         if ($summaryData && is_array($summaryData)) {
             $formatVal = function ($val) {
                 if (is_array($val)) {
-                    return '• '.implode("\n• ", array_map('strval', $val));
+                    return '• '.implode("\n• ", array_map(function ($item) {
+                        return is_array($item) ? json_encode($item, JSON_UNESCAPED_UNICODE) : (string) $item;
+                    }, $val));
                 }
 
                 return (string) $val;

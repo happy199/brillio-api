@@ -213,7 +213,7 @@
                                 @else
                                     bg-gray-100 text-gray-800
                                 @endif">
-                                <p class="text-sm whitespace-pre-wrap">{{ $message->content }}</p>
+                                <p class="text-sm whitespace-pre-wrap">{{ trim(preg_replace('/\[ADVISOR_VIDEO_CALL:\d+\]/', '', $message->content)) }}</p>
 
                                 @if($advisorCall)
                                     @if($advisorCall->isAccepted())
@@ -309,12 +309,36 @@
 
 @push('scripts')
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-    // Scroll automatique vers le bas des messages
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('messages-container');
         if (container) {
             container.scrollTop = container.scrollHeight;
         }
+
+        // Auto-polling automatique toutes les 3 secondes pour actualiser les messages en temps réel
+        setInterval(async () => {
+            try {
+                const response = await fetch(window.location.href, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (response.ok) {
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.getElementById('messages-container');
+                    const currentContainer = document.getElementById('messages-container');
+                    if (newContent && currentContainer && newContent.innerHTML !== currentContainer.innerHTML) {
+                        const isAtBottom = currentContainer.scrollHeight - currentContainer.scrollTop <= currentContainer.clientHeight + 100;
+                        currentContainer.innerHTML = newContent.innerHTML;
+                        if (isAtBottom) {
+                            currentContainer.scrollTop = currentContainer.scrollHeight;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Admin chat polling error:', e);
+            }
+        }, 3000);
     });
 </script>
 @endpush

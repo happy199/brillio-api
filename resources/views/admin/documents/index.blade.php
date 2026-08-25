@@ -81,24 +81,24 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    <div class="bg-white rounded-xl shadow-sm overflow-x-auto border border-gray-100">
+        <table class="w-full text-left divide-y divide-gray-200">
+            <thead class="bg-gray-50/80">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taille</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Document</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Utilisateur</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Taille</th>
+                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-gray-100">
                 @forelse($documents as $document)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <tr class="hover:bg-gray-50/80 transition-colors">
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
                                     @php
                                         $extension = pathinfo($document->file_name, PATHINFO_EXTENSION);
                                         $iconColor = match($extension) {
@@ -108,71 +108,75 @@
                                             default => 'text-gray-500'
                                         };
                                     @endphp
-                                    <svg class="w-6 h-6 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 {{ $iconColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                 </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900 truncate max-w-xs" title="{{ $document->file_name }}">
-                                        {{ Str::limit($document->file_name, 40) }}
+                                <div class="min-w-0">
+                                    <div class="text-xs sm:text-sm font-semibold text-gray-900 truncate max-w-[180px] sm:max-w-[240px]" title="{{ $document->file_name }}">
+                                        {{ Str::limit($document->file_name, 35) }}
                                     </div>
-                                    <div class="text-xs text-gray-500">
+                                    <div class="text-[10px] text-gray-400 font-bold">
                                         {{ strtoupper($extension) }}
                                     </div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 py-3 whitespace-nowrap">
                             @if($document->user)
-                                <a href="{{ route('admin.users.show', $document->user) }}" class="text-indigo-600 hover:text-indigo-900">
-                                    <div class="text-sm font-medium">{{ $document->user->name }}</div>
-                                    <div class="text-xs text-gray-500">{{ $document->user->email }}</div>
+                                <a href="{{ route('admin.users.show', $document->user) }}" class="text-indigo-600 hover:text-indigo-900 block">
+                                    <div class="text-xs sm:text-sm font-medium leading-snug">{{ $document->user->name }}</div>
+                                    <div class="text-[11px] text-gray-500">{{ $document->user->email }}</div>
                                 </a>
                             @else
-                                <span class="text-gray-400">Utilisateur supprimé</span>
+                                <span class="text-xs text-gray-400">Utilisateur supprimé</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 py-3 whitespace-nowrap">
                             @php
                                 $typeColors = [
-                                    'bulletin' => 'bg-blue-100 text-blue-700',
-                                    'releve_notes' => 'bg-green-100 text-green-700',
-                                    'diplome' => 'bg-purple-100 text-purple-700',
-                                    'certificat' => 'bg-yellow-100 text-yellow-700',
-                                    'attestation' => 'bg-orange-100 text-orange-700',
-                                    'autre' => 'bg-gray-100 text-gray-700',
+                                    'bulletin' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                    'releve_notes' => 'bg-green-50 text-green-700 border-green-200',
+                                    'diplome' => 'bg-purple-50 text-purple-700 border-purple-200',
+                                    'certificat' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                                    'attestation' => 'bg-orange-50 text-orange-700 border-orange-200',
+                                    'autre' => 'bg-gray-50 text-gray-700 border-gray-200',
                                 ];
                             @endphp
-                            <span class="px-2 py-1 text-xs rounded-full {{ $typeColors[$document->document_type] ?? 'bg-gray-100 text-gray-700' }}">
+                            <span class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full border {{ $typeColors[$document->document_type] ?? 'bg-gray-50 text-gray-700 border-gray-200' }}">
                                 {{ $documentTypes[$document->document_type] ?? $document->document_type }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                             {{ number_format($document->file_size / 1024, 1) }} Ko
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                             {{ $document->created_at->format('d/m/Y H:i') }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                            <button type="button"
-                                    @click="openPreview('{{ route('admin.documents.preview', $document) }}', '{{ addslashes($document->file_name) }}', '{{ strtolower($extension) }}')"
-                                    class="text-indigo-600 hover:text-indigo-900 font-semibold mr-3 inline-flex items-center">
-                                Visualiser
-                            </button>
-                            <a href="{{ route('admin.documents.download', $document) }}"
-                               class="text-gray-600 hover:text-gray-900 mr-3">
-                                Télécharger
-                            </a>
-                            <form action="{{ route('admin.documents.destroy', $document) }}"
-                                  method="POST"
-                                  class="inline"
-                                  onsubmit="return confirm('Supprimer ce document ?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900">
-                                    Supprimer
+                        <td class="px-4 py-3 whitespace-nowrap text-right text-xs">
+                            <div class="flex items-center justify-end gap-2.5">
+                                <button type="button"
+                                        @click="openPreview('{{ route('admin.documents.preview', $document) }}', '{{ addslashes($document->file_name) }}', '{{ strtolower($extension) }}')"
+                                        class="text-indigo-600 hover:text-indigo-900 font-bold transition-colors">
+                                    Visualiser
                                 </button>
-                            </form>
+                                <span class="text-gray-300">|</span>
+                                <a href="{{ route('admin.documents.download', $document) }}"
+                                   class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                                    Télécharger
+                                </a>
+                                <span class="text-gray-300">|</span>
+                                <form action="{{ route('admin.documents.destroy', $document) }}"
+                                      method="POST"
+                                      class="inline"
+                                      onsubmit="return confirm('Supprimer ce document ?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-900 font-medium transition-colors">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty

@@ -67,7 +67,7 @@ class AdminDocumentPreviewTest extends TestCase
             ->withSession(['admin_2fa_passed' => true])
             ->get(route('admin.documents.preview', $document));
 
-        $response->assertRedirect();
-        $response->assertSessionHas('error', 'Fichier introuvable');
+        $response->assertStatus(404);
+        $response->assertSee('Fichier introuvable sur le serveur');
     }
 }
