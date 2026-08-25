@@ -503,7 +503,7 @@ class JeuneDashboardController extends Controller
 
         // Déterminer la localisation pour les suggestions
         $location = $this->getUserLocation($user);
-        $videoCallAdvisorCost = SystemSetting::get('feature_cost_video_call_advisor', 50);
+        $videoCallAdvisorCost = SystemSetting::getValue('feature_cost_video_call_advisor', 50);
 
         return view('jeune.chat', [
             'user' => $user,

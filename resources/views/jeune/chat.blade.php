@@ -1,7 +1,7 @@
 @extends('layouts.jeune')
 
 @php
-    $videoCallAdvisorCost = $videoCallAdvisorCost ?? \App\Models\SystemSetting::get('feature_cost_video_call_advisor', 50);
+    $videoCallAdvisorCost = $videoCallAdvisorCost ?? \App\Models\SystemSetting::getValue('feature_cost_video_call_advisor', 50);
 @endphp
 
 @section('title', 'Orientation')
