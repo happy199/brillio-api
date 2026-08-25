@@ -14,7 +14,7 @@
 
 <body class="bg-gray-900 h-screen flex flex-col overflow-hidden">
     <!-- Header Sécurisé -->
-    <header class="bg-black/50 text-white p-3 flex items-center justify-between border-b border-gray-700">
+    <header class="relative z-50 bg-black/90 text-white p-3 flex items-center justify-between border-b border-gray-700 shadow-lg">
         <div class="flex items-center gap-3">
             <span class="font-bold text-lg tracking-tight">{{ isset($current_organization) ? $current_organization->name : 'Brillio' }}<span class="text-indigo-500">Visio</span></span>
             <div class="h-4 w-px bg-gray-600"></div>
@@ -28,13 +28,13 @@
 
         <div class="flex items-center gap-3">
             <button id="recording-btn" type="button" onclick="toggleVideoRecording()"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer shadow">
+                class="relative z-50 pointer-events-auto bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer shadow select-none">
                 <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
                 <span id="recording-btn-text">Démarrer l'enregistrement</span>
             </button>
 
             <button id="exit-btn" type="button" onclick="finishCallAndExit()"
-                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer">
+                class="relative z-50 pointer-events-auto bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer select-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
@@ -46,7 +46,7 @@
     </header>
 
     <!-- Jitsi Container -->
-    <main class="flex-1 relative w-full h-full bg-black">
+    <main class="flex-1 relative w-full h-full bg-black z-0">
         <div id="meet" class="w-full h-full"></div>
     </main>
 
@@ -64,24 +64,40 @@
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 stopAndUploadVideoRecording();
             } else {
-                startVideoRecording();
+                await startVideoRecording();
             }
         }
 
         async function startVideoRecording() {
             try {
-                let stream;
-                try {
-                    stream = await navigator.mediaDevices.getDisplayMedia({
-                        video: { mediaSource: 'screen' },
-                        audio: true
-                    });
-                } catch (e) {
+                let stream = null;
+                if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+                    try {
+                        stream = await navigator.mediaDevices.getDisplayMedia({
+                            video: { mediaSource: 'screen' },
+                            audio: true
+                        });
+                    } catch (e) {
+                        console.warn('getDisplayMedia rejected, trying getUserMedia:', e);
+                    }
+                }
+
+                if (!stream && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 }
 
+                if (!stream) {
+                    alert("Impossible d'accéder au flux vidéo/audio pour l'enregistrement. Vérifiez les autorisations de votre navigateur.");
+                    return;
+                }
+
                 recordedChunks = [];
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp8,opus' });
+                let options = { mimeType: 'video/webm;codecs=vp8,opus' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options = { mimeType: 'video/webm' };
+                }
+
+                mediaRecorder = new MediaRecorder(stream, options);
 
                 mediaRecorder.ondataavailable = (event) => {
                     if (event.data && event.data.size > 0) {
@@ -174,38 +190,60 @@
                 exitBtnText.innerText = "Fermeture...";
             }
 
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                try {
+            try {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                     stopAndUploadVideoRecording();
-                } catch (e) {}
-            }
+                }
+            } catch (e) {}
 
-            if (window.jitsiApi) {
-                try {
+            try {
+                if (window.jitsiApi) {
                     window.jitsiApi.executeCommand('hangup');
-                } catch (e) {}
-            }
+                }
+            } catch (e) {}
 
-            fetch('{{ route("advisor-meeting.finish", $call) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                keepalive: true
-            }).catch(err => console.error('Error ending meeting:', err));
+            try {
+                fetch('{{ route("advisor-meeting.finish", $call) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    keepalive: true
+                });
+            } catch (e) {}
 
             setTimeout(() => {
-                window.location.href = "{{ $exitUrl }}";
-            }, 400);
+                window.location.replace("{{ $exitUrl }}");
+            }, 300);
         }
+
+        window.toggleVideoRecording = toggleVideoRecording;
+        window.finishCallAndExit = finishCallAndExit;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const recBtn = document.getElementById('recording-btn');
+            if (recBtn) {
+                recBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleVideoRecording();
+                });
+            }
+            const exitBtn = document.getElementById('exit-btn');
+            if (exitBtn) {
+                exitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    finishCallAndExit();
+                });
+            }
+        });
 
         (function() {
             const jitsiScript = document.getElementById('jitsi-api');
             if (window.JitsiMeetExternalAPI) {
                 initJitsi();
             } else {
-                jitsiScript.addEventListener('load', initJitsi);
+                jitsiScript?.addEventListener('load', initJitsi);
             }
         })();
 
