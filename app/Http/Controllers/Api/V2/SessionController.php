@@ -355,14 +355,15 @@ class SessionController extends V1SessionController
             return $this->forbidden();
         }
 
-        if (empty($session->video_recording_url)) {
-            return $this->error('Aucun enregistrement vidéo disponible.', 404);
-        }
-
         $cost = $this->walletService->getFeatureCost('video_recording_download', 15);
 
-        if ($user->credits_balance < $cost) {
-            return $this->error("Votre solde de crédits est insuffisant ($cost crédits requis).", 402);
+        if (empty($session->video_recording_url) || $user->credits_balance < $cost) {
+            $msg = empty($session->video_recording_url)
+                ? 'Aucun enregistrement vidéo disponible.'
+                : "Votre solde de crédits est insuffisant ($cost crédits requis).";
+            $status = empty($session->video_recording_url) ? 404 : 402;
+
+            return $this->error($msg, $status);
         }
 
         $this->walletService->deductCredits(

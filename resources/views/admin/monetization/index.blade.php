@@ -350,9 +350,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement Vidéo Enregistrée (Crédits)</label>
+                                <label for="feature_cost_video_recording_download" class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement Vidéo Enregistrée (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_video_recording_download" value="{{ $videoRecordingDownloadCost }}"
+                                    <input id="feature_cost_video_recording_download" type="number" name="feature_cost_video_recording_download" value="{{ $videoRecordingDownloadCost }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>

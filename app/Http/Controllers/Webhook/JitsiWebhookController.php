@@ -165,19 +165,11 @@ class JitsiWebhookController extends Controller
      */
     public function uploadRecording(Request $request, MentoringSession $session)
     {
-        $validated = $request->validate([
-            'video' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:512000',
-            'file' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:512000',
-        ]);
+        $url = app(VideoRecordingService::class)->processUploadRequest($request, 'mentoring_session_'.$session->id);
 
-        $file = $validated['video'] ?? $validated['file'] ?? null;
-
-        if (! $file) {
+        if (! $url) {
             return response()->json(['error' => 'Aucun fichier vidéo transmis.'], 400);
         }
-
-        $recordingService = app(VideoRecordingService::class);
-        $url = $recordingService->storeRecording($file, 'mentoring_session_'.$session->id);
 
         $session->update([
             'video_recording_url' => $url,

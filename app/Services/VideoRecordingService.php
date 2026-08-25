@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -10,6 +11,25 @@ use Illuminate\Support\Str;
 
 class VideoRecordingService
 {
+    /**
+     * Validate and process video upload request from HTTP controllers
+     */
+    public function processUploadRequest(Request $request, string $prefix): ?string
+    {
+        $validated = $request->validate([
+            'video' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:100000',
+            'file' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:100000',
+        ]);
+
+        $file = $validated['video'] ?? $validated['file'] ?? null;
+
+        if (! $file) {
+            return null;
+        }
+
+        return $this->storeRecording($file, $prefix);
+    }
+
     /**
      * Store a video recording file either on Cloudinary (if configured) or locally in public storage.
      *
