@@ -155,7 +155,13 @@ class VideoRecordingService
             $timestamp = time();
             $params['timestamp'] = $timestamp;
             ksort($params);
-            $stringToSign = http_build_query($params, '', '&').$creds['apiSecret'];
+
+            // Construct raw query string without URL encoding values (e.g. slashes in folder path)
+            $toSign = [];
+            foreach ($params as $key => $value) {
+                $toSign[] = $key.'='.$value;
+            }
+            $stringToSign = implode('&', $toSign).$creds['apiSecret'];
             $signature = sha1($stringToSign); // NOSONAR - SHA-1 is required by Cloudinary API signature protocol
 
             return array_merge($params, [
