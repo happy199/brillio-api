@@ -221,6 +221,37 @@ class AnalyticsController extends Controller
     }
 
     /**
+     * Endpoint API pour charger les commentaires avec pagination (scroll infini)
+     */
+    public function comments(Request $request)
+    {
+        $feedbacks = UserFeedback::with('user')
+            ->whereNotNull('comment')
+            ->where('comment', '!=', '')
+            ->latest()
+            ->paginate(15);
+
+        $items = collect($feedbacks->items())->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'user_name' => $item->user->name ?? 'Anonyme',
+                'initial' => strtoupper(substr($item->user->name ?? 'A', 0, 1)),
+                'user_type' => $item->user->user_type ?? 'N/C',
+                'rating' => (int) $item->rating,
+                'comment' => $item->comment,
+                'created_at_formatted' => $item->created_at ? $item->created_at->format('d M Y à H:i') : '',
+            ];
+        });
+
+        return response()->json([
+            'comments' => $items,
+            'current_page' => $feedbacks->currentPage(),
+            'last_page' => $feedbacks->lastPage(),
+            'has_more' => $feedbacks->hasMorePages(),
+        ]);
+    }
+
+    /**
      * Dashboard analytics principal
      */
     public function index(Request $request)

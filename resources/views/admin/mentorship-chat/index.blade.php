@@ -5,10 +5,21 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Suivi Chat Mentorat</h1>
             <p class="text-gray-600">Surveillez les échanges entre mentors et jeunes (PII et modération)</p>
+        </div>
+        <div>
+            <form action="{{ route('admin.mentorship-chat.clear-all') }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir lever TOUS les signalements et alertes PII de toutes les conversations ?');">
+                @csrf
+                <button type="submit" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-semibold flex items-center shadow-sm transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Lever tous les signalements
+                </button>
+            </form>
         </div>
     </div>
 

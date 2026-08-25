@@ -48,6 +48,37 @@ class DocumentController extends Controller
     }
 
     /**
+     * Visualise / prévisualise un document en ligne dans le navigateur
+     */
+    public function preview(AcademicDocument $document)
+    {
+        if (! Storage::disk('local')->exists($document->file_path)) {
+            return back()->with('error', 'Fichier introuvable');
+        }
+
+        $extension = strtolower(pathinfo($document->file_name, PATHINFO_EXTENSION));
+        $mimeType = match ($extension) {
+            'pdf' => 'application/pdf',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            'txt' => 'text/plain',
+            default => Storage::disk('local')->mimeType($document->file_path) ?? 'application/octet-stream',
+        };
+
+        return Storage::disk('local')->response(
+            $document->file_path,
+            $document->file_name,
+            [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="'.addslashes($document->file_name).'"',
+            ]
+        );
+    }
+
+    /**
      * Télécharge un document
      */
     public function download(AcademicDocument $document)

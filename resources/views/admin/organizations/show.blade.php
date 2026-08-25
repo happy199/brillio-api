@@ -81,27 +81,40 @@
         <!-- Stats rapides -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
-                <h4 class="font-semibold text-gray-700 mb-4">Statistiques</h4>
-                <div class="grid grid-cols-2 gap-4 text-center">
+                <h4 class="font-semibold text-gray-700 mb-4">Statistiques & Capacité</h4>
+                <div class="grid grid-cols-3 gap-3 text-center mb-4">
                     <div class="bg-gray-50 p-3 rounded">
-                        <div class="text-2xl font-bold text-indigo-600">{{ $organization->sponsoredUsers->count() }}
-                        </div>
-                        <div class="text-xs text-gray-500">Jeunes parrainés</div>
+                        <div class="text-xl font-bold text-indigo-600">{{ $organization->sponsoredUsers->count() }}</div>
+                        <div class="text-xs text-gray-500">Jeunes</div>
                     </div>
                     <div class="bg-gray-50 p-3 rounded">
-                        <div class="text-2xl font-bold text-green-600">{{ $organization->active_users_count }}</div>
+                        <div class="text-xl font-bold text-purple-600">{{ $linkedMentors->count() }}</div>
+                        <div class="text-xs text-gray-500">Mentors liés</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded">
+                        <div class="text-xl font-bold text-green-600">{{ $organization->active_users_count }}</div>
                         <div class="text-xs text-gray-500">Actifs (30j)</div>
                     </div>
+                </div>
+
+                <div class="pt-3 border-t flex justify-between items-center text-sm">
+                    <span class="text-gray-500">Limite de places :</span>
+                    @if($organization->getMemberLimit() === null)
+                    <span class="font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-xs">Illimité</span>
+                    @else
+                    <span class="font-semibold text-gray-900">{{ $organization->getMemberLimit() }} places</span>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Liste des Jeunes Parrainés -->
-    <div class="md:col-span-2">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg h-full">
+    <!-- Tables Jeunes Parrainés & Mentors Liés -->
+    <div class="md:col-span-2 space-y-6">
+        <!-- Jeunes Parrainés -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Jeunes Parrainés</h3>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Jeunes Parrainés ({{ $organization->sponsoredUsers->count() }})</h3>
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -167,6 +180,84 @@
                             <tr>
                                 <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                                     Aucun jeune parrainé pour le moment.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mentors Liés -->
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 bg-white border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Mentors Liés ({{ $linkedMentors->count() }})</h3>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Nom</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Email</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date d'association</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Dernière connexion</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse($linkedMentors as $mentor)
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-8 w-8">
+                                            @if($mentor->profile_photo_path)
+                                            <img class="h-8 w-8 rounded-full object-cover"
+                                                src="{{ Storage::url($mentor->profile_photo_path) }}"
+                                                alt="{{ $mentor->name }}">
+                                            @else
+                                            <div
+                                                class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs">
+                                                {{ substr($mentor->name, 0, 2) }}
+                                            </div>
+                                            @endif
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ $mentor->name }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $mentor->email }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $mentor->created_at->format('d/m/Y') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $mentor->last_login_at ?
+                                    \Carbon\Carbon::parse($mentor->last_login_at)->diffForHumans() : 'Jamais' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{{ route('admin.mentors.show', $mentor) }}"
+                                        class="text-indigo-600 hover:text-indigo-900">
+                                        Voir
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                                    Aucun mentor lié à cette organisation pour le moment.
                                 </td>
                             </tr>
                             @endforelse

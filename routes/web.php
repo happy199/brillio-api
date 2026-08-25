@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\SpecializationController;
 use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\AdvisorVideoCallController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\WebAuthController;
 use App\Http\Controllers\Coach\CoachAuthController;
@@ -233,6 +234,15 @@ Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.pu
  */
 Route::middleware(['auth'])->group(function () {
     Route::get('/meeting/{meetingId}', [MeetingController::class, 'show'])->name('meeting.show');
+
+    // Routes d'appel vidéo conseiller
+    Route::post('/chat/conversations/{conversation}/propose-video-call', [AdvisorVideoCallController::class, 'proposeByJeune'])->name('chat.video-call.propose-jeune');
+    Route::post('/admin/chat/conversations/{conversation}/propose-video-call', [AdvisorVideoCallController::class, 'proposeByCounselor'])->name('admin.chat.video-call.propose-counselor');
+    Route::post('/chat/video-calls/{call}/accept', [AdvisorVideoCallController::class, 'acceptByJeune'])->name('chat.video-call.accept');
+    Route::post('/chat/video-calls/{call}/refuse', [AdvisorVideoCallController::class, 'refuseByJeune'])->name('chat.video-call.refuse');
+    Route::get('/advisor-meeting/{meetingId}', [AdvisorVideoCallController::class, 'showMeeting'])->name('advisor-meeting.show');
+    Route::post('/advisor-meeting/{call}/transcribe', [AdvisorVideoCallController::class, 'appendTranscription'])->name('advisor-meeting.transcribe');
+    Route::post('/advisor-meeting/{call}/finish', [AdvisorVideoCallController::class, 'finishMeeting'])->name('advisor-meeting.finish');
 });
 
 // Route meeting accessible par les invités (bypass token)
@@ -621,7 +631,16 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::resource('resources', App\Http\Controllers\Admin\ResourceController::class)->except(['index', 'show']);
         Route::put('resources/{resource}/approve', [App\Http\Controllers\Admin\ResourceController::class, 'approve'])->name('resources.approve');
         Route::post('resources/{resource}/unpublish', [App\Http\Controllers\Admin\ResourceController::class, 'unpublish'])->name('resources.unpublish');
+    });
+});
 
+/*
+ |--------------------------------------------------------------------------
+ | Routes Admin - Suite (Monétisation, Analytiques, Module Établissements)
+ |--------------------------------------------------------------------------
+ */
+Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
+    Route::middleware(['auth', 'is_admin', 'admin_2fa'])->group(function () {
         // Monétisation
         Route::post('comptabilite/transactions/{id}/renvoyer-facture', [AccountingController::class, 'resendInvoice'])->name('accounting.resend-invoice');
         Route::get('comptabilite/transactions/{id}/view-invoice', [AccountingController::class, 'viewInvoice'])->name('accounting.view-invoice');
@@ -650,6 +669,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Analytiques
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
         Route::prefix('analytics')->name('analytics.')->group(function () {
+            Route::get('comments', [AnalyticsController::class, 'comments'])->name('comments');
             Route::get('personality', [AnalyticsController::class, 'personality'])->name('personality');
             Route::get('chat', [AnalyticsController::class, 'chat'])->name('chat');
             Route::get('export', [AnalyticsController::class, 'export'])->name('export');
@@ -691,6 +711,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('contact-messages/{contact_message}/reply', [ContactMessageController::class, 'reply'])->name('contact-messages.reply');
 
         // Gestion des documents
+        Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
         Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
         Route::resource('documents', DocumentController::class)->only(['index', 'destroy']);
 
@@ -702,6 +723,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
 
         // Monitoring des chats de mentorat
         Route::get('mentorship-chat', [MentorshipChatController::class, 'index'])->name('mentorship-chat.index');
+        Route::post('mentorship-chat/clear-all', [MentorshipChatController::class, 'clearAll'])->name('mentorship-chat.clear-all');
         Route::get('mentorship-chat/{mentorship}', [MentorshipChatController::class, 'show'])->name('mentorship-chat.show');
         Route::post('mentorship-chat/{mentorship}/clear-report', [MentorshipChatController::class, 'clearReport'])->name('mentorship-chat.clear-report');
         Route::post('mentorship-chat/message/{message}/unflag', [MentorshipChatController::class, 'unflagMessage'])->name('mentorship-chat.unflag-message');

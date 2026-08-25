@@ -55,6 +55,7 @@ class Organization extends Model
         'private_circle_enabled',
         'private_circle_plus_enabled',
         'disable_onboarding_steps',
+        'custom_member_limit',
     ];
 
     /**
@@ -78,6 +79,7 @@ class Organization extends Model
         'private_circle_enabled' => 'boolean',
         'private_circle_plus_enabled' => 'boolean',
         'disable_onboarding_steps' => 'boolean',
+        'custom_member_limit' => 'integer',
     ];
 
     /**
@@ -315,12 +317,16 @@ class Organization extends Model
      */
     public function getMemberLimit(): ?int
     {
+        // Priorité 0 : limite sur-mesure spécifiée directement sur l'organisation
+        if ($this->custom_member_limit !== null) {
+            return $this->custom_member_limit > 0 ? (int) $this->custom_member_limit : null;
+        }
+
         // Priorité 1 : lire depuis le plan CreditPack en base (configurable via l'admin)
         $pack = CreditPack::where('type', 'subscription')
             ->where('target_plan', $this->subscription_plan)
             ->where('is_active', true)
             ->whereNotNull('member_limit')
-            // Pour les plans multi-durée, on prend la limite du plan mensuel comme référence
             ->orderBy('duration_days')
             ->first();
 
@@ -329,13 +335,9 @@ class Organization extends Model
         }
 
         // Priorité 2 : fallback sur les constantes si la DB n'est pas encore mise à jour
-        // On utilise array_key_exists car ?? traite null comme "absent" et renverrait le fallback 10
-        // pour le plan Établissement dont la limite est explicitement null (illimité)
-        if (array_key_exists($this->subscription_plan, self::MEMBER_LIMITS)) {
-            return self::MEMBER_LIMITS[$this->subscription_plan];
-        }
-
-        return 10; // Fallback sécurisé pour tout plan inconnu
+        return array_key_exists($this->subscription_plan, self::MEMBER_LIMITS)
+            ? self::MEMBER_LIMITS[$this->subscription_plan]
+            : 10;
     }
 
     /**

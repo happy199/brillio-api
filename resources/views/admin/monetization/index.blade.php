@@ -296,6 +296,17 @@
                             </div>
 
                             <div>
+                                <label for="feature_cost_video_call_advisor" class="block text-sm font-semibold text-indigo-900 mb-2 font-bold">Appel Vidéo Conseiller (Crédits)</label>
+                                <div class="relative">
+                                    <input id="feature_cost_video_call_advisor" type="number" name="feature_cost_video_call_advisor" value="{{ $videoCallAdvisorCost }}"
+                                        class="bg-indigo-50/50 border border-indigo-200 text-indigo-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12 font-bold">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-indigo-600 text-xs font-bold">
+                                        Crédits</div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Coût pour un appel vidéo d'orientation avec un conseiller humain.</p>
+                            </div>
+
+                            <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Nouveau Chat AI (Crédits)</label>
                                 <div class="relative">
                                     <input type="number" name="feature_cost_new_chat" value="{{ $newChatCost }}"
