@@ -69,7 +69,7 @@ class AdminNewFeaturesTest extends TestCase
 
     public function test_admin_can_fetch_paginated_analytics_comments(): void
     {
-        $user = User::factory()->create(['user_type' => 'jeune']);
+        $user = User::factory()->create(['name' => 'Élodie Kouassi', 'user_type' => 'jeune']);
 
         UserFeedback::create([
             'user_id' => $user->id,

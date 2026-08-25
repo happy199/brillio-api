@@ -232,14 +232,16 @@ class AnalyticsController extends Controller
             ->paginate(15);
 
         $items = collect($feedbacks->items())->map(function ($item) {
+            $userName = $item->user->name ?? 'Anonyme';
+
             return [
                 'id' => $item->id,
-                'user_name' => $item->user->name ?? 'Anonyme',
-                'initial' => strtoupper(substr($item->user->name ?? 'A', 0, 1)),
+                'user_name' => $userName,
+                'initial' => Str::upper(Str::substr($userName, 0, 1)),
                 'user_type' => $item->user->user_type ?? 'N/C',
                 'rating' => (int) $item->rating,
                 'comment' => $item->comment,
-                'created_at_formatted' => $item->created_at ? $item->created_at->format('d M Y à H:i') : '',
+                'created_at_formatted' => $item->created_at ? $item->created_at->format('d M Y \à H:i') : '',
             ];
         });
 
