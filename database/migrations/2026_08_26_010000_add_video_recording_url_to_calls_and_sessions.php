@@ -14,7 +14,7 @@ return new class extends Migration
         if (Schema::hasTable('advisor_video_calls')) {
             Schema::table('advisor_video_calls', function (Blueprint $table) {
                 if (! Schema::hasColumn('advisor_video_calls', 'video_recording_url')) {
-                    $table->text('video_recording_url')->nullable()->after('meeting_id');
+                    $table->text('video_recording_url')->nullable();
                 }
             });
         }
@@ -22,7 +22,7 @@ return new class extends Migration
         if (Schema::hasTable('mentoring_sessions')) {
             Schema::table('mentoring_sessions', function (Blueprint $table) {
                 if (! Schema::hasColumn('mentoring_sessions', 'video_recording_url')) {
-                    $table->text('video_recording_url')->nullable()->after('meeting_id');
+                    $table->text('video_recording_url')->nullable();
                 }
             });
         }
