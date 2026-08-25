@@ -98,11 +98,22 @@ class VideoRecordingService
     {
         $cloudinaryUrl = config('services.cloudinary.url') ?? env('CLOUDINARY_URL');
         $cloudName = config('services.cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
+        $apiKey = config('services.cloudinary.api_key') ?? env('CLOUDINARY_API_KEY');
+        $apiSecret = config('services.cloudinary.api_secret') ?? env('CLOUDINARY_API_SECRET');
         $uploadPreset = config('services.cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET', 'ml_default');
 
-        if (empty($cloudName) && ! empty($cloudinaryUrl) && str_contains($cloudinaryUrl, '@')) {
-            $parts = explode('@', $cloudinaryUrl);
-            $cloudName = trim(end($parts));
+        // Extract cloudName and API credentials from CLOUDINARY_URL if provided
+        if (! empty($cloudinaryUrl) && str_contains($cloudinaryUrl, 'cloudinary://')) {
+            $parsed = parse_url($cloudinaryUrl);
+            if (! empty($parsed['host'])) {
+                $cloudName = $cloudName ?: $parsed['host'];
+            }
+            if (! empty($parsed['user'])) {
+                $apiKey = $apiKey ?: $parsed['user'];
+            }
+            if (! empty($parsed['pass'])) {
+                $apiSecret = $apiSecret ?: $parsed['pass'];
+            }
         }
 
         if (empty($cloudName)) {
@@ -116,12 +127,32 @@ class VideoRecordingService
             ? 'brillio_recordings/orientation'
             : 'brillio_recordings/mentoring';
 
+        $timestamp = time();
+        $params = [
+            'folder' => $folder,
+        ];
+
+        if (! empty($apiKey) && ! empty($apiSecret)) {
+            // SIGNED UPLOAD: Calculate SHA-1 signature (No upload preset required!)
+            $params['timestamp'] = $timestamp;
+            ksort($params);
+            $stringToSign = http_build_query($params, '', '&').$apiSecret;
+            $signature = sha1($stringToSign);
+
+            $postData = array_merge($params, [
+                'api_key' => $apiKey,
+                'signature' => $signature,
+            ]);
+        } else {
+            // UNSIGNED UPLOAD: Fallback to preset
+            $postData = array_merge($params, [
+                'upload_preset' => $uploadPreset,
+            ]);
+        }
+
         $response = Http::timeout(180)
             ->attach('file', file_get_contents($filePath), $prefix.'_'.time().'.webm')
-            ->post("https://api.cloudinary.com/v1_1/{$cloudName}/video/upload", [
-                'upload_preset' => $uploadPreset,
-                'folder' => $folder,
-            ]);
+            ->post("https://api.cloudinary.com/v1_1/{$cloudName}/video/upload", $postData);
 
         if ($response->successful()) {
             return $response->json('secure_url');
