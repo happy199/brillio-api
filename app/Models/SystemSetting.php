@@ -28,6 +28,11 @@ class SystemSetting extends Model
         });
     }
 
+    public static function get(string $key, $default = null)
+    {
+        return static::getValue($key, $default);
+    }
+
     public static function getValue(string $key, $default = null)
     {
         return Cache::remember('system_setting_'.$key, 86400, function () use ($key, $default) {
