@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdvisorVideoCall;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
 use App\Models\MentorProfile;
@@ -940,13 +941,31 @@ class JeuneDashboardController extends Controller
             ->with('admin')
             ->orderBy('created_at', 'asc')
             ->get()
-            ->map(fn ($m) => [
-                'role' => $m->role,
-                'content' => $m->content,
-                'is_from_human' => (bool) $m->is_from_human,
-                'is_system_message' => (bool) $m->is_system_message,
-                'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant Brillio',
-            ]);
+            ->map(function ($m) {
+                $call = null;
+                if (preg_match('/\[ADVISOR_VIDEO_CALL:(\d+)\]/', $m->content, $matches)) {
+                    $c = AdvisorVideoCall::find($matches[1]);
+                    if ($c) {
+                        $call = [
+                            'id' => $c->id,
+                            'status' => $c->status,
+                            'credits_cost' => $c->credits_cost,
+                            'meeting_id' => $c->meeting_id,
+                            'initiated_by' => $c->initiated_by,
+                        ];
+                    }
+                }
+
+                return [
+                    'id' => $m->id,
+                    'role' => $m->role,
+                    'content' => $m->content,
+                    'is_from_human' => (bool) $m->is_from_human,
+                    'is_system_message' => (bool) $m->is_system_message,
+                    'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant Brillio',
+                    'advisor_video_call' => $call,
+                ];
+            });
 
         return response()->json([
             'success' => true,

@@ -137,15 +137,34 @@
         <!-- Messages -->
         <div class="lg:col-span-3">
             <div class="bg-white rounded-xl shadow-sm flex flex-col" style="height: 700px;">
-                <div class="p-4 border-b flex justify-between items-center">
+                <div class="p-4 border-b flex justify-between items-center bg-gray-50/50">
                     <h3 class="font-semibold text-gray-900">Messages ({{ $conversation->messages->count() }})</h3>
                     @if($conversation->human_support_active)
-                    <span class="text-sm text-orange-600 font-medium">Mode conseiller actif</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-orange-600 font-semibold bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-200">Mode conseiller actif</span>
+                        <form action="{{ route('admin.chat.video-call.propose-counselor', $conversation) }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit"
+                                    onclick="return confirm('Proposer un appel vidéo d\'orientation à l\'élève ?')"
+                                    class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                Proposer un appel vidéo
+                            </button>
+                        </form>
+                    </div>
                     @endif
                 </div>
 
                 <div class="flex-1 p-4 space-y-4 overflow-y-auto" id="messages-container">
                     @forelse($conversation->messages as $message)
+                    @php
+                        $advisorCall = null;
+                        if (preg_match('/\[ADVISOR_VIDEO_CALL:(\d+)\]/', $message->content, $matches)) {
+                            $advisorCall = \App\Models\AdvisorVideoCall::find($matches[1]);
+                        }
+                    @endphp
                     <div class="flex {{ $message->role === 'user' ? 'justify-end' : 'justify-start' }}">
                         <div class="max-w-[80%]">
                             <div class="flex items-center gap-2 mb-1 {{ $message->role === 'user' ? 'justify-end' : 'justify-start' }}">
@@ -183,6 +202,7 @@
                                 </div>
                                 @endif
                             </div>
+
                             <div class="rounded-2xl px-4 py-3
                                 @if($message->role === 'user')
                                     bg-blue-600 text-white
@@ -194,6 +214,41 @@
                                     bg-gray-100 text-gray-800
                                 @endif">
                                 <p class="text-sm whitespace-pre-wrap">{{ $message->content }}</p>
+
+                                @if($advisorCall)
+                                    @if($advisorCall->isAccepted())
+                                        <div class="mt-3 bg-indigo-900 text-white p-4 rounded-xl shadow border border-indigo-700 space-y-2">
+                                            <div class="flex items-center gap-2 text-indigo-200 text-xs font-bold uppercase tracking-wider">
+                                                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                                Appel Vidéo Conseiller Actif
+                                            </div>
+                                            <p class="text-xs text-indigo-100">La salle de visioconférence est prête.</p>
+                                            <a href="{{ route('advisor-meeting.show', $advisorCall->meeting_id) }}" target="_blank" rel="noopener"
+                                               class="inline-flex items-center gap-2 px-3 py-1.5 bg-white text-indigo-900 hover:bg-indigo-50 font-bold rounded-lg text-xs transition shadow">
+                                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                                Rejoindre l'appel vidéo
+                                            </a>
+                                        </div>
+                                    @elseif($advisorCall->isPending())
+                                        <div class="mt-3 bg-amber-50 text-amber-900 p-3 rounded-xl border border-amber-200 text-xs space-y-1">
+                                            <div class="flex items-center gap-1.5 font-bold text-amber-700">
+                                                <svg class="w-4 h-4 animate-spin text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                </svg>
+                                                Proposition d'appel vidéo envoyée
+                                            </div>
+                                            <p class="text-amber-800">En attente de réponse de l'élève ({{ $advisorCall->credits_cost }} crédits)...</p>
+                                        </div>
+                                    @elseif($advisorCall->isRefused())
+                                        <div class="mt-2 bg-red-50 text-red-700 px-3 py-1.5 rounded-lg border border-red-200 text-xs font-bold inline-flex items-center gap-1.5">
+                                            <span>❌ Le jeune a refusé l'appel vidéo.</span>
+                                        </div>
+                                    @endif
+                                @endif
                             </div>
                             <p class="text-xs text-gray-400 mt-1 {{ $message->role === 'user' ? 'text-right' : 'text-left' }}">
                                 {{ $message->created_at->format('d/m/Y H:i') }}

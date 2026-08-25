@@ -94,14 +94,28 @@
                             </button>
                         </template>
 
-                        <!-- Active Support Indicator -->
+                        <!-- Active Support Indicator & Video Call Button -->
                         <template x-if="isHumanSupportActive">
-                            <div class="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-[11px] font-bold italic">
-                                <span class="relative flex h-2 w-2">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                                </span>
-                                Conseiller pédagogique en ligne
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-[11px] font-bold italic">
+                                    <span class="relative flex h-2 w-2">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                    </span>
+                                    Conseiller en ligne
+                                </div>
+                                <form :action="'/chat/conversations/' + currentConversationId + '/propose-video-call'" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        onclick="return confirm('Proposer et lancer un appel vidéo d\'orientation pour 50 crédits ?')"
+                                        class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold shadow-sm transition-all duration-300">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                        <span>Appel vidéo</span>
+                                        <span class="bg-indigo-800 text-white px-1.5 py-0.5 rounded-full text-[9px] font-bold">50C</span>
+                                    </button>
+                                </form>
                             </div>
                         </template>
                     </div>
@@ -278,6 +292,60 @@
                                                 </template>
                                             </div>
                                             <div class="prose prose-sm prose-slate max-w-none text-gray-800 leading-relaxed" x-html="formatMessage(message.content)"></div>
+
+                                            <!-- Carte d'appel vidéo (Accepted) -->
+                                            <template x-if="message.advisor_video_call && (message.advisor_video_call.status === 'accepted' || message.advisor_video_call.status === 'completed')">
+                                                <div class="mt-3 bg-gradient-to-br from-indigo-900 to-indigo-800 text-white p-4 rounded-2xl shadow-lg border border-indigo-700 space-y-2">
+                                                    <div class="flex items-center gap-2 text-indigo-200 text-xs font-bold uppercase tracking-wider">
+                                                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                        </svg>
+                                                        Entretien vidéo avec le conseiller
+                                                    </div>
+                                                    <p class="text-xs text-indigo-100">Votre séance de visioconférence est prête. Cliquez pour rejoindre la réunion dans un nouvel onglet.</p>
+                                                    <a :href="'/advisor-meeting/' + message.advisor_video_call.meeting_id"
+                                                       target="_blank"
+                                                       rel="noopener"
+                                                       class="inline-flex items-center gap-2 px-4 py-2 bg-white text-indigo-900 hover:bg-indigo-50 font-bold rounded-xl text-xs shadow-md transition-all">
+                                                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                        </svg>
+                                                        Rejoindre l'appel vidéo
+                                                    </a>
+                                                </div>
+                                            </template>
+
+                                            <!-- Carte d'appel vidéo (Pending Proposal) -->
+                                            <template x-if="message.advisor_video_call && message.advisor_video_call.status === 'pending_acceptance'">
+                                                <div class="mt-3 bg-gradient-to-br from-amber-50 to-orange-50 text-amber-950 p-4 rounded-2xl border border-amber-200 shadow-sm space-y-3">
+                                                    <div class="flex items-center gap-2 text-amber-800 text-xs font-bold uppercase tracking-wider">
+                                                        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                        </svg>
+                                                        Proposition d'appel vidéo
+                                                    </div>
+                                                    <p class="text-xs text-amber-900 font-medium">
+                                                        Le conseiller vous propose de passer en appel vidéo pour approfondir votre orientation (<span x-text="message.advisor_video_call.credits_cost || 50"></span> crédits).
+                                                    </p>
+                                                    <div class="flex flex-wrap items-center gap-2 pt-1">
+                                                        <form :action="'/chat/video-calls/' + message.advisor_video_call.id + '/accept'" method="POST" class="inline">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow transition-colors inline-flex items-center gap-1">
+                                                                <span>Accepter</span>
+                                                                <span class="bg-emerald-800 text-white px-1.5 py-0.5 rounded-full text-[9px]" x-text="(message.advisor_video_call.credits_cost || 50) + 'C'"></span>
+                                                            </button>
+                                                        </form>
+                                                        <form :action="'/chat/video-calls/' + message.advisor_video_call.id + '/refuse'" method="POST" class="inline">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl text-xs transition-colors">
+                                                                Refuser
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </template>
                                         </div>
                                     </div>
                                 </template>

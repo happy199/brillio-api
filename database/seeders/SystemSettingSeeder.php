@@ -53,6 +53,12 @@ class SystemSettingSeeder extends Seeder
                 'description' => 'Nombre de crédits pour contacter un conseiller humain',
             ],
             [
+                'key' => 'feature_cost_video_call_advisor',
+                'value' => '50',
+                'type' => 'integer',
+                'description' => 'Nombre de crédits pour un appel vidéo avec un conseiller d\'orientation',
+            ],
+            [
                 'key' => 'feature_cost_new_chat',
                 'value' => '10',
                 'type' => 'integer',

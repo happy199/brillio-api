@@ -23,6 +23,7 @@ class MonetizationController extends Controller
             'feature_cost_advanced_targeting',
             'feature_cost_analysis_tool',
             'feature_cost_contact_advisor',
+            'feature_cost_video_call_advisor',
             'feature_cost_new_chat',
             'feature_cost_unlock_history',
             'feature_cost_compiled_report',
@@ -43,6 +44,7 @@ class MonetizationController extends Controller
         $analysisToolCost = $settings['feature_cost_analysis_tool']->value ?? 5;
         $aiGenerationCost = $settings['feature_cost_ai_generation']->value ?? 5;
         $contactAdvisorCost = $settings['feature_cost_contact_advisor']->value ?? 10;
+        $videoCallAdvisorCost = $settings['feature_cost_video_call_advisor']->value ?? 50;
         $newChatCost = $settings['feature_cost_new_chat']->value ?? 10;
         $unlockHistoryCost = $settings['feature_cost_unlock_history']->value ?? 5;
         $compiledReportCost = $settings['feature_cost_compiled_report']->value ?? 5;
@@ -109,6 +111,7 @@ class MonetizationController extends Controller
             'analysisToolCost',
             'aiGenerationCost',
             'contactAdvisorCost',
+            'videoCallAdvisorCost',
             'newChatCost',
             'unlockHistoryCost',
             'compiledReportCost',
@@ -151,6 +154,7 @@ class MonetizationController extends Controller
             'feature_cost_analysis_tool' => 'required|integer|min:0',
             'feature_cost_ai_generation' => 'required|integer|min:0',
             'feature_cost_contact_advisor' => 'required|integer|min:0',
+            'feature_cost_video_call_advisor' => 'required|integer|min:0',
             'feature_cost_new_chat' => 'required|integer|min:0',
             'feature_cost_unlock_history' => 'required|integer|min:0',
             'feature_cost_compiled_report' => 'required|integer|min:0',

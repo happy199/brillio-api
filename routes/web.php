@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\SpecializationController;
 use App\Http\Controllers\Admin\SubscriptionPlanController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\AdvisorVideoCallController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\WebAuthController;
 use App\Http\Controllers\Coach\CoachAuthController;
@@ -233,6 +234,15 @@ Route::get('/p/{slug}', [PageController::class, 'jeuneProfile'])->name('jeune.pu
  */
 Route::middleware(['auth'])->group(function () {
     Route::get('/meeting/{meetingId}', [MeetingController::class, 'show'])->name('meeting.show');
+
+    // Routes d'appel vidéo conseiller
+    Route::post('/chat/conversations/{conversation}/propose-video-call', [AdvisorVideoCallController::class, 'proposeByJeune'])->name('chat.video-call.propose-jeune');
+    Route::post('/admin/chat/conversations/{conversation}/propose-video-call', [AdvisorVideoCallController::class, 'proposeByCounselor'])->name('admin.chat.video-call.propose-counselor');
+    Route::post('/chat/video-calls/{call}/accept', [AdvisorVideoCallController::class, 'acceptByJeune'])->name('chat.video-call.accept');
+    Route::post('/chat/video-calls/{call}/refuse', [AdvisorVideoCallController::class, 'refuseByJeune'])->name('chat.video-call.refuse');
+    Route::get('/advisor-meeting/{meetingId}', [AdvisorVideoCallController::class, 'showMeeting'])->name('advisor-meeting.show');
+    Route::post('/advisor-meeting/{call}/transcribe', [AdvisorVideoCallController::class, 'appendTranscription'])->name('advisor-meeting.transcribe');
+    Route::post('/advisor-meeting/{call}/finish', [AdvisorVideoCallController::class, 'finishMeeting'])->name('advisor-meeting.finish');
 });
 
 // Route meeting accessible par les invités (bypass token)
