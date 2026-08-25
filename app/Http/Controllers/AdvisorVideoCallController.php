@@ -342,12 +342,12 @@ class AdvisorVideoCallController extends Controller
      */
     public function uploadRecording(Request $request, AdvisorVideoCall $call)
     {
-        $request->validate([
+        $validated = $request->validate([
             'video' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:512000', // max 500MB
             'file' => 'nullable|file|mimes:webm,mp4,mkv,avi,mov|max:512000',
         ]);
 
-        $file = $request->file('video') ?: $request->file('file');
+        $file = $validated['video'] ?? $validated['file'] ?? null;
 
         if (! $file) {
             return response()->json(['error' => 'Aucun fichier vidéo transmis.'], 400);
