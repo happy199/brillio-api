@@ -347,13 +347,13 @@
 </div>
 
 <!-- Modal Lecteur Vidéo Admin -->
-<div id="adminVideoPlayerModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<dialog id="adminVideoPlayerModal" class="fixed inset-0 z-50 p-0 m-0 w-full h-full max-w-none max-h-none bg-transparent backdrop:bg-gray-900/80 hidden border-0 overflow-y-auto" aria-labelledby="admin-video-modal-title">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm transition-opacity" onclick="window.closeAdminVideoPlayer()"></div>
+        <button type="button" aria-label="Fermer le lecteur vidéo" class="fixed inset-0 w-full h-full bg-gray-900/80 backdrop-blur-sm transition-opacity border-0 cursor-default" onclick="window.closeAdminVideoPlayer()"></button>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-gray-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-800">
+        <div class="relative inline-block align-bottom bg-gray-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-800 z-10">
             <div class="bg-gray-900 px-6 py-4 flex justify-between items-center border-b border-gray-800">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <h3 id="admin-video-modal-title" class="text-sm font-bold text-white flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
                     Visionnage d'Enregistrement Vidéo
                 </h3>
@@ -364,6 +364,7 @@
             <div class="p-4 bg-black flex justify-center items-center">
                 <video id="adminModalVideoElement" controls autoplay class="w-full max-h-[75vh] rounded-lg shadow-2xl">
                     <source id="adminModalVideoSource" src="" type="video/webm">
+                    <track kind="captions" src="" srclang="fr" label="Français">
                 </video>
             </div>
             <div class="bg-gray-900 px-6 py-3 flex justify-end">
@@ -373,7 +374,7 @@
             </div>
         </div>
     </div>
-</div>
+</dialog>
 
 @push('scripts')
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
@@ -385,6 +386,9 @@
             source.src = url;
             video.load();
             modal.classList.remove('hidden');
+            if (typeof modal.showModal === 'function' && !modal.open) {
+                modal.showModal();
+            }
             video.play().catch(e => console.log('Autoplay handled:', e));
         }
     };
@@ -395,6 +399,9 @@
         if (modal && video) {
             video.pause();
             modal.classList.add('hidden');
+            if (typeof modal.close === 'function' && modal.open) {
+                modal.close();
+            }
         }
     };
 

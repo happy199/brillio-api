@@ -155,13 +155,13 @@
         <!-- Video Recording Modal -->
         @if($session->video_recording_url)
         <template x-if="showVideo">
-            <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="video-modal-title" role="dialog" aria-modal="true">
+            <dialog open class="fixed inset-0 z-50 p-0 m-0 w-full h-full max-w-none max-h-none bg-transparent backdrop:bg-gray-500/75 overflow-y-auto border-0" aria-labelledby="video-modal-title">
                 <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="showVideo = false"></div>
+                    <button type="button" aria-label="Fermer" class="fixed inset-0 w-full h-full bg-gray-900/80 backdrop-blur-sm transition-opacity border-0 cursor-default" @click="showVideo = false"></button>
 
                     <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                    <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                    <div class="relative inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full z-10">
                         <div class="bg-gray-900 px-6 py-4 flex justify-between items-center text-white">
                             <h3 class="text-lg leading-6 font-bold flex items-center gap-2" id="video-modal-title">
                                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@
                                 </svg>
                                 Enregistrement Vidéo de la Séance : {{ $session->title }}
                             </h3>
-                            <button @click="showVideo = false" class="text-gray-400 hover:text-white transition">
+                            <button type="button" @click="showVideo = false" class="text-gray-400 hover:text-white transition">
                                 <span class="sr-only">Fermer</span>
                                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -181,6 +181,7 @@
                             <video controls autoplay class="w-full max-h-[70vh] rounded-lg shadow-lg">
                                 <source src="{{ $session->video_recording_url }}" type="video/webm">
                                 <source src="{{ $session->video_recording_url }}" type="video/mp4">
+                                <track kind="captions" src="" srclang="fr" label="Français">
                                 Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
                             </video>
                         </div>
@@ -200,7 +201,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </dialog>
         </template>
         @endif
 

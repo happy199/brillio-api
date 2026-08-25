@@ -100,11 +100,9 @@ class VideoRecordingService
         $cloudName = config('services.cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
         $uploadPreset = config('services.cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET', 'ml_default');
 
-        if (empty($cloudName) && ! empty($cloudinaryUrl)) {
-            if (str_contains($cloudinaryUrl, '@')) {
-                $parts = explode('@', $cloudinaryUrl);
-                $cloudName = trim(end($parts));
-            }
+        if (empty($cloudName) && ! empty($cloudinaryUrl) && str_contains($cloudinaryUrl, '@')) {
+            $parts = explode('@', $cloudinaryUrl);
+            $cloudName = trim(end($parts));
         }
 
         if (empty($cloudName)) {
