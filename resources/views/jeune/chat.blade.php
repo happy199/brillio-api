@@ -431,8 +431,9 @@
                         @if(isset($currentConversation) && $currentConversation->messages)
                             @php
                                 $advisorCallsMap = \App\Models\AdvisorVideoCall::where('conversation_id', $currentConversation->id)->get()->keyBy('id');
+                                $orgName = isset($current_organization) ? $current_organization->name : 'Brillio';
                             @endphp
-                            this.messages = {!! json_encode($currentConversation->messages->map(function($m) use ($advisorCallsMap, $current_organization) {
+                            this.messages = {!! json_encode($currentConversation->messages->map(function($m) use ($advisorCallsMap, $orgName) {
                                 $callData = null;
                                 if (preg_match('/\[ADVISOR_VIDEO_CALL:(\d+)\]/', $m->content, $matches)) {
                                     $c = $advisorCallsMap->get($matches[1]) ?? \App\Models\AdvisorVideoCall::find($matches[1]);
@@ -452,7 +453,7 @@
                                     'content' => $m->content,
                                     'is_from_human' => (bool)$m->is_from_human,
                                     'is_system_message' => (bool)$m->is_system_message,
-                                    'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant ' . (isset($current_organization) ? $current_organization->name : 'Brillio'),
+                                    'sender_name' => $m->is_from_human ? ($m->admin?->name ?? 'Conseiller') : 'Assistant ' . $orgName,
                                     'advisor_video_call' => $callData,
                                 ];
                             })->toArray()) !!};
