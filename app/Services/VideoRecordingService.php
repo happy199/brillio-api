@@ -19,8 +19,8 @@ class VideoRecordingService
     public function processUploadRequest(Request $request, string $prefix): ?string
     {
         $validated = $request->validate([
-            'video' => ['nullable', 'file', 'mimes:webm,mp4,mkv,avi,mov', 'max:51200'],
-            'file' => ['nullable', 'file', 'mimes:webm,mp4,mkv,avi,mov', 'max:51200'],
+            'video' => ['nullable', 'file', 'mimes:webm,mp4,mkv,avi,mov', 'max:512000'],
+            'file' => ['nullable', 'file', 'mimes:webm,mp4,mkv,avi,mov', 'max:512000'],
         ]);
 
         $file = $validated['video'] ?? $validated['file'] ?? null;
