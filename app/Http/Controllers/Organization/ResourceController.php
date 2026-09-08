@@ -143,49 +143,13 @@ class ResourceController extends Controller
         }
 
         $organization = $this->getCurrentOrganization();
-
-        $messages = [
-            'required' => 'Ce champ est obligatoire.',
-            'string' => 'Ce champ doit être une chaîne de caractères.',
-            'max' => 'La taille ne doit pas dépasser :max.',
-            'in' => 'La valeur sélectionnée est invalide.',
-            'integer' => 'Ce champ doit être un entier.',
-            'min' => 'La valeur doit être au moins :min.',
-            'file' => 'Le fichier doit être valide.',
-            'image' => 'Le fichier doit être une image.',
-            'file.max' => 'Le fichier est trop volumineux (Max 20 Mo).',
-            'preview_image.max' => 'L\'image de couverture est trop volumineuse (Max 5 Mo).',
-        ];
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
-            'content' => 'nullable|string',
-            'type' => 'required|in:article,video,tool,exercise,template,script,advertisement,book,podcast,webinar,guide,case_study,course',
-            'price' => 'nullable|integer',
-            'is_premium' => 'required|in:0,1',
-            'file' => 'nullable|file|max:20480', // NOSONAR: safe file limit for documents and resources
-            'preview_image' => 'nullable|image|max:5120', // 5MB
-            'metadata' => 'nullable|array',
-            'mbti_types' => 'nullable|array',
-            'tags' => 'nullable|string',
-            'targeting' => 'nullable|array',
-            'quizzes_data' => 'nullable|string',
-        ], $messages);
-
-        if ($request->is_premium == '1') {
-            $request->validate([
-                'price' => 'required|integer|min:200',
-            ], [
-                'price.required' => 'Le prix est obligatoire pour une ressource payante.',
-                'price.min' => 'Le prix minimum pour une ressource payante est de 200 FCFA.',
-            ]);
-        }
+        $validated = $this->validateResourceRequest($request);
+        $this->assertHasResourceContent($request, $validated);
 
         // File handling
         $filePath = null;
         if ($request->hasFile('file')) {
-            $fileValidated = $request->validate(['file' => 'required|file|max:20480']); // NOSONAR: safe file limit for documents and resources
+            $fileValidated = $request->validate(['file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,mp4,mov,avi,mp3,wav|max:20480']); // NOSONAR: safe file limit for documents and resources
             $filePath = $fileValidated['file']->store('resources/files', 'public');
         }
 
@@ -195,53 +159,19 @@ class ResourceController extends Controller
             $previewPath = $previewValidated['preview_image']->store('resources/previews', 'public');
         }
 
-        $tags = ! empty($validated['tags']) ? array_map('trim', explode(',', $validated['tags'])) : [];
-
-        // Must have at least content, file, or quizzes
-        $hasQuizzes = false;
-        if (! empty($validated['quizzes_data'])) {
-            $quizzesDecoded = json_decode($validated['quizzes_data'], true);
-            if (is_array($quizzesDecoded) && count($quizzesDecoded) > 0) {
-                foreach ($quizzesDecoded as $qData) {
-                    if (! empty($qData['title'])) {
-                        $hasQuizzes = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (empty($validated['content']) && ! $request->hasFile('file') && ! $hasQuizzes) {
-            throw ValidationException::withMessages(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
-        }
-
         try {
             DB::beginTransaction();
 
-            $resource = Resource::create([
+            $payload = $this->buildResourcePayload($validated, [
                 'user_id' => auth()->id(),
                 'organization_id' => $organization->id,
-                'title' => $validated['title'],
                 'slug' => Str::slug($validated['title']).'-'.uniqid(),
-                'description' => $validated['description'],
-                'content' => $validated['content'] ?? null,
-                'type' => $validated['type'],
-                'price' => $request->is_premium == '1' ? ($request->price ?? 0) : 0,
-                'is_premium' => $request->is_premium == '1',
                 'file_path' => $filePath,
                 'preview_image_path' => $previewPath,
-                'metadata' => $validated['metadata'] ?? [],
-                'mbti_types' => $validated['mbti_types'] ?? [],
-                'tags' => $tags,
-                'targeting' => $validated['targeting'] ?? [],
-                'is_published' => true,
-                'is_validated' => true,
                 'validated_at' => now(),
-                'admin_feedback' => null,
-                'unpublished_at' => null,
             ]);
 
-            // Save quizzes
+            $resource = Resource::create($payload);
             $this->saveQuizzes($resource, $validated['quizzes_data'] ?? null);
 
             DB::commit();
@@ -285,104 +215,37 @@ class ResourceController extends Controller
             return back()->with('error', 'La taille de la requête est trop volumineuse (max 30 Mo).');
         }
 
-        $messages = [
-            'required' => 'Ce champ est obligatoire.',
-            'string' => 'Ce champ doit être une chaîne de caractères.',
-            'max' => 'La taille ne doit pas dépasser :max.',
-            'in' => 'La valeur sélectionnée est invalide.',
-            'integer' => 'Ce champ doit être un entier.',
-            'min' => 'La valeur doit être au moins :min.',
-            'file' => 'Le fichier doit être valide.',
-            'image' => 'Le fichier doit être une image.',
-            'file.max' => 'Le fichier est trop volumineux (Max 20 Mo).',
-            'preview_image.max' => 'L\'image de couverture est trop volumineuse (Max 5 Mo).',
-        ];
+        $validated = $this->validateResourceRequest($request);
+        $this->assertHasResourceContent($request, $validated, $resource);
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
-            'content' => 'nullable|string',
-            'type' => 'required|in:article,video,tool,exercise,template,script,advertisement,book,podcast,webinar,guide,case_study,course',
-            'price' => 'nullable|integer',
-            'is_premium' => 'required|in:0,1',
-            'file' => 'nullable|file|max:20480', // NOSONAR: safe file limit for documents and resources
-            'preview_image' => 'nullable|image|max:5120',
-            'metadata' => 'nullable|array',
-            'mbti_types' => 'nullable|array',
-            'tags' => 'nullable|string',
-            'targeting' => 'nullable|array',
-            'quizzes_data' => 'nullable|string',
-        ], $messages);
-
-        if ($request->is_premium == '1') {
-            $request->validate([
-                'price' => 'required|integer|min:200',
-            ], [
-                'price.required' => 'Le prix est obligatoire pour une ressource payante.',
-                'price.min' => 'Le prix minimum pour une ressource payante est de 200 FCFA.',
-            ]);
-        }
-
+        $previewPath = $resource->preview_image_path;
         if ($request->hasFile('preview_image')) {
-            if ($resource->preview_image_path) {
-                Storage::disk('public')->delete($resource->preview_image_path);
+            if ($previewPath) {
+                Storage::disk('public')->delete($previewPath);
             }
             $previewValidated = $request->validate(['preview_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120']);
-            $resource->preview_image_path = $previewValidated['preview_image']->store('resources/previews', 'public');
+            $previewPath = $previewValidated['preview_image']->store('resources/previews', 'public');
         }
 
+        $filePath = $resource->file_path;
         if ($request->hasFile('file')) {
-            if ($resource->file_path) {
-                Storage::disk('public')->delete($resource->file_path);
+            if ($filePath) {
+                Storage::disk('public')->delete($filePath);
             }
-            $fileValidated = $request->validate(['file' => 'required|file|max:20480']); // NOSONAR: safe file limit for documents and resources
-            $resource->file_path = $fileValidated['file']->store('resources/files', 'public');
-        }
-
-        $tags = ! empty($validated['tags']) ? array_map('trim', explode(',', $validated['tags'])) : [];
-
-        $hasQuizzes = false;
-        if ($request->has('quizzes_data')) {
-            $quizzesDecoded = json_decode($request->quizzes_data, true);
-            if (is_array($quizzesDecoded) && count($quizzesDecoded) > 0) {
-                foreach ($quizzesDecoded as $qData) {
-                    if (! empty($qData['title'])) {
-                        $hasQuizzes = true;
-                        break;
-                    }
-                }
-            }
-        } elseif ($resource->quizzes()->count() > 0) {
-            $hasQuizzes = true;
-        }
-
-        $hasContent = ! empty($validated['content']) || (! array_key_exists('content', $validated) && ! empty($resource->content));
-        $hasFile = $request->hasFile('file') || (! empty($resource->file_path) && ! $request->has('remove_file'));
-
-        if (! $hasContent && ! $hasFile && ! $hasQuizzes) {
-            throw ValidationException::withMessages(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
+            $fileValidated = $request->validate(['file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,mp4,mov,avi,mp3,wav|max:20480']); // NOSONAR: safe file limit for documents and resources
+            $filePath = $fileValidated['file']->store('resources/files', 'public');
         }
 
         try {
             DB::beginTransaction();
 
-            $resource->update([
-                'title' => $validated['title'],
-                'description' => $validated['description'],
-                'content' => $validated['content'] ?? null,
-                'type' => $validated['type'],
-                'price' => $request->is_premium == '1' ? ($request->price ?? 0) : 0,
-                'is_premium' => $request->is_premium == '1',
-                'metadata' => $validated['metadata'] ?? [],
-                'mbti_types' => $validated['mbti_types'] ?? [],
-                'tags' => $tags,
-                'targeting' => $validated['targeting'] ?? [],
-                'is_published' => true,
-                'is_validated' => true,
+            $payload = $this->buildResourcePayload($validated, [
+                'preview_image_path' => $previewPath,
+                'file_path' => $filePath,
                 'validated_at' => $resource->validated_at ?? now(),
-                'admin_feedback' => null,
-                'unpublished_at' => null,
             ]);
+
+            $resource->update($payload);
 
             if ($request->has('quizzes_data')) {
                 $this->saveQuizzes($resource, $request->quizzes_data);
@@ -398,6 +261,75 @@ class ResourceController extends Controller
 
             return back()->withInput()->with('error', 'Erreur lors de la mise à jour : '.$e->getMessage());
         }
+    }
+
+    private function validateResourceRequest(Request $request): array
+    {
+        $rules = [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:1000',
+            'content' => 'nullable|string',
+            'type' => 'required|in:article,video,tool,exercise,template,script,advertisement,book,podcast,webinar,guide,case_study,course',
+            'price' => 'nullable|integer',
+            'is_premium' => 'required|in:0,1',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,mp4,mov,avi,mp3,wav|max:20480', // NOSONAR: safe file limit for documents and resources
+            'preview_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'metadata' => 'nullable|array',
+            'mbti_types' => 'nullable|array',
+            'tags' => 'nullable|string',
+            'targeting' => 'nullable|array',
+            'quizzes_data' => 'nullable|string',
+        ];
+
+        if ($request->is_premium == '1') {
+            $rules['price'] = 'required|integer|min:200';
+        }
+
+        return $request->validate($rules, [
+            'price.required' => 'Le prix est obligatoire pour une ressource payante.',
+            'price.min' => 'Le prix minimum pour une ressource payante est de 200 FCFA.',
+        ]);
+    }
+
+    private function assertHasResourceContent(Request $request, array $validated, ?Resource $existing = null): void
+    {
+        $quizzes = json_decode($validated['quizzes_data'] ?? '', true);
+        $hasQuizzes = (is_array($quizzes) && collect($quizzes)->contains(fn ($q) => ! empty($q['title'])))
+            || ($existing && $existing->quizzes()->exists());
+
+        $hasContent = ! empty($validated['content']) || ($existing && ! empty($existing->content));
+        $hasFile = $request->hasFile('file') || ($existing && ! empty($existing->file_path) && ! $request->has('remove_file'));
+
+        if (! $hasContent && ! $hasFile && ! $hasQuizzes) {
+            throw ValidationException::withMessages([
+                'content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.',
+            ]);
+        }
+    }
+
+    private function buildResourcePayload(array $validated, array $extra = []): array
+    {
+        $isPremium = ($validated['is_premium'] ?? '0') === '1';
+        $tags = ! empty($validated['tags'])
+            ? array_values(array_filter(array_map('trim', explode(',', (string) $validated['tags']))))
+            : [];
+
+        return array_merge([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'content' => $validated['content'] ?? null,
+            'type' => $validated['type'],
+            'price' => $isPremium ? ((int) ($validated['price'] ?? 0)) : 0,
+            'is_premium' => $isPremium,
+            'metadata' => $validated['metadata'] ?? [],
+            'mbti_types' => $validated['mbti_types'] ?? [],
+            'tags' => $tags,
+            'targeting' => $validated['targeting'] ?? [],
+            'is_published' => true,
+            'is_validated' => true,
+            'admin_feedback' => null,
+            'unpublished_at' => null,
+        ], $extra);
     }
 
     /**
