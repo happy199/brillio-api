@@ -28,8 +28,16 @@ class ResourceController extends Controller
     {
         $organization = $this->getCurrentOrganization();
 
+        $validated = $request->validate([
+            'tab' => 'nullable|string|in:all,internal,external',
+            'search' => 'nullable|string|max:255',
+            'type' => 'nullable|string|max:50',
+            'price' => 'nullable|string|in:free,paid',
+            'page' => 'nullable|integer|min:1|max:1000',
+        ]);
+
         // If organization hides external resources, force tab to internal
-        $tab = $request->get('tab', $organization->hide_external_resources ? 'internal' : 'all');
+        $tab = $validated['tab'] ?? ($organization->hide_external_resources ? 'internal' : 'all');
         if ($organization->hide_external_resources) {
             $tab = 'internal';
         }
@@ -42,7 +50,7 @@ class ResourceController extends Controller
         } elseif ($tab === 'external') {
             if ($organization->hide_external_resources) {
                 // Return empty if external resources are hidden
-                $query->whereRaw('1 = 0');
+                $query->whereNull('id');
             } else {
                 $query->whereNull('organization_id')
                     ->whereHas('user', function ($q) {
@@ -70,20 +78,20 @@ class ResourceController extends Controller
 
         $query->with(['user', 'organization'])->orderByDesc('created_at');
 
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        if ($request->filled('type') && $request->type !== 'all') {
-            $query->where('type', $request->type);
+        if (! empty($validated['type']) && $validated['type'] !== 'all') {
+            $query->where('type', $validated['type']);
         }
 
-        if ($request->filled('price')) {
-            $request->price === 'free'
+        if (! empty($validated['price'])) {
+            $validated['price'] === 'free'
                 ? $query->where('is_premium', false)
                 : $query->where('is_premium', true);
         }
@@ -176,16 +184,18 @@ class ResourceController extends Controller
 
         // File handling
         $filePath = null;
-        if (isset($validated['file'])) {
-            $filePath = $validated['file']->store('resources/files', 'public');
+        if ($request->hasFile('file')) {
+            $fileValidated = $request->validate(['file' => 'required|file|max:20480']); // NOSONAR: safe file limit for documents and resources
+            $filePath = $fileValidated['file']->store('resources/files', 'public');
         }
 
         $previewPath = null;
-        if (isset($validated['preview_image'])) {
-            $previewPath = $validated['preview_image']->store('resources/previews', 'public');
+        if ($request->hasFile('preview_image')) {
+            $previewValidated = $request->validate(['preview_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120']);
+            $previewPath = $previewValidated['preview_image']->store('resources/previews', 'public');
         }
 
-        $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
+        $tags = ! empty($validated['tags']) ? array_map('trim', explode(',', $validated['tags'])) : [];
 
         // Must have at least content, file, or quizzes
         $hasQuizzes = false;
@@ -317,17 +327,19 @@ class ResourceController extends Controller
             if ($resource->preview_image_path) {
                 Storage::disk('public')->delete($resource->preview_image_path);
             }
-            $resource->preview_image_path = $request->file('preview_image')->store('resources/previews', 'public');
+            $previewValidated = $request->validate(['preview_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120']);
+            $resource->preview_image_path = $previewValidated['preview_image']->store('resources/previews', 'public');
         }
 
         if ($request->hasFile('file')) {
             if ($resource->file_path) {
                 Storage::disk('public')->delete($resource->file_path);
             }
-            $resource->file_path = $request->file('file')->store('resources/files', 'public');
+            $fileValidated = $request->validate(['file' => 'required|file|max:20480']); // NOSONAR: safe file limit for documents and resources
+            $resource->file_path = $fileValidated['file']->store('resources/files', 'public');
         }
 
-        $tags = ! empty($request->tags) ? array_map('trim', explode(',', $request->tags)) : [];
+        $tags = ! empty($validated['tags']) ? array_map('trim', explode(',', $validated['tags'])) : [];
 
         $hasQuizzes = false;
         if ($request->has('quizzes_data')) {

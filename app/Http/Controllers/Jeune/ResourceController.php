@@ -161,8 +161,8 @@ class ResourceController extends Controller
             ->withCount('quizzes');
 
         if (! empty($orgIds)) {
-            $escapedIds = implode(',', array_map('intval', $orgIds));
-            $query->orderByRaw("CASE WHEN organization_id IN ({$escapedIds}) THEN 0 ELSE 1 END");
+            $placeholders = implode(',', array_fill(0, count($orgIds), '?'));
+            $query->orderByRaw("CASE WHEN organization_id IN ({$placeholders}) THEN 0 ELSE 1 END", array_values(array_map('intval', $orgIds)));
         }
         $query->orderByDesc('created_at');
 
