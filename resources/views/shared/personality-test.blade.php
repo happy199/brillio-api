@@ -224,7 +224,7 @@
                 </a>
 
                 <!-- SECTION RECOMMANDATIONS : ÉTABLISSEMENTS (AJOUT DYNAMIQUE) -->
-                @if($theme === 'jeune')
+                @if($theme === 'jeune' && (!auth()->check() || !auth()->user()->hasAntiCompetitionRestriction()))
                 <div class="mt-12 py-10 bg-gray-50/80 -mx-6 px-6 sm:-mx-8 sm:px-8 border-t border-gray-100 shadow-inner rounded-b-[2rem]">
                     <style>
                         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -1125,7 +1125,7 @@
                     formData: {},
 
                     init() {
-                        if ('{{ $theme }}' === 'jeune') {
+                        if ('{{ $theme }}' === 'jeune' && {{ (!auth()->check() || !auth()->user()->hasAntiCompetitionRestriction()) ? 'true' : 'false' }}) {
                             this.loadRecommendations();
                         }
                     },

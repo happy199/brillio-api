@@ -55,6 +55,7 @@ class Organization extends Model
         'private_circle_enabled',
         'private_circle_plus_enabled',
         'disable_onboarding_steps',
+        'anti_competition_enabled',
         'custom_member_limit',
     ];
 
@@ -79,6 +80,7 @@ class Organization extends Model
         'private_circle_enabled' => 'boolean',
         'private_circle_plus_enabled' => 'boolean',
         'disable_onboarding_steps' => 'boolean',
+        'anti_competition_enabled' => 'boolean',
         'custom_member_limit' => 'integer',
     ];
 

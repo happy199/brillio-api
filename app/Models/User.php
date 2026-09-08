@@ -609,6 +609,34 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Check if the user is subject to an organization non-competition rule
+     * (hiding external recommendations/formations).
+     */
+    public function hasAntiCompetitionRestriction(): bool
+    {
+        if (app()->bound('current_organization')) {
+            $currentOrg = app('current_organization');
+            if ($currentOrg && $currentOrg->anti_competition_enabled) {
+                return true;
+            }
+        }
+
+        if ($this->organizations()->where('anti_competition_enabled', true)->exists()) {
+            return true;
+        }
+
+        if ($this->sponsored_by_organization_id && $this->sponsoringOrganization?->anti_competition_enabled) {
+            return true;
+        }
+
+        if ($this->organization_id && $this->organization?->anti_competition_enabled) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Détermine si l'utilisateur doit recevoir un "nudge" (une sollicitation) pour son profil ou feedback.
      */
     public function needsProfilingNudge(): bool
