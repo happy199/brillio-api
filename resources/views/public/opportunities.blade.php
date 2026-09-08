@@ -96,31 +96,58 @@
                                     <span class="text-primary-600">Détail</span>
                                 </div>
 
+                                @php
+                                    $scores = $cvAnalysis->criteria_scores ?? [];
+                                    $scoreStructure = $scores['structure'] ?? 70;
+                                    $scoreClarite   = $scores['clarite']   ?? 70;
+                                    $scoreExperiences = $scores['experiences'] ?? 70;
+                                    $scoreCompetences = $scores['competences'] ?? 70;
+                                    $scoreImpact    = $scores['impact']    ?? 50;
+
+                                    // Helper : retourne les classes CSS selon le niveau du score
+                                    $pilierClasses = function(int $s): array {
+                                        if ($s >= 75) return ['bg-emerald-100', 'text-emerald-600', '✓', 'text-emerald-700'];
+                                        if ($s >= 50) return ['bg-amber-100',   'text-amber-600',   '!', 'text-amber-700'];
+                                        return                ['bg-red-100',     'text-red-600',     '✕', 'text-red-700'];
+                                    };
+
+                                    [$structBg, $structIcon, $structSym, $structVal] = $pilierClasses($scoreStructure);
+                                    [$expBg,    $expIcon,    $expSym,    $expVal]    = $pilierClasses($scoreExperiences);
+                                    [$impBg,    $impIcon,    $impSym,    $impVal]    = $pilierClasses($scoreImpact);
+
+                                    $structLabel = $scoreStructure >= 75 ? $scoreStructure . '%' : ($scoreStructure >= 50 ? 'À renforcer' : 'Insuffisant');
+                                    $expLabel    = $scoreExperiences >= 75 ? 'Solide' : ($scoreExperiences >= 50 ? 'À muscler' : 'Incomplet');
+                                    $impLabel    = $scoreImpact >= 75 ? 'Quantifié' : ($scoreImpact >= 50 ? 'À muscler' : 'Manquant');
+                                @endphp
                                 <div class="space-y-2 text-xs">
+                                    {{-- Structure / Taux de Parse --}}
                                     <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-[10px]">✓</span>
-                                            <span class="font-medium text-gray-800">Taux de Parse du texte</span>
+                                            <span class="w-4 h-4 rounded-full {{ $structBg }} {{ $structIcon }} flex items-center justify-center font-bold text-[10px]">{{ $structSym }}</span>
+                                            <span class="font-medium text-gray-800">Structure & Parse ATS</span>
                                         </div>
-                                        <span class="text-emerald-700 font-bold">90%</span>
+                                        <span class="{{ $structVal }} font-bold">{{ $structLabel }}</span>
                                     </div>
 
+                                    {{-- Expériences --}}
                                     <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-[10px]">✓</span>
-                                            <span class="font-medium text-gray-800">Coordonnées détectées</span>
+                                            <span class="w-4 h-4 rounded-full {{ $expBg }} {{ $expIcon }} flex items-center justify-center font-bold text-[10px]">{{ $expSym }}</span>
+                                            <span class="font-medium text-gray-800">Expériences & Parcours</span>
                                         </div>
-                                        <span class="text-emerald-700 font-bold">Valide</span>
+                                        <span class="{{ $expVal }} font-bold">{{ $expLabel }}</span>
                                     </div>
 
+                                    {{-- Impact / Quantification --}}
                                     <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <span class="w-4 h-4 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-[10px]">!</span>
+                                            <span class="w-4 h-4 rounded-full {{ $impBg }} {{ $impIcon }} flex items-center justify-center font-bold text-[10px]">{{ $impSym }}</span>
                                             <span class="font-medium text-gray-800">Quantification des missions</span>
                                         </div>
-                                        <span class="text-amber-700 font-bold">À muscler</span>
+                                        <span class="{{ $impVal }} font-bold">{{ $impLabel }}</span>
                                     </div>
 
+                                    {{-- Signaux RH – verrouillé --}}
                                     <div class="p-2.5 rounded-xl bg-gray-50/70 border border-dashed border-gray-200 flex items-center justify-between text-gray-400">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -129,6 +156,7 @@
                                         <span class="text-[10px] font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded">Verrouillé</span>
                                     </div>
 
+                                    {{-- Mots-clés – verrouillé --}}
                                     <div class="p-2.5 rounded-xl bg-gray-50/70 border border-dashed border-gray-200 flex items-center justify-between text-gray-400">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -323,57 +351,118 @@
 
                         </div>
 
+                        {{-- ===== BANNIÈRE CERTIFICATION ATS BRILLIO ===== --}}
+                        @php
+                            $globalScore = $cvAnalysis->global_score ?? 75;
+                            $isCertified = $globalScore >= 65;
+                        @endphp
+                        <div class="rounded-2xl p-5 border flex flex-col sm:flex-row sm:items-center gap-4 {{ $isCertified ? 'bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200' : 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200' }}">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 {{ $isCertified ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600' }}">
+                                @if($isCertified)
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                                @else
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-black {{ $isCertified ? 'text-emerald-900' : 'text-amber-900' }}">
+                                    {{ $isCertified ? '✅ Votre CV est compatible ATS' : '⚠️ Optimisation ATS recommandée' }}
+                                </h4>
+                                <p class="text-xs mt-0.5 {{ $isCertified ? 'text-emerald-700' : 'text-amber-700' }}">
+                                    {{ $isCertified
+                                        ? 'Votre CV atteint le seuil de compatibilité Brillio ATS (' . $globalScore . '/100). Inscrivez-vous pour télécharger la version Pro optimisée.'
+                                        : 'Votre score (' . $globalScore . '/100) est en dessous du seuil recommandé. Le modèle Brillio Pro corrige automatiquement ces points faibles.' }}
+                                </p>
+                            </div>
+                            <a href="{{ route('auth.jeune.register') }}"
+                               class="flex-shrink-0 px-4 py-2.5 rounded-xl text-white text-xs font-bold shadow-sm hover:shadow-md transition {{ $isCertified ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700' }}">
+                                {{ $isCertified ? 'Télécharger mon CV Pro' : 'Optimiser maintenant' }}
+                            </a>
+                        </div>
+
                         <!-- ========================================================================= -->
                         <!-- MODULES D'AUDIT CONTENU & ATS DÉTAILLÉS (Conforme aux maquettes 2, 3, 4)   -->
                         <!-- ========================================================================= -->
                         <div class="space-y-6">
                             
-                            <!-- Module 1 : TAUX DE PARSE ATS (Image 3) -->
+                            <!-- Module 1 : TAUX DE PARSE ATS (Dynamique) -->
+                            @php
+                                $parseScore = $scores['structure'] ?? 70;
+                                $missedPct  = 100 - $parseScore;
+                                $parseLabel = $parseScore >= 75 ? $parseScore . '% Lisible' : ($parseScore >= 50 ? $parseScore . '% Partiel' : $parseScore . '% Faible');
+                                $parseLabelClass = $parseScore >= 75 ? 'text-emerald-600' : ($parseScore >= 50 ? 'text-amber-600' : 'text-red-600');
+                                $parseBarClass   = $parseScore >= 75 ? 'bg-emerald-500' : ($parseScore >= 50 ? 'bg-amber-400' : 'bg-red-400');
+                                $parseMsgClass   = $parseScore >= 75 ? 'text-emerald-700' : ($parseScore >= 50 ? 'text-amber-700' : 'text-red-700');
+                                $parseMsg = $parseScore >= 75
+                                    ? 'Excellente structure ! Vos rubriques sont bien reconnues par les robots ATS.'
+                                    : ($parseScore >= 50
+                                        ? 'Quelques zones de votre CV risquent d\'être mal lues. Le modèle Brillio Pro corrige automatiquement ces points.'
+                                        : 'Attention : une part importante de vos informations risque d\'être ignorée par les ATS. Une restructuration est fortement recommandée.');
+                            @endphp
                             <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 space-y-4">
                                 <div class="flex items-center justify-between gap-4">
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-2.5 h-2.5 rounded-full bg-primary-600"></div>
                                         <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Taux de Parse ATS</h4>
                                     </div>
-                                    <span class="text-xs font-bold text-emerald-600">90% Lisible</span>
+                                    <span class="text-xs font-bold {{ $parseLabelClass }}">{{ $parseLabel }}</span>
                                 </div>
                                 <p class="text-xs text-gray-600 leading-relaxed">
                                     Les recruteurs utilisent des Systèmes de Suivi des Candidatures (ATS) pour scanner les CV à grande échelle. Un taux élevé signifie que l'algorithme extrait parfaitement vos compétences.
                                 </p>
                                 <div class="space-y-2 pt-2">
                                     <div class="w-full bg-gray-100 rounded-full h-3 flex overflow-hidden">
-                                        <div class="bg-emerald-500 h-3 rounded-l-full" style="width: 90%"></div>
-                                        <div class="bg-red-400/50 h-3 rounded-r-full" style="width: 10%"></div>
+                                        <div class="{{ $parseBarClass }} h-3 rounded-l-full" style="width: {{ $parseScore }}%"></div>
+                                        <div class="bg-red-400/50 h-3 rounded-r-full" style="width: {{ $missedPct }}%"></div>
                                     </div>
                                     <div class="flex items-center justify-between text-[11px] text-gray-500">
-                                        <span class="text-emerald-700 font-bold">90% lus par l'ATS</span>
-                                        <span class="text-red-600 font-bold">10% manqués</span>
+                                        <span class="{{ $parseMsgClass }} font-bold">{{ $parseScore }}% lus par l'ATS</span>
+                                        <span class="text-red-600 font-bold">{{ $missedPct }}% manqués</span>
                                     </div>
                                 </div>
-                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 text-center text-xs text-gray-700 font-medium">
-                                    Les 10% manquants de votre CV ne sont pas liés à votre valeur — mais à la mise en page d'origine de votre fichier.
+                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 text-center text-xs {{ $parseMsgClass }} font-medium">
+                                    {{ $parseMsg }}
                                 </div>
                             </div>
 
-                            <!-- Module 2 : QUANTIFIER L'IMPACT (Image 4) -->
+                            <!-- Module 2 : QUANTIFIER L'IMPACT (Dynamique) -->
+                            @php
+                                $impactScore = $scores['impact'] ?? 50;
+                                $impactGood  = $impactScore >= 75;
+                                $impactOk    = $impactScore >= 50;
+
+                                $impactBadgeClass = $impactGood ? 'bg-emerald-100 text-emerald-800' : ($impactOk ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+                                $impactBadgeText  = $impactGood ? '✓ Bien quantifié' : ($impactOk ? 'À muscler' : 'Insuffisant');
+
+                                $impactAlertClass = $impactGood
+                                    ? 'bg-emerald-50/70 border-emerald-200 text-emerald-800'
+                                    : ($impactOk ? 'bg-amber-50/70 border-amber-200 text-amber-800' : 'bg-red-50/70 border-red-200 text-red-800');
+                                $impactAlertIcon  = $impactGood ? '✓' : '✕';
+                                $impactAlertIconClass = $impactGood ? 'text-emerald-500' : ($impactOk ? 'text-amber-500' : 'text-red-500');
+                                $impactAlertMsg = $impactGood
+                                    ? 'Excellent ! Vos expériences contiennent des résultats mesurables qui renforcent votre crédibilité.'
+                                    : ($impactOk
+                                        ? 'Votre section d\'expérience manque de quelques données chiffrées. Ajoutez des % ou montants pour booster votre profil.'
+                                        : 'Votre section d\'expérience manque d\'accomplissements chiffrés sur vos postes précédents.');
+                            @endphp
                             <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 space-y-4">
                                 <div class="flex items-center justify-between gap-4">
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-2.5 h-2.5 rounded-full bg-accent-600"></div>
                                         <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Quantifier l'Impact</h4>
                                     </div>
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">À muscler</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ $impactBadgeClass }}">{{ $impactBadgeText }}</span>
                                 </div>
                                 <p class="text-xs text-gray-600 leading-relaxed">
                                     Un bon CV démontre l'impact avec des chiffres (ex: % de croissance, temps gagné, budget géré). Quantifiez vos résultats pour doubler vos invitations en entretien.
                                 </p>
-                                
-                                <div class="p-4 rounded-2xl bg-red-50/70 border border-red-200 text-xs text-red-800 flex items-center gap-2.5">
-                                    <span class="text-red-500 font-bold text-base">✕</span>
-                                    <span>Votre section d'expérience manque d'accomplissements chiffrés sur vos postes précédents.</span>
+
+                                <div class="p-4 rounded-2xl border {{ $impactAlertClass }} text-xs flex items-center gap-2.5">
+                                    <span class="{{ $impactAlertIconClass }} font-bold text-base">{{ $impactAlertIcon }}</span>
+                                    <span>{{ $impactAlertMsg }}</span>
                                 </div>
 
-                                <!-- Suggestions floutées avec CTA Brillio Pro (Conforme Image 4) -->
+                                <!-- Suggestions floutées avec CTA Brillio Pro -->
                                 <div class="relative rounded-2xl overflow-hidden border border-gray-200 p-6 space-y-3 bg-gray-50/50">
                                     <div class="select-none pointer-events-none filter blur-xs opacity-35 space-y-2 text-xs text-gray-700">
                                         <p class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Réalisé une progression de 35% des flux en automatisant la chaîne CI/CD.</p>
@@ -391,18 +480,37 @@
                                 </div>
                             </div>
 
-                            <!-- Module 3 : RÉPÉTITIONS & MOTS-CLÉS (Image 5) -->
+                            <!-- Module 3 : RÉPÉTITIONS & MOTS-CLÉS (Dynamique) -->
+                            @php
+                                $clarteScore = $scores['clarite'] ?? 70;
+                                $clarteGood  = $clarteScore >= 75;
+                                $clarteOk    = $clarteScore >= 50;
+
+                                $clarteBadgeClass = $clarteGood ? 'bg-emerald-100 text-emerald-800' : ($clarteOk ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+                                $clarteBadgeText  = $clarteGood ? 'Conforme' : ($clarteOk ? 'À clarifier' : 'Problèmes détectés');
+
+                                $clarteAlertClass = $clarteGood
+                                    ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
+                                    : ($clarteOk ? 'bg-amber-50/70 border-amber-200 text-amber-900' : 'bg-red-50/70 border-red-200 text-red-900');
+                                $clarteIcon      = $clarteGood ? '✓' : ($clarteOk ? '!' : '✕');
+                                $clarteIconClass = $clarteGood ? 'text-emerald-600' : ($clarteOk ? 'text-amber-600' : 'text-red-600');
+                                $clarteMsg = $clarteGood
+                                    ? 'Bon travail ! Aucun mot répété excessivement trouvé dans votre CV. Le vocabulaire technique est varié.'
+                                    : ($clarteOk
+                                        ? 'Quelques répétitions ou formulations vagues détectées. Le modèle Brillio Pro suggère des alternatives plus percutantes.'
+                                        : 'Votre vocabulaire est trop répétitif ou peu précis. Cela peut nuire à votre lisibilité et réduire votre score ATS.');
+                            @endphp
                             <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 space-y-4">
                                 <div class="flex items-center justify-between gap-4">
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-2.5 h-2.5 rounded-full bg-emerald-600"></div>
                                         <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Répétition & Vocabulaire</h4>
                                     </div>
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold {{ $clarteBadgeClass }}">{{ $clarteBadgeText }}</span>
                                 </div>
-                                <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2.5">
-                                    <span class="text-emerald-600 font-bold text-base">✓</span>
-                                    <span>Bon travail ! Aucun mot répété excessivement trouvé dans votre CV. Le vocabulaire technique est varié.</span>
+                                <div class="p-4 rounded-2xl border {{ $clarteAlertClass }} text-xs flex items-center gap-2.5">
+                                    <span class="{{ $clarteIconClass }} font-bold text-base">{{ $clarteIcon }}</span>
+                                    <span>{{ $clarteMsg }}</span>
                                 </div>
                             </div>
 

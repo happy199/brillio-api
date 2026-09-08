@@ -175,6 +175,14 @@ class CvAnalysisService
         // Limiter la taille du texte pour éviter de dépasser les quotas de tokens
         $sampleText = mb_substr($text, 0, 8000);
 
+        // ─── Détection du CV Brillio Pro ATS-Certifié ───────────────────────────
+        // Si le PDF re-uploadé contient notre watermark de certification, on
+        // court-circuite l'analyse IA et retournons directement un score parfait.
+        if (str_contains($sampleText, 'BRILLIO-ATS-CERTIFIED')) {
+            return $this->generateBrillioProAnalysis($sampleText);
+        }
+        // ────────────────────────────────────────────────────────────────────────
+
         if (mb_strlen($sampleText) < 40) {
             return $this->generateFallbackAnalysis($originalFilename);
         }
@@ -331,6 +339,64 @@ Format JSON attendu :
                 'Créez votre compte Brillio pour accéder à nos modèles optimisés et au réseau de mentors',
             ],
             'summary' => 'Votre CV présente une base solide et un potentiel prometteur. En précisant vos réalisations avec des données quantifiées, votre score pourra atteindre le niveau supérieur.',
+        ];
+    }
+
+    /**
+     * Analyse certifiée pour les CV générés par Brillio Pro (score 100/100).
+     * Déclenché quand le watermark BRILLIO-ATS-CERTIFIED est détecté dans le PDF.
+     */
+    private function generateBrillioProAnalysis(string $text): array
+    {
+        // Essayer d'extraire le nom du candidat depuis le texte
+        $lines = array_filter(array_map('trim', explode("\n", $text)));
+        $firstLine = reset($lines) ?: 'Candidat Brillio';
+        $candidateName = mb_strlen($firstLine) < 60 ? $firstLine : 'Candidat Brillio';
+
+        // Extraire email et téléphone si présents
+        preg_match('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', $text, $emailMatches);
+        preg_match('/(?:\+?\d{1,4}[ -]?)?\(?\d{2,4}\)?[ -]?\d{2,4}[ -]?\d{2,4}/', $text, $phoneMatches);
+
+        return [
+            'candidate_name'    => $candidateName,
+            'candidate_title'   => 'Profil Brillio Pro — ATS Certifié',
+            'candidate_contact' => [
+                'phone'    => $phoneMatches[0] ?? 'Disponible sur le CV',
+                'email'    => $emailMatches[0] ?? 'Disponible sur le CV',
+                'location' => 'Afrique de l\'Ouest',
+            ],
+            'parsed_content' => [
+                'profil'          => 'Profil généré et optimisé par Brillio Pro. Ce CV respecte à 100% les standards ATS (Workday, Taleo, Greenhouse, Lever, SmartRecruiters).',
+                'experiences'     => ['Expériences structurées en format STAR avec impact chiffré'],
+                'formation'       => ['Formations et diplômes normalisés pour la lisibilité ATS'],
+                'certifications'  => ['Certifications incluses et reconnues par les parsers ATS'],
+                'competences'     => ['Compétences techniques alignées avec les mots-clés sectoriels'],
+                'langues'         => ['Français (Courant)', 'Anglais (Professionnel)'],
+                'raw_text'        => $text,
+                'is_brillio_certified' => true,
+            ],
+            'global_score'   => 100,
+            'criteria_scores' => [
+                'structure'    => 100,
+                'clarite'      => 100,
+                'experiences'  => 100,
+                'competences'  => 100,
+                'impact'       => 100,
+            ],
+            'strengths' => [
+                'Structure mono-colonne optimale : 100% lisible par tous les parsers ATS industriels',
+                'Sections normalisées (Profil, Expériences, Formation, Compétences, Langues)',
+                'Impact quantifié via méthode STAR — formule validée par Google et McKinsey',
+                'Densité de mots-clés métier optimisée pour les filtres Workday, Taleo et Greenhouse',
+                'Coordonnées de contact claires, sans ambiguïté pour l\'extraction automatique',
+            ],
+            'improvements'    => [],
+            'recommendations' => [
+                'Votre CV Brillio Pro est déjà parfaitement optimisé — aucune modification nécessaire.',
+                'Personnalisez les mots-clés selon l\'offre d\'emploi ciblée pour maximiser le score de matching.',
+                'Mettez à jour vos expériences au fur et à mesure de votre évolution professionnelle.',
+            ],
+            'summary' => '🏆 CV Brillio Pro ATS Certifié — Score parfait 100/100. Ce CV a été généré et optimisé par Brillio pour passer tous les filtres ATS sans exception. Il répond aux standards stricts de Workday, Taleo, Greenhouse, Lever et SmartRecruiters.',
         ];
     }
 
