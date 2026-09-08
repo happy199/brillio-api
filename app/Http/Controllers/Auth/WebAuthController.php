@@ -483,6 +483,22 @@ class WebAuthController extends Controller
                 return redirect()->route('jeune.onboarding');
             }
 
+            // Rattachement du CV invité si analysé avant la connexion
+            $pendingCvToken = session('pending_cv_token');
+            if ($pendingCvToken) {
+                try {
+                    $cvService = app(\App\Services\CvAnalysisService::class);
+                    $claimed = $cvService->claimGuestCv($pendingCvToken, $user);
+                    session()->forget('pending_cv_token');
+                    if ($claimed) {
+                        return redirect()->route('jeune.documents', ['tab' => 'cv'])
+                            ->with('success', 'Votre analyse de CV est maintenant disponible dans votre espace.');
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Impossible de rattacher le CV invité (login): '.$e->getMessage());
+                }
+            }
+
             return redirect()->intended(route('jeune.dashboard'));
         }
 
@@ -818,6 +834,24 @@ class WebAuthController extends Controller
         }
 
         Auth::login($user, true);
+
+        // Rattachement du CV invité si analysé avant la connexion (OAuth)
+        $pendingCvToken = session('pending_cv_token');
+        if ($pendingCvToken) {
+            try {
+                $cvService = app(\App\Services\CvAnalysisService::class);
+                $claimed = $cvService->claimGuestCv($pendingCvToken, $user);
+                session()->forget('pending_cv_token');
+                if ($claimed && $user->onboarding_completed) {
+                    return [
+                        'success' => true,
+                        'redirect' => route('jeune.documents', ['tab' => 'cv']),
+                    ];
+                }
+            } catch (\Exception $e) {
+                Log::warning('Impossible de rattacher le CV invité (OAuth): '.$e->getMessage());
+            }
+        }
 
         $redirect = ! $user->onboarding_completed
             ? route('jeune.onboarding')

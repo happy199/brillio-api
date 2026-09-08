@@ -866,10 +866,11 @@
 
 </div>
 
-<script>
+@push('scripts')
+<script nonce="{{ request()->attributes->get('csp_nonce') }}">
 function opportunitiesHubApp(initialTab) {
     return {
-        currentTab: initialTab || 'drive',
+        currentTab: initialTab || 'emploi',
         driveFilter: 'all',
         showUploadModal: false,
         showCvUploadModal: false,
@@ -918,6 +919,8 @@ function opportunitiesHubApp(initialTab) {
     };
 }
 </script>
+@endpush
+
 
 @push('styles')
 <style>
