@@ -12,6 +12,16 @@ class ResourceManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const EXTERNAL_BRILLIO_TITLE = 'Ressource Brillio Externe';
+
+    private const INTERNAL_ORG_TITLE = 'Ressource Interne Org';
+
+    private const EXTERNAL_RESOURCE_TITLE = 'Ressource Externe Brillio';
+
+    private const INTERNAL_RESOURCE_TITLE = 'Ressource Interne de Notre Organisation';
+
+    private const INTERNAL_PRIORITY_TITLE = 'Ressource Interne Prioritaire';
+
     protected Organization $organization;
 
     protected User $admin;
@@ -190,10 +200,10 @@ class ResourceManagementTest extends TestCase
         $adminUser = User::factory()->create(['is_admin' => true]);
 
         // External Brillio resource
-        $externalResource = Resource::create([
+        Resource::create([
             'user_id' => $adminUser->id,
             'organization_id' => null,
-            'title' => 'Ressource Brillio Externe',
+            'title' => self::EXTERNAL_BRILLIO_TITLE,
             'slug' => 'ressource-brillio-externe',
             'type' => 'article',
             'is_published' => true,
@@ -201,10 +211,10 @@ class ResourceManagementTest extends TestCase
         ]);
 
         // Internal resource
-        $internalResource = Resource::create([
+        Resource::create([
             'user_id' => $this->admin->id,
             'organization_id' => $this->organization->id,
-            'title' => 'Ressource Interne Org',
+            'title' => self::INTERNAL_ORG_TITLE,
             'slug' => 'ressource-interne-org',
             'type' => 'article',
             'is_published' => true,
@@ -214,28 +224,28 @@ class ResourceManagementTest extends TestCase
         // 1. By default (hide_external_resources = false, tab = all): sees both
         $response = $this->get($this->getOrgUrl('organization.resources.index', ['tab' => 'all']));
         $response->assertStatus(200);
-        $response->assertSee('Ressource Brillio Externe');
-        $response->assertSee('Ressource Interne Org');
+        $response->assertSee(self::EXTERNAL_BRILLIO_TITLE);
+        $response->assertSee(self::INTERNAL_ORG_TITLE);
 
         // 2. Tab internal: only sees internal
         $response = $this->get($this->getOrgUrl('organization.resources.index', ['tab' => 'internal']));
         $response->assertStatus(200);
-        $response->assertDontSee('Ressource Brillio Externe');
-        $response->assertSee('Ressource Interne Org');
+        $response->assertDontSee(self::EXTERNAL_BRILLIO_TITLE);
+        $response->assertSee(self::INTERNAL_ORG_TITLE);
 
         // 3. Tab external: only sees external
         $response = $this->get($this->getOrgUrl('organization.resources.index', ['tab' => 'external']));
         $response->assertStatus(200);
-        $response->assertSee('Ressource Brillio Externe');
-        $response->assertDontSee('Ressource Interne Org');
+        $response->assertSee(self::EXTERNAL_BRILLIO_TITLE);
+        $response->assertDontSee(self::INTERNAL_ORG_TITLE);
 
         // 4. When hide_external_resources = true:
         $this->organization->update(['hide_external_resources' => true]);
 
         $response = $this->get($this->getOrgUrl('organization.resources.index', ['tab' => 'all']));
         $response->assertStatus(200);
-        $response->assertDontSee('Ressource Brillio Externe');
-        $response->assertSee('Ressource Interne Org');
+        $response->assertDontSee(self::EXTERNAL_BRILLIO_TITLE);
+        $response->assertSee(self::INTERNAL_ORG_TITLE);
     }
 
     public function test_youth_in_organization_with_hide_external_resources_sees_only_internal_resources(): void
@@ -248,7 +258,7 @@ class ResourceManagementTest extends TestCase
         $externalResource = Resource::create([
             'user_id' => $adminUser->id,
             'organization_id' => null,
-            'title' => 'Ressource Externe Brillio',
+            'title' => self::EXTERNAL_RESOURCE_TITLE,
             'slug' => 'ressource-externe-brillio',
             'type' => 'article',
             'is_published' => true,
@@ -258,7 +268,7 @@ class ResourceManagementTest extends TestCase
         $internalResource = Resource::create([
             'user_id' => $this->admin->id,
             'organization_id' => $this->organization->id,
-            'title' => 'Ressource Interne de Notre Organisation',
+            'title' => self::INTERNAL_RESOURCE_TITLE,
             'slug' => 'ressource-interne-notre-organisation',
             'type' => 'article',
             'is_published' => true,
@@ -276,13 +286,13 @@ class ResourceManagementTest extends TestCase
         // Youth index should only contain internal resource
         $response = $this->get(route('jeune.resources.index'));
         $response->assertStatus(200);
-        $response->assertSee('Ressource Interne de Notre Organisation');
-        $response->assertDontSee('Ressource Externe Brillio');
+        $response->assertSee(self::INTERNAL_RESOURCE_TITLE);
+        $response->assertDontSee(self::EXTERNAL_RESOURCE_TITLE);
 
         // Youth show for internal resource succeeds
         $response = $this->get(route('jeune.resources.show', ['resource' => $internalResource]));
         $response->assertStatus(200);
-        $response->assertSee('Ressource Interne de Notre Organisation');
+        $response->assertSee(self::INTERNAL_RESOURCE_TITLE);
 
         // Youth show for external resource is strictly forbidden (404)
         $response = $this->get(route('jeune.resources.show', ['resource' => $externalResource]));
@@ -299,17 +309,17 @@ class ResourceManagementTest extends TestCase
         $externalResource = Resource::create([
             'user_id' => $adminUser->id,
             'organization_id' => null,
-            'title' => 'Ressource Externe Brillio',
+            'title' => self::EXTERNAL_RESOURCE_TITLE,
             'slug' => 'ressource-externe-brillio',
             'type' => 'article',
             'is_published' => true,
             'is_validated' => true,
         ]);
 
-        $internalResource = Resource::create([
+        Resource::create([
             'user_id' => $this->admin->id,
             'organization_id' => $this->organization->id,
-            'title' => 'Ressource Interne Prioritaire',
+            'title' => self::INTERNAL_PRIORITY_TITLE,
             'slug' => 'ressource-interne-prioritaire',
             'type' => 'article',
             'is_published' => true,
@@ -324,18 +334,18 @@ class ResourceManagementTest extends TestCase
         // it filters to source=organization
         $response = $this->get(route('jeune.resources.index'));
         $response->assertStatus(200);
-        $response->assertSee('Ressource Interne Prioritaire');
+        $response->assertSee(self::INTERNAL_PRIORITY_TITLE);
 
         // Youth can still consult external resource when requesting source=all
         $response = $this->get(route('jeune.resources.index', ['source' => 'all']));
         $response->assertStatus(200);
-        $response->assertSee('Ressource Externe Brillio');
-        $response->assertSee('Ressource Interne Prioritaire');
+        $response->assertSee(self::EXTERNAL_RESOURCE_TITLE);
+        $response->assertSee(self::INTERNAL_PRIORITY_TITLE);
 
         // Youth show for external resource succeeds because hide_external_resources is false
         $response = $this->get(route('jeune.resources.show', ['resource' => $externalResource]));
         $response->assertStatus(200);
-        $response->assertSee('Ressource Externe Brillio');
+        $response->assertSee(self::EXTERNAL_RESOURCE_TITLE);
     }
 
     public function test_youth_cannot_access_other_organization_internal_resource(): void

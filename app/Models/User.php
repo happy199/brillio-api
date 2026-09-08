@@ -693,26 +693,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasExternalResourcesHidden(): bool
     {
-        if (app()->bound('current_organization')) {
-            $currentOrg = app('current_organization');
-            if ($currentOrg && $currentOrg->hide_external_resources) {
-                return true;
-            }
-        }
+        $hasBoundOrgHidden = app()->bound('current_organization') && (bool) app('current_organization')?->hide_external_resources;
+        $hasSponsorHidden = $this->sponsored_by_organization_id && (bool) $this->sponsoringOrganization?->hide_external_resources;
+        $hasDirectOrgHidden = $this->organization_id && (bool) $this->organization?->hide_external_resources;
 
-        if ($this->organizations()->where('hide_external_resources', true)->exists()) {
-            return true;
-        }
-
-        if ($this->sponsored_by_organization_id && $this->sponsoringOrganization?->hide_external_resources) {
-            return true;
-        }
-
-        if ($this->organization_id && $this->organization?->hide_external_resources) {
-            return true;
-        }
-
-        return false;
+        return $hasBoundOrgHidden
+            || $this->organizations()->where('hide_external_resources', true)->exists()
+            || $hasSponsorHidden
+            || $hasDirectOrgHidden;
     }
 
     /**

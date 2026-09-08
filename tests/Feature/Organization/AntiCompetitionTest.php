@@ -13,6 +13,10 @@ class AntiCompetitionTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const TEST_DESCRIPTION = 'Description test';
+
+    private const RECOMMENDED_TRAININGS_TEXT = 'Formations recommandées';
+
     protected Organization $organization;
 
     protected User $admin;
@@ -98,7 +102,7 @@ class AntiCompetitionTest extends TestCase
             'user_id' => $youth->id,
             'personality_type' => 'ENFJ',
             'personality_label' => 'Protagoniste',
-            'personality_description' => 'Description test',
+            'personality_description' => self::TEST_DESCRIPTION,
             'traits_scores' => [],
             'raw_responses' => [],
             'completed_at' => now(),
@@ -135,7 +139,7 @@ class AntiCompetitionTest extends TestCase
             'user_id' => $youth->id,
             'personality_type' => 'INTJ',
             'personality_label' => 'Architecte',
-            'personality_description' => 'Description test',
+            'personality_description' => self::TEST_DESCRIPTION,
             'traits_scores' => [],
             'raw_responses' => [],
             'completed_at' => now(),
@@ -167,7 +171,7 @@ class AntiCompetitionTest extends TestCase
             'user_id' => $youth->id,
             'personality_type' => 'ENFP',
             'personality_label' => 'Inspirateur',
-            'personality_description' => 'Description test',
+            'personality_description' => self::TEST_DESCRIPTION,
             'traits_scores' => [],
             'raw_responses' => [],
             'completed_at' => now(),
@@ -177,14 +181,14 @@ class AntiCompetitionTest extends TestCase
         // When anti-competition is disabled: see "Formations recommandées"
         $responseOpen = $this->actingAs($youth)->get(route('jeune.personality'));
         $responseOpen->assertOk();
-        $responseOpen->assertSee('Formations recommandées');
+        $responseOpen->assertSee(self::RECOMMENDED_TRAININGS_TEXT);
 
         // When anti-competition is enabled: do NOT see "Formations recommandées"
         $this->organization->update(['anti_competition_enabled' => true]);
 
         $responseRestricted = $this->actingAs($youth)->get(route('jeune.personality'));
         $responseRestricted->assertOk();
-        $responseRestricted->assertDontSee('Formations recommandées');
+        $responseRestricted->assertDontSee(self::RECOMMENDED_TRAININGS_TEXT);
     }
 
     public function test_dashboard_hides_recommendations_for_restricted_youth(): void
@@ -196,7 +200,7 @@ class AntiCompetitionTest extends TestCase
             'user_id' => $youth->id,
             'personality_type' => 'ENFP',
             'personality_label' => 'Inspirateur',
-            'personality_description' => 'Description test',
+            'personality_description' => self::TEST_DESCRIPTION,
             'traits_scores' => [],
             'raw_responses' => [],
             'completed_at' => now(),
@@ -206,13 +210,13 @@ class AntiCompetitionTest extends TestCase
         // When anti-competition is disabled: see "Formations recommandées"
         $responseOpen = $this->actingAs($youth)->get(route('jeune.dashboard'));
         $responseOpen->assertOk();
-        $responseOpen->assertSee('Formations recommandées');
+        $responseOpen->assertSee(self::RECOMMENDED_TRAININGS_TEXT);
 
         // When anti-competition is enabled: do NOT see "Formations recommandées"
         $this->organization->update(['anti_competition_enabled' => true]);
 
         $responseRestricted = $this->actingAs($youth)->get(route('jeune.dashboard'));
         $responseRestricted->assertOk();
-        $responseRestricted->assertDontSee('Formations recommandées');
+        $responseRestricted->assertDontSee(self::RECOMMENDED_TRAININGS_TEXT);
     }
 }

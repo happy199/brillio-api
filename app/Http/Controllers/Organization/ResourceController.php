@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ResourceController extends Controller
 {
@@ -155,7 +156,7 @@ class ResourceController extends Controller
             'type' => 'required|in:article,video,tool,exercise,template,script,advertisement,book,podcast,webinar,guide,case_study,course',
             'price' => 'nullable|integer',
             'is_premium' => 'required|in:0,1',
-            'file' => 'nullable|file|max:20480', // 20MB
+            'file' => 'nullable|file|max:20480', // NOSONAR: safe file limit for documents and resources
             'preview_image' => 'nullable|image|max:5120', // 5MB
             'metadata' => 'nullable|array',
             'mbti_types' => 'nullable|array',
@@ -201,7 +202,7 @@ class ResourceController extends Controller
         }
 
         if (empty($validated['content']) && ! $request->hasFile('file') && ! $hasQuizzes) {
-            return back()->withInput()->withErrors(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
+            throw ValidationException::withMessages(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
         }
 
         try {
@@ -294,7 +295,7 @@ class ResourceController extends Controller
             'type' => 'required|in:article,video,tool,exercise,template,script,advertisement,book,podcast,webinar,guide,case_study,course',
             'price' => 'nullable|integer',
             'is_premium' => 'required|in:0,1',
-            'file' => 'nullable|file|max:20480',
+            'file' => 'nullable|file|max:20480', // NOSONAR: safe file limit for documents and resources
             'preview_image' => 'nullable|image|max:5120',
             'metadata' => 'nullable|array',
             'mbti_types' => 'nullable|array',
@@ -347,7 +348,7 @@ class ResourceController extends Controller
         $hasFile = $request->hasFile('file') || (! empty($resource->file_path) && ! $request->has('remove_file'));
 
         if (! $hasContent && ! $hasFile && ! $hasQuizzes) {
-            return back()->withInput()->withErrors(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
+            throw ValidationException::withMessages(['content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.']);
         }
 
         try {
