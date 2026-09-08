@@ -74,13 +74,36 @@ class ResourceController extends Controller
             'price' => 'nullable|string|in:free,premium',
             'mbti' => 'nullable|string|max:10',
             'has_quiz' => 'nullable|string|in:1,0',
-            'source' => 'nullable|string|in:mentor,brillio',
+            'source' => 'nullable|string|in:all,organization,mentor,brillio',
             'page' => 'nullable|integer|min:1|max:1000',
         ]);
 
+        $orgIds = $user->getAssociatedOrganizationIds();
+        $primaryOrg = $user->getPrimaryOrganization();
+        $hasExternalHidden = $user->hasExternalResourcesHidden();
+        $hasOrgResources = ! empty($orgIds) && Resource::whereIn('organization_id', $orgIds)
+            ->where('is_published', true)
+            ->where('is_validated', true)
+            ->exists();
+
+        // Determine active source filter
+        if ($hasExternalHidden) {
+            $source = 'organization';
+        } elseif (! $request->has('source') && ! $request->has('search') && ! $request->has('filter') && $hasOrgResources) {
+            // Prioritize organization resources when they exist and no filter is active
+            $source = 'organization';
+        } else {
+            $rawSource = $validated['source'] ?? null;
+            $source = $rawSource === 'all' ? null : $rawSource;
+        }
+
         // Mode de filtrage : 'suggestions' (défaut) ou 'all'
-        // Si l'utilisateur effectue une recherche ou applique des filtres spécifiques, on bascule en mode 'all' pour ne pas masquer les résultats
-        $hasActiveFilters = ! empty($validated['search']) || (! empty($validated['type']) && $validated['type'] !== 'all') || ! empty($validated['price']) || ! empty($validated['mbti']) || ! empty($validated['source']) || (! empty($validated['ownership']) && $validated['ownership'] !== 'new');
+        $hasActiveFilters = ! empty($validated['search'])
+            || (! empty($validated['type']) && $validated['type'] !== 'all')
+            || ! empty($validated['price'])
+            || ! empty($validated['mbti'])
+            || ! empty($source)
+            || (! empty($validated['ownership']) && $validated['ownership'] !== 'new');
 
         $filterMode = $validated['filter'] ?? ($hasActiveFilters ? 'all' : 'suggestions');
 
@@ -89,19 +112,59 @@ class ResourceController extends Controller
         $viewedIds = ResourceView::where('user_id', $user->id)->pluck('resource_id');
         $myResourceIds = $purchasedIds->merge($viewedIds)->unique();
 
-        // Récupérer toutes les ressources validées et publiées
-        // ET dont l'auteur (si mentor) a un profil PUBLIÉ
+        // Base Query
         $query = Resource::where('is_published', true)
-            ->where('is_validated', true)
-            ->whereHas('user', function ($q) {
-                $q->where('is_admin', true) // Les admins sont toujours OK
-                    ->orWhereHas('mentorProfile', function ($mp) {
-                        $mp->where('is_published', true); // Les mentors doivent être publiés
+            ->where('is_validated', true);
+
+        if ($hasExternalHidden) {
+            // Strict isolation: only internal resources from the youth's organization
+            $query->whereIn('organization_id', $orgIds);
+        } else {
+            if ($source === 'organization') {
+                $query->whereIn('organization_id', $orgIds);
+            } elseif ($source === 'mentor') {
+                $query->whereNull('organization_id')
+                    ->whereHas('user', function ($q) {
+                        $q->where('user_type', 'mentor')
+                            ->where('is_admin', false)
+                            ->whereHas('mentorProfile', fn ($mp) => $mp->where('is_published', true));
                     });
-            })
-            ->with('user') // Le créateur (Mentor/Admin)
-            ->withCount('quizzes') // Load quizzes count to avoid N+1
-            ->orderByDesc('created_at');
+            } elseif ($source === 'brillio') {
+                $query->whereNull('organization_id')
+                    ->whereHas('user', function ($q) {
+                        $q->where('is_admin', true);
+                    });
+            } else {
+                // All sources: internal organization resources OR valid external resources
+                $query->where(function ($q) use ($orgIds) {
+                    if (! empty($orgIds)) {
+                        $q->whereIn('organization_id', $orgIds)
+                            ->orWhere(function ($q2) {
+                                $q2->whereNull('organization_id')
+                                    ->whereHas('user', function ($u) {
+                                        $u->where('is_admin', true)
+                                            ->orWhereHas('mentorProfile', fn ($mp) => $mp->where('is_published', true));
+                                    });
+                            });
+                    } else {
+                        $q->whereNull('organization_id')
+                            ->whereHas('user', function ($u) {
+                                $u->where('is_admin', true)
+                                    ->orWhereHas('mentorProfile', fn ($mp) => $mp->where('is_published', true));
+                            });
+                    }
+                });
+            }
+        }
+
+        $query->with(['user', 'organization'])
+            ->withCount('quizzes');
+
+        if (! empty($orgIds)) {
+            $escapedIds = implode(',', array_map('intval', $orgIds));
+            $query->orderByRaw("CASE WHEN organization_id IN ({$escapedIds}) THEN 0 ELSE 1 END");
+        }
+        $query->orderByDesc('created_at');
 
         // --- FILTRES GLOBAUX ---
 
@@ -302,7 +365,11 @@ class ResourceController extends Controller
             'resources' => $paginatedResources,
             'user' => $user,
             'currentFilter' => $filterMode,
+            'currentSource' => $source,
             'mbtiGroups' => $this->mbtiGroups,
+            'primaryOrganization' => $primaryOrg,
+            'hasExternalHidden' => $hasExternalHidden,
+            'hasOrgResources' => $hasOrgResources,
         ]);
     }
 
@@ -314,6 +381,16 @@ class ResourceController extends Controller
         }
 
         $user = auth()->user();
+        $orgIds = $user->getAssociatedOrganizationIds();
+
+        // Isolation des ressources si masquage externe ou ressource d'une autre organisation
+        if ($user->hasExternalResourcesHidden()) {
+            if (! $resource->organization_id || ! in_array($resource->organization_id, $orgIds)) {
+                abort(404);
+            }
+        } elseif ($resource->organization_id && ! in_array($resource->organization_id, $orgIds)) {
+            abort(404);
+        }
 
         // Enregistrer la vue (Compteur global)
         $resource->increment('views_count');
@@ -376,6 +453,15 @@ class ResourceController extends Controller
         }
 
         $user = auth()->user();
+        $orgIds = $user->getAssociatedOrganizationIds();
+
+        if ($user->hasExternalResourcesHidden()) {
+            if (! $resource->organization_id || ! in_array($resource->organization_id, $orgIds)) {
+                return redirect()->route('jeune.resources.index')->with('error', 'Cette ressource n\'est pas disponible.');
+            }
+        } elseif ($resource->organization_id && ! in_array($resource->organization_id, $orgIds)) {
+            return redirect()->route('jeune.resources.index')->with('error', 'Cette ressource n\'est pas disponible.');
+        }
 
         // Vérifier si déjà acheté
         $exists = Purchase::where('user_id', $user->id)

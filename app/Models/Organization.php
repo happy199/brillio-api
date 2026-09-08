@@ -56,6 +56,7 @@ class Organization extends Model
         'private_circle_plus_enabled',
         'disable_onboarding_steps',
         'anti_competition_enabled',
+        'hide_external_resources',
         'custom_member_limit',
     ];
 
@@ -81,6 +82,7 @@ class Organization extends Model
         'private_circle_plus_enabled' => 'boolean',
         'disable_onboarding_steps' => 'boolean',
         'anti_competition_enabled' => 'boolean',
+        'hide_external_resources' => 'boolean',
         'custom_member_limit' => 'integer',
     ];
 
@@ -158,6 +160,14 @@ class Organization extends Model
     public function establishments(): HasMany
     {
         return $this->hasMany(Establishment::class);
+    }
+
+    /**
+     * Get all internal resources created for this organization.
+     */
+    public function resources(): HasMany
+    {
+        return $this->hasMany(Resource::class);
     }
 
     public function establishmentClicks(): HasManyThrough

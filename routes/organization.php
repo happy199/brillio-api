@@ -196,7 +196,12 @@ Route::middleware('auth')->group(function () {
             Route::prefix('resources')->name('resources.')->group(
                 function () {
                     Route::get('/', [ResourceController::class, 'index'])->name('index');
+                    Route::get('/create', [ResourceController::class, 'create'])->name('create');
+                    Route::post('/', [ResourceController::class, 'store'])->name('store');
                     Route::get('/{resource:slug}', [ResourceController::class, 'show'])->name('show');
+                    Route::get('/{resource:slug}/edit', [ResourceController::class, 'edit'])->name('edit');
+                    Route::put('/{resource:slug}', [ResourceController::class, 'update'])->name('update');
+                    Route::delete('/{resource:slug}', [ResourceController::class, 'destroy'])->name('destroy');
                     Route::post('/{resource:slug}/gift', [ResourceController::class, 'gift'])->name('gift');
                 }
             );
