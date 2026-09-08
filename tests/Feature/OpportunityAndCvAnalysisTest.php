@@ -1,0 +1,186 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\CvAnalysis;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
+
+class OpportunityAndCvAnalysisTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake('public');
+    }
+
+    public function test_public_opportunities_page_is_accessible()
+    {
+        $response = $this->get(route('public.opportunities'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Mon CV');
+        $response->assertSee('Importer un CV');
+        $response->assertSee('Conseils pour un bon CV');
+    }
+
+    public function test_guest_can_upload_and_analyze_cv()
+    {
+        $file = UploadedFile::fake()->create('CV_Fatoumata_Traore_UXUI.pdf', 150, 'application/pdf');
+
+        $response = $this->post(route('public.opportunities.analyze'), [
+            'cv_file' => $file,
+        ]);
+
+        $this->assertDatabaseCount('cv_analyses', 1);
+
+        $analysis = CvAnalysis::first();
+        $this->assertNotNull($analysis);
+        $this->assertNull($analysis->user_id);
+        $this->assertFalse($analysis->is_claimed);
+        $this->assertGreaterThanOrEqual(10, $analysis->global_score);
+        $this->assertNotNull($analysis->guest_token);
+
+        $response->assertRedirect(route('public.opportunities.score', ['token' => $analysis->guest_token]));
+        $this->assertEquals($analysis->guest_token, session('pending_cv_token'));
+    }
+
+    public function test_guest_cannot_upload_invalid_file_extension()
+    {
+        $file = UploadedFile::fake()->create('malicious.php', 10, 'application/x-php');
+
+        $response = $this->post(route('public.opportunities.analyze'), [
+            'cv_file' => $file,
+        ]);
+
+        $response->assertSessionHasErrors('cv_file');
+        $this->assertDatabaseCount('cv_analyses', 0);
+    }
+
+    public function test_guest_score_page_shows_locked_notice_and_registration_cta()
+    {
+        $analysis = CvAnalysis::create([
+            'guest_token' => 'abcdef1234567890abcdef1234567890',
+            'original_filename' => 'CV_Fatoumata_Traore.pdf',
+            'file_path' => 'cv_analyses/guests/fake.pdf',
+            'file_size' => 10240,
+            'mime_type' => 'application/pdf',
+            'candidate_name' => 'Fatoumata TRAORÉ',
+            'candidate_title' => 'UX/UI Designer',
+            'global_score' => 66,
+            'status_label' => 'Très bien',
+            'is_claimed' => false,
+        ]);
+
+        $response = $this->get(route('public.opportunities.score', ['token' => $analysis->guest_token]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Mon score Career');
+        $response->assertSee('66');
+        $response->assertSee('Détail verrouillé en mode invité');
+        $response->assertSee('Créer mon compte pour voir le détail');
+    }
+
+    public function test_registered_user_claims_pending_cv_analysis()
+    {
+        $analysis = CvAnalysis::create([
+            'guest_token' => 'token_for_claim_test_12345678901234567890',
+            'original_filename' => 'CV_Test.pdf',
+            'file_path' => 'cv_analyses/guests/test.pdf',
+            'file_size' => 5000,
+            'mime_type' => 'application/pdf',
+            'candidate_name' => 'Jean Dupont',
+            'candidate_title' => 'Data Analyst',
+            'global_score' => 74,
+            'status_label' => 'Très bien',
+            'is_claimed' => false,
+        ]);
+
+        $response = $this->withSession(['pending_cv_token' => $analysis->guest_token])
+            ->post(route('auth.jeune.register.submit'), [
+                'name' => 'Jean Dupont',
+                'email' => 'jean.dupont@testbrillio.com',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ]);
+
+        $user = User::where('email', 'jean.dupont@testbrillio.com')->first();
+        $this->assertNotNull($user);
+
+        $analysis->refresh();
+        $this->assertEquals($user->id, $analysis->user_id);
+        $this->assertTrue($analysis->is_claimed);
+
+        // L'utilisateur doit être redirigé vers l'onboarding s'il n'est pas encore complété
+        $response->assertRedirect(route('jeune.onboarding'));
+    }
+
+    public function test_authenticated_jeune_can_access_opportunities_tabs_and_unlocked_cv()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'auth_token_test_12345678901234567890',
+            'original_filename' => 'CV_Jean_Dev.pdf',
+            'file_path' => 'cv_analyses/users/'.$user->id.'/cv.pdf',
+            'file_size' => 8000,
+            'mime_type' => 'application/pdf',
+            'candidate_name' => 'Jean Développeur',
+            'candidate_title' => 'Fullstack Laravel',
+            'global_score' => 82,
+            'status_label' => 'Très bien',
+            'summary' => 'Excellent profil technique.',
+            'criteria_scores' => [
+                'structure' => 80,
+                'clarite' => 85,
+                'experiences' => 80,
+                'competences' => 85,
+                'impact' => 80,
+            ],
+            'strengths' => ['Stack technique solide'],
+            'improvements' => ['Ajouter des métriques'],
+            'recommendations' => ['Participer à des hackathons'],
+            'is_claimed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.documents', ['tab' => 'cv']));
+
+        $response->assertStatus(200);
+        $response->assertSee('Opportunités');
+        $response->assertSee('Analyse Débloquée');
+        $response->assertSee('82');
+        $response->assertSee('Score Omnhi RH : Très bien');
+        $response->assertSee('Stack technique solide');
+        $response->assertSee('Détail des 5 piliers', false);
+    }
+
+    public function test_authenticated_jeune_can_upload_and_analyze_new_cv()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $file = UploadedFile::fake()->create('CV_Updated_Version.docx', 120, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+        $response = $this->actingAs($user)->post(route('jeune.cv.analyze'), [
+            'cv_file' => $file,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('cv_analyses', [
+            'user_id' => $user->id,
+            'original_filename' => 'CV_Updated_Version.docx',
+            'is_claimed' => true,
+        ]);
+    }
+}

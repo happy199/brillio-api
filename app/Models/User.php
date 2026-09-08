@@ -367,6 +367,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Relation vers les analyses de CV de l'utilisateur
+     */
+    public function cvAnalyses(): HasMany
+    {
+        return $this->hasMany(CvAnalysis::class);
+    }
+
+    /**
      * Relation vers les ressources créées par l'utilisateur (mentor/admin)
      */
     public function resources(): HasMany

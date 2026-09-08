@@ -13,6 +13,7 @@ use App\Models\PersonalityTest;
 use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Services\BrillioIAService;
+use App\Services\CvAnalysisService;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
 use App\Services\WalletService;
@@ -532,19 +533,81 @@ class JeuneDashboardController extends Controller
     }
 
     /**
-     * Page des documents
+     * Page des opportunités (Emploi, Formation, Drive, CV)
      */
-    public function documents()
+    public function documents(Request $request)
     {
+        $validated = $request->validate([
+            'tab' => 'nullable|string|in:emploi,formation,drive,cv',
+            'cv_id' => 'nullable|integer',
+        ]);
+
         $user = auth()->user();
+        $tab = $validated['tab'] ?? 'drive';
+
+        // Si l'utilisateur a un token de CV invité en session, le rattacher automatiquement
+        if (session('pending_cv_token')) {
+            try {
+                $cvService = app(CvAnalysisService::class);
+                $cvService->claimGuestCv(session('pending_cv_token'), $user);
+                session()->forget('pending_cv_token');
+            } catch (\Exception $e) {
+                Log::warning('Échec rattachement CV invité: '.$e->getMessage());
+            }
+        }
+
         $documents = $user->academicDocuments()
             ->orderByDesc('created_at')
             ->get();
 
+        $cvAnalyses = $user->cvAnalyses()
+            ->orderByDesc('created_at')
+            ->get();
+
+        $activeCv = null;
+        if (! empty($validated['cv_id'])) {
+            $activeCv = $cvAnalyses->firstWhere('id', $validated['cv_id']);
+        }
+        if (! $activeCv) {
+            $activeCv = $cvAnalyses->first();
+        }
+
         return view('jeune.documents', [
             'user' => $user,
+            'tab' => $tab,
             'documents' => $documents,
+            'cvAnalyses' => $cvAnalyses,
+            'activeCv' => $activeCv,
         ]);
+    }
+
+    /**
+     * Analyse un nouveau CV pour le jeune connecté
+     */
+    public function analyzeCv(Request $request, CvAnalysisService $cvService)
+    {
+        $validated = $request->validate([
+            'cv_file' => 'required|file|mimes:pdf,docx,png,jpg,jpeg|max:10240',
+        ], [
+            'cv_file.required' => 'Veuillez sélectionner un fichier CV à importer.',
+            'cv_file.file' => 'Le document téléversé est invalide.',
+            'cv_file.mimes' => 'Format non supporté. Formats acceptés : PDF, DOCX, JPG ou PNG.',
+            'cv_file.max' => 'La taille maximale autorisée est de 10 Mo.',
+        ]);
+
+        try {
+            $user = auth()->user();
+            $analysis = $cvService->processAndAnalyze($validated['cv_file'], $user);
+
+            return redirect()->route('jeune.documents', ['tab' => 'cv', 'cv_id' => $analysis->id])
+                ->with('success', 'Votre CV a été analysé avec succès ! Votre nouveau score Career est de '.$analysis->global_score.'/100.');
+        } catch (\Exception $e) {
+            Log::error('Erreur analyse CV jeune: '.$e->getMessage());
+
+            return back()->withErrors([
+                'cv_file' => 'Une erreur est survenue lors de l\'analyse de votre CV. Veuillez réessayer.',
+            ]);
+        }
     }
 
     /**

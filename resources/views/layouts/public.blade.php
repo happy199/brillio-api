@@ -330,6 +330,11 @@
                         propos</a>
                     <a href="{{ route('public.resources') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Ressources</a>
+                    <a href="{{ route('public.opportunities') }}" class="font-medium transition-colors flex items-center gap-1.5"
+                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">
+                        <span>Opportunités</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary-100 text-primary-700">CV IA</span>
+                    </a>
                     <a href="{{ route('public.advertisements') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Publicités</a>
                     <a href="{{ route('contact') }}" class="font-medium transition-colors"
@@ -376,6 +381,11 @@
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">À propos</a>
                 <a href="{{ route('public.resources') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Ressources</a>
+                <a href="{{ route('public.opportunities') }}"
+                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg flex items-center justify-between">
+                    <span>Opportunités (Mon CV)</span>
+                    <span class="px-2 py-0.5 text-xs font-semibold rounded bg-primary-100 text-primary-700">Test IA</span>
+                </a>
                 <a href="{{ route('public.advertisements') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Publicités</a>
                 <a href="{{ route('contact') }}"
@@ -484,6 +494,8 @@
                         <li><a href="{{ route('about') }}" class="text-gray-400 hover:text-white transition-colors">À propos</a></li>
                         <li><a href="{{ route('public.resources') }}"
                                 class="text-gray-400 hover:text-white transition-colors">Ressources</a></li>
+                        <li><a href="{{ route('public.opportunities') }}"
+                                class="text-gray-400 hover:text-white transition-colors">Opportunités & Mon CV</a></li>
                         <li><a href="{{ route('public.advertisements') }}"
                                 class="text-gray-400 hover:text-white transition-colors">Publicités</a></li>
                         <li><a href="{{ route('contact') }}"

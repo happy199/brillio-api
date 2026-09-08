@@ -145,8 +145,8 @@
                         Orientation
                     </a>
                     <a href="{{ route('jeune.documents') }}"
-                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Documents
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents*', 'jeune.opportunities*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Opportunités
                     </a>
 
                     <a href="{{ route('jeune.messages.index') }}"
@@ -263,8 +263,8 @@
                 Orientation
             </a>
             <a href="{{ route('jeune.documents') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.documents') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Docs
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.documents*', 'jeune.opportunities*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Opportunités
             </a>
             <a href="{{ route('jeune.messages.index') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.messages.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">

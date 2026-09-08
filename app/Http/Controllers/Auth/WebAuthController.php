@@ -9,6 +9,7 @@ use App\Models\MentorProfile;
 use App\Models\OrganizationInvitation;
 use App\Models\User;
 use App\Rules\ValidEmailDomain;
+use App\Services\CvAnalysisService;
 use App\Services\MentorshipNotificationService;
 use App\Services\SupabaseAuthService;
 use App\Services\UserAvatarService;
@@ -392,8 +393,29 @@ class WebAuthController extends Controller
 
         Auth::login($user);
 
+        // Rattachement du CV invité si analysé avant l'inscription
+        $pendingCvToken = session('pending_cv_token');
+        if ($pendingCvToken) {
+            try {
+                $cvService = app(CvAnalysisService::class);
+                $claimed = $cvService->claimGuestCv($pendingCvToken, $user);
+                if ($claimed) {
+                    session(['redirect_to_cv_after_onboarding' => true]);
+                }
+            } catch (\Exception $e) {
+                Log::warning('Impossible de rattacher le CV invite: '.$e->getMessage());
+            }
+        }
+
         if (! $user->onboarding_completed) {
             return redirect()->route('jeune.onboarding');
+        }
+
+        if (session('redirect_to_cv_after_onboarding')) {
+            session()->forget('redirect_to_cv_after_onboarding');
+
+            return redirect()->route('jeune.documents', ['tab' => 'cv'])
+                ->with('success', 'Félicitations ! Votre analyse de CV complète est désormais débloquée.');
         }
 
         return redirect()->route('jeune.dashboard');
