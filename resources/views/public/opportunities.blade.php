@@ -236,43 +236,60 @@
                                         </div>
                                     </div>
 
-                                    <!-- Corps Flouté du CV -->
-                                    <div class="p-6 sm:p-8 space-y-6 select-none pointer-events-none filter blur-[5px] opacity-35">
-                                        <div class="space-y-1.5">
-                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Profil Professionnel</h3>
-                                            <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                                                {{ $cvAnalysis->parsed_content['profil'] ?? 'Ingénieur expérimenté spécialisé dans la transformation et l\'automatisation des architectures.' }}
-                                            </p>
+                                    <!-- Corps Flouté du CV (Protégé côté serveur : faux squelette / dummy text pour empêcher l'inspection DevTools) -->
+                                    <div class="p-6 sm:p-8 space-y-6 select-none pointer-events-none filter blur-[6px] opacity-30" aria-hidden="true">
+                                        <!-- Profil squelette -->
+                                        <div class="space-y-2">
+                                            <div class="h-3 w-32 bg-gray-900 rounded"></div>
+                                            <div class="h-3 w-full bg-gray-300 rounded"></div>
+                                            <div class="h-3 w-5/6 bg-gray-300 rounded"></div>
+                                            <div class="h-3 w-2/3 bg-gray-300 rounded"></div>
                                         </div>
 
+                                        <!-- Compétences squelette -->
                                         <div class="space-y-2">
-                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Compétences Clés Claires</h3>
-                                            <div class="flex flex-wrap gap-1.5">
-                                                <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-medium">Architecture Cloud</span>
-                                                <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-medium">Automatisation CI/CD</span>
-                                                <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-medium">Infrastructure as Code</span>
+                                            <div class="h-3 w-40 bg-gray-900 rounded"></div>
+                                            <div class="flex flex-wrap gap-2 pt-1">
+                                                <div class="h-6 w-24 bg-gray-200 rounded-md"></div>
+                                                <div class="h-6 w-32 bg-gray-200 rounded-md"></div>
+                                                <div class="h-6 w-20 bg-gray-200 rounded-md"></div>
+                                                <div class="h-6 w-28 bg-gray-200 rounded-md"></div>
                                             </div>
                                         </div>
 
-                                        <div class="space-y-2.5">
-                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Expérience Professionnelle</h3>
-                                            <p class="text-xs text-gray-700">• Conduite de projets majeurs avec réduction mesurable des délais de déploiement de 45%.</p>
-                                            <p class="text-xs text-gray-700">• Gestion d'infrastructures hautement disponibles et monitoring proactif 24/7.</p>
+                                        <!-- Expériences squelette avec puces -->
+                                        <div class="space-y-3">
+                                            <div class="h-3 w-48 bg-gray-900 rounded"></div>
+                                            <div class="space-y-2">
+                                                <div class="h-3 w-full bg-gray-300 rounded"></div>
+                                                <div class="h-3 w-11/12 bg-gray-300 rounded"></div>
+                                                <div class="h-3 w-4/5 bg-gray-300 rounded"></div>
+                                            </div>
+                                            <div class="space-y-2 pt-2">
+                                                <div class="h-3 w-full bg-gray-300 rounded"></div>
+                                                <div class="h-3 w-3/4 bg-gray-300 rounded"></div>
+                                            </div>
                                         </div>
 
+                                        <!-- Formation squelette -->
                                         <div class="space-y-2">
-                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Formation & Diplômes</h3>
-                                            <p class="text-xs text-gray-700">🎓 Diplôme d'Ingénieur / Cursus Académique Supérieur</p>
+                                            <div class="h-3 w-36 bg-gray-900 rounded"></div>
+                                            <div class="h-3 w-2/3 bg-gray-300 rounded"></div>
                                         </div>
 
+                                        <!-- Certifications squelette -->
                                         <div class="space-y-2">
-                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Certifications Professionnelles</h3>
-                                            <p class="text-xs text-gray-700">📜 Certifications professionnelles reconnues sur le marché</p>
+                                            <div class="h-3 w-44 bg-gray-900 rounded"></div>
+                                            <div class="h-3 w-1/2 bg-gray-300 rounded"></div>
                                         </div>
 
+                                        <!-- Langues squelette -->
                                         <div class="space-y-2">
-                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Langues</h3>
-                                            <p class="text-xs text-gray-700">🌐 Français & Anglais professionnel</p>
+                                            <div class="h-3 w-28 bg-gray-900 rounded"></div>
+                                            <div class="flex gap-2">
+                                                <div class="h-5 w-20 bg-gray-200 rounded"></div>
+                                                <div class="h-5 w-24 bg-gray-200 rounded"></div>
+                                            </div>
                                         </div>
                                     </div>
 
