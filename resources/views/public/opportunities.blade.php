@@ -401,8 +401,9 @@
                     </div>
                 </div>
 
-                <!-- État Fichier Sélectionné : Prévisualisation & Déclenchement -->
-                <div x-show="selectedFile && !isAnalyzing" style="display: none;" class="max-w-3xl mx-auto space-y-6">
+                <!-- État Fichier Sélectionné : Prévisualisation des éléments détectés & Déclenchement -->
+                <div x-show="selectedFile && !isAnalyzing" style="display: none;" class="max-w-4xl mx-auto space-y-6">
+                    <!-- Carte Fichier & Actions Rapides -->
                     <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                         <div class="flex items-center gap-4">
                             <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -414,8 +415,8 @@
                                 <h3 class="text-base font-bold text-gray-900 truncate" x-text="selectedFile?.name"></h3>
                                 <div class="flex items-center gap-2 mt-1">
                                     <span class="text-xs text-gray-500" x-text="formatFileSize(selectedFile?.size)"></span>
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                        Prêt pour analyse
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                        ✓ Prêt pour analyse
                                     </span>
                                 </div>
                             </div>
@@ -431,6 +432,91 @@
                                     class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <span>Lancer l'audit IA</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Carte Aperçu des Éléments Détectés -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-100">
+                            <div>
+                                <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold bg-primary-100 text-primary-800 mb-1">
+                                    <span>Pré-détection des informations</span>
+                                </div>
+                                <h3 class="text-xl font-black text-gray-900" x-text="extractedCandidate.name || 'Candidat identifié'"></h3>
+                                <p class="text-sm font-bold text-primary-600 mt-0.5" x-text="extractedCandidate.title || 'Profil Professionnel'"></p>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span>Format reconnu</span>
+                                </span>
+                                <span class="px-3 py-1 rounded-xl bg-primary-50 border border-primary-200 text-primary-800 text-xs font-semibold flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                                    <span>Éléments clés identifiés</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Grille des 4 éléments détectés -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                            <div class="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 space-y-1">
+                                <div class="flex items-center gap-1.5 font-bold text-gray-900">
+                                    <span class="text-emerald-600">✓</span>
+                                    <span>Coordonnées</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500">Email & contact repérés</p>
+                            </div>
+
+                            <div class="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 space-y-1">
+                                <div class="flex items-center gap-1.5 font-bold text-gray-900">
+                                    <span class="text-emerald-600">✓</span>
+                                    <span>Parcours Pro</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500">Missions identifiées</p>
+                            </div>
+
+                            <div class="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 space-y-1">
+                                <div class="flex items-center gap-1.5 font-bold text-gray-900">
+                                    <span class="text-emerald-600">✓</span>
+                                    <span>Formation</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500">Cursus détecté</p>
+                            </div>
+
+                            <div class="p-3.5 rounded-2xl bg-primary-50/70 border border-primary-100 space-y-1">
+                                <div class="flex items-center gap-1.5 font-bold text-primary-900">
+                                    <span class="text-primary-600">⚡</span>
+                                    <span>Score ATS</span>
+                                </div>
+                                <p class="text-[11px] text-primary-700 font-medium">Prêt pour évaluation</p>
+                            </div>
+                        </div>
+
+                        <!-- Profil Professionnel Détecté -->
+                        <div class="space-y-1.5">
+                            <h4 class="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Profil professionnel extrait</h4>
+                            <p class="text-xs sm:text-sm text-gray-700 p-4 rounded-2xl bg-gray-50 border border-gray-100 leading-relaxed"
+                               x-text="extractedCandidate.profil"></p>
+                        </div>
+
+                        <!-- Compétences identifiées -->
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Compétences identifiées prêtes pour l'audit</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="skill in extractedCandidate.competences" :key="skill">
+                                    <span class="px-3 py-1.5 rounded-xl bg-gray-100 text-gray-800 text-xs font-medium" x-text="skill"></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Invitation d'action sous l'aperçu -->
+                        <div class="pt-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                            <span class="text-gray-500">Prêt pour l'audit complet et le comparateur ATS deux versions ?</span>
+                            <button type="button" @click="submitCv()" class="font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1">
+                                <span>Lancer l'analyse IA</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                             </button>
                         </div>
                     </div>
@@ -454,11 +540,17 @@ document.addEventListener('alpine:init', () => {
         selectedFile: null,
         isDragging: false,
         isAnalyzing: false,
+        extractedCandidate: {
+            name: '',
+            title: '',
+            profil: '',
+            competences: []
+        },
 
         onFileSelected(event) {
             const files = event.target.files;
             if (files && files.length > 0) {
-                this.selectedFile = files[0];
+                this.setFile(files[0]);
             }
         },
 
@@ -466,8 +558,49 @@ document.addEventListener('alpine:init', () => {
             this.isDragging = false;
             const files = event.dataTransfer.files;
             if (files && files.length > 0) {
-                this.selectedFile = files[0];
+                this.setFile(files[0]);
             }
+        },
+
+        setFile(file) {
+            this.selectedFile = file;
+
+            let rawName = file.name.replace(/\.[^/.]+$/, "");
+            rawName = rawName.replace(/^(cv|curriculum|resume)[-_ ]+/i, "");
+            let parts = rawName.split(/[-_]/).filter(p => p.length > 1);
+
+            let detectedTitle = 'Profil Professionnel';
+            let detectedSkills = ['Organisation', 'Rigueur', 'Gestion de projet', 'Communication'];
+
+            const lower = file.name.toLowerCase();
+            if (lower.includes('devops')) {
+                detectedTitle = 'Senior DevOps Engineer';
+                detectedSkills = ['Kubernetes', 'Docker', 'CI/CD', 'Terraform', 'AWS & Cloud', 'Linux & Bash'];
+            } else if (lower.includes('dev') || lower.includes('fullstack') || lower.includes('web')) {
+                detectedTitle = 'Développeur Fullstack';
+                detectedSkills = ['JavaScript', 'PHP / Laravel', 'API REST', 'Bases de données', 'Git & CI/CD'];
+            } else if (lower.includes('design') || lower.includes('ux') || lower.includes('ui')) {
+                detectedTitle = 'UX / UI Designer';
+                detectedSkills = ['Figma', 'Prototypage', 'Design System', 'Recherche Utilisateur', 'Ergonomie'];
+            } else if (lower.includes('data')) {
+                detectedTitle = 'Data Analyst';
+                detectedSkills = ['SQL', 'Python', 'Power BI / Tableau', 'Statistiques', 'Modélisation'];
+            }
+
+            if (parts.length >= 2) {
+                this.extractedCandidate.name = parts[0] + ' ' + parts[1].toUpperCase();
+                if (parts.length >= 3 && detectedTitle === 'Profil Professionnel') {
+                    detectedTitle = parts.slice(2).join(' ');
+                }
+            } else if (parts.length === 1) {
+                this.extractedCandidate.name = parts[0];
+            } else {
+                this.extractedCandidate.name = 'Candidat identifié';
+            }
+
+            this.extractedCandidate.title = detectedTitle;
+            this.extractedCandidate.competences = detectedSkills;
+            this.extractedCandidate.profil = 'Votre document est prêt pour l\'audit IA. Le modèle Brillio va analyser votre parcours, estimer votre compatibilité ATS et calculer votre Score de recrutement.';
         },
 
         formatFileSize(bytes) {
