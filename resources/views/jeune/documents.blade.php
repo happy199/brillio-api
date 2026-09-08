@@ -25,7 +25,7 @@
             </template>
             <template x-if="currentTab === 'cv'">
                 <button @click="showCvUploadModal = true"
-                    class="px-5 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition flex items-center gap-2 shadow-sm">
+                    class="px-5 py-2.5 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-500 text-white font-semibold rounded-xl hover:opacity-95 transition flex items-center gap-2 shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                     </svg>
@@ -37,8 +37,8 @@
 
     <!-- Alertes & Messages flash -->
     @if(session('success'))
-        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
+        <div class="p-4 rounded-2xl bg-primary-50 border border-primary-200 text-primary-900 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0 text-primary-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
@@ -100,13 +100,13 @@
             <!-- 4. CV (Historique, Scores et IA) -->
             <button type="button"
                     @click="setTab('cv')"
-                    :class="currentTab === 'cv' ? 'border-emerald-600 text-emerald-600 font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium'"
+                    :class="currentTab === 'cv' ? 'border-secondary-600 text-secondary-600 font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium'"
                     class="whitespace-nowrap py-3 px-3 sm:px-1 border-b-2 text-sm sm:text-base flex items-center gap-2 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span>CV</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-100 text-secondary-800">
                     @if(isset($cvAnalyses) && $cvAnalyses->count() > 0)
                         {{ $cvAnalyses->first()->global_score }}/100
                     @else
@@ -390,7 +390,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-gray-100">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">Analyse Débloquée</span>
+                            <span class="px-3 py-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 text-white text-xs font-bold rounded-full">Diagnostic Débloqué</span>
                             <span class="text-xs text-gray-400">Analysé le {{ $activeCv->created_at->format('d/m/Y à H:i') }}</span>
                         </div>
                         <h2 class="text-2xl font-extrabold text-gray-900">{{ $activeCv->original_filename }}</h2>
@@ -406,7 +406,7 @@
                                 <div x-show="openVersions" @click.away="openVersions = false" class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-20">
                                     @foreach($cvAnalyses as $cvItem)
                                         <a href="{{ route('jeune.documents', ['tab' => 'cv', 'cv_id' => $cvItem->id]) }}"
-                                           class="px-4 py-2 text-xs flex items-center justify-between hover:bg-gray-50 {{ $cvItem->id === $activeCv->id ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-gray-700' }}">
+                                           class="px-4 py-2 text-xs flex items-center justify-between hover:bg-gray-50 {{ $cvItem->id === $activeCv->id ? 'bg-primary-50 text-primary-700 font-bold' : 'text-gray-700' }}">
                                             <span class="truncate">{{ $cvItem->original_filename }}</span>
                                             <span class="font-bold">{{ $cvItem->global_score }}/100</span>
                                         </a>
@@ -415,7 +415,7 @@
                             </div>
                         @endif
 
-                        <button @click="showCvUploadModal = true" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+                        <button @click="showCvUploadModal = true" class="px-4 py-2 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-500 hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             <span>Réévaluer un CV</span>
                         </button>
@@ -426,8 +426,15 @@
                 <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-10">
                     <div class="relative w-40 h-40 flex-shrink-0 flex items-center justify-center">
                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                            <defs>
+                                <linearGradient id="dashboardScoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#6366f1" />
+                                    <stop offset="50%" stop-color="#d946ef" />
+                                    <stop offset="100%" stop-color="#f97316" />
+                                </linearGradient>
+                            </defs>
                             <circle cx="60" cy="60" r="50" fill="none" stroke="#E5E7EB" stroke-width="10" />
-                            <circle cx="60" cy="60" r="50" fill="none" stroke="#10B981" stroke-width="10"
+                            <circle cx="60" cy="60" r="50" fill="none" stroke="url(#dashboardScoreGrad)" stroke-width="10"
                                     stroke-linecap="round"
                                     stroke-dasharray="314.159"
                                     stroke-dashoffset="{{ 314.159 - (314.159 * $activeCv->global_score / 100) }}" />
@@ -440,8 +447,8 @@
 
                     <div class="flex-1 space-y-3 text-center md:text-left">
                         <div class="flex items-center justify-center md:justify-start gap-3 flex-wrap">
-                            <h3 class="text-xl font-bold text-gray-900">Score Omnhi RH : {{ $activeCv->status_label }}</h3>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">{{ $activeCv->global_score >= 70 ? 'Prêt pour le marché' : 'À perfectionner' }}</span>
+                            <h3 class="text-xl font-bold text-gray-900">Score Career : {{ $activeCv->status_label }}</h3>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-primary-100 text-primary-800">{{ $activeCv->global_score >= 70 ? 'Prêt pour le marché' : 'En progression' }}</span>
                         </div>
                         <p class="text-sm text-gray-700 leading-relaxed">{{ $activeCv->summary }}</p>
                     </div>
@@ -450,7 +457,7 @@
                 <!-- Critères Détaillés (Débloqués à 100%) -->
                 <div class="space-y-4 mb-10">
                     <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                         <span>Détail des 5 piliers d'évaluation</span>
                     </h3>
 
@@ -462,10 +469,10 @@
                             <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2">
                                 <div class="flex items-center justify-between text-xs font-bold">
                                     <span class="capitalize text-gray-700">{{ $criterion }}</span>
-                                    <span class="text-emerald-700">{{ $val }}%</span>
+                                    <span class="text-primary-700">{{ $val }}%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-emerald-500 h-2 rounded-full" style="width: {{ $val }}%"></div>
+                                    <div class="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full" style="width: {{ $val }}%"></div>
                                 </div>
                             </div>
                         @endforeach
@@ -475,17 +482,17 @@
                 <!-- Deux Colonnes : Points Forts & Axes d'Amélioration -->
                 <div class="grid sm:grid-cols-2 gap-6 mb-10">
                     <!-- Points Forts -->
-                    <div class="p-6 rounded-2xl bg-emerald-50/70 border border-emerald-100 space-y-4">
-                        <div class="flex items-center gap-2.5 text-emerald-900 font-bold text-sm">
-                            <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                    <div class="p-6 rounded-2xl bg-primary-50/60 border border-primary-100 space-y-4">
+                        <div class="flex items-center gap-2.5 text-primary-900 font-bold text-sm">
+                            <div class="w-7 h-7 rounded-lg bg-primary-100 text-primary-700 flex items-center justify-center flex-shrink-0">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </div>
                             <span>Points forts de votre CV</span>
                         </div>
-                        <ul class="space-y-3 text-xs sm:text-sm text-emerald-950">
+                        <ul class="space-y-3 text-xs sm:text-sm text-primary-950">
                             @foreach($activeCv->strengths ?? [] as $strength)
                                 <li class="flex items-start gap-2">
-                                    <span class="text-emerald-600 font-bold">•</span>
+                                    <span class="text-primary-600 font-bold">•</span>
                                     <span>{{ $strength }}</span>
                                 </li>
                             @endforeach
@@ -493,17 +500,17 @@
                     </div>
 
                     <!-- Axes d'Amélioration -->
-                    <div class="p-6 rounded-2xl bg-amber-50/70 border border-amber-100 space-y-4">
-                        <div class="flex items-center gap-2.5 text-amber-900 font-bold text-sm">
-                            <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                    <div class="p-6 rounded-2xl bg-accent-50/60 border border-accent-100 space-y-4">
+                        <div class="flex items-center gap-2.5 text-accent-900 font-bold text-sm">
+                            <div class="w-7 h-7 rounded-lg bg-accent-100 text-accent-700 flex items-center justify-center flex-shrink-0">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             </div>
                             <span>Axes d'amélioration prioritaires</span>
                         </div>
-                        <ul class="space-y-3 text-xs sm:text-sm text-amber-950">
+                        <ul class="space-y-3 text-xs sm:text-sm text-accent-950">
                             @foreach($activeCv->improvements ?? [] as $improvement)
                                 <li class="flex items-start gap-2">
-                                    <span class="text-amber-600 font-bold">•</span>
+                                    <span class="text-accent-600 font-bold">•</span>
                                     <span>{{ $improvement }}</span>
                                 </li>
                             @endforeach
@@ -512,9 +519,9 @@
                 </div>
 
                 <!-- Recommandations Personnalisées du Coach IA -->
-                <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 border border-indigo-100 space-y-4">
-                    <div class="flex items-center gap-2.5 text-indigo-900 font-bold text-base">
-                        <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-primary-50/80 via-secondary-50/60 to-accent-50/50 border border-primary-100 space-y-4">
+                    <div class="flex items-center gap-2.5 text-primary-900 font-bold text-base">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
                         <span>Conseils concrets du Coach IA Brillio</span>
@@ -522,7 +529,7 @@
 
                     <div class="grid sm:grid-cols-3 gap-4 pt-2">
                         @foreach($activeCv->recommendations ?? [] as $rec)
-                            <div class="p-4 rounded-xl bg-white/80 border border-indigo-100/60 text-xs sm:text-sm text-gray-700 leading-relaxed shadow-2xs">
+                            <div class="p-4 rounded-xl bg-white border border-primary-100/60 text-xs sm:text-sm text-gray-700 leading-relaxed shadow-2xs">
                                 {{ $rec }}
                             </div>
                         @endforeach
@@ -532,14 +539,14 @@
         @else
             <!-- État vide : Aucun CV encore analysé dans le profil -->
             <div class="bg-white rounded-3xl p-12 text-center border border-gray-100">
-                <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mx-auto mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-2xl flex items-center justify-center text-primary-600 mx-auto mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900">Évaluez votre premier CV avec l'IA</h3>
                 <p class="text-sm text-gray-500 max-w-md mx-auto mt-1 mb-6">Importez votre CV pour obtenir un diagnostic instantané, vos points forts, vos axes d'amélioration et booster votre employabilité.</p>
-                <button @click="showCvUploadModal = true" class="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition shadow">
+                <button @click="showCvUploadModal = true" class="px-6 py-3 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-500 text-white font-bold rounded-xl hover:opacity-95 transition shadow-sm">
                     Analyser mon CV maintenant
                 </button>
             </div>
@@ -608,12 +615,12 @@
                     @csrf
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Fichier CV (PDF, DOCX, JPG ou PNG)</label>
-                        <input type="file" name="cv_file" required accept=".pdf,.docx,.png,.jpg,.jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+                        <input type="file" name="cv_file" required accept=".pdf,.docx,.png,.jpg,.jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                         <button type="button" @click="showCvUploadModal = false" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50">Annuler</button>
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition">Lancer l'analyse IA</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-500 text-white font-bold text-sm hover:opacity-95 transition shadow-sm">Lancer l'analyse IA</button>
                     </div>
                 </form>
             </div>

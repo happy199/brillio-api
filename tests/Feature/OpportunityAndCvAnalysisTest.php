@@ -24,9 +24,9 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->get(route('public.opportunities'));
 
         $response->assertStatus(200);
-        $response->assertSee('Mon CV');
-        $response->assertSee('Importer un CV');
-        $response->assertSee('Conseils pour un bon CV');
+        $response->assertSee('Opportunités');
+        $response->assertSee('Évaluez l\'impact de votre CV', false);
+        $response->assertSee('Glissez-déposez votre CV ici');
     }
 
     public function test_guest_can_upload_and_analyze_cv()
@@ -80,10 +80,10 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->get(route('public.opportunities.score', ['token' => $analysis->guest_token]));
 
         $response->assertStatus(200);
-        $response->assertSee('Mon score Career');
+        $response->assertSee('Votre Score Career');
         $response->assertSee('66');
-        $response->assertSee('Détail verrouillé en mode invité');
-        $response->assertSee('Créer mon compte pour voir le détail');
+        $response->assertSee('Rapport complet et recommandations verrouillés pour les visiteurs');
+        $response->assertSee('Créer mon compte & débloquer mon audit', false);
     }
 
     public function test_registered_user_claims_pending_cv_analysis()
@@ -156,9 +156,9 @@ class OpportunityAndCvAnalysisTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Opportunités');
-        $response->assertSee('Analyse Débloquée');
+        $response->assertSee('Diagnostic Débloqué');
         $response->assertSee('82');
-        $response->assertSee('Score Omnhi RH : Très bien');
+        $response->assertSee('Score Career : Très bien');
         $response->assertSee('Stack technique solide');
         $response->assertSee('Détail des 5 piliers', false);
     }
