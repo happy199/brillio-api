@@ -595,12 +595,12 @@
                             </div>
                         </div>
 
-                        <!-- Fiche CV Restructurée Haute Définition -->
-                        <div x-ref="cvEnhancedContent" class="p-8 sm:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-6 text-gray-800">
+                        <!-- Fiche CV Restructurée Haute Définition (Prête pour impression et ATS) -->
+                        <div id="cvEnhancedPrintArea" x-ref="cvEnhancedContent" class="p-8 sm:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-6 text-gray-800">
                             <!-- En-tête Candidat avec avatar initiales rond (Image 4) -->
-                            <div class="flex items-start justify-between gap-4 pb-6 border-b border-gray-100">
+                            <div class="flex items-start justify-between gap-4 pb-6 border-b border-gray-100 print:border-b-2 print:border-gray-800">
                                 <div>
-                                    <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">
+                                    <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight print:text-xl print:text-black">
                                         {{ $activeCv->candidate_name ?? 'Candidat Brillio' }}
                                     </h2>
                                     <p class="text-sm font-bold text-primary-600 mt-1">
@@ -918,4 +918,34 @@ function opportunitiesHubApp(initialTab) {
     };
 }
 </script>
+
+@push('styles')
+<style>
+@media print {
+    /* Cache toute l'interface Brillio (sidebar, header, boutons, onglets) */
+    body * {
+        visibility: hidden !important;
+    }
+    /* Rend uniquement visible le conteneur du CV ATS */
+    #cvEnhancedPrintArea, #cvEnhancedPrintArea * {
+        visibility: visible !important;
+    }
+    #cvEnhancedPrintArea {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10mm 15mm !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+    }
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+}
+</style>
+@endpush
 @endsection

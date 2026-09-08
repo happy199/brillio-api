@@ -179,7 +179,14 @@ class CvAnalysisService
             return $this->generateFallbackAnalysis($originalFilename);
         }
 
-        $systemPrompt = "Tu es un directeur des ressources humaines et expert en recrutement certifié, spécialiste de l'insertion professionnelle et des opportunités d'emploi en Afrique. Tu analyses un CV pour évaluer sa structure, sa clarté, la pertinence de ses expériences, ses compétences et son impact global.
+        $systemPrompt = "Tu es un expert mondial en recrutement et spécialiste des systèmes ATS (Applicant Tracking Systems tels que Workday, Taleo, Greenhouse, Lever, SmartRecruiters). Tu analyses un CV pour évaluer sa compatibilité ATS, sa structure, sa lisibilité algorithmique et son impact humain auprès des recruteurs, quel que soit le secteur d'activité (Tech, Finance, Marketing, Droit, Santé, Logistique, Enseignement, Commerce, etc.) et quel que soit le niveau d'expérience (débutant, intermédiaire, senior).
+
+RÈGLES D'ÉVALUATION ATS UNIVERSELLES :
+1. Structure & Parsage (25%) : Lisibilité des rubriques standardisées (Profil, Expériences, Formation, Certifications, Compétences, Langues), détection des sections sans dépendance à des éléments graphiques.
+2. Clarté & Coordonnées (20%) : Présence d'un titre de poste clair, coordonnées nettoyées (téléphone, email, ville/pays).
+3. Chronologie & Dates (15%) : Cohérence des dates permettant au parser ATS de calculer l'ancienneté.
+4. Quantification de l'Impact (20%) : Application de la formule Google XYZ / méthode STAR (verbes d'action + indicateurs chiffrés, pourcentages, volumes).
+5. Mots-clés & Compétences Métier (20%) : Pertinence et densité du vocabulaire technique et méthodologique adapté au métier ciblé, avec sigles et noms complets.
 
 RÈGLE ABSOLUE :
 Réponds UNIQUEMENT avec un objet JSON valide, sans aucune balise markdown, ni texte avant ou après.
@@ -187,47 +194,47 @@ Réponds UNIQUEMENT avec un objet JSON valide, sans aucune balise markdown, ni t
 Format JSON attendu :
 {
   \"candidate_name\": \"Nom et prénom du candidat détecté (ou 'Candidat')\",
-  \"candidate_title\": \"Intitulé du poste ou profil visé\",
+  \"candidate_title\": \"Intitulé du poste ou spécialité ciblée\",
   \"candidate_contact\": {
     \"phone\": \"Numéro ou non spécifié\",
     \"email\": \"Email ou non spécifié\",
     \"location\": \"Ville, Pays ou non spécifié\"
   },
   \"parsed_content\": {
-    \"profil\": \"Résumé du profil professionnel en 2-3 phrases\",
-    \"experiences\": [\"Intitulé poste - Entreprise (Dates) : brève mission\"],
-    \"formation\": [\"Diplôme - Établissement (Année)\"],
-    \"certifications\": [\"Certification professionnelle (ex: CKA, AWS, PMP, Scrum)\"],
+    \"profil\": \"Résumé du profil professionnel en 2-3 phrases accrocheuses\",
+    \"experiences\": [\"Intitulé poste - Entreprise (Dates) : mission formulée avec verbe d'action et impact chiffré si possible\"],
+    \"formation\": [\"Diplôme ou Cursus - Établissement (Année)\"],
+    \"certifications\": [\"Certification professionnelle reconnue (ex: CKA, AWS, PMP, Scrum)\"],
     \"competences\": [\"Compétence 1\", \"Compétence 2\", \"Compétence 3\"],
     \"langues\": [\"Français (Courant)\", \"Anglais (Professionnel)\"]
   },
-  \"global_score\": 68,
+  \"global_score\": 75,
   \"criteria_scores\": {
-    \"structure\": 70,
-    \"clarite\": 75,
-    \"experiences\": 65,
-    \"competences\": 68,
-    \"impact\": 62
+    \"structure\": 75,
+    \"clarite\": 80,
+    \"experiences\": 70,
+    \"competences\": 75,
+    \"impact\": 65
   },
   \"strengths\": [
-    \"Point fort 1 (concret et constructif)\",
+    \"Point fort concret (ex: rubriques bien normalisées pour les parsers ATS)\",
     \"Point fort 2\",
     \"Point fort 3\"
   ],
   \"improvements\": [
-    \"Axe d'amélioration 1 (précis et actionnable)\",
+    \"Axe d'amélioration actionnable (ex: chiffrer les accomplissements dans les expériences)\",
     \"Axe d'amélioration 2\",
     \"Axe d'amélioration 3\"
   ],
   \"recommendations\": [
-    \"Recommandation pratique 1\",
-    \"Recommandation pratique 2\",
-    \"Recommandation pratique 3\"
+    \"Conseil pratique directement applicable pour franchir les filtres ATS\",
+    \"Recommandation 2\",
+    \"Recommandation 3\"
   ],
-  \"summary\": \"Synthèse d'évaluation en 2-3 phrases pour encourager le candidat et situer son niveau d'adéquation.\"
+  \"summary\": \"Synthèse d'évaluation ATS en 2-3 phrases valorisante et constructive.\"
 }";
 
-        $userPrompt = "Voici le contenu extrait du CV ('{$originalFilename}') :\n\n".$sampleText."\n\nÉvalue ce CV de façon rigoureuse, bienveillante et professionnelle. Attribue une note globale réaliste entre 40 et 90 selon la richesse du profil.";
+        $userPrompt = "Voici le texte extrait du CV ('{$originalFilename}') :\n\n".$sampleText."\n\nÉvalue ce CV selon les standards stricts des filtres ATS et des recruteurs. Attribue une note globale réaliste entre 40 et 92 selon la qualité de la structure et du contenu.";
 
         try {
             $response = $this->brillioIAService->analyzeText($userPrompt, $systemPrompt);
