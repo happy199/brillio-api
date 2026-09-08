@@ -13,6 +13,7 @@ class Resource extends Model
 
     protected $fillable = [
         'user_id',
+        'organization_id',
         'title',
         'slug',
         'description',
@@ -49,6 +50,21 @@ class Resource extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function isInternalTo(?Organization $organization): bool
+    {
+        return $organization !== null && (int) $this->organization_id === (int) $organization->id;
+    }
+
+    public function isExternal(): bool
+    {
+        return is_null($this->organization_id);
     }
 
     // Scopes potentiels

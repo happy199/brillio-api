@@ -488,14 +488,14 @@
     </div>
     @endif
 
-    <!-- Formations recommandées -->
-    @if($stats['personality_completed'])
+    @if($stats['personality_completed'] && !$user->hasAntiCompetitionRestriction())
+        <!-- Formations recommandées -->
         @include('shared.partials.formations-carousel', ['mbtiType' => $user->personalityTest->personality_type])
         @include('shared.partials.formations-drawer')
     @endif
 </div>
 @push('scripts')
-    @if($stats['personality_completed'])
+    @if($stats['personality_completed'] && !$user->hasAntiCompetitionRestriction())
         @include('shared.partials.formations-script')
     @endif
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">

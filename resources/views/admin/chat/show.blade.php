@@ -437,9 +437,9 @@
                     const doc = parser.parseFromString(html, 'text/html');
                     const newContent = doc.getElementById('messages-container');
                     const currentContainer = document.getElementById('messages-container');
-                    if (newContent && currentContainer && newContent.innerHTML !== currentContainer.innerHTML) {
+                    if (newContent && currentContainer && !currentContainer.isEqualNode(newContent)) {
                         const isAtBottom = currentContainer.scrollHeight - currentContainer.scrollTop <= currentContainer.clientHeight + 100;
-                        currentContainer.innerHTML = newContent.innerHTML;
+                        currentContainer.replaceChildren(...Array.from(newContent.childNodes));
                         if (isAtBottom) {
                             currentContainer.scrollTop = currentContainer.scrollHeight;
                         }

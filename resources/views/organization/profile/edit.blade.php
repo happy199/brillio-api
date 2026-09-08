@@ -214,6 +214,101 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Mode Règle de Non-concurrence -->
+                        <div
+                            class="mb-8 p-4 rounded-lg border {{ $organization->anti_competition_enabled ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200' }}">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h4
+                                        class="text-sm font-bold {{ $organization->anti_competition_enabled ? 'text-emerald-900' : 'text-gray-900' }} flex items-center">
+                                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                        </svg>
+                                        Règle de non-concurrence : Recommandations de formations
+                                    </h4>
+                                    <p
+                                        class="mt-1 text-xs {{ $organization->anti_competition_enabled ? 'text-emerald-700' : 'text-gray-500' }}">
+                                        Protégez l'attention de vos membres en <strong>masquant les propositions de formations et d'établissements tiers</strong> lors du test de personnalité.
+                                    </p>
+                                </div>
+                                <div class="ml-4 flex-shrink-0">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="anti_competition_enabled" value="1"
+                                            class="sr-only peer" {{ $organization->anti_competition_enabled ? 'checked' :
+                                        '' }}>
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600">
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div
+                                class="mt-3 space-y-1.5 text-[10px] {{ $organization->anti_competition_enabled ? 'text-emerald-600' : 'text-gray-400' }}">
+                                <div class="flex items-start">
+                                    <svg class="h-3 w-3 mr-1.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span><strong>Masquage automatique</strong> : La section des formations recommandées ne s'affichera pas sur les résultats de test MBTI pour tous les jeunes liés à votre organisation.</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <svg class="h-3 w-3 mr-1.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span><strong>Focalisation interne</strong> : Vos jeunes restent orientés vers vos propres parcours sans suggestions d'autres structures.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mode Masquage des Ressources Externes -->
+                        <div
+                            class="mb-8 p-4 rounded-lg border {{ $organization->hide_external_resources ? 'bg-indigo-50 border-indigo-200' : 'bg-gray-50 border-gray-200' }}">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h4
+                                        class="text-sm font-bold {{ $organization->hide_external_resources ? 'text-indigo-900' : 'text-gray-900' }} flex items-center">
+                                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                        </svg>
+                                        Masquage des ressources externes
+                                    </h4>
+                                    <p
+                                        class="mt-1 text-xs {{ $organization->hide_external_resources ? 'text-indigo-700' : 'text-gray-500' }}">
+                                        Masquez toutes les ressources publiées par Brillio ou par des mentors externes. Vos jeunes n'accèdent qu'aux ressources créées par votre organisation.
+                                    </p>
+                                </div>
+                                <div class="ml-4 flex-shrink-0">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="hide_external_resources" value="1"
+                                            class="sr-only peer" {{ $organization->hide_external_resources ? 'checked' : '' }}>
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div
+                                class="mt-3 space-y-1.5 text-[10px] {{ $organization->hide_external_resources ? 'text-indigo-600' : 'text-gray-400' }}">
+                                <div class="flex items-start">
+                                    <svg class="h-3 w-3 mr-1.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span><strong>Bibliothèque fermée</strong> : Seules vos ressources internes créées par votre organisation sont visibles par vos jeunes et dans votre espace.</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <svg class="h-3 w-3 mr-1.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span><strong>Exclusivité pédagogique</strong> : Aucune ressource de Brillio ou de mentors externes ne sera suggérée à vos membres.</span>
+                                </div>
+                            </div>
+                        </div>
                         @endif
 
                         @if($organization->isEnterprise())

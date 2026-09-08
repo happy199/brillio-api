@@ -15,6 +15,11 @@ class EstablishmentController extends Controller
     public function recommended(Request $request)
     {
         $user = auth()->user();
+
+        if ($user && $user->hasAntiCompetitionRestriction()) {
+            return response()->json(['establishments' => []]);
+        }
+
         $test = $user->personalityTest;
 
         if (! $test || ! $test->isCompleted()) {

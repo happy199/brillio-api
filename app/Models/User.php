@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 use OpenApi\Attributes as OA;
@@ -606,6 +607,100 @@ class User extends Authenticatable implements MustVerifyEmail
             ->where('private_circle_plus_enabled', true)
             ->pluck('organizations.id')
             ->toArray();
+    }
+
+    /**
+     * Check if the user is subject to an organization non-competition rule
+     * (hiding external recommendations/formations).
+     */
+    public function hasAntiCompetitionRestriction(): bool
+    {
+        if (app()->bound('current_organization')) {
+            $currentOrg = app('current_organization');
+            if ($currentOrg && $currentOrg->anti_competition_enabled) {
+                return true;
+            }
+        }
+
+        if ($this->organizations()->where('anti_competition_enabled', true)->exists()) {
+            return true;
+        }
+
+        if ($this->sponsored_by_organization_id && $this->sponsoringOrganization?->anti_competition_enabled) {
+            return true;
+        }
+
+        if ($this->organization_id && $this->organization?->anti_competition_enabled) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get all unique organizations associated with this user.
+     */
+    public function getAssociatedOrganizations(): Collection
+    {
+        $orgs = collect();
+
+        if (app()->bound('current_organization')) {
+            $currentOrg = app('current_organization');
+            if ($currentOrg) {
+                $orgs->push($currentOrg);
+            }
+        }
+
+        if ($this->sponsored_by_organization_id && $this->sponsoringOrganization) {
+            $orgs->push($this->sponsoringOrganization);
+        }
+
+        if ($this->organization_id && $this->organization) {
+            $orgs->push($this->organization);
+        }
+
+        if ($this->relationLoaded('organizations')) {
+            foreach ($this->organizations as $org) {
+                $orgs->push($org);
+            }
+        } else {
+            foreach ($this->organizations()->get() as $org) {
+                $orgs->push($org);
+            }
+        }
+
+        return $orgs->unique('id');
+    }
+
+    /**
+     * Get primary associated organization for this user.
+     */
+    public function getPrimaryOrganization(): ?Organization
+    {
+        return $this->getAssociatedOrganizations()->first();
+    }
+
+    /**
+     * Get all associated organization IDs for this user.
+     */
+    public function getAssociatedOrganizationIds(): array
+    {
+        return $this->getAssociatedOrganizations()->pluck('id')->all();
+    }
+
+    /**
+     * Check if the user's organization(s) have enabled hiding external resources.
+     */
+    public function hasExternalResourcesHidden(): bool
+    {
+        $hasBoundOrgHidden = app()->bound('current_organization') && (bool) app('current_organization')?->hide_external_resources;
+        $hasSponsorHidden = $this->sponsored_by_organization_id && (bool) $this->sponsoringOrganization?->hide_external_resources;
+        $hasDirectOrgHidden = $this->organization_id && (bool) $this->organization?->hide_external_resources;
+
+        return $hasBoundOrgHidden
+            || $this->organizations()->where('hide_external_resources', true)->exists()
+            || $hasSponsorHidden
+            || $hasDirectOrgHidden;
     }
 
     /**

@@ -80,6 +80,18 @@
             </svg>
             Retour à la bibliothèque
         </a>
+
+        @if($isInternal ?? $resource->isInternalTo($organization))
+        <div class="flex items-center gap-2">
+            <a href="{{ route('organization.resources.edit', $resource) }}"
+                class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold transition gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Modifier la ressource
+            </a>
+        </div>
+        @endif
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -95,6 +107,9 @@
                 <div class="p-8">
                     <header class="mb-8">
                         <div class="flex items-center gap-2 mb-4">
+                            @if($isInternal ?? $resource->isInternalTo($organization))
+                            <span class="px-2 py-1 bg-organization-700 text-white text-[10px] font-bold rounded-lg uppercase">🏛️ Interne</span>
+                            @endif
                             @if($resource->is_premium)
                             <span
                                 class="px-2 py-1 bg-organization-600 text-white text-[10px] font-bold rounded-lg uppercase">Premium</span>

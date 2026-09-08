@@ -9,13 +9,19 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Bibliothèque de Ressources</h1>
-                <p class="text-sm text-gray-500 mt-1">Parcourez les ressources de la plateforme et offrez-les à vos
-                    jeunes parrainés.</p>
+                <p class="text-sm text-gray-500 mt-1">Créez vos ressources internes et explorez les ressources disponibles pour vos jeunes.</p>
             </div>
 
-            <div class="flex items-center gap-3">
-                <div
-                    class="px-4 py-2 bg-organization-50 rounded-lg border border-organization-100 flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('organization.resources.create') }}"
+                    class="px-4 py-2 bg-organization-600 hover:bg-organization-700 text-white rounded-lg font-semibold text-sm shadow-sm transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Créer une ressource
+                </a>
+
+                <div class="px-4 py-2 bg-organization-50 rounded-lg border border-organization-100 flex items-center gap-2">
                     <span class="text-organization-600">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -28,11 +34,45 @@
             </div>
         </div>
 
-        <div class="h-px bg-gray-100"></div>
+        @if($organization->hide_external_resources)
+        <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center justify-between text-xs text-indigo-700">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><strong>Masquage des ressources externes actif</strong> : Seules vos ressources internes sont affichées dans votre espace et pour vos jeunes.</span>
+            </div>
+            <a href="{{ route('organization.profile.edit') }}" class="underline font-semibold hover:text-indigo-900">Gérer</a>
+        </div>
+        @endif
+
+        <!-- Tabs Navigation -->
+        <div class="flex flex-wrap items-center gap-2 border-b border-gray-200 pb-4">
+            @if(!$organization->hide_external_resources)
+            <a href="{{ route('organization.resources.index', array_merge(request()->except(['tab', 'page']), ['tab' => 'all'])) }}"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $tab === 'all' ? 'bg-organization-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                Toutes les ressources <span class="ml-1 text-xs opacity-80">({{ $internalCount + $externalCount }})</span>
+            </a>
+            @endif
+
+            <a href="{{ route('organization.resources.index', array_merge(request()->except(['tab', 'page']), ['tab' => 'internal'])) }}"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $tab === 'internal' ? 'bg-organization-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                🏛️ Ressources Internes <span class="ml-1 text-xs opacity-80">({{ $internalCount }})</span>
+            </a>
+
+            @if(!$organization->hide_external_resources)
+            <a href="{{ route('organization.resources.index', array_merge(request()->except(['tab', 'page']), ['tab' => 'external'])) }}"
+                class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $tab === 'external' ? 'bg-organization-600 text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                🌐 Ressources Externes <span class="ml-1 text-xs opacity-80">({{ $externalCount }})</span>
+            </a>
+            @endif
+        </div>
 
         <!-- Filters Form -->
         <form action="{{ route('organization.resources.index') }}" method="GET"
             class="flex flex-wrap items-center gap-4">
+            <input type="hidden" name="tab" value="{{ $tab }}">
+
             <!-- Search -->
             <div class="relative flex-1 min-w-[280px]">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -56,6 +96,12 @@
                 <option value="exercise" {{ request('type')==='exercise' ? 'selected' : '' }}>📝 Exercice</option>
                 <option value="template" {{ request('type')==='template' ? 'selected' : '' }}>📋 Modèle</option>
                 <option value="script" {{ request('type')==='script' ? 'selected' : '' }}>📜 Script</option>
+                <option value="book" {{ request('type')==='book' ? 'selected' : '' }}>📚 Livre / PDF</option>
+                <option value="podcast" {{ request('type')==='podcast' ? 'selected' : '' }}>🎧 Podcast</option>
+                <option value="webinar" {{ request('type')==='webinar' ? 'selected' : '' }}>📺 Webinaire</option>
+                <option value="guide" {{ request('type')==='guide' ? 'selected' : '' }}>🧭 Guide</option>
+                <option value="case_study" {{ request('type')==='case_study' ? 'selected' : '' }}>📊 Étude de cas</option>
+                <option value="course" {{ request('type')==='course' ? 'selected' : '' }}>🎓 Formation</option>
             </select>
 
             <!-- Price Filter -->
@@ -75,7 +121,7 @@
             </div>
 
             @if(request()->anyFilled(['search', 'type', 'price']))
-            <a href="{{ route('organization.resources.index') }}"
+            <a href="{{ route('organization.resources.index', ['tab' => $tab]) }}"
                 class="text-sm text-red-500 hover:text-red-700 underline">
                 Réinitialiser
             </a>
@@ -93,13 +139,33 @@
             </svg>
         </div>
         <h3 class="text-lg font-semibold text-gray-900">Aucune ressource trouvée</h3>
-        <p class="text-gray-500 mt-1">Réessayez avec des critères de recherche différents.</p>
+        <p class="text-gray-500 mt-1">
+            @if($tab === 'internal')
+            Vous n'avez pas encore créé de ressource interne pour votre organisation.
+            @else
+            Réessayez avec des critères de recherche différents.
+            @endif
+        </p>
+        @if($tab === 'internal')
+        <div class="mt-4">
+            <a href="{{ route('organization.resources.create') }}"
+                class="inline-flex items-center px-4 py-2 bg-organization-600 hover:bg-organization-700 text-white text-sm font-semibold rounded-lg shadow-sm transition gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Créer votre première ressource
+            </a>
+        </div>
+        @endif
     </div>
     @else
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($resources as $resource)
+        @php
+            $isOwnResource = $resource->organization_id === $organization->id;
+        @endphp
         <div
-            class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition flex flex-col h-full group">
+            class="bg-white rounded-xl border {{ $isOwnResource ? 'border-organization-200 ring-1 ring-organization-100' : 'border-gray-200' }} overflow-hidden hover:shadow-md transition flex flex-col h-full group">
             <a href="{{ route('organization.resources.show', $resource) }}"
                 class="block aspect-video bg-gray-100 relative overflow-hidden flex-shrink-0">
                 @if($resource->preview_image_path)
@@ -115,16 +181,27 @@
                 @endif
 
                 <!-- Badges -->
-                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+                <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                    @if($isOwnResource)
+                    <span class="px-2 py-1 bg-organization-700 text-white text-[10px] font-bold rounded-lg uppercase shadow-sm flex items-center gap-1">
+                        🏛️ Interne
+                    </span>
+                    @else
+                    <span class="px-2 py-1 bg-gray-900/70 text-white text-[10px] font-bold rounded-lg uppercase backdrop-blur-sm">
+                        Externe
+                    </span>
+                    @endif
+
                     @if($resource->is_premium)
                     <span
-                        class="px-2 py-1 bg-organization-600 text-white text-[10px] font-bold rounded-lg uppercase shadow-sm">Premium</span>
+                        class="px-2 py-1 bg-purple-600 text-white text-[10px] font-bold rounded-lg uppercase shadow-sm">Premium</span>
                     @else
                     <span
                         class="px-2 py-1 bg-green-600 text-white text-[10px] font-bold rounded-lg uppercase shadow-sm">Gratuit</span>
                     @endif
+
                     <span
-                        class="px-2 py-1 bg-gray-900/70 text-white text-[10px] font-bold rounded-lg uppercase backdrop-blur-sm">{{
+                        class="px-2 py-1 bg-gray-800/80 text-white text-[10px] font-bold rounded-lg uppercase backdrop-blur-sm">{{
                         $resource->type }}</span>
                 </div>
 
@@ -151,25 +228,51 @@
 
                 <div class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
+                        @if($isOwnResource)
+                        <span class="text-xs font-semibold text-organization-700 flex items-center gap-1">
+                            🏛️ {{ $organization->name }}
+                        </span>
+                        @else
                         <div
                             class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500 overflow-hidden border border-gray-200">
-                            @if($resource->user->profile_photo_path)
+                            @if($resource->user && $resource->user->profile_photo_path)
                             <img src="{{ Storage::url($resource->user->profile_photo_path) }}"
                                 class="w-full h-full object-cover">
                             @else
-                            {{ substr($resource->user->name, 0, 1) }}
+                            {{ substr($resource->user->name ?? 'B', 0, 1) }}
                             @endif
                         </div>
-                        <span class="text-xs text-gray-500 font-medium">{{ $resource->user->name }}</span>
+                        <span class="text-xs text-gray-500 font-medium truncate max-w-[120px]">{{ $resource->user->name ?? 'Brillio' }}</span>
+                        @endif
                     </div>
 
-                    <a href="{{ route('organization.resources.show', $resource) }}"
-                        class="text-sm font-semibold text-organization-600 hover:text-organization-700 flex items-center gap-1">
-                        Consulter
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
+                    <div class="flex items-center gap-2">
+                        @if($isOwnResource)
+                        <a href="{{ route('organization.resources.edit', $resource) }}"
+                            class="text-xs font-semibold text-gray-600 hover:text-organization-600 px-2 py-1 bg-gray-100 hover:bg-organization-50 rounded transition">
+                            Modifier
+                        </a>
+                        <form action="{{ route('organization.resources.destroy', $resource) }}" method="POST"
+                            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette ressource interne ?');"
+                            class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-xs text-red-500 hover:text-red-700 p-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </form>
+                        @endif
+
+                        <a href="{{ route('organization.resources.show', $resource) }}"
+                            class="text-sm font-semibold text-organization-600 hover:text-organization-700 flex items-center gap-1">
+                            Consulter
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

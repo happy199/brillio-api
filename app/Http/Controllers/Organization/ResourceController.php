@@ -8,72 +8,376 @@ use App\Models\Resource;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
+use App\Traits\ManagesQuizzes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ResourceController extends Controller
 {
+    use ManagesQuizzes;
+
     public function __construct(protected WalletService $walletService) {}
 
     /**
-     * List all published resources (visible for the organization).
+     * List all resources (internal created by this organization, and external unless hidden).
      */
     public function index(Request $request)
     {
         $organization = $this->getCurrentOrganization();
 
-        $query = Resource::where('is_published', true)
-            ->where('is_validated', true)
-            ->whereHas('user', function ($q) {
-                $q->where('is_admin', true)
-                    ->orWhereHas('mentorProfile', fn ($mp) => $mp->where('is_published', true));
-            })
-            ->with('user')
-            ->orderByDesc('created_at');
+        $validated = $request->validate([
+            'tab' => 'nullable|string|in:all,internal,external',
+            'search' => 'nullable|string|max:255',
+            'type' => 'nullable|string|max:50',
+            'price' => 'nullable|string|in:free,paid',
+            'page' => 'nullable|integer|min:1|max:1000',
+        ]);
 
-        if ($request->filled('search')) {
-            $search = $request->search;
+        // If organization hides external resources, force tab to internal
+        $tab = $validated['tab'] ?? ($organization->hide_external_resources ? 'internal' : 'all');
+        if ($organization->hide_external_resources) {
+            $tab = 'internal';
+        }
+
+        $query = Resource::where('is_published', true)
+            ->where('is_validated', true);
+
+        if ($tab === 'internal') {
+            $query->where('organization_id', $organization->id);
+        } elseif ($tab === 'external') {
+            if ($organization->hide_external_resources) {
+                // Return empty if external resources are hidden
+                $query->whereNull('id');
+            } else {
+                $query->whereNull('organization_id')
+                    ->whereHas('user', function ($q) {
+                        $q->where('is_admin', true)
+                            ->orWhereHas('mentorProfile', fn ($mp) => $mp->where('is_published', true));
+                    });
+            }
+        } else {
+            // 'all': internal resources OR external resources (if not hidden)
+            if ($organization->hide_external_resources) {
+                $query->where('organization_id', $organization->id);
+            } else {
+                $query->where(function ($q) use ($organization) {
+                    $q->where('organization_id', $organization->id)
+                        ->orWhere(function ($q2) {
+                            $q2->whereNull('organization_id')
+                                ->whereHas('user', function ($u) {
+                                    $u->where('is_admin', true)
+                                        ->orWhereHas('mentorProfile', fn ($mp) => $mp->where('is_published', true));
+                                });
+                        });
+                });
+            }
+        }
+
+        $query->with(['user', 'organization'])->orderByDesc('created_at');
+
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        if ($request->filled('type') && $request->type !== 'all') {
-            $query->where('type', $request->type);
+        if (! empty($validated['type']) && $validated['type'] !== 'all') {
+            $query->where('type', $validated['type']);
         }
 
-        if ($request->filled('price')) {
-            $request->price === 'free'
+        if (! empty($validated['price'])) {
+            $validated['price'] === 'free'
                 ? $query->where('is_premium', false)
                 : $query->where('is_premium', true);
         }
 
         $resources = $query->paginate(12)->withQueryString();
 
+        // Counts for tabs
+        $internalCount = Resource::where('organization_id', $organization->id)->count();
+        $externalCount = $organization->hide_external_resources ? 0 : Resource::where('is_published', true)
+            ->where('is_validated', true)
+            ->whereNull('organization_id')
+            ->whereHas('user', function ($q) {
+                $q->where('is_admin', true)
+                    ->orWhereHas('mentorProfile', fn ($mp) => $mp->where('is_published', true));
+            })->count();
+
         // IDs déjà offerts par l'org (pour badge "déjà offert")
         $giftedIds = Purchase::where('gifted_by_organization_id', $organization->id)
             ->pluck('item_id')
             ->unique();
 
-        return view('organization.resources.index', compact('resources', 'organization', 'giftedIds'));
+        return view('organization.resources.index', compact(
+            'resources',
+            'organization',
+            'giftedIds',
+            'tab',
+            'internalCount',
+            'externalCount'
+        ));
     }
 
     /**
-     * Show a single resource with the gift modal.
+     * Show the form for creating a new internal organization resource.
+     */
+    public function create()
+    {
+        $organization = $this->getCurrentOrganization();
+
+        return view('organization.resources.create', compact('organization'));
+    }
+
+    /**
+     * Store a newly created organization resource.
+     */
+    public function store(Request $request)
+    {
+        if ($request->header('Content-Length') > 30 * 1024 * 1024) { // 30MB max
+            return back()->with('error', 'La taille de la requête est trop volumineuse (max 30 Mo).');
+        }
+
+        $organization = $this->getCurrentOrganization();
+        $validated = $this->validateResourceRequest($request);
+        $this->assertHasResourceContent($request, $validated);
+
+        // File handling
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $fileValidated = $request->validate(['file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,mp4,mov,avi,mp3,wav|max:20480']); // NOSONAR: safe file limit for documents and resources
+            $filePath = $fileValidated['file']->store('resources/files', 'public');
+        }
+
+        $previewPath = null;
+        if ($request->hasFile('preview_image')) {
+            $previewValidated = $request->validate(['preview_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120']);
+            $previewPath = $previewValidated['preview_image']->store('resources/previews', 'public');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $payload = $this->buildResourcePayload($validated, [
+                'user_id' => auth()->id(),
+                'organization_id' => $organization->id,
+                'slug' => Str::slug($validated['title']).'-'.uniqid(),
+                'file_path' => $filePath,
+                'preview_image_path' => $previewPath,
+                'validated_at' => now(),
+            ]);
+
+            $resource = Resource::create($payload);
+            $this->saveQuizzes($resource, $validated['quizzes_data'] ?? null);
+
+            DB::commit();
+
+            return redirect()->route('organization.resources.index', ['tab' => 'internal'])
+                ->with('success', 'Ressource interne créée et publiée avec succès !');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->withInput()->with('error', 'Erreur lors de la création : '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Show the form for editing an internal organization resource.
+     */
+    public function edit(Resource $resource)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        if (! $resource->isInternalTo($organization)) {
+            abort(403, 'Vous ne pouvez modifier que les ressources internes créées par votre organisation.');
+        }
+
+        return view('organization.resources.edit', compact('resource', 'organization'));
+    }
+
+    /**
+     * Update an internal organization resource.
+     */
+    public function update(Request $request, Resource $resource)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        if (! $resource->isInternalTo($organization)) {
+            abort(403, 'Vous ne pouvez modifier que les ressources internes créées par votre organisation.');
+        }
+
+        if ($request->header('Content-Length') > 30 * 1024 * 1024) {
+            return back()->with('error', 'La taille de la requête est trop volumineuse (max 30 Mo).');
+        }
+
+        $validated = $this->validateResourceRequest($request);
+        $this->assertHasResourceContent($request, $validated, $resource);
+
+        $previewPath = $resource->preview_image_path;
+        if ($request->hasFile('preview_image')) {
+            if ($previewPath) {
+                Storage::disk('public')->delete($previewPath);
+            }
+            $previewValidated = $request->validate(['preview_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120']);
+            $previewPath = $previewValidated['preview_image']->store('resources/previews', 'public');
+        }
+
+        $filePath = $resource->file_path;
+        if ($request->hasFile('file')) {
+            if ($filePath) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $fileValidated = $request->validate(['file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,mp4,mov,avi,mp3,wav|max:20480']); // NOSONAR: safe file limit for documents and resources
+            $filePath = $fileValidated['file']->store('resources/files', 'public');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $payload = $this->buildResourcePayload($validated, [
+                'preview_image_path' => $previewPath,
+                'file_path' => $filePath,
+                'validated_at' => $resource->validated_at ?? now(),
+            ]);
+
+            $resource->update($payload);
+
+            if ($request->has('quizzes_data')) {
+                $this->saveQuizzes($resource, $request->quizzes_data);
+            }
+
+            DB::commit();
+
+            return redirect()->route('organization.resources.index', ['tab' => 'internal'])
+                ->with('success', 'Ressource mise à jour avec succès.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()->withInput()->with('error', 'Erreur lors de la mise à jour : '.$e->getMessage());
+        }
+    }
+
+    private function validateResourceRequest(Request $request): array
+    {
+        $rules = [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:1000',
+            'content' => 'nullable|string',
+            'type' => 'required|in:article,video,tool,exercise,template,script,advertisement,book,podcast,webinar,guide,case_study,course',
+            'price' => 'nullable|integer',
+            'is_premium' => 'required|in:0,1',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,mp4,mov,avi,mp3,wav|max:20480', // NOSONAR: safe file limit for documents and resources
+            'preview_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'metadata' => 'nullable|array',
+            'mbti_types' => 'nullable|array',
+            'tags' => 'nullable|string',
+            'targeting' => 'nullable|array',
+            'quizzes_data' => 'nullable|string',
+        ];
+
+        if ($request->is_premium == '1') {
+            $rules['price'] = 'required|integer|min:200';
+        }
+
+        return $request->validate($rules, [
+            'price.required' => 'Le prix est obligatoire pour une ressource payante.',
+            'price.min' => 'Le prix minimum pour une ressource payante est de 200 FCFA.',
+        ]);
+    }
+
+    private function assertHasResourceContent(Request $request, array $validated, ?Resource $existing = null): void
+    {
+        $quizzes = json_decode($validated['quizzes_data'] ?? '', true);
+        $hasQuizzes = (is_array($quizzes) && collect($quizzes)->contains(fn ($q) => ! empty($q['title'])))
+            || ($existing && $existing->quizzes()->exists());
+
+        $hasContent = ! empty($validated['content']) || ($existing && ! empty($existing->content));
+        $hasFile = $request->hasFile('file') || ($existing && ! empty($existing->file_path) && ! $request->has('remove_file'));
+
+        if (! $hasContent && ! $hasFile && ! $hasQuizzes) {
+            throw ValidationException::withMessages([
+                'content' => 'Vous devez fournir au moins un contenu texte, un fichier joint ou un quiz.',
+            ]);
+        }
+    }
+
+    private function buildResourcePayload(array $validated, array $extra = []): array
+    {
+        $isPremium = ($validated['is_premium'] ?? '0') === '1';
+        $tags = ! empty($validated['tags'])
+            ? array_values(array_filter(array_map('trim', explode(',', (string) $validated['tags']))))
+            : [];
+
+        return array_merge([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'content' => $validated['content'] ?? null,
+            'type' => $validated['type'],
+            'price' => $isPremium ? ((int) ($validated['price'] ?? 0)) : 0,
+            'is_premium' => $isPremium,
+            'metadata' => $validated['metadata'] ?? [],
+            'mbti_types' => $validated['mbti_types'] ?? [],
+            'tags' => $tags,
+            'targeting' => $validated['targeting'] ?? [],
+            'is_published' => true,
+            'is_validated' => true,
+            'admin_feedback' => null,
+            'unpublished_at' => null,
+        ], $extra);
+    }
+
+    /**
+     * Delete an internal organization resource.
+     */
+    public function destroy(Resource $resource)
+    {
+        $organization = $this->getCurrentOrganization();
+
+        if (! $resource->isInternalTo($organization)) {
+            abort(403, 'Vous ne pouvez supprimer que les ressources internes créées par votre organisation.');
+        }
+
+        if ($resource->file_path) {
+            Storage::disk('public')->delete($resource->file_path);
+        }
+        if ($resource->preview_image_path) {
+            Storage::disk('public')->delete($resource->preview_image_path);
+        }
+
+        $resource->delete();
+
+        return redirect()->route('organization.resources.index', ['tab' => 'internal'])
+            ->with('success', 'Ressource supprimée avec succès.');
+    }
+
+    /**
+     * Show a single resource with the gift modal or internal view.
      */
     public function show(Resource $resource)
     {
+        $organization = $this->getCurrentOrganization();
+
+        // If external resources are hidden, ensure resource is internal to this organization
+        if ($organization->hide_external_resources && ! $resource->isInternalTo($organization)) {
+            abort(404);
+        }
+
         if (! $resource->is_published || ! $resource->is_validated) {
             abort(404);
         }
 
-        $organization = $this->getCurrentOrganization();
+        $isInternal = $resource->isInternalTo($organization);
 
         // Credit cost per young person
         $creditCost = 0;
         $isLocked = false;
-        if ($resource->is_premium) {
+        if (! $isInternal && $resource->is_premium) {
             $isLocked = true;
             $creditPrice = $this->walletService->getCreditPrice('jeune');
             $creditCost = $creditPrice > 0 ? (int) ceil($resource->price / $creditPrice) : 0;
@@ -81,6 +385,10 @@ class ResourceController extends Controller
             // Security: don't show content or file for premium resources to organizations
             $resource->content = null;
             $resource->file_path = null;
+        }
+
+        if ($isInternal) {
+            $resource->load(['quizzes']);
         }
 
         // Jeunes of this organization who DON'T already own the resource
@@ -114,7 +422,8 @@ class ResourceController extends Controller
             'creditCost',
             'jeunes',
             'alreadyGiftedJeuneIds',
-            'isLocked'
+            'isLocked',
+            'isInternal'
         ));
     }
 
@@ -187,7 +496,6 @@ class ResourceController extends Controller
         }
 
         if ($validJeunes->count() !== $jeuneIds->count()) {
-            // Some were filtered out, but at least some remain
             session()->flash('warning', ($jeuneIds->count() - $validJeunes->count()).' jeunes ont été ignorés car ils possèdent déjà la ressource.');
         }
 
@@ -216,7 +524,6 @@ class ResourceController extends Controller
                 }
 
                 foreach ($validJeunes as $jeune) {
-                    // Create Purchase record
                     $purchase = Purchase::create([
                         'user_id' => $jeune->id,
                         'item_type' => Resource::class,
@@ -227,7 +534,6 @@ class ResourceController extends Controller
                         'purchased_at' => now(),
                     ]);
 
-                    // 3. Credit the Mentor (if applicable)
                     if ($mentor && $mentorCreditsPerSale > 0) {
                         $this->walletService->addCredits(
                             $mentor,
@@ -238,11 +544,9 @@ class ResourceController extends Controller
                         );
                     }
 
-                    // Notification par email au jeune
                     DB::afterCommit(function () use ($jeune, $resource, $organization) {
                         app(MentorshipNotificationService::class)->sendResourceGiftedNotification($jeune, $resource, $organization);
-                    }
-                    );
+                    });
                 }
 
                 $resource->increment('sales_count', $validJeunes->count());

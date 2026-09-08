@@ -37,22 +37,38 @@
 
                     <!-- Source Tabs (Pills) -->
                     <div class="flex bg-gray-100 p-1 rounded-lg self-start sm:self-auto overflow-x-auto max-w-full">
-                        <a href="{{ route('jeune.resources.index', array_merge(request()->except(['source', 'filter', 'page']), ['filter' => 'suggestions'])) }}"
-                            class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ $currentFilter === 'suggestions' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
-                            ✨ Pour toi
-                        </a>
-                        <a href="{{ route('jeune.resources.index', array_merge(request()->except(['source', 'filter', 'page']), ['filter' => 'all'])) }}"
-                            class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ $currentFilter === 'all' && !request('source') ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
-                            Tout
-                        </a>
-                        <a href="{{ route('jeune.resources.index', array_merge(request()->except(['filter', 'page']), ['filter' => 'all', 'source' => 'mentor'])) }}"
-                            class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ request('source') === 'mentor' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
-                            Mentors
-                        </a>
-                        <a href="{{ route('jeune.resources.index', array_merge(request()->except(['filter', 'page']), ['filter' => 'all', 'source' => 'brillio'])) }}"
-                            class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ request('source') === 'brillio' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
-                            {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}
-                        </a>
+                        @if($hasExternalHidden)
+                            <span class="px-3 py-1.5 rounded-md text-sm font-bold bg-white text-indigo-700 shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                                🏛️ {{ $primaryOrganization->name ?? 'Mon Établissement' }}
+                            </span>
+                        @else
+                            @if($primaryOrganization)
+                            <a href="{{ route('jeune.resources.index', array_merge(request()->except(['page']), ['source' => 'organization'])) }}"
+                                class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition flex items-center gap-1.5 {{ (request('source') === 'organization' || ($currentSource === 'organization' && !request()->has('source') && !request()->has('filter'))) ? 'bg-white text-indigo-700 shadow-sm font-bold ring-1 ring-indigo-200' : 'text-gray-600 hover:text-gray-900' }}">
+                                <span>🏛️ {{ $primaryOrganization->name }}</span>
+                                @if($hasOrgResources)
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700">Prioritaire</span>
+                                @endif
+                            </a>
+                            @endif
+
+                            <a href="{{ route('jeune.resources.index', array_merge(request()->except(['source', 'filter', 'page']), ['filter' => 'suggestions'])) }}"
+                                class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ $currentFilter === 'suggestions' && !request('source') && !($currentSource === 'organization' && !request()->has('source')) ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                                ✨ Pour toi
+                            </a>
+                            <a href="{{ route('jeune.resources.index', array_merge(request()->except(['source', 'filter', 'page']), ['filter' => 'all'])) }}"
+                                class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ $currentFilter === 'all' && !request('source') && !($currentSource === 'organization' && !request()->has('source')) ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                                Tout
+                            </a>
+                            <a href="{{ route('jeune.resources.index', array_merge(request()->except(['filter', 'page']), ['filter' => 'all', 'source' => 'mentor'])) }}"
+                                class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ request('source') === 'mentor' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                                Mentors
+                            </a>
+                            <a href="{{ route('jeune.resources.index', array_merge(request()->except(['filter', 'page']), ['filter' => 'all', 'source' => 'brillio'])) }}"
+                                class="px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition {{ request('source') === 'brillio' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                                Brillio
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -197,6 +213,11 @@
 
                     <!-- Badges -->
                     <div class="absolute top-3 left-3 flex gap-2 z-10 flex-wrap">
+                        @if($resource->organization_id)
+                        <span class="bg-indigo-700 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+                            🏛️ {{ $resource->organization?->name ?? 'Établissement' }}
+                        </span>
+                        @endif
                         @if($resource->is_premium)
                         <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
                             Premium
@@ -242,51 +263,65 @@
                     <div
                         class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
                         <div class="flex items-center gap-2">
-                            @php
-                            $creatorProfileUrl = $resource->user->isMentor() && $resource->user->mentorProfile ?
-                            route('jeune.mentors.show', $resource->user->mentorProfile) : '#';
-                            @endphp
-                            <a href="{{ $creatorProfileUrl }}"
-                                class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm flex-shrink-0 {{ $creatorProfileUrl !== '#' ? 'hover:scale-110 transition-transform' : 'cursor-default' }}">
-                                @if($resource->user->profile_photo_path)
-                                <img src="{{ Storage::url($resource->user->profile_photo_path) }}"
-                                    class="w-full h-full object-cover">
-                                @else
-                                <div
-                                    class="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 text-xs font-bold">
-                                    {{ substr($resource->user->name, 0, 1) }}
+                            @if($resource->organization_id)
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 ring-2 ring-white shadow-sm flex-shrink-0 flex items-center justify-center text-sm">
+                                    🏛️
                                 </div>
-                                @endif
-                            </a>
-                            <div class="flex flex-col min-w-0">
+                                <div class="flex flex-col min-w-0">
+                                    <span class="truncate font-semibold text-gray-900 text-xs">
+                                        {{ $resource->organization?->name ?? 'Organisation' }}
+                                    </span>
+                                    <span class="text-[10px] font-bold text-indigo-600">
+                                        Ressource interne
+                                    </span>
+                                </div>
+                            @else
+                                @php
+                                $creatorProfileUrl = $resource->user && $resource->user->isMentor() && $resource->user->mentorProfile ?
+                                route('jeune.mentors.show', $resource->user->mentorProfile) : '#';
+                                @endphp
                                 <a href="{{ $creatorProfileUrl }}"
-                                    class="truncate font-medium text-gray-900 {{ $creatorProfileUrl !== '#' ? 'hover:text-indigo-600' : 'cursor-default' }}">
-                                    {{ $resource->user->name }}
+                                    class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm flex-shrink-0 {{ $creatorProfileUrl !== '#' ? 'hover:scale-110 transition-transform' : 'cursor-default' }}">
+                                    @if($resource->user && $resource->user->profile_photo_path)
+                                    <img src="{{ Storage::url($resource->user->profile_photo_path) }}"
+                                        class="w-full h-full object-cover">
+                                    @else
+                                    <div
+                                        class="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 text-xs font-bold">
+                                        {{ substr($resource->user->name ?? 'B', 0, 1) }}
+                                    </div>
+                                    @endif
                                 </a>
+                                <div class="flex flex-col min-w-0">
+                                    <a href="{{ $creatorProfileUrl }}"
+                                        class="truncate font-medium text-gray-900 {{ $creatorProfileUrl !== '#' ? 'hover:text-indigo-600' : 'cursor-default' }}">
+                                        {{ $resource->user->name ?? 'Brillio' }}
+                                    </a>
 
-                                <!-- Badge Créateur -->
-                                @if($resource->user->is_admin)
-                                <span class="text-[10px] font-bold text-indigo-600 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                    Team {{ isset($current_organization) ? $current_organization->name : 'Brillio' }}
-                                </span>
-                                @elseif($resource->user->isMentor())
-                                <span class="text-[10px] font-bold text-purple-600 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 14l9-5-9-5-9 5 9 5z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z">
-                                        </path>
-                                    </svg>
-                                    Mentor
-                                </span>
-                                @endif
-                            </div>
+                                    <!-- Badge Créateur -->
+                                    @if($resource->user && $resource->user->is_admin)
+                                    <span class="text-[10px] font-bold text-indigo-600 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                        Team Brillio
+                                    </span>
+                                    @elseif($resource->user && $resource->user->isMentor())
+                                    <span class="text-[10px] font-bold text-purple-600 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z">
+                                            </path>
+                                        </svg>
+                                        Mentor
+                                    </span>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                         <div class="flex flex-col items-end gap-2">
                             <a href="{{ route('jeune.resources.show', $resource) }}"

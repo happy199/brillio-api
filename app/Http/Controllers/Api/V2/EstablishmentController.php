@@ -37,6 +37,14 @@ class EstablishmentController extends Controller
     public function recommended(Request $request): JsonResponse
     {
         $user = $request->user();
+
+        if ($user && $user->hasAntiCompetitionRestriction()) {
+            return $this->success([
+                'mbti_type' => null,
+                'establishments' => [],
+            ]);
+        }
+
         $test = $user->personalityTest;
 
         if (! $test || ! $test->isCompleted()) {
