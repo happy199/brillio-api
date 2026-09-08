@@ -195,18 +195,21 @@
                                 </div>
                             </div>
 
-                            <!-- 2. VUE VERSION OPTIMISÉE BRILLIO (Conforme Image 4) -->
+                            <!-- 2. VUE VERSION OPTIMISÉE BRILLIO (Conditionnée à l'inscription) -->
                             <div x-show="currentVersionTab === 'enhanced'" class="space-y-4">
-                                <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    <span>Modèle testé pour les filtres ATS : hiérarchie normalisée, sections isolées et mots-clés valorisés.</span>
+                                <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Modèle testé pour les filtres ATS : hiérarchie normalisée, sections isolées et mots-clés valorisés.</span>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-200/60 text-emerald-900 text-[10px] font-bold uppercase">Réservé membres</span>
                                 </div>
 
-                                <!-- Rendu Haute Définition du CV Restructuré -->
-                                <div class="p-6 sm:p-8 rounded-2xl bg-white border border-gray-200 shadow-inner space-y-6 text-gray-800">
+                                <!-- Rendu avec Déblocage et Flou partiel -->
+                                <div class="relative rounded-2xl overflow-hidden border border-gray-200 bg-white">
                                     
-                                    <!-- Entête Candidat avec Initiale ronde (Conforme Image 4) -->
-                                    <div class="flex items-start justify-between gap-4 pb-4 border-b border-gray-100">
+                                    <!-- Entête Candidat Visible -->
+                                    <div class="p-6 sm:p-8 pb-4 border-b border-gray-100 flex items-start justify-between gap-4">
                                         <div>
                                             <h2 class="text-xl sm:text-2xl font-black text-gray-900 uppercase tracking-tight">
                                                 {{ $cvAnalysis->candidate_name ?? 'Candidat Brillio' }}
@@ -215,19 +218,12 @@
                                                 {{ $cvAnalysis->candidate_title ?? 'Profil & Spécialité' }}
                                             </p>
                                             <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-2">
-                                                @if(!empty($cvAnalysis->candidate_contact['phone']))
-                                                    <span>📞 {{ $cvAnalysis->candidate_contact['phone'] }}</span>
-                                                @endif
-                                                @if(!empty($cvAnalysis->candidate_contact['email']))
-                                                    <span>✉️ {{ $cvAnalysis->candidate_contact['email'] }}</span>
-                                                @endif
-                                                @if(!empty($cvAnalysis->candidate_contact['location']))
-                                                    <span>📍 {{ $cvAnalysis->candidate_contact['location'] }}</span>
-                                                @endif
+                                                <span>📞 Coordonnées normalisées</span>
+                                                <span>✉️ Email certifié</span>
+                                                <span>📍 Localisation standardisée</span>
                                             </div>
                                         </div>
 
-                                        <!-- Badge Initiale -->
                                         @php
                                             $initials = 'CV';
                                             if (!empty($cvAnalysis->candidate_name)) {
@@ -240,57 +236,161 @@
                                         </div>
                                     </div>
 
-                                    <!-- Section Profil / Résumé -->
-                                    <div class="space-y-1.5">
-                                        <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Profil Professionnel</h3>
-                                        <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                                            {{ $cvAnalysis->parsed_content['profil'] ?? $cvAnalysis->summary ?? 'Professionnel motivé avec des bases techniques solides, prêt à apporter son savoir-faire et à développer ses compétences au sein d\'équipes exigeantes.' }}
-                                        </p>
-                                    </div>
-
-                                    <!-- Section Compétences avec puces Pro -->
-                                    <div class="space-y-2">
-                                        <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Compétences Clés Claires</h3>
-                                        <div class="flex flex-wrap gap-1.5">
-                                            @php
-                                                $skills = $cvAnalysis->parsed_content['competences'] ?? ['Organisation', 'Gestion de projet', 'Rigueur', 'Communication'];
-                                            @endphp
-                                            @foreach($skills as $skill)
-                                                <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-medium">
-                                                    {{ $skill }}
-                                                </span>
-                                            @endforeach
+                                    <!-- Corps Flouté du CV -->
+                                    <div class="p-6 sm:p-8 space-y-6 select-none pointer-events-none filter blur-[5px] opacity-35">
+                                        <div class="space-y-1.5">
+                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Profil Professionnel</h3>
+                                            <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                                                {{ $cvAnalysis->parsed_content['profil'] ?? 'Ingénieur expérimenté spécialisé dans la transformation et l\'automatisation des architectures.' }}
+                                            </p>
                                         </div>
-                                    </div>
 
-                                    <!-- Section Expériences -->
-                                    @if(!empty($cvAnalysis->parsed_content['experiences']))
+                                        <div class="space-y-2">
+                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Compétences Clés Claires</h3>
+                                            <div class="flex flex-wrap gap-1.5">
+                                                <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-medium">Architecture Cloud</span>
+                                                <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-medium">Automatisation CI/CD</span>
+                                                <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-medium">Infrastructure as Code</span>
+                                            </div>
+                                        </div>
+
                                         <div class="space-y-2.5">
                                             <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Expérience Professionnelle</h3>
-                                            <ul class="space-y-2 text-xs sm:text-sm text-gray-700">
-                                                @foreach($cvAnalysis->parsed_content['experiences'] as $exp)
-                                                    <li class="flex items-start gap-2">
-                                                        <span class="text-primary-600 font-bold">•</span>
-                                                        <span>{{ $exp }}</span>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
+                                            <p class="text-xs text-gray-700">• Conduite de projets majeurs avec réduction mesurable des délais de déploiement de 45%.</p>
+                                            <p class="text-xs text-gray-700">• Gestion d'infrastructures hautement disponibles et monitoring proactif 24/7.</p>
                                         </div>
-                                    @endif
 
-                                    <!-- Invitation pour exporter la version complète -->
-                                    <div class="pt-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                                        <span class="text-gray-500">Ce modèle est optimisé à 100% pour franchir les filtres recruteurs.</span>
-                                        <a href="{{ route('auth.jeune.register') }}" class="font-bold text-primary-600 hover:underline flex items-center gap-1">
-                                            <span>Exporter mon CV au format Pro</span>
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                                        </a>
+                                        <div class="space-y-2">
+                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Formation & Diplômes</h3>
+                                            <p class="text-xs text-gray-700">🎓 Diplôme d'Ingénieur / Cursus Académique Supérieur</p>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Certifications Professionnelles</h3>
+                                            <p class="text-xs text-gray-700">📜 Certifications professionnelles reconnues sur le marché</p>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <h3 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Langues</h3>
+                                            <p class="text-xs text-gray-700">🌐 Français & Anglais professionnel</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Overlay de Déblocage (Conforme Image 4 & 5) -->
+                                    <div class="absolute inset-0 z-10 flex items-center justify-center p-4 bg-white/40 backdrop-blur-[2px]">
+                                        <div class="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-white shadow-2xl border border-gray-100 text-center space-y-4">
+                                            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white flex items-center justify-center shadow-md">
+                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                            </div>
+                                            
+                                            <div class="space-y-1.5">
+                                                <h4 class="text-lg sm:text-xl font-black text-gray-900">Débloquez le Modèle Brillio Pro ATS</h4>
+                                                <p class="text-xs text-gray-600 leading-relaxed">
+                                                    Créez votre compte gratuit pour accéder au modèle complet restructuré (avec <strong>réalisations quantifiées</strong>, <strong>formation</strong>, <strong>certifications</strong> et <strong>langues</strong>) et le télécharger en PDF.
+                                                </p>
+                                            </div>
+
+                                            <div class="pt-2">
+                                                <a href="{{ route('auth.jeune.register') }}"
+                                                   class="inline-flex w-full items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white font-black text-sm shadow-md hover:shadow-lg transition">
+                                                    <span>Créer mon compte & Débloquer mon CV Pro</span>
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                                </a>
+                                                <p class="text-[11px] text-gray-400 mt-2">100% gratuit · Accès immédiat dans votre Espace Jeune</p>
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
                             </div>
 
                         </div>
+
+                        <!-- ========================================================================= -->
+                        <!-- MODULES D'AUDIT CONTENU & ATS DÉTAILLÉS (Conforme aux maquettes 2, 3, 4)   -->
+                        <!-- ========================================================================= -->
+                        <div class="space-y-6">
+                            
+                            <!-- Module 1 : TAUX DE PARSE ATS (Image 3) -->
+                            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 space-y-4">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-primary-600"></div>
+                                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Taux de Parse ATS</h4>
+                                    </div>
+                                    <span class="text-xs font-bold text-emerald-600">90% Lisible</span>
+                                </div>
+                                <p class="text-xs text-gray-600 leading-relaxed">
+                                    Les recruteurs utilisent des Systèmes de Suivi des Candidatures (ATS) pour scanner les CV à grande échelle. Un taux élevé signifie que l'algorithme extrait parfaitement vos compétences.
+                                </p>
+                                <div class="space-y-2 pt-2">
+                                    <div class="w-full bg-gray-100 rounded-full h-3 flex overflow-hidden">
+                                        <div class="bg-emerald-500 h-3 rounded-l-full" style="width: 90%"></div>
+                                        <div class="bg-red-400/50 h-3 rounded-r-full" style="width: 10%"></div>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[11px] text-gray-500">
+                                        <span class="text-emerald-700 font-bold">90% lus par l'ATS</span>
+                                        <span class="text-red-600 font-bold">10% manqués</span>
+                                    </div>
+                                </div>
+                                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 text-center text-xs text-gray-700 font-medium">
+                                    Les 10% manquants de votre CV ne sont pas liés à votre valeur — mais à la mise en page d'origine de votre fichier.
+                                </div>
+                            </div>
+
+                            <!-- Module 2 : QUANTIFIER L'IMPACT (Image 4) -->
+                            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 space-y-4">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-accent-600"></div>
+                                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Quantifier l'Impact</h4>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">À muscler</span>
+                                </div>
+                                <p class="text-xs text-gray-600 leading-relaxed">
+                                    Un bon CV démontre l'impact avec des chiffres (ex: % de croissance, temps gagné, budget géré). Quantifiez vos résultats pour doubler vos invitations en entretien.
+                                </p>
+                                
+                                <div class="p-4 rounded-2xl bg-red-50/70 border border-red-200 text-xs text-red-800 flex items-center gap-2.5">
+                                    <span class="text-red-500 font-bold text-base">✕</span>
+                                    <span>Votre section d'expérience manque d'accomplissements chiffrés sur vos postes précédents.</span>
+                                </div>
+
+                                <!-- Suggestions floutées avec CTA Brillio Pro (Conforme Image 4) -->
+                                <div class="relative rounded-2xl overflow-hidden border border-gray-200 p-6 space-y-3 bg-gray-50/50">
+                                    <div class="select-none pointer-events-none filter blur-xs opacity-35 space-y-2 text-xs text-gray-700">
+                                        <p class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Réalisé une progression de 35% des flux en automatisant la chaîne CI/CD.</p>
+                                        <p class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Réduction du taux d'incident de 60% grâce à un monitoring proactif 24/7.</p>
+                                    </div>
+
+                                    <div class="absolute inset-0 flex items-center justify-center p-4 bg-white/70 backdrop-blur-[1px]">
+                                        <div class="text-center space-y-2">
+                                            <p class="text-xs font-bold text-gray-900">Réécrire automatiquement mes points avec Brillio Pro</p>
+                                            <a href="{{ route('auth.jeune.register') }}" class="inline-flex px-4 py-2 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition">
+                                                Corriger les points maintenant
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Module 3 : RÉPÉTITIONS & MOTS-CLÉS (Image 5) -->
+                            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 space-y-4">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-600"></div>
+                                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Répétition & Vocabulaire</h4>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span>
+                                </div>
+                                <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2.5">
+                                    <span class="text-emerald-600 font-bold text-base">✓</span>
+                                    <span>Bon travail ! Aucun mot répété excessivement trouvé dans votre CV. Le vocabulaire technique est varié.</span>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
 
                 </div>

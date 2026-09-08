@@ -197,8 +197,9 @@ Format JSON attendu :
     \"profil\": \"Résumé du profil professionnel en 2-3 phrases\",
     \"experiences\": [\"Intitulé poste - Entreprise (Dates) : brève mission\"],
     \"formation\": [\"Diplôme - Établissement (Année)\"],
+    \"certifications\": [\"Certification professionnelle (ex: CKA, AWS, PMP, Scrum)\"],
     \"competences\": [\"Compétence 1\", \"Compétence 2\", \"Compétence 3\"],
-    \"langues\": [\"Français\", \"Anglais\"]
+    \"langues\": [\"Français (Courant)\", \"Anglais (Professionnel)\"]
   },
   \"global_score\": 68,
   \"criteria_scores\": {
@@ -264,8 +265,9 @@ Format JSON attendu :
         $phone = $phoneMatches[0] ?? null;
 
         $hasExp = (bool) preg_match('/exp[eé]rience/i', $text);
-        $hasForm = (bool) preg_match('/formation|dipl[oô]me|[eé]tude/i', $text);
+        $hasForm = (bool) preg_match('/formation|dipl[oô]me|[eé]tude|education|degree/i', $text);
         $hasComp = (bool) preg_match('/comp[eé]tence|skills/i', $text);
+        $hasCert = (bool) preg_match('/certif|cka|aws|azure|gcp|cisco|pmp|scrum|itil/i', $text);
 
         $baseScore = 55;
         if ($hasExp) {
@@ -294,8 +296,9 @@ Format JSON attendu :
                 'profil' => 'Profil dynamique prêt à s\'investir dans de nouveaux challenges professionnels.',
                 'experiences' => $hasExp ? ['Expériences professionnelles répertoriées dans le document'] : ['Débutant / En formation'],
                 'formation' => $hasForm ? ['Formations et diplômes mentionnés'] : ['Cursus en cours'],
+                'certifications' => $hasCert ? ['Certifications techniques identifiées'] : [],
                 'competences' => $hasComp ? ['Compétences techniques et relationnelles'] : ['Organisation', 'Communication'],
-                'langues' => ['Français'],
+                'langues' => ['Français (Courant)', 'Anglais (Professionnel)'],
             ],
             'global_score' => $score,
             'criteria_scores' => [

@@ -669,18 +669,72 @@
                                 </div>
                             @endif
 
-                            <!-- Formations -->
-                            @if(!empty($activeCv->parsed_content['formation']))
+                            <!-- Formations & Parcours Académique -->
+                            @php
+                                $formations = $activeCv->parsed_content['formation'] ?? [];
+                                if (empty($formations) && !empty($activeCv->parsed_content['raw_text'])) {
+                                    if (preg_match('/(?:EDUCATION|FORMATION|DIPL[OÔ]ME)[\s\:\-]+([^\n]+(?:\n[^\n]+){1,3})/i', $activeCv->parsed_content['raw_text'], $formMatches)) {
+                                        $formations = array_filter(array_map('trim', explode("\n", $formMatches[1])));
+                                    }
+                                }
+                            @endphp
+                            @if(!empty($formations))
                                 <div class="space-y-2">
-                                    <h4 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Formation & Diplômes</h4>
+                                    <h4 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Formation & Parcours Académique</h4>
                                     <ul class="space-y-1.5 text-xs sm:text-sm text-gray-700">
-                                        @foreach($activeCv->parsed_content['formation'] as $form)
+                                        @foreach($formations as $form)
                                             <li class="flex items-center gap-2">
                                                 <span class="text-secondary-600 font-bold">🎓</span>
                                                 <span>{{ $form }}</span>
                                             </li>
                                         @endforeach
                                     </ul>
+                                </div>
+                            @endif
+
+                            <!-- Certifications Professionnelles -->
+                            @php
+                                $certifs = $activeCv->parsed_content['certifications'] ?? [];
+                                if (empty($certifs) && !empty($activeCv->parsed_content['raw_text'])) {
+                                    if (preg_match('/(?:CERTIFICATIONS?|ACCR[EÉ]DITATIONS?)[\s\:\-]+([^\n]+(?:\n[^\n]+){1,3})/i', $activeCv->parsed_content['raw_text'], $certMatches)) {
+                                        $certifs = array_filter(array_map('trim', explode("\n", $certMatches[1])));
+                                    }
+                                }
+                            @endphp
+                            @if(!empty($certifs))
+                                <div class="space-y-2">
+                                    <h4 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Certifications Professionnelles</h4>
+                                    <ul class="space-y-1.5 text-xs sm:text-sm text-gray-700">
+                                        @foreach($certifs as $cert)
+                                            <li class="flex items-center gap-2">
+                                                <span class="text-emerald-600 font-bold">📜</span>
+                                                <span class="font-medium text-gray-800">{{ $cert }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <!-- Langues Maîtrisées -->
+                            @php
+                                $langs = $activeCv->parsed_content['langues'] ?? [];
+                                if (empty($langs) && !empty($activeCv->parsed_content['raw_text'])) {
+                                    if (preg_match('/(?:LANGUAGES?|LANGUES?)[\s\:\-]+([^\n]+(?:\n[^\n]+){1,2})/i', $activeCv->parsed_content['raw_text'], $langMatches)) {
+                                        $langs = array_filter(array_map('trim', explode("\n", $langMatches[1])));
+                                    }
+                                }
+                            @endphp
+                            @if(!empty($langs))
+                                <div class="space-y-2">
+                                    <h4 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Langues</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($langs as $lang)
+                                            <span class="px-3 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 text-xs font-semibold flex items-center gap-1.5">
+                                                <span>🌐</span>
+                                                <span>{{ $lang }}</span>
+                                            </span>
+                                        @endforeach
+                                    </div>
                                 </div>
                             @endif
                         </div>
