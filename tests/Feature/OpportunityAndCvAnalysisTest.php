@@ -25,7 +25,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Opportunités');
-        $response->assertSee('Évaluez l\'impact de votre CV', false);
+        $response->assertSee('Votre CV est-il assez percutant', false);
         $response->assertSee('Glissez-déposez votre CV ici');
     }
 
@@ -80,10 +80,10 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->get(route('public.opportunities.score', ['token' => $analysis->guest_token]));
 
         $response->assertStatus(200);
-        $response->assertSee('Votre Score Career');
+        $response->assertSee('Votre Score ATS');
         $response->assertSee('66');
-        $response->assertSee('Rapport complet et recommandations verrouillés pour les visiteurs');
-        $response->assertSee('Créer mon compte & débloquer mon audit', false);
+        $response->assertSee('Débloquer le rapport complet');
+        $response->assertSee('Votre CV, deux versions');
     }
 
     public function test_registered_user_claims_pending_cv_analysis()

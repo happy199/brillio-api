@@ -535,6 +535,157 @@
                         @endforeach
                     </div>
                 </div>
+
+                <!-- ========================================================= -->
+                <!-- COMPARATEUR : VOTRE CV, DEUX VERSIONS (ORIGINAL VS ATS)  -->
+                <!-- ========================================================= -->
+                <div class="pt-8 border-t border-gray-100 space-y-6" x-data="{ cvCompareTab: 'enhanced', copied: false }">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-[11px] font-bold bg-primary-100 text-primary-800 mb-1">
+                                <span>Optimisation ATS & Recruteur</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">Votre CV, deux versions</h3>
+                            <p class="text-xs text-gray-500">Comparez votre fichier original avec le modèle restructuré conforme aux normes des recruteurs.</p>
+                        </div>
+
+                        <!-- Toggle Switcher -->
+                        <div class="inline-flex p-1 bg-gray-100 rounded-xl">
+                            <button type="button"
+                                    @click="cvCompareTab = 'original'"
+                                    :class="cvCompareTab === 'original' ? 'bg-white text-gray-900 shadow-xs font-bold' : 'text-gray-500 hover:text-gray-900 font-medium'"
+                                    class="px-4 py-2 text-xs rounded-lg transition">
+                                Original importé
+                            </button>
+                            <button type="button"
+                                    @click="cvCompareTab = 'enhanced'"
+                                    :class="cvCompareTab === 'enhanced' ? 'bg-gradient-to-r from-primary-600 to-secondary-600 text-white shadow-xs font-bold' : 'text-gray-500 hover:text-gray-900 font-medium'"
+                                    class="px-4 py-2 text-xs rounded-lg transition flex items-center gap-1.5">
+                                <span>Modèle Brillio Pro ATS</span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 1. Onglet Original -->
+                    <div x-show="cvCompareTab === 'original'" class="space-y-4">
+                        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
+                            <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>Ce format brut peut contenir des incohérences de mise en page et des polices non reconnues par certains parseurs ATS.</span>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-gray-50 border border-gray-200 text-xs sm:text-sm text-gray-700 font-mono whitespace-pre-line max-h-[450px] overflow-y-auto leading-relaxed">
+                            {{ $activeCv->parsed_content['raw_text'] ?? 'Contenu d\'origine extrait du fichier ' . $activeCv->original_filename }}
+                        </div>
+                    </div>
+
+                    <!-- 2. Onglet Version Brillio Optimisée (Conforme Image 4) -->
+                    <div x-show="cvCompareTab === 'enhanced'" class="space-y-4">
+                        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Modèle testé pour les ATS · Conçu pour maximiser votre taux d'obtention d'entretiens.</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" @click="navigator.clipboard.writeText($refs.cvEnhancedContent.innerText); copied = true; setTimeout(() => copied = false, 2500)" class="px-3 py-1 bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                    <span x-text="copied ? '✓ Copié !' : 'Copier le texte'"></span>
+                                </button>
+                                <button type="button" onclick="window.print()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                    <span>Imprimer / PDF</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Fiche CV Restructurée Haute Définition -->
+                        <div x-ref="cvEnhancedContent" class="p-8 sm:p-10 rounded-3xl bg-white border border-gray-200 shadow-sm space-y-6 text-gray-800">
+                            <!-- En-tête Candidat avec avatar initiales rond (Image 4) -->
+                            <div class="flex items-start justify-between gap-4 pb-6 border-b border-gray-100">
+                                <div>
+                                    <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">
+                                        {{ $activeCv->candidate_name ?? 'Candidat Brillio' }}
+                                    </h2>
+                                    <p class="text-sm font-bold text-primary-600 mt-1">
+                                        {{ $activeCv->candidate_title ?? 'Profil & Spécialité' }}
+                                    </p>
+                                    <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-2.5">
+                                        @if(!empty($activeCv->candidate_contact['phone']))
+                                            <span>📞 {{ $activeCv->candidate_contact['phone'] }}</span>
+                                        @endif
+                                        @if(!empty($activeCv->candidate_contact['email']))
+                                            <span>✉️ {{ $activeCv->candidate_contact['email'] }}</span>
+                                        @endif
+                                        @if(!empty($activeCv->candidate_contact['location']))
+                                            <span>📍 {{ $activeCv->candidate_contact['location'] }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                @php
+                                    $initials = 'CV';
+                                    if (!empty($activeCv->candidate_name)) {
+                                        $words = explode(' ', trim($activeCv->candidate_name));
+                                        $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
+                                    }
+                                @endphp
+                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 text-white flex items-center justify-center font-bold text-lg shadow-sm flex-shrink-0">
+                                    {{ $initials }}
+                                </div>
+                            </div>
+
+                            <!-- Résumé Pro -->
+                            <div class="space-y-1.5">
+                                <h4 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Profil Professionnel</h4>
+                                <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                                    {{ $activeCv->parsed_content['profil'] ?? $activeCv->summary }}
+                                </p>
+                            </div>
+
+                            <!-- Compétences -->
+                            <div class="space-y-2">
+                                <h4 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Compétences Techniques & Transverses</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    @php
+                                        $skills = $activeCv->parsed_content['competences'] ?? ['Organisation', 'Communication', 'Rigueur', 'Adaptabilité'];
+                                    @endphp
+                                    @foreach($skills as $skill)
+                                        <span class="px-3 py-1 rounded-lg bg-gray-100 text-gray-800 text-xs font-medium">
+                                            {{ $skill }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Expériences -->
+                            @if(!empty($activeCv->parsed_content['experiences']))
+                                <div class="space-y-3">
+                                    <h4 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Expériences Professionnelles</h4>
+                                    <ul class="space-y-2.5 text-xs sm:text-sm text-gray-700">
+                                        @foreach($activeCv->parsed_content['experiences'] as $exp)
+                                            <li class="flex items-start gap-2.5">
+                                                <span class="text-primary-600 font-bold text-base">•</span>
+                                                <span class="leading-relaxed">{{ $exp }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <!-- Formations -->
+                            @if(!empty($activeCv->parsed_content['formation']))
+                                <div class="space-y-2">
+                                    <h4 class="text-xs font-extrabold text-gray-900 uppercase tracking-wider">Formation & Diplômes</h4>
+                                    <ul class="space-y-1.5 text-xs sm:text-sm text-gray-700">
+                                        @foreach($activeCv->parsed_content['formation'] as $form)
+                                            <li class="flex items-center gap-2">
+                                                <span class="text-secondary-600 font-bold">🎓</span>
+                                                <span>{{ $form }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
             </div>
         @else
             <!-- État vide : Aucun CV encore analysé dans le profil -->

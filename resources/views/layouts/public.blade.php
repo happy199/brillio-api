@@ -321,19 +321,19 @@
                     @endif
                 </a>
 
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-8">
+                <!-- Desktop Navigation (Adapté tablette et grands écrans 700px - 1280px) -->
+                <div class="hidden lg:flex items-center space-x-3 xl:space-x-6 text-xs xl:text-sm">
                     <a href="{{ route('home') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Accueil</a>
-                    <a href="{{ route('about') }}" class="font-medium transition-colors"
+                    <a href="{{ route('about') }}" class="font-medium transition-colors whitespace-nowrap"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">À
                         propos</a>
                     <a href="{{ route('public.resources') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Ressources</a>
-                    <a href="{{ route('public.opportunities') }}" class="font-medium transition-colors flex items-center gap-1.5"
+                    <a href="{{ route('public.opportunities') }}" class="font-medium transition-colors flex items-center gap-1 whitespace-nowrap"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">
                         <span>Opportunités</span>
-                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary-100 text-primary-700">CV IA</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] xl:text-[10px] font-bold bg-primary-100 text-primary-700">CV IA</span>
                     </a>
                     <a href="{{ route('public.advertisements') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Publicités</a>
@@ -342,21 +342,21 @@
                 </div>
 
                 <!-- CTA Buttons -->
-                <div class="hidden md:flex items-center space-x-3">
+                <div class="hidden lg:flex items-center space-x-2 xl:space-x-3">
                     <a href="{{ route('auth.login') }}"
-                        class="px-5 py-2.5 font-semibold rounded-full transition-all duration-300"
+                        class="hidden xl:inline-flex px-4 py-2 xl:px-5 xl:py-2.5 text-xs xl:text-sm font-semibold rounded-full transition-all duration-300 whitespace-nowrap"
                         :class="scrolled ? 'text-primary-600 hover:bg-primary-50' : 'text-white hover:bg-white/10'">
                         Explorer ta carrière
                     </a>
                     <a href="#telecharger"
-                        class="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300">
+                        class="px-4 py-2 xl:px-6 xl:py-2.5 text-xs xl:text-sm bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 whitespace-nowrap">
                         Télécharger l'app
                     </a>
                 </div>
 
-                <!-- Mobile menu button -->
-                <button @click="mobileMenu = !mobileMenu" class="md:hidden p-2 rounded-lg"
-                    :class="scrolled ? 'text-gray-700' : 'text-white'">
+                <!-- Mobile & Tablet menu button (affiché jusqu'à 1024px) -->
+                <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 rounded-lg"
+                    :class="scrolled ? 'text-gray-700' : 'text-white'" aria-label="Menu principal">
                     <svg x-show="!mobileMenu" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16"></path>

@@ -44,6 +44,11 @@ class CvAnalysisService
         $globalScore = max(10, min(99, $globalScore));
         $statusLabel = CvAnalysis::determineStatusLabel($globalScore);
 
+        $parsedContent = $analysisResult['parsed_content'] ?? [];
+        if (empty($parsedContent['raw_text'])) {
+            $parsedContent['raw_text'] = $extractedText;
+        }
+
         return CvAnalysis::create([
             'user_id' => $user?->id,
             'guest_token' => $guestToken,
@@ -54,7 +59,7 @@ class CvAnalysisService
             'candidate_name' => $analysisResult['candidate_name'] ?? 'Candidat Brillio',
             'candidate_title' => $analysisResult['candidate_title'] ?? 'Profil Professionnel',
             'candidate_contact' => $analysisResult['candidate_contact'] ?? [],
-            'parsed_content' => $analysisResult['parsed_content'] ?? [],
+            'parsed_content' => $parsedContent,
             'global_score' => $globalScore,
             'status_label' => $statusLabel,
             'criteria_scores' => $analysisResult['criteria_scores'] ?? [
