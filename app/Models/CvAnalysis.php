@@ -53,16 +53,11 @@ class CvAnalysis extends Model
      */
     public static function determineStatusLabel(int $score): string
     {
-        if ($score >= 85) {
-            return 'Excellent';
-        }
-        if ($score >= 70) {
-            return 'Très bien';
-        }
-        if ($score >= 50) {
-            return 'Bon potentiel';
-        }
-
-        return 'À perfectionner';
+        return match (true) {
+            $score >= 85 => 'Excellent',
+            $score >= 70 => 'Très bien',
+            $score >= 50 => 'Bon potentiel',
+            default => 'À perfectionner',
+        };
     }
 }

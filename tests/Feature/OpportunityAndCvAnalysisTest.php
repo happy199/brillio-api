@@ -13,6 +13,10 @@ class OpportunityAndCvAnalysisTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const MIME_PDF = 'application/pdf';
+
+    private const STATUS_TRES_BIEN = 'Très bien';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -31,7 +35,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
 
     public function test_guest_can_upload_and_analyze_cv()
     {
-        $file = UploadedFile::fake()->create('CV_Fatoumata_Traore_UXUI.pdf', 150, 'application/pdf');
+        $file = UploadedFile::fake()->create('CV_Fatoumata_Traore_UXUI.pdf', 150, self::MIME_PDF);
 
         $response = $this->post(route('public.opportunities.analyze'), [
             'cv_file' => $file,
@@ -69,11 +73,11 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'original_filename' => 'CV_Fatoumata_Traore.pdf',
             'file_path' => 'cv_analyses/guests/fake.pdf',
             'file_size' => 10240,
-            'mime_type' => 'application/pdf',
+            'mime_type' => self::MIME_PDF,
             'candidate_name' => 'Fatoumata TRAORÉ',
             'candidate_title' => 'UX/UI Designer',
             'global_score' => 66,
-            'status_label' => 'Très bien',
+            'status_label' => self::STATUS_TRES_BIEN,
             'is_claimed' => false,
         ]);
 
@@ -93,11 +97,11 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'original_filename' => 'CV_Test.pdf',
             'file_path' => 'cv_analyses/guests/test.pdf',
             'file_size' => 5000,
-            'mime_type' => 'application/pdf',
+            'mime_type' => self::MIME_PDF,
             'candidate_name' => 'Jean Dupont',
             'candidate_title' => 'Data Analyst',
             'global_score' => 74,
-            'status_label' => 'Très bien',
+            'status_label' => self::STATUS_TRES_BIEN,
             'is_claimed' => false,
         ]);
 
@@ -127,17 +131,17 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'onboarding_completed' => true,
         ]);
 
-        $analysis = CvAnalysis::create([
+        CvAnalysis::create([
             'user_id' => $user->id,
             'guest_token' => 'auth_token_test_12345678901234567890',
             'original_filename' => 'CV_Jean_Dev.pdf',
             'file_path' => 'cv_analyses/users/'.$user->id.'/cv.pdf',
             'file_size' => 8000,
-            'mime_type' => 'application/pdf',
+            'mime_type' => self::MIME_PDF,
             'candidate_name' => 'Jean Développeur',
             'candidate_title' => 'Fullstack Laravel',
             'global_score' => 82,
-            'status_label' => 'Très bien',
+            'status_label' => self::STATUS_TRES_BIEN,
             'summary' => 'Excellent profil technique.',
             'criteria_scores' => [
                 'structure' => 80,

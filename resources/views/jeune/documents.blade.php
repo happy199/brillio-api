@@ -25,7 +25,7 @@
             </template>
             <template x-if="currentTab === 'cv'">
                 <button @click="showCvUploadModal = true"
-                    class="px-5 py-2.5 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-500 text-white font-semibold rounded-xl hover:opacity-95 transition flex items-center gap-2 shadow-sm">
+                    class="px-5 py-2.5 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition flex items-center gap-2 shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                     </svg>
@@ -390,7 +390,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-gray-100">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="px-3 py-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 text-white text-xs font-bold rounded-full">Diagnostic Débloqué</span>
+                            <span class="px-3 py-1 bg-primary-600 text-white text-xs font-bold rounded-full">Diagnostic Débloqué</span>
                             <span class="text-xs text-gray-400">Analysé le {{ $activeCv->created_at->format('d/m/Y à H:i') }}</span>
                         </div>
                         <h2 class="text-2xl font-extrabold text-gray-900">{{ $activeCv->original_filename }}</h2>
@@ -415,7 +415,7 @@
                             </div>
                         @endif
 
-                        <button @click="showCvUploadModal = true" class="px-4 py-2 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-500 hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+                        <button @click="showCvUploadModal = true" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             <span>Réévaluer un CV</span>
                         </button>
@@ -424,23 +424,41 @@
 
                 <!-- Jauge & Synthèse globale -->
                 <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-10">
-                    <div class="relative w-40 h-40 flex-shrink-0 flex items-center justify-center">
+                    <div class="relative w-40 h-40 flex-shrink-0 flex items-center justify-center"
+                         x-data="{ 
+                             animatedScore: 0,
+                             targetScore: {{ $activeCv->global_score }},
+                             dashoffset: 314.159,
+                             targetDashoffset: {{ 314.159 - (314.159 * $activeCv->global_score / 100) }}
+                         }"
+                         x-init="
+                             setTimeout(() => {
+                                 dashoffset = targetDashoffset;
+                                 let duration = 1800;
+                                 let startTime = null;
+                                 function step(timestamp) {
+                                     if (!startTime) startTime = timestamp;
+                                     let progress = Math.min((timestamp - startTime) / duration, 1);
+                                     animatedScore = Math.floor(progress * targetScore);
+                                     if (progress < 1) {
+                                         window.requestAnimationFrame(step);
+                                     } else {
+                                         animatedScore = targetScore;
+                                     }
+                                 }
+                                 window.requestAnimationFrame(step);
+                             }, 250);
+                         ">
                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-                            <defs>
-                                <linearGradient id="dashboardScoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#6366f1" />
-                                    <stop offset="50%" stop-color="#d946ef" />
-                                    <stop offset="100%" stop-color="#f97316" />
-                                </linearGradient>
-                            </defs>
                             <circle cx="60" cy="60" r="50" fill="none" stroke="#E5E7EB" stroke-width="10" />
-                            <circle cx="60" cy="60" r="50" fill="none" stroke="url(#dashboardScoreGrad)" stroke-width="10"
+                            <circle cx="60" cy="60" r="50" fill="none" stroke="#6366f1" stroke-width="10"
                                     stroke-linecap="round"
                                     stroke-dasharray="314.159"
-                                    stroke-dashoffset="{{ 314.159 - (314.159 * $activeCv->global_score / 100) }}" />
+                                    :stroke-dashoffset="dashoffset"
+                                    class="transition-all duration-[1800ms] ease-out" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <span class="text-4xl font-extrabold text-gray-900">{{ $activeCv->global_score }}</span>
+                            <span class="text-4xl font-extrabold text-gray-900" x-text="animatedScore">0</span>
                             <span class="text-xs font-semibold text-gray-400 -mt-1">/ 100</span>
                         </div>
                     </div>
@@ -466,13 +484,36 @@
                             $crit = $activeCv->criteria_scores ?? ['structure' => 65, 'clarite' => 70, 'experiences' => 60, 'competences' => 68, 'impact' => 62];
                         @endphp
                         @foreach($crit as $criterion => $val)
-                            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2">
+                            <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2"
+                                 x-data="{ 
+                                     animatedVal: 0,
+                                     targetVal: {{ $val }},
+                                     barWidth: 0 
+                                 }"
+                                 x-init="
+                                     setTimeout(() => {
+                                         barWidth = targetVal;
+                                         let duration = 1500;
+                                         let startTime = null;
+                                         function step(timestamp) {
+                                             if (!startTime) startTime = timestamp;
+                                             let progress = Math.min((timestamp - startTime) / duration, 1);
+                                             animatedVal = Math.floor(progress * targetVal);
+                                             if (progress < 1) {
+                                                 window.requestAnimationFrame(step);
+                                             } else {
+                                                 animatedVal = targetVal;
+                                             }
+                                         }
+                                         window.requestAnimationFrame(step);
+                                     }, 300);
+                                 ">
                                 <div class="flex items-center justify-between text-xs font-bold">
                                     <span class="capitalize text-gray-700">{{ $criterion }}</span>
-                                    <span class="text-primary-700">{{ $val }}%</span>
+                                    <span class="text-primary-700"><span x-text="animatedVal">0</span>%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full" style="width: {{ $val }}%"></div>
+                                    <div class="bg-primary-600 h-2 rounded-full transition-all duration-[1500ms] ease-out" :style="'width: ' + barWidth + '%'"></div>
                                 </div>
                             </div>
                         @endforeach
@@ -519,9 +560,9 @@
                 </div>
 
                 <!-- Recommandations Personnalisées du Coach IA -->
-                <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-primary-50/80 via-secondary-50/60 to-accent-50/50 border border-primary-100 space-y-4">
+                <div class="p-6 sm:p-8 rounded-2xl bg-primary-50/80 border border-primary-100 space-y-4">
                     <div class="flex items-center gap-2.5 text-primary-900 font-bold text-base">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <div class="w-8 h-8 rounded-xl bg-primary-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
                         <span>Conseils concrets du Coach IA Brillio</span>
@@ -559,7 +600,7 @@
                             </button>
                             <button type="button"
                                     @click="cvCompareTab = 'enhanced'"
-                                    :class="cvCompareTab === 'enhanced' ? 'bg-gradient-to-r from-primary-600 to-secondary-600 text-white shadow-xs font-bold' : 'text-gray-500 hover:text-gray-900 font-medium'"
+                                    :class="cvCompareTab === 'enhanced' ? 'bg-primary-600 text-white shadow-xs font-bold' : 'text-gray-500 hover:text-gray-900 font-medium'"
                                     class="px-4 py-2 text-xs rounded-lg transition flex items-center gap-1.5">
                                 <span>Modèle Brillio Pro ATS</span>
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -589,7 +630,8 @@
                                 <button type="button" @click="navigator.clipboard.writeText($refs.cvEnhancedContent.innerText); copied = true; setTimeout(() => copied = false, 2500)" class="px-3 py-1 bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
                                     <span x-text="copied ? '✓ Copié !' : 'Copier le texte'"></span>
                                 </button>
-                                <button type="button" onclick="window.print()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                <button type="button" onclick="printCvDocument()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                                     <span>Imprimer / PDF</span>
                                 </button>
                             </div>
@@ -626,7 +668,7 @@
                                         $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
                                     }
                                 @endphp
-                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 text-white flex items-center justify-center font-bold text-lg shadow-sm flex-shrink-0">
+                                <div class="w-14 h-14 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-lg shadow-sm flex-shrink-0">
                                     {{ $initials }}
                                 </div>
                             </div>
@@ -744,14 +786,14 @@
         @else
             <!-- État vide : Aucun CV encore analysé dans le profil -->
             <div class="bg-white rounded-3xl p-12 text-center border border-gray-100">
-                <div class="w-16 h-16 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-2xl flex items-center justify-center text-primary-600 mx-auto mb-4">
+                <div class="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center text-primary-600 mx-auto mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900">Évaluez votre premier CV avec l'IA</h3>
                 <p class="text-sm text-gray-500 max-w-md mx-auto mt-1 mb-6">Importez votre CV pour obtenir un diagnostic instantané, vos points forts, vos axes d'amélioration et booster votre employabilité.</p>
-                <button @click="showCvUploadModal = true" class="px-6 py-3 bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-500 text-white font-bold rounded-xl hover:opacity-95 transition shadow-sm">
+                <button @click="showCvUploadModal = true" class="px-6 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition shadow-sm">
                     Analyser mon CV maintenant
                 </button>
             </div>
@@ -776,8 +818,8 @@
                 <form action="{{ route('jeune.documents.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                     @csrf
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Type de document</label>
-                        <select name="document_type" required class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-hidden">
+                        <label for="document_type" class="block text-sm font-semibold text-gray-700 mb-2">Type de document</label>
+                        <select id="document_type" name="document_type" required class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-primary-500 focus:outline-hidden">
                             <option value="bulletin">Bulletin de notes</option>
                             <option value="diplome">Diplôme</option>
                             <option value="attestation">Attestation de réussite</option>
@@ -786,8 +828,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Fichier (PDF ou image max 10 Mo)</label>
-                        <input type="file" name="document" required accept=".pdf,.jpg,.jpeg,.png" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
+                        <label for="document" class="block text-sm font-semibold text-gray-700 mb-2">Fichier (PDF ou image max 10 Mo)</label>
+                        <input id="document" type="file" name="document" required accept=".pdf,.jpg,.jpeg,.png" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
@@ -819,13 +861,13 @@
                 <form action="{{ route('jeune.cv.analyze') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                     @csrf
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Fichier CV (PDF, DOCX, JPG ou PNG)</label>
-                        <input type="file" name="cv_file" required accept=".pdf,.docx,.png,.jpg,.jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
+                        <label for="cv_file" class="block text-sm font-semibold text-gray-700 mb-2">Fichier CV (PDF, DOCX, JPG ou PNG)</label>
+                        <input id="cv_file" type="file" name="cv_file" required accept=".pdf,.docx,.png,.jpg,.jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                         <button type="button" @click="showCvUploadModal = false" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50">Annuler</button>
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-500 text-white font-bold text-sm hover:opacity-95 transition shadow-sm">Lancer l'analyse IA</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 text-white font-bold text-sm hover:bg-primary-700 transition shadow-sm">Lancer l'analyse IA</button>
                     </div>
                 </form>
             </div>
@@ -842,7 +884,7 @@
                     <button @click="showPreviewModal = false" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
                 <div class="h-[65vh] flex items-center justify-center bg-gray-50 rounded-2xl overflow-hidden">
-                    <iframe :src="previewUrl" class="w-full h-full border-0"></iframe>
+                    <iframe :src="previewUrl" title="Aperçu du document" class="w-full h-full border-0"></iframe>
                 </div>
             </div>
         </div>
@@ -918,6 +960,69 @@ function opportunitiesHubApp(initialTab) {
         }
     };
 }
+
+function printCvDocument() {
+    const printArea = document.getElementById('cvEnhancedPrintArea');
+    if (!printArea) {
+        window.print();
+        return;
+    }
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <title>CV_Optimise_Brillio</title>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+            <script src="https://cdn.tailwindcss.com"><\/script>
+            <style>
+                @page {
+                    size: A4 portrait;
+                    margin: 10mm 12mm;
+                }
+                body {
+                    font-family: 'Inter', sans-serif;
+                    background: white !important;
+                    color: #111827 !important;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+                #cvContent {
+                    background: white !important;
+                }
+            </style>
+        </head>
+        <body class="p-4 bg-white">
+            <div id="cvContent">${printArea.innerHTML}</div>
+        </body>
+        </html>
+    `);
+    doc.close();
+
+    setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(() => {
+            if (document.body.contains(iframe)) {
+                document.body.removeChild(iframe);
+            }
+        }, 2000);
+    }, 600);
+}
 </script>
 @endpush
 
@@ -925,28 +1030,22 @@ function opportunitiesHubApp(initialTab) {
 @push('styles')
 <style>
 @media print {
-    /* Cache toute l'interface Brillio (sidebar, header, boutons, onglets) */
-    body * {
-        visibility: hidden !important;
+    body > * {
+        display: none !important;
     }
-    /* Rend uniquement visible le conteneur du CV ATS */
-    #cvEnhancedPrintArea, #cvEnhancedPrintArea * {
-        visibility: visible !important;
-    }
-    #cvEnhancedPrintArea {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 10mm 15mm !important;
-        border: none !important;
-        box-shadow: none !important;
+    body {
         background: white !important;
     }
-    @page {
-        size: A4 portrait;
-        margin: 10mm;
+    #cvEnhancedPrintArea {
+        display: block !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10mm !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 }
 </style>

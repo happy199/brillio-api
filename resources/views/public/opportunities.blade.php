@@ -637,7 +637,7 @@
                                 </svg>
                             </div>
                             <div class="truncate">
-                                <h3 class="text-base font-bold text-gray-900 truncate" x-text="selectedFile?.name"></h3>
+                                <h3 class="text-base font-bold text-gray-900 truncate" x-text="selectedFile?.name">Document sélectionné</h3>
                                 <div class="flex items-center gap-2 mt-1">
                                     <span class="text-xs text-gray-500" x-text="formatFileSize(selectedFile?.size)"></span>
                                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
@@ -668,7 +668,7 @@
                                 <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold bg-primary-100 text-primary-800 mb-1">
                                     <span>Pré-détection des informations</span>
                                 </div>
-                                <h3 class="text-xl font-black text-gray-900" x-text="extractedCandidate.name || 'Candidat identifié'"></h3>
+                                <h3 class="text-xl font-black text-gray-900" x-text="extractedCandidate.name || 'Candidat identifié'">Candidat identifié</h3>
                                 <p class="text-sm font-bold text-primary-600 mt-0.5" x-text="extractedCandidate.title || 'Profil Professionnel'"></p>
                             </div>
 
@@ -750,7 +750,8 @@
                 <!-- Formulaire HTML invisible -->
                 <form id="cvUploadForm" action="{{ route('public.opportunities.analyze') }}" method="POST" enctype="multipart/form-data" class="hidden">
                     @csrf
-                    <input type="file" x-ref="fileInput" name="cv_file" accept=".pdf,.docx,.png,.jpg,.jpeg" @change="onFileSelected($event)">
+                    <label for="public_cv_file" class="sr-only">Fichier CV à analyser</label>
+                    <input id="public_cv_file" type="file" x-ref="fileInput" name="cv_file" accept=".pdf,.docx,.png,.jpg,.jpeg" @change="onFileSelected($event)">
                 </form>
 
             </div>

@@ -587,7 +587,7 @@ class JeuneDashboardController extends Controller
     public function analyzeCv(Request $request, CvAnalysisService $cvService)
     {
         $validated = $request->validate([
-            'cv_file' => 'required|file|mimes:pdf,docx,png,jpg,jpeg|max:10240',
+            'cv_file' => ['required', 'file', 'mimes:pdf,docx,png,jpg,jpeg', 'max:10240'],
         ], [
             'cv_file.required' => 'Veuillez sélectionner un fichier CV à importer.',
             'cv_file.file' => 'Le document téléversé est invalide.',

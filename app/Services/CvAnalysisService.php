@@ -11,12 +11,15 @@ use Smalot\PdfParser\Parser;
 
 class CvAnalysisService
 {
-    protected BrillioIAService $brillioIAService;
+    private const CANDIDATE_DEFAULT = 'Candidat Brillio';
 
-    public function __construct(BrillioIAService $brillioIAService)
-    {
-        $this->brillioIAService = $brillioIAService;
-    }
+    private const NOT_SPECIFIED = 'Non spécifié';
+
+    private const AVAILABLE_ON_CV = 'Disponible sur le CV';
+
+    public function __construct(
+        protected BrillioIAService $brillioIAService
+    ) {}
 
     /**
      * Traite un fichier CV téléversé, extrait son contenu et réalise l'analyse IA.
@@ -56,7 +59,7 @@ class CvAnalysisService
             'file_path' => $path,
             'file_size' => $fileSize,
             'mime_type' => $mimeType,
-            'candidate_name' => $analysisResult['candidate_name'] ?? 'Candidat Brillio',
+            'candidate_name' => $analysisResult['candidate_name'] ?? self::CANDIDATE_DEFAULT,
             'candidate_title' => $analysisResult['candidate_title'] ?? 'Profil Professionnel',
             'candidate_contact' => $analysisResult['candidate_contact'] ?? [],
             'parsed_content' => $parsedContent,
@@ -176,12 +179,9 @@ class CvAnalysisService
         $sampleText = mb_substr($text, 0, 8000);
 
         // ─── Détection du CV Brillio Pro ATS-Certifié ───────────────────────────
-        // Si le PDF re-uploadé contient notre watermark de certification, on
-        // court-circuite l'analyse IA et retournons directement un score parfait.
         if (str_contains($sampleText, 'BRILLIO-ATS-CERTIFIED')) {
             return $this->generateBrillioProAnalysis($sampleText);
         }
-        // ────────────────────────────────────────────────────────────────────────
 
         if (mb_strlen($sampleText) < 40) {
             return $this->generateFallbackAnalysis($originalFilename);
@@ -244,13 +244,14 @@ Format JSON attendu :
 
         $userPrompt = "Voici le texte extrait du CV ('{$originalFilename}') :\n\n".$sampleText."\n\nÉvalue ce CV selon les standards stricts des filtres ATS et des recruteurs. Attribue une note globale réaliste entre 40 et 92 selon la qualité de la structure et du contenu.";
 
+        $aiResult = null;
         try {
             $response = $this->brillioIAService->analyzeText($userPrompt, $systemPrompt);
             $cleanJson = $this->brillioIAService->cleanJson($response);
             $decoded = json_decode($cleanJson, true);
 
             if (is_array($decoded) && isset($decoded['global_score'])) {
-                return $decoded;
+                $aiResult = $decoded;
             }
         } catch (\Exception $e) {
             Log::warning('Échec appel IA analyse CV, utilisation du fallback heuristique', [
@@ -258,17 +259,17 @@ Format JSON attendu :
             ]);
         }
 
-        return $this->generateHeuristicAnalysis($sampleText, $originalFilename);
+        return $aiResult ?? $this->generateHeuristicAnalysis($sampleText);
     }
 
     /**
      * Analyse heuristique si l'IA distante est indisponible
      */
-    private function generateHeuristicAnalysis(string $text, string $originalFilename): array
+    private function generateHeuristicAnalysis(string $text): array
     {
         // Détecter un nom potentiel
         $lines = array_filter(array_map('trim', explode("\n", $text)));
-        $firstLine = reset($lines) ?: 'Candidat Brillio';
+        $firstLine = reset($lines) ?: self::CANDIDATE_DEFAULT;
         $candidateName = mb_strlen($firstLine) < 50 ? $firstLine : 'Candidat';
 
         // Détection email
@@ -303,8 +304,8 @@ Format JSON attendu :
             'candidate_name' => $candidateName,
             'candidate_title' => 'Candidat & Talent',
             'candidate_contact' => [
-                'phone' => $phone ?? 'Disponible sur le CV',
-                'email' => $email ?? 'Disponible sur le CV',
+                'phone' => $phone ?? self::AVAILABLE_ON_CV,
+                'email' => $email ?? self::AVAILABLE_ON_CV,
                 'location' => 'Afrique de l\'Ouest',
             ],
             'parsed_content' => [
@@ -358,30 +359,30 @@ Format JSON attendu :
         preg_match('/(?:\+?\d{1,4}[ -]?)?\(?\d{2,4}\)?[ -]?\d{2,4}[ -]?\d{2,4}/', $text, $phoneMatches);
 
         return [
-            'candidate_name'    => $candidateName,
-            'candidate_title'   => 'Profil Brillio Pro — ATS Certifié',
+            'candidate_name' => $candidateName,
+            'candidate_title' => 'Profil Brillio Pro — ATS Certifié',
             'candidate_contact' => [
-                'phone'    => $phoneMatches[0] ?? 'Disponible sur le CV',
-                'email'    => $emailMatches[0] ?? 'Disponible sur le CV',
+                'phone' => $phoneMatches[0] ?? 'Disponible sur le CV',
+                'email' => $emailMatches[0] ?? 'Disponible sur le CV',
                 'location' => 'Afrique de l\'Ouest',
             ],
             'parsed_content' => [
-                'profil'          => 'Profil généré et optimisé par Brillio Pro. Ce CV respecte à 100% les standards ATS (Workday, Taleo, Greenhouse, Lever, SmartRecruiters).',
-                'experiences'     => ['Expériences structurées en format STAR avec impact chiffré'],
-                'formation'       => ['Formations et diplômes normalisés pour la lisibilité ATS'],
-                'certifications'  => ['Certifications incluses et reconnues par les parsers ATS'],
-                'competences'     => ['Compétences techniques alignées avec les mots-clés sectoriels'],
-                'langues'         => ['Français (Courant)', 'Anglais (Professionnel)'],
-                'raw_text'        => $text,
+                'profil' => 'Profil généré et optimisé par Brillio Pro. Ce CV respecte à 100% les standards ATS (Workday, Taleo, Greenhouse, Lever, SmartRecruiters).',
+                'experiences' => ['Expériences structurées en format STAR avec impact chiffré'],
+                'formation' => ['Formations et diplômes normalisés pour la lisibilité ATS'],
+                'certifications' => ['Certifications incluses et reconnues par les parsers ATS'],
+                'competences' => ['Compétences techniques alignées avec les mots-clés sectoriels'],
+                'langues' => ['Français (Courant)', 'Anglais (Professionnel)'],
+                'raw_text' => $text,
                 'is_brillio_certified' => true,
             ],
-            'global_score'   => 100,
+            'global_score' => 100,
             'criteria_scores' => [
-                'structure'    => 100,
-                'clarite'      => 100,
-                'experiences'  => 100,
-                'competences'  => 100,
-                'impact'       => 100,
+                'structure' => 100,
+                'clarite' => 100,
+                'experiences' => 100,
+                'competences' => 100,
+                'impact' => 100,
             ],
             'strengths' => [
                 'Structure mono-colonne optimale : 100% lisible par tous les parsers ATS industriels',
@@ -390,7 +391,7 @@ Format JSON attendu :
                 'Densité de mots-clés métier optimisée pour les filtres Workday, Taleo et Greenhouse',
                 'Coordonnées de contact claires, sans ambiguïté pour l\'extraction automatique',
             ],
-            'improvements'    => [],
+            'improvements' => [],
             'recommendations' => [
                 'Votre CV Brillio Pro est déjà parfaitement optimisé — aucune modification nécessaire.',
                 'Personnalisez les mots-clés selon l\'offre d\'emploi ciblée pour maximiser le score de matching.',
@@ -409,9 +410,9 @@ Format JSON attendu :
             'candidate_name' => 'Candidat',
             'candidate_title' => 'Postulant',
             'candidate_contact' => [
-                'phone' => 'Non spécifié',
-                'email' => 'Non spécifié',
-                'location' => 'Non spécifié',
+                'phone' => self::NOT_SPECIFIED,
+                'email' => self::NOT_SPECIFIED,
+                'location' => self::NOT_SPECIFIED,
             ],
             'parsed_content' => [
                 'profil' => 'Document importé : '.$filename,

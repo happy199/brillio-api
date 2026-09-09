@@ -33,7 +33,7 @@ class OpportunityController extends Controller
     public function analyzeCv(Request $request, CvAnalysisService $cvService)
     {
         $validated = $request->validate([
-            'cv_file' => 'required|file|mimes:pdf,docx,png,jpg,jpeg|max:10240',
+            'cv_file' => ['required', 'file', 'mimes:pdf,docx,png,jpg,jpeg', 'max:10240'],
         ], [
             'cv_file.required' => 'Veuillez sélectionner un fichier CV à importer.',
             'cv_file.file' => 'Le document téléversé est invalide.',
@@ -48,35 +48,45 @@ class OpportunityController extends Controller
             // Mémorisation du token dans la session
             session(['pending_cv_token' => $cvAnalysis->guest_token]);
 
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'token' => $cvAnalysis->guest_token,
-                    'score' => $cvAnalysis->global_score,
-                    'status_label' => $cvAnalysis->status_label,
-                    'candidate_name' => $cvAnalysis->candidate_name,
-                    'candidate_title' => $cvAnalysis->candidate_title,
-                    'candidate_contact' => $cvAnalysis->candidate_contact,
-                    'parsed_content' => $cvAnalysis->parsed_content,
-                    'redirect_url' => route('public.opportunities.score', ['token' => $cvAnalysis->guest_token]),
-                ]);
-            }
-
-            return redirect()->route('public.opportunities.score', ['token' => $cvAnalysis->guest_token]);
+            return $this->buildAnalysisSuccessResponse($request, $cvAnalysis);
         } catch (\Exception $e) {
             Log::error('Erreur lors de l\'analyse du CV : '.$e->getMessage());
 
-            if ($request->wantsJson() || $request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Une erreur est survenue lors de l\'analyse de votre CV. Veuillez réessayer.',
-                ], 500);
-            }
+            return $this->buildAnalysisErrorResponse($request);
+        }
+    }
 
-            return back()->withErrors([
-                'cv_file' => 'Une erreur est survenue lors de l\'analyse de votre CV. Veuillez réessayer.',
+    private function buildAnalysisSuccessResponse(Request $request, CvAnalysis $cvAnalysis)
+    {
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'token' => $cvAnalysis->guest_token,
+                'score' => $cvAnalysis->global_score,
+                'status_label' => $cvAnalysis->status_label,
+                'candidate_name' => $cvAnalysis->candidate_name,
+                'candidate_title' => $cvAnalysis->candidate_title,
+                'candidate_contact' => $cvAnalysis->candidate_contact,
+                'parsed_content' => $cvAnalysis->parsed_content,
+                'redirect_url' => route('public.opportunities.score', ['token' => $cvAnalysis->guest_token]),
             ]);
         }
+
+        return redirect()->route('public.opportunities.score', ['token' => $cvAnalysis->guest_token]);
+    }
+
+    private function buildAnalysisErrorResponse(Request $request)
+    {
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de l\'analyse de votre CV. Veuillez réessayer.',
+            ], 500);
+        }
+
+        return back()->withErrors([
+            'cv_file' => 'Une erreur est survenue lors de l\'analyse de votre CV. Veuillez réessayer.',
+        ]);
     }
 
     /**
