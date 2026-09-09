@@ -490,16 +490,26 @@ Format JSON attendu :
      */
     public function storeCvInAcademicDocuments(User $user, CvAnalysis $cvAnalysis): void
     {
+        $filename = $cvAnalysis->original_filename ?: 'CV_Original.pdf';
+        $filesize = $cvAnalysis->file_size ?: 0;
+
         $exists = $user->academicDocuments()
-            ->where('file_path', $cvAnalysis->file_path)
+            ->where('document_type', AcademicDocument::TYPE_CV)
+            ->where(function ($query) use ($cvAnalysis, $filename, $filesize) {
+                $query->where('file_path', $cvAnalysis->file_path)
+                    ->orWhere(function ($sub) use ($filename, $filesize) {
+                        $sub->where('file_name', $filename)
+                            ->where('file_size', $filesize);
+                    });
+            })
             ->exists();
 
         if (! $exists) {
             $user->academicDocuments()->create([
                 'document_type' => AcademicDocument::TYPE_CV,
                 'file_path' => $cvAnalysis->file_path,
-                'file_name' => $cvAnalysis->original_filename ?: 'CV_Original.pdf',
-                'file_size' => $cvAnalysis->file_size ?: 0,
+                'file_name' => $filename,
+                'file_size' => $filesize,
                 'mime_type' => $cvAnalysis->mime_type,
                 'uploaded_at' => now(),
             ]);

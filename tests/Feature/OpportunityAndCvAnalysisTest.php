@@ -725,4 +725,66 @@ TXT;
         $this->assertStringContainsString('CV_Word_Original.docx', $downloadResponse->headers->get('Content-Disposition'));
         $this->assertEquals('Fichier Word Original Brut', $downloadResponse->streamedContent());
     }
+
+    public function test_rapid_multiple_cv_uploads_do_not_create_duplicates()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $file1 = UploadedFile::fake()->create('Mon_CV_Unique.pdf', 350, 'application/pdf');
+
+        // Première soumission
+        $this->actingAs($user)->post(route('jeune.cv.analyze'), ['cv_file' => $file1]);
+
+        // Deuxième soumission en rafale immédiate du même fichier
+        $file2 = UploadedFile::fake()->create('Mon_CV_Unique.pdf', 350, 'application/pdf');
+        $this->actingAs($user)->post(route('jeune.cv.analyze'), ['cv_file' => $file2]);
+
+        // Vérifier qu'une seule analyse a été persistée pour cet upload répété
+        $this->assertEquals(1, $user->cvAnalyses()->where('original_filename', 'Mon_CV_Unique.pdf')->count());
+        $this->assertEquals(1, $user->academicDocuments()->where('file_name', 'Mon_CV_Unique.pdf')->count());
+    }
+
+    public function test_view_document_serves_html_preview_for_docx()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        Storage::disk('public')->put('documents/test.docx', 'PK mock docx content');
+
+        $doc = $user->academicDocuments()->create([
+            'document_type' => 'cv',
+            'file_name' => 'Mon_CV.docx',
+            'file_path' => 'documents/test.docx',
+            'file_size' => 12000,
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'uploaded_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.documents.view', $doc->id));
+        $response->assertStatus(200);
+        $response->assertSee('DOCX');
+        $response->assertSee('Mon_CV.docx');
+        $response->assertSee('Télécharger le fichier (.docx)');
+    }
+
+    public function test_reevaluer_button_is_removed_and_modal_has_no_ia_mention()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.outils', ['tab' => 'cv']));
+        $response->assertStatus(200);
+        $response->assertDontSee('Réévaluer un CV');
+        $response->assertDontSee("Évaluer un CV avec l'IA");
+        $response->assertDontSee("Lancer l'analyse IA");
+        $response->assertSee('Évaluer un nouveau CV');
+        $response->assertSee("Lancer l'analyse", false);
+    }
 }

@@ -166,11 +166,6 @@
                                 </div>
                             </div>
                         @endif
-
-                        <button @click="showCvUploadModal = true" class="px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition flex items-center gap-2 shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            <span>Réévaluer un CV</span>
-                        </button>
                     </div>
                 </div>
 
@@ -1246,32 +1241,56 @@
         </div>
     </div>
 
-    <!-- MODAL : TÉLÉVERSER UN NOUVEAU CV IA -->
-    <div x-show="showCvUploadModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showCvUploadModal = false">
+    <!-- MODAL : TÉLÉVERSER UN NOUVEAU CV -->
+    <div x-show="showCvUploadModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="if (!isUploadingCv) showCvUploadModal = false">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" @click="showCvUploadModal = false"></div>
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" @click="if (!isUploadingCv) showCvUploadModal = false"></div>
             <div class="relative bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl z-10 space-y-6">
-                <div class="flex items-center justify-between pb-4 border-b border-gray-100">
-                    <h3 class="text-xl font-bold text-gray-900">Évaluer un CV avec l'IA</h3>
-                    <button @click="showCvUploadModal = false" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
+                <!-- État formulaire (avant validation) -->
+                <div x-show="!isUploadingCv" class="space-y-6">
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                        <h3 class="text-xl font-bold text-gray-900">Évaluer un nouveau CV</h3>
+                        <button @click="showCvUploadModal = false" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-gray-500">Importez votre CV mis à jour pour comparer votre score, détecter les évolutions et obtenir de nouveaux conseils de recrutement.</p>
+
+                    <form action="{{ route('jeune.cv.analyze') }}" method="POST" enctype="multipart/form-data" @submit="isUploadingCv = true" class="space-y-5">
+                        @csrf
+                        <div>
+                            <label for="cv_file" class="block text-sm font-semibold text-gray-700 mb-2">Fichier CV (PDF, DOCX, JPG ou PNG - max 5 Mo)</label>
+                            <input id="cv_file" type="file" name="cv_file" required accept=".pdf,.docx,.png,.jpg,.jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                            <button type="button" @click="showCvUploadModal = false" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50">Annuler</button>
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 text-white font-bold text-sm hover:bg-primary-700 transition shadow-sm flex items-center gap-2">
+                                <span>Lancer l'analyse</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
-                <p class="text-xs text-gray-500 mb-6">Importez votre CV mis à jour pour comparer votre score, détecter les évolutions et obtenir de nouveaux conseils de recrutement.</p>
-
-                <form action="{{ route('jeune.cv.analyze') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
-                    @csrf
-                    <div>
-                        <label for="cv_file" class="block text-sm font-semibold text-gray-700 mb-2">Fichier CV (PDF, DOCX, JPG ou PNG - max 5 Mo)</label>
-                        <input id="cv_file" type="file" name="cv_file" required accept=".pdf,.docx,.png,.jpg,.jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
+                <!-- État de chargement avec loader animé -->
+                <div x-show="isUploadingCv" class="py-8 text-center space-y-4">
+                    <div class="w-16 h-16 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center mx-auto">
+                        <svg class="animate-spin w-8 h-8 text-primary-600" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </div>
-
-                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                        <button type="button" @click="showCvUploadModal = false" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50">Annuler</button>
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary-600 text-white font-bold text-sm hover:bg-primary-700 transition shadow-sm">Lancer l'analyse IA</button>
+                    <div class="space-y-1">
+                        <h4 class="text-lg font-bold text-gray-900">Analyse de votre CV en cours...</h4>
+                        <p class="text-xs text-gray-500 max-w-sm mx-auto">Veuillez patienter pendant la lecture, la notation et la restructuration du document.</p>
                     </div>
-                </form>
+                    <div class="pt-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                            Ne fermez pas cette page
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1332,14 +1351,23 @@
             <div class="relative bg-white rounded-3xl p-6 max-w-4xl w-full shadow-2xl z-10 space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                     <h3 class="font-bold text-gray-900 truncate" x-text="previewFileName">Aperçu</h3>
-                    <button @click="showPreviewModal = false" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                    <div class="flex items-center gap-2">
+                        <a :href="previewDownloadUrl" download
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary-50 text-primary-700 text-xs font-bold hover:bg-primary-100 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <span>Télécharger</span>
+                        </a>
+                        <button @click="showPreviewModal = false" class="text-gray-400 hover:text-gray-600 p-1">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="w-full h-[70vh] bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center">
-                    <template x-if="previewType.includes('pdf')">
-                        <iframe :src="previewUrl" class="w-full h-full border-0" title="Aperçu du document au format PDF"></iframe>
+                    <template x-if="previewType.includes('pdf') || previewType.includes('word') || previewType.includes('officedocument') || previewFileName.toLowerCase().endsWith('.docx') || previewFileName.toLowerCase().endsWith('.doc')">
+                        <iframe :src="previewUrl" class="w-full h-full border-0 rounded-xl" title="Aperçu du document"></iframe>
                     </template>
-                    <template x-if="!previewType.includes('pdf')">
-                        <img :src="previewUrl" class="max-w-full max-h-full object-contain" alt="Aperçu" />
+                    <template x-if="!(previewType.includes('pdf') || previewType.includes('word') || previewType.includes('officedocument') || previewFileName.toLowerCase().endsWith('.docx') || previewFileName.toLowerCase().endsWith('.doc'))">
+                        <img :src="previewUrl" class="max-w-full max-h-full object-contain" alt="Aperçu du document" />
                     </template>
                 </div>
             </div>
@@ -1396,7 +1424,9 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
         showCvUploadModal: false,
         showPreviewModal: false,
         showDeleteModal: false,
+        isUploadingCv: false,
         previewUrl: '',
+        previewDownloadUrl: '',
         previewType: '',
         previewFileName: '',
         documentToDelete: null,
@@ -1512,7 +1542,8 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
 
         previewDocument(id, mimeType, fileName) {
             this.previewUrl = `/espace-jeune/documents/${id}/view`;
-            this.previewType = mimeType;
+            this.previewDownloadUrl = `/espace-jeune/documents/${id}/download`;
+            this.previewType = (mimeType || '').toLowerCase();
             this.previewFileName = fileName;
             this.showPreviewModal = true;
         },

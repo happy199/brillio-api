@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicDocument;
 use App\Models\AdvisorVideoCall;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
@@ -579,6 +580,8 @@ class JeuneDashboardController extends Controller
             }
         }
 
+        $this->cleanupDuplicateCvRecords($user);
+
         $documents = $user->academicDocuments()
             ->orderByDesc('created_at')
             ->get();
@@ -616,6 +619,42 @@ class JeuneDashboardController extends Controller
             'cvDownloadCost' => $cvDownloadCost,
             'templateCosts' => $templateCosts,
         ]);
+    }
+
+    /**
+     * Nettoie les doublons de CV originaux et d'analyses générés par des clics multiples
+     */
+    private function cleanupDuplicateCvRecords($user): void
+    {
+        $cvDocs = $user->academicDocuments()
+            ->where('document_type', AcademicDocument::TYPE_CV)
+            ->orderBy('id')
+            ->get();
+
+        $seenDocs = [];
+        foreach ($cvDocs as $doc) {
+            $key = $doc->file_name.'_'.$doc->file_size;
+            if (isset($seenDocs[$key])) {
+                $doc->delete();
+            } else {
+                $seenDocs[$key] = true;
+            }
+        }
+
+        $analyses = $user->cvAnalyses()
+            ->orderBy('id')
+            ->get();
+
+        $seenAnalyses = [];
+        foreach ($analyses as $an) {
+            $minuteKey = $an->created_at ? $an->created_at->format('Y-m-d H:i') : 'now';
+            $key = $an->original_filename.'_'.$an->file_size.'_'.$minuteKey;
+            if (isset($seenAnalyses[$key])) {
+                $an->delete();
+            } else {
+                $seenAnalyses[$key] = true;
+            }
+        }
     }
 
     /**
@@ -910,7 +949,16 @@ class JeuneDashboardController extends Controller
 
         try {
             $user = auth()->user();
-            $analysis = $cvService->processAndAnalyze($validated['cv_file'], $user);
+            $file = $validated['cv_file'];
+
+            // Éviter les soumissions multiples répétées (ex: multi-clics successifs dans les 30 dernières secondes)
+            $recent = $user->cvAnalyses()
+                ->where('original_filename', $file->getClientOriginalName())
+                ->where('file_size', $file->getSize())
+                ->where('created_at', '>=', now()->subSeconds(30))
+                ->first();
+
+            $analysis = $recent ?: $cvService->processAndAnalyze($file, $user);
 
             return redirect()->route('jeune.outils', ['tab' => 'cv', 'cv_id' => $analysis->id])
                 ->with('success', 'Votre CV a été analysé avec succès ! Votre nouveau score Career est de '.$analysis->global_score.'/100.');
@@ -1146,7 +1194,11 @@ class JeuneDashboardController extends Controller
     {
         $doc = auth()->user()->academicDocuments()->findOrFail($document);
 
-        return response()->download(storage_path('app/public/'.$doc->file_path), $doc->file_name);
+        if (! Storage::disk('public')->exists($doc->file_path)) {
+            abort(404);
+        }
+
+        return response()->download(Storage::disk('public')->path($doc->file_path), $doc->file_name);
     }
 
     /**
@@ -1155,10 +1207,22 @@ class JeuneDashboardController extends Controller
     public function viewDocument($document)
     {
         $doc = auth()->user()->academicDocuments()->findOrFail($document);
-        $path = storage_path('app/public/'.$doc->file_path);
 
-        if (! file_exists($path)) {
+        if (! Storage::disk('public')->exists($doc->file_path)) {
             abort(404);
+        }
+
+        $path = Storage::disk('public')->path($doc->file_path);
+        $ext = strtolower(pathinfo($doc->file_name ?: $doc->file_path, PATHINFO_EXTENSION));
+
+        if ($ext === 'docx' || str_contains($doc->mime_type ?? '', 'wordprocessingml')) {
+            $cvService = app(CvAnalysisService::class);
+            $extractedText = $cvService->extractText($path, 'docx');
+
+            return view('jeune.documents_docx_preview', [
+                'document' => $doc,
+                'content' => $extractedText,
+            ]);
         }
 
         return response()->file($path);
