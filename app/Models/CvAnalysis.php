@@ -76,6 +76,64 @@ class CvAnalysis extends Model
     }
 
     /**
+     * Libellé lisible et convivial du format de fichier pour le jeune (ex: Word, PDF, Image)
+     */
+    public function getFileFormatLabelAttribute(): string
+    {
+        $mime = strtolower((string) ($this->mime_type ?? ''));
+        $ext = strtolower(pathinfo((string) ($this->original_filename ?? ''), PATHINFO_EXTENSION));
+
+        if ($ext === 'docx' || str_contains($mime, 'wordprocessingml') || str_contains($mime, 'docx')) {
+            return 'Document Word (.docx)';
+        }
+
+        if ($ext === 'doc' || str_contains($mime, 'msword')) {
+            return 'Document Word (.doc)';
+        }
+
+        if ($ext === 'pdf' || str_contains($mime, 'pdf')) {
+            return 'Document PDF (.pdf)';
+        }
+
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'webp']) || str_contains($mime, 'image')) {
+            return 'Image ('.strtoupper($ext ?: 'JPG').')';
+        }
+
+        if ($ext === 'txt' || str_contains($mime, 'text/plain')) {
+            return 'Fichier Texte (.txt)';
+        }
+
+        if (! empty($ext)) {
+            return 'Fichier .'.strtoupper($ext);
+        }
+
+        return 'Document CV';
+    }
+
+    /**
+     * Classes Tailwind pour le badge de format de fichier
+     */
+    public function getFileFormatBadgeColorAttribute(): string
+    {
+        $mime = strtolower((string) ($this->mime_type ?? ''));
+        $ext = strtolower(pathinfo((string) ($this->original_filename ?? ''), PATHINFO_EXTENSION));
+
+        if ($ext === 'docx' || $ext === 'doc' || str_contains($mime, 'wordprocessingml') || str_contains($mime, 'msword') || str_contains($mime, 'docx')) {
+            return 'bg-blue-50 text-blue-700 border-blue-200';
+        }
+
+        if ($ext === 'pdf' || str_contains($mime, 'pdf')) {
+            return 'bg-red-50 text-red-700 border-red-200';
+        }
+
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'webp']) || str_contains($mime, 'image')) {
+            return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        }
+
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+
+    /**
      * Données normalisées prêtes pour les templates ATS (résolution des chaînes et clés bilingues)
      */
     public function getNormalizedCvDataAttribute(): array

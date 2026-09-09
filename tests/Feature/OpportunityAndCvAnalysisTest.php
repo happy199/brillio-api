@@ -558,5 +558,28 @@ TXT;
         $this->assertStringContainsString('DevOps engineer with 9 years of experience', $content);
         $this->assertStringNotContainsString('Ce CV est très bien structuré', $content);
         $this->assertStringContainsString('EDUCATION', $content);
+
+        // Test human-readable file format label instead of raw technical MIME type
+        $docxAnalysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_docx_test',
+            'original_filename' => 'CV_Moussa_Diallo_DevOps_EN.docx',
+            'file_path' => 'cv_analyses/moussa.docx',
+            'file_size' => 10137,
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'candidate_name' => 'Moussa Diallo',
+            'global_score' => 88,
+            'status_label' => 'Excellent',
+            'summary' => 'DevOps',
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $this->assertEquals('Document Word (.docx)', $docxAnalysis->file_format_label);
+        $this->assertStringContainsString('text-blue-700', $docxAnalysis->file_format_badge_color);
+        $this->assertEquals('Document PDF (.pdf)', $analysis->file_format_label);
     }
 }
