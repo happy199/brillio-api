@@ -736,11 +736,15 @@ class JeuneDashboardController extends Controller
     /**
      * Téléchargement direct du CV restructuré sous format Word (.docx) modifiable
      */
-    public function downloadDocxCv($cvId, Request $request, CvDocxExportService $docxService)
+    public function downloadDocxCv(int $cvId, Request $request, CvDocxExportService $docxService)
     {
+        $validated = $request->validate([
+            'template' => ['nullable', 'integer', 'between:0,5'],
+        ]);
+
         $user = auth()->user();
         $cvAnalysis = $user->cvAnalyses()->findOrFail($cvId);
-        $template = (int) $request->query('template', 0);
+        $template = isset($validated['template']) ? (int) $validated['template'] : 0;
 
         // Si le template est payant et que la requête n'a pas de signature valide
         $settingKey = $template === 0 ? 'feature_cost_cv_download' : 'feature_cost_cv_template_'.$template;
@@ -762,7 +766,7 @@ class JeuneDashboardController extends Controller
     /**
      * Visualiser le fichier CV d'origine téléversé par le jeune
      */
-    public function viewOriginalCv($cvId)
+    public function viewOriginalCv(int $cvId)
     {
         $cv = auth()->user()->cvAnalyses()->findOrFail($cvId);
 
@@ -776,7 +780,7 @@ class JeuneDashboardController extends Controller
     /**
      * Télécharger exactement le fichier CV original téléversé par le jeune
      */
-    public function downloadOriginalCv($cvId)
+    public function downloadOriginalCv(int $cvId)
     {
         $cv = auth()->user()->cvAnalyses()->findOrFail($cvId);
 
