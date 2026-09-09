@@ -205,21 +205,21 @@
                             @mouseleave="hide()"
                             class="absolute left-0 top-full pt-1.5 w-56 z-50">
                             <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-1.5 ring-1 ring-black/5">
+                                <a href="{{ route('jeune.mentors') }}"
+                                    class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition font-medium">
+                                    Trouver un mentor
+                                </a>
                                 <a href="{{ route('jeune.mentorship.index') }}"
                                     class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition">
                                     Mes Mentors
-                                </a>
-                                <a href="{{ route('jeune.sessions.index') }}"
-                                    class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition">
-                                    Mes Séances
                                 </a>
                                 <a href="{{ route('jeune.sessions.calendar') }}"
                                     class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition">
                                     Mon Calendrier
                                 </a>
-                                <a href="{{ route('jeune.mentors') }}"
+                                <a href="{{ route('jeune.sessions.index') }}"
                                     class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition">
-                                    Trouver un mentor
+                                    Mes Séances
                                 </a>
                             </div>
                         </div>
@@ -304,19 +304,19 @@
             </a>
             <a href="{{ route('jeune.mentors') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentors') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Explorer
+                Trouver un mentor
             </a>
             <a href="{{ route('jeune.mentorship.index') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentorship.index') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Mes Mentors
             </a>
-            <a href="{{ route('jeune.sessions.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->is('espace-jeune/mentorat/seances*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Séances
-            </a>
             <a href="{{ route('jeune.sessions.calendar') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.sessions.calendar') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Calendrier
+                Mon Calendrier
+            </a>
+            <a href="{{ route('jeune.sessions.index') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->is('espace-jeune/mentorat/seances*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                Mes Séances
             </a>
         </div>
     </nav>
