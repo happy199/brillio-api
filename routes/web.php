@@ -306,6 +306,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::post('/outils/cv/action', [JeuneDashboardController::class, 'handleCvAction'])->name('cv.action');
     Route::get('/outils/cv/{cv}/download-docx', [JeuneDashboardController::class, 'downloadDocxCv'])->name('cv.download-docx');
     Route::get('/outils/cv/{cv}/view-original', [JeuneDashboardController::class, 'viewOriginalCv'])->name('cv.view-original');
+    Route::get('/outils/cv/{cv}/download-original', [JeuneDashboardController::class, 'downloadOriginalCv'])->name('cv.download-original');
     Route::get('/mentors', [JeuneDashboardController::class, 'mentors'])->name('mentors');
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [ProfileController::class, 'index'])->name('profile');

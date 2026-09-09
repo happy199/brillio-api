@@ -735,6 +735,23 @@ class JeuneDashboardController extends Controller
     }
 
     /**
+     * Télécharger exactement le fichier CV original téléversé par le jeune
+     */
+    public function downloadOriginalCv($cvId)
+    {
+        $cv = auth()->user()->cvAnalyses()->findOrFail($cvId);
+
+        if (! $cv->file_path || ! Storage::disk('public')->exists($cv->file_path)) {
+            abort(404, 'Le fichier original est introuvable.');
+        }
+
+        return response()->download(
+            Storage::disk('public')->path($cv->file_path),
+            $cv->original_filename ?: 'CV_Original.'.pathinfo($cv->file_path, PATHINFO_EXTENSION)
+        );
+    }
+
+    /**
      * Formate les données du CV en texte brut pour le presse-papier
      */
     private function formatCvAsPlainText(CvAnalysis $cv): string

@@ -399,14 +399,26 @@
 
                     <!-- VUE 1 : CV ORIGINAL TÉLÉVERSÉ -->
                     <div x-show="cvViewMode === 'original'" x-cloak class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-md max-w-4xl mx-auto space-y-6">
-                        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-gray-100">
                             <div>
                                 <h4 class="text-sm font-bold text-gray-900">{{ $activeCv->original_filename }}</h4>
                                 <p class="text-xs text-gray-500">{{ round($activeCv->file_size / 1024, 1) }} Ko • Transmis le {{ $activeCv->created_at->format('d/m/Y à H:i') }}</p>
                             </div>
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold border {{ $activeCv->file_format_badge_color }}">
-                                {{ $activeCv->file_format_label }}
-                            </span>
+                            <div class="flex items-center gap-2.5">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold border {{ $activeCv->file_format_badge_color }}">
+                                    {{ $activeCv->file_format_label }}
+                                </span>
+                                @if($activeCv->has_original_file)
+                                    <a href="{{ route('jeune.cv.download-original', $activeCv->id) }}"
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-900 text-white text-xs font-bold hover:bg-gray-800 shadow-xs transition"
+                                       title="Télécharger exactement le document CV d'origine transmis">
+                                        <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                        </svg>
+                                        <span>Télécharger le CV original</span>
+                                    </a>
+                                @endif
+                            </div>
                         </div>
 
                         @if(str_contains(strtolower($activeCv->mime_type ?? ''), 'pdf'))
@@ -419,9 +431,19 @@
                             </div>
                         @else
                             <div class="p-6 bg-gray-50 rounded-2xl border border-gray-200 text-left space-y-4">
-                                <div class="space-y-0.5 pb-3 border-b border-gray-200">
-                                    <p class="text-xs font-bold text-gray-800 uppercase tracking-wider">Contenu texte extrait de votre document</p>
-                                    <p class="text-[11px] text-gray-500">Les documents Word (.docx) sont analysés et retranscrits textuellement ici pour préserver la fidélité de votre profil.</p>
+                                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-200">
+                                    <div class="space-y-0.5">
+                                        <p class="text-xs font-bold text-gray-800 uppercase tracking-wider">Contenu texte extrait de votre document</p>
+                                        <p class="text-[11px] text-gray-500">Les documents Word (.docx) sont analysés et retranscrits textuellement ici pour préserver la fidélité de votre profil.</p>
+                                    </div>
+                                    @if($activeCv->has_original_file)
+                                        <a href="{{ route('jeune.cv.download-original', $activeCv->id) }}"
+                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-xs transition"
+                                           title="Télécharger exactement votre document Word d'origine">
+                                            <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                            <span>Télécharger le document original</span>
+                                        </a>
+                                    @endif
                                 </div>
                                 <pre class="whitespace-pre-wrap font-sans text-xs text-gray-800 bg-white p-4 rounded-xl border border-gray-200 max-h-[500px] overflow-y-auto leading-relaxed shadow-xs">{{ $activeCv->parsed_content['raw_text'] ?? 'Contenu non disponible.' }}</pre>
                             </div>

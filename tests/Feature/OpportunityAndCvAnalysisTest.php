@@ -680,7 +680,7 @@ TXT;
         ]);
     }
 
-    public function test_original_cv_view_does_not_contain_download_original_bypass_button()
+    public function test_original_cv_download_button_is_conditional_and_serves_exact_file()
     {
         $user = User::factory()->create([
             'user_type' => 'jeune',
@@ -690,8 +690,8 @@ TXT;
         $analysis = CvAnalysis::create([
             'user_id' => $user->id,
             'guest_token' => 'token_bypass_check',
-            'original_filename' => 'CV_Word.docx',
-            'file_path' => 'cv_analyses/test.docx',
+            'original_filename' => 'CV_Word_Original.docx',
+            'file_path' => 'cv_analyses/test_original.docx',
             'file_size' => 10000,
             'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'candidate_name' => 'Moussa Diallo',
@@ -708,9 +708,21 @@ TXT;
             'is_claimed' => true,
         ]);
 
-        $response = $this->actingAs($user)->get(route('jeune.outils', ['tab' => 'cv', 'cv_id' => $analysis->id]));
-        $response->assertStatus(200);
-        $response->assertDontSee('Télécharger le fichier original');
-        $response->assertSee('Télécharger en Word (.docx)');
+        // 1. Quand le fichier physique n'est PAS trouvé sur le disque, le bouton n'apparaît pas
+        $responseWithoutFile = $this->actingAs($user)->get(route('jeune.outils', ['tab' => 'cv', 'cv_id' => $analysis->id]));
+        $responseWithoutFile->assertStatus(200);
+        $responseWithoutFile->assertDontSee('Télécharger le CV original');
+
+        // 2. Quand le fichier physique est disponible sur le disque, le bouton apparaît
+        Storage::disk('public')->put('cv_analyses/test_original.docx', 'Fichier Word Original Brut');
+        $responseWithFile = $this->actingAs($user)->get(route('jeune.outils', ['tab' => 'cv', 'cv_id' => $analysis->id]));
+        $responseWithFile->assertStatus(200);
+        $responseWithFile->assertSee('Télécharger le CV original');
+
+        // 3. Le clic sur le bouton télécharge exactement le fichier original uploadé
+        $downloadResponse = $this->actingAs($user)->get(route('jeune.cv.download-original', $analysis->id));
+        $downloadResponse->assertStatus(200);
+        $this->assertStringContainsString('CV_Word_Original.docx', $downloadResponse->headers->get('Content-Disposition'));
+        $this->assertEquals('Fichier Word Original Brut', $downloadResponse->streamedContent());
     }
 }

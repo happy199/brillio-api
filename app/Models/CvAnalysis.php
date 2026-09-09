@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class CvAnalysis extends Model
 {
@@ -121,6 +122,14 @@ class CvAnalysis extends Model
         }
 
         return $class;
+    }
+
+    /**
+     * Vérifie si le fichier d'origine téléversé existe réellement sur le disque public
+     */
+    public function getHasOriginalFileAttribute(): bool
+    {
+        return ! empty($this->file_path) && Storage::disk('public')->exists($this->file_path);
     }
 
     /**
