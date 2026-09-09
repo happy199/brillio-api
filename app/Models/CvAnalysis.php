@@ -236,33 +236,41 @@ class CvAnalysis extends Model
         ];
     }
 
+    private const KNOWN_SECTION_KEYWORDS = [
+        'COMPÉTENCES', 'COMPETENCES', 'SKILLS', 'CORE SKILLS',
+        'EXPÉRIENCE', 'EXPERIENCE', 'EXPÉRIENCES', 'EXPERIENCES',
+        'FORMATION', 'FORMATIONS', 'EDUCATION', 'DIPLÔMES', 'DIPLOMES',
+        'PROJETS', 'PROJECTS', 'RÉALISATIONS', 'REALISATIONS',
+        'LANGUES', 'LANGUAGES', 'CERTIFICATIONS', 'CERTIFICATION',
+        'CENTRES D\'INTÉRÊT', 'CENTRES D’INTÉRÊT', 'INTERESTS', 'LOISIRS',
+        'RÉFÉRENCES', 'REFERENCES', 'CONTACT',
+    ];
+
     private function extractSectionByHeader(string $rawText, array $headers): string
     {
         if (empty($rawText)) {
             return '';
         }
 
-        $lines = explode("\n", $rawText);
         $capturing = false;
         $captured = [];
 
-        foreach ($lines as $line) {
+        foreach (explode("\n", $rawText) as $line) {
             $trimmed = trim($line);
             if ($capturing) {
-                if ($trimmed !== '' && preg_match('/^[A-Z\s]{3,}:$/u', $trimmed)) {
+                if ($this->isSectionBoundary($trimmed, $headers)) {
                     break;
                 }
                 $captured[] = $line;
-            } else {
-                foreach ($headers as $header) {
-                    if (stripos($trimmed, $header) === 0) {
-                        $capturing = true;
-                        $rest = trim(substr($trimmed, strlen($header)), ": \t-");
-                        if ($rest !== '') {
-                            $captured[] = $rest;
-                        }
-                        break;
-                    }
+
+                continue;
+            }
+
+            $rest = $this->matchHeaderPrefix($trimmed, $headers);
+            if ($rest !== null) {
+                $capturing = true;
+                if ($rest !== '') {
+                    $captured[] = $rest;
                 }
             }
         }
@@ -270,9 +278,50 @@ class CvAnalysis extends Model
         return trim(implode("\n", $captured));
     }
 
+    private function matchHeaderPrefix(string $trimmed, array $headers): ?string
+    {
+        foreach ($headers as $header) {
+            if (stripos($trimmed, $header) === 0) {
+                return trim(substr($trimmed, strlen($header)), ": \t-");
+            }
+        }
+
+        return null;
+    }
+
+    private function isSectionBoundary(string $trimmed, array $currentHeaders): bool
+    {
+        if ($trimmed === '') {
+            return false;
+        }
+
+        $upper = mb_strtoupper($trimmed);
+        foreach (self::KNOWN_SECTION_KEYWORDS as $keyword) {
+            if (! $this->isHeaderInCurrentList($keyword, $currentHeaders) && mb_stripos($upper, $keyword) === 0) {
+                return true;
+            }
+        }
+
+        return (bool) preg_match('/^[A-ZÀ-ÖØ-ß\s]{3,}:?$/u', $trimmed);
+    }
+
+    private function isHeaderInCurrentList(string $keyword, array $currentHeaders): bool
+    {
+        foreach ($currentHeaders as $ch) {
+            if (mb_stripos($keyword, $ch) !== false || mb_stripos($ch, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function extractCandidateSummary(string $rawText, array $parsed, bool $isEnglish): string
     {
-        $profileSummary = '';
+        $candProfile = trim((string) ($parsed['profil'] ?? $parsed['profile'] ?? $parsed['candidate_summary'] ?? ''));
+        if (! empty($candProfile) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $candProfile)) {
+            return $candProfile;
+        }
 
         if (! empty($rawText)) {
             $summaryRaw = $this->extractSectionByHeader($rawText, [
@@ -287,25 +336,15 @@ class CvAnalysis extends Model
                 'ABOUT ME',
             ]);
             if (! empty($summaryRaw) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $summaryRaw)) {
-                $profileSummary = $summaryRaw;
+                return $summaryRaw;
             }
         }
 
-        if (empty($profileSummary)) {
-            $candProfile = trim((string) ($parsed['profil'] ?? $parsed['profile'] ?? $parsed['candidate_summary'] ?? ''));
-            if (! empty($candProfile) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $candProfile)) {
-                $profileSummary = $candProfile;
-            }
-        }
+        $title = $this->candidate_title ?: 'Professional';
 
-        if (empty($profileSummary)) {
-            $title = $this->candidate_title ?: 'Professional';
-            $profileSummary = $isEnglish
-                ? "Experienced {$title} with a proven track record of delivering impactful results and driving technical excellence across distributed environments."
-                : "{$title} expérimenté avec une solide expertise technique et une capacité démontrée à piloter des projets avec impact.";
-        }
-
-        return $profileSummary;
+        return $isEnglish
+            ? "Experienced {$title} with a proven track record of delivering impactful results and driving technical excellence across distributed environments."
+            : "{$title} expérimenté avec une solide expertise technique et une capacité démontrée à piloter des projets avec impact.";
     }
 
     private function extractNormalizedExperiences(array $rawExperiences): array

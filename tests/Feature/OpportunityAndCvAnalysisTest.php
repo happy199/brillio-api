@@ -551,6 +551,9 @@ TXT;
         // Verify profile summary is the candidate's actual summary and NOT the AI critique
         $this->assertStringContainsString('DevOps engineer with 9 years of experience', $norm['profile_summary']);
         $this->assertStringNotContainsString('Ce CV est très bien structuré', $norm['profile_summary']);
+        $this->assertStringNotContainsString('CORE SKILLS', $norm['profile_summary']);
+        $this->assertStringNotContainsString('PROFESSIONAL EXPERIENCE', $norm['profile_summary']);
+        $this->assertStringNotContainsString('EDUCATION', $norm['profile_summary']);
 
         // Verify certifications & languages extracted from raw text
         $this->assertNotEmpty($norm['certifications']);
