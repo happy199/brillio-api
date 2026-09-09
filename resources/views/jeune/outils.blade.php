@@ -450,7 +450,7 @@
                         <!-- Sélecteur de templates ATS (0 Défaut gratuit + 5 Templates au choix tarifés) -->
                         <div class="space-y-3">
                             <div class="flex items-center justify-between">
-                                <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Sélectionnez un modèle de CV ATS :</label>
+                                <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Sélectionnez un modèle de CV ATS :</h3>
                                 <span class="text-xs text-gray-500">Le modèle par défaut est gratuit. Les modèles avancés valorisent vos compétences clés.</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

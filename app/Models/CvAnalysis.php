@@ -236,17 +236,58 @@ class CvAnalysis extends Model
         ];
     }
 
+    private function extractSectionByHeader(string $rawText, array $headers): string
+    {
+        if (empty($rawText)) {
+            return '';
+        }
+
+        $lines = explode("\n", $rawText);
+        $capturing = false;
+        $captured = [];
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            if ($capturing) {
+                if ($trimmed !== '' && preg_match('/^[A-Z\s]{3,}:$/u', $trimmed)) {
+                    break;
+                }
+                $captured[] = $line;
+            } else {
+                foreach ($headers as $header) {
+                    if (stripos($trimmed, $header) === 0) {
+                        $capturing = true;
+                        $rest = trim(substr($trimmed, strlen($header)), ": \t-");
+                        if ($rest !== '') {
+                            $captured[] = $rest;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        return trim(implode("\n", $captured));
+    }
+
     private function extractCandidateSummary(string $rawText, array $parsed, bool $isEnglish): string
     {
         $profileSummary = '';
 
         if (! empty($rawText)) {
-            $pattern = '/(?:PROFESSIONAL\s+SUMMARY|RÉSUMÉ\s+PROFESSIONNEL|RESUME\s+PROFESSIONNEL|PROFILE|PROFIL(?:\s+PROFESSIONNEL)?|SUMMARY|RÉSUMÉ|ABOUT\s+ME)\s*[:\n\-]+\s*(.+?)(?=\n[A-Z\s]{3,}:|\z)/siu';
-            if (preg_match($pattern, $rawText, $match)) {
-                $candidateRaw = trim($match[1]);
-                if (! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $candidateRaw)) {
-                    $profileSummary = $candidateRaw;
-                }
+            $summaryRaw = $this->extractSectionByHeader($rawText, [
+                'PROFESSIONAL SUMMARY',
+                'RÉSUMÉ PROFESSIONNEL',
+                'RESUME PROFESSIONNEL',
+                'PROFIL PROFESSIONNEL',
+                'PROFILE',
+                'PROFIL',
+                'SUMMARY',
+                'RÉSUMÉ',
+                'ABOUT ME',
+            ]);
+            if (! empty($summaryRaw) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $summaryRaw)) {
+                $profileSummary = $summaryRaw;
             }
         }
 
@@ -271,64 +312,64 @@ class CvAnalysis extends Model
     {
         $experiences = [];
         foreach ($rawExperiences as $exp) {
-            if (is_array($exp)) {
-                $bullets = [];
-                if (! empty($exp['bullets'])) {
-                    $bullets = (array) $exp['bullets'];
-                } elseif (! empty($exp['description'])) {
-                    $bullets = array_filter(array_map('trim', explode("\n", (string) $exp['description'])));
-                }
-
-                $experiences[] = [
-                    'title' => $exp['title'] ?? 'Poste',
-                    'company' => $exp['company'] ?? '',
-                    'period' => $exp['period'] ?? '',
-                    'description' => $exp['description'] ?? '',
-                    'bullets' => $bullets,
-                ];
-
-                continue;
-            }
-
-            $expStr = (string) $exp;
-            $company = '';
-            $period = '';
-            $desc = '';
-
-            if (preg_match('/^([^-—:]+)\s*[-—]\s*([^(:—]+)(?:\s*\(([^)]+)\))?\s*(?::\s*(.*))?$/su', $expStr, $matches)) {
-                $title = trim($matches[1]);
-                $company = trim($matches[2]);
-                $period = trim($matches[3] ?? '');
-                $desc = trim($matches[4] ?? '');
-            } else {
-                $parts = explode(':', $expStr, 2);
-                $title = trim($parts[0]);
-                $desc = trim($parts[1] ?? '');
-            }
-
-            $bullets = [];
-            if (! empty($desc)) {
-                $split = preg_split('/(?<=[.!?])\s+(?=[A-ZÀ-ÖØ-ß])/u', $desc);
-                $bullets = array_filter(array_map('trim', $split ?: []));
-            }
-
-            $finalBullets = [];
-            if (count($bullets) > 1) {
-                $finalBullets = $bullets;
-            } elseif (! empty($desc)) {
-                $finalBullets = [$desc];
-            }
-
-            $experiences[] = [
-                'title' => $title,
-                'company' => $company,
-                'period' => $period,
-                'description' => $desc,
-                'bullets' => $finalBullets,
-            ];
+            $experiences[] = is_array($exp)
+                ? $this->normalizeArrayExperience($exp)
+                : $this->parseStringExperience((string) $exp);
         }
 
         return $experiences;
+    }
+
+    private function normalizeArrayExperience(array $exp): array
+    {
+        $bullets = [];
+        if (! empty($exp['bullets'])) {
+            $bullets = (array) $exp['bullets'];
+        } elseif (! empty($exp['description'])) {
+            $bullets = array_filter(array_map('trim', explode("\n", (string) $exp['description'])));
+        }
+
+        return [
+            'title' => $exp['title'] ?? 'Poste',
+            'company' => $exp['company'] ?? '',
+            'period' => $exp['period'] ?? '',
+            'description' => $exp['description'] ?? '',
+            'bullets' => $bullets,
+        ];
+    }
+
+    private function parseStringExperience(string $expStr): array
+    {
+        $company = '';
+        $period = '';
+        $desc = '';
+
+        if (preg_match('/^([^-—:]+)\s*[-—]\s*([^(:—]+)(?:\s*\(([^)]+)\))?\s*(?::\s*(.*))?$/su', $expStr, $matches)) {
+            $title = trim($matches[1]);
+            $company = trim($matches[2]);
+            $period = trim($matches[3] ?? '');
+            $desc = trim($matches[4] ?? '');
+        } else {
+            $parts = explode(':', $expStr, 2);
+            $title = trim($parts[0]);
+            $desc = trim($parts[1] ?? '');
+        }
+
+        $bullets = [];
+        if (! empty($desc)) {
+            $split = preg_split('/(?<=[.!?])\s+(?=[A-ZÀ-ÖØ-ß])/u', $desc);
+            $bullets = array_filter(array_map('trim', $split ?: []));
+        }
+
+        $finalBullets = count($bullets) > 1 ? $bullets : (! empty($desc) ? [$desc] : []);
+
+        return [
+            'title' => $title,
+            'company' => $company,
+            'period' => $period,
+            'description' => $desc,
+            'bullets' => $finalBullets,
+        ];
     }
 
     private function extractNormalizedEducation(array $rawFormations): array
@@ -390,12 +431,15 @@ class CvAnalysis extends Model
 
     private function extractNormalizedCertifications(array $rawCerts, string $rawText): array
     {
-        if (empty($rawCerts) && ! empty($rawText) && preg_match('/CERTIFICATIONS?\s*[:\n\-]+\s*(.+?)(?=\n[A-Z\s]{3,}:|\z)/siu', $rawText, $certMatch)) {
-            $certLines = array_filter(array_map('trim', explode("\n", $certMatch[1])));
-            foreach ($certLines as $cl) {
-                $cleaned = ltrim($cl, "•-* \t");
-                if ($cleaned !== '') {
-                    $rawCerts[] = $cleaned;
+        if (empty($rawCerts) && ! empty($rawText)) {
+            $certText = $this->extractSectionByHeader($rawText, ['CERTIFICATIONS', 'CERTIFICATION']);
+            if (! empty($certText)) {
+                $certLines = array_filter(array_map('trim', explode("\n", $certText)));
+                foreach ($certLines as $cl) {
+                    $cleaned = ltrim($cl, "•-* \t");
+                    if ($cleaned !== '') {
+                        $rawCerts[] = $cleaned;
+                    }
                 }
             }
         }
@@ -405,12 +449,11 @@ class CvAnalysis extends Model
 
     private function extractNormalizedLanguages(array $rawLanguages, string $rawText): array
     {
-        if (empty($rawLanguages) && ! empty($rawText) && preg_match('/LANGU(?:AGES?|ES?)\s*[:\n\-]+\s*(.+?)(?=\n[A-Z\s]{3,}:|\z)/siu', $rawText, $langMatch)) {
-            $langText = trim($langMatch[1]);
-            if (str_contains($langText, '—')) {
-                $rawLanguages = array_filter(array_map('trim', explode('—', $langText)));
-            } else {
-                $rawLanguages = array_filter(array_map('trim', explode("\n", $langText)));
+        if (empty($rawLanguages) && ! empty($rawText)) {
+            $langText = $this->extractSectionByHeader($rawText, ['LANGUAGES', 'LANGUES', 'LANGUAGE', 'LANGUE']);
+            if (! empty($langText)) {
+                $delimiter = str_contains($langText, '—') ? '—' : "\n";
+                $rawLanguages = array_filter(array_map('trim', explode($delimiter, $langText)));
             }
         }
 

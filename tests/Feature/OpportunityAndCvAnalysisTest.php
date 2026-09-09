@@ -16,6 +16,16 @@ class OpportunityAndCvAnalysisTest extends TestCase
 
     private const MIME_PDF = 'application/pdf';
 
+    private const MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+    private const TEST_DEV_OPS_TITLE = 'Senior DevOps Engineer';
+
+    private const TEST_CANDIDATE_NAME = 'Moussa Diallo';
+
+    private const TEST_CV_PATH_PDF = 'cv_analyses/test.pdf';
+
+    private const TEXT_OPPORTUNITES = 'Opportunités';
+
     private const STATUS_TRES_BIEN = 'Très bien';
 
     protected function setUp(): void
@@ -29,7 +39,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->get(route('public.opportunities'));
 
         $response->assertStatus(200);
-        $response->assertSee('Opportunités');
+        $response->assertSee(self::TEXT_OPPORTUNITES);
         $response->assertSee('Votre CV est-il assez percutant', false);
         $response->assertSee('Glissez-déposez votre CV ici');
     }
@@ -160,7 +170,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->actingAs($user)->get(route('jeune.documents', ['tab' => 'cv']));
 
         $response->assertStatus(200);
-        $response->assertSee('Opportunités');
+        $response->assertSee(self::TEXT_OPPORTUNITES);
         $response->assertSee('Diagnostic Débloqué');
         $response->assertSee('82');
         $response->assertSee('Score Career : Très bien');
@@ -175,7 +185,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'onboarding_completed' => true,
         ]);
 
-        $file = UploadedFile::fake()->create('CV_Updated_Version.docx', 120, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $file = UploadedFile::fake()->create('CV_Updated_Version.docx', 120, self::MIME_DOCX);
 
         $response = $this->actingAs($user)->post(route('jeune.cv.analyze'), [
             'cv_file' => $file,
@@ -210,7 +220,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->actingAs($user)->get(route('jeune.opportunities'));
 
         $response->assertStatus(200);
-        $response->assertSee('Opportunités');
+        $response->assertSee(self::TEXT_OPPORTUNITES);
         $response->assertSee('Outils');
         $response->assertSee('New');
         $response->assertSee('Emploi');
@@ -245,7 +255,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'user_id' => $user->id,
             'guest_token' => 'token_insufficient_test',
             'original_filename' => 'Mon_CV.pdf',
-            'file_path' => 'cv_analyses/test.pdf',
+            'file_path' => self::TEST_CV_PATH_PDF,
             'file_size' => 5000,
             'mime_type' => self::MIME_PDF,
             'candidate_name' => 'Adama Traore',
@@ -285,7 +295,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'user_id' => $user->id,
             'guest_token' => 'token_sufficient_test',
             'original_filename' => 'Mon_CV_Pro.pdf',
-            'file_path' => 'cv_analyses/test.pdf',
+            'file_path' => self::TEST_CV_PATH_PDF,
             'file_size' => 5000,
             'mime_type' => self::MIME_PDF,
             'candidate_name' => 'Adama Traore',
@@ -346,7 +356,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'user_id' => $user->id,
             'guest_token' => 'token_free_test',
             'original_filename' => 'Mon_CV_Free.pdf',
-            'file_path' => 'cv_analyses/test.pdf',
+            'file_path' => self::TEST_CV_PATH_PDF,
             'file_size' => 5000,
             'mime_type' => self::MIME_PDF,
             'candidate_name' => 'Fatou Sylla',
@@ -397,8 +407,8 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'file_path' => 'cv_analyses/moussa.pdf',
             'file_size' => 12000,
             'mime_type' => self::MIME_PDF,
-            'candidate_name' => 'Moussa Diallo',
-            'candidate_title' => 'Senior DevOps Engineer',
+            'candidate_name' => self::TEST_CANDIDATE_NAME,
+            'candidate_title' => self::TEST_DEV_OPS_TITLE,
             'global_score' => 88,
             'status_label' => 'Excellent',
             'summary' => 'DevOps engineer with 9 years of experience.',
@@ -449,7 +459,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'file_path' => 'cv_analyses/test_doc.pdf',
             'file_size' => 100,
             'mime_type' => self::MIME_PDF,
-            'candidate_name' => 'Moussa Diallo',
+            'candidate_name' => self::TEST_CANDIDATE_NAME,
             'global_score' => 80,
             'status_label' => self::STATUS_TRES_BIEN,
             'summary' => 'DevOps',
@@ -507,8 +517,8 @@ TXT;
             'file_path' => 'cv_analyses/moussa.pdf',
             'file_size' => 12000,
             'mime_type' => self::MIME_PDF,
-            'candidate_name' => 'Moussa Diallo',
-            'candidate_title' => 'Senior DevOps Engineer',
+            'candidate_name' => self::TEST_CANDIDATE_NAME,
+            'candidate_title' => self::TEST_DEV_OPS_TITLE,
             'global_score' => 88,
             'status_label' => 'Excellent',
             // Notice: the AI critique is stored in summary
@@ -566,8 +576,8 @@ TXT;
             'original_filename' => 'CV_Moussa_Diallo_DevOps_EN.docx',
             'file_path' => 'cv_analyses/moussa.docx',
             'file_size' => 10137,
-            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'candidate_name' => 'Moussa Diallo',
+            'mime_type' => self::MIME_DOCX,
+            'candidate_name' => self::TEST_CANDIDATE_NAME,
             'global_score' => 88,
             'status_label' => 'Excellent',
             'summary' => 'DevOps',
@@ -598,8 +608,8 @@ TXT;
             'file_path' => 'cv_analyses/users/'.$user->id.'/moussa.pdf',
             'file_size' => 15000,
             'mime_type' => self::MIME_PDF,
-            'candidate_name' => 'Moussa Diallo',
-            'candidate_title' => 'Senior DevOps Engineer',
+            'candidate_name' => self::TEST_CANDIDATE_NAME,
+            'candidate_title' => self::TEST_DEV_OPS_TITLE,
             'global_score' => 90,
             'status_label' => 'Excellent',
             'summary' => 'DevOps expert',
@@ -628,7 +638,7 @@ TXT;
 
         $downloadResponse = $this->actingAs($user)->get($downloadUrl);
         $downloadResponse->assertStatus(200);
-        $this->assertStringContainsString('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $downloadResponse->headers->get('Content-Type'));
+        $this->assertStringContainsString(self::MIME_DOCX, $downloadResponse->headers->get('Content-Type'));
         $this->assertStringContainsString('CV_moussa_diallo_ATS.docx', $downloadResponse->headers->get('Content-Disposition'));
     }
 
@@ -655,7 +665,7 @@ TXT;
 
     public function test_claiming_guest_cv_stores_document_in_academic_documents()
     {
-        $file = UploadedFile::fake()->create('CV_Guest_Original.docx', 250, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $file = UploadedFile::fake()->create('CV_Guest_Original.docx', 250, self::MIME_DOCX);
 
         $this->post(route('public.opportunities.analyze'), [
             'cv_file' => $file,
@@ -693,8 +703,8 @@ TXT;
             'original_filename' => 'CV_Word_Original.docx',
             'file_path' => 'cv_analyses/test_original.docx',
             'file_size' => 10000,
-            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'candidate_name' => 'Moussa Diallo',
+            'mime_type' => self::MIME_DOCX,
+            'candidate_name' => self::TEST_CANDIDATE_NAME,
             'global_score' => 85,
             'status_label' => 'Bien',
             'summary' => 'DevOps',
@@ -761,7 +771,7 @@ TXT;
             'file_name' => 'Mon_CV.docx',
             'file_path' => 'documents/test.docx',
             'file_size' => 12000,
-            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'mime_type' => self::MIME_DOCX,
             'uploaded_at' => now(),
         ]);
 
@@ -801,7 +811,7 @@ TXT;
             'original_filename' => 'CV_Fatoumata_Traore.docx',
             'file_path' => 'cv_analyses/test_fatoumata.docx',
             'file_size' => 8000,
-            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'mime_type' => self::MIME_DOCX,
             'candidate_name' => 'Fatoumata Traoré',
             'candidate_title' => 'UX/UI Designer Junior',
             'candidate_contact' => [
@@ -835,7 +845,7 @@ TXT;
         ]));
 
         $response->assertStatus(200);
-        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $response->assertHeader('Content-Type', self::MIME_DOCX);
         $this->assertStringContainsString('CV_fatoumata_traore_ATS.docx', $response->headers->get('Content-Disposition'));
 
         // Sauvegarder le contenu streamé pour analyser le XML interne
