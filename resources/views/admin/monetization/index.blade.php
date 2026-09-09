@@ -264,9 +264,9 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Copie de CV ATS (Crédits)</label>
+                                <label for="feature_cost_cv_copy" class="block text-sm font-semibold text-gray-700 mb-2">Copie de CV ATS (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_cv_copy" value="{{ $cvCopyCost }}" min="0"
+                                    <input id="feature_cost_cv_copy" type="number" name="feature_cost_cv_copy" value="{{ $cvCopyCost }}" min="0"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
@@ -275,9 +275,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement / Impression CV PDF - Template Basic ATS (Crédits)</label>
+                                <label for="feature_cost_cv_download" class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement / Impression CV PDF - Template Basic ATS (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_cv_download" value="{{ $cvDownloadCost }}" min="0"
+                                    <input id="feature_cost_cv_download" type="number" name="feature_cost_cv_download" value="{{ $cvDownloadCost }}" min="0"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
@@ -295,48 +295,48 @@
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-xs font-semibold text-gray-700 mb-1">1. Template Standard Classique</label>
+                                        <label for="feature_cost_cv_template_1" class="block text-xs font-semibold text-gray-700 mb-1">1. Template Standard Classique</label>
                                         <div class="relative">
-                                            <input type="number" name="feature_cost_cv_template_1" value="{{ $cvTemplate1Cost }}" min="0"
+                                            <input id="feature_cost_cv_template_1" type="number" name="feature_cost_cv_template_1" value="{{ $cvTemplate1Cost }}" min="0"
                                                 class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
                                             <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500 text-[10px]">Crédits</div>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-semibold text-gray-700 mb-1">2. Template Standard Minimaliste</label>
+                                        <label for="feature_cost_cv_template_2" class="block text-xs font-semibold text-gray-700 mb-1">2. Template Standard Minimaliste</label>
                                         <div class="relative">
-                                            <input type="number" name="feature_cost_cv_template_2" value="{{ $cvTemplate2Cost }}" min="0"
+                                            <input id="feature_cost_cv_template_2" type="number" name="feature_cost_cv_template_2" value="{{ $cvTemplate2Cost }}" min="0"
                                                 class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
                                             <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500 text-[10px]">Crédits</div>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-bold text-indigo-900 mb-1 flex items-center gap-1.5">
+                                        <label for="feature_cost_cv_template_3" class="block text-xs font-bold text-indigo-900 mb-1 flex items-center gap-1.5">
                                             <span>3. Template Professionnel Élite</span>
                                             <span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[9px] font-extrabold">Best-Seller</span>
                                         </label>
                                         <div class="relative">
-                                            <input type="number" name="feature_cost_cv_template_3" value="{{ $cvTemplate3Cost }}" min="0"
+                                            <input id="feature_cost_cv_template_3" type="number" name="feature_cost_cv_template_3" value="{{ $cvTemplate3Cost }}" min="0"
                                                 class="bg-white border-2 border-indigo-300 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
                                             <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-indigo-600 font-bold text-[10px]">Crédits</div>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-semibold text-gray-700 mb-1">4. Template Expert Moderne</label>
+                                        <label for="feature_cost_cv_template_4" class="block text-xs font-semibold text-gray-700 mb-1">4. Template Expert Moderne</label>
                                         <div class="relative">
-                                            <input type="number" name="feature_cost_cv_template_4" value="{{ $cvTemplate4Cost }}" min="0"
+                                            <input id="feature_cost_cv_template_4" type="number" name="feature_cost_cv_template_4" value="{{ $cvTemplate4Cost }}" min="0"
                                                 class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
                                             <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500 text-[10px]">Crédits</div>
                                         </div>
                                     </div>
 
                                     <div class="sm:col-span-2">
-                                        <label class="block text-xs font-semibold text-gray-700 mb-1">5. Template Avancé Cadre & International</label>
+                                        <label for="feature_cost_cv_template_5" class="block text-xs font-semibold text-gray-700 mb-1">5. Template Avancé Cadre & International</label>
                                         <div class="relative">
-                                            <input type="number" name="feature_cost_cv_template_5" value="{{ $cvTemplate5Cost }}" min="0"
+                                            <input id="feature_cost_cv_template_5" type="number" name="feature_cost_cv_template_5" value="{{ $cvTemplate5Cost }}" min="0"
                                                 class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
                                             <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500 text-[10px]">Crédits</div>
                                         </div>
@@ -345,20 +345,20 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Outils d'Analyse (Crédits)</label>
-                                <div class="relative">
-                                    <input type="number" name="feature_cost_analysis_tool" value="{{ $analysisToolCost }}"
-                                        class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
-                                        Crédits</div>
-                                </div>
-                                <p class="text-[10px] text-gray-500 mt-1 italic">Utilisé par les mentors pour analyser la demande.</p>
+                                <label for="feature_cost_analysis_tool" class="block text-sm font-semibold text-gray-700 mb-2">Outils d'Analyse (Crédits)</label>
+                                 <div class="relative">
+                                     <input id="feature_cost_analysis_tool" type="number" name="feature_cost_analysis_tool" value="{{ $analysisToolCost }}"
+                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
+                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
+                                         Crédits</div>
+                                 </div>
+                                 <p class="text-[10px] text-gray-500 mt-1 italic">Utilisé par les mentors pour analyser la demande.</p>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Génération Quiz par IA (Crédits)</label>
+                                <label for="feature_cost_ai_generation" class="block text-sm font-semibold text-gray-700 mb-2">Génération Quiz par IA (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_ai_generation" value="{{ $aiGenerationCost }}"
+                                    <input id="feature_cost_ai_generation" type="number" name="feature_cost_ai_generation" value="{{ $aiGenerationCost }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
@@ -367,9 +367,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Conseiller (Crédits)</label>
+                                <label for="feature_cost_contact_advisor" class="block text-sm font-semibold text-gray-700 mb-2">Contact Conseiller (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_contact_advisor" value="{{ $contactAdvisorCost }}"
+                                    <input id="feature_cost_contact_advisor" type="number" name="feature_cost_contact_advisor" value="{{ $contactAdvisorCost }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
@@ -388,9 +388,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nouveau Chat AI (Crédits)</label>
+                                <label for="feature_cost_new_chat" class="block text-sm font-semibold text-gray-700 mb-2">Nouveau Chat AI (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_new_chat" value="{{ $newChatCost }}"
+                                    <input id="feature_cost_new_chat" type="number" name="feature_cost_new_chat" value="{{ $newChatCost }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
@@ -398,9 +398,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Déblocage Historique (Crédits)</label>
+                                <label for="feature_cost_unlock_history" class="block text-sm font-semibold text-gray-700 mb-2">Déblocage Historique (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_unlock_history" value="{{ $unlockHistoryCost }}"
+                                    <input id="feature_cost_unlock_history" type="number" name="feature_cost_unlock_history" value="{{ $unlockHistoryCost }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
@@ -409,9 +409,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Rapport Compilé (Crédits)</label>
+                                <label for="feature_cost_compiled_report" class="block text-sm font-semibold text-gray-700 mb-2">Rapport Compilé (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_compiled_report" value="{{ $compiledReportCost }}"
+                                    <input id="feature_cost_compiled_report" type="number" name="feature_cost_compiled_report" value="{{ $compiledReportCost }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
@@ -420,9 +420,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement Transcription (Crédits)</label>
+                                <label for="feature_cost_transcription_download" class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement Transcription (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_transcription_download" value="{{ $transcriptionDownloadCost }}"
+                                    <input id="feature_cost_transcription_download" type="number" name="feature_cost_transcription_download" value="{{ $transcriptionDownloadCost }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
@@ -442,9 +442,9 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Génération Rapport IA (Crédits)</label>
+                                <label for="feature_cost_ai_report_generation" class="block text-sm font-semibold text-gray-700 mb-2">Génération Rapport IA (Crédits)</label>
                                 <div class="relative">
-                                    <input type="number" name="feature_cost_ai_report_generation" value="{{ $aiReportGenerationCost }}"
+                                    <input id="feature_cost_ai_report_generation" type="number" name="feature_cost_ai_report_generation" value="{{ $aiReportGenerationCost }}"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>

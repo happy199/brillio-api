@@ -705,6 +705,20 @@ class JeuneDashboardController extends Controller
         $norm = $cv->normalized_cv_data;
         $labels = $norm['labels'] ?? [];
         $lines = [];
+
+        $this->appendCvHeader($lines, $cv);
+        $this->appendCvSummary($lines, $labels, $norm, $separator);
+        $this->appendCvExperiences($lines, $labels, $norm['experiences'] ?? [], $separator);
+        $this->appendCvEducation($lines, $labels, $norm['education'] ?? [], $separator);
+        $this->appendCvSkills($lines, $labels, $norm['skills'] ?? [], $separator);
+        $this->appendCvCertifications($lines, $labels, $norm['certifications'] ?? [], $separator);
+        $this->appendCvLanguages($lines, $labels, $norm['languages'] ?? [], $separator);
+
+        return trim(implode("\n", $lines));
+    }
+
+    private function appendCvHeader(array &$lines, CvAnalysis $cv): void
+    {
         $lines[] = mb_strtoupper($cv->candidate_name ?? 'Candidat');
         if ($cv->candidate_title) {
             $lines[] = $cv->candidate_title;
@@ -723,72 +737,98 @@ class JeuneDashboardController extends Controller
         if (! empty($contact)) {
             $lines[] = implode(' | ', $contact);
         }
+    }
 
+    private function appendCvSummary(array &$lines, array $labels, array $norm, string $separator): void
+    {
         $lines[] = '';
         $lines[] = $labels['profile'] ?? 'PROFESSIONAL SUMMARY';
         $lines[] = $separator;
         $lines[] = $norm['profile_summary'] ?? '';
+    }
 
-        if (! empty($norm['experiences'])) {
-            $lines[] = '';
-            $lines[] = $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE';
-            $lines[] = $separator;
-            foreach ($norm['experiences'] as $exp) {
-                $header = $exp['title'].' — '.$exp['company'];
-                if (! empty($exp['period'])) {
-                    $header .= ' ('.$exp['period'].')';
+    private function appendCvExperiences(array &$lines, array $labels, array $experiences, string $separator): void
+    {
+        if (empty($experiences)) {
+            return;
+        }
+
+        $lines[] = '';
+        $lines[] = $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE';
+        $lines[] = $separator;
+        foreach ($experiences as $exp) {
+            $header = $exp['title'].' — '.$exp['company'];
+            if (! empty($exp['period'])) {
+                $header .= ' ('.$exp['period'].')';
+            }
+            $lines[] = $header;
+            if (! empty($exp['bullets'])) {
+                foreach ($exp['bullets'] as $b) {
+                    $lines[] = '• '.$b;
                 }
-                $lines[] = $header;
-                if (! empty($exp['bullets'])) {
-                    foreach ($exp['bullets'] as $b) {
-                        $lines[] = '• '.$b;
-                    }
-                } elseif (! empty($exp['description'])) {
-                    $lines[] = $exp['description'];
-                }
-                $lines[] = '';
-            }
-        }
-
-        if (! empty($norm['education'])) {
-            $lines[] = $labels['education'] ?? 'EDUCATION';
-            $lines[] = $separator;
-            foreach ($norm['education'] as $edu) {
-                $item = $edu['degree'].' — '.$edu['school'];
-                if (! empty($edu['year'])) {
-                    $item .= ' ('.$edu['year'].')';
-                }
-                $lines[] = $item;
+            } elseif (! empty($exp['description'])) {
+                $lines[] = $exp['description'];
             }
             $lines[] = '';
         }
+    }
 
-        if (! empty($norm['skills'])) {
-            $lines[] = $labels['skills'] ?? 'SKILLS';
-            $lines[] = $separator;
-            $lines[] = implode(', ', $norm['skills']);
-            $lines[] = '';
+    private function appendCvEducation(array &$lines, array $labels, array $education, string $separator): void
+    {
+        if (empty($education)) {
+            return;
         }
 
-        if (! empty($norm['certifications'])) {
-            $lines[] = $labels['certifications'] ?? 'CERTIFICATIONS';
-            $lines[] = $separator;
-            foreach ($norm['certifications'] as $cert) {
-                $lines[] = '• '.(is_array($cert) ? ($cert['name'] ?? implode(', ', $cert)) : $cert);
+        $lines[] = $labels['education'] ?? 'EDUCATION';
+        $lines[] = $separator;
+        foreach ($education as $edu) {
+            $item = $edu['degree'].' — '.$edu['school'];
+            if (! empty($edu['year'])) {
+                $item .= ' ('.$edu['year'].')';
             }
-            $lines[] = '';
+            $lines[] = $item;
+        }
+        $lines[] = '';
+    }
+
+    private function appendCvSkills(array &$lines, array $labels, array $skills, string $separator): void
+    {
+        if (empty($skills)) {
+            return;
         }
 
-        if (! empty($norm['languages'])) {
-            $lines[] = $labels['languages'] ?? 'LANGUAGES';
-            $lines[] = $separator;
-            foreach ($norm['languages'] as $lang) {
-                $lines[] = '• '.(is_array($lang) ? ($lang['language'] ?? implode(', ', $lang)) : $lang);
-            }
-            $lines[] = '';
+        $lines[] = $labels['skills'] ?? 'SKILLS';
+        $lines[] = $separator;
+        $lines[] = implode(', ', $skills);
+        $lines[] = '';
+    }
+
+    private function appendCvCertifications(array &$lines, array $labels, array $certifications, string $separator): void
+    {
+        if (empty($certifications)) {
+            return;
         }
 
-        return trim(implode("\n", $lines));
+        $lines[] = $labels['certifications'] ?? 'CERTIFICATIONS';
+        $lines[] = $separator;
+        foreach ($certifications as $cert) {
+            $lines[] = '• '.(is_array($cert) ? ($cert['name'] ?? implode(', ', $cert)) : $cert);
+        }
+        $lines[] = '';
+    }
+
+    private function appendCvLanguages(array &$lines, array $labels, array $languages, string $separator): void
+    {
+        if (empty($languages)) {
+            return;
+        }
+
+        $lines[] = $labels['languages'] ?? 'LANGUAGES';
+        $lines[] = $separator;
+        foreach ($languages as $lang) {
+            $lines[] = '• '.(is_array($lang) ? ($lang['language'] ?? implode(', ', $lang)) : $lang);
+        }
+        $lines[] = '';
     }
 
     /**

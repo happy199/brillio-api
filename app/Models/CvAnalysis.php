@@ -84,30 +84,22 @@ class CvAnalysis extends Model
         $ext = strtolower(pathinfo((string) ($this->original_filename ?? ''), PATHINFO_EXTENSION));
 
         if ($ext === 'docx' || str_contains($mime, 'wordprocessingml') || str_contains($mime, 'docx')) {
-            return 'Document Word (.docx)';
+            $label = 'Document Word (.docx)';
+        } elseif ($ext === 'doc' || str_contains($mime, 'msword')) {
+            $label = 'Document Word (.doc)';
+        } elseif ($ext === 'pdf' || str_contains($mime, 'pdf')) {
+            $label = 'Document PDF (.pdf)';
+        } elseif (in_array($ext, ['png', 'jpg', 'jpeg', 'webp']) || str_contains($mime, 'image')) {
+            $label = 'Image ('.strtoupper($ext ?: 'JPG').')';
+        } elseif ($ext === 'txt' || str_contains($mime, 'text/plain')) {
+            $label = 'Fichier Texte (.txt)';
+        } elseif (! empty($ext)) {
+            $label = 'Fichier .'.strtoupper($ext);
+        } else {
+            $label = 'Document CV';
         }
 
-        if ($ext === 'doc' || str_contains($mime, 'msword')) {
-            return 'Document Word (.doc)';
-        }
-
-        if ($ext === 'pdf' || str_contains($mime, 'pdf')) {
-            return 'Document PDF (.pdf)';
-        }
-
-        if (in_array($ext, ['png', 'jpg', 'jpeg', 'webp']) || str_contains($mime, 'image')) {
-            return 'Image ('.strtoupper($ext ?: 'JPG').')';
-        }
-
-        if ($ext === 'txt' || str_contains($mime, 'text/plain')) {
-            return 'Fichier Texte (.txt)';
-        }
-
-        if (! empty($ext)) {
-            return 'Fichier .'.strtoupper($ext);
-        }
-
-        return 'Document CV';
+        return $label;
     }
 
     /**
@@ -119,18 +111,16 @@ class CvAnalysis extends Model
         $ext = strtolower(pathinfo((string) ($this->original_filename ?? ''), PATHINFO_EXTENSION));
 
         if ($ext === 'docx' || $ext === 'doc' || str_contains($mime, 'wordprocessingml') || str_contains($mime, 'msword') || str_contains($mime, 'docx')) {
-            return 'bg-blue-50 text-blue-700 border-blue-200';
+            $class = 'bg-blue-50 text-blue-700 border-blue-200';
+        } elseif ($ext === 'pdf' || str_contains($mime, 'pdf')) {
+            $class = 'bg-red-50 text-red-700 border-red-200';
+        } elseif (in_array($ext, ['png', 'jpg', 'jpeg', 'webp']) || str_contains($mime, 'image')) {
+            $class = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        } else {
+            $class = 'bg-gray-100 text-gray-700 border-gray-200';
         }
 
-        if ($ext === 'pdf' || str_contains($mime, 'pdf')) {
-            return 'bg-red-50 text-red-700 border-red-200';
-        }
-
-        if (in_array($ext, ['png', 'jpg', 'jpeg', 'webp']) || str_contains($mime, 'image')) {
-            return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-        }
-
-        return 'bg-gray-100 text-gray-700 border-gray-200';
+        return $class;
     }
 
     /**
@@ -141,8 +131,32 @@ class CvAnalysis extends Model
         $parsed = $this->parsed_content ?? [];
         $rawText = $parsed['raw_text'] ?? '';
 
-        // 0. Détection de la langue du CV (Anglais vs Français)
-        $searchCorpus = mb_strtolower($rawText.' '.json_encode($parsed));
+        $isEnglish = $this->detectLanguage($rawText, $parsed);
+        $labels = $this->resolveLocalizedLabels($isEnglish);
+        $profileSummary = $this->extractCandidateSummary($rawText, $parsed, $isEnglish);
+        $experiences = $this->extractNormalizedExperiences($parsed['experiences'] ?? []);
+        $formations = $this->extractNormalizedEducation($parsed['education'] ?? $parsed['formation'] ?? []);
+        $rawSkills = (array) ($parsed['skills'] ?? $parsed['competences'] ?? []);
+        $categorizedSkills = $this->extractCategorizedSkills($rawText);
+        $certifications = $this->extractNormalizedCertifications($parsed['certifications'] ?? [], $rawText);
+        $languages = $this->extractNormalizedLanguages($parsed['langues'] ?? $parsed['languages'] ?? [], $rawText);
+
+        return [
+            'is_english' => $isEnglish,
+            'labels' => $labels,
+            'profile_summary' => $profileSummary,
+            'experiences' => $experiences,
+            'education' => $formations,
+            'skills' => $rawSkills,
+            'categorized_skills' => $categorizedSkills,
+            'certifications' => $certifications,
+            'languages' => $languages,
+        ];
+    }
+
+    private function detectLanguage(string $rawText, array $parsed): bool
+    {
+        $corpus = mb_strtolower($rawText.' '.json_encode($parsed));
         $englishScore = 0;
         $frenchScore = 0;
 
@@ -158,12 +172,12 @@ class CvAnalysis extends Model
         ];
 
         foreach ($englishKeywords as $kw) {
-            if (str_contains($searchCorpus, $kw)) {
+            if (str_contains($corpus, $kw)) {
                 $englishScore += 2;
             }
         }
         foreach ($frenchKeywords as $kw) {
-            if (str_contains($searchCorpus, $kw)) {
+            if (str_contains($corpus, $kw)) {
                 $frenchScore += 2;
             }
         }
@@ -175,22 +189,29 @@ class CvAnalysis extends Model
             $frenchScore += 2;
         }
 
-        $isEnglish = $englishScore > $frenchScore;
+        return $englishScore > $frenchScore;
+    }
 
-        $labels = $isEnglish ? [
-            'profile' => 'PROFESSIONAL SUMMARY',
-            'experience' => 'PROFESSIONAL EXPERIENCE',
-            'education' => 'EDUCATION',
-            'skills' => 'CORE SKILLS & TOOLS',
-            'skills_simple' => 'CORE SKILLS',
-            'certifications' => 'CERTIFICATIONS',
-            'languages' => 'LANGUAGES',
-            'recently' => 'Current role',
-            'executive_summary' => 'EXECUTIVE SUMMARY',
-            'achievements' => 'KEY ACHIEVEMENTS & ROLES',
-            'leadership' => 'LEADERSHIP PROFILE',
-            'higher_education' => 'HIGHER EDUCATION & DEGREES',
-        ] : [
+    private function resolveLocalizedLabels(bool $isEnglish): array
+    {
+        if ($isEnglish) {
+            return [
+                'profile' => 'PROFESSIONAL SUMMARY',
+                'experience' => 'PROFESSIONAL EXPERIENCE',
+                'education' => 'EDUCATION',
+                'skills' => 'CORE SKILLS & TOOLS',
+                'skills_simple' => 'CORE SKILLS',
+                'certifications' => 'CERTIFICATIONS',
+                'languages' => 'LANGUAGES',
+                'recently' => 'Current role',
+                'executive_summary' => 'EXECUTIVE SUMMARY',
+                'achievements' => 'KEY ACHIEVEMENTS & ROLES',
+                'leadership' => 'LEADERSHIP PROFILE',
+                'higher_education' => 'HIGHER EDUCATION & DEGREES',
+            ];
+        }
+
+        return [
             'profile' => 'PROFIL PROFESSIONNEL',
             'experience' => 'EXPÉRIENCES PROFESSIONNELLES',
             'education' => 'FORMATIONS & DIPLÔMES',
@@ -204,22 +225,26 @@ class CvAnalysis extends Model
             'leadership' => 'PROFIL DE LEADERSHIP',
             'higher_education' => 'FORMATION & DIPLÔMES SUPÉRIEURS',
         ];
+    }
 
-        // 1. Résumé du profil professionnel du candidat (exclure l'évaluation IA "Ce CV est très bien structuré...")
+    private function extractCandidateSummary(string $rawText, array $parsed, bool $isEnglish): string
+    {
         $profileSummary = '';
+
         if (! empty($rawText)) {
-            if (preg_match('/(?:PROFESSIONAL\s+SUMMARY|RÉSUMÉ\s+PROFESSIONNEL|RESUME\s+PROFESSIONNEL|PROFILE|PROFIL(?:\s+PROFESSIONNEL)?|SUMMARY|RÉSUMÉ|ABOUT\s+ME)\s*[:\n\-]+\s*(.*?)(?=\n+\s*(?:CORE\s+SKILLS|SKILLS|COMPÉTENCES|COMPETENCES|PROFESSIONAL\s+EXPERIENCE|EXPERIENCES?|EXPÉRIENCES?|FORMATION|EDUCATION|CERTIFICATIONS|LANGUAGES|LANGUES)|\z)/siu', $rawText, $sumMatch)) {
-                $candidateRawSummary = trim($sumMatch[1]);
-                if (! empty($candidateRawSummary) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $candidateRawSummary)) {
-                    $profileSummary = $candidateRawSummary;
+            $pattern = '/(?:PROFESSIONAL\s+SUMMARY|RÉSUMÉ\s+PROFESSIONNEL|RESUME\s+PROFESSIONNEL|PROFILE|PROFIL(?:\s+PROFESSIONNEL)?|SUMMARY|RÉSUMÉ|ABOUT\s+ME)\s*[:\n\-]+\s*(.+?)(?=\n[A-Z\s]{3,}:|\z)/siu';
+            if (preg_match($pattern, $rawText, $match)) {
+                $candidateRaw = trim($match[1]);
+                if (! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $candidateRaw)) {
+                    $profileSummary = $candidateRaw;
                 }
             }
         }
 
         if (empty($profileSummary)) {
-            $candProfile = $parsed['profil'] ?? $parsed['profile'] ?? $parsed['candidate_summary'] ?? '';
-            if (! empty($candProfile) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', trim($candProfile))) {
-                $profileSummary = trim($candProfile);
+            $candProfile = trim((string) ($parsed['profil'] ?? $parsed['profile'] ?? $parsed['candidate_summary'] ?? ''));
+            if (! empty($candProfile) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $candProfile)) {
+                $profileSummary = $candProfile;
             }
         }
 
@@ -230,12 +255,21 @@ class CvAnalysis extends Model
                 : "{$title} expérimenté avec une solide expertise technique et une capacité démontrée à piloter des projets avec impact.";
         }
 
-        // 2. Expériences structurées
-        $rawExperiences = $parsed['experiences'] ?? [];
+        return $profileSummary;
+    }
+
+    private function extractNormalizedExperiences(array $rawExperiences): array
+    {
         $experiences = [];
         foreach ($rawExperiences as $exp) {
             if (is_array($exp)) {
-                $bullets = ! empty($exp['bullets']) ? (array) $exp['bullets'] : (! empty($exp['description']) ? array_filter(array_map('trim', explode("\n", $exp['description']))) : []);
+                $bullets = [];
+                if (! empty($exp['bullets'])) {
+                    $bullets = (array) $exp['bullets'];
+                } elseif (! empty($exp['description'])) {
+                    $bullets = array_filter(array_map('trim', explode("\n", (string) $exp['description'])));
+                }
+
                 $experiences[] = [
                     'title' => $exp['title'] ?? 'Poste',
                     'company' => $exp['company'] ?? '',
@@ -248,11 +282,9 @@ class CvAnalysis extends Model
             }
 
             $expStr = (string) $exp;
-            $title = 'Poste';
             $company = '';
             $period = '';
             $desc = '';
-            $bullets = [];
 
             if (preg_match('/^([^-—:]+)\s*[-—]\s*([^(:—]+)(?:\s*\(([^)]+)\))?\s*(?::\s*(.*))?$/su', $expStr, $matches)) {
                 $title = trim($matches[1]);
@@ -265,9 +297,17 @@ class CvAnalysis extends Model
                 $desc = trim($parts[1] ?? '');
             }
 
+            $bullets = [];
             if (! empty($desc)) {
                 $split = preg_split('/(?<=[.!?])\s+(?=[A-ZÀ-ÖØ-ß])/u', $desc);
                 $bullets = array_filter(array_map('trim', $split ?: []));
+            }
+
+            $finalBullets = [];
+            if (count($bullets) > 1) {
+                $finalBullets = $bullets;
+            } elseif (! empty($desc)) {
+                $finalBullets = [$desc];
             }
 
             $experiences[] = [
@@ -275,12 +315,15 @@ class CvAnalysis extends Model
                 'company' => $company,
                 'period' => $period,
                 'description' => $desc,
-                'bullets' => count($bullets) > 1 ? $bullets : (! empty($desc) ? [$desc] : []),
+                'bullets' => $finalBullets,
             ];
         }
 
-        // 3. Formations structurées
-        $rawFormations = $parsed['education'] ?? $parsed['formation'] ?? [];
+        return $experiences;
+    }
+
+    private function extractNormalizedEducation(array $rawFormations): array
+    {
         $formations = [];
         foreach ($rawFormations as $edu) {
             if (is_array($edu)) {
@@ -311,61 +354,57 @@ class CvAnalysis extends Model
             ];
         }
 
-        // 4. Compétences & Compétences catégorisées
-        $rawSkills = $parsed['skills'] ?? $parsed['competences'] ?? [];
+        return $formations;
+    }
+
+    private function extractCategorizedSkills(string $rawText): array
+    {
         $categorizedSkills = [];
+        if (empty($rawText) || ! preg_match_all('/^([A-Za-zÀ-ÿ\s&]+)\s*:\s*([A-Za-z0-9\s,._\-+]+)$/m', $rawText, $catMatches, PREG_SET_ORDER)) {
+            return $categorizedSkills;
+        }
 
-        if (! empty($rawText) && preg_match_all('/^([A-Za-zÀ-ÿ\s&]+)\s*:\s*([A-Za-z0-9\s,._\-+]+)$/m', $rawText, $catMatches, PREG_SET_ORDER)) {
-            $ignored = ['abidjan', 'professional summary', 'education', 'certifications', 'languages', 'phone', 'email'];
-            foreach ($catMatches as $cm) {
-                $catName = trim($cm[1]);
-                if (in_array(strtolower($catName), $ignored)) {
-                    continue;
-                }
-                $skillItems = array_filter(array_map('trim', explode(',', $cm[2])));
-                if (! empty($skillItems)) {
-                    $categorizedSkills[$catName] = $skillItems;
+        $ignored = ['abidjan', 'professional summary', 'education', 'certifications', 'languages', 'phone', 'email'];
+        foreach ($catMatches as $cm) {
+            $catName = trim($cm[1]);
+            if (in_array(strtolower($catName), $ignored, true)) {
+                continue;
+            }
+            $skillItems = array_filter(array_map('trim', explode(',', $cm[2])));
+            if (! empty($skillItems)) {
+                $categorizedSkills[$catName] = $skillItems;
+            }
+        }
+
+        return $categorizedSkills;
+    }
+
+    private function extractNormalizedCertifications(array $rawCerts, string $rawText): array
+    {
+        if (empty($rawCerts) && ! empty($rawText) && preg_match('/CERTIFICATIONS?\s*[:\n\-]+\s*(.+?)(?=\n[A-Z\s]{3,}:|\z)/siu', $rawText, $certMatch)) {
+            $certLines = array_filter(array_map('trim', explode("\n", $certMatch[1])));
+            foreach ($certLines as $cl) {
+                $cleaned = ltrim($cl, "•-* \t");
+                if ($cleaned !== '') {
+                    $rawCerts[] = $cleaned;
                 }
             }
         }
 
-        // 5. Certifications
-        $rawCerts = $parsed['certifications'] ?? [];
-        if (empty($rawCerts) && ! empty($rawText)) {
-            if (preg_match('/(?:CERTIFICATIONS?)\s*[:\n\-]+\s*(.*?)(?=\n+\s*(?:LANGUAGES?|LANGUES?)|$)/siu', $rawText, $certMatch)) {
-                $certLines = array_filter(array_map('trim', explode("\n", $certMatch[1])));
-                foreach ($certLines as $cl) {
-                    $cl = ltrim($cl, "•-* \t");
-                    if (! empty($cl)) {
-                        $rawCerts[] = $cl;
-                    }
-                }
+        return $rawCerts;
+    }
+
+    private function extractNormalizedLanguages(array $rawLanguages, string $rawText): array
+    {
+        if (empty($rawLanguages) && ! empty($rawText) && preg_match('/LANGU(?:AGES?|ES?)\s*[:\n\-]+\s*(.+?)(?=\n[A-Z\s]{3,}:|\z)/siu', $rawText, $langMatch)) {
+            $langText = trim($langMatch[1]);
+            if (str_contains($langText, '—')) {
+                $rawLanguages = array_filter(array_map('trim', explode('—', $langText)));
+            } else {
+                $rawLanguages = array_filter(array_map('trim', explode("\n", $langText)));
             }
         }
 
-        // 6. Langues
-        $rawLanguages = $parsed['langues'] ?? $parsed['languages'] ?? [];
-        if (empty($rawLanguages) && ! empty($rawText)) {
-            if (preg_match('/(?:LANGUAGES?|LANGUES?)\s*[:\n\-]+\s*(.*?)(?=\n+[A-Z\s]{3,}:|$)/siu', $rawText, $langMatch)) {
-                $langText = trim($langMatch[1]);
-                if (str_contains($langText, '—')) {
-                    $rawLanguages = array_filter(array_map('trim', explode('—', $langText)));
-                } else {
-                    $rawLanguages = array_filter(array_map('trim', explode("\n", $langText)));
-                }
-            }
-        }
-
-        return [
-            'is_english' => $isEnglish,
-            'labels' => $labels,
-            'profile_summary' => $profileSummary,
-            'experiences' => $experiences,
-            'education' => $formations,
-            'skills' => (array) $rawSkills,
-            'categorized_skills' => $categorizedSkills,
-            'certifications' => (array) $rawCerts,
-            'languages' => (array) $rawLanguages,
-        ];
+        return $rawLanguages;
     }
 }

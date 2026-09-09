@@ -352,8 +352,8 @@
                                     <span>CV Original Téléversé</span>
                                 </button>
                             </div>
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-gray-900" x-text="cvViewMode === 'ats' ? 'Votre CV Reformulé & Optimisé ATS' : 'Document CV Original Téléversé'"></h3>
-                            <p class="text-xs sm:text-sm text-gray-500" x-text="cvViewMode === 'ats' ? 'Cette version structure vos compétences avec des verbes d\'action, standardise la typographie et maximise vos chances lors des screenings.' : 'Visualisez le document original tel qu\'il a été transmis pour l\'analyse.'"></p>
+                            <h3 class="text-xl sm:text-2xl font-extrabold text-gray-900" x-text="cvViewMode === 'ats' ? 'Votre CV Reformulé & Optimisé ATS' : 'Document CV Original Téléversé'">Votre CV Reformulé &amp; Optimisé ATS</h3>
+                            <p class="text-xs sm:text-sm text-gray-500" x-text="cvViewMode === 'ats' ? 'Cette version structure vos compétences avec des verbes d\'action, standardise la typographie et maximise vos chances lors des screenings.' : 'Visualisez le document original tel qu\'il a été transmis pour l\'analyse.'">Cette version structure vos compétences avec des verbes d'action, standardise la typographie et maximise vos chances lors des screenings.</p>
                         </div>
 
                         <!-- Actions ATS (Copier, Télécharger, Postuler) -->
@@ -368,34 +368,31 @@
                                 </svg>
                                 <span>
                                     @if(isset($cvCopyCost) && $cvCopyCost > 0)
-                                        Copier le texte ({{ $cvCopyCost }} {{ $cvCopyCost > 1 ? 'crédits' : 'crédit' }})
+                                        Copier le CV ATS ({{ $cvCopyCost }} {{ $cvCopyCost > 1 ? 'crédits' : 'crédit' }})
                                     @else
-                                        Copier le texte (Gratuit)
+                                        Copier le CV ATS (Gratuit)
                                     @endif
                                 </span>
                             </button>
 
-                            <!-- Bouton Télécharger / Imprimer PDF dynamique -->
+                            <!-- Bouton Imprimer / Télécharger le CV ATS -->
                             <button type="button"
                                     @click="triggerCvAction('download')"
                                     :disabled="isProcessingCvAction"
                                     class="px-4 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 disabled:opacity-50 transition flex items-center gap-2 shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                <span x-text="selectedTemplateCostText()"></span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                <span x-text="downloadButtonLabel">Imprimer / Télécharger le PDF</span>
                             </button>
 
-                            <a href="{{ route('jeune.opportunities', ['tab' => 'emploi']) }}"
-                               class="px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-xs font-bold hover:bg-gray-50 transition flex items-center gap-1.5 shadow-sm">
-                                <span>Postuler aux offres</span>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            </a>
-                        </div>
-
-                        <!-- Action Fichier Original -->
-                        <div x-show="cvViewMode === 'original'" class="flex items-center gap-2.5">
-                            <a href="{{ route('jeune.cv.view-original', $activeCv->id) }}" target="_blank" download class="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-xs font-bold hover:bg-gray-800 transition flex items-center gap-2 shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                <span>Télécharger l'original</span>
+                            <!-- Bouton Postuler avec ce CV (Ouvre l'onglet Opportunités) -->
+                            <a href="{{ route('jeune.opportunities') }}"
+                               class="px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-800 text-xs font-bold hover:bg-gray-50 transition flex items-center gap-2 shadow-xs">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                <span>Postuler avec ce CV</span>
                             </a>
                         </div>
                     </div>
@@ -414,7 +411,7 @@
 
                         @if(str_contains(strtolower($activeCv->mime_type ?? ''), 'pdf'))
                             <div class="w-full h-[750px] rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 shadow-inner">
-                                <iframe src="{{ route('jeune.cv.view-original', $activeCv->id) }}" class="w-full h-full border-0"></iframe>
+                                <iframe src="{{ route('jeune.cv.view-original', $activeCv->id) }}" class="w-full h-full border-0" title="Aperçu du CV original au format PDF"></iframe>
                             </div>
                         @elseif(str_contains(strtolower($activeCv->mime_type ?? ''), 'image'))
                             <div class="flex justify-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
@@ -1318,7 +1315,7 @@
                 </div>
                 <div class="w-full h-[70vh] bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center">
                     <template x-if="previewType.includes('pdf')">
-                        <iframe :src="previewUrl" class="w-full h-full border-0"></iframe>
+                        <iframe :src="previewUrl" class="w-full h-full border-0" title="Aperçu du document au format PDF"></iframe>
                     </template>
                     <template x-if="!previewType.includes('pdf')">
                         <img :src="previewUrl" class="max-w-full max-h-full object-contain" alt="Aperçu" />
