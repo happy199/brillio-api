@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AdvisorVideoCall;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
+use App\Models\CvAnalysis;
 use App\Models\MentorProfile;
 use App\Models\MentorProfileView;
 use App\Models\PersonalityQuestion;
@@ -591,13 +592,149 @@ class JeuneDashboardController extends Controller
             $activeCv = $cvAnalyses->first();
         }
 
+        $cvCopyCost = (int) SystemSetting::getValue('feature_cost_cv_copy', 1);
+        $cvDownloadCost = (int) SystemSetting::getValue('feature_cost_cv_download', 2);
+
         return view('jeune.outils', [
             'user' => $user,
             'tab' => $tab,
             'documents' => $documents,
             'cvAnalyses' => $cvAnalyses,
             'activeCv' => $activeCv,
+            'cvCopyCost' => $cvCopyCost,
+            'cvDownloadCost' => $cvDownloadCost,
         ]);
+    }
+
+    /**
+     * Traite l'action payante ou gratuite de copie ou de téléchargement/impression du CV
+     */
+    public function handleCvAction(Request $request, WalletService $walletService)
+    {
+        $validated = $request->validate([
+            'action' => 'required|string|in:copy,download',
+            'cv_id' => 'required|integer',
+        ]);
+
+        $user = auth()->user();
+        $cvAnalysis = $user->cvAnalyses()->find($validated['cv_id']);
+
+        if (! $cvAnalysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV introuvable ou non autorisé.',
+            ], 404);
+        }
+
+        $action = $validated['action'];
+        $isCopy = $action === 'copy';
+        $settingKey = $isCopy ? 'feature_cost_cv_copy' : 'feature_cost_cv_download';
+        $defaultCost = $isCopy ? 1 : 2;
+        $cost = (int) SystemSetting::getValue($settingKey, $defaultCost);
+
+        if ($cost > 0 && $user->credits_balance < $cost) {
+            return response()->json([
+                'success' => false,
+                'redirect_to_wallet' => true,
+                'wallet_url' => route('jeune.wallet.index'),
+                'message' => 'Solde de crédits insuffisant. Veuillez recharger votre portefeuille.',
+            ], 402);
+        }
+
+        if ($cost > 0) {
+            $description = $isCopy ? 'Copie du CV ATS' : 'Téléchargement / Impression du CV ATS en PDF';
+            $walletService->deductCredits($user, $cost, 'cv_action', $description, $cvAnalysis);
+        }
+
+        return response()->json([
+            'success' => true,
+            'action' => $action,
+            'cost' => $cost,
+            'remaining_balance' => (int) $user->fresh()->credits_balance,
+            'cv_text' => $this->formatCvAsPlainText($cvAnalysis),
+        ]);
+    }
+
+    /**
+     * Formate les données du CV en texte brut pour le presse-papier
+     */
+    private function formatCvAsPlainText(CvAnalysis $cv): string
+    {
+        $separator = '-------------------------';
+        $lines = [];
+        $lines[] = mb_strtoupper($cv->candidate_name ?? 'Candidat');
+        if ($cv->candidate_title) {
+            $lines[] = $cv->candidate_title;
+        }
+
+        $contact = [];
+        if (! empty($cv->candidate_contact['email'])) {
+            $contact[] = $cv->candidate_contact['email'];
+        }
+        if (! empty($cv->candidate_contact['phone'])) {
+            $contact[] = $cv->candidate_contact['phone'];
+        }
+        if (! empty($cv->candidate_contact['location'])) {
+            $contact[] = $cv->candidate_contact['location'];
+        }
+        if (! empty($contact)) {
+            $lines[] = implode(' | ', $contact);
+        }
+
+        $lines[] = '';
+        $lines[] = 'PROFIL PROFESSIONNEL';
+        $lines[] = $separator;
+        $lines[] = $cv->summary ?: ($cv->parsed_content['profil'] ?? '');
+
+        $experiences = $cv->parsed_content['experiences'] ?? [];
+        if (! empty($experiences)) {
+            $lines[] = '';
+            $lines[] = 'EXPÉRIENCES PROFESSIONNELLES';
+            $lines[] = $separator;
+            foreach ($experiences as $exp) {
+                if (is_array($exp)) {
+                    $header = ($exp['title'] ?? 'Poste').' — '.($exp['company'] ?? '');
+                    if (! empty($exp['period'])) {
+                        $header .= ' ('.$exp['period'].')';
+                    }
+                    $lines[] = $header;
+                    if (! empty($exp['description'])) {
+                        $lines[] = $exp['description'];
+                    }
+                } else {
+                    $lines[] = (string) $exp;
+                }
+                $lines[] = '';
+            }
+        }
+
+        $formations = $cv->parsed_content['education'] ?? $cv->parsed_content['formation'] ?? [];
+        if (! empty($formations)) {
+            $lines[] = 'FORMATIONS & DIPLÔMES';
+            $lines[] = $separator;
+            foreach ($formations as $edu) {
+                if (is_array($edu)) {
+                    $item = ($edu['degree'] ?? 'Diplôme').' — '.($edu['school'] ?? '');
+                    if (! empty($edu['year'])) {
+                        $item .= ' ('.$edu['year'].')';
+                    }
+                    $lines[] = $item;
+                } else {
+                    $lines[] = (string) $edu;
+                }
+            }
+            $lines[] = '';
+        }
+
+        $skills = $cv->parsed_content['skills'] ?? $cv->parsed_content['competences'] ?? [];
+        if (! empty($skills)) {
+            $lines[] = 'COMPÉTENCES CLÉS';
+            $lines[] = $separator;
+            $lines[] = implode(', ', array_map('strval', $skills));
+            $lines[] = '';
+        }
+
+        return trim(implode("\n", $lines));
     }
 
     /**

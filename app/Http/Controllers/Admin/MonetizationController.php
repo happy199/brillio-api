@@ -30,6 +30,8 @@ class MonetizationController extends Controller
             'feature_cost_transcription_download',
             'feature_cost_ai_report_generation',
             'feature_cost_ai_generation',
+            'feature_cost_cv_copy',
+            'feature_cost_cv_download',
             'payout_fee_percentage',
             'mentorship_commission_percent',
             'credit_bonus_pro',
@@ -43,6 +45,8 @@ class MonetizationController extends Controller
         $targetingCost = $settings['feature_cost_advanced_targeting']->value ?? 10;
         $analysisToolCost = $settings['feature_cost_analysis_tool']->value ?? 5;
         $aiGenerationCost = $settings['feature_cost_ai_generation']->value ?? 5;
+        $cvCopyCost = $settings['feature_cost_cv_copy']->value ?? 1;
+        $cvDownloadCost = $settings['feature_cost_cv_download']->value ?? 2;
         $contactAdvisorCost = $settings['feature_cost_contact_advisor']->value ?? 10;
         $videoCallAdvisorCost = $settings['feature_cost_video_call_advisor']->value ?? 50;
         $newChatCost = $settings['feature_cost_new_chat']->value ?? 10;
@@ -119,6 +123,8 @@ class MonetizationController extends Controller
             'transcriptionDownloadCost',
             'videoRecordingDownloadCost',
             'aiReportGenerationCost',
+            'cvCopyCost',
+            'cvDownloadCost',
             'payoutFeePercentage',
             'totalCreditsPurchased',
             'creditsPurchasedJeune',
@@ -155,6 +161,8 @@ class MonetizationController extends Controller
             'feature_cost_advanced_targeting' => 'required|integer|min:0',
             'feature_cost_analysis_tool' => 'required|integer|min:0',
             'feature_cost_ai_generation' => 'required|integer|min:0',
+            'feature_cost_cv_copy' => 'required|integer|min:0',
+            'feature_cost_cv_download' => 'required|integer|min:0',
             'feature_cost_contact_advisor' => 'required|integer|min:0',
             'feature_cost_video_call_advisor' => 'required|integer|min:0',
             'feature_cost_new_chat' => 'required|integer|min:0',

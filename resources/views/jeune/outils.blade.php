@@ -3,7 +3,7 @@
 @section('title', 'Outils - CV, Ressources & Documents')
 
 @section('content')
-<div class="space-y-8" x-data="outilsApp('{{ $tab ?? 'cv' }}')">
+<div class="space-y-8" x-data="outilsApp('{{ $tab ?? 'cv' }}', {{ $activeCv ? $activeCv->id : 'null' }})">
 
     <!-- Top Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -325,14 +325,41 @@
                             <h3 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-2">Votre CV Reformulé & Optimisé ATS</h3>
                             <p class="text-xs sm:text-sm text-gray-500">Cette version structure vos compétences avec des verbes d'action, standardise la typographie et maximise vos chances lors des screenings.</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="printCvDocument()"
-                                    class="px-4 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 transition flex items-center gap-2 shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                <span>Imprimer / PDF</span>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <!-- Bouton Copier le texte ATS -->
+                            <button type="button"
+                                    @click="triggerCvAction('copy')"
+                                    :disabled="isProcessingCvAction"
+                                    class="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-xs font-bold hover:bg-gray-800 disabled:opacity-50 transition flex items-center gap-2 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                                <span>
+                                    @if(isset($cvCopyCost) && $cvCopyCost > 0)
+                                        Copier le texte ({{ $cvCopyCost }} {{ $cvCopyCost > 1 ? 'crédits' : 'crédit' }})
+                                    @else
+                                        Copier le texte (Gratuit)
+                                    @endif
+                                </span>
                             </button>
+
+                            <!-- Bouton Télécharger / Imprimer PDF -->
+                            <button type="button"
+                                    @click="triggerCvAction('download')"
+                                    :disabled="isProcessingCvAction"
+                                    class="px-4 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 disabled:opacity-50 transition flex items-center gap-2 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                <span>
+                                    @if(isset($cvDownloadCost) && $cvDownloadCost > 0)
+                                        Télécharger / Imprimer ({{ $cvDownloadCost }} {{ $cvDownloadCost > 1 ? 'crédits' : 'crédit' }})
+                                    @else
+                                        Télécharger / Imprimer (Gratuit)
+                                    @endif
+                                </span>
+                            </button>
+
                             <a href="{{ route('jeune.opportunities', ['tab' => 'emploi']) }}"
-                               class="px-4 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 transition flex items-center gap-1.5 shadow-sm">
+                               class="px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-xs font-bold hover:bg-gray-50 transition flex items-center gap-1.5 shadow-sm">
                                 <span>Postuler aux offres</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                             </a>
@@ -340,7 +367,9 @@
                     </div>
 
                     <!-- Fiche CV ATS Pro Rendue en HTML/A4 Prête à être imprimée -->
-                    <div id="cvEnhancedPrintArea" class="bg-white rounded-3xl p-8 sm:p-12 border border-gray-200 shadow-md max-w-4xl mx-auto space-y-8 text-gray-900 font-sans">
+                    <div id="cvEnhancedPrintArea"
+                         class="select-none bg-white rounded-3xl p-8 sm:p-12 border border-gray-200 shadow-md max-w-4xl mx-auto space-y-8 text-gray-900 font-sans"
+                         style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
                         <!-- En-tête CV -->
                         <div class="border-b-2 border-gray-900 pb-6 text-center space-y-2">
                             <h1 class="text-3xl font-black tracking-tight text-gray-900 uppercase">{{ $activeCv->candidate_name }}</h1>
@@ -700,13 +729,32 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div x-show="showToast"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold border"
+         :class="toastType === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'"
+         x-cloak>
+        <span x-text="toastMessage"></span>
+    </div>
+
 </div>
 
 @push('scripts')
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-function outilsApp(initialTab) {
+function outilsApp(initialTab, initialCvId) {
     return {
         currentTab: initialTab || 'cv',
+        activeCvId: initialCvId || null,
+        isProcessingCvAction: false,
+        toastMessage: '',
+        toastType: 'success',
+        showToast: false,
         driveFilter: 'all',
         showUploadModal: false,
         showCvUploadModal: false,
@@ -716,6 +764,86 @@ function outilsApp(initialTab) {
         previewType: '',
         previewFileName: '',
         documentToDelete: null,
+
+        init() {
+            this.$nextTick(() => {
+                const cvArea = document.getElementById('cvEnhancedPrintArea');
+                if (cvArea) {
+                    const preventCopyHandler = (e) => {
+                        e.preventDefault();
+                        return false;
+                    };
+                    ['copy', 'cut', 'contextmenu', 'selectstart', 'dragstart'].forEach((evt) => {
+                        cvArea.addEventListener(evt, preventCopyHandler);
+                    });
+                }
+            });
+        },
+
+        showToastNotification(msg, type = 'success') {
+            this.toastMessage = msg;
+            this.toastType = type;
+            this.showToast = true;
+            setTimeout(() => {
+                this.showToast = false;
+            }, 4000);
+        },
+
+        async triggerCvAction(action) {
+            if (!this.activeCvId || this.isProcessingCvAction) return;
+            this.isProcessingCvAction = true;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                const response = await fetch('{{ route('jeune.cv.action') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        cv_id: this.activeCvId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.status === 402 || data.redirect_to_wallet) {
+                    window.location.href = data.wallet_url || '{{ route('jeune.wallet.index') }}';
+                    return;
+                }
+
+                if (!response.ok || !data.success) {
+                    this.showToastNotification(data.message || 'Une erreur est survenue.', 'error');
+                    return;
+                }
+
+                if (action === 'copy') {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(data.cv_text);
+                    } else {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = data.cv_text;
+                        textArea.style.position = 'fixed';
+                        textArea.style.opacity = '0';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                    }
+                    this.showToastNotification('Texte du CV copié dans le presse-papier !', 'success');
+                } else if (action === 'download') {
+                    window.print();
+                }
+            } catch (err) {
+                console.error('CV Action error:', err);
+                this.showToastNotification('Une erreur inattendue est survenue.', 'error');
+            } finally {
+                this.isProcessingCvAction = false;
+            }
+        },
 
         setTab(tabName) {
             this.currentTab = tabName;
@@ -754,91 +882,42 @@ function outilsApp(initialTab) {
         }
     };
 }
-
-function printCvDocument() {
-    const printArea = document.getElementById('cvEnhancedPrintArea');
-    if (!printArea) {
-        window.print();
-        return;
-    }
-
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    document.body.appendChild(iframe);
-
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-            <meta charset="UTF-8">
-            <title>CV_Optimise_Brillio</title>
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-            <script src="https://cdn.tailwindcss.com"><\/script>
-            <style>
-                @page {
-                    size: A4 portrait;
-                    margin: 10mm 12mm;
-                }
-                body {
-                    font-family: 'Inter', sans-serif;
-                    background: white !important;
-                    color: #111827 !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                }
-                #cvContent {
-                    background: white !important;
-                }
-            </style>
-        </head>
-        <body class="p-4 bg-white">
-            <div id="cvContent">${printArea.innerHTML}</div>
-        </body>
-        </html>
-    `);
-    doc.close();
-
-    setTimeout(() => {
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-        setTimeout(() => {
-            if (document.body.contains(iframe)) {
-                document.body.removeChild(iframe);
-            }
-        }, 2000);
-    }, 600);
-}
 </script>
 @endpush
 
 @push('styles')
 <style>
+#cvEnhancedPrintArea, #cvEnhancedPrintArea * {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+
 @media print {
-    body > * {
-        display: none !important;
-    }
     body {
-        background: white !important;
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    body * {
+        visibility: hidden !important;
+    }
+    #cvEnhancedPrintArea, #cvEnhancedPrintArea * {
+        visibility: visible !important;
+        -webkit-user-select: text !important;
+        user-select: text !important;
     }
     #cvEnhancedPrintArea {
-        display: block !important;
         position: absolute !important;
-        top: 0 !important;
         left: 0 !important;
+        top: 0 !important;
         width: 100% !important;
         margin: 0 !important;
         padding: 10mm !important;
         border: none !important;
         box-shadow: none !important;
+        background: white !important;
     }
 }
 </style>

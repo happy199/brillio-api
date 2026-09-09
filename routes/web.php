@@ -303,6 +303,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::delete('/documents/{document}', [JeuneDashboardController::class, 'deleteDocument'])->name('documents.destroy');
     Route::post('/opportunites/cv/analyser', [JeuneDashboardController::class, 'analyzeCv'])->name('cv.analyze');
     Route::post('/outils/cv/analyser', [JeuneDashboardController::class, 'analyzeCv']);
+    Route::post('/outils/cv/action', [JeuneDashboardController::class, 'handleCvAction'])->name('cv.action');
     Route::get('/mentors', [JeuneDashboardController::class, 'mentors'])->name('mentors');
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [ProfileController::class, 'index'])->name('profile');

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\CvAnalysis;
+use App\Models\SystemSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -230,5 +231,149 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response->assertSee('CV');
         $response->assertSee('Ressources');
         $response->assertSee('Documents');
+    }
+
+    public function test_cv_action_redirects_to_wallet_when_insufficient_credits()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+            'credits_balance' => 0,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_insufficient_test',
+            'original_filename' => 'Mon_CV.pdf',
+            'file_path' => 'cv_analyses/test.pdf',
+            'file_size' => 5000,
+            'mime_type' => self::MIME_PDF,
+            'candidate_name' => 'Adama Traore',
+            'candidate_title' => 'Développeur Backend',
+            'global_score' => 78,
+            'status_label' => self::STATUS_TRES_BIEN,
+            'summary' => 'Profil de développeur backend.',
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'action' => 'copy',
+            'cv_id' => $analysis->id,
+        ]);
+
+        $response->assertStatus(402);
+        $response->assertJson([
+            'success' => false,
+            'redirect_to_wallet' => true,
+            'wallet_url' => route('jeune.wallet.index'),
+        ]);
+    }
+
+    public function test_cv_action_deducts_credits_and_returns_data_when_sufficient_credits()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+            'credits_balance' => 10,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_sufficient_test',
+            'original_filename' => 'Mon_CV_Pro.pdf',
+            'file_path' => 'cv_analyses/test.pdf',
+            'file_size' => 5000,
+            'mime_type' => self::MIME_PDF,
+            'candidate_name' => 'Adama Traore',
+            'candidate_title' => 'Développeur Backend',
+            'global_score' => 85,
+            'status_label' => 'Excellent',
+            'summary' => 'Profil complet avec 5 ans d\'expérience.',
+            'parsed_content' => [
+                'experiences' => [
+                    [
+                        'title' => 'Backend Engineer',
+                        'company' => 'Brillio Tech',
+                        'period' => '2022 - 2024',
+                        'description' => 'Développement d\'APIs haute performance.',
+                    ],
+                ],
+                'skills' => ['PHP', 'Laravel', 'Docker'],
+            ],
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'action' => 'copy',
+            'cv_id' => $analysis->id,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'action' => 'copy',
+            'cost' => 1,
+            'remaining_balance' => 9,
+        ]);
+
+        $this->assertEquals(9, $user->fresh()->credits_balance);
+        $this->assertStringContainsString('ADAMA TRAORE', $response->json('cv_text'));
+        $this->assertStringContainsString('Backend Engineer', $response->json('cv_text'));
+    }
+
+    public function test_cv_action_is_free_when_cost_set_to_zero()
+    {
+        SystemSetting::updateOrCreate(
+            ['key' => 'feature_cost_cv_download'],
+            ['value' => 0]
+        );
+
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+            'credits_balance' => 0,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_free_test',
+            'original_filename' => 'Mon_CV_Free.pdf',
+            'file_path' => 'cv_analyses/test.pdf',
+            'file_size' => 5000,
+            'mime_type' => self::MIME_PDF,
+            'candidate_name' => 'Fatou Sylla',
+            'candidate_title' => 'Chef de Projet',
+            'global_score' => 80,
+            'status_label' => self::STATUS_TRES_BIEN,
+            'summary' => 'Chef de projet certifiée.',
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'action' => 'download',
+            'cv_id' => $analysis->id,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'action' => 'download',
+            'cost' => 0,
+            'remaining_balance' => 0,
+        ]);
+
+        $this->assertEquals(0, $user->fresh()->credits_balance);
     }
 }
