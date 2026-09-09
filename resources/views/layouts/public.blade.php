@@ -328,13 +328,43 @@
                     <a href="{{ route('about') }}" class="font-medium transition-colors whitespace-nowrap"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">À
                         propos</a>
-                    <a href="{{ route('public.resources') }}" class="font-medium transition-colors"
-                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Ressources</a>
-                    <a href="{{ route('public.opportunities') }}" class="font-medium transition-colors flex items-center gap-1 whitespace-nowrap"
-                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">
-                        <span>Opportunités</span>
-                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] xl:text-[10px] font-bold bg-primary-100 text-primary-700">CV IA</span>
-                    </a>
+
+                    <!-- Dropdown Outils (avec tag animé New) -->
+                    <div class="relative" x-data="{ outilsDropdown: false }" @mouseleave="outilsDropdown = false">
+                        <button @mouseover="outilsDropdown = true" @click="outilsDropdown = !outilsDropdown"
+                            class="font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap py-2"
+                            :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">
+                            <span>Outils</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] xl:text-[10px] font-bold bg-primary-600 text-white animate-pulse shadow-xs">New</span>
+                            <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': outilsDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div x-show="outilsDropdown" x-cloak
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 translate-y-1"
+                            class="absolute left-0 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                            <a href="{{ route('public.opportunities') }}"
+                                class="flex items-center gap-2.5 px-4 py-2.5 text-xs xl:text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
+                                <svg class="w-4 h-4 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Analyse CV</span>
+                            </a>
+                            <a href="{{ route('public.resources') }}"
+                                class="flex items-center gap-2.5 px-4 py-2.5 text-xs xl:text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
+                                <svg class="w-4 h-4 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                <span>Ressources</span>
+                            </a>
+                        </div>
+                    </div>
+
                     <a href="{{ route('public.advertisements') }}" class="font-medium transition-colors"
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Publicités</a>
                     <a href="{{ route('contact') }}" class="font-medium transition-colors"
@@ -379,13 +409,30 @@
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Accueil</a>
                 <a href="{{ route('about') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">À propos</a>
-                <a href="{{ route('public.resources') }}"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Ressources</a>
-                <a href="{{ route('public.opportunities') }}"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg flex items-center justify-between">
-                    <span>Opportunités (Mon CV)</span>
-                    <span class="px-2 py-0.5 text-xs font-semibold rounded bg-primary-100 text-primary-700">Test IA</span>
-                </a>
+
+                <!-- Outils (Mobile avec sous-menu) -->
+                <div x-data="{ mobileOutilsOpen: true }" class="rounded-lg">
+                    <button @click="mobileOutilsOpen = !mobileOutilsOpen"
+                        class="w-full flex items-center justify-between py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium">Outils</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-600 text-white animate-pulse">New</span>
+                        </div>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': mobileOutilsOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="mobileOutilsOpen" class="pl-4 pr-2 py-1 space-y-1 bg-gray-50/80 rounded-xl mt-1">
+                        <a href="{{ route('public.opportunities') }}"
+                            class="block py-2.5 px-3 text-sm text-gray-700 hover:text-primary-600 hover:bg-white rounded-lg font-medium">
+                            • Analyse CV
+                        </a>
+                        <a href="{{ route('public.resources') }}"
+                            class="block py-2.5 px-3 text-sm text-gray-700 hover:text-primary-600 hover:bg-white rounded-lg font-medium">
+                            • Ressources
+                        </a>
+                    </div>
+                </div>
                 <a href="{{ route('public.advertisements') }}"
                     class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Publicités</a>
                 <a href="{{ route('contact') }}"

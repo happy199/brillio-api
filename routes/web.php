@@ -291,13 +291,18 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::delete('/chat/{conversation}', [JeuneDashboardController::class, 'deleteConversation'])->name('chat.delete');
     Route::post('/chat/{conversation}/request-human', [JeuneDashboardController::class, 'requestHumanSupport'])->name('chat.request-human');
     Route::post('/chat/{conversation}/cancel-human', [JeuneDashboardController::class, 'cancelHumanSupport'])->name('chat.cancel-human');
+    // Opportunités (Emploi & Formation)
+    Route::get('/opportunites', [JeuneDashboardController::class, 'opportunities'])->name('opportunities');
+
+    // Outils (CV, Ressources, Documents Drive)
+    Route::get('/outils', [JeuneDashboardController::class, 'outils'])->name('outils');
     Route::get('/documents', [JeuneDashboardController::class, 'documents'])->name('documents');
-    Route::get('/opportunites', [JeuneDashboardController::class, 'documents'])->name('opportunities');
     Route::post('/documents', [JeuneDashboardController::class, 'storeDocument'])->name('documents.store');
     Route::get('/documents/{document}/download', [JeuneDashboardController::class, 'downloadDocument'])->name('documents.download');
     Route::get('/documents/{document}/view', [JeuneDashboardController::class, 'viewDocument'])->name('documents.view');
     Route::delete('/documents/{document}', [JeuneDashboardController::class, 'deleteDocument'])->name('documents.destroy');
     Route::post('/opportunites/cv/analyser', [JeuneDashboardController::class, 'analyzeCv'])->name('cv.analyze');
+    Route::post('/outils/cv/analyser', [JeuneDashboardController::class, 'analyzeCv']);
     Route::get('/mentors', [JeuneDashboardController::class, 'mentors'])->name('mentors');
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [ProfileController::class, 'index'])->name('profile');

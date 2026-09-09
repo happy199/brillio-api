@@ -144,9 +144,15 @@
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Orientation
                     </a>
-                    <a href="{{ route('jeune.documents') }}"
-                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.documents*', 'jeune.opportunities*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <a href="{{ route('jeune.opportunities') }}"
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.opportunities*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Opportunités
+                    </a>
+
+                    <a href="{{ route('jeune.outils') }}"
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1.5 {{ request()->routeIs('jeune.outils*', 'jeune.documents*', 'jeune.resources*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <span>Outils</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-600 text-white animate-pulse shadow-xs">New</span>
                     </a>
 
                     <a href="{{ route('jeune.messages.index') }}"
@@ -166,7 +172,7 @@
                     <!-- Dropdown Mentorat -->
                     <div class="relative" x-data="{ open: false }" @mouseleave="open = false">
                         <button @mouseover="open = true"
-                            class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1 {{ request()->routeIs('jeune.mentors', 'jeune.mentorship.*', 'jeune.resources.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                            class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1 {{ request()->routeIs('jeune.mentors', 'jeune.mentorship.*', 'jeune.sessions.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                             Mentorat
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -175,10 +181,6 @@
                         </button>
                         <div x-show="open" x-transition
                             class="absolute left-0 mt-0 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
-                            <a href="{{ route('jeune.resources.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Ressources
-                            </a>
                             <a href="{{ route('jeune.mentorship.index') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 Mes Mentors
@@ -262,17 +264,18 @@
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Orientation
             </a>
-            <a href="{{ route('jeune.documents') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.documents*', 'jeune.opportunities*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+            <a href="{{ route('jeune.opportunities') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.opportunities*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Opportunités
+            </a>
+            <a href="{{ route('jeune.outils') }}"
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1 {{ request()->routeIs('jeune.outils*', 'jeune.documents*', 'jeune.resources*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                <span>Outils</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary-600 text-white animate-pulse">New</span>
             </a>
             <a href="{{ route('jeune.messages.index') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.messages.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
                 Messages
-            </a>
-            <a href="{{ route('jeune.resources.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.resources.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Ressources
             </a>
             <a href="{{ route('jeune.mentors') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentors') ? 'active' : 'text-gray-600 bg-gray-100' }}">

@@ -187,4 +187,48 @@ class OpportunityAndCvAnalysisTest extends TestCase
             'is_claimed' => true,
         ]);
     }
+
+    public function test_public_navbar_displays_outils_with_new_tag_and_submenus()
+    {
+        $response = $this->get(route('home'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Outils');
+        $response->assertSee('New');
+        $response->assertSee('Analyse CV');
+        $response->assertSee('Ressources');
+    }
+
+    public function test_authenticated_jeune_navigation_has_opportunities_and_outils()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.opportunities'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Opportunités');
+        $response->assertSee('Outils');
+        $response->assertSee('New');
+        $response->assertSee('Emploi');
+        $response->assertSee('Formation');
+    }
+
+    public function test_outils_page_displays_cv_first_ressources_and_documents()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.outils'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Outils');
+        $response->assertSee('CV');
+        $response->assertSee('Ressources');
+        $response->assertSee('Documents');
+    }
 }

@@ -533,17 +533,36 @@ class JeuneDashboardController extends Controller
     }
 
     /**
-     * Page des opportunités (Emploi, Formation, Drive, CV)
+     * Page des opportunités (Emploi, Formation)
      */
-    public function documents(Request $request)
+    public function opportunities(Request $request)
     {
         $validated = $request->validate([
-            'tab' => 'nullable|string|in:emploi,formation,drive,cv',
+            'tab' => 'nullable|string|in:emploi,formation',
+        ]);
+
+        $tab = $validated['tab'] ?? 'emploi';
+
+        return view('jeune.opportunities', [
+            'tab' => $tab,
+        ]);
+    }
+
+    /**
+     * Page des outils (CV IA, Ressources, Documents Drive)
+     */
+    public function outils(Request $request)
+    {
+        $validated = $request->validate([
+            'tab' => 'nullable|string|in:emploi,formation,drive,cv,documents,ressources',
             'cv_id' => 'nullable|integer',
         ]);
 
         $user = auth()->user();
-        $tab = $validated['tab'] ?? 'drive';
+        $tab = $validated['tab'] ?? 'cv';
+        if ($tab === 'documents') {
+            $tab = 'drive';
+        }
 
         // Si l'utilisateur a un token de CV invité en session, le rattacher automatiquement
         if (session('pending_cv_token')) {
@@ -572,13 +591,21 @@ class JeuneDashboardController extends Controller
             $activeCv = $cvAnalyses->first();
         }
 
-        return view('jeune.documents', [
+        return view('jeune.outils', [
             'user' => $user,
             'tab' => $tab,
             'documents' => $documents,
             'cvAnalyses' => $cvAnalyses,
             'activeCv' => $activeCv,
         ]);
+    }
+
+    /**
+     * Alias de rétrocompatibilité pour documents
+     */
+    public function documents(Request $request)
+    {
+        return $this->outils($request);
     }
 
     /**
@@ -599,7 +626,7 @@ class JeuneDashboardController extends Controller
             $user = auth()->user();
             $analysis = $cvService->processAndAnalyze($validated['cv_file'], $user);
 
-            return redirect()->route('jeune.documents', ['tab' => 'cv', 'cv_id' => $analysis->id])
+            return redirect()->route('jeune.outils', ['tab' => 'cv', 'cv_id' => $analysis->id])
                 ->with('success', 'Votre CV a été analysé avec succès ! Votre nouveau score Career est de '.$analysis->global_score.'/100.');
         } catch (\Exception $e) {
             Log::error('Erreur analyse CV jeune: '.$e->getMessage());
