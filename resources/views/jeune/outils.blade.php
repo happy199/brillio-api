@@ -3,7 +3,7 @@
 @section('title', 'Outils - CV, Ressources & Documents')
 
 @section('content')
-<div class="space-y-8" x-data="outilsApp('{{ $tab ?? 'cv' }}', {{ $activeCv ? $activeCv->id : 'null' }})">
+<div class="space-y-8" x-data="outilsApp('{{ $tab ?? 'cv' }}', {{ $activeCv ? $activeCv->id : 'null' }}, {{ json_encode($templateCosts ?? [0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5]) }})">
 
     <!-- Top Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -148,15 +148,19 @@
                                     <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     <span>Historique ({{ $cvAnalyses->count() }})</span>
                                 </button>
-                                <div x-show="historyOpen" @click.away="historyOpen = false" class="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-20 space-y-1">
+                                <div x-show="historyOpen" @click.away="historyOpen = false" class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-20 space-y-1">
                                     @foreach($cvAnalyses as $cvItem)
+                                        @php
+                                            $itemScore = $cvItem->global_score;
+                                            $itemBadgeClass = $itemScore >= 75 ? 'bg-emerald-100 text-emerald-800' : ($itemScore >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+                                        @endphp
                                         <a href="{{ route('jeune.outils', ['tab' => 'cv', 'cv_id' => $cvItem->id]) }}"
-                                           class="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-50 transition text-xs {{ $cvItem->id === $activeCv->id ? 'bg-primary-50 text-primary-700 font-bold' : 'text-gray-700' }}">
-                                            <div>
-                                                <p class="truncate font-medium">{{ $cvItem->original_filename }}</p>
+                                           class="flex items-center justify-between gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition text-xs {{ $cvItem->id === $activeCv->id ? 'bg-primary-50 text-primary-700 font-bold' : 'text-gray-700' }}">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="truncate font-semibold">{{ $cvItem->original_filename }}</p>
                                                 <p class="text-gray-400 text-[10px]">{{ $cvItem->created_at->format('d/m/Y H:i') }}</p>
                                             </div>
-                                            <span class="px-2 py-0.5 rounded-md text-xs font-bold {{ $cvItem->global_score >= 70 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">{{ $cvItem->global_score }}/100</span>
+                                            <span class="flex-shrink-0 px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap {{ $itemBadgeClass }}">{{ $itemScore }}/100</span>
                                         </a>
                                     @endforeach
                                 </div>
@@ -169,6 +173,12 @@
                         </button>
                     </div>
                 </div>
+
+                @php
+                    $mainScore = $activeCv->global_score;
+                    $gaugeColor = $mainScore >= 75 ? '#10b981' : ($mainScore >= 50 ? '#f59e0b' : '#ef4444');
+                    $scoreBadgeClass = $mainScore >= 75 ? 'bg-emerald-100 text-emerald-800' : ($mainScore >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800');
+                @endphp
 
                 <!-- Jauge & Synthèse globale avec animation au chargement -->
                 <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-10">
@@ -199,7 +209,7 @@
                          ">
                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
                             <circle cx="60" cy="60" r="50" fill="none" stroke="#E5E7EB" stroke-width="10" />
-                            <circle cx="60" cy="60" r="50" fill="none" stroke="#6366f1" stroke-width="10"
+                            <circle cx="60" cy="60" r="50" fill="none" stroke="{{ $gaugeColor }}" stroke-width="10"
                                     stroke-linecap="round"
                                     stroke-dasharray="314.159"
                                     :stroke-dashoffset="dashoffset"
@@ -214,7 +224,7 @@
                     <div class="flex-1 space-y-3 text-center md:text-left">
                         <div class="flex items-center justify-center md:justify-start gap-3 flex-wrap">
                             <h3 class="text-xl font-bold text-gray-900">Score Career : {{ $activeCv->status_label }}</h3>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-primary-100 text-primary-800">{{ $activeCv->global_score >= 70 ? 'Prêt pour le marché' : 'En progression' }}</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold {{ $scoreBadgeClass }}">{{ $activeCv->global_score >= 70 ? 'Prêt pour le marché' : 'En progression' }}</span>
                         </div>
                         <p class="text-sm text-gray-700 leading-relaxed">{{ $activeCv->summary }}</p>
                     </div>
@@ -256,12 +266,16 @@
                                          window.requestAnimationFrame(step);
                                      }, 300);
                                  ">
+                                 @php
+                                     $pColor = $val >= 75 ? 'bg-emerald-500' : ($val >= 50 ? 'bg-amber-500' : 'bg-red-500');
+                                     $pTextColor = $val >= 75 ? 'text-emerald-600' : ($val >= 50 ? 'text-amber-600' : 'text-red-600');
+                                 @endphp
                                 <div class="flex items-center justify-between text-xs font-bold">
                                     <span class="text-gray-700 capitalize">{{ $criterion }}</span>
-                                    <span class="text-primary-600"><span x-text="animatedVal">0</span>%</span>
+                                    <span class="{{ $pTextColor }}"><span x-text="animatedVal">0</span>%</span>
                                 </div>
                                 <div class="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
-                                    <div class="h-full rounded-full bg-primary-600 transition-all duration-[1500ms] ease-out"
+                                    <div class="h-full rounded-full {{ $pColor }} transition-all duration-[1500ms] ease-out"
                                          :style="`width: ${barWidth}%`"></div>
                                 </div>
                             </div>
@@ -317,15 +331,33 @@
                     </div>
                 </div>
 
-                <!-- SECTION : CV OPTIMISÉ POUR L'EMPLOI (Format ATS Pro prêt à postuler) -->
+                <!-- SECTION : TOGGLE & AFFICHAGE (CV RESTRUCTURÉ ATS VS CV ORIGINAL) -->
                 <div class="space-y-6 pt-6 border-t border-gray-100">
+                    <!-- Switcher de vue : CV ATS vs CV Original -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-primary-100 text-primary-800 uppercase tracking-wider">Version Pro Recommandée</span>
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-2">Votre CV Reformulé & Optimisé ATS</h3>
-                            <p class="text-xs sm:text-sm text-gray-500">Cette version structure vos compétences avec des verbes d'action, standardise la typographie et maximise vos chances lors des screenings.</p>
+                            <div class="inline-flex p-1 bg-gray-100 rounded-2xl border border-gray-200 mb-2">
+                                <button type="button"
+                                        @click="cvViewMode = 'ats'"
+                                        :class="cvViewMode === 'ats' ? 'bg-white text-gray-900 shadow-xs font-bold' : 'text-gray-500 hover:text-gray-900 font-semibold'"
+                                        class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>CV Restructuré ATS</span>
+                                </button>
+                                <button type="button"
+                                        @click="cvViewMode = 'original'"
+                                        :class="cvViewMode === 'original' ? 'bg-white text-gray-900 shadow-xs font-bold' : 'text-gray-500 hover:text-gray-900 font-semibold'"
+                                        class="px-4 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    <span>CV Original Téléversé</span>
+                                </button>
+                            </div>
+                            <h3 class="text-xl sm:text-2xl font-extrabold text-gray-900" x-text="cvViewMode === 'ats' ? 'Votre CV Reformulé & Optimisé ATS' : 'Document CV Original Téléversé'"></h3>
+                            <p class="text-xs sm:text-sm text-gray-500" x-text="cvViewMode === 'ats' ? 'Cette version structure vos compétences avec des verbes d\'action, standardise la typographie et maximise vos chances lors des screenings.' : 'Visualisez le document original tel qu\'il a été transmis pour l\'analyse.'"></p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2.5">
+
+                        <!-- Actions ATS (Copier, Télécharger, Postuler) -->
+                        <div x-show="cvViewMode === 'ats'" class="flex flex-wrap items-center gap-2.5">
                             <!-- Bouton Copier le texte ATS -->
                             <button type="button"
                                     @click="triggerCvAction('copy')"
@@ -343,19 +375,13 @@
                                 </span>
                             </button>
 
-                            <!-- Bouton Télécharger / Imprimer PDF -->
+                            <!-- Bouton Télécharger / Imprimer PDF dynamique -->
                             <button type="button"
                                     @click="triggerCvAction('download')"
                                     :disabled="isProcessingCvAction"
                                     class="px-4 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 disabled:opacity-50 transition flex items-center gap-2 shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                <span>
-                                    @if(isset($cvDownloadCost) && $cvDownloadCost > 0)
-                                        Télécharger / Imprimer ({{ $cvDownloadCost }} {{ $cvDownloadCost > 1 ? 'crédits' : 'crédit' }})
-                                    @else
-                                        Télécharger / Imprimer (Gratuit)
-                                    @endif
-                                </span>
+                                <span x-text="selectedTemplateCostText()"></span>
                             </button>
 
                             <a href="{{ route('jeune.opportunities', ['tab' => 'emploi']) }}"
@@ -364,86 +390,629 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                             </a>
                         </div>
+
+                        <!-- Action Fichier Original -->
+                        <div x-show="cvViewMode === 'original'" class="flex items-center gap-2.5">
+                            <a href="{{ route('jeune.cv.view-original', $activeCv->id) }}" target="_blank" download class="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-xs font-bold hover:bg-gray-800 transition flex items-center gap-2 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Télécharger l'original</span>
+                            </a>
+                        </div>
                     </div>
 
-                    <!-- Fiche CV ATS Pro Rendue en HTML/A4 Prête à être imprimée -->
-                    <div id="cvEnhancedPrintArea"
-                         class="select-none bg-white rounded-3xl p-8 sm:p-12 border border-gray-200 shadow-md max-w-4xl mx-auto space-y-8 text-gray-900 font-sans"
-                         style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
-                        <!-- En-tête CV -->
-                        <div class="border-b-2 border-gray-900 pb-6 text-center space-y-2">
-                            <h1 class="text-3xl font-black tracking-tight text-gray-900 uppercase">{{ $activeCv->candidate_name }}</h1>
-                            <p class="text-base font-bold text-primary-700 tracking-wide">{{ $activeCv->candidate_title }}</p>
-                            <div class="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600 pt-1">
-                                @if(!empty($activeCv->candidate_contact['email']))
-                                    <span>{{ $activeCv->candidate_contact['email'] }}</span>
-                                @endif
-                                @if(!empty($activeCv->candidate_contact['phone']))
-                                    <span>• {{ $activeCv->candidate_contact['phone'] }}</span>
-                                @endif
-                                @if(!empty($activeCv->candidate_contact['location']))
-                                    <span>• {{ $activeCv->candidate_contact['location'] }}</span>
-                                @endif
+                    <!-- VUE 1 : CV ORIGINAL TÉLÉVERSÉ -->
+                    <div x-show="cvViewMode === 'original'" x-cloak class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-md max-w-4xl mx-auto space-y-6">
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-900">{{ $activeCv->original_filename }}</h4>
+                                <p class="text-xs text-gray-500">{{ round($activeCv->file_size / 1024, 1) }} Ko • Transmis le {{ $activeCv->created_at->format('d/m/Y à H:i') }}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 uppercase">{{ $activeCv->mime_type ?? 'Fichier' }}</span>
+                        </div>
+
+                        @if(str_contains(strtolower($activeCv->mime_type ?? ''), 'pdf'))
+                            <div class="w-full h-[750px] rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 shadow-inner">
+                                <iframe src="{{ route('jeune.cv.view-original', $activeCv->id) }}" class="w-full h-full border-0"></iframe>
+                            </div>
+                        @elseif(str_contains(strtolower($activeCv->mime_type ?? ''), 'image'))
+                            <div class="flex justify-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                <img src="{{ route('jeune.cv.view-original', $activeCv->id) }}" alt="CV Original" class="max-h-[800px] object-contain rounded-xl shadow-sm" />
+                            </div>
+                        @else
+                            <div class="p-6 bg-gray-50 rounded-2xl border border-gray-200 text-left space-y-3">
+                                <p class="text-xs font-bold text-gray-700 uppercase tracking-wider">Texte intégral extrait du document :</p>
+                                <pre class="whitespace-pre-wrap font-sans text-xs text-gray-800 bg-white p-4 rounded-xl border border-gray-200 max-h-[500px] overflow-y-auto leading-relaxed">{{ $activeCv->parsed_content['raw_text'] ?? 'Contenu non disponible.' }}</pre>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- VUE 2 : CV RESTRUCTURÉ ATS + SÉLECTION DE 5 TEMPLATES -->
+                    <div x-show="cvViewMode === 'ats'" class="space-y-6">
+                        <!-- Sélecteur de templates ATS (0 Défaut gratuit + 5 Templates au choix tarifés) -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">Sélectionnez un modèle de CV ATS :</label>
+                                <span class="text-xs text-gray-500">Le modèle par défaut est gratuit. Les modèles avancés valorisent vos compétences clés.</span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                                <!-- Template 0 : Défaut Épuré -->
+                                <button type="button"
+                                        @click="selectedTemplate = 0"
+                                        :class="selectedTemplate === 0 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
+                                        class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">Inclus</span>
+                                        <p class="text-xs font-bold mt-1.5 truncate">Défaut Épuré</p>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-emerald-600 mt-2">Gratuit (0 cr.)</p>
+                                </button>
+
+                                <!-- Template 1 : Basic ATS -->
+                                <button type="button"
+                                        @click="selectedTemplate = 1"
+                                        :class="selectedTemplate === 1 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
+                                        class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">Simple</span>
+                                        <p class="text-xs font-bold mt-1.5 truncate">Basic ATS</p>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-primary-700 mt-2">{{ $templateCosts[1] ?? 1 }} {{ ($templateCosts[1] ?? 1) > 1 ? 'crédits' : 'crédit' }}</p>
+                                </button>
+
+                                <!-- Template 2 : Standard Minimaliste -->
+                                <button type="button"
+                                        @click="selectedTemplate = 2"
+                                        :class="selectedTemplate === 2 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
+                                        class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700">Clean</span>
+                                        <p class="text-xs font-bold mt-1.5 truncate">Standard Minimal</p>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-primary-700 mt-2">{{ $templateCosts[2] ?? 2 }} {{ ($templateCosts[2] ?? 2) > 1 ? 'crédits' : 'crédit' }}</p>
+                                </button>
+
+                                <!-- Template 3 : Professionnel Élite (BEST-SELLER) -->
+                                <button type="button"
+                                        @click="selectedTemplate = 3"
+                                        :class="selectedTemplate === 3 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
+                                        class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
+                                    <span class="absolute -top-2.5 right-2 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white shadow-xs">⭐ Best-Seller</span>
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-100 text-purple-700">2 Colonnes</span>
+                                        <p class="text-xs font-bold mt-1.5 truncate">Professionnel Élite</p>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-primary-700 mt-2">{{ $templateCosts[3] ?? 3 }} {{ ($templateCosts[3] ?? 3) > 1 ? 'crédits' : 'crédit' }}</p>
+                                </button>
+
+                                <!-- Template 4 : Expert Moderne -->
+                                <button type="button"
+                                        @click="selectedTemplate = 4"
+                                        :class="selectedTemplate === 4 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
+                                        class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700">Moderne</span>
+                                        <p class="text-xs font-bold mt-1.5 truncate">Expert Moderne</p>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-primary-700 mt-2">{{ $templateCosts[4] ?? 4 }} {{ ($templateCosts[4] ?? 4) > 1 ? 'crédits' : 'crédit' }}</p>
+                                </button>
+
+                                <!-- Template 5 : Avancé Cadre -->
+                                <button type="button"
+                                        @click="selectedTemplate = 5"
+                                        :class="selectedTemplate === 5 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
+                                        class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
+                                    <div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-rose-100 text-rose-700">Cadre</span>
+                                        <p class="text-xs font-bold mt-1.5 truncate">Avancé International</p>
+                                    </div>
+                                    <p class="text-[11px] font-semibold text-primary-700 mt-2">{{ $templateCosts[5] ?? 5 }} {{ ($templateCosts[5] ?? 5) > 1 ? 'crédits' : 'crédit' }}</p>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Résumé professionnel -->
-                        <div class="space-y-2">
-                            <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Profil Professionnel</h2>
-                            <p class="text-xs leading-relaxed text-gray-700 text-justify">
-                                {{ $activeCv->summary }}
-                            </p>
-                        </div>
+                        @php
+                            $norm = $activeCv->normalized_cv_data;
+                        @endphp
 
-                        <!-- Expériences professionnelles -->
-                        @if(!empty($activeCv->parsed_content['experiences']))
-                            <div class="space-y-4">
-                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Expériences Professionnelles</h2>
-                                <div class="space-y-4">
-                                    @foreach($activeCv->parsed_content['experiences'] as $exp)
-                                        <div class="space-y-1">
-                                            <div class="flex items-center justify-between text-xs">
-                                                <h3 class="font-bold text-gray-900">{{ $exp['title'] ?? 'Poste occupé' }} — <span class="font-semibold text-gray-700">{{ $exp['company'] ?? 'Entreprise' }}</span></h3>
-                                                <span class="text-gray-500 font-medium">{{ $exp['period'] ?? 'Récemment' }}</span>
+                        <!-- Zone d'impression & d'aperçu du CV ATS sélectionné -->
+                        <div id="cvEnhancedPrintArea"
+                             class="select-none bg-white rounded-3xl p-8 sm:p-12 border border-gray-200 shadow-md max-w-4xl mx-auto text-gray-900 font-sans"
+                             style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
+
+                            <!-- ======================================================== -->
+                            <!-- TEMPLATE 0 : DÉFAUT ÉPURÉ (1 Colonne classique gratuit)   -->
+                            <!-- ======================================================== -->
+                            <div x-show="selectedTemplate === 0" class="space-y-8">
+                                <div class="border-b-2 border-gray-900 pb-6 text-center space-y-2">
+                                    <h1 class="text-3xl font-black tracking-tight text-gray-900 uppercase">{{ $activeCv->candidate_name }}</h1>
+                                    <p class="text-base font-bold text-primary-700 tracking-wide">{{ $activeCv->candidate_title }}</p>
+                                    <div class="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600 pt-1">
+                                        @if(!empty($activeCv->candidate_contact['email'])) <span>{{ $activeCv->candidate_contact['email'] }}</span> @endif
+                                        @if(!empty($activeCv->candidate_contact['phone'])) <span>• {{ $activeCv->candidate_contact['phone'] }}</span> @endif
+                                        @if(!empty($activeCv->candidate_contact['location'])) <span>• {{ $activeCv->candidate_contact['location'] }}</span> @endif
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Profil Professionnel</h2>
+                                    <p class="text-xs leading-relaxed text-gray-700 text-justify">{{ $activeCv->summary }}</p>
+                                </div>
+
+                                @if(!empty($norm['experiences']))
+                                    <div class="space-y-4">
+                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Expériences Professionnelles</h2>
+                                        <div class="space-y-4">
+                                            @foreach($norm['experiences'] as $exp)
+                                                <div class="space-y-1">
+                                                    <div class="flex items-center justify-between text-xs">
+                                                        <h3 class="font-bold text-gray-900">{{ $exp['title'] }} @if(!empty($exp['company'])) — <span class="font-semibold text-gray-700">{{ $exp['company'] }}</span> @endif</h3>
+                                                        <span class="text-gray-500 font-medium">{{ $exp['period'] }}</span>
+                                                    </div>
+                                                    @if(!empty($exp['bullets']))
+                                                        <ul class="space-y-1 pt-1 text-xs text-gray-600">
+                                                            @foreach($exp['bullets'] as $bullet)
+                                                                <li class="flex items-start gap-2">
+                                                                    <span class="text-gray-400 font-bold">•</span>
+                                                                    <span class="leading-relaxed">{{ $bullet }}</span>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @elseif(!empty($exp['description']))
+                                                        <p class="text-xs text-gray-600 leading-relaxed">{{ $exp['description'] }}</p>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['education']))
+                                    <div class="space-y-4">
+                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Formations & Diplômes</h2>
+                                        <div class="space-y-3">
+                                            @foreach($norm['education'] as $edu)
+                                                <div class="flex items-center justify-between text-xs">
+                                                    <div>
+                                                        <h3 class="font-bold text-gray-900">{{ $edu['degree'] }}</h3>
+                                                        <p class="text-gray-600">{{ $edu['school'] }}</p>
+                                                    </div>
+                                                    <span class="text-gray-500 font-medium">{{ $edu['year'] }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['skills']))
+                                    <div class="space-y-2">
+                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Compétences Clés & Outils</h2>
+                                        <div class="flex flex-wrap gap-2 pt-1">
+                                            @foreach($norm['skills'] as $skill)
+                                                <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-semibold">{{ $skill }}</span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- ======================================================== -->
+                            <!-- TEMPLATE 1 : BASIC ATS (Compact standard 1 colonne)       -->
+                            <!-- ======================================================== -->
+                            <div x-show="selectedTemplate === 1" class="space-y-6">
+                                <div class="pb-4 border-b border-gray-300 space-y-1">
+                                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $activeCv->candidate_name }}</h1>
+                                    <p class="text-sm font-semibold text-gray-700">{{ $activeCv->candidate_title }}</p>
+                                    <p class="text-xs text-gray-600">
+                                        {{ $activeCv->candidate_contact['email'] ?? '' }} | {{ $activeCv->candidate_contact['phone'] ?? '' }} | {{ $activeCv->candidate_contact['location'] ?? '' }}
+                                    </p>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">Résumé Professionnel</h2>
+                                    <p class="text-xs leading-relaxed text-gray-800">{{ $activeCv->summary }}</p>
+                                </div>
+
+                                @if(!empty($norm['experiences']))
+                                    <div class="space-y-3">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">Expérience Professionnelle</h2>
+                                        @foreach($norm['experiences'] as $exp)
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-xs font-semibold">
+                                                    <span class="text-gray-900">{{ $exp['title'] }} — {{ $exp['company'] }}</span>
+                                                    <span class="text-gray-600">{{ $exp['period'] }}</span>
+                                                </div>
+                                                @if(!empty($exp['bullets']))
+                                                    <ul class="list-disc list-inside text-xs text-gray-700 space-y-0.5 pl-1">
+                                                        @foreach($exp['bullets'] as $b)
+                                                            <li class="leading-relaxed">{{ $b }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                @endif
                                             </div>
-                                            @if(!empty($exp['description']))
-                                                <p class="text-xs text-gray-600 leading-relaxed">{{ $exp['description'] }}</p>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['education']))
+                                    <div class="space-y-2">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">Formation</h2>
+                                        @foreach($norm['education'] as $edu)
+                                            <div class="flex justify-between text-xs">
+                                                <span class="font-semibold text-gray-900">{{ $edu['degree'] }} — {{ $edu['school'] }}</span>
+                                                <span class="text-gray-600">{{ $edu['year'] }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['skills']))
+                                    <div class="space-y-1.5">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">Compétences</h2>
+                                        <p class="text-xs text-gray-800 leading-relaxed">{{ implode(' • ', $norm['skills']) }}</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- ======================================================== -->
+                            <!-- TEMPLATE 2 : STANDARD MINIMALISTE (Bordures d'accent)    -->
+                            <!-- ======================================================== -->
+                            <div x-show="selectedTemplate === 2" class="space-y-7">
+                                <div class="flex items-center justify-between pb-5 border-b border-gray-200">
+                                    <div class="space-y-1">
+                                        <h1 class="text-3xl font-extrabold text-gray-900">{{ $activeCv->candidate_name }}</h1>
+                                        <p class="text-sm font-semibold text-indigo-600">{{ $activeCv->candidate_title }}</p>
+                                    </div>
+                                    <div class="text-right text-xs text-gray-500 space-y-0.5">
+                                        <p>{{ $activeCv->candidate_contact['email'] ?? '' }}</p>
+                                        <p>{{ $activeCv->candidate_contact['phone'] ?? '' }}</p>
+                                        <p>{{ $activeCv->candidate_contact['location'] ?? '' }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">Profil & Objectifs</h2>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $activeCv->summary }}</p>
+                                </div>
+
+                                @if(!empty($norm['experiences']))
+                                    <div class="space-y-4">
+                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">Parcours Professionnel</h2>
+                                        <div class="space-y-4">
+                                            @foreach($norm['experiences'] as $exp)
+                                                <div class="space-y-1 bg-gray-50/70 p-3 rounded-xl border border-gray-100">
+                                                    <div class="flex items-center justify-between text-xs">
+                                                        <h3 class="font-bold text-gray-900">{{ $exp['title'] }} <span class="text-indigo-600 font-semibold">• {{ $exp['company'] }}</span></h3>
+                                                        <span class="text-gray-500 font-medium text-[11px]">{{ $exp['period'] }}</span>
+                                                    </div>
+                                                    @if(!empty($exp['bullets']))
+                                                        <ul class="space-y-1 pt-1 text-xs text-gray-700">
+                                                            @foreach($exp['bullets'] as $b)
+                                                                <li class="flex items-start gap-1.5"><span class="text-indigo-500 font-bold">›</span><span>{{ $b }}</span></li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['education']))
+                                    <div class="space-y-3">
+                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">Diplômes & Cursus</h2>
+                                        <div class="grid sm:grid-cols-2 gap-3">
+                                            @foreach($norm['education'] as $edu)
+                                                <div class="p-3 rounded-xl border border-gray-100 text-xs space-y-0.5">
+                                                    <p class="font-bold text-gray-900">{{ $edu['degree'] }}</p>
+                                                    <p class="text-gray-600">{{ $edu['school'] }}</p>
+                                                    <p class="text-gray-400 text-[11px]">{{ $edu['year'] }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['skills']))
+                                    <div class="space-y-2">
+                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">Expertise & Technologies</h2>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach($norm['skills'] as $skill)
+                                                <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-900 text-xs font-semibold">{{ $skill }}</span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- ======================================================== -->
+                            <!-- TEMPLATE 3 : PROFESSIONNEL ÉLITE (BEST-SELLER / MODÈLE)    -->
+                            <!-- ======================================================== -->
+                            <div x-show="selectedTemplate === 3" class="space-y-8">
+                                <!-- En-tête avec Avatar initiales bleu vif -->
+                                <div class="flex items-start justify-between gap-6 pb-6 border-b border-gray-200">
+                                    <div class="space-y-1.5 flex-1">
+                                        <h1 class="text-3xl font-black text-gray-900 uppercase tracking-tight">{{ $activeCv->candidate_name }}</h1>
+                                        <p class="text-base font-bold text-blue-600">{{ $activeCv->candidate_title }}</p>
+                                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 pt-1">
+                                            @if(!empty($activeCv->candidate_contact['phone']))
+                                                <span class="flex items-center gap-1 font-medium">📞 {{ $activeCv->candidate_contact['phone'] }}</span>
+                                            @endif
+                                            @if(!empty($activeCv->candidate_contact['email']))
+                                                <span class="flex items-center gap-1 font-medium">✉️ {{ $activeCv->candidate_contact['email'] }}</span>
+                                            @endif
+                                            @if(!empty($activeCv->candidate_contact['location']))
+                                                <span class="flex items-center gap-1 font-medium">📍 {{ $activeCv->candidate_contact['location'] }}</span>
                                             @endif
                                         </div>
-                                    @endforeach
+                                    </div>
+                                    <div class="w-16 h-16 rounded-full bg-blue-600 text-white font-black text-2xl flex items-center justify-center flex-shrink-0 shadow-md">
+                                        {{ $activeCv->initials }}
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
 
-                        <!-- Formations -->
-                        @if(!empty($activeCv->parsed_content['education']))
-                            <div class="space-y-4">
-                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Formations & Diplômes</h2>
-                                <div class="space-y-3">
-                                    @foreach($activeCv->parsed_content['education'] as $edu)
-                                        <div class="flex items-center justify-between text-xs">
-                                            <div>
-                                                <h3 class="font-bold text-gray-900">{{ $edu['degree'] ?? 'Diplôme' }}</h3>
-                                                <p class="text-gray-600">{{ $edu['school'] ?? 'Établissement' }}</p>
-                                            </div>
-                                            <span class="text-gray-500 font-medium">{{ $edu['year'] ?? '' }}</span>
+                                <!-- Structure 2 Colonnes -->
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                                    <!-- Colonne Gauche (~60% / 7 cols) -->
+                                    <div class="md:col-span-7 space-y-6">
+                                        <!-- RÉSUMÉ -->
+                                        <div class="space-y-2">
+                                            <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">RÉSUMÉ</h2>
+                                            <p class="text-xs leading-relaxed text-gray-700 text-justify">{{ $activeCv->summary }}</p>
                                         </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
 
-                        <!-- Compétences clés -->
-                        @if(!empty($activeCv->parsed_content['skills']))
-                            <div class="space-y-2">
-                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Compétences Clés & Outils</h2>
-                                <div class="flex flex-wrap gap-2 pt-1">
-                                    @foreach($activeCv->parsed_content['skills'] as $skill)
-                                        <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-semibold">{{ $skill }}</span>
-                                    @endforeach
+                                        <!-- EXPÉRIENCE -->
+                                        @if(!empty($norm['experiences']))
+                                            <div class="space-y-4">
+                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">EXPÉRIENCE</h2>
+                                                <div class="space-y-5">
+                                                    @foreach($norm['experiences'] as $exp)
+                                                        <div class="space-y-1.5">
+                                                            <div class="flex items-baseline justify-between text-xs">
+                                                                <h3 class="font-bold text-gray-900">{{ $exp['title'] }}</h3>
+                                                                <span class="text-gray-500 font-medium text-[11px]">{{ $exp['period'] }}</span>
+                                                            </div>
+                                                            @if(!empty($exp['company']))
+                                                                <p class="text-xs font-semibold text-blue-600">{{ $exp['company'] }}</p>
+                                                            @endif
+                                                            @if(!empty($exp['bullets']))
+                                                                <ul class="space-y-1.5 pt-1 text-xs text-gray-700">
+                                                                    @foreach($exp['bullets'] as $bullet)
+                                                                        <li class="flex items-start gap-2">
+                                                                            <span class="text-blue-500 font-bold">•</span>
+                                                                            <span class="leading-relaxed">{{ $bullet }}</span>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @elseif(!empty($exp['description']))
+                                                                <p class="text-xs text-gray-700 leading-relaxed">{{ $exp['description'] }}</p>
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <!-- ÉDUCATION -->
+                                        @if(!empty($norm['education']))
+                                            <div class="space-y-3">
+                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">ÉDUCATION</h2>
+                                                <div class="space-y-3">
+                                                    @foreach($norm['education'] as $edu)
+                                                        <div class="text-xs">
+                                                            <div class="flex items-baseline justify-between">
+                                                                <h3 class="font-bold text-gray-900">{{ $edu['degree'] }}</h3>
+                                                                <span class="text-gray-500 font-medium text-[11px]">{{ $edu['year'] }}</span>
+                                                            </div>
+                                                            @if(!empty($edu['school']))
+                                                                <p class="text-blue-600 font-medium text-xs">{{ $edu['school'] }}</p>
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Colonne Droite (~40% / 5 cols) -->
+                                    <div class="md:col-span-5 space-y-6">
+                                        <!-- COMPÉTENCES -->
+                                        <div class="space-y-4">
+                                            <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">COMPÉTENCES</h2>
+                                            @if(!empty($norm['categorized_skills']))
+                                                <div class="space-y-4">
+                                                    @foreach($norm['categorized_skills'] as $catName => $skills)
+                                                        <div class="space-y-2">
+                                                            <h3 class="text-xs font-bold text-blue-600 border-b border-dashed border-blue-200 pb-0.5">{{ $catName }}</h3>
+                                                            <div class="flex flex-wrap gap-1.5">
+                                                                @foreach($skills as $sk)
+                                                                    <span class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 text-[11px] font-medium">{{ $sk }}</span>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @elseif(!empty($norm['skills']))
+                                                <div class="flex flex-wrap gap-1.5">
+                                                    @foreach($norm['skills'] as $sk)
+                                                        <span class="px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 text-[11px] font-medium">{{ $sk }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <!-- CERTIFICATIONS -->
+                                        @if(!empty($norm['certifications']))
+                                            <div class="space-y-2.5">
+                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">CERTIFICATIONS</h2>
+                                                <div class="space-y-2 text-xs">
+                                                    @foreach($norm['certifications'] as $cert)
+                                                        <div class="flex items-start gap-2">
+                                                            <span class="text-amber-600 font-bold">📜</span>
+                                                            <span class="font-semibold text-gray-800">{{ is_array($cert) ? ($cert['name'] ?? implode(', ', $cert)) : $cert }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <!-- LANGUES -->
+                                        @if(!empty($norm['languages']))
+                                            <div class="space-y-2.5">
+                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">LANGUES</h2>
+                                                <div class="space-y-2 text-xs">
+                                                    @foreach($norm['languages'] as $lang)
+                                                        <div class="flex items-center justify-between text-gray-800 font-medium">
+                                                            <span>{{ is_array($lang) ? ($lang['language'] ?? implode(', ', $lang)) : $lang }}</span>
+                                                            <span class="text-blue-600 font-bold">●●●●○</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        @endif
+
+                            <!-- ======================================================== -->
+                            <!-- TEMPLATE 4 : EXPERT MODERNE (Bandeau et badges)           -->
+                            <!-- ======================================================== -->
+                            <div x-show="selectedTemplate === 4" class="space-y-7">
+                                <div class="bg-gray-900 text-white p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div class="space-y-1">
+                                        <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight">{{ $activeCv->candidate_name }}</h1>
+                                        <p class="text-sm font-semibold text-emerald-400">{{ $activeCv->candidate_title }}</p>
+                                    </div>
+                                    <div class="text-xs text-gray-300 space-y-0.5 sm:text-right">
+                                        <p>{{ $activeCv->candidate_contact['email'] ?? '' }}</p>
+                                        <p>{{ $activeCv->candidate_contact['phone'] ?? '' }}</p>
+                                        <p>{{ $activeCv->candidate_contact['location'] ?? '' }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">Synthèse Exécutive</h2>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $activeCv->summary }}</p>
+                                </div>
+
+                                @if(!empty($norm['experiences']))
+                                    <div class="space-y-4">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">Réalisations & Postes Occupés</h2>
+                                        <div class="space-y-4">
+                                            @foreach($norm['experiences'] as $exp)
+                                                <div class="space-y-1.5 border-l-2 border-gray-200 pl-4">
+                                                    <div class="flex items-center justify-between text-xs">
+                                                        <h3 class="font-bold text-gray-900">{{ $exp['title'] }} — <span class="text-emerald-700">{{ $exp['company'] }}</span></h3>
+                                                        <span class="text-gray-500 font-medium">{{ $exp['period'] }}</span>
+                                                    </div>
+                                                    @if(!empty($exp['bullets']))
+                                                        <ul class="space-y-1 text-xs text-gray-600">
+                                                            @foreach($exp['bullets'] as $b)
+                                                                <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">✔</span><span>{{ $b }}</span></li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['education']))
+                                    <div class="space-y-3">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">Parcours Universitaire</h2>
+                                        <div class="grid sm:grid-cols-2 gap-3">
+                                            @foreach($norm['education'] as $edu)
+                                                <div class="p-3 bg-gray-50 rounded-xl text-xs space-y-0.5">
+                                                    <p class="font-bold text-gray-900">{{ $edu['degree'] }}</p>
+                                                    <p class="text-emerald-700 font-medium">{{ $edu['school'] }}</p>
+                                                    <p class="text-gray-400 text-[11px]">{{ $edu['year'] }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['skills']))
+                                    <div class="space-y-2">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">Compétences Techniques & Outils</h2>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach($norm['skills'] as $sk)
+                                                <span class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-xs font-medium">{{ $sk }}</span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- ======================================================== -->
+                            <!-- TEMPLATE 5 : AVANCÉ CADRE & INTERNATIONAL (Exécutif)      -->
+                            <!-- ======================================================== -->
+                            <div x-show="selectedTemplate === 5" class="space-y-7 font-serif">
+                                <div class="text-center pb-6 border-b-4 border-double border-gray-900 space-y-2">
+                                    <h1 class="text-3xl font-bold uppercase tracking-widest text-gray-900">{{ $activeCv->candidate_name }}</h1>
+                                    <p class="text-sm italic font-semibold text-gray-700 font-sans tracking-wide">{{ $activeCv->candidate_title }}</p>
+                                    <div class="flex items-center justify-center gap-4 text-xs font-sans text-gray-600">
+                                        @if(!empty($activeCv->candidate_contact['email'])) <span>{{ $activeCv->candidate_contact['email'] }}</span> @endif
+                                        @if(!empty($activeCv->candidate_contact['phone'])) <span>• {{ $activeCv->candidate_contact['phone'] }}</span> @endif
+                                        @if(!empty($activeCv->candidate_contact['location'])) <span>• {{ $activeCv->candidate_contact['location'] }}</span> @endif
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2 font-sans">
+                                    <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">PROFIL DE LEADERSHIP</h2>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $activeCv->summary }}</p>
+                                </div>
+
+                                @if(!empty($norm['experiences']))
+                                    <div class="space-y-4 font-sans">
+                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">EXPÉRIENCES ET RESPONSABILITÉS</h2>
+                                        <div class="space-y-4">
+                                            @foreach($norm['experiences'] as $exp)
+                                                <div class="space-y-1">
+                                                    <div class="flex items-center justify-between text-xs font-serif font-bold text-gray-900">
+                                                        <span>{{ $exp['title'] }} — {{ $exp['company'] }}</span>
+                                                        <span class="font-sans font-normal text-gray-600">{{ $exp['period'] }}</span>
+                                                    </div>
+                                                    @if(!empty($exp['bullets']))
+                                                        <ul class="space-y-1 pt-1 text-xs text-gray-700">
+                                                            @foreach($exp['bullets'] as $b)
+                                                                <li class="flex items-start gap-2">
+                                                                    <span class="text-gray-400 font-bold">—</span>
+                                                                    <span class="leading-relaxed">{{ $b }}</span>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['education']))
+                                    <div class="space-y-3 font-sans">
+                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">FORMATION & DIPLÔMES SUPÉRIEURS</h2>
+                                        @foreach($norm['education'] as $edu)
+                                            <div class="flex items-center justify-between text-xs">
+                                                <div>
+                                                    <h3 class="font-bold text-gray-900 font-serif">{{ $edu['degree'] }}</h3>
+                                                    <p class="text-gray-600">{{ $edu['school'] }}</p>
+                                                </div>
+                                                <span class="text-gray-500 font-medium">{{ $edu['year'] }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['skills']))
+                                    <div class="space-y-2 font-sans">
+                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">COMPÉTENCES & APTITUDES CLÉS</h2>
+                                        <p class="text-xs text-gray-800 leading-relaxed">{{ implode('  |  ', $norm['skills']) }}</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -747,10 +1316,13 @@
 
 @push('scripts')
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-function outilsApp(initialTab, initialCvId) {
+function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
     return {
         currentTab: initialTab || 'cv',
         activeCvId: initialCvId || null,
+        cvViewMode: 'ats',
+        selectedTemplate: 0,
+        templateCosts: initialTemplateCosts || { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 },
         isProcessingCvAction: false,
         toastMessage: '',
         toastType: 'success',
@@ -764,6 +1336,14 @@ function outilsApp(initialTab, initialCvId) {
         previewType: '',
         previewFileName: '',
         documentToDelete: null,
+
+        selectedTemplateCostText() {
+            const cost = this.templateCosts[this.selectedTemplate] ?? 0;
+            if (cost <= 0) {
+                return 'Télécharger / Imprimer (Gratuit)';
+            }
+            return `Télécharger / Imprimer (${cost} ${cost > 1 ? 'crédits' : 'crédit'})`;
+        },
 
         init() {
             this.$nextTick(() => {
@@ -803,7 +1383,8 @@ function outilsApp(initialTab, initialCvId) {
                     },
                     body: JSON.stringify({
                         action: action,
-                        cv_id: this.activeCvId
+                        cv_id: this.activeCvId,
+                        template: this.selectedTemplate
                     })
                 });
 

@@ -275,14 +275,73 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement / Impression CV PDF (Crédits)</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement / Impression CV PDF - Template Défaut (Crédits)</label>
                                 <div class="relative">
                                     <input type="number" name="feature_cost_cv_download" value="{{ $cvDownloadCost }}" min="0"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
                                 </div>
-                                <p class="text-[10px] text-gray-500 mt-1 italic">Coût prélevé lors du téléchargement ou de l'impression du CV ATS en PDF (0 = gratuit, par défaut : 2 crédits).</p>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Coût prélevé lors du téléchargement du template par défaut (0 = gratuit, actuellement : {{ $cvDownloadCost }} crédits).</p>
+                            </div>
+
+                            <!-- Templates ATS Options Payantes -->
+                            <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold text-indigo-900 uppercase tracking-wider">Tarification des 5 Templates ATS au choix</h4>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800">Modèles Débloquables</span>
+                                </div>
+                                <p class="text-[11px] text-gray-600">Définissez le coût en crédits pour chaque template de CV ATS sélectionné par le jeune.</p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">1. Template Basic ATS</label>
+                                        <div class="relative">
+                                            <input type="number" name="feature_cost_cv_template_1" value="{{ $cvTemplate1Cost }}" min="0"
+                                                class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
+                                            <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500 text-[10px]">Crédits</div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">2. Template Standard Minimaliste</label>
+                                        <div class="relative">
+                                            <input type="number" name="feature_cost_cv_template_2" value="{{ $cvTemplate2Cost }}" min="0"
+                                                class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
+                                            <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500 text-[10px]">Crédits</div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-indigo-900 mb-1 flex items-center gap-1.5">
+                                            <span>3. Template Professionnel Élite</span>
+                                            <span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[9px] font-extrabold">Best-Seller</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input type="number" name="feature_cost_cv_template_3" value="{{ $cvTemplate3Cost }}" min="0"
+                                                class="bg-white border-2 border-indigo-300 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
+                                            <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-indigo-600 font-bold text-[10px]">Crédits</div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">4. Template Expert Moderne</label>
+                                        <div class="relative">
+                                            <input type="number" name="feature_cost_cv_template_4" value="{{ $cvTemplate4Cost }}" min="0"
+                                                class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
+                                            <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500 text-[10px]">Crédits</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">5. Template Avancé Cadre & International</label>
+                                        <div class="relative">
+                                            <input type="number" name="feature_cost_cv_template_5" value="{{ $cvTemplate5Cost }}" min="0"
+                                                class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">
+                                            <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-500 text-[10px]">Crédits</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div>

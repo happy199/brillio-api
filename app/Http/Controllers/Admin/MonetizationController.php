@@ -32,6 +32,11 @@ class MonetizationController extends Controller
             'feature_cost_ai_generation',
             'feature_cost_cv_copy',
             'feature_cost_cv_download',
+            'feature_cost_cv_template_1',
+            'feature_cost_cv_template_2',
+            'feature_cost_cv_template_3',
+            'feature_cost_cv_template_4',
+            'feature_cost_cv_template_5',
             'payout_fee_percentage',
             'mentorship_commission_percent',
             'credit_bonus_pro',
@@ -46,7 +51,12 @@ class MonetizationController extends Controller
         $analysisToolCost = $settings['feature_cost_analysis_tool']->value ?? 5;
         $aiGenerationCost = $settings['feature_cost_ai_generation']->value ?? 5;
         $cvCopyCost = $settings['feature_cost_cv_copy']->value ?? 1;
-        $cvDownloadCost = $settings['feature_cost_cv_download']->value ?? 2;
+        $cvDownloadCost = $settings['feature_cost_cv_download']->value ?? 0;
+        $cvTemplate1Cost = $settings['feature_cost_cv_template_1']->value ?? 1;
+        $cvTemplate2Cost = $settings['feature_cost_cv_template_2']->value ?? 2;
+        $cvTemplate3Cost = $settings['feature_cost_cv_template_3']->value ?? 3;
+        $cvTemplate4Cost = $settings['feature_cost_cv_template_4']->value ?? 4;
+        $cvTemplate5Cost = $settings['feature_cost_cv_template_5']->value ?? 5;
         $contactAdvisorCost = $settings['feature_cost_contact_advisor']->value ?? 10;
         $videoCallAdvisorCost = $settings['feature_cost_video_call_advisor']->value ?? 50;
         $newChatCost = $settings['feature_cost_new_chat']->value ?? 10;
@@ -125,6 +135,11 @@ class MonetizationController extends Controller
             'aiReportGenerationCost',
             'cvCopyCost',
             'cvDownloadCost',
+            'cvTemplate1Cost',
+            'cvTemplate2Cost',
+            'cvTemplate3Cost',
+            'cvTemplate4Cost',
+            'cvTemplate5Cost',
             'payoutFeePercentage',
             'totalCreditsPurchased',
             'creditsPurchasedJeune',
@@ -163,6 +178,11 @@ class MonetizationController extends Controller
             'feature_cost_ai_generation' => 'required|integer|min:0',
             'feature_cost_cv_copy' => 'required|integer|min:0',
             'feature_cost_cv_download' => 'required|integer|min:0',
+            'feature_cost_cv_template_1' => 'required|integer|min:0',
+            'feature_cost_cv_template_2' => 'required|integer|min:0',
+            'feature_cost_cv_template_3' => 'required|integer|min:0',
+            'feature_cost_cv_template_4' => 'required|integer|min:0',
+            'feature_cost_cv_template_5' => 'required|integer|min:0',
             'feature_cost_contact_advisor' => 'required|integer|min:0',
             'feature_cost_video_call_advisor' => 'required|integer|min:0',
             'feature_cost_new_chat' => 'required|integer|min:0',

@@ -376,4 +376,91 @@ class OpportunityAndCvAnalysisTest extends TestCase
 
         $this->assertEquals(0, $user->fresh()->credits_balance);
     }
+
+    public function test_cv_action_charges_tiered_credits_for_selected_template()
+    {
+        SystemSetting::updateOrCreate(
+            ['key' => 'feature_cost_cv_template_3'],
+            ['value' => 3]
+        );
+
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+            'credits_balance' => 5,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_tier_test',
+            'original_filename' => 'Moussa_Diallo_CV.pdf',
+            'file_path' => 'cv_analyses/moussa.pdf',
+            'file_size' => 12000,
+            'mime_type' => self::MIME_PDF,
+            'candidate_name' => 'Moussa Diallo',
+            'candidate_title' => 'Senior DevOps Engineer',
+            'global_score' => 88,
+            'status_label' => 'Excellent',
+            'summary' => 'DevOps engineer with 9 years of experience.',
+            'parsed_content' => [
+                'experiences' => [
+                    'Lead DevOps Engineer - Technology company (4 years) : Led the full migration.',
+                ],
+                'skills' => ['Kubernetes', 'Docker', 'Terraform'],
+            ],
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'action' => 'download',
+            'cv_id' => $analysis->id,
+            'template' => 3,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'action' => 'download',
+            'template' => 3,
+            'cost' => 3,
+            'remaining_balance' => 2,
+        ]);
+
+        $this->assertEquals(2, $user->fresh()->credits_balance);
+    }
+
+    public function test_cv_view_original_serves_uploaded_file()
+    {
+        Storage::disk('public')->put('cv_analyses/test_doc.pdf', 'dummy content');
+
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_view_test',
+            'original_filename' => 'mon_cv.pdf',
+            'file_path' => 'cv_analyses/test_doc.pdf',
+            'file_size' => 100,
+            'mime_type' => self::MIME_PDF,
+            'candidate_name' => 'Moussa Diallo',
+            'global_score' => 80,
+            'status_label' => self::STATUS_TRES_BIEN,
+            'summary' => 'DevOps',
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.cv.view-original', $analysis->id));
+        $response->assertStatus(200);
+    }
 }

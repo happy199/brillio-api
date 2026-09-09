@@ -21,6 +21,7 @@ use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class JeuneDashboardController extends Controller
 {
@@ -593,7 +594,15 @@ class JeuneDashboardController extends Controller
         }
 
         $cvCopyCost = (int) SystemSetting::getValue('feature_cost_cv_copy', 1);
-        $cvDownloadCost = (int) SystemSetting::getValue('feature_cost_cv_download', 2);
+        $cvDownloadCost = (int) SystemSetting::getValue('feature_cost_cv_download', 0);
+        $templateCosts = [
+            0 => $cvDownloadCost,
+            1 => (int) SystemSetting::getValue('feature_cost_cv_template_1', 1),
+            2 => (int) SystemSetting::getValue('feature_cost_cv_template_2', 2),
+            3 => (int) SystemSetting::getValue('feature_cost_cv_template_3', 3),
+            4 => (int) SystemSetting::getValue('feature_cost_cv_template_4', 4),
+            5 => (int) SystemSetting::getValue('feature_cost_cv_template_5', 5),
+        ];
 
         return view('jeune.outils', [
             'user' => $user,
@@ -603,6 +612,7 @@ class JeuneDashboardController extends Controller
             'activeCv' => $activeCv,
             'cvCopyCost' => $cvCopyCost,
             'cvDownloadCost' => $cvDownloadCost,
+            'templateCosts' => $templateCosts,
         ]);
     }
 
@@ -614,6 +624,7 @@ class JeuneDashboardController extends Controller
         $validated = $request->validate([
             'action' => 'required|string|in:copy,download',
             'cv_id' => 'required|integer',
+            'template' => 'nullable|integer|between:0,5',
         ]);
 
         $user = auth()->user();
@@ -627,10 +638,26 @@ class JeuneDashboardController extends Controller
         }
 
         $action = $validated['action'];
+        $template = (int) ($validated['template'] ?? 0);
         $isCopy = $action === 'copy';
-        $settingKey = $isCopy ? 'feature_cost_cv_copy' : 'feature_cost_cv_download';
-        $defaultCost = $isCopy ? 1 : 2;
-        $cost = (int) SystemSetting::getValue($settingKey, $defaultCost);
+
+        if ($isCopy) {
+            $cost = (int) SystemSetting::getValue('feature_cost_cv_copy', 1);
+            $description = 'Copie du CV ATS';
+        } else {
+            $templateLabels = [
+                0 => 'Défaut',
+                1 => 'Basic ATS',
+                2 => 'Standard Minimaliste',
+                3 => 'Professionnel Élite',
+                4 => 'Expert Moderne',
+                5 => 'Avancé Cadre',
+            ];
+            $settingKey = $template === 0 ? 'feature_cost_cv_download' : 'feature_cost_cv_template_'.$template;
+            $defaultCost = $template === 0 ? 0 : $template;
+            $cost = (int) SystemSetting::getValue($settingKey, $defaultCost);
+            $description = 'Téléchargement CV ATS (Template '.($templateLabels[$template] ?? 'Défaut').')';
+        }
 
         if ($cost > 0 && $user->credits_balance < $cost) {
             return response()->json([
@@ -642,17 +669,31 @@ class JeuneDashboardController extends Controller
         }
 
         if ($cost > 0) {
-            $description = $isCopy ? 'Copie du CV ATS' : 'Téléchargement / Impression du CV ATS en PDF';
             $walletService->deductCredits($user, $cost, 'cv_action', $description, $cvAnalysis);
         }
 
         return response()->json([
             'success' => true,
             'action' => $action,
+            'template' => $template,
             'cost' => $cost,
             'remaining_balance' => (int) $user->fresh()->credits_balance,
             'cv_text' => $this->formatCvAsPlainText($cvAnalysis),
         ]);
+    }
+
+    /**
+     * Visualiser le fichier CV d'origine téléversé par le jeune
+     */
+    public function viewOriginalCv($cvId)
+    {
+        $cv = auth()->user()->cvAnalyses()->findOrFail($cvId);
+
+        if (! Storage::disk('public')->exists($cv->file_path)) {
+            abort(404);
+        }
+
+        return response()->file(Storage::disk('public')->path($cv->file_path));
     }
 
     /**
@@ -661,6 +702,7 @@ class JeuneDashboardController extends Controller
     private function formatCvAsPlainText(CvAnalysis $cv): string
     {
         $separator = '-------------------------';
+        $norm = $cv->normalized_cv_data;
         $lines = [];
         $lines[] = mb_strtoupper($cv->candidate_name ?? 'Candidat');
         if ($cv->candidate_title) {
@@ -686,51 +728,62 @@ class JeuneDashboardController extends Controller
         $lines[] = $separator;
         $lines[] = $cv->summary ?: ($cv->parsed_content['profil'] ?? '');
 
-        $experiences = $cv->parsed_content['experiences'] ?? [];
-        if (! empty($experiences)) {
+        if (! empty($norm['experiences'])) {
             $lines[] = '';
             $lines[] = 'EXPÉRIENCES PROFESSIONNELLES';
             $lines[] = $separator;
-            foreach ($experiences as $exp) {
-                if (is_array($exp)) {
-                    $header = ($exp['title'] ?? 'Poste').' — '.($exp['company'] ?? '');
-                    if (! empty($exp['period'])) {
-                        $header .= ' ('.$exp['period'].')';
+            foreach ($norm['experiences'] as $exp) {
+                $header = $exp['title'].' — '.$exp['company'];
+                if (! empty($exp['period'])) {
+                    $header .= ' ('.$exp['period'].')';
+                }
+                $lines[] = $header;
+                if (! empty($exp['bullets'])) {
+                    foreach ($exp['bullets'] as $b) {
+                        $lines[] = '• '.$b;
                     }
-                    $lines[] = $header;
-                    if (! empty($exp['description'])) {
-                        $lines[] = $exp['description'];
-                    }
-                } else {
-                    $lines[] = (string) $exp;
+                } elseif (! empty($exp['description'])) {
+                    $lines[] = $exp['description'];
                 }
                 $lines[] = '';
             }
         }
 
-        $formations = $cv->parsed_content['education'] ?? $cv->parsed_content['formation'] ?? [];
-        if (! empty($formations)) {
+        if (! empty($norm['education'])) {
             $lines[] = 'FORMATIONS & DIPLÔMES';
             $lines[] = $separator;
-            foreach ($formations as $edu) {
-                if (is_array($edu)) {
-                    $item = ($edu['degree'] ?? 'Diplôme').' — '.($edu['school'] ?? '');
-                    if (! empty($edu['year'])) {
-                        $item .= ' ('.$edu['year'].')';
-                    }
-                    $lines[] = $item;
-                } else {
-                    $lines[] = (string) $edu;
+            foreach ($norm['education'] as $edu) {
+                $item = $edu['degree'].' — '.$edu['school'];
+                if (! empty($edu['year'])) {
+                    $item .= ' ('.$edu['year'].')';
                 }
+                $lines[] = $item;
             }
             $lines[] = '';
         }
 
-        $skills = $cv->parsed_content['skills'] ?? $cv->parsed_content['competences'] ?? [];
-        if (! empty($skills)) {
+        if (! empty($norm['skills'])) {
             $lines[] = 'COMPÉTENCES CLÉS';
             $lines[] = $separator;
-            $lines[] = implode(', ', array_map('strval', $skills));
+            $lines[] = implode(', ', array_map('strval', $norm['skills']));
+            $lines[] = '';
+        }
+
+        if (! empty($norm['certifications'])) {
+            $lines[] = 'CERTIFICATIONS';
+            $lines[] = $separator;
+            foreach ($norm['certifications'] as $c) {
+                $lines[] = '• '.(string) $c;
+            }
+            $lines[] = '';
+        }
+
+        if (! empty($norm['languages'])) {
+            $lines[] = 'LANGUES';
+            $lines[] = $separator;
+            foreach ($norm['languages'] as $l) {
+                $lines[] = '• '.(string) $l;
+            }
             $lines[] = '';
         }
 
