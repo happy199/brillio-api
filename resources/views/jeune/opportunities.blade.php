@@ -140,7 +140,7 @@
                 <p class="text-xs text-gray-500">Prise en charge des frais de scolarité et allocation mensuelle pour les filières STEM et Management.</p>
                 <div class="pt-4 border-t border-gray-100 flex items-center justify-between text-xs">
                     <span class="text-gray-400">Date limite : 31 Décembre</span>
-                    <a href="{{ route('jeune.chat') }}" class="font-bold text-purple-600 hover:underline">Demander conseil à l'IA</a>
+                    <a href="{{ route('jeune.chat') }}" class="font-bold text-purple-600 hover:underline">Demander conseil</a>
                 </div>
             </div>
 

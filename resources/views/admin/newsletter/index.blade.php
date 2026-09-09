@@ -387,7 +387,7 @@
           &lt;!-- Footer --&gt;
           &lt;tr&gt;
             &lt;td style="background-color: #f9fafb; padding: 20px; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb;"&gt;
-              © 2026 Brillio - Tous droits réservés
+              © {{ date('Y') }} Brillio - Tous droits réservés
             &lt;/td&gt;
           &lt;/tr&gt;
         &lt;/table&gt;

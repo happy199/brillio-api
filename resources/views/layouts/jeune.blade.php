@@ -145,8 +145,9 @@
                         Orientation
                     </a>
                     <a href="{{ route('jeune.opportunities') }}"
-                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.opportunities*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Opportunités
+                        class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1.5 {{ request()->routeIs('jeune.opportunities*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <span>Opportunités</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse shadow-xs">Soon</span>
                     </a>
 
                     <a href="{{ route('jeune.outils') }}"
@@ -290,8 +291,9 @@
                 Orientation
             </a>
             <a href="{{ route('jeune.opportunities') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.opportunities*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Opportunités
+                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1 {{ request()->routeIs('jeune.opportunities*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
+                <span>Opportunités</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500 text-white animate-pulse">Soon</span>
             </a>
             <a href="{{ route('jeune.outils') }}"
                 class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1 {{ request()->routeIs('jeune.outils*', 'jeune.documents*', 'jeune.resources*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
@@ -330,7 +332,7 @@
     <footer class="bg-white border-t border-gray-100 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <p class="text-sm text-gray-500">2026 {{ $displayOrg ? $displayOrg->name : 'Brillio' }}. Tous droits reserves.</p>
+                <p class="text-sm text-gray-500">&copy; {{ date('Y') }} {{ $displayOrg ? $displayOrg->name : 'Brillio' }}. Tous droits réservés.</p>
                 <div class="flex gap-4">
                     <a href="{{ route('about') }}" class="text-sm text-gray-500 hover:text-primary-600">A propos</a>
                     <a href="{{ route('contact') }}" class="text-sm text-gray-500 hover:text-primary-600">Contact</a>

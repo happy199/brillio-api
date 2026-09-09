@@ -221,6 +221,7 @@ class OpportunityAndCvAnalysisTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee(self::TEXT_OPPORTUNITES);
+        $response->assertSee('Soon');
         $response->assertSee('Outils');
         $response->assertSee('New');
         $response->assertSee('Emploi');

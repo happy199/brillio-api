@@ -8,7 +8,7 @@
     <div class="space-y-4">
         <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Outils</h1>
-            <p class="text-sm sm:text-base text-gray-500 mt-0.5">Évaluez votre CV avec l'IA, explorez les ressources pédagogiques et gérez votre Drive documentaire.</p>
+            <p class="text-sm sm:text-base text-gray-500 mt-0.5">Évaluez votre CV, explorez les ressources pédagogiques et gérez votre Drive documentaire.</p>
         </div>
 
         <div class="border-b border-gray-200">
