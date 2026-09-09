@@ -463,4 +463,100 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->actingAs($user)->get(route('jeune.cv.view-original', $analysis->id));
         $response->assertStatus(200);
     }
+
+    public function test_cv_detects_language_and_extracts_real_profile_summary()
+    {
+        $rawCvEnglish = <<<'TXT'
+MOUSSA DIALLO
+Senior DevOps Engineer — Cloud Infrastructure & Automation
+Abidjan, Côte d'Ivoire | +225 07 00 00 00 00 | moussa@example.com
+
+PROFESSIONAL SUMMARY
+DevOps engineer with 9 years of experience, including 4 years as Lead DevOps. Specialized in migrating manually managed infrastructure to fully automated environments (Kubernetes, Terraform, CI/CD).
+
+CORE SKILLS
+Orchestration : Kubernetes, Docker
+Infrastructure as Code : Terraform, Ansible
+
+PROFESSIONAL EXPERIENCE
+Lead DevOps Engineer — Technology company, Abidjan
+4 years — current role
+Led the full migration of a manually managed infrastructure to a fully automated setup.
+
+EDUCATION
+Engineering Degree in Computer Science — Engineering School (2015)
+
+CERTIFICATIONS
+Certified Kubernetes Administrator (CKA)
+AWS Certified Solutions Architect – Associate
+
+LANGUAGES
+French (native) — English (fluent)
+TXT;
+
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+            'credits_balance' => 5,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_moussa_test',
+            'original_filename' => 'Moussa_Diallo_CV.pdf',
+            'file_path' => 'cv_analyses/moussa.pdf',
+            'file_size' => 12000,
+            'mime_type' => self::MIME_PDF,
+            'candidate_name' => 'Moussa Diallo',
+            'candidate_title' => 'Senior DevOps Engineer',
+            'global_score' => 88,
+            'status_label' => 'Excellent',
+            // Notice: the AI critique is stored in summary
+            'summary' => 'Ce CV est très bien structuré et optimisé pour les ATS, avec des rubriques claires.',
+            'parsed_content' => [
+                'raw_text' => $rawCvEnglish,
+                'experiences' => [
+                    'Lead DevOps Engineer — Technology company (4 years) : Led the full migration.',
+                ],
+                'education' => [
+                    'Engineering Degree in Computer Science — Engineering School (2015)',
+                ],
+                'skills' => ['Kubernetes', 'Docker', 'Terraform', 'Ansible'],
+            ],
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $norm = $analysis->normalized_cv_data;
+
+        // Verify language detection
+        $this->assertTrue($norm['is_english']);
+        $this->assertEquals('PROFESSIONAL SUMMARY', $norm['labels']['profile']);
+        $this->assertEquals('PROFESSIONAL EXPERIENCE', $norm['labels']['experience']);
+        $this->assertEquals('EDUCATION', $norm['labels']['education']);
+
+        // Verify profile summary is the candidate's actual summary and NOT the AI critique
+        $this->assertStringContainsString('DevOps engineer with 9 years of experience', $norm['profile_summary']);
+        $this->assertStringNotContainsString('Ce CV est très bien structuré', $norm['profile_summary']);
+
+        // Verify certifications & languages extracted from raw text
+        $this->assertNotEmpty($norm['certifications']);
+        $this->assertNotEmpty($norm['languages']);
+
+        // Test copy plain text uses English labels and candidate summary
+        $response = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'action' => 'copy',
+            'cv_id' => $analysis->id,
+        ]);
+
+        $response->assertStatus(200);
+        $content = $response->json('cv_text');
+        $this->assertStringContainsString('PROFESSIONAL SUMMARY', $content);
+        $this->assertStringContainsString('DevOps engineer with 9 years of experience', $content);
+        $this->assertStringNotContainsString('Ce CV est très bien structuré', $content);
+        $this->assertStringContainsString('EDUCATION', $content);
+    }
 }

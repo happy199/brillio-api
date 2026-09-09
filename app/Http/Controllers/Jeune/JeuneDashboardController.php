@@ -646,8 +646,8 @@ class JeuneDashboardController extends Controller
             $description = 'Copie du CV ATS';
         } else {
             $templateLabels = [
-                0 => 'Défaut',
-                1 => 'Basic ATS',
+                0 => 'Basic ATS (Simple)',
+                1 => 'Standard Classique',
                 2 => 'Standard Minimaliste',
                 3 => 'Professionnel Élite',
                 4 => 'Expert Moderne',
@@ -656,7 +656,7 @@ class JeuneDashboardController extends Controller
             $settingKey = $template === 0 ? 'feature_cost_cv_download' : 'feature_cost_cv_template_'.$template;
             $defaultCost = $template === 0 ? 0 : $template;
             $cost = (int) SystemSetting::getValue($settingKey, $defaultCost);
-            $description = 'Téléchargement CV ATS (Template '.($templateLabels[$template] ?? 'Défaut').')';
+            $description = 'Téléchargement CV ATS (Template '.($templateLabels[$template] ?? 'Basic ATS').')';
         }
 
         if ($cost > 0 && $user->credits_balance < $cost) {
@@ -703,6 +703,7 @@ class JeuneDashboardController extends Controller
     {
         $separator = '-------------------------';
         $norm = $cv->normalized_cv_data;
+        $labels = $norm['labels'] ?? [];
         $lines = [];
         $lines[] = mb_strtoupper($cv->candidate_name ?? 'Candidat');
         if ($cv->candidate_title) {
@@ -724,13 +725,13 @@ class JeuneDashboardController extends Controller
         }
 
         $lines[] = '';
-        $lines[] = 'PROFIL PROFESSIONNEL';
+        $lines[] = $labels['profile'] ?? 'PROFESSIONAL SUMMARY';
         $lines[] = $separator;
-        $lines[] = $cv->summary ?: ($cv->parsed_content['profil'] ?? '');
+        $lines[] = $norm['profile_summary'] ?? '';
 
         if (! empty($norm['experiences'])) {
             $lines[] = '';
-            $lines[] = 'EXPÉRIENCES PROFESSIONNELLES';
+            $lines[] = $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE';
             $lines[] = $separator;
             foreach ($norm['experiences'] as $exp) {
                 $header = $exp['title'].' — '.$exp['company'];
@@ -750,7 +751,7 @@ class JeuneDashboardController extends Controller
         }
 
         if (! empty($norm['education'])) {
-            $lines[] = 'FORMATIONS & DIPLÔMES';
+            $lines[] = $labels['education'] ?? 'EDUCATION';
             $lines[] = $separator;
             foreach ($norm['education'] as $edu) {
                 $item = $edu['degree'].' — '.$edu['school'];
@@ -763,26 +764,26 @@ class JeuneDashboardController extends Controller
         }
 
         if (! empty($norm['skills'])) {
-            $lines[] = 'COMPÉTENCES CLÉS';
+            $lines[] = $labels['skills'] ?? 'SKILLS';
             $lines[] = $separator;
-            $lines[] = implode(', ', array_map('strval', $norm['skills']));
+            $lines[] = implode(', ', $norm['skills']);
             $lines[] = '';
         }
 
         if (! empty($norm['certifications'])) {
-            $lines[] = 'CERTIFICATIONS';
+            $lines[] = $labels['certifications'] ?? 'CERTIFICATIONS';
             $lines[] = $separator;
-            foreach ($norm['certifications'] as $c) {
-                $lines[] = '• '.(string) $c;
+            foreach ($norm['certifications'] as $cert) {
+                $lines[] = '• '.(is_array($cert) ? ($cert['name'] ?? implode(', ', $cert)) : $cert);
             }
             $lines[] = '';
         }
 
         if (! empty($norm['languages'])) {
-            $lines[] = 'LANGUES';
+            $lines[] = $labels['languages'] ?? 'LANGUAGES';
             $lines[] = $separator;
-            foreach ($norm['languages'] as $l) {
-                $lines[] = '• '.(string) $l;
+            foreach ($norm['languages'] as $lang) {
+                $lines[] = '• '.(is_array($lang) ? ($lang['language'] ?? implode(', ', $lang)) : $lang);
             }
             $lines[] = '';
         }

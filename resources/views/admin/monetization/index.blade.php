@@ -275,14 +275,14 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement / Impression CV PDF - Template Défaut (Crédits)</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Téléchargement / Impression CV PDF - Template Basic ATS (Crédits)</label>
                                 <div class="relative">
                                     <input type="number" name="feature_cost_cv_download" value="{{ $cvDownloadCost }}" min="0"
                                         class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 pr-12">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 text-xs">
                                         Crédits</div>
                                 </div>
-                                <p class="text-[10px] text-gray-500 mt-1 italic">Coût prélevé lors du téléchargement du template par défaut (0 = gratuit, actuellement : {{ $cvDownloadCost }} crédits).</p>
+                                <p class="text-[10px] text-gray-500 mt-1 italic">Coût prélevé lors du téléchargement du template par défaut Basic ATS (0 = gratuit, actuellement : {{ $cvDownloadCost }} crédits).</p>
                             </div>
 
                             <!-- Templates ATS Options Payantes -->
@@ -295,7 +295,7 @@
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-xs font-semibold text-gray-700 mb-1">1. Template Basic ATS</label>
+                                        <label class="block text-xs font-semibold text-gray-700 mb-1">1. Template Standard Classique</label>
                                         <div class="relative">
                                             <input type="number" name="feature_cost_cv_template_1" value="{{ $cvTemplate1Cost }}" min="0"
                                                 class="bg-white border border-gray-200 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 pr-12">

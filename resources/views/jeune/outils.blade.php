@@ -435,26 +435,26 @@
                                 <span class="text-xs text-gray-500">Le modèle par défaut est gratuit. Les modèles avancés valorisent vos compétences clés.</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                                <!-- Template 0 : Défaut Épuré -->
+                                <!-- Template 0 : Basic ATS (Simple & Inclus) -->
                                 <button type="button"
                                         @click="selectedTemplate = 0"
                                         :class="selectedTemplate === 0 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
                                         class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
                                     <div>
                                         <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">Inclus</span>
-                                        <p class="text-xs font-bold mt-1.5 truncate">Défaut Épuré</p>
+                                        <p class="text-xs font-bold mt-1.5 truncate">Basic ATS</p>
                                     </div>
                                     <p class="text-[11px] font-semibold text-emerald-600 mt-2">Gratuit (0 cr.)</p>
                                 </button>
 
-                                <!-- Template 1 : Basic ATS -->
+                                <!-- Template 1 : Standard Classique -->
                                 <button type="button"
                                         @click="selectedTemplate = 1"
                                         :class="selectedTemplate === 1 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
                                         class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
                                     <div>
-                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">Simple</span>
-                                        <p class="text-xs font-bold mt-1.5 truncate">Basic ATS</p>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">Classique</span>
+                                        <p class="text-xs font-bold mt-1.5 truncate">Standard Classique</p>
                                     </div>
                                     <p class="text-[11px] font-semibold text-primary-700 mt-2">{{ $templateCosts[1] ?? 1 }} {{ ($templateCosts[1] ?? 1) > 1 ? 'crédits' : 'crédit' }}</p>
                                 </button>
@@ -512,6 +512,7 @@
 
                         @php
                             $norm = $activeCv->normalized_cv_data;
+                            $labels = $norm['labels'] ?? [];
                         @endphp
 
                         <!-- Zone d'impression & d'aperçu du CV ATS sélectionné -->
@@ -520,9 +521,89 @@
                              style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">
 
                             <!-- ======================================================== -->
-                            <!-- TEMPLATE 0 : DÉFAUT ÉPURÉ (1 Colonne classique gratuit)   -->
+                            <!-- TEMPLATE 0 : BASIC ATS SIMPLE (Modèle par défaut gratuit) -->
                             <!-- ======================================================== -->
-                            <div x-show="selectedTemplate === 0" class="space-y-8">
+                            <div x-show="selectedTemplate === 0" class="space-y-6">
+                                <div class="pb-4 border-b border-gray-300 space-y-1">
+                                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $activeCv->candidate_name }}</h1>
+                                    <p class="text-sm font-semibold text-gray-700">{{ $activeCv->candidate_title }}</p>
+                                    <p class="text-xs text-gray-600">
+                                        {{ $activeCv->candidate_contact['email'] ?? '' }}
+                                        @if(!empty($activeCv->candidate_contact['phone'])) | {{ $activeCv->candidate_contact['phone'] }} @endif
+                                        @if(!empty($activeCv->candidate_contact['location'])) | {{ $activeCv->candidate_contact['location'] }} @endif
+                                    </p>
+                                </div>
+
+                                <div class="space-y-1.5">
+                                    <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">{{ $labels['profile'] ?? 'PROFESSIONAL SUMMARY' }}</h2>
+                                    <p class="text-xs leading-relaxed text-gray-800 text-justify">{{ $norm['profile_summary'] }}</p>
+                                </div>
+
+                                @if(!empty($norm['experiences']))
+                                    <div class="space-y-3">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
+                                        @foreach($norm['experiences'] as $exp)
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-xs font-semibold">
+                                                    <span class="text-gray-900">{{ $exp['title'] }} @if(!empty($exp['company'])) — {{ $exp['company'] }} @endif</span>
+                                                    <span class="text-gray-600">{{ $exp['period'] ?: ($labels['recently'] ?? 'Current role') }}</span>
+                                                </div>
+                                                @if(!empty($exp['bullets']))
+                                                    <ul class="list-disc list-inside text-xs text-gray-700 space-y-0.5 pl-1">
+                                                        @foreach($exp['bullets'] as $b)
+                                                            <li class="leading-relaxed">{{ $b }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                @elseif(!empty($exp['description']))
+                                                    <p class="text-xs text-gray-700 leading-relaxed">{{ $exp['description'] }}</p>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['education']))
+                                    <div class="space-y-2">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">{{ $labels['education'] ?? 'EDUCATION' }}</h2>
+                                        @foreach($norm['education'] as $edu)
+                                            <div class="flex justify-between text-xs">
+                                                <span class="font-semibold text-gray-900">{{ $edu['degree'] }} @if(!empty($edu['school'])) — {{ $edu['school'] }} @endif</span>
+                                                <span class="text-gray-600">{{ $edu['year'] }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['skills']))
+                                    <div class="space-y-1.5">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">{{ $labels['skills'] ?? 'CORE SKILLS' }}</h2>
+                                        <p class="text-xs text-gray-800 leading-relaxed">{{ implode(' • ', $norm['skills']) }}</p>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['certifications']))
+                                    <div class="space-y-1.5">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">{{ $labels['certifications'] ?? 'CERTIFICATIONS' }}</h2>
+                                        <ul class="list-disc list-inside text-xs text-gray-700 space-y-0.5 pl-1">
+                                            @foreach($norm['certifications'] as $cert)
+                                                <li>{{ is_array($cert) ? ($cert['name'] ?? implode(', ', $cert)) : $cert }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                @if(!empty($norm['languages']))
+                                    <div class="space-y-1.5">
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">{{ $labels['languages'] ?? 'LANGUAGES' }}</h2>
+                                        <p class="text-xs text-gray-800 leading-relaxed">{{ implode('  •  ', array_map(fn($l) => is_array($l) ? ($l['language'] ?? implode(', ', $l)) : $l, $norm['languages'])) }}</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- ======================================================== -->
+                            <!-- TEMPLATE 1 : STANDARD CLASSIQUE (1 Colonne centré)        -->
+                            <!-- ======================================================== -->
+                            <div x-show="selectedTemplate === 1" class="space-y-8">
                                 <div class="border-b-2 border-gray-900 pb-6 text-center space-y-2">
                                     <h1 class="text-3xl font-black tracking-tight text-gray-900 uppercase">{{ $activeCv->candidate_name }}</h1>
                                     <p class="text-base font-bold text-primary-700 tracking-wide">{{ $activeCv->candidate_title }}</p>
@@ -534,19 +615,19 @@
                                 </div>
 
                                 <div class="space-y-2">
-                                    <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Profil Professionnel</h2>
-                                    <p class="text-xs leading-relaxed text-gray-700 text-justify">{{ $activeCv->summary }}</p>
+                                    <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">{{ $labels['profile'] ?? 'PROFESSIONAL SUMMARY' }}</h2>
+                                    <p class="text-xs leading-relaxed text-gray-700 text-justify">{{ $norm['profile_summary'] }}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
                                     <div class="space-y-4">
-                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Expériences Professionnelles</h2>
+                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
                                         <div class="space-y-4">
                                             @foreach($norm['experiences'] as $exp)
                                                 <div class="space-y-1">
                                                     <div class="flex items-center justify-between text-xs">
                                                         <h3 class="font-bold text-gray-900">{{ $exp['title'] }} @if(!empty($exp['company'])) — <span class="font-semibold text-gray-700">{{ $exp['company'] }}</span> @endif</h3>
-                                                        <span class="text-gray-500 font-medium">{{ $exp['period'] }}</span>
+                                                        <span class="text-gray-500 font-medium">{{ $exp['period'] ?: ($labels['recently'] ?? 'Current role') }}</span>
                                                     </div>
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 pt-1 text-xs text-gray-600">
@@ -568,7 +649,7 @@
 
                                 @if(!empty($norm['education']))
                                     <div class="space-y-4">
-                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Formations & Diplômes</h2>
+                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">{{ $labels['education'] ?? 'EDUCATION' }}</h2>
                                         <div class="space-y-3">
                                             @foreach($norm['education'] as $edu)
                                                 <div class="flex items-center justify-between text-xs">
@@ -585,7 +666,7 @@
 
                                 @if(!empty($norm['skills']))
                                     <div class="space-y-2">
-                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">Compétences Clés & Outils</h2>
+                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">{{ $labels['skills'] ?? 'CORE SKILLS' }}</h2>
                                         <div class="flex flex-wrap gap-2 pt-1">
                                             @foreach($norm['skills'] as $skill)
                                                 <span class="px-2.5 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-semibold">{{ $skill }}</span>
@@ -593,62 +674,15 @@
                                         </div>
                                     </div>
                                 @endif
-                            </div>
 
-                            <!-- ======================================================== -->
-                            <!-- TEMPLATE 1 : BASIC ATS (Compact standard 1 colonne)       -->
-                            <!-- ======================================================== -->
-                            <div x-show="selectedTemplate === 1" class="space-y-6">
-                                <div class="pb-4 border-b border-gray-300 space-y-1">
-                                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $activeCv->candidate_name }}</h1>
-                                    <p class="text-sm font-semibold text-gray-700">{{ $activeCv->candidate_title }}</p>
-                                    <p class="text-xs text-gray-600">
-                                        {{ $activeCv->candidate_contact['email'] ?? '' }} | {{ $activeCv->candidate_contact['phone'] ?? '' }} | {{ $activeCv->candidate_contact['location'] ?? '' }}
-                                    </p>
-                                </div>
-
-                                <div class="space-y-1.5">
-                                    <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">Résumé Professionnel</h2>
-                                    <p class="text-xs leading-relaxed text-gray-800">{{ $activeCv->summary }}</p>
-                                </div>
-
-                                @if(!empty($norm['experiences']))
-                                    <div class="space-y-3">
-                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">Expérience Professionnelle</h2>
-                                        @foreach($norm['experiences'] as $exp)
-                                            <div class="space-y-1">
-                                                <div class="flex justify-between text-xs font-semibold">
-                                                    <span class="text-gray-900">{{ $exp['title'] }} — {{ $exp['company'] }}</span>
-                                                    <span class="text-gray-600">{{ $exp['period'] }}</span>
-                                                </div>
-                                                @if(!empty($exp['bullets']))
-                                                    <ul class="list-disc list-inside text-xs text-gray-700 space-y-0.5 pl-1">
-                                                        @foreach($exp['bullets'] as $b)
-                                                            <li class="leading-relaxed">{{ $b }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-
-                                @if(!empty($norm['education']))
+                                @if(!empty($norm['certifications']))
                                     <div class="space-y-2">
-                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">Formation</h2>
-                                        @foreach($norm['education'] as $edu)
-                                            <div class="flex justify-between text-xs">
-                                                <span class="font-semibold text-gray-900">{{ $edu['degree'] }} — {{ $edu['school'] }}</span>
-                                                <span class="text-gray-600">{{ $edu['year'] }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-
-                                @if(!empty($norm['skills']))
-                                    <div class="space-y-1.5">
-                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">Compétences</h2>
-                                        <p class="text-xs text-gray-800 leading-relaxed">{{ implode(' • ', $norm['skills']) }}</p>
+                                        <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">{{ $labels['certifications'] ?? 'CERTIFICATIONS' }}</h2>
+                                        <div class="space-y-1 text-xs">
+                                            @foreach($norm['certifications'] as $cert)
+                                                <p class="text-gray-800 font-medium">• {{ is_array($cert) ? ($cert['name'] ?? implode(', ', $cert)) : $cert }}</p>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @endif
                             </div>
@@ -670,19 +704,19 @@
                                 </div>
 
                                 <div class="space-y-2">
-                                    <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">Profil & Objectifs</h2>
-                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $activeCv->summary }}</p>
+                                    <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">{{ $labels['profile'] ?? 'PROFESSIONAL SUMMARY' }}</h2>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $norm['profile_summary'] }}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
                                     <div class="space-y-4">
-                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">Parcours Professionnel</h2>
+                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
                                         <div class="space-y-4">
                                             @foreach($norm['experiences'] as $exp)
                                                 <div class="space-y-1 bg-gray-50/70 p-3 rounded-xl border border-gray-100">
                                                     <div class="flex items-center justify-between text-xs">
                                                         <h3 class="font-bold text-gray-900">{{ $exp['title'] }} <span class="text-indigo-600 font-semibold">• {{ $exp['company'] }}</span></h3>
-                                                        <span class="text-gray-500 font-medium text-[11px]">{{ $exp['period'] }}</span>
+                                                        <span class="text-gray-500 font-medium text-[11px]">{{ $exp['period'] ?: ($labels['recently'] ?? 'Current role') }}</span>
                                                     </div>
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 pt-1 text-xs text-gray-700">
@@ -699,7 +733,7 @@
 
                                 @if(!empty($norm['education']))
                                     <div class="space-y-3">
-                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">Diplômes & Cursus</h2>
+                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">{{ $labels['education'] ?? 'EDUCATION' }}</h2>
                                         <div class="grid sm:grid-cols-2 gap-3">
                                             @foreach($norm['education'] as $edu)
                                                 <div class="p-3 rounded-xl border border-gray-100 text-xs space-y-0.5">
@@ -714,7 +748,7 @@
 
                                 @if(!empty($norm['skills']))
                                     <div class="space-y-2">
-                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">Expertise & Technologies</h2>
+                                        <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">{{ $labels['skills'] ?? 'CORE SKILLS' }}</h2>
                                         <div class="flex flex-wrap gap-1.5">
                                             @foreach($norm['skills'] as $skill)
                                                 <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-900 text-xs font-semibold">{{ $skill }}</span>
@@ -756,20 +790,20 @@
                                     <div class="md:col-span-7 space-y-6">
                                         <!-- RÉSUMÉ -->
                                         <div class="space-y-2">
-                                            <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">RÉSUMÉ</h2>
-                                            <p class="text-xs leading-relaxed text-gray-700 text-justify">{{ $activeCv->summary }}</p>
+                                            <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">{{ $labels['profile'] ?? 'PROFESSIONAL SUMMARY' }}</h2>
+                                            <p class="text-xs leading-relaxed text-gray-700 text-justify">{{ $norm['profile_summary'] }}</p>
                                         </div>
 
                                         <!-- EXPÉRIENCE -->
                                         @if(!empty($norm['experiences']))
                                             <div class="space-y-4">
-                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">EXPÉRIENCE</h2>
+                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
                                                 <div class="space-y-5">
                                                     @foreach($norm['experiences'] as $exp)
                                                         <div class="space-y-1.5">
                                                             <div class="flex items-baseline justify-between text-xs">
                                                                 <h3 class="font-bold text-gray-900">{{ $exp['title'] }}</h3>
-                                                                <span class="text-gray-500 font-medium text-[11px]">{{ $exp['period'] }}</span>
+                                                                <span class="text-gray-500 font-medium text-[11px]">{{ $exp['period'] ?: ($labels['recently'] ?? 'Current role') }}</span>
                                                             </div>
                                                             @if(!empty($exp['company']))
                                                                 <p class="text-xs font-semibold text-blue-600">{{ $exp['company'] }}</p>
@@ -795,7 +829,7 @@
                                         <!-- ÉDUCATION -->
                                         @if(!empty($norm['education']))
                                             <div class="space-y-3">
-                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">ÉDUCATION</h2>
+                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">{{ $labels['education'] ?? 'EDUCATION' }}</h2>
                                                 <div class="space-y-3">
                                                     @foreach($norm['education'] as $edu)
                                                         <div class="text-xs">
@@ -817,7 +851,7 @@
                                     <div class="md:col-span-5 space-y-6">
                                         <!-- COMPÉTENCES -->
                                         <div class="space-y-4">
-                                            <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">COMPÉTENCES</h2>
+                                            <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">{{ $labels['skills_simple'] ?? 'CORE SKILLS' }}</h2>
                                             @if(!empty($norm['categorized_skills']))
                                                 <div class="space-y-4">
                                                     @foreach($norm['categorized_skills'] as $catName => $skills)
@@ -843,7 +877,7 @@
                                         <!-- CERTIFICATIONS -->
                                         @if(!empty($norm['certifications']))
                                             <div class="space-y-2.5">
-                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">CERTIFICATIONS</h2>
+                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">{{ $labels['certifications'] ?? 'CERTIFICATIONS' }}</h2>
                                                 <div class="space-y-2 text-xs">
                                                     @foreach($norm['certifications'] as $cert)
                                                         <div class="flex items-start gap-2">
@@ -858,7 +892,7 @@
                                         <!-- LANGUES -->
                                         @if(!empty($norm['languages']))
                                             <div class="space-y-2.5">
-                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">LANGUES</h2>
+                                                <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">{{ $labels['languages'] ?? 'LANGUAGES' }}</h2>
                                                 <div class="space-y-2 text-xs">
                                                     @foreach($norm['languages'] as $lang)
                                                         <div class="flex items-center justify-between text-gray-800 font-medium">
@@ -890,19 +924,19 @@
                                 </div>
 
                                 <div class="space-y-2">
-                                    <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">Synthèse Exécutive</h2>
-                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $activeCv->summary }}</p>
+                                    <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">{{ $labels['executive_summary'] ?? 'EXECUTIVE SUMMARY' }}</h2>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $norm['profile_summary'] }}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
                                     <div class="space-y-4">
-                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">Réalisations & Postes Occupés</h2>
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">{{ $labels['achievements'] ?? 'KEY ACHIEVEMENTS' }}</h2>
                                         <div class="space-y-4">
                                             @foreach($norm['experiences'] as $exp)
                                                 <div class="space-y-1.5 border-l-2 border-gray-200 pl-4">
                                                     <div class="flex items-center justify-between text-xs">
                                                         <h3 class="font-bold text-gray-900">{{ $exp['title'] }} — <span class="text-emerald-700">{{ $exp['company'] }}</span></h3>
-                                                        <span class="text-gray-500 font-medium">{{ $exp['period'] }}</span>
+                                                        <span class="text-gray-500 font-medium">{{ $exp['period'] ?: ($labels['recently'] ?? 'Current role') }}</span>
                                                     </div>
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 text-xs text-gray-600">
@@ -919,7 +953,7 @@
 
                                 @if(!empty($norm['education']))
                                     <div class="space-y-3">
-                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">Parcours Universitaire</h2>
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">{{ $labels['education'] ?? 'EDUCATION' }}</h2>
                                         <div class="grid sm:grid-cols-2 gap-3">
                                             @foreach($norm['education'] as $edu)
                                                 <div class="p-3 bg-gray-50 rounded-xl text-xs space-y-0.5">
@@ -934,7 +968,7 @@
 
                                 @if(!empty($norm['skills']))
                                     <div class="space-y-2">
-                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">Compétences Techniques & Outils</h2>
+                                        <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">{{ $labels['skills'] ?? 'CORE SKILLS' }}</h2>
                                         <div class="flex flex-wrap gap-1.5">
                                             @foreach($norm['skills'] as $sk)
                                                 <span class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-xs font-medium">{{ $sk }}</span>
@@ -959,19 +993,19 @@
                                 </div>
 
                                 <div class="space-y-2 font-sans">
-                                    <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">PROFIL DE LEADERSHIP</h2>
-                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $activeCv->summary }}</p>
+                                    <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">{{ $labels['leadership'] ?? 'LEADERSHIP PROFILE' }}</h2>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $norm['profile_summary'] }}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
                                     <div class="space-y-4 font-sans">
-                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">EXPÉRIENCES ET RESPONSABILITÉS</h2>
+                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
                                         <div class="space-y-4">
                                             @foreach($norm['experiences'] as $exp)
                                                 <div class="space-y-1">
                                                     <div class="flex items-center justify-between text-xs font-serif font-bold text-gray-900">
                                                         <span>{{ $exp['title'] }} — {{ $exp['company'] }}</span>
-                                                        <span class="font-sans font-normal text-gray-600">{{ $exp['period'] }}</span>
+                                                        <span class="font-sans font-normal text-gray-600">{{ $exp['period'] ?: ($labels['recently'] ?? 'Current role') }}</span>
                                                     </div>
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 pt-1 text-xs text-gray-700">
@@ -991,7 +1025,7 @@
 
                                 @if(!empty($norm['education']))
                                     <div class="space-y-3 font-sans">
-                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">FORMATION & DIPLÔMES SUPÉRIEURS</h2>
+                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">{{ $labels['higher_education'] ?? 'EDUCATION' }}</h2>
                                         @foreach($norm['education'] as $edu)
                                             <div class="flex items-center justify-between text-xs">
                                                 <div>
@@ -1006,7 +1040,7 @@
 
                                 @if(!empty($norm['skills']))
                                     <div class="space-y-2 font-sans">
-                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">COMPÉTENCES & APTITUDES CLÉS</h2>
+                                        <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">{{ $labels['skills'] ?? 'CORE SKILLS' }}</h2>
                                         <p class="text-xs text-gray-800 leading-relaxed">{{ implode('  |  ', $norm['skills']) }}</p>
                                     </div>
                                 @endif

@@ -83,7 +83,96 @@ class CvAnalysis extends Model
         $parsed = $this->parsed_content ?? [];
         $rawText = $parsed['raw_text'] ?? '';
 
-        // 1. Expériences structurées
+        // 0. Détection de la langue du CV (Anglais vs Français)
+        $searchCorpus = mb_strtolower($rawText.' '.json_encode($parsed));
+        $englishScore = 0;
+        $frenchScore = 0;
+
+        $englishKeywords = [
+            'professional summary', 'core skills', 'professional experience', 'education',
+            'certifications', 'languages', 'years', 'current role', 'experience', 'skills',
+            'degree', 'engineer', 'native', 'fluent', 'university', 'responsibilities',
+        ];
+        $frenchKeywords = [
+            'profil professionnel', 'résumé professionnel', 'expériences professionnelles',
+            'formations', 'diplômes', 'compétences', 'langues', 'années', 'poste actuel',
+            'expérience', 'formation', 'ingénieur', 'courant', 'maternelle', 'université',
+        ];
+
+        foreach ($englishKeywords as $kw) {
+            if (str_contains($searchCorpus, $kw)) {
+                $englishScore += 2;
+            }
+        }
+        foreach ($frenchKeywords as $kw) {
+            if (str_contains($searchCorpus, $kw)) {
+                $frenchScore += 2;
+            }
+        }
+
+        if (preg_match('/\b(with|and|from|for|team|developer|lead|tools)\b/i', $rawText)) {
+            $englishScore += 2;
+        }
+        if (preg_match('/\b(avec|dans|pour|équipe|développeur|gestion|outils)\b/i', $rawText)) {
+            $frenchScore += 2;
+        }
+
+        $isEnglish = $englishScore > $frenchScore;
+
+        $labels = $isEnglish ? [
+            'profile' => 'PROFESSIONAL SUMMARY',
+            'experience' => 'PROFESSIONAL EXPERIENCE',
+            'education' => 'EDUCATION',
+            'skills' => 'CORE SKILLS & TOOLS',
+            'skills_simple' => 'CORE SKILLS',
+            'certifications' => 'CERTIFICATIONS',
+            'languages' => 'LANGUAGES',
+            'recently' => 'Current role',
+            'executive_summary' => 'EXECUTIVE SUMMARY',
+            'achievements' => 'KEY ACHIEVEMENTS & ROLES',
+            'leadership' => 'LEADERSHIP PROFILE',
+            'higher_education' => 'HIGHER EDUCATION & DEGREES',
+        ] : [
+            'profile' => 'PROFIL PROFESSIONNEL',
+            'experience' => 'EXPÉRIENCES PROFESSIONNELLES',
+            'education' => 'FORMATIONS & DIPLÔMES',
+            'skills' => 'COMPÉTENCES CLÉS & OUTILS',
+            'skills_simple' => 'COMPÉTENCES',
+            'certifications' => 'CERTIFICATIONS',
+            'languages' => 'LANGUES',
+            'recently' => 'Récemment',
+            'executive_summary' => 'SYNTHÈSE EXÉCUTIVE',
+            'achievements' => 'RÉALISATIONS & POSTES OCCUPÉS',
+            'leadership' => 'PROFIL DE LEADERSHIP',
+            'higher_education' => 'FORMATION & DIPLÔMES SUPÉRIEURS',
+        ];
+
+        // 1. Résumé du profil professionnel du candidat (exclure l'évaluation IA "Ce CV est très bien structuré...")
+        $profileSummary = '';
+        if (! empty($rawText)) {
+            if (preg_match('/(?:PROFESSIONAL\s+SUMMARY|RÉSUMÉ\s+PROFESSIONNEL|RESUME\s+PROFESSIONNEL|PROFILE|PROFIL(?:\s+PROFESSIONNEL)?|SUMMARY|RÉSUMÉ|ABOUT\s+ME)\s*[:\n\-]+\s*(.*?)(?=\n+\s*(?:CORE\s+SKILLS|SKILLS|COMPÉTENCES|COMPETENCES|PROFESSIONAL\s+EXPERIENCE|EXPERIENCES?|EXPÉRIENCES?|FORMATION|EDUCATION|CERTIFICATIONS|LANGUAGES|LANGUES)|\z)/siu', $rawText, $sumMatch)) {
+                $candidateRawSummary = trim($sumMatch[1]);
+                if (! empty($candidateRawSummary) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $candidateRawSummary)) {
+                    $profileSummary = $candidateRawSummary;
+                }
+            }
+        }
+
+        if (empty($profileSummary)) {
+            $candProfile = $parsed['profil'] ?? $parsed['profile'] ?? $parsed['candidate_summary'] ?? '';
+            if (! empty($candProfile) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', trim($candProfile))) {
+                $profileSummary = trim($candProfile);
+            }
+        }
+
+        if (empty($profileSummary)) {
+            $title = $this->candidate_title ?: 'Professional';
+            $profileSummary = $isEnglish
+                ? "Experienced {$title} with a proven track record of delivering impactful results and driving technical excellence across distributed environments."
+                : "{$title} expérimenté avec une solide expertise technique et une capacité démontrée à piloter des projets avec impact.";
+        }
+
+        // 2. Expériences structurées
         $rawExperiences = $parsed['experiences'] ?? [];
         $experiences = [];
         foreach ($rawExperiences as $exp) {
@@ -132,7 +221,7 @@ class CvAnalysis extends Model
             ];
         }
 
-        // 2. Formations structurées
+        // 3. Formations structurées
         $rawFormations = $parsed['education'] ?? $parsed['formation'] ?? [];
         $formations = [];
         foreach ($rawFormations as $edu) {
@@ -164,7 +253,7 @@ class CvAnalysis extends Model
             ];
         }
 
-        // 3. Compétences & Compétences catégorisées
+        // 4. Compétences & Compétences catégorisées
         $rawSkills = $parsed['skills'] ?? $parsed['competences'] ?? [];
         $categorizedSkills = [];
 
@@ -182,13 +271,43 @@ class CvAnalysis extends Model
             }
         }
 
+        // 5. Certifications
+        $rawCerts = $parsed['certifications'] ?? [];
+        if (empty($rawCerts) && ! empty($rawText)) {
+            if (preg_match('/(?:CERTIFICATIONS?)\s*[:\n\-]+\s*(.*?)(?=\n+\s*(?:LANGUAGES?|LANGUES?)|$)/siu', $rawText, $certMatch)) {
+                $certLines = array_filter(array_map('trim', explode("\n", $certMatch[1])));
+                foreach ($certLines as $cl) {
+                    $cl = ltrim($cl, "•-* \t");
+                    if (! empty($cl)) {
+                        $rawCerts[] = $cl;
+                    }
+                }
+            }
+        }
+
+        // 6. Langues
+        $rawLanguages = $parsed['langues'] ?? $parsed['languages'] ?? [];
+        if (empty($rawLanguages) && ! empty($rawText)) {
+            if (preg_match('/(?:LANGUAGES?|LANGUES?)\s*[:\n\-]+\s*(.*?)(?=\n+[A-Z\s]{3,}:|$)/siu', $rawText, $langMatch)) {
+                $langText = trim($langMatch[1]);
+                if (str_contains($langText, '—')) {
+                    $rawLanguages = array_filter(array_map('trim', explode('—', $langText)));
+                } else {
+                    $rawLanguages = array_filter(array_map('trim', explode("\n", $langText)));
+                }
+            }
+        }
+
         return [
+            'is_english' => $isEnglish,
+            'labels' => $labels,
+            'profile_summary' => $profileSummary,
             'experiences' => $experiences,
             'education' => $formations,
             'skills' => (array) $rawSkills,
             'categorized_skills' => $categorizedSkills,
-            'certifications' => (array) ($parsed['certifications'] ?? []),
-            'languages' => (array) ($parsed['langues'] ?? $parsed['languages'] ?? []),
+            'certifications' => (array) $rawCerts,
+            'languages' => (array) $rawLanguages,
         ];
     }
 }
