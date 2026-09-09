@@ -169,34 +169,59 @@
                         @endif
                     </a>
 
-                    <!-- Dropdown Mentorat -->
-                    <div class="relative" x-data="{ open: false }" @mouseleave="open = false">
-                        <button @mouseover="open = true"
+                    <!-- Dropdown Mentorat (avec pont de survol) -->
+                    <div class="relative"
+                         x-data="{
+                             open: false,
+                             closeTimer: null,
+                             show() {
+                                 clearTimeout(this.closeTimer);
+                                 this.open = true;
+                             },
+                             hide() {
+                                 this.closeTimer = setTimeout(() => {
+                                     this.open = false;
+                                 }, 300);
+                             }
+                         }"
+                         @mouseenter="show()"
+                         @mouseleave="hide()">
+                        <button @click="open = !open"
                             class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1 {{ request()->routeIs('jeune.mentors', 'jeune.mentorship.*', 'jeune.sessions.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                             Mentorat
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
-                        <div x-show="open" x-transition
-                            class="absolute left-0 mt-0 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
-                            <a href="{{ route('jeune.mentorship.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Mes Mentors
-                            </a>
-                            <a href="{{ route('jeune.sessions.index') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Mes Séances
-                            </a>
-                            <a href="{{ route('jeune.sessions.calendar') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Mon Calendrier
-                            </a>
-                            <a href="{{ route('jeune.mentors') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Trouver un mentor
-                            </a>
+                        <div x-show="open" x-cloak
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 translate-y-1"
+                            @mouseenter="show()"
+                            @mouseleave="hide()"
+                            class="absolute left-0 top-full pt-1.5 w-56 z-50">
+                            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-1.5 ring-1 ring-black/5">
+                                <a href="{{ route('jeune.mentorship.index') }}"
+                                    class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition">
+                                    Mes Mentors
+                                </a>
+                                <a href="{{ route('jeune.sessions.index') }}"
+                                    class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition">
+                                    Mes Séances
+                                </a>
+                                <a href="{{ route('jeune.sessions.calendar') }}"
+                                    class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition">
+                                    Mon Calendrier
+                                </a>
+                                <a href="{{ route('jeune.mentors') }}"
+                                    class="block px-3.5 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 rounded-xl transition">
+                                    Trouver un mentor
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

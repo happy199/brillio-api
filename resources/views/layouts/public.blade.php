@@ -329,9 +329,24 @@
                         :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">À
                         propos</a>
 
-                    <!-- Dropdown Outils (avec tag animé New) -->
-                    <div class="relative" x-data="{ outilsDropdown: false }" @mouseleave="outilsDropdown = false">
-                        <button @mouseover="outilsDropdown = true" @click="outilsDropdown = !outilsDropdown"
+                    <!-- Dropdown Outils (avec tag animé New et pont invisible pour faciliter le survol) -->
+                    <div class="relative"
+                         x-data="{
+                             outilsDropdown: false,
+                             closeTimer: null,
+                             open() {
+                                 clearTimeout(this.closeTimer);
+                                 this.outilsDropdown = true;
+                             },
+                             close() {
+                                 this.closeTimer = setTimeout(() => {
+                                     this.outilsDropdown = false;
+                                 }, 300);
+                             }
+                         }"
+                         @mouseenter="open()"
+                         @mouseleave="close()">
+                        <button @click="outilsDropdown = !outilsDropdown"
                             class="font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap py-2"
                             :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">
                             <span>Outils</span>
@@ -340,28 +355,43 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
+                        <!-- Pont invisible de survol (pt-2) pour ne jamais perdre le focus curseur -->
                         <div x-show="outilsDropdown" x-cloak
                             x-transition:enter="transition ease-out duration-150"
                             x-transition:enter-start="opacity-0 translate-y-1"
                             x-transition:enter-end="opacity-100 translate-y-0"
-                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave="transition ease-in duration-150"
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-1"
-                            class="absolute left-0 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
-                            <a href="{{ route('public.opportunities') }}"
-                                class="flex items-center gap-2.5 px-4 py-2.5 text-xs xl:text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                                <svg class="w-4 h-4 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span>Analyse CV</span>
-                            </a>
-                            <a href="{{ route('public.resources') }}"
-                                class="flex items-center gap-2.5 px-4 py-2.5 text-xs xl:text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition">
-                                <svg class="w-4 h-4 text-primary-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                                <span>Ressources</span>
-                            </a>
+                            @mouseenter="open()"
+                            @mouseleave="close()"
+                            class="absolute left-0 top-full pt-1.5 w-60 z-50">
+                            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 ring-1 ring-black/5">
+                                <a href="{{ route('public.opportunities') }}"
+                                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs xl:text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition group">
+                                    <div class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-colors flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 group-hover:text-primary-700">Analyse CV</p>
+                                        <p class="text-[10px] text-gray-400 font-normal">Score & CV ATS gratuit</p>
+                                    </div>
+                                </a>
+                                <a href="{{ route('public.resources') }}"
+                                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs xl:text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition group">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 group-hover:text-primary-700">Ressources</p>
+                                        <p class="text-[10px] text-gray-400 font-normal">Guides & outils carrière</p>
+                                    </div>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
