@@ -663,7 +663,7 @@ class JeuneDashboardController extends Controller
     public function handleCvAction(Request $request, WalletService $walletService)
     {
         $validated = $request->validate([
-            'action' => 'required|string|in:copy,download',
+            'action' => 'required|string|in:copy,download,download_docx,download_pdf',
             'cv_id' => 'required|integer',
             'template' => 'nullable|integer|between:0,5',
         ]);
@@ -694,10 +694,11 @@ class JeuneDashboardController extends Controller
                 4 => 'Expert Moderne',
                 5 => 'Avancé Cadre',
             ];
+            $formatLabel = $action === 'download_pdf' ? 'PDF' : 'Word';
             $settingKey = $template === 0 ? 'feature_cost_cv_download' : 'feature_cost_cv_template_'.$template;
             $defaultCost = $template === 0 ? 0 : $template;
             $cost = (int) SystemSetting::getValue($settingKey, $defaultCost);
-            $description = 'Téléchargement CV ATS (Template '.($templateLabels[$template] ?? 'Basic ATS').')';
+            $description = "Téléchargement CV ATS {$formatLabel} (Template ".($templateLabels[$template] ?? 'Basic ATS').')';
         }
 
         if ($cost > 0 && $user->credits_balance < $cost) {
@@ -714,7 +715,7 @@ class JeuneDashboardController extends Controller
         }
 
         $downloadUrl = null;
-        if ($action === 'download') {
+        if ($action === 'download' || $action === 'download_docx') {
             $downloadUrl = URL::temporarySignedRoute(
                 'jeune.cv.download-docx',
                 now()->addMinutes(60),
@@ -725,6 +726,7 @@ class JeuneDashboardController extends Controller
         return response()->json([
             'success' => true,
             'action' => $action,
+            'format' => $action === 'download_pdf' ? 'pdf' : ($action === 'copy' ? 'text' : 'docx'),
             'template' => $template,
             'cost' => $cost,
             'remaining_balance' => (int) $user->fresh()->credits_balance,

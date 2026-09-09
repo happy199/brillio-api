@@ -370,15 +370,18 @@
                                 </span>
                             </button>
 
-                            <!-- Bouton Télécharger le CV ATS en Word (.docx) -->
+                            <!-- Bouton Télécharger le CV ATS (Ouvre le choix du format PDF ou Word) -->
                             <button type="button"
-                                    @click="triggerCvAction('download')"
+                                    @click="showDownloadFormatModal = true"
                                     :disabled="isProcessingCvAction"
                                     class="px-4 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 disabled:opacity-50 transition flex items-center gap-2 shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span x-text="downloadButtonLabel">Télécharger en Word (.docx)</span>
+                                <span x-text="downloadButtonLabel">Télécharger mon CV</span>
+                                <svg class="w-3.5 h-3.5 opacity-80 -mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
                             </button>
 
                             <!-- Bouton Postuler avec ce CV (Ouvre l'onglet Opportunités) -->
@@ -1241,6 +1244,99 @@
         </div>
     </div>
 
+    <!-- MODAL : CHOIX DU FORMAT DE TÉLÉCHARGEMENT (PDF vs WORD) -->
+    <div x-show="showDownloadFormatModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showDownloadFormatModal = false">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" @click="showDownloadFormatModal = false"></div>
+            <div class="relative bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl z-10 space-y-6">
+                <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-primary-50 flex items-center justify-center text-primary-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-900">Format d'export de votre CV</h3>
+                            <p class="text-xs text-gray-500">Choisissez le format adapté à votre besoin</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showDownloadFormatModal = false" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+
+                <!-- Les 2 options de format -->
+                <div class="space-y-4">
+                    <!-- Option 1 : Fichier PDF (Recommandé) -->
+                    <button type="button"
+                            @click="showDownloadFormatModal = false; triggerCvAction('download_pdf')"
+                            class="w-full p-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50/40 hover:bg-emerald-50 hover:border-emerald-500 text-left transition group relative shadow-xs flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 2h7l5 5v13a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2zm6 1.5V7h3.5L13 3.5zM8.5 13a1.5 1.5 0 00-1.5 1.5v3a1.5 1.5 0 003 0v-.5h-1v.5a.5.5 0 01-.5.5.5.5 0 01-.5-.5v-1h2a1 1 0 001-1v-.5a1.5 1.5 0 00-1.5-1.5h-2zm0 1h1.5a.5.5 0 01.5.5v.5h-2v-.5a.5.5 0 01.5-.5z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                <h4 class="text-sm font-bold text-gray-900 group-hover:text-emerald-900">Format PDF (.pdf)</h4>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 uppercase tracking-wide">Recommandé</span>
+                            </div>
+                            <p class="text-xs text-gray-600 leading-relaxed mb-2">
+                                <strong>Rendu visuel exact et soigné</strong>, 100% fidèle à l'aperçu affiché à l'écran. Idéal pour postuler directement auprès des recruteurs et franchir les filtres ATS sans risque de déformation.
+                            </p>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 group-hover:underline">
+                                Télécharger en PDF
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </span>
+                        </div>
+                    </button>
+
+                    <!-- Option 2 : Fichier Word (.docx) -->
+                    <button type="button"
+                            @click="showDownloadFormatModal = false; triggerCvAction('download_docx')"
+                            class="w-full p-4 rounded-2xl border-2 border-indigo-200 bg-indigo-50/40 hover:bg-indigo-50 hover:border-indigo-500 text-left transition group relative shadow-xs flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zm-1.8 14.5l-1.2-4.5-1.2 4.5H7.2L5.5 11h1.7l1.1 5.3 1.2-4.3h1.2l1.2 4.3 1.1-5.3h1.7l-1.7 7.5h-1.6z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                <h4 class="text-sm font-bold text-gray-900 group-hover:text-indigo-900">Format Word (.docx)</h4>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800 uppercase tracking-wide">Modifiable</span>
+                            </div>
+                            <p class="text-xs text-gray-600 leading-relaxed mb-2">
+                                Fichier bureautique modifiable pour adapter vos expériences, ajouter des détails ou personnaliser le contenu à votre convenance.
+                            </p>
+                            <!-- Avertissement Word demandé par l'utilisateur -->
+                            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200/70 text-[11px] text-amber-900 flex items-start gap-2 mb-2">
+                                <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span><strong>Remarque importante :</strong> La mise en page dans Microsoft Word ou WPS peut différer légèrement de l'aperçu PDF, compte tenu des contraintes techniques et de gestion des styles propres à ces logiciels.</span>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 group-hover:underline">
+                                Télécharger en Word (.docx)
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </span>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <p class="text-xs text-gray-500">
+                        Coût pour ce template :
+                        <span class="font-bold text-primary-700" x-text="templateCosts[selectedTemplate] > 0 ? `${templateCosts[selectedTemplate]} crédits` : 'Gratuit'"></span>
+                    </p>
+                    <button type="button" @click="showDownloadFormatModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL : TÉLÉVERSER UN NOUVEAU CV -->
     <div x-show="showCvUploadModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="if (!isUploadingCv) showCvUploadModal = false">
         <div class="flex items-center justify-center min-h-screen p-4">
@@ -1422,6 +1518,7 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
         driveFilter: 'all',
         showUploadModal: false,
         showCvUploadModal: false,
+        showDownloadFormatModal: false,
         showPreviewModal: false,
         showDeleteModal: false,
         isUploadingCv: false,
@@ -1434,17 +1531,17 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
         selectedTemplateCostText() {
             const cost = this.templateCosts[this.selectedTemplate] ?? 0;
             if (cost <= 0) {
-                return 'Télécharger en Word (.docx) (Gratuit)';
+                return 'Télécharger mon CV (Gratuit)';
             }
-            return `Télécharger en Word (.docx) (${cost} ${cost > 1 ? 'crédits' : 'crédit'})`;
+            return `Télécharger mon CV (${cost} ${cost > 1 ? 'crédits' : 'crédit'})`;
         },
 
         downloadButtonLabel() {
             const cost = this.templateCosts[this.selectedTemplate] ?? 0;
             if (cost <= 0) {
-                return 'Télécharger en Word (.docx) (Gratuit)';
+                return 'Télécharger mon CV (Gratuit)';
             }
-            return `Télécharger en Word (.docx) (${cost} ${cost > 1 ? 'crédits' : 'crédit'})`;
+            return `Télécharger mon CV (${cost} ${cost > 1 ? 'crédits' : 'crédit'})`;
         },
 
         init() {
@@ -1517,13 +1614,18 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
                         document.body.removeChild(textArea);
                     }
                     this.showToastNotification('Texte du CV copié dans le presse-papier !', 'success');
-                } else if (action === 'download') {
+                } else if (action === 'download' || action === 'download_docx') {
                     if (data.download_url) {
                         window.location.href = data.download_url;
                         this.showToastNotification('Votre CV Word (.docx) est en cours de téléchargement !', 'success');
                     } else {
                         this.showToastNotification('Impossible de préparer le fichier Word.', 'error');
                     }
+                } else if (action === 'download_pdf') {
+                    this.showToastNotification('Préparation de votre CV en PDF...', 'success');
+                    setTimeout(() => {
+                        window.print();
+                    }, 350);
                 }
             } catch (err) {
                 console.error('CV Action error:', err);
@@ -1584,10 +1686,16 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
 }
 
 @media print {
-    body {
+    @page {
+        size: A4;
+        margin: 8mm;
+    }
+    html, body {
         background: #fff !important;
         margin: 0 !important;
         padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     body * {
         visibility: hidden !important;
@@ -1603,7 +1711,7 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
         top: 0 !important;
         width: 100% !important;
         margin: 0 !important;
-        padding: 10mm !important;
+        padding: 8mm !important;
         border: none !important;
         box-shadow: none !important;
         background: white !important;

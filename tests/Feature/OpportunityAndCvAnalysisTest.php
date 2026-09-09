@@ -643,6 +643,26 @@ TXT;
         $downloadResponse->assertStatus(200);
         $this->assertStringContainsString(self::MIME_DOCX, $downloadResponse->headers->get('Content-Type'));
         $this->assertStringContainsString('CV_moussa_diallo_ATS.docx', $downloadResponse->headers->get('Content-Disposition'));
+
+        // Test download_docx action explicitly
+        $responseDocx = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'action' => 'download_docx',
+            'cv_id' => $analysis->id,
+            'template' => 0,
+        ]);
+        $responseDocx->assertStatus(200);
+        $this->assertNotEmpty($responseDocx->json('download_url'));
+        $this->assertEquals('docx', $responseDocx->json('format'));
+
+        // Test download_pdf action
+        $responsePdf = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'action' => 'download_pdf',
+            'cv_id' => $analysis->id,
+            'template' => 0,
+        ]);
+        $responsePdf->assertStatus(200);
+        $this->assertEquals('pdf', $responsePdf->json('format'));
+        $this->assertTrue($responsePdf->json('success'));
     }
 
     public function test_authenticated_cv_upload_stores_document_in_academic_documents()
