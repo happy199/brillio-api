@@ -787,4 +787,73 @@ TXT;
         $response->assertSee('Évaluer un nouveau CV');
         $response->assertSee("Lancer l'analyse", false);
     }
+
+    public function test_download_docx_cv_serves_valid_document_matching_chosen_template()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_docx_template_check',
+            'original_filename' => 'CV_Fatoumata_Traore.docx',
+            'file_path' => 'cv_analyses/test_fatoumata.docx',
+            'file_size' => 8000,
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'candidate_name' => 'Fatoumata Traoré',
+            'candidate_title' => 'UX/UI Designer Junior',
+            'candidate_contact' => [
+                'email' => 'fatoumata.traore.design@gmail.com',
+                'phone' => '+225 07 00 00 00 00',
+                'location' => "Abidjan, Côte d'Ivoire",
+            ],
+            'global_score' => 88,
+            'status_label' => 'Excellent',
+            'summary' => 'Profil UX Designer',
+            'parsed_content' => [
+                'raw_text' => "FATOUMATA TRAORÉ\nUX/UI Designer Junior\nRÉSUMÉ PROFESSIONNEL\nAncienne assistante sociale reconvertie en UX/UI Designer avec expérience en recherche utilisateur.",
+            ],
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        // L'utilisateur a mis le coût du template moderne à 0 dans le backoffice
+        SystemSetting::updateOrCreate(
+            ['key' => 'feature_cost_cv_template_4'],
+            ['value' => '0', 'group' => 'features', 'type' => 'integer']
+        );
+
+        // Téléchargement Template 4 (Expert Moderne)
+        $response = $this->actingAs($user)->get(route('jeune.cv.download-docx', [
+            'cv' => $analysis->id,
+            'template' => 4,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $this->assertStringContainsString('CV_fatoumata_traore_ATS.docx', $response->headers->get('Content-Disposition'));
+
+        // Sauvegarder le contenu streamé pour analyser le XML interne
+        $tempDocx = tempnam(sys_get_temp_dir(), 'test_verify_t4_').'.docx';
+        file_put_contents($tempDocx, $response->streamedContent());
+
+        $zip = new \ZipArchive;
+        $this->assertTrue($zip->open($tempDocx));
+        $xml = $zip->getFromName('word/document.xml');
+
+        // Vérification des éléments distinctifs de la maquette Expert Moderne
+        $this->assertStringContainsString('ModernDarkBanner', $xml);
+        $this->assertStringContainsString('111827', $xml); // Fond sombre du bandeau
+        $this->assertStringContainsString('10B981', $xml); // Soulignement émeraude
+        $this->assertStringContainsString('FATOUMATA TRAORÉ', $xml);
+        $this->assertStringContainsString('UX/UI Designer Junior', $xml);
+        $this->assertStringContainsString('SYNTHÈSE EXÉCUTIVE', $xml);
+
+        unlink($tempDocx);
+    }
 }
