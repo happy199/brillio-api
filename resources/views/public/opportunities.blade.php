@@ -531,7 +531,7 @@
                 <!-- Hero Header aux couleurs Brillio par défaut -->
                 <div class="text-center max-w-3xl mx-auto space-y-3">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-primary-100 text-primary-800 shadow-2xs">
-                        <span>✨ Évaluateur de CV IA</span>
+                        <span>✨ Évaluateur de CV</span>
                         <span class="w-1 h-1 rounded-full bg-primary-400"></span>
                         <span>Compatible ATS</span>
                     </div>
@@ -541,7 +541,7 @@
                     </h1>
                     
                     <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-                        Testez gratuitement votre CV avec notre scanner IA : vérification de compatibilité ATS, score sur 100 et détection des opportunités adaptées.
+                        Testez gratuitement votre CV avec notre scanner : vérification de compatibilité ATS, score sur 100 et détection des opportunités adaptées.
                     </p>
                 </div>
 
@@ -598,7 +598,7 @@
                                 </svg>
                             </div>
                             <h3 class="text-xl font-bold text-gray-900">Analyse de votre CV en cours...</h3>
-                            <p class="text-xs text-gray-500">Notre modèle IA évalue votre structure et calcule votre compatibilité ATS.</p>
+                            <p class="text-xs text-gray-500">Notre analyseur évalue votre structure et calcule votre compatibilité ATS.</p>
                         </div>
 
                         <!-- 4 Étapes animées de scan (Conforme Image 3) -->
@@ -656,7 +656,7 @@
                                     @click="submitCv()"
                                     class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Lancer l'audit IA</span>
+                                <span>Lancer l'audit de mon CV</span>
                             </button>
                         </div>
                     </div>
@@ -740,7 +740,7 @@
                         <div class="pt-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                             <span class="text-gray-500">Prêt pour l'audit complet et le comparateur ATS deux versions ?</span>
                             <button type="button" @click="submitCv()" class="font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                                <span>Lancer l'analyse IA</span>
+                                <span>Lancer l'analyse de mon CV</span>
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                             </button>
                         </div>
@@ -826,7 +826,7 @@ document.addEventListener('alpine:init', () => {
 
             this.extractedCandidate.title = detectedTitle;
             this.extractedCandidate.competences = detectedSkills;
-            this.extractedCandidate.profil = 'Votre document est prêt pour l\'audit IA. Le modèle Brillio va analyser votre parcours, estimer votre compatibilité ATS et calculer votre Score de recrutement.';
+            this.extractedCandidate.profil = 'Votre document est prêt pour l\'audit. L\'analyseur Brillio va évaluer votre parcours, estimer votre compatibilité ATS et calculer votre Score de recrutement.';
         },
 
         formatFileSize(bytes) {
