@@ -4,14 +4,53 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header -->
+    <!-- En-tête Outils & Barre d'onglets unifiée -->
+    <div class="space-y-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Outils</h1>
+            <p class="text-sm sm:text-base text-gray-500 mt-0.5">Évaluez votre CV avec l'IA, explorez les ressources pédagogiques et gérez votre Drive documentaire.</p>
+        </div>
+
+        <div class="border-b border-gray-200">
+            <nav class="flex space-x-2 sm:space-x-8 overflow-x-auto pb-1" aria-label="Tabs">
+                <!-- 1. CV -->
+                <a href="{{ route('jeune.outils', ['tab' => 'cv']) }}"
+                   class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium whitespace-nowrap py-3 px-3 sm:px-1 border-b-2 text-sm sm:text-base flex items-center gap-2 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>CV</span>
+                </a>
+
+                <!-- 2. Ressources (Actif) -->
+                <a href="{{ route('jeune.resources.index') }}"
+                   class="border-primary-600 text-primary-600 font-bold whitespace-nowrap py-3 px-3 sm:px-1 border-b-2 text-sm sm:text-base flex items-center gap-2 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <span>Ressources</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-100 text-primary-800">Pédagogie</span>
+                </a>
+
+                <!-- 3. Documents (Drive) -->
+                <a href="{{ route('jeune.outils', ['tab' => 'drive']) }}"
+                   class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium whitespace-nowrap py-3 px-3 sm:px-1 border-b-2 text-sm sm:text-base flex items-center gap-2 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Documents</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Header & Filters -->
     <div class="space-y-6">
-        <!-- Header & Filters -->
         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm space-y-4">
             <!-- Top Row: Title, Search, Source Tabs -->
             <div class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Ressources</h1>
+                    <h2 class="text-xl font-bold text-gray-900">Bibliothèque de ressources</h2>
                     <p class="text-sm text-gray-500">Explorez et apprenez.</p>
                 </div>
 

@@ -117,6 +117,13 @@ class OnboardingController extends Controller
             'onboarding_data' => $onboardingData,
         ]);
 
+        if (session('redirect_to_cv_after_onboarding') || session('pending_cv_token')) {
+            session()->forget(['redirect_to_cv_after_onboarding', 'pending_cv_token']);
+
+            return redirect()->route('jeune.documents', ['tab' => 'cv'])
+                ->with('success', 'Félicitations ! Votre profil est configuré et votre analyse de CV complète est désormais disponible.');
+        }
+
         return redirect()->route('jeune.dashboard')
             ->with('success', 'Bienvenue sur Brillio ! Votre profil a ete configure.');
     }

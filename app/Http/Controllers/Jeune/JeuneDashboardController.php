@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicDocument;
 use App\Models\AdvisorVideoCall;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
+use App\Models\CvAnalysis;
 use App\Models\MentorProfile;
 use App\Models\MentorProfileView;
 use App\Models\PersonalityQuestion;
@@ -13,12 +15,16 @@ use App\Models\PersonalityTest;
 use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Services\BrillioIAService;
+use App\Services\CvAnalysisService;
+use App\Services\CvDocxExportService;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class JeuneDashboardController extends Controller
 {
@@ -532,19 +538,443 @@ class JeuneDashboardController extends Controller
     }
 
     /**
-     * Page des documents
+     * Page des opportunités (Emploi, Formation)
      */
-    public function documents()
+    public function opportunities(Request $request)
     {
+        $validated = $request->validate([
+            'tab' => 'nullable|string|in:emploi,formation',
+        ]);
+
+        $tab = $validated['tab'] ?? 'emploi';
+
+        return view('jeune.opportunities', [
+            'tab' => $tab,
+        ]);
+    }
+
+    /**
+     * Page des outils (CV IA, Ressources, Documents Drive)
+     */
+    public function outils(Request $request)
+    {
+        $validated = $request->validate([
+            'tab' => 'nullable|string|in:emploi,formation,drive,cv,documents,ressources',
+            'cv_id' => 'nullable|integer',
+        ]);
+
         $user = auth()->user();
+        $tab = $validated['tab'] ?? 'cv';
+        if ($tab === 'documents') {
+            $tab = 'drive';
+        }
+
+        // Si l'utilisateur a un token de CV invité en session, le rattacher automatiquement
+        if (session('pending_cv_token')) {
+            try {
+                $cvService = app(CvAnalysisService::class);
+                $cvService->claimGuestCv(session('pending_cv_token'), $user);
+                session()->forget('pending_cv_token');
+            } catch (\Exception $e) {
+                Log::warning('Échec rattachement CV invité: '.$e->getMessage());
+            }
+        }
+
+        $this->cleanupDuplicateCvRecords($user);
+
         $documents = $user->academicDocuments()
             ->orderByDesc('created_at')
             ->get();
 
-        return view('jeune.documents', [
+        $cvAnalyses = $user->cvAnalyses()
+            ->orderByDesc('created_at')
+            ->get();
+
+        $activeCv = null;
+        if (! empty($validated['cv_id'])) {
+            $activeCv = $cvAnalyses->firstWhere('id', $validated['cv_id']);
+        }
+        if (! $activeCv) {
+            $activeCv = $cvAnalyses->first();
+        }
+
+        $cvCopyCost = (int) SystemSetting::getValue('feature_cost_cv_copy', 1);
+        $cvDownloadCost = (int) SystemSetting::getValue('feature_cost_cv_download', 0);
+        $templateCosts = [
+            0 => $cvDownloadCost,
+            1 => (int) SystemSetting::getValue('feature_cost_cv_template_1', 1),
+            2 => (int) SystemSetting::getValue('feature_cost_cv_template_2', 2),
+            3 => (int) SystemSetting::getValue('feature_cost_cv_template_3', 3),
+            4 => (int) SystemSetting::getValue('feature_cost_cv_template_4', 4),
+            5 => (int) SystemSetting::getValue('feature_cost_cv_template_5', 5),
+        ];
+
+        return view('jeune.outils', [
             'user' => $user,
+            'tab' => $tab,
             'documents' => $documents,
+            'cvAnalyses' => $cvAnalyses,
+            'activeCv' => $activeCv,
+            'cvCopyCost' => $cvCopyCost,
+            'cvDownloadCost' => $cvDownloadCost,
+            'templateCosts' => $templateCosts,
         ]);
+    }
+
+    /**
+     * Nettoie les doublons de CV originaux et d'analyses générés par des clics multiples
+     */
+    private function cleanupDuplicateCvRecords($user): void
+    {
+        $cvDocs = $user->academicDocuments()
+            ->where('document_type', AcademicDocument::TYPE_CV)
+            ->orderBy('id')
+            ->get();
+
+        $seenDocs = [];
+        foreach ($cvDocs as $doc) {
+            $key = $doc->file_name.'_'.$doc->file_size;
+            if (isset($seenDocs[$key])) {
+                $doc->delete();
+            } else {
+                $seenDocs[$key] = true;
+            }
+        }
+
+        $analyses = $user->cvAnalyses()
+            ->orderBy('id')
+            ->get();
+
+        $seenAnalyses = [];
+        foreach ($analyses as $an) {
+            $minuteKey = $an->created_at ? $an->created_at->format('Y-m-d H:i') : 'now';
+            $key = $an->original_filename.'_'.$an->file_size.'_'.$minuteKey;
+            if (isset($seenAnalyses[$key])) {
+                $an->delete();
+            } else {
+                $seenAnalyses[$key] = true;
+            }
+        }
+    }
+
+    /**
+     * Traite l'action payante ou gratuite de copie ou de téléchargement/impression du CV
+     */
+    public function handleCvAction(Request $request, WalletService $walletService)
+    {
+        $validated = $request->validate([
+            'action' => 'required|string|in:copy,download,download_docx,download_pdf',
+            'cv_id' => 'required|integer',
+            'template' => 'nullable|integer|between:0,5',
+        ]);
+
+        $user = auth()->user();
+        $cvAnalysis = $user->cvAnalyses()->find($validated['cv_id']);
+
+        if (! $cvAnalysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV introuvable ou non autorisé.',
+            ], 404);
+        }
+
+        $action = $validated['action'];
+        $template = (int) ($validated['template'] ?? 0);
+        $isCopy = $action === 'copy';
+
+        if ($isCopy) {
+            $cost = (int) SystemSetting::getValue('feature_cost_cv_copy', 1);
+            $description = 'Copie du CV ATS';
+        } else {
+            $templateLabels = [
+                0 => 'Basic ATS (Simple)',
+                1 => 'Standard Classique',
+                2 => 'Standard Minimaliste',
+                3 => 'Professionnel Élite',
+                4 => 'Expert Moderne',
+                5 => 'Avancé Cadre',
+            ];
+            $formatLabel = $action === 'download_pdf' ? 'PDF' : 'Word';
+            $settingKey = $template === 0 ? 'feature_cost_cv_download' : 'feature_cost_cv_template_'.$template;
+            $defaultCost = $template === 0 ? 0 : $template;
+            $cost = (int) SystemSetting::getValue($settingKey, $defaultCost);
+            $description = "Téléchargement CV ATS {$formatLabel} (Template ".($templateLabels[$template] ?? 'Basic ATS').')';
+        }
+
+        if ($cost > 0 && $user->credits_balance < $cost) {
+            return response()->json([
+                'success' => false,
+                'redirect_to_wallet' => true,
+                'wallet_url' => route('jeune.wallet.index'),
+                'message' => 'Solde de crédits insuffisant. Veuillez recharger votre portefeuille.',
+            ], 402);
+        }
+
+        if ($cost > 0) {
+            $walletService->deductCredits($user, $cost, 'cv_action', $description, $cvAnalysis);
+        }
+
+        $downloadUrl = null;
+        if ($action === 'download' || $action === 'download_docx') {
+            $downloadUrl = URL::temporarySignedRoute(
+                'jeune.cv.download-docx',
+                now()->addMinutes(60),
+                ['cv' => $cvAnalysis->id, 'template' => $template]
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'action' => $action,
+            'format' => $action === 'download_pdf' ? 'pdf' : ($action === 'copy' ? 'text' : 'docx'),
+            'template' => $template,
+            'cost' => $cost,
+            'remaining_balance' => (int) $user->fresh()->credits_balance,
+            'cv_text' => $this->formatCvAsPlainText($cvAnalysis),
+            'download_url' => $downloadUrl,
+        ]);
+    }
+
+    /**
+     * Téléchargement direct du CV restructuré sous format Word (.docx) modifiable
+     */
+    public function downloadDocxCv(int $cvId, Request $request, CvDocxExportService $docxService)
+    {
+        $validated = $request->validate([
+            'template' => ['nullable', 'integer', 'between:0,5'],
+        ]);
+
+        $user = auth()->user();
+        $cvAnalysis = $user->cvAnalyses()->findOrFail($cvId);
+        $template = isset($validated['template']) ? (int) $validated['template'] : 0;
+
+        // Si le template est payant et que la requête n'a pas de signature valide
+        $settingKey = $template === 0 ? 'feature_cost_cv_download' : 'feature_cost_cv_template_'.$template;
+        $defaultCost = $template === 0 ? 0 : $template;
+        $cost = (int) SystemSetting::getValue($settingKey, $defaultCost);
+
+        if ($cost > 0 && ! $request->hasValidSignature()) {
+            abort(403, 'Lien de téléchargement expiré ou non autorisé.');
+        }
+
+        $filePath = $docxService->generateDocx($cvAnalysis, $template);
+        $filename = $docxService->generateFilename($cvAnalysis);
+
+        return response()->download($filePath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Visualiser le fichier CV d'origine téléversé par le jeune
+     */
+    public function viewOriginalCv(int $cvId)
+    {
+        $cv = auth()->user()->cvAnalyses()->findOrFail($cvId);
+
+        if (! Storage::disk('public')->exists($cv->file_path)) {
+            abort(404);
+        }
+
+        return response()->file(Storage::disk('public')->path($cv->file_path));
+    }
+
+    /**
+     * Télécharger exactement le fichier CV original téléversé par le jeune
+     */
+    public function downloadOriginalCv(int $cvId)
+    {
+        $cv = auth()->user()->cvAnalyses()->findOrFail($cvId);
+
+        if (! $cv->file_path || ! Storage::disk('public')->exists($cv->file_path)) {
+            abort(404, 'Le fichier original est introuvable.');
+        }
+
+        return response()->download(
+            Storage::disk('public')->path($cv->file_path),
+            $cv->original_filename ?: 'CV_Original.'.pathinfo($cv->file_path, PATHINFO_EXTENSION)
+        );
+    }
+
+    /**
+     * Formate les données du CV en texte brut pour le presse-papier
+     */
+    private function formatCvAsPlainText(CvAnalysis $cv): string
+    {
+        $separator = '-------------------------';
+        $norm = $cv->normalized_cv_data;
+        $labels = $norm['labels'] ?? [];
+        $lines = [];
+
+        $this->appendCvHeader($lines, $cv);
+        $this->appendCvSummary($lines, $labels, $norm, $separator);
+        $this->appendCvExperiences($lines, $labels, $norm['experiences'] ?? [], $separator);
+        $this->appendCvEducation($lines, $labels, $norm['education'] ?? [], $separator);
+        $this->appendCvSkills($lines, $labels, $norm['skills'] ?? [], $separator);
+        $this->appendCvCertifications($lines, $labels, $norm['certifications'] ?? [], $separator);
+        $this->appendCvLanguages($lines, $labels, $norm['languages'] ?? [], $separator);
+
+        return trim(implode("\n", $lines));
+    }
+
+    private function appendCvHeader(array &$lines, CvAnalysis $cv): void
+    {
+        $lines[] = mb_strtoupper($cv->candidate_name ?? 'Candidat');
+        if ($cv->candidate_title) {
+            $lines[] = $cv->candidate_title;
+        }
+
+        $contact = [];
+        if (! empty($cv->candidate_contact['email'])) {
+            $contact[] = $cv->candidate_contact['email'];
+        }
+        if (! empty($cv->candidate_contact['phone'])) {
+            $contact[] = $cv->candidate_contact['phone'];
+        }
+        if (! empty($cv->candidate_contact['location'])) {
+            $contact[] = $cv->candidate_contact['location'];
+        }
+        if (! empty($contact)) {
+            $lines[] = implode(' | ', $contact);
+        }
+    }
+
+    private function appendCvSummary(array &$lines, array $labels, array $norm, string $separator): void
+    {
+        $lines[] = '';
+        $lines[] = $labels['profile'] ?? 'PROFESSIONAL SUMMARY';
+        $lines[] = $separator;
+        $lines[] = $norm['profile_summary'] ?? '';
+    }
+
+    private function appendCvExperiences(array &$lines, array $labels, array $experiences, string $separator): void
+    {
+        if (empty($experiences)) {
+            return;
+        }
+
+        $lines[] = '';
+        $lines[] = $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE';
+        $lines[] = $separator;
+        foreach ($experiences as $exp) {
+            $header = $exp['title'].' — '.$exp['company'];
+            if (! empty($exp['period'])) {
+                $header .= ' ('.$exp['period'].')';
+            }
+            $lines[] = $header;
+            if (! empty($exp['bullets'])) {
+                foreach ($exp['bullets'] as $b) {
+                    $lines[] = '• '.$b;
+                }
+            } elseif (! empty($exp['description'])) {
+                $lines[] = $exp['description'];
+            }
+            $lines[] = '';
+        }
+    }
+
+    private function appendCvEducation(array &$lines, array $labels, array $education, string $separator): void
+    {
+        if (empty($education)) {
+            return;
+        }
+
+        $lines[] = $labels['education'] ?? 'EDUCATION';
+        $lines[] = $separator;
+        foreach ($education as $edu) {
+            $item = $edu['degree'].' — '.$edu['school'];
+            if (! empty($edu['year'])) {
+                $item .= ' ('.$edu['year'].')';
+            }
+            $lines[] = $item;
+        }
+        $lines[] = '';
+    }
+
+    private function appendCvSkills(array &$lines, array $labels, array $skills, string $separator): void
+    {
+        if (empty($skills)) {
+            return;
+        }
+
+        $lines[] = $labels['skills'] ?? 'SKILLS';
+        $lines[] = $separator;
+        $lines[] = implode(', ', $skills);
+        $lines[] = '';
+    }
+
+    private function appendCvCertifications(array &$lines, array $labels, array $certifications, string $separator): void
+    {
+        if (empty($certifications)) {
+            return;
+        }
+
+        $lines[] = $labels['certifications'] ?? 'CERTIFICATIONS';
+        $lines[] = $separator;
+        foreach ($certifications as $cert) {
+            $lines[] = '• '.(is_array($cert) ? ($cert['name'] ?? implode(', ', $cert)) : $cert);
+        }
+        $lines[] = '';
+    }
+
+    private function appendCvLanguages(array &$lines, array $labels, array $languages, string $separator): void
+    {
+        if (empty($languages)) {
+            return;
+        }
+
+        $lines[] = $labels['languages'] ?? 'LANGUAGES';
+        $lines[] = $separator;
+        foreach ($languages as $lang) {
+            $lines[] = '• '.(is_array($lang) ? ($lang['language'] ?? implode(', ', $lang)) : $lang);
+        }
+        $lines[] = '';
+    }
+
+    /**
+     * Alias de rétrocompatibilité pour documents
+     */
+    public function documents(Request $request)
+    {
+        return $this->outils($request);
+    }
+
+    /**
+     * Analyse un nouveau CV pour le jeune connecté
+     */
+    public function analyzeCv(Request $request, CvAnalysisService $cvService)
+    {
+        $validated = $request->validate([
+            'cv_file' => ['required', 'file', 'mimes:pdf,docx,png,jpg,jpeg', 'max:5120'],
+        ], [
+            'cv_file.required' => 'Veuillez sélectionner un fichier CV à importer.',
+            'cv_file.file' => 'Le document téléversé est invalide.',
+            'cv_file.mimes' => 'Format non supporté. Formats acceptés : PDF, DOCX, JPG ou PNG.',
+            'cv_file.max' => 'La taille maximale autorisée est de 5 Mo.',
+        ]);
+
+        try {
+            $user = auth()->user();
+            $file = $validated['cv_file'];
+
+            // Éviter les soumissions multiples répétées (ex: multi-clics successifs dans les 30 dernières secondes)
+            $recent = $user->cvAnalyses()
+                ->where('original_filename', $file->getClientOriginalName())
+                ->where('file_size', $file->getSize())
+                ->where('created_at', '>=', now()->subSeconds(30))
+                ->first();
+
+            $analysis = $recent ?: $cvService->processAndAnalyze($file, $user);
+
+            return redirect()->route('jeune.outils', ['tab' => 'cv', 'cv_id' => $analysis->id])
+                ->with('success', 'Votre CV a été analysé avec succès ! Votre nouveau score Career est de '.$analysis->global_score.'/100.');
+        } catch (\Exception $e) {
+            Log::error('Erreur analyse CV jeune: '.$e->getMessage());
+
+            return back()->withErrors([
+                'cv_file' => 'Une erreur est survenue lors de l\'analyse de votre CV. Veuillez réessayer.',
+            ]);
+        }
     }
 
     /**
@@ -770,7 +1200,11 @@ class JeuneDashboardController extends Controller
     {
         $doc = auth()->user()->academicDocuments()->findOrFail($document);
 
-        return response()->download(storage_path('app/public/'.$doc->file_path), $doc->file_name);
+        if (! Storage::disk('public')->exists($doc->file_path)) {
+            abort(404);
+        }
+
+        return response()->download(Storage::disk('public')->path($doc->file_path), $doc->file_name);
     }
 
     /**
@@ -779,10 +1213,22 @@ class JeuneDashboardController extends Controller
     public function viewDocument($document)
     {
         $doc = auth()->user()->academicDocuments()->findOrFail($document);
-        $path = storage_path('app/public/'.$doc->file_path);
 
-        if (! file_exists($path)) {
+        if (! Storage::disk('public')->exists($doc->file_path)) {
             abort(404);
+        }
+
+        $path = Storage::disk('public')->path($doc->file_path);
+        $ext = strtolower(pathinfo($doc->file_name ?: $doc->file_path, PATHINFO_EXTENSION));
+
+        if ($ext === 'docx' || str_contains($doc->mime_type ?? '', 'wordprocessingml')) {
+            $cvService = app(CvAnalysisService::class);
+            $extractedText = $cvService->extractText($path, 'docx');
+
+            return view('jeune.documents_docx_preview', [
+                'document' => $doc,
+                'content' => $extractedText,
+            ]);
         }
 
         return response()->file($path);

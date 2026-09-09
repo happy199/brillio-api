@@ -58,6 +58,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Webhook\JitsiWebhookController;
 use App\Http\Controllers\Website\ContactController as WebsiteContactController;
 use App\Http\Controllers\Website\NewsletterController as WebsiteNewsletterController;
+use App\Http\Controllers\Website\OpportunityController;
 use App\Http\Controllers\Website\PageController;
 use App\Http\Middleware\EnsureAdminOrCoach;
 use App\Http\Middleware\VerifyCsrfToken;
@@ -99,6 +100,12 @@ Route::get('/ressources', [PageController::class, 'resources'])->name('public.re
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::get('/publicite', [PageController::class, 'advertisements'])->name('public.advertisements');
 Route::post('/publicite/{advertisement}/click', [PageController::class, 'trackAdvertisementClick'])->name('public.advertisements.click');
+
+// Section Opportunités & Évaluation de CV
+Route::get('/opportunites', [OpportunityController::class, 'index'])->name('public.opportunities');
+Route::post('/opportunites/analyser-cv', [OpportunityController::class, 'analyzeCv'])->name('public.opportunities.analyze');
+Route::get('/opportunites/score/{token}', [OpportunityController::class, 'showScore'])->name('public.opportunities.score');
+
 Route::post('/contact', [WebsiteContactController::class, 'submit'])->name('contact.submit');
 
 // Newsletter
@@ -284,11 +291,22 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::delete('/chat/{conversation}', [JeuneDashboardController::class, 'deleteConversation'])->name('chat.delete');
     Route::post('/chat/{conversation}/request-human', [JeuneDashboardController::class, 'requestHumanSupport'])->name('chat.request-human');
     Route::post('/chat/{conversation}/cancel-human', [JeuneDashboardController::class, 'cancelHumanSupport'])->name('chat.cancel-human');
+    // Opportunités (Emploi & Formation)
+    Route::get('/opportunites', [JeuneDashboardController::class, 'opportunities'])->name('opportunities');
+
+    // Outils (CV, Ressources, Documents Drive)
+    Route::get('/outils', [JeuneDashboardController::class, 'outils'])->name('outils');
     Route::get('/documents', [JeuneDashboardController::class, 'documents'])->name('documents');
     Route::post('/documents', [JeuneDashboardController::class, 'storeDocument'])->name('documents.store');
     Route::get('/documents/{document}/download', [JeuneDashboardController::class, 'downloadDocument'])->name('documents.download');
     Route::get('/documents/{document}/view', [JeuneDashboardController::class, 'viewDocument'])->name('documents.view');
     Route::delete('/documents/{document}', [JeuneDashboardController::class, 'deleteDocument'])->name('documents.destroy');
+    Route::post('/opportunites/cv/analyser', [JeuneDashboardController::class, 'analyzeCv'])->name('cv.analyze');
+    Route::post('/outils/cv/analyser', [JeuneDashboardController::class, 'analyzeCv']);
+    Route::post('/outils/cv/action', [JeuneDashboardController::class, 'handleCvAction'])->name('cv.action');
+    Route::get('/outils/cv/{cv}/download-docx', [JeuneDashboardController::class, 'downloadDocxCv'])->name('cv.download-docx')->whereNumber('cv');
+    Route::get('/outils/cv/{cv}/view-original', [JeuneDashboardController::class, 'viewOriginalCv'])->name('cv.view-original')->whereNumber('cv');
+    Route::get('/outils/cv/{cv}/download-original', [JeuneDashboardController::class, 'downloadOriginalCv'])->name('cv.download-original')->whereNumber('cv');
     Route::get('/mentors', [JeuneDashboardController::class, 'mentors'])->name('mentors');
     Route::get('/mentors/{mentor}', [JeuneDashboardController::class, 'mentorShow'])->name('mentors.show');
     Route::get('/profil', [ProfileController::class, 'index'])->name('profile');

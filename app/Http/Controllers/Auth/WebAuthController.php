@@ -9,6 +9,7 @@ use App\Models\MentorProfile;
 use App\Models\OrganizationInvitation;
 use App\Models\User;
 use App\Rules\ValidEmailDomain;
+use App\Services\CvAnalysisService;
 use App\Services\MentorshipNotificationService;
 use App\Services\SupabaseAuthService;
 use App\Services\UserAvatarService;
@@ -319,30 +320,9 @@ class WebAuthController extends Controller
             ['name' => $validated['name']]
         );
 
-        // Check for referral code in request (hidden field) or session
         $refInput = $request->validate(['referral_code' => 'nullable|string|max:100|alpha_num']);
         $referralCode = $refInput['referral_code'] ?? session('referral_code');
-        $organizationId = null;
-
-        Log::info('Jeune Registration Debug', [
-            'referral_code_input' => $refInput['referral_code'] ?? null,
-            'referral_code_session' => session('referral_code'),
-            'resolved_code' => $referralCode,
-        ]);
-
-        if ($referralCode) {
-            $invitation = OrganizationInvitation::where('referral_code', $referralCode)
-                ->where('status', 'pending')
-                ->whereDate('expires_at', '>=', now()) // Only if NOT expired
-                ->first();
-
-            if ($invitation) {
-                $organizationId = $invitation->organization_id;
-                Log::info('Invitation found and valid', ['organization_id' => $organizationId]);
-            } else {
-                Log::warning('Invitation not found, not pending or expired', ['code' => $referralCode]);
-            }
-        }
+        [$organizationId, $invitation] = $this->resolveInvitationForRegistration($referralCode);
 
         try {
             $user = User::create([
@@ -353,8 +333,8 @@ class WebAuthController extends Controller
                 'auth_provider' => 'email',
                 'provider_id' => $supabaseResult['user']['id'] ?? null,
                 'sponsored_by_organization_id' => $organizationId,
-                'organization_id' => (isset($invitation) && in_array($invitation->role, ['admin', 'viewer'])) ? $organizationId : null,
-                'organization_role' => (isset($invitation) && in_array($invitation->role, ['admin', 'viewer'])) ? $invitation->role : null,
+                'organization_id' => ($invitation && in_array($invitation->role, ['admin', 'viewer'])) ? $organizationId : null,
+                'organization_role' => ($invitation && in_array($invitation->role, ['admin', 'viewer'])) ? $invitation->role : null,
                 'referral_code_used' => $referralCode,
                 'last_login_at' => now(),
             ]);
@@ -366,9 +346,36 @@ class WebAuthController extends Controller
             ])->withInput();
         }
 
-        // Mark invitation as used
-        if ($referralCode && isset($invitation)) {
-            // Link user to organization in pivot table with role
+        $this->attachInvitationToUser($user, $invitation, $organizationId, $referralCode);
+
+        return $this->finalizeRegistrationAndRedirect($user);
+    }
+
+    private function resolveInvitationForRegistration(?string $referralCode): array
+    {
+        $organizationId = null;
+        $invitation = null;
+
+        if ($referralCode) {
+            $invitation = OrganizationInvitation::where('referral_code', $referralCode)
+                ->where('status', 'pending')
+                ->whereDate('expires_at', '>=', now())
+                ->first();
+
+            if ($invitation) {
+                $organizationId = $invitation->organization_id;
+                Log::info('Invitation found and valid', ['organization_id' => $organizationId]);
+            } else {
+                Log::warning('Invitation not found, not pending or expired', ['code' => $referralCode]);
+            }
+        }
+
+        return [$organizationId, $invitation];
+    }
+
+    private function attachInvitationToUser(User $user, ?OrganizationInvitation $invitation, ?int $organizationId, ?string $referralCode): void
+    {
+        if ($referralCode && $invitation) {
             $user->organizations()->syncWithoutDetaching([
                 $organizationId => [
                     'referral_code_used' => $referralCode,
@@ -377,11 +384,12 @@ class WebAuthController extends Controller
             ]);
 
             $invitation->markAsAccepted();
-
-            // Clear referral code from session
             session()->forget(['referral_code', 'organization_name']);
         }
+    }
 
+    private function finalizeRegistrationAndRedirect(User $user)
+    {
         try {
             $this->notificationService->sendWelcomeEmail($user);
         } catch (\Exception $e) {
@@ -389,11 +397,30 @@ class WebAuthController extends Controller
         }
 
         event(new Registered($user));
-
         Auth::login($user);
+
+        $pendingCvToken = session('pending_cv_token');
+        if ($pendingCvToken) {
+            try {
+                $cvService = app(CvAnalysisService::class);
+                $claimed = $cvService->claimGuestCv($pendingCvToken, $user);
+                if ($claimed) {
+                    session(['redirect_to_cv_after_onboarding' => true]);
+                }
+            } catch (\Exception $e) {
+                Log::warning('Impossible de rattacher le CV invite: '.$e->getMessage());
+            }
+        }
 
         if (! $user->onboarding_completed) {
             return redirect()->route('jeune.onboarding');
+        }
+
+        if (session('redirect_to_cv_after_onboarding')) {
+            session()->forget('redirect_to_cv_after_onboarding');
+
+            return redirect()->route('jeune.documents', ['tab' => 'cv'])
+                ->with('success', 'Félicitations ! Votre analyse de CV complète est désormais débloquée.');
         }
 
         return redirect()->route('jeune.dashboard');
@@ -413,7 +440,6 @@ class WebAuthController extends Controller
             'password.required' => 'Le mot de passe est obligatoire.',
         ]);
 
-        // Verifier que c'est un compte autorisé à se connecter par email
         $user = User::where('email', $credentials['email'])
             ->whereIn('user_type', ['jeune', 'mentor', 'organization'])
             ->first();
@@ -424,49 +450,85 @@ class WebAuthController extends Controller
             ])->withInput();
         }
 
-        // Vérifier si l'utilisateur est bloqué
         if ($user->is_blocked) {
             return back()->withErrors([
                 'email' => 'Votre accès à Brillio a été suspendu pour non-respect des règles de la plateforme. Motif : '.($user->blocked_reason ?? 'Non spécifié'),
             ])->withInput();
         }
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            $user->update(['last_login_at' => now()]);
-
-            // Check for referral code in session (existing user logging in via link)
-            $this->processOrganizationInvitation($user);
-
-            // Reactivate archived account automatically
-            if ($user->is_archived) {
-                $user->is_archived = false;
-                $user->archived_at = null;
-                $user->archived_reason = null;
-                $user->save();
-
-                session()->flash('success', 'Bon retour ! Votre compte a été réactivé automatiquement.');
-            }
-
-            if ($user->user_type === 'organization') {
-                return redirect()->intended(route('organization.dashboard'));
-            }
-
-            if ($user->isMentor()) {
-                return redirect()->intended(route('mentor.dashboard'));
-            }
-
-            if (! $user->onboarding_completed) {
-                return redirect()->route('jeune.onboarding');
-            }
-
-            return redirect()->intended(route('jeune.dashboard'));
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            return back()->withErrors([
+                'email' => 'Les identifiants fournis sont incorrects.',
+            ])->withInput();
         }
 
-        return back()->withErrors([
-            'email' => 'Les identifiants fournis sont incorrects.',
-        ])->withInput();
+        return $this->finalizeLoginAndRedirect($request, $user);
+    }
+
+    private function finalizeLoginAndRedirect(Request $request, User $user)
+    {
+        $request->session()->regenerate();
+        $user->update(['last_login_at' => now()]);
+
+        $this->processOrganizationInvitation($user);
+
+        if ($user->is_archived) {
+            $user->is_archived = false;
+            $user->archived_at = null;
+            $user->archived_reason = null;
+            $user->save();
+
+            session()->flash('success', 'Bon retour ! Votre compte a été réactivé automatiquement.');
+        }
+
+        return $this->determineLoginRedirect($user);
+    }
+
+    private function determineLoginRedirect(User $user)
+    {
+        if ($user->user_type === 'organization') {
+            return redirect()->intended(route('organization.dashboard'));
+        }
+
+        if ($user->isMentor()) {
+            return redirect()->intended(route('mentor.dashboard'));
+        }
+
+        return $this->determineJeuneLoginRedirect($user);
+    }
+
+    private function determineJeuneLoginRedirect(User $user)
+    {
+        if (! $user->onboarding_completed) {
+            return redirect()->route('jeune.onboarding');
+        }
+
+        if ($this->tryClaimGuestCvForLogin($user)) {
+            return redirect()->route('jeune.documents', ['tab' => 'cv'])
+                ->with('success', 'Votre analyse de CV est maintenant disponible dans votre espace.');
+        }
+
+        return redirect()->intended(route('jeune.dashboard'));
+    }
+
+    private function tryClaimGuestCvForLogin(User $user): bool
+    {
+        $pendingCvToken = session('pending_cv_token');
+        if (! $pendingCvToken) {
+            return false;
+        }
+
+        try {
+            $cvService = app(CvAnalysisService::class);
+            $claimed = $cvService->claimGuestCv($pendingCvToken, $user);
+            session()->forget('pending_cv_token');
+
+            return (bool) $claimed;
+        } catch (\Exception $e) {
+            Log::warning('Impossible de rattacher le CV invité (login): '.$e->getMessage());
+
+            return false;
+        }
     }
 
     /**
@@ -796,6 +858,24 @@ class WebAuthController extends Controller
         }
 
         Auth::login($user, true);
+
+        // Rattachement du CV invité si analysé avant la connexion (OAuth)
+        $pendingCvToken = session('pending_cv_token');
+        if ($pendingCvToken) {
+            try {
+                $cvService = app(CvAnalysisService::class);
+                $claimed = $cvService->claimGuestCv($pendingCvToken, $user);
+                session()->forget('pending_cv_token');
+                if ($claimed && $user->onboarding_completed) {
+                    return [
+                        'success' => true,
+                        'redirect' => route('jeune.documents', ['tab' => 'cv']),
+                    ];
+                }
+            } catch (\Exception $e) {
+                Log::warning('Impossible de rattacher le CV invité (OAuth): '.$e->getMessage());
+            }
+        }
 
         $redirect = ! $user->onboarding_completed
             ? route('jeune.onboarding')

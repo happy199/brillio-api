@@ -25,6 +25,8 @@ class AcademicDocument extends Model
 
     public const TYPE_ATTESTATION = 'attestation';
 
+    public const TYPE_CV = 'cv';
+
     public const TYPE_AUTRE = 'autre';
 
     public const DOCUMENT_TYPES = [
@@ -32,6 +34,7 @@ class AcademicDocument extends Model
         self::TYPE_RELEVE_NOTES => 'Relevé de notes',
         self::TYPE_DIPLOME => 'Diplôme',
         self::TYPE_ATTESTATION => 'Attestation',
+        self::TYPE_CV => 'CV Original',
         self::TYPE_AUTRE => 'Autre document',
     ];
 
@@ -71,6 +74,16 @@ class AcademicDocument extends Model
         return self::DOCUMENT_TYPES[$this->document_type] ?? 'Document';
     }
 
+    public function getTypeLabelAttribute(): string
+    {
+        return $this->document_type_label;
+    }
+
+    public function getTitleAttribute(): string
+    {
+        return $this->attributes['title'] ?? $this->file_name ?? 'Document';
+    }
+
     /**
      * Retourne la taille formatée en Ko/Mo
      */
@@ -83,6 +96,11 @@ class AcademicDocument extends Model
         }
 
         return number_format($bytes / 1024, 2).' Ko';
+    }
+
+    public function getFormattedFileSizeAttribute(): string
+    {
+        return $this->formatted_size;
     }
 
     /**
@@ -99,7 +117,10 @@ class AcademicDocument extends Model
     protected static function booted(): void
     {
         static::deleting(function (AcademicDocument $document) {
-            Storage::delete($document->file_path);
+            // Ne pas supprimer le fichier sous-jacent s'il s'agit d'un CV lié à CvAnalysis
+            if ($document->document_type !== self::TYPE_CV) {
+                Storage::delete($document->file_path);
+            }
         });
     }
 }
