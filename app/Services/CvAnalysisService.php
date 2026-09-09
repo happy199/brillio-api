@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AcademicDocument;
 use App\Models\CvAnalysis;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -52,7 +53,7 @@ class CvAnalysisService
             $parsedContent['raw_text'] = $extractedText;
         }
 
-        return CvAnalysis::create([
+        $analysis = CvAnalysis::create([
             'user_id' => $user?->id,
             'guest_token' => $guestToken,
             'original_filename' => $originalFilename,
@@ -90,6 +91,12 @@ class CvAnalysisService
             'summary' => $analysisResult['summary'] ?? 'Profil prometteur avec de bonnes bases. En structurant davantage les réalisations concrètes, ce CV gagnera significativement en attractivité auprès des recruteurs.',
             'is_claimed' => (bool) $user,
         ]);
+
+        if ($user) {
+            $this->storeCvInAcademicDocuments($user, $analysis);
+        }
+
+        return $analysis;
     }
 
     /**
@@ -444,8 +451,16 @@ Format JSON attendu :
      */
     public function claimGuestCv(string $token, User $user): ?CvAnalysis
     {
-        $cvAnalysis = CvAnalysis::where('guest_token', $token)
-            ->whereNull('user_id')
+        $cvAnalysis = CvAnalysis::where(function ($query) use ($token) {
+            $query->where('guest_token', $token);
+            if (is_numeric($token)) {
+                $query->orWhere('id', (int) $token);
+            }
+        })
+            ->where(function ($query) use ($user) {
+                $query->whereNull('user_id')
+                    ->orWhere('user_id', $user->id);
+            })
             ->first();
 
         if ($cvAnalysis) {
@@ -461,9 +476,33 @@ Format JSON attendu :
                 ]);
             }
 
+            // Enregistrer également dans les documents de l'utilisateur
+            $this->storeCvInAcademicDocuments($user, $cvAnalysis);
+
             return $cvAnalysis;
         }
 
         return null;
+    }
+
+    /**
+     * Enregistre le CV original téléversé dans la collection des documents du jeune.
+     */
+    public function storeCvInAcademicDocuments(User $user, CvAnalysis $cvAnalysis): void
+    {
+        $exists = $user->academicDocuments()
+            ->where('file_path', $cvAnalysis->file_path)
+            ->exists();
+
+        if (! $exists) {
+            $user->academicDocuments()->create([
+                'document_type' => AcademicDocument::TYPE_CV,
+                'file_path' => $cvAnalysis->file_path,
+                'file_name' => $cvAnalysis->original_filename ?: 'CV_Original.pdf',
+                'file_size' => $cvAnalysis->file_size ?: 0,
+                'mime_type' => $cvAnalysis->mime_type,
+                'uploaded_at' => now(),
+            ]);
+        }
     }
 }

@@ -375,15 +375,15 @@
                                 </span>
                             </button>
 
-                            <!-- Bouton Imprimer / Télécharger le CV ATS -->
+                            <!-- Bouton Télécharger le CV ATS en Word (.docx) -->
                             <button type="button"
                                     @click="triggerCvAction('download')"
                                     :disabled="isProcessingCvAction"
                                     class="px-4 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 disabled:opacity-50 transition flex items-center gap-2 shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <span x-text="downloadButtonLabel">Imprimer / Télécharger le PDF</span>
+                                <span x-text="downloadButtonLabel">Télécharger en Word (.docx)</span>
                             </button>
 
                             <!-- Bouton Postuler avec ce CV (Ouvre l'onglet Opportunités) -->
@@ -419,16 +419,9 @@
                             </div>
                         @else
                             <div class="p-6 bg-gray-50 rounded-2xl border border-gray-200 text-left space-y-4">
-                                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-200">
-                                    <div class="space-y-0.5">
-                                        <p class="text-xs font-bold text-gray-800 uppercase tracking-wider">Contenu texte extrait de votre document</p>
-                                        <p class="text-[11px] text-gray-500">Les documents Word (.docx) sont analysés et retranscrits textuellement ici pour préserver la fidélité de votre profil.</p>
-                                    </div>
-                                    <a href="{{ route('jeune.cv.view-original', $activeCv->id) }}" target="_blank"
-                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-xs transition">
-                                        <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                        <span>Télécharger le fichier original</span>
-                                    </a>
+                                <div class="space-y-0.5 pb-3 border-b border-gray-200">
+                                    <p class="text-xs font-bold text-gray-800 uppercase tracking-wider">Contenu texte extrait de votre document</p>
+                                    <p class="text-[11px] text-gray-500">Les documents Word (.docx) sont analysés et retranscrits textuellement ici pour préserver la fidélité de votre profil.</p>
                                 </div>
                                 <pre class="whitespace-pre-wrap font-sans text-xs text-gray-800 bg-white p-4 rounded-xl border border-gray-200 max-h-[500px] overflow-y-auto leading-relaxed shadow-xs">{{ $activeCv->parsed_content['raw_text'] ?? 'Contenu non disponible.' }}</pre>
                             </div>
@@ -1129,6 +1122,11 @@
                 class="px-4 py-2 rounded-full text-sm font-medium transition">
                 Diplômes
             </button>
+            <button @click="driveFilter = 'cv'"
+                :class="driveFilter === 'cv' ? 'bg-primary-500 text-white shadow-xs' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'"
+                class="px-4 py-2 rounded-full text-sm font-medium transition">
+                CVs originaux
+            </button>
             <button @click="driveFilter = 'certificat'"
                 :class="driveFilter === 'certificat' ? 'bg-primary-500 text-white shadow-xs' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'"
                 class="px-4 py-2 rounded-full text-sm font-medium transition">
@@ -1170,6 +1168,7 @@
                                 <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
                                     @if($document->document_type === 'bulletin') bg-blue-50 text-blue-600
                                     @elseif($document->document_type === 'diplome') bg-green-50 text-green-600
+                                    @elseif($document->document_type === 'cv') bg-amber-50 text-amber-600
                                     @elseif($document->document_type === 'certificat') bg-purple-50 text-purple-600
                                     @else bg-gray-50 text-gray-600 @endif">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1383,9 +1382,17 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
         selectedTemplateCostText() {
             const cost = this.templateCosts[this.selectedTemplate] ?? 0;
             if (cost <= 0) {
-                return 'Télécharger / Imprimer (Gratuit)';
+                return 'Télécharger en Word (.docx) (Gratuit)';
             }
-            return `Télécharger / Imprimer (${cost} ${cost > 1 ? 'crédits' : 'crédit'})`;
+            return `Télécharger en Word (.docx) (${cost} ${cost > 1 ? 'crédits' : 'crédit'})`;
+        },
+
+        downloadButtonLabel() {
+            const cost = this.templateCosts[this.selectedTemplate] ?? 0;
+            if (cost <= 0) {
+                return 'Télécharger en Word (.docx) (Gratuit)';
+            }
+            return `Télécharger en Word (.docx) (${cost} ${cost > 1 ? 'crédits' : 'crédit'})`;
         },
 
         init() {
@@ -1459,7 +1466,12 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
                     }
                     this.showToastNotification('Texte du CV copié dans le presse-papier !', 'success');
                 } else if (action === 'download') {
-                    window.print();
+                    if (data.download_url) {
+                        window.location.href = data.download_url;
+                        this.showToastNotification('Votre CV Word (.docx) est en cours de téléchargement !', 'success');
+                    } else {
+                        this.showToastNotification('Impossible de préparer le fichier Word.', 'error');
+                    }
                 }
             } catch (err) {
                 console.error('CV Action error:', err);

@@ -15,6 +15,7 @@ use App\Models\Resource;
 use App\Models\SystemSetting;
 use App\Services\BrillioIAService;
 use App\Services\CvAnalysisService;
+use App\Services\CvDocxExportService;
 use App\Services\MbtiCareersService;
 use App\Services\PersonalityService;
 use App\Services\WalletService;
@@ -22,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class JeuneDashboardController extends Controller
 {
@@ -672,6 +674,15 @@ class JeuneDashboardController extends Controller
             $walletService->deductCredits($user, $cost, 'cv_action', $description, $cvAnalysis);
         }
 
+        $downloadUrl = null;
+        if ($action === 'download') {
+            $downloadUrl = URL::temporarySignedRoute(
+                'jeune.cv.download-docx',
+                now()->addMinutes(60),
+                ['cv' => $cvAnalysis->id, 'template' => $template]
+            );
+        }
+
         return response()->json([
             'success' => true,
             'action' => $action,
@@ -679,7 +690,34 @@ class JeuneDashboardController extends Controller
             'cost' => $cost,
             'remaining_balance' => (int) $user->fresh()->credits_balance,
             'cv_text' => $this->formatCvAsPlainText($cvAnalysis),
+            'download_url' => $downloadUrl,
         ]);
+    }
+
+    /**
+     * Téléchargement direct du CV restructuré sous format Word (.docx) modifiable
+     */
+    public function downloadDocxCv($cvId, Request $request, CvDocxExportService $docxService)
+    {
+        $user = auth()->user();
+        $cvAnalysis = $user->cvAnalyses()->findOrFail($cvId);
+        $template = (int) $request->query('template', 0);
+
+        // Si le template est payant et que la requête n'a pas de signature valide
+        $settingKey = $template === 0 ? 'feature_cost_cv_download' : 'feature_cost_cv_template_'.$template;
+        $defaultCost = $template === 0 ? 0 : $template;
+        $cost = (int) SystemSetting::getValue($settingKey, $defaultCost);
+
+        if ($cost > 0 && ! $request->hasValidSignature()) {
+            abort(403, 'Lien de téléchargement expiré ou non autorisé.');
+        }
+
+        $filePath = $docxService->generateDocx($cvAnalysis, $template);
+        $filename = $docxService->generateFilename($cvAnalysis);
+
+        return response()->download($filePath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend(true);
     }
 
     /**

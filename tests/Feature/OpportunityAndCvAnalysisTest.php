@@ -582,4 +582,135 @@ TXT;
         $this->assertStringContainsString('text-blue-700', $docxAnalysis->file_format_badge_color);
         $this->assertEquals('Document PDF (.pdf)', $analysis->file_format_label);
     }
+
+    public function test_cv_action_download_returns_signed_url_and_downloads_docx()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+            'credits_balance' => 10,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_docx_download',
+            'original_filename' => 'CV_Moussa_Diallo.pdf',
+            'file_path' => 'cv_analyses/users/'.$user->id.'/moussa.pdf',
+            'file_size' => 15000,
+            'mime_type' => self::MIME_PDF,
+            'candidate_name' => 'Moussa Diallo',
+            'candidate_title' => 'Senior DevOps Engineer',
+            'global_score' => 90,
+            'status_label' => 'Excellent',
+            'summary' => 'DevOps expert',
+            'parsed_content' => [
+                'experiences' => [
+                    'Lead DevOps Engineer - Tech Corp (3 ans) : Deployed Kubernetes.',
+                ],
+                'skills' => ['Docker', 'Kubernetes'],
+            ],
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'action' => 'download',
+            'cv_id' => $analysis->id,
+            'template' => 0,
+        ]);
+
+        $response->assertStatus(200);
+        $downloadUrl = $response->json('download_url');
+        $this->assertNotEmpty($downloadUrl);
+
+        $downloadResponse = $this->actingAs($user)->get($downloadUrl);
+        $downloadResponse->assertStatus(200);
+        $this->assertStringContainsString('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $downloadResponse->headers->get('Content-Type'));
+        $this->assertStringContainsString('CV_moussa_diallo_ATS.docx', $downloadResponse->headers->get('Content-Disposition'));
+    }
+
+    public function test_authenticated_cv_upload_stores_document_in_academic_documents()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $file = UploadedFile::fake()->create('Mon_CV_Original.pdf', 300, 'application/pdf');
+
+        $response = $this->actingAs($user)->post(route('jeune.cv.analyze'), [
+            'cv_file' => $file,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('academic_documents', [
+            'user_id' => $user->id,
+            'document_type' => 'cv',
+            'file_name' => 'Mon_CV_Original.pdf',
+        ]);
+    }
+
+    public function test_claiming_guest_cv_stores_document_in_academic_documents()
+    {
+        $file = UploadedFile::fake()->create('CV_Guest_Original.docx', 250, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+        $this->post(route('public.opportunities.analyze'), [
+            'cv_file' => $file,
+        ]);
+
+        $guestToken = session('pending_cv_token');
+        $this->assertNotNull($guestToken);
+
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        // Simuler la visite de la page outils avec le token en session
+        $this->actingAs($user)->withSession(['pending_cv_token' => $guestToken])
+            ->get(route('jeune.outils'));
+
+        $this->assertDatabaseHas('academic_documents', [
+            'user_id' => $user->id,
+            'document_type' => 'cv',
+            'file_name' => 'CV_Guest_Original.docx',
+        ]);
+    }
+
+    public function test_original_cv_view_does_not_contain_download_original_bypass_button()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_bypass_check',
+            'original_filename' => 'CV_Word.docx',
+            'file_path' => 'cv_analyses/test.docx',
+            'file_size' => 10000,
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'candidate_name' => 'Moussa Diallo',
+            'global_score' => 85,
+            'status_label' => 'Bien',
+            'summary' => 'DevOps',
+            'parsed_content' => [
+                'raw_text' => 'MOUSSA DIALLO\nSenior DevOps Engineer',
+            ],
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.outils', ['tab' => 'cv', 'cv_id' => $analysis->id]));
+        $response->assertStatus(200);
+        $response->assertDontSee('Télécharger le fichier original');
+        $response->assertSee('Télécharger en Word (.docx)');
+    }
 }
