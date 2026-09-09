@@ -587,12 +587,12 @@ class JeuneDashboardController extends Controller
     public function analyzeCv(Request $request, CvAnalysisService $cvService)
     {
         $validated = $request->validate([
-            'cv_file' => ['required', 'file', 'mimes:pdf,docx,png,jpg,jpeg', 'max:10240'],
+            'cv_file' => ['required', 'file', 'mimes:pdf,docx,png,jpg,jpeg', 'max:5120'],
         ], [
             'cv_file.required' => 'Veuillez sélectionner un fichier CV à importer.',
             'cv_file.file' => 'Le document téléversé est invalide.',
             'cv_file.mimes' => 'Format non supporté. Formats acceptés : PDF, DOCX, JPG ou PNG.',
-            'cv_file.max' => 'La taille maximale autorisée est de 10 Mo.',
+            'cv_file.max' => 'La taille maximale autorisée est de 5 Mo.',
         ]);
 
         try {

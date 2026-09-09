@@ -33,12 +33,12 @@ class OpportunityController extends Controller
     public function analyzeCv(Request $request, CvAnalysisService $cvService)
     {
         $validated = $request->validate([
-            'cv_file' => ['required', 'file', 'mimes:pdf,docx,png,jpg,jpeg', 'max:10240'],
+            'cv_file' => ['required', 'file', 'mimes:pdf,docx,png,jpg,jpeg', 'max:5120'],
         ], [
             'cv_file.required' => 'Veuillez sélectionner un fichier CV à importer.',
             'cv_file.file' => 'Le document téléversé est invalide.',
             'cv_file.mimes' => 'Format de fichier non supporté. Formats acceptés : PDF, DOCX, JPG ou PNG.',
-            'cv_file.max' => 'La taille du document ne peut pas dépasser 10 Mo.',
+            'cv_file.max' => 'La taille du document ne peut pas dépasser 5 Mo.',
         ]);
 
         try {

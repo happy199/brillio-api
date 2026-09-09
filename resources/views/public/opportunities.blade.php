@@ -582,7 +582,7 @@
                             <span class="px-2.5 py-1 rounded-lg bg-gray-100 font-semibold text-gray-700">PNG</span>
                             <span class="px-2.5 py-1 rounded-lg bg-gray-100 font-semibold text-gray-700">JPG</span>
                             <span>•</span>
-                            <span>Taille max : 10 Mo</span>
+                            <span>Taille max : 5 Mo</span>
                         </div>
                     </div>
                 </div>

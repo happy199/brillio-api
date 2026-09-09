@@ -481,6 +481,11 @@ class WebAuthController extends Controller
             session()->flash('success', 'Bon retour ! Votre compte a été réactivé automatiquement.');
         }
 
+        return $this->determineLoginRedirect($user);
+    }
+
+    private function determineLoginRedirect(User $user)
+    {
         if ($user->user_type === 'organization') {
             return redirect()->intended(route('organization.dashboard'));
         }
@@ -489,26 +494,41 @@ class WebAuthController extends Controller
             return redirect()->intended(route('mentor.dashboard'));
         }
 
+        return $this->determineJeuneLoginRedirect($user);
+    }
+
+    private function determineJeuneLoginRedirect(User $user)
+    {
         if (! $user->onboarding_completed) {
             return redirect()->route('jeune.onboarding');
         }
 
-        $pendingCvToken = session('pending_cv_token');
-        if ($pendingCvToken) {
-            try {
-                $cvService = app(CvAnalysisService::class);
-                $claimed = $cvService->claimGuestCv($pendingCvToken, $user);
-                session()->forget('pending_cv_token');
-                if ($claimed) {
-                    return redirect()->route('jeune.documents', ['tab' => 'cv'])
-                        ->with('success', 'Votre analyse de CV est maintenant disponible dans votre espace.');
-                }
-            } catch (\Exception $e) {
-                Log::warning('Impossible de rattacher le CV invité (login): '.$e->getMessage());
-            }
+        if ($this->tryClaimGuestCvForLogin($user)) {
+            return redirect()->route('jeune.documents', ['tab' => 'cv'])
+                ->with('success', 'Votre analyse de CV est maintenant disponible dans votre espace.');
         }
 
         return redirect()->intended(route('jeune.dashboard'));
+    }
+
+    private function tryClaimGuestCvForLogin(User $user): bool
+    {
+        $pendingCvToken = session('pending_cv_token');
+        if (! $pendingCvToken) {
+            return false;
+        }
+
+        try {
+            $cvService = app(CvAnalysisService::class);
+            $claimed = $cvService->claimGuestCv($pendingCvToken, $user);
+            session()->forget('pending_cv_token');
+
+            return (bool) $claimed;
+        } catch (\Exception $e) {
+            Log::warning('Impossible de rattacher le CV invité (login): '.$e->getMessage());
+
+            return false;
+        }
     }
 
     /**

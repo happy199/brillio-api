@@ -425,7 +425,7 @@
                 <!-- Jauge & Synthèse globale -->
                 <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-10">
                     <div class="relative w-40 h-40 flex-shrink-0 flex items-center justify-center"
-                         x-data="{ 
+                         x-data="{
                              animatedScore: 0,
                              targetScore: {{ $activeCv->global_score }},
                              dashoffset: 314.159,
@@ -485,10 +485,10 @@
                         @endphp
                         @foreach($crit as $criterion => $val)
                             <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2"
-                                 x-data="{ 
+                                 x-data="{
                                      animatedVal: 0,
                                      targetVal: {{ $val }},
-                                     barWidth: 0 
+                                     barWidth: 0
                                  }"
                                  x-init="
                                      setTimeout(() => {
@@ -861,7 +861,7 @@
                 <form action="{{ route('jeune.cv.analyze') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                     @csrf
                     <div>
-                        <label for="cv_file" class="block text-sm font-semibold text-gray-700 mb-2">Fichier CV (PDF, DOCX, JPG ou PNG)</label>
+                        <label for="cv_file" class="block text-sm font-semibold text-gray-700 mb-2">Fichier CV (PDF, DOCX, JPG ou PNG - max 5 Mo)</label>
                         <input id="cv_file" type="file" name="cv_file" required accept=".pdf,.docx,.png,.jpg,.jpeg" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" />
                     </div>
 

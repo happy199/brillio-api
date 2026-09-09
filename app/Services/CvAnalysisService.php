@@ -103,22 +103,16 @@ class CvAnalysisService
             return '';
         }
 
+        $text = '';
         try {
             if ($extension === 'pdf') {
                 $parser = new Parser;
                 $pdf = $parser->parseFile($filePath);
-                $text = $pdf->getText();
-
-                return $this->cleanExtractedText($text);
-            }
-
-            if (in_array($extension, ['docx', 'doc'])) {
-                return $this->extractFromDocx($filePath);
-            }
-
-            if (in_array($extension, ['png', 'jpg', 'jpeg'])) {
-                // Pour les images sans OCR binaire système lourd, extraire le nom et fournir un contexte
-                return 'CV au format image : '.basename($filePath);
+                $text = $this->cleanExtractedText($pdf->getText());
+            } elseif (in_array($extension, ['docx', 'doc'])) {
+                $text = $this->extractFromDocx($filePath);
+            } elseif (in_array($extension, ['png', 'jpg', 'jpeg'])) {
+                $text = 'CV au format image : '.basename($filePath);
             }
         } catch (\Exception $e) {
             Log::warning('Échec extraction texte CV', [
@@ -127,7 +121,7 @@ class CvAnalysisService
             ]);
         }
 
-        return '';
+        return $text;
     }
 
     /**
@@ -351,8 +345,8 @@ Format JSON attendu :
     {
         // Essayer d'extraire le nom du candidat depuis le texte
         $lines = array_filter(array_map('trim', explode("\n", $text)));
-        $firstLine = reset($lines) ?: 'Candidat Brillio';
-        $candidateName = mb_strlen($firstLine) < 60 ? $firstLine : 'Candidat Brillio';
+        $firstLine = reset($lines) ?: self::CANDIDATE_DEFAULT;
+        $candidateName = mb_strlen($firstLine) < 60 ? $firstLine : self::CANDIDATE_DEFAULT;
 
         // Extraire email et téléphone si présents
         preg_match('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', $text, $emailMatches);
@@ -362,8 +356,8 @@ Format JSON attendu :
             'candidate_name' => $candidateName,
             'candidate_title' => 'Profil Brillio Pro — ATS Certifié',
             'candidate_contact' => [
-                'phone' => $phoneMatches[0] ?? 'Disponible sur le CV',
-                'email' => $emailMatches[0] ?? 'Disponible sur le CV',
+                'phone' => $phoneMatches[0] ?? self::AVAILABLE_ON_CV,
+                'email' => $emailMatches[0] ?? self::AVAILABLE_ON_CV,
                 'location' => 'Afrique de l\'Ouest',
             ],
             'parsed_content' => [
