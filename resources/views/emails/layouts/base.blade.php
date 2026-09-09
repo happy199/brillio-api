@@ -41,7 +41,7 @@
                         <td
                             style="background-color: #f9fafb; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; border-top: 1px solid #e5e7eb;">
                             <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                                © 2026 Brillio - Tous droits réservés
+                                © {{ date('Y') }} Brillio - Tous droits réservés
                             </p>
                             <p style="margin: 10px 0 0; font-size: 12px;">
                                 <a href="{{ route('about') }}" style="color: #6366f1; text-decoration: none;">À
