@@ -101,10 +101,14 @@ Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::get('/publicite', [PageController::class, 'advertisements'])->name('public.advertisements');
 Route::post('/publicite/{advertisement}/click', [PageController::class, 'trackAdvertisementClick'])->name('public.advertisements.click');
 
-// Section Opportunités & Évaluation de CV
-Route::get('/opportunites', [OpportunityController::class, 'index'])->name('public.opportunities');
-Route::post('/opportunites/analyser-cv', [OpportunityController::class, 'analyzeCv'])->name('public.opportunities.analyze');
-Route::get('/opportunites/score/{token}', [OpportunityController::class, 'showScore'])->name('public.opportunities.score');
+// Section Évaluation & Analyse de CV
+Route::get('/analysemoncv', [OpportunityController::class, 'index'])->name('public.opportunities');
+Route::post('/analysemoncv/analyser-cv', [OpportunityController::class, 'analyzeCv'])->name('public.opportunities.analyze');
+Route::get('/analysemoncv/score/{token}', [OpportunityController::class, 'showScore'])->name('public.opportunities.score');
+
+// Redirections pour rétrocompatibilité
+Route::redirect('/opportunites', '/analysemoncv', 301);
+Route::redirect('/opportunites/score/{token}', '/analysemoncv/score/{token}', 301);
 
 Route::post('/contact', [WebsiteContactController::class, 'submit'])->name('contact.submit');
 

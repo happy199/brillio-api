@@ -39,9 +39,15 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->get(route('public.opportunities'));
 
         $response->assertStatus(200);
-        $response->assertSee(self::TEXT_OPPORTUNITES);
+        $this->assertEquals(url('/analysemoncv'), route('public.opportunities'));
+        $response->assertSee('Analyse mon CV');
         $response->assertSee('Votre CV est-il assez percutant', false);
         $response->assertSee('Glissez-déposez votre CV ici');
+
+        // Test 301 redirect from /opportunites
+        $redirectResponse = $this->get('/opportunites');
+        $redirectResponse->assertStatus(301);
+        $redirectResponse->assertRedirect('/analysemoncv');
     }
 
     public function test_guest_can_upload_and_analyze_cv()
