@@ -7,6 +7,7 @@ use App\Models\CvAnalysis;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminCvAnalyticsAndAccountingTest extends TestCase
@@ -104,9 +105,31 @@ class AdminCvAnalyticsAndAccountingTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
         $response->assertStatus(200);
-        $response->assertSee('Analyses de CV', false);
-        $response->assertSee('Score moy.', false);
+        $response->assertSee('Total analyses CV', false);
+        $response->assertSee('Total des CV analysés', false);
         $response->assertSee('84/100', false);
+    }
+
+    public function test_admin_can_preview_docx_document_as_html_view()
+    {
+        $docxDoc = $this->jeune->academicDocuments()->create([
+            'document_type' => 'cv',
+            'file_name' => 'CV_Candidate_Test.docx',
+            'file_path' => 'cv_analyses/test_aya_admin.docx',
+            'file_size' => 10240,
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'uploaded_at' => now(),
+        ]);
+
+        // Simule un fichier physique temporaire
+        Storage::disk('public')->put('cv_analyses/test_aya_admin.docx', 'test docx binary');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.documents.preview', $docxDoc));
+        $response->assertStatus(200);
+        $response->assertSee('Contenu extrait du document Word', false);
+        $response->assertSee('Télécharger l\'original (.docx)', false);
+
+        Storage::disk('public')->delete('cv_analyses/test_aya_admin.docx');
     }
 
     public function test_admin_documents_page_displays_cv_and_has_ai_propositions_and_export_buttons()

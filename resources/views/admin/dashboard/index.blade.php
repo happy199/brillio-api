@@ -80,12 +80,12 @@
             </div>
             <div class="ml-3 min-w-0">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">Analyses de CV</h3>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total analyses CV</h3>
                     <span class="text-[10px] text-amber-600 font-bold bg-amber-50 px-1.5 py-0.5 rounded">IA</span>
                 </div>
                 <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ number_format($stats['total_cv_analyses']) }}</p>
-                <p class="text-[11px] text-gray-500 truncate" title="{{ $stats['cv_analyses_this_week'] }} cette semaine • Score moy. {{ $stats['avg_cv_score'] }}/100">
-                    {{ $stats['cv_analyses_this_week'] }} cette sem. • {{ $stats['avg_cv_score'] }}/100 moy.
+                <p class="text-[11px] text-gray-500 truncate" title="{{ $stats['total_cv_analyses'] }} au total • {{ $stats['cv_analyses_this_week'] }} cette semaine">
+                    Total des CV analysés • {{ $stats['avg_cv_score'] }}/100 moy.
                 </p>
             </div>
         </div>

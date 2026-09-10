@@ -10,11 +10,15 @@
     fileName: '',
     isImage: false,
     isPdf: false,
-    openPreview(url, name, ext) {
+    currentDocId: null,
+    isCvDoc: false,
+    openPreview(url, name, ext, docId = null, isCv = false) {
         this.previewUrl = url;
         this.fileName = name;
         this.isImage = ['jpg','jpeg','png','gif','webp','svg'].includes(ext);
         this.isPdf = ext === 'pdf';
+        this.currentDocId = docId;
+        this.isCvDoc = isCv;
         this.showModal = true;
     },
     showCvModal: false,
@@ -22,12 +26,13 @@
     cvData: null,
     cvError: '',
     async openCvAnalysis(docId) {
+        this.currentDocId = docId;
         this.showCvModal = true;
         this.cvLoading = true;
         this.cvData = null;
         this.cvError = '';
         try {
-            const url = '{{ url('admin/documents') }}/' + docId + '/cv-analysis';
+            const url = '/admin/documents/' + docId + '/cv-analysis';
             const res = await fetch(url, {
                 headers: {
                     'Accept': 'application/json',
@@ -222,7 +227,8 @@
                                     <span class="text-gray-300">|</span>
                                 @endif
                                 <button type="button"
-                                        @click="openPreview('{{ route('admin.documents.preview', $document) }}', '{{ addslashes($document->file_name) }}', '{{ strtolower($extension) }}')"
+                                        id="preview-btn-{{ $document->id }}"
+                                        @click="openPreview('{{ route('admin.documents.preview', $document) }}', '{{ addslashes($document->file_name) }}', '{{ strtolower($extension) }}', {{ $document->id }}, {{ $document->document_type === 'cv' ? 'true' : 'false' }})"
                                         class="text-indigo-600 hover:text-indigo-900 font-bold transition-colors">
                                     Visualiser
                                 </button>
@@ -298,6 +304,16 @@
                 <div class="flex items-center justify-between pb-4 border-b border-gray-200">
                     <h3 id="modal-title" class="text-lg font-bold text-gray-900 truncate max-w-xl" x-text="fileName">Prévisualisation du document</h3>
                     <div class="flex items-center gap-3">
+                        <template x-if="isCvDoc && currentDocId">
+                            <button @click="showModal = false; openCvAnalysis(currentDocId)"
+                                    type="button"
+                                    class="px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors inline-flex items-center gap-1 cursor-pointer">
+                                <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <span>Propositions IA</span>
+                            </button>
+                        </template>
                         <a :href="previewUrl"
                            target="_blank"
                            rel="noopener"
@@ -377,11 +393,24 @@
                             <p class="text-xs text-gray-500" x-text="cvData ? (cvData.candidate_title + ' • Analysé le ' + cvData.created_at) : 'Chargement...'"></p>
                         </div>
                     </div>
-                    <button @click="showCvModal = false" type="button" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <template x-if="currentDocId">
+                            <button @click="showCvModal = false; const btn = document.getElementById('preview-btn-' + currentDocId); if (btn) btn.click();"
+                                    type="button"
+                                    class="px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors inline-flex items-center gap-1 cursor-pointer">
+                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span>Voir document</span>
+                            </button>
+                        </template>
+                        <button @click="showCvModal = false" type="button" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Contenu défilant -->
@@ -424,10 +453,10 @@
                             <div class="bg-white border rounded-xl p-4 shadow-2xs">
                                 <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Scores par critères ATS</h4>
                                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                                    <template x-for="(score, criterion) in cvData.criteria_scores" :key="criterion">
+                                    <template x-for="(crit, i) in (cvData.criteria || [])" :key="i">
                                         <div class="bg-gray-50 p-2.5 rounded-lg text-center">
-                                            <p class="text-[11px] text-gray-500 font-medium capitalize truncate" x-text="criterion"></p>
-                                            <p class="text-lg font-bold text-indigo-600 mt-0.5" x-text="score + '/100'"></p>
+                                            <p class="text-[11px] text-gray-500 font-medium capitalize truncate" x-text="crit.name"></p>
+                                            <p class="text-lg font-bold text-indigo-600 mt-0.5" x-text="crit.score + '/100'"></p>
                                         </div>
                                     </template>
                                 </div>
@@ -438,7 +467,7 @@
                                 <div class="p-4 bg-emerald-50/60 border border-emerald-100 rounded-xl">
                                     <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">Points forts</h4>
                                     <ul class="text-xs text-emerald-900 space-y-1.5 list-disc list-inside">
-                                        <template x-for="(st, i) in cvData.strengths" :key="i">
+                                        <template x-for="(st, i) in (cvData.strengths || [])" :key="i">
                                             <li x-text="st"></li>
                                         </template>
                                     </ul>
@@ -446,7 +475,7 @@
                                 <div class="p-4 bg-amber-50/60 border border-amber-100 rounded-xl">
                                     <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2">Axes d'amélioration</h4>
                                     <ul class="text-xs text-amber-900 space-y-1.5 list-disc list-inside">
-                                        <template x-for="(wk, i) in cvData.weaknesses" :key="i">
+                                        <template x-for="(wk, i) in (cvData.improvements || cvData.weaknesses || [])" :key="i">
                                             <li x-text="wk"></li>
                                         </template>
                                     </ul>
@@ -463,15 +492,15 @@
                             <div class="border rounded-xl p-4">
                                 <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Expériences & Projets revalorisés</h4>
                                 <div class="space-y-3">
-                                    <template x-for="(exp, i) in cvData.experiences" :key="i">
+                                    <template x-for="(exp, i) in (cvData.experiences || [])" :key="i">
                                         <div class="border-b last:border-0 pb-3 last:pb-0">
                                             <div class="flex items-center justify-between">
                                                 <h5 class="text-xs sm:text-sm font-bold text-gray-900" x-text="exp.title"></h5>
                                                 <span class="text-[11px] text-gray-400 font-medium" x-text="exp.period"></span>
                                             </div>
-                                            <p class="text-xs text-primary-700 font-semibold" x-text="exp.company"></p>
+                                            <p class="text-xs text-indigo-700 font-semibold" x-text="exp.company"></p>
                                             <ul class="mt-1.5 text-xs text-gray-600 space-y-1 list-disc list-inside">
-                                                <template x-for="(bullet, bIdx) in exp.bullets" :key="bIdx">
+                                                <template x-for="(bullet, bIdx) in (exp.bullets || [])" :key="bIdx">
                                                     <li x-text="bullet"></li>
                                                 </template>
                                             </ul>
@@ -480,11 +509,29 @@
                                 </div>
                             </div>
 
+                            <!-- Formations & Diplômes -->
+                            <template x-if="cvData.formation && cvData.formation.length > 0">
+                                <div class="border rounded-xl p-4">
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Formations & Diplômes</h4>
+                                    <div class="space-y-2">
+                                        <template x-for="(form, fIdx) in cvData.formation" :key="fIdx">
+                                            <div class="flex items-center justify-between text-xs border-b last:border-0 pb-2 last:pb-0">
+                                                <div>
+                                                    <p class="font-bold text-gray-800" x-text="form.degree || form.diploma || form.title"></p>
+                                                    <p class="text-gray-500" x-text="form.school || form.institution || form.etablissement"></p>
+                                                </div>
+                                                <span class="text-gray-400 font-medium" x-text="form.year || form.period || form.annee"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+
                             <!-- Compétences clés -->
                             <div class="p-4 bg-gray-50 rounded-xl border">
                                 <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Compétences clés détectées</h4>
                                 <div class="flex flex-wrap gap-1.5">
-                                    <template x-for="(sk, i) in cvData.competences" :key="i">
+                                    <template x-for="(sk, i) in (cvData.competences || [])" :key="i">
                                         <span class="px-2 py-0.5 bg-white border border-gray-200 rounded-md text-xs font-medium text-gray-700" x-text="sk"></span>
                                     </template>
                                 </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AcademicDocument;
 use App\Models\CvAnalysis;
+use App\Services\CvAnalysisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -41,7 +42,7 @@ class DocumentController extends Controller
             $query->where('file_name', 'like', "%{$search}%");
         }
 
-        $documents = $query->orderBy('created_at', 'desc')->paginate(25);
+        $documents = $query->latest()->paginate(15);
 
         $documentTypes = AcademicDocument::DOCUMENT_TYPES;
 
@@ -64,6 +65,41 @@ class DocumentController extends Controller
         }
 
         $extension = strtolower(pathinfo($document->file_name, PATHINFO_EXTENSION));
+        if (in_array($extension, ['docx', 'doc'])) {
+            return $this->renderDocxPreview($document, $fileInfo);
+        }
+
+        return $this->streamStandardFile($document, $fileInfo, $extension);
+    }
+
+    /**
+     * Rendu HTML sécurisé pour prévisualiser un document Word sans forcer le téléchargement
+     */
+    private function renderDocxPreview(AcademicDocument $document, array $fileInfo)
+    {
+        $filePath = $fileInfo['type'] === 'disk'
+            ? Storage::disk($fileInfo['disk'])->path($document->file_path)
+            : $fileInfo['full_path'];
+
+        $content = '';
+        if (file_exists($filePath)) {
+            $content = app(CvAnalysisService::class)->extractText($filePath, 'docx');
+        }
+
+        $cvAnalysis = $this->findAssociatedCvAnalysis($document);
+
+        return view('admin.documents.preview_docx', [
+            'document' => $document,
+            'content' => $content,
+            'cvAnalysis' => $cvAnalysis,
+        ]);
+    }
+
+    /**
+     * Envoi du flux binaire inline pour les fichiers supportés nativement (PDF, images, txt)
+     */
+    private function streamStandardFile(AcademicDocument $document, array $fileInfo, string $extension)
+    {
         $mimeType = match ($extension) {
             'pdf' => 'application/pdf',
             'jpg', 'jpeg' => 'image/jpeg',
@@ -167,7 +203,9 @@ class DocumentController extends Controller
             ], 404);
         }
 
-        $norm = $cvAnalysis->normalized_cv_data;
+        $norm = (array) ($cvAnalysis->normalized_cv_data ?? []);
+        $parsed = (array) ($cvAnalysis->parsed_content ?? []);
+        $improvements = (array) ($cvAnalysis->improvements ?? ($cvAnalysis->weaknesses ?? []));
 
         return response()->json([
             'success' => true,
@@ -177,20 +215,44 @@ class DocumentController extends Controller
                 'candidate_title' => $cvAnalysis->candidate_title,
                 'contact' => $cvAnalysis->candidate_contact ?? [],
                 'global_score' => $cvAnalysis->global_score,
+                'criteria' => collect($cvAnalysis->criteria_scores ?? [])->map(fn ($score, $name) => [
+                    'name' => ucfirst($name),
+                    'score' => $score,
+                ])->values()->all(),
                 'criteria_scores' => $cvAnalysis->criteria_scores ?? [],
                 'strengths' => $cvAnalysis->strengths ?? [],
-                'weaknesses' => $cvAnalysis->weaknesses ?? [],
+                'improvements' => $improvements,
+                'weaknesses' => $improvements,
                 'recommendations' => $cvAnalysis->recommendations ?? [],
                 'summary' => $cvAnalysis->summary,
-                'profil' => $cvAnalysis->parsed_content['profil'] ?? '',
-                'experiences' => $norm['experiences'] ?? [],
-                'formation' => $norm['formation'] ?? [],
-                'competences' => $norm['competences'] ?? [],
-                'certifications' => $norm['certifications'] ?? [],
-                'langues' => $norm['langues'] ?? [],
+                'profil' => $parsed['profil'] ?? ($norm['profil'] ?? ''),
+                'experiences' => $this->formatAdminExperiences($norm['experiences'] ?? ($parsed['experiences'] ?? [])),
+                'formation' => $parsed['formation'] ?? ($norm['formation'] ?? []),
+                'competences' => $parsed['competences'] ?? ($norm['competences'] ?? []),
+                'certifications' => $norm['certifications'] ?? ($parsed['certifications'] ?? []),
+                'langues' => $norm['langues'] ?? ($parsed['langues'] ?? []),
                 'created_at' => $cvAnalysis->created_at->format('d/m/Y à H:i'),
             ],
         ]);
+    }
+
+    /**
+     * Nettoie les balises d'édition et structure les expériences pour l'affichage admin
+     */
+    private function formatAdminExperiences(array $experiences): array
+    {
+        return array_map(function ($exp) {
+            $bullets = (array) ($exp['bullets'] ?? []);
+            $cleanedBullets = array_map(function ($b) {
+                $cleaned = preg_replace('/\[rempli:([^|\]]+)\|guide:[^\]]+\]/u', '$1', (string) $b);
+
+                return trim(preg_replace('/\[(?:À compléter|Compléter|Insérer|A completer)[^\]]*\]/u', '', $cleaned));
+            }, $bullets);
+
+            $exp['bullets'] = array_values(array_filter($cleanedBullets));
+
+            return $exp;
+        }, $experiences);
     }
 
     /**
@@ -289,12 +351,14 @@ class DocumentController extends Controller
     {
         $contact = (array) ($cv->candidate_contact ?? []);
         $user = $cv->user;
-        $norm = $cv->normalized_cv_data;
+        $norm = (array) ($cv->normalized_cv_data ?? []);
+        $parsed = (array) ($cv->parsed_content ?? []);
 
         $email = $contact['email'] ?? ($user?->email ?? '');
         $phone = $contact['phone'] ?? ($user?->phone_number ?? ($user?->phone ?? ''));
         $location = $contact['location'] ?? ($user?->city ?? ($user?->country ?? ''));
-        $skills = implode(', ', (array) ($norm['competences'] ?? []));
+        $skillsList = $parsed['competences'] ?? ($norm['competences'] ?? []);
+        $skills = implode(', ', (array) $skillsList);
 
         $values = [
             'candidate_name' => $cv->candidate_name ?: ($user?->name ?? 'Non spécifié'),
