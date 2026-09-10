@@ -42,20 +42,21 @@
     <!-- Mode Édition Inline -->
     <template x-if="isEditing">
         <span class="inline-flex items-center gap-1 mx-0.5 no-print" @click.stop>
-            <label :for="'cv-ph-input-' + cvId + '-' + fieldType + '-' + (expIndex ?? 'none') + '-' + (bulletIndex ?? 'none')"
-                   for="cv-ph-input"
-                   class="sr-only">
-                Modifier cette information
+            <label class="inline-flex items-center"
+                   :for="'cv-ph-input-' + cvId + '-' + fieldType + '-' + (expIndex ?? 'none') + '-' + (bulletIndex ?? 'none')"
+                   for="cv-ph-input">
+                <span class="sr-only">Modifier cette information</span>
+                <input type="text"
+                       id="cv-ph-input"
+                       :id="'cv-ph-input-' + cvId + '-' + fieldType + '-' + (expIndex ?? 'none') + '-' + (bulletIndex ?? 'none')"
+                       aria-label="Modifier cette information"
+                       x-ref="inputField"
+                       x-model="tempValue"
+                       @keydown.enter.prevent.stop="save()"
+                       @keydown.escape.prevent.stop="cancel()"
+                       class="px-2 py-0.5 text-xs font-semibold text-gray-900 bg-white border-2 border-amber-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-amber-400 min-w-[130px] max-w-[260px]"
+                       :placeholder="placeholderText" />
             </label>
-            <input type="text"
-                   id="cv-ph-input"
-                   :id="'cv-ph-input-' + cvId + '-' + fieldType + '-' + (expIndex ?? 'none') + '-' + (bulletIndex ?? 'none')"
-                   x-ref="inputField"
-                   x-model="tempValue"
-                   @keydown.enter.prevent.stop="save()"
-                   @keydown.escape.prevent.stop="cancel()"
-                   class="px-2 py-0.5 text-xs font-semibold text-gray-900 bg-white border-2 border-amber-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-amber-400 min-w-[130px] max-w-[260px]"
-                   :placeholder="placeholderText" />
             <button type="button"
                     @click.stop="save()"
                     :disabled="isSaving"

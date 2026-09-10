@@ -827,11 +827,9 @@ class JeuneDashboardController extends Controller
             return $this->updateSummaryPlaceholder($parsed, $pattern, $replacement);
         }
 
-        if ($fieldType === 'experience') {
-            return $this->updateExperiencePlaceholder($parsed, $validated, $pattern, $replacement);
-        }
-
-        return false;
+        return $fieldType === 'experience'
+            ? $this->updateExperiencePlaceholder($parsed, $validated, $pattern, $replacement)
+            : false;
     }
 
     /**
@@ -878,21 +876,17 @@ class JeuneDashboardController extends Controller
     private function replaceExperienceField(mixed &$exp, int $bulletIdx, string $pattern, string $replacement): bool
     {
         if (is_array($exp)) {
+            $target = null;
             if (isset($exp['bullets'][$bulletIdx])) {
-                return $this->replaceInStringField($exp['bullets'][$bulletIdx], $pattern, $replacement);
-            }
-            if (isset($exp['description'])) {
-                return $this->replaceInStringField($exp['description'], $pattern, $replacement);
+                $target = &$exp['bullets'][$bulletIdx];
+            } elseif (isset($exp['description'])) {
+                $target = &$exp['description'];
             }
 
-            return false;
+            return $target !== null ? $this->replaceInStringField($target, $pattern, $replacement) : false;
         }
 
-        if (is_string($exp)) {
-            return $this->replaceInStringField($exp, $pattern, $replacement);
-        }
-
-        return false;
+        return is_string($exp) ? $this->replaceInStringField($exp, $pattern, $replacement) : false;
     }
 
     /**
