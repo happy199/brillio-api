@@ -1225,4 +1225,45 @@ TXT;
         ]);
         $unauthorizedResponse->assertStatus(404);
     }
+
+    public function test_basic_ats_template_card_displays_dynamic_cost_and_badge()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'onboarding_completed' => true,
+        ]);
+
+        CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_dyn_test',
+            'original_filename' => 'Test_CV.docx',
+            'file_path' => 'cv_analyses/test.docx',
+            'file_size' => 1024,
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'candidate_name' => 'Aya Nguessan',
+            'candidate_title' => 'Frontend Dev',
+            'global_score' => 85,
+            'status_label' => self::STATUS_TRES_BIEN,
+        ]);
+
+        // CAS 1: Gratuit (0 crédit)
+        SystemSetting::updateOrCreate(['key' => 'feature_cost_cv_download'], ['value' => 0]);
+        SystemSetting::updateOrCreate(['key' => 'feature_cost_cv_copy'], ['value' => 0]);
+
+        $responseFree = $this->actingAs($user)->get(route('jeune.outils', ['tab' => 'cv']));
+        $responseFree->assertStatus(200);
+        $responseFree->assertSee('Gratuit (0 cr.)');
+        $responseFree->assertSee('Inclus');
+        $responseFree->assertSee('Copier le CV ATS (Gratuit)');
+
+        // CAS 2: Payant (1 crédit pour Basic ATS et Copie)
+        SystemSetting::updateOrCreate(['key' => 'feature_cost_cv_download'], ['value' => 1]);
+        SystemSetting::updateOrCreate(['key' => 'feature_cost_cv_copy'], ['value' => 1]);
+
+        $responsePaid = $this->actingAs($user)->get(route('jeune.outils', ['tab' => 'cv']));
+        $responsePaid->assertStatus(200);
+        $responsePaid->assertSee('1 crédit');
+        $responsePaid->assertSee('Standard');
+        $responsePaid->assertSee('Copier le CV ATS (1 crédit)');
+    }
 }
