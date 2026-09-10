@@ -42,7 +42,14 @@
     <!-- Mode Édition Inline -->
     <template x-if="isEditing">
         <span class="inline-flex items-center gap-1 mx-0.5 no-print" @click.stop>
+            <label :for="'cv-ph-input-' + cvId + '-' + fieldType + '-' + (expIndex ?? 'none') + '-' + (bulletIndex ?? 'none')"
+                   for="cv-ph-input"
+                   class="sr-only">
+                Modifier cette information
+            </label>
             <input type="text"
+                   id="cv-ph-input"
+                   :id="'cv-ph-input-' + cvId + '-' + fieldType + '-' + (expIndex ?? 'none') + '-' + (bulletIndex ?? 'none')"
                    x-ref="inputField"
                    x-model="tempValue"
                    @keydown.enter.prevent.stop="save()"

@@ -761,71 +761,20 @@ class JeuneDashboardController extends Controller
         }
 
         $parsed = $cvAnalysis->parsed_content ?? [];
-        $rawOriginalTag = trim($validated['original_tag']);
-        // Si la balise reçue est déjà sous forme [rempli:valeur|guide:texte_guide], extraire le texte_guide
-        if (preg_match('/guide:([^\]]+)/u', $rawOriginalTag, $guideMatches)) {
-            $rawGuide = $guideMatches[1];
-        } else {
-            $rawGuide = $rawOriginalTag;
-        }
-        $cleanGuide = trim($rawGuide, "[] \t\n\r\0\x0B");
-        $guideTagWithBrackets = '['.$cleanGuide.']';
+        [$cleanGuide, $guideTagWithBrackets] = $this->extractGuideTagInfo($validated['original_tag']);
         $newValue = trim((string) ($validated['new_value'] ?? ($validated['custom_value'] ?? '')));
-        $fieldType = $validated['field_type'];
-
-        // Format de stockage : [rempli:valeur|guide:texte_guide] ou rétablissement de [texte_guide] si vidé
         $replacement = $newValue !== ''
             ? "[rempli:{$newValue}|guide:{$cleanGuide}]"
             : $guideTagWithBrackets;
 
-        // Pattern pour matcher soit l'ancienne balise remplie, soit la balise guide brute
-        $quotedGuideClean = preg_quote($cleanGuide, '/');
-        $quotedGuideWithBrackets = preg_quote($guideTagWithBrackets, '/');
-        $pattern = '/(\[rempli:[^|\]]+\|guide:'.$quotedGuideClean.'\]|'.$quotedGuideWithBrackets.')/u';
-        $updated = false;
-
-        if ($fieldType === 'summary') {
-            $summaryKey = null;
-            foreach (['profil', 'summary', 'profile', 'candidate_summary'] as $key) {
-                if (isset($parsed[$key])) {
-                    $summaryKey = $key;
-                    break;
-                }
-            }
-            $summaryKey = $summaryKey ?? 'profil';
-            $summary = (string) ($parsed[$summaryKey] ?? '');
-            if (preg_match($pattern, $summary)) {
-                $parsed[$summaryKey] = preg_replace($pattern, $replacement, $summary, 1);
-                $updated = true;
-            }
-        } elseif ($fieldType === 'experience') {
-            $expIdx = (int) ($validated['exp_index'] ?? 0);
-            $bulletIdx = (int) ($validated['bullet_index'] ?? 0);
-
-            if (isset($parsed['experiences'][$expIdx])) {
-                $exp = $parsed['experiences'][$expIdx];
-                if (is_array($exp)) {
-                    if (isset($exp['bullets'][$bulletIdx])) {
-                        $bulletText = (string) $exp['bullets'][$bulletIdx];
-                        if (preg_match($pattern, $bulletText)) {
-                            $parsed['experiences'][$expIdx]['bullets'][$bulletIdx] = preg_replace($pattern, $replacement, $bulletText, 1);
-                            $updated = true;
-                        }
-                    } elseif (isset($exp['description'])) {
-                        $descText = (string) $exp['description'];
-                        if (preg_match($pattern, $descText)) {
-                            $parsed['experiences'][$expIdx]['description'] = preg_replace($pattern, $replacement, $descText, 1);
-                            $updated = true;
-                        }
-                    }
-                } elseif (is_string($exp)) {
-                    if (preg_match($pattern, $exp)) {
-                        $parsed['experiences'][$expIdx] = preg_replace($pattern, $replacement, $exp, 1);
-                        $updated = true;
-                    }
-                }
-            }
-        }
+        $pattern = $this->buildGuidePattern($cleanGuide, $guideTagWithBrackets);
+        $updated = $this->applyPlaceholderReplacement(
+            $parsed,
+            $validated['field_type'],
+            $validated,
+            $pattern,
+            $replacement
+        );
 
         if ($updated) {
             $cvAnalysis->update(['parsed_content' => $parsed]);
@@ -840,6 +789,125 @@ class JeuneDashboardController extends Controller
             'new_tag' => $replacement,
             'message' => $newValue !== '' ? 'Information enregistrée avec succès !' : 'Balise réinitialisée.',
         ]);
+    }
+
+    /**
+     * Extrait les informations de balise guide brute ou déjà remplie.
+     */
+    private function extractGuideTagInfo(string $rawOriginalTag): array
+    {
+        $trimmedTag = trim($rawOriginalTag);
+        if (preg_match('/guide:([^\]]+)/u', $trimmedTag, $matches)) {
+            $rawGuide = $matches[1];
+        } else {
+            $rawGuide = $trimmedTag;
+        }
+        $cleanGuide = trim($rawGuide, "[] \t\n\r\0\x0B");
+
+        return [$cleanGuide, '['.$cleanGuide.']'];
+    }
+
+    /**
+     * Construit le pattern regex permettant de cibler la balise (remplie ou vierge).
+     */
+    private function buildGuidePattern(string $cleanGuide, string $guideTagWithBrackets): string
+    {
+        $quotedGuideClean = preg_quote($cleanGuide, '/');
+        $quotedGuideWithBrackets = preg_quote($guideTagWithBrackets, '/');
+
+        return '/(\[rempli:[^|\]]+\|guide:'.$quotedGuideClean.'\]|'.$quotedGuideWithBrackets.')/u';
+    }
+
+    /**
+     * Applique le remplacement de balise selon le type de champ (summary ou experience).
+     */
+    private function applyPlaceholderReplacement(array &$parsed, string $fieldType, array $validated, string $pattern, string $replacement): bool
+    {
+        if ($fieldType === 'summary') {
+            return $this->updateSummaryPlaceholder($parsed, $pattern, $replacement);
+        }
+
+        if ($fieldType === 'experience') {
+            return $this->updateExperiencePlaceholder($parsed, $validated, $pattern, $replacement);
+        }
+
+        return false;
+    }
+
+    /**
+     * Met à jour la balise dans le résumé professionnel.
+     */
+    private function updateSummaryPlaceholder(array &$parsed, string $pattern, string $replacement): bool
+    {
+        $summaryKey = 'profil';
+        foreach (['profil', 'summary', 'profile', 'candidate_summary'] as $key) {
+            if (isset($parsed[$key])) {
+                $summaryKey = $key;
+                break;
+            }
+        }
+
+        $summary = (string) ($parsed[$summaryKey] ?? '');
+        if (preg_match($pattern, $summary)) {
+            $parsed[$summaryKey] = preg_replace($pattern, $replacement, $summary, 1);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Met à jour la balise dans les expériences professionnelles.
+     */
+    private function updateExperiencePlaceholder(array &$parsed, array $validated, string $pattern, string $replacement): bool
+    {
+        $expIdx = (int) ($validated['exp_index'] ?? 0);
+        $bulletIdx = (int) ($validated['bullet_index'] ?? 0);
+
+        if (! isset($parsed['experiences'][$expIdx])) {
+            return false;
+        }
+
+        return $this->replaceExperienceField($parsed['experiences'][$expIdx], $bulletIdx, $pattern, $replacement);
+    }
+
+    /**
+     * Remplace le motif dans une expérience spécifique (liste à puces, description ou chaîne).
+     */
+    private function replaceExperienceField(mixed &$exp, int $bulletIdx, string $pattern, string $replacement): bool
+    {
+        if (is_array($exp)) {
+            if (isset($exp['bullets'][$bulletIdx])) {
+                return $this->replaceInStringField($exp['bullets'][$bulletIdx], $pattern, $replacement);
+            }
+            if (isset($exp['description'])) {
+                return $this->replaceInStringField($exp['description'], $pattern, $replacement);
+            }
+
+            return false;
+        }
+
+        if (is_string($exp)) {
+            return $this->replaceInStringField($exp, $pattern, $replacement);
+        }
+
+        return false;
+    }
+
+    /**
+     * Remplace le motif dans une chaîne si elle correspond au motif.
+     */
+    private function replaceInStringField(mixed &$field, string $pattern, string $replacement): bool
+    {
+        $text = (string) $field;
+        if (preg_match($pattern, $text)) {
+            $field = preg_replace($pattern, $replacement, $text, 1);
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
