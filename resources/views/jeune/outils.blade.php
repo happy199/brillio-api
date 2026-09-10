@@ -1560,7 +1560,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 translate-y-2"
-         class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold border"
+         class="no-print fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold border"
          :class="toastType === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'"
          x-cloak>
         <span x-text="toastMessage"></span>
@@ -1799,7 +1799,8 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
                 } else if (action === 'download_pdf') {
                     this.currentTab = 'cv';
                     this.cvViewMode = 'ats';
-                    this.showToastNotification('Préparation de votre CV en PDF...', 'success');
+                    this.showDownloadCvModal = false;
+                    this.showToast = false;
                     setTimeout(() => {
                         window.print();
                     }, 250);
@@ -1886,6 +1887,7 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
     body > footer,
     body > #cookieBanner,
     #toast-container,
+    [x-show="showToast"],
     .no-print,
     .no-print * {
         display: none !important;
