@@ -473,19 +473,34 @@
                         <div class="space-y-3 no-print">
                             <div class="flex items-center justify-between">
                                 <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Sélectionnez un modèle de CV ATS :</h3>
-                                <span class="text-xs text-gray-500">Le modèle par défaut est gratuit. Les modèles avancés valorisent vos compétences clés.</span>
+                                <span class="text-xs text-gray-500"
+                                      x-text="(templateCosts[0] ?? 0) === 0 ? 'Le modèle par défaut est gratuit. Les modèles avancés valorisent vos compétences clés.' : 'Sélectionnez le modèle ATS adapté pour valoriser votre profil.'">
+                                    {{ ($templateCosts[0] ?? 0) === 0 ? 'Le modèle par défaut est gratuit. Les modèles avancés valorisent vos compétences clés.' : 'Sélectionnez le modèle ATS adapté pour valoriser votre profil.' }}
+                                </span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                                <!-- Template 0 : Basic ATS (Simple & Inclus) -->
+                                <!-- Template 0 : Basic ATS -->
                                 <button type="button"
                                         @click="selectedTemplate = 0"
                                         :class="selectedTemplate === 0 ? 'ring-2 ring-primary-600 border-primary-600 bg-primary-50/40 text-primary-950 font-bold' : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'"
                                         class="relative p-3 rounded-2xl border text-left transition flex flex-col justify-between shadow-xs">
                                     <div>
-                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">Inclus</span>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
+                                              :class="(templateCosts[0] ?? 0) === 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'"
+                                              x-text="(templateCosts[0] ?? 0) === 0 ? 'Inclus' : 'Standard'">
+                                            {{ ($templateCosts[0] ?? 0) === 0 ? 'Inclus' : 'Standard' }}
+                                        </span>
                                         <p class="text-xs font-bold mt-1.5 truncate">Basic ATS</p>
                                     </div>
-                                    <p class="text-[11px] font-semibold text-emerald-600 mt-2">Gratuit (0 cr.)</p>
+                                    <p class="text-[11px] font-semibold mt-2"
+                                       :class="(templateCosts[0] ?? 0) === 0 ? 'text-emerald-600' : 'text-primary-700'"
+                                       x-text="(templateCosts[0] ?? 0) === 0 ? 'Gratuit (0 cr.)' : `${templateCosts[0]} ${templateCosts[0] > 1 ? 'crédits' : 'crédit'}`">
+                                        @if(($templateCosts[0] ?? 0) === 0)
+                                            Gratuit (0 cr.)
+                                        @else
+                                            {{ $templateCosts[0] }} {{ $templateCosts[0] > 1 ? 'crédits' : 'crédit' }}
+                                        @endif
+                                    </p>
                                 </button>
 
                                 <!-- Template 1 : Standard Classique -->
@@ -1409,7 +1424,7 @@
                 <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                     <p class="text-xs text-gray-500">
                         Coût pour ce template :
-                        <span class="font-bold text-primary-700" x-text="templateCosts[selectedTemplate] > 0 ? `${templateCosts[selectedTemplate]} crédits` : 'Gratuit'"></span>
+                        <span class="font-bold text-primary-700" x-text="templateCosts[selectedTemplate] > 0 ? `${templateCosts[selectedTemplate]} ${templateCosts[selectedTemplate] > 1 ? 'crédits' : 'crédit'}` : 'Gratuit'"></span>
                     </p>
                     <button type="button" @click="showDownloadFormatModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition">
                         Fermer
