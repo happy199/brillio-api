@@ -736,6 +736,175 @@ class JeuneDashboardController extends Controller
     }
 
     /**
+     * Met à jour dynamiquement la valeur d'une balise guidée dans le CV analysé.
+     */
+    public function updateCvPlaceholder(Request $request)
+    {
+        $validated = $request->validate([
+            'cv_id' => 'required|integer',
+            'field_type' => 'required|string|in:summary,experience',
+            'exp_index' => 'nullable|integer|min:0',
+            'bullet_index' => 'nullable|integer|min:0',
+            'original_tag' => 'required|string|max:500',
+            'new_value' => 'nullable|string|max:500',
+            'custom_value' => 'nullable|string|max:500',
+        ]);
+
+        $user = auth()->user();
+        $cvAnalysis = $user->cvAnalyses()->find($validated['cv_id']);
+
+        if (! $cvAnalysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CV introuvable ou non autorisé.',
+            ], 404);
+        }
+
+        $parsed = $cvAnalysis->parsed_content ?? [];
+        [$cleanGuide, $guideTagWithBrackets] = $this->extractGuideTagInfo($validated['original_tag']);
+        $newValue = trim((string) ($validated['new_value'] ?? ($validated['custom_value'] ?? '')));
+        $replacement = $newValue !== ''
+            ? "[rempli:{$newValue}|guide:{$cleanGuide}]"
+            : $guideTagWithBrackets;
+
+        $pattern = $this->buildGuidePattern($cleanGuide, $guideTagWithBrackets);
+        $updated = $this->applyPlaceholderReplacement(
+            $parsed,
+            $validated['field_type'],
+            $validated,
+            $pattern,
+            $replacement
+        );
+
+        if ($updated) {
+            $cvAnalysis->update(['parsed_content' => $parsed]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'is_filled' => $newValue !== '',
+            'new_value' => $newValue,
+            'custom_value' => $newValue,
+            'original_tag' => $guideTagWithBrackets,
+            'new_tag' => $replacement,
+            'message' => $newValue !== '' ? 'Information enregistrée avec succès !' : 'Balise réinitialisée.',
+        ]);
+    }
+
+    /**
+     * Extrait les informations de balise guide brute ou déjà remplie.
+     */
+    private function extractGuideTagInfo(string $rawOriginalTag): array
+    {
+        $trimmedTag = trim($rawOriginalTag);
+        if (preg_match('/guide:([^\]]+)/u', $trimmedTag, $matches)) {
+            $rawGuide = $matches[1];
+        } else {
+            $rawGuide = $trimmedTag;
+        }
+        $cleanGuide = trim($rawGuide, "[] \t\n\r\0\x0B");
+
+        return [$cleanGuide, '['.$cleanGuide.']'];
+    }
+
+    /**
+     * Construit le pattern regex permettant de cibler la balise (remplie ou vierge).
+     */
+    private function buildGuidePattern(string $cleanGuide, string $guideTagWithBrackets): string
+    {
+        $quotedGuideClean = preg_quote($cleanGuide, '/');
+        $quotedGuideWithBrackets = preg_quote($guideTagWithBrackets, '/');
+
+        return '/(\[rempli:[^|\]]+\|guide:'.$quotedGuideClean.'\]|'.$quotedGuideWithBrackets.')/u';
+    }
+
+    /**
+     * Applique le remplacement de balise selon le type de champ (summary ou experience).
+     */
+    private function applyPlaceholderReplacement(array &$parsed, string $fieldType, array $validated, string $pattern, string $replacement): bool
+    {
+        if ($fieldType === 'summary') {
+            return $this->updateSummaryPlaceholder($parsed, $pattern, $replacement);
+        }
+
+        return $fieldType === 'experience'
+            ? $this->updateExperiencePlaceholder($parsed, $validated, $pattern, $replacement)
+            : false;
+    }
+
+    /**
+     * Met à jour la balise dans le résumé professionnel.
+     */
+    private function updateSummaryPlaceholder(array &$parsed, string $pattern, string $replacement): bool
+    {
+        $summaryKey = 'profil';
+        foreach (['profil', 'summary', 'profile', 'candidate_summary'] as $key) {
+            if (isset($parsed[$key])) {
+                $summaryKey = $key;
+                break;
+            }
+        }
+
+        $summary = (string) ($parsed[$summaryKey] ?? '');
+        if (preg_match($pattern, $summary)) {
+            $parsed[$summaryKey] = preg_replace($pattern, $replacement, $summary, 1);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Met à jour la balise dans les expériences professionnelles.
+     */
+    private function updateExperiencePlaceholder(array &$parsed, array $validated, string $pattern, string $replacement): bool
+    {
+        $expIdx = (int) ($validated['exp_index'] ?? 0);
+        $bulletIdx = (int) ($validated['bullet_index'] ?? 0);
+
+        if (! isset($parsed['experiences'][$expIdx])) {
+            return false;
+        }
+
+        return $this->replaceExperienceField($parsed['experiences'][$expIdx], $bulletIdx, $pattern, $replacement);
+    }
+
+    /**
+     * Remplace le motif dans une expérience spécifique (liste à puces, description ou chaîne).
+     */
+    private function replaceExperienceField(mixed &$exp, int $bulletIdx, string $pattern, string $replacement): bool
+    {
+        if (is_array($exp)) {
+            $target = null;
+            if (isset($exp['bullets'][$bulletIdx])) {
+                $target = &$exp['bullets'][$bulletIdx];
+            } elseif (isset($exp['description'])) {
+                $target = &$exp['description'];
+            }
+
+            return $target !== null ? $this->replaceInStringField($target, $pattern, $replacement) : false;
+        }
+
+        return is_string($exp) ? $this->replaceInStringField($exp, $pattern, $replacement) : false;
+    }
+
+    /**
+     * Remplace le motif dans une chaîne si elle correspond au motif.
+     */
+    private function replaceInStringField(mixed &$field, string $pattern, string $replacement): bool
+    {
+        $text = (string) $field;
+        if (preg_match($pattern, $text)) {
+            $field = preg_replace($pattern, $replacement, $text, 1);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Téléchargement direct du CV restructuré sous format Word (.docx) modifiable
      */
     public function downloadDocxCv(int $cvId, Request $request, CvDocxExportService $docxService)
@@ -814,7 +983,9 @@ class JeuneDashboardController extends Controller
         $this->appendCvCertifications($lines, $labels, $norm['certifications'] ?? [], $separator);
         $this->appendCvLanguages($lines, $labels, $norm['languages'] ?? [], $separator);
 
-        return trim(implode("\n", $lines));
+        $text = trim(implode("\n", $lines));
+
+        return preg_replace('/\[rempli:([^|]+)\|guide:[^\]]+\]/u', '$1', $text);
     }
 
     private function appendCvHeader(array &$lines, CvAnalysis $cv): void

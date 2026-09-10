@@ -458,11 +458,8 @@ class CvDocxExportService
             return;
         }
 
-        $section->addText(
-            $summary,
-            ['name' => $font, 'size' => 9.5, 'color' => self::COLOR_TEXT_BODY],
-            ['spaceAfter' => 60, 'alignment' => Jc::BOTH]
-        );
+        $run = $section->addTextRun(['spaceAfter' => 60, 'alignment' => Jc::BOTH]);
+        $this->addFormattedTextWithPlaceholders($run, $summary, $font, self::COLOR_TEXT_BODY);
     }
 
     private function addExperiencesList($container, array $experiences, string $recentlyLabel, string $font, string $bulletIcon = '•  ', string $bulletColor = self::COLOR_TEXT_MUTED, ?string $companyColor = null): void
@@ -486,10 +483,47 @@ class CvDocxExportService
                 if (trim((string) $bullet) !== '') {
                     $bRun = $container->addTextRun(['spaceAfter' => 20]);
                     $bRun->addText($bulletIcon, ['name' => $font, 'bold' => true, 'size' => 9, 'color' => $bulletColor]);
-                    $bRun->addText((string) $bullet, ['name' => $font, 'size' => 9.5, 'color' => self::COLOR_TEXT_BODY]);
+                    $this->addFormattedTextWithPlaceholders($bRun, (string) $bullet, $font, self::COLOR_TEXT_BODY);
                 }
             }
             $container->addText('', [], ['spaceAfter' => 20]);
+        }
+    }
+
+    private function addFormattedTextWithPlaceholders($container, string $text, string $font, string $defaultColor): void
+    {
+        $parts = preg_split('/(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\}|\[rempli:[^|\]]+\|guide:[^\]]+\])/iu', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+        if (! $parts) {
+            $container->addText($text, ['name' => $font, 'size' => 9.5, 'color' => $defaultColor]);
+
+            return;
+        }
+
+        foreach ($parts as $part) {
+            if (preg_match('/^\[rempli:([^|\]]+)\|guide:[^\]]+\]$/u', $part, $matches)) {
+                // Balise complétée par le candidat : rendue proprement sans crochets dans Word
+                $container->addText($matches[1], [
+                    'name' => $font,
+                    'size' => 9.5,
+                    'color' => self::COLOR_DARK,
+                    'bold' => true,
+                ]);
+            } elseif (preg_match('/^(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\})$/iu', $part)) {
+                $container->addText($part, [
+                    'name' => $font,
+                    'size' => 9.5,
+                    'bold' => true,
+                    'italic' => true,
+                    'color' => 'B45309',
+                ]);
+            } else {
+                $container->addText($part, [
+                    'name' => $font,
+                    'size' => 9.5,
+                    'color' => $defaultColor,
+                ]);
+            }
         }
     }
 

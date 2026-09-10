@@ -101,10 +101,14 @@ Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::get('/publicite', [PageController::class, 'advertisements'])->name('public.advertisements');
 Route::post('/publicite/{advertisement}/click', [PageController::class, 'trackAdvertisementClick'])->name('public.advertisements.click');
 
-// Section Opportunités & Évaluation de CV
-Route::get('/opportunites', [OpportunityController::class, 'index'])->name('public.opportunities');
-Route::post('/opportunites/analyser-cv', [OpportunityController::class, 'analyzeCv'])->name('public.opportunities.analyze');
-Route::get('/opportunites/score/{token}', [OpportunityController::class, 'showScore'])->name('public.opportunities.score');
+// Section Évaluation & Analyse de CV
+Route::get('/analysemoncv', [OpportunityController::class, 'index'])->name('public.opportunities');
+Route::post('/analysemoncv/analyser-cv', [OpportunityController::class, 'analyzeCv'])->name('public.opportunities.analyze');
+Route::get('/analysemoncv/score/{token}', [OpportunityController::class, 'showScore'])->name('public.opportunities.score');
+
+// Redirections pour rétrocompatibilité
+Route::redirect('/opportunites', '/analysemoncv', 301);
+Route::redirect('/opportunites/score/{token}', '/analysemoncv/score/{token}', 301);
 
 Route::post('/contact', [WebsiteContactController::class, 'submit'])->name('contact.submit');
 
@@ -304,6 +308,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
     Route::post('/opportunites/cv/analyser', [JeuneDashboardController::class, 'analyzeCv'])->name('cv.analyze');
     Route::post('/outils/cv/analyser', [JeuneDashboardController::class, 'analyzeCv']);
     Route::post('/outils/cv/action', [JeuneDashboardController::class, 'handleCvAction'])->name('cv.action');
+    Route::post('/outils/cv/placeholder', [JeuneDashboardController::class, 'updateCvPlaceholder'])->name('cv.update-placeholder');
     Route::get('/outils/cv/{cv}/download-docx', [JeuneDashboardController::class, 'downloadDocxCv'])->name('cv.download-docx')->whereNumber('cv');
     Route::get('/outils/cv/{cv}/view-original', [JeuneDashboardController::class, 'viewOriginalCv'])->name('cv.view-original')->whereNumber('cv');
     Route::get('/outils/cv/{cv}/download-original', [JeuneDashboardController::class, 'downloadOriginalCv'])->name('cv.download-original')->whereNumber('cv');

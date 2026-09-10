@@ -12,7 +12,7 @@
         <nav class="flex items-center text-xs sm:text-sm font-medium text-gray-500 mb-8 space-x-2">
             <a href="{{ route('home') }}" class="hover:text-primary-600 transition">Accueil</a>
             <span>/</span>
-            <a href="{{ route('public.opportunities') }}" class="hover:text-primary-600 transition">Opportunités</a>
+            <a href="{{ route('public.opportunities') }}" class="hover:text-primary-600 transition">Analyse mon CV</a>
             <span>/</span>
             <span class="text-gray-900 font-semibold">{{ isset($isScoreView) && $isScoreView ? 'Diagnostic ATS' : 'Vérificateur de CV' }}</span>
         </nav>

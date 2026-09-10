@@ -28,6 +28,55 @@ class OpportunityAndCvAnalysisTest extends TestCase
 
     private const STATUS_TRES_BIEN = 'Très bien';
 
+    private const EXTENSION_DOCX = '.docx';
+
+    private const DOCX_DOCUMENT_XML = 'word/document.xml';
+
+    private const TEST_CUSTOM_VALUE_REQUESTS = '15 000';
+
+    private const TEST_CUSTOM_VALUE_YEARS = '3 années';
+
+    private function extractDocxXmlContent($streamedResponse, string $tempPrefix = 'test_docx_'): string
+    {
+        $tempDocx = tempnam(sys_get_temp_dir(), $tempPrefix).self::EXTENSION_DOCX;
+        file_put_contents($tempDocx, $streamedResponse->streamedContent());
+
+        $zip = new \ZipArchive;
+        $this->assertTrue($zip->open($tempDocx));
+        $xml = (string) $zip->getFromName(self::DOCX_DOCUMENT_XML);
+        $zip->close();
+        unlink($tempDocx);
+
+        return $xml;
+    }
+
+    private function createCvAnalysisFixture(User $user, array $overrides = []): CvAnalysis
+    {
+        return CvAnalysis::create(array_merge([
+            'user_id' => $user->id,
+            'guest_token' => 'token_'.uniqid(),
+            'original_filename' => 'CV_Candidat.pdf',
+            'file_path' => 'cv_analyses/test.pdf',
+            'file_size' => 12345,
+            'mime_type' => self::MIME_PDF,
+            'status' => 'completed',
+            'candidate_name' => 'Amadou Coulibaly',
+            'candidate_title' => 'Développeur Web & Mobile Full-Stack',
+            'candidate_contact' => [
+                'email' => 'amadou.coulibaly@email.com',
+                'phone' => '+225 07 00 00 00 00',
+                'location' => "Abidjan, Côte d'Ivoire",
+            ],
+            'global_score' => 82,
+            'status_label' => self::STATUS_TRES_BIEN,
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ], $overrides));
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -39,9 +88,15 @@ class OpportunityAndCvAnalysisTest extends TestCase
         $response = $this->get(route('public.opportunities'));
 
         $response->assertStatus(200);
-        $response->assertSee(self::TEXT_OPPORTUNITES);
+        $this->assertEquals(url('/analysemoncv'), route('public.opportunities'));
+        $response->assertSee('Analyse mon CV');
         $response->assertSee('Votre CV est-il assez percutant', false);
         $response->assertSee('Glissez-déposez votre CV ici');
+
+        // Test 301 redirect from /opportunites
+        $redirectResponse = $this->get('/opportunites');
+        $redirectResponse->assertStatus(301);
+        $redirectResponse->assertRedirect('/analysemoncv');
     }
 
     public function test_guest_can_upload_and_analyze_cv()
@@ -829,8 +884,7 @@ TXT;
             'onboarding_completed' => true,
         ]);
 
-        $analysis = CvAnalysis::create([
-            'user_id' => $user->id,
+        $analysis = $this->createCvAnalysisFixture($user, [
             'guest_token' => 'token_docx_template_check',
             'original_filename' => 'CV_Fatoumata_Traore.docx',
             'file_path' => 'cv_analyses/test_fatoumata.docx',
@@ -838,22 +892,12 @@ TXT;
             'mime_type' => self::MIME_DOCX,
             'candidate_name' => 'Fatoumata Traoré',
             'candidate_title' => 'UX/UI Designer Junior',
-            'candidate_contact' => [
-                'email' => 'fatoumata.traore.design@gmail.com',
-                'phone' => '+225 07 00 00 00 00',
-                'location' => "Abidjan, Côte d'Ivoire",
-            ],
             'global_score' => 88,
             'status_label' => 'Excellent',
             'summary' => 'Profil UX Designer',
             'parsed_content' => [
                 'raw_text' => "FATOUMATA TRAORÉ\nUX/UI Designer Junior\nRÉSUMÉ PROFESSIONNEL\nAncienne assistante sociale reconvertie en UX/UI Designer avec expérience en recherche utilisateur.",
             ],
-            'criteria_scores' => [],
-            'strengths' => [],
-            'improvements' => [],
-            'recommendations' => [],
-            'is_claimed' => true,
         ]);
 
         // L'utilisateur a mis le coût du template moderne à 0 dans le backoffice
@@ -872,13 +916,7 @@ TXT;
         $response->assertHeader('Content-Type', self::MIME_DOCX);
         $this->assertStringContainsString('CV_fatoumata_traore_ATS.docx', $response->headers->get('Content-Disposition'));
 
-        // Sauvegarder le contenu streamé pour analyser le XML interne
-        $tempDocx = tempnam(sys_get_temp_dir(), 'test_verify_t4_').'.docx';
-        file_put_contents($tempDocx, $response->streamedContent());
-
-        $zip = new \ZipArchive;
-        $this->assertTrue($zip->open($tempDocx));
-        $xml = $zip->getFromName('word/document.xml');
+        $xml = $this->extractDocxXmlContent($response, 'test_verify_t4_');
 
         // Vérification des éléments distinctifs de la maquette Expert Moderne
         $this->assertStringContainsString('ModernDarkBanner', $xml);
@@ -887,7 +925,226 @@ TXT;
         $this->assertStringContainsString('FATOUMATA TRAORÉ', $xml);
         $this->assertStringContainsString('UX/UI Designer Junior', $xml);
         $this->assertStringContainsString('SYNTHÈSE EXÉCUTIVE', $xml);
+    }
 
-        unlink($tempDocx);
+    public function test_cv_restructured_content_applies_recommendations_with_placeholders_in_web_and_docx()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'email' => 'candidat.star@brillio.test',
+        ]);
+
+        $analysis = $this->createCvAnalysisFixture($user, [
+            'guest_token' => 'token_star_restructured',
+            'original_filename' => 'CV_Candidat_Ameliore.pdf',
+            'file_path' => 'cv_analyses/test_star.pdf',
+            'parsed_content' => [
+                'profil' => 'Développeur passionné orienté résultats avec expertise en Laravel et Vue.js [À compléter : années d\'expérience ou impact majeur].',
+                'experiences' => [
+                    [
+                        'title' => 'Développeur Web & Mobile (Stagiaire)',
+                        'company' => 'Tech Solutions SARL',
+                        'period' => 'Janv 2024 - Présent',
+                        'bullets' => [
+                            'Conception et développement d\'une API REST sous Laravel permettant de fluidifier les échanges de données [À compléter : +30% de rapidité / 500 requêtes/sec]',
+                            'Optimisation des requêtes SQL et refonte du tableau de bord de suivi [À compléter : temps de réponse divisé par 2]',
+                        ],
+                    ],
+                ],
+                'formation' => [
+                    [
+                        'degree' => 'Master en Ingénierie Logicielle',
+                        'school' => 'INP-HB Yamoussoukro',
+                        'year' => '2023 - 2024',
+                    ],
+                ],
+                'competences' => ['Laravel', 'Vue.js', 'PostgreSQL', 'Docker'],
+                'langues' => ['Français (Courant)', 'Anglais (Professionnel)'],
+            ],
+        ]);
+
+        // 1. Vérification de la normalisation des données
+        $norm = $analysis->normalized_cv_data;
+        $this->assertCount(1, $norm['experiences']);
+        $this->assertEquals('Développeur Web & Mobile (Stagiaire)', $norm['experiences'][0]['title']);
+        $this->assertCount(2, $norm['experiences'][0]['bullets']);
+        $this->assertStringContainsString('[À compléter : +30% de rapidité', $norm['experiences'][0]['bullets'][0]);
+
+        // 2. Vérification du rendu Web dans outils.blade.php
+        $webResponse = $this->actingAs($user)->get(route('jeune.outils'));
+        $webResponse->assertStatus(200);
+        $webResponse->assertSee('Contenu restructuré', false);
+        $webResponse->assertSee('Recommandations ATS appliquées', false);
+        $webResponse->assertSee('bg-amber-100 text-amber-900 border border-amber-300', false);
+        $webResponse->assertSee('À compléter : +30% de rapidité', false);
+
+        // 3. Vérification de l'export Word .docx avec balises stylisées en ambre
+        $docxResponse = $this->actingAs($user)->get(route('jeune.cv.download-docx', [
+            'cv' => $analysis->id,
+            'template' => 0,
+        ]));
+        $docxResponse->assertStatus(200);
+
+        $xml = $this->extractDocxXmlContent($docxResponse, 'test_star_docx_');
+
+        $this->assertStringContainsString('B45309', $xml); // Couleur ambre des balises
+        $this->assertStringContainsString('À compléter : +30% de rapidité', $xml);
+    }
+
+    public function test_cv_inline_placeholder_editing_saves_to_model_and_renders_cleanly_in_copy_and_docx(): void
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'credits_balance' => 10,
+        ]);
+
+        $analysis = $this->createCvAnalysisFixture($user, [
+            'guest_token' => 'token_test_inline_edit',
+            'original_filename' => 'Mon_CV.pdf',
+            'file_path' => 'cv_analyses/test_inline.pdf',
+            'candidate_name' => 'Kouame Yao',
+            'candidate_title' => 'Développeur Full Stack',
+            'global_score' => 80,
+            'status_label' => 'Bien',
+            'parsed_content' => [
+                'summary' => 'Passionné par le web avec [À compléter : X années] d\'expérience.',
+                'experiences' => [
+                    [
+                        'title' => 'Développeur Full Stack',
+                        'company' => 'Tech SARL',
+                        'dates' => '2022 - 2024',
+                        'location' => 'Abidjan',
+                        'bullets' => [
+                            'Développé une API traitant [À compléter : nombre de] requêtes par jour.',
+                        ],
+                    ],
+                ],
+                'formations' => [],
+                'competences' => ['PHP', 'Laravel'],
+                'langues' => ['Français'],
+            ],
+        ]);
+
+        // 1. Mise à jour inline du placeholder d'une expérience (bullet 0)
+        $updateResponse = $this->actingAs($user)->postJson(route('jeune.cv.update-placeholder'), [
+            'cv_id' => $analysis->id,
+            'field_type' => 'experience',
+            'exp_index' => 0,
+            'bullet_index' => 0,
+            'original_tag' => '[À compléter : nombre de]',
+            'custom_value' => self::TEST_CUSTOM_VALUE_REQUESTS,
+        ]);
+
+        $updateResponse->assertStatus(200);
+        $updateResponse->assertJson([
+            'success' => true,
+            'is_filled' => true,
+            'custom_value' => self::TEST_CUSTOM_VALUE_REQUESTS,
+            'new_tag' => '[rempli:'.self::TEST_CUSTOM_VALUE_REQUESTS.'|guide:À compléter : nombre de]',
+        ]);
+
+        // Vérifier la persistance dans le modèle CvAnalysis
+        $analysis->refresh();
+        $updatedBullet = $analysis->parsed_content['experiences'][0]['bullets'][0];
+        $this->assertEquals(
+            'Développé une API traitant [rempli:'.self::TEST_CUSTOM_VALUE_REQUESTS.'|guide:À compléter : nombre de] requêtes par jour.',
+            $updatedBullet
+        );
+
+        // 2. Mise à jour inline du résumé (summary)
+        $summaryUpdateResponse = $this->actingAs($user)->postJson(route('jeune.cv.update-placeholder'), [
+            'cv_id' => $analysis->id,
+            'field_type' => 'summary',
+            'original_tag' => '[À compléter : X années]',
+            'custom_value' => self::TEST_CUSTOM_VALUE_YEARS,
+        ]);
+
+        $summaryUpdateResponse->assertStatus(200);
+        $summaryUpdateResponse->assertJson([
+            'success' => true,
+            'is_filled' => true,
+            'custom_value' => self::TEST_CUSTOM_VALUE_YEARS,
+        ]);
+
+        $analysis->refresh();
+        $this->assertEquals(
+            'Passionné par le web avec [rempli:'.self::TEST_CUSTOM_VALUE_YEARS.'|guide:À compléter : X années] d\'expérience.',
+            $analysis->parsed_content['summary']
+        );
+
+        // 3. Vérification du rendu dans la page Outils (affiche les valeurs complétées)
+        $pageResponse = $this->actingAs($user)->get(route('jeune.outils'));
+        $pageResponse->assertStatus(200);
+        $pageResponse->assertSee(self::TEST_CUSTOM_VALUE_REQUESTS, false);
+        $pageResponse->assertSee(self::TEST_CUSTOM_VALUE_YEARS, false);
+
+        // 4. Vérification de l'action "Copier le texte" : les balises [rempli:valeur|guide:...] doivent être nettoyées
+        $copyResponse = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'cv_id' => $analysis->id,
+            'action' => 'copy',
+            'template' => 0,
+        ]);
+
+        $copyResponse->assertStatus(200);
+        $plainText = $copyResponse->json('cv_text');
+        $this->assertStringContainsString(self::TEST_CUSTOM_VALUE_REQUESTS.' requêtes par jour', $plainText);
+        $this->assertStringContainsString(self::TEST_CUSTOM_VALUE_YEARS.' d\'expérience', $plainText);
+        $this->assertStringNotContainsString('rempli:', $plainText);
+        $this->assertStringNotContainsString('guide:', $plainText);
+
+        // 5. Vérification de l'export Word (.docx) : la valeur personnalisée est présente sans balises résiduelles
+        $docxResponse = $this->actingAs($user)->get(route('jeune.cv.download-docx', [
+            'cv' => $analysis->id,
+            'template' => 0,
+        ]));
+        $docxResponse->assertStatus(200);
+
+        $xml = $this->extractDocxXmlContent($docxResponse, 'test_filled_docx_');
+
+        $this->assertStringContainsString(self::TEST_CUSTOM_VALUE_REQUESTS, $xml);
+        $this->assertStringContainsString(self::TEST_CUSTOM_VALUE_YEARS, $xml);
+        $this->assertStringNotContainsString('rempli:', $xml);
+        $this->assertStringNotContainsString('guide:', $xml);
+
+        // 6. Test de réinitialisation (effacer la valeur pour revenir à la balise guide initiale)
+        $resetResponse = $this->actingAs($user)->postJson(route('jeune.cv.update-placeholder'), [
+            'cv_id' => $analysis->id,
+            'field_type' => 'experience',
+            'exp_index' => 0,
+            'bullet_index' => 0,
+            'original_tag' => '[rempli:'.self::TEST_CUSTOM_VALUE_REQUESTS.'|guide:À compléter : nombre de]',
+            'custom_value' => '', // valeur vide => rétablissement
+        ]);
+
+        $resetResponse->assertStatus(200);
+        $resetResponse->assertJson([
+            'success' => true,
+            'is_filled' => false,
+            'new_tag' => '[À compléter : nombre de]',
+        ]);
+
+        $analysis->refresh();
+        $this->assertEquals(
+            'Développé une API traitant [À compléter : nombre de] requêtes par jour.',
+            $analysis->parsed_content['experiences'][0]['bullets'][0]
+        );
+    }
+
+    public function test_cv_print_media_rules_enforce_single_page_and_isolate_print_area(): void
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.outils'));
+        $response->assertStatus(200);
+
+        // Vérifie les règles CSS clés pour l'impression A4 sur 1 page
+        $response->assertSee('@media print', false);
+        $response->assertSee('size: A4 portrait;', false);
+        $response->assertSee('#cvEnhancedPrintArea', false);
+        $response->assertSee('position: static !important;', false);
+        $response->assertSee('page-break-after: avoid !important;', false);
+        $response->assertSee('.no-print', false);
     }
 }

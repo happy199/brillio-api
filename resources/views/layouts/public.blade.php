@@ -572,7 +572,7 @@
                         <li><a href="{{ route('public.resources') }}"
                                 class="text-gray-400 hover:text-white transition-colors">Ressources</a></li>
                         <li><a href="{{ route('public.opportunities') }}"
-                                class="text-gray-400 hover:text-white transition-colors">Opportunités & Mon CV</a></li>
+                                class="text-gray-400 hover:text-white transition-colors">Analyse mon CV</a></li>
                         <li><a href="{{ route('public.advertisements') }}"
                                 class="text-gray-400 hover:text-white transition-colors">Publicités</a></li>
                         <li><a href="{{ route('contact') }}"

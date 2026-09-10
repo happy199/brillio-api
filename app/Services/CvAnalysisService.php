@@ -197,24 +197,47 @@ RÈGLES D'ÉVALUATION ATS UNIVERSELLES :
 4. Quantification de l'Impact (20%) : Application de la formule Google XYZ / méthode STAR (verbes d'action + indicateurs chiffrés, pourcentages, volumes).
 5. Mots-clés & Compétences Métier (20%) : Pertinence et densité du vocabulaire technique et méthodologique adapté au métier ciblé, avec sigles et noms complets.
 
+DIRECTIVE MAJEURE SUR LE CONTENU RESTITUÉ (parsed_content) :
+Le CV restitué dans 'parsed_content' NE DOIT PAS être une simple copie brute du texte. Tu dois directement APPLIQUER tes propres recommandations ATS pour produire une version optimisée prête à l'emploi :
+1. Revalorise l'intitulé de chaque poste (si le candidat a mis simplement 'Stage', transforme-le en 'Assistant Développeur Web (Stage)' ou 'Chargé de Communication (Stage)' selon son domaine réel).
+2. Rédige une synthèse professionnelle percutante (2-3 phrases valorisant l'expertise, les réalisations et les compétences clés).
+3. Reformule chaque puce d'expérience avec des verbes d'action puissants selon la formule STAR (Situation, Tâche, Action, Résultat).
+4. Lorsque les données chiffrées ne sont pas précisées dans le CV original, insère obligatoirement une balise explicite entre crochets au format exact : [À compléter : métrique ou résultat, ex: +20% d'efficacité / X clients] pour que le candidat personnalise facilement son document Word.
+
 RÈGLE ABSOLUE :
 Réponds UNIQUEMENT avec un objet JSON valide, sans aucune balise markdown, ni texte avant ou après.
 
 Format JSON attendu :
 {
   \"candidate_name\": \"Nom et prénom du candidat détecté (ou 'Candidat')\",
-  \"candidate_title\": \"Intitulé du poste ou spécialité ciblée\",
+  \"candidate_title\": \"Intitulé du poste revalorisé et clair pour les ATS (ex: 'Développeur Web Full-Stack' au lieu de vague 'Stagiaire')\",
   \"candidate_contact\": {
     \"phone\": \"Numéro ou non spécifié\",
     \"email\": \"Email ou non spécifié\",
     \"location\": \"Ville, Pays ou non spécifié\"
   },
   \"parsed_content\": {
-    \"profil\": \"Résumé du profil professionnel en 2-3 phrases accrocheuses\",
-    \"experiences\": [\"Intitulé poste - Entreprise (Dates) : mission formulée avec verbe d'action et impact chiffré si possible\"],
-    \"formation\": [\"Diplôme ou Cursus - Établissement (Année)\"],
+    \"profil\": \"Synthèse professionnelle percutante en 2-3 phrases valorisant l'expertise et l'impact candidat\",
+    \"experiences\": [
+      {
+        \"title\": \"Intitulé de poste revalorisé (ex: 'Développeur Web & Mobile (Stagiaire)')\",
+        \"company\": \"Nom de l'entreprise ou Organisation\",
+        \"period\": \"Dates (ex: Janv 2024 - Présent)\",
+        \"bullets\": [
+          \"Verbe d'action au début + mission menée avec contexte + [À compléter : résultat chiffré, ex: +20% de productivité / X utilisateurs]\",
+          \"Action réalisée avec outil ou méthode clé + [À compléter : impact ou livrable mesurable obtenu]\"
+        ]
+      }
+    ],
+    \"formation\": [
+      {
+        \"degree\": \"Intitulé exact du diplôme valorisé\",
+        \"school\": \"Nom complet de l'établissement / université\",
+        \"year\": \"Année ou période (ex: 2022 - 2024)\"
+      }
+    ],
     \"certifications\": [\"Certification professionnelle reconnue (ex: CKA, AWS, PMP, Scrum)\"],
-    \"competences\": [\"Compétence 1\", \"Compétence 2\", \"Compétence 3\"],
+    \"competences\": [\"Compétence technique 1\", \"Compétence 2\", \"Outil métier 3\"],
     \"langues\": [\"Français (Courant)\", \"Anglais (Professionnel)\"]
   },
   \"global_score\": 75,
@@ -310,11 +333,42 @@ Format JSON attendu :
                 'location' => 'Afrique de l\'Ouest',
             ],
             'parsed_content' => [
-                'profil' => 'Profil dynamique prêt à s\'investir dans de nouveaux challenges professionnels.',
-                'experiences' => $hasExp ? ['Expériences professionnelles répertoriées dans le document'] : ['Débutant / En formation'],
-                'formation' => $hasForm ? ['Formations et diplômes mentionnés'] : ['Cursus en cours'],
+                'profil' => 'Professionnel dynamique et orienté résultats, alliant rigueur méthodologique et esprit d\'initiative pour contribuer activement au succès des projets de l\'organisation.',
+                'experiences' => $hasExp ? [
+                    [
+                        'title' => 'Chargé de Mission & Projets',
+                        'company' => 'Entreprise / Organisation',
+                        'period' => 'Récemment',
+                        'bullets' => [
+                            'Pilotage et exécution des missions opérationnelles avec autonomie et rigueur [À compléter : résultat chiffré, ex: +15% de productivité]',
+                            'Coordination avec les parties prenantes et application des bonnes pratiques métiers [À compléter : projet ou livrable abouti]',
+                        ],
+                    ],
+                ] : [
+                    [
+                        'title' => 'Projets Académiques & Réalisations',
+                        'company' => 'Projets Personnels / Formation',
+                        'period' => 'En cours',
+                        'bullets' => [
+                            'Conception et réalisation de cas pratiques d\'application [À compléter : outils utilisés et impact obtenu]',
+                        ],
+                    ],
+                ],
+                'formation' => $hasForm ? [
+                    [
+                        'degree' => 'Diplôme de l\'Enseignement Supérieur',
+                        'school' => 'Université ou Grande École',
+                        'year' => (string) date('Y'),
+                    ],
+                ] : [
+                    [
+                        'degree' => 'Cursus de Formation Professionnelle',
+                        'school' => 'Centre de Formation',
+                        'year' => (string) date('Y'),
+                    ],
+                ],
                 'certifications' => $hasCert ? ['Certifications techniques identifiées'] : [],
-                'competences' => $hasComp ? ['Compétences techniques et relationnelles'] : ['Organisation', 'Communication'],
+                'competences' => $hasComp ? ['Gestion de projet', 'Analyse et résolution de problèmes', 'Communication professionnelle'] : ['Organisation', 'Communication', 'Rigueur'],
                 'langues' => ['Français (Courant)', 'Anglais (Professionnel)'],
             ],
             'global_score' => $score,
