@@ -1147,4 +1147,82 @@ TXT;
         $response->assertSee('page-break-after: avoid !important;', false);
         $response->assertSee('.no-print', false);
     }
+
+    public function test_authenticated_jeune_can_reanalyze_existing_cv_without_upload_and_preserves_projects(): void
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+        ]);
+
+        $initialAnalysis = $this->createCvAnalysisFixture($user, [
+            'candidate_name' => 'Aya N\'Guessan',
+            'candidate_title' => 'Développeuse Frontend Junior',
+            'original_filename' => 'CV_Aya_Nguessan.pdf',
+            'file_path' => 'cv_analyses/test_aya.pdf',
+            'parsed_content' => [
+                'raw_text' => "AYA N'GUESSAN\nDéveloppeuse Frontend Junior\nPROJETS\nSystème de réservation en ligne — Salon de coiffure",
+                'profil' => 'Développeuse frontend passionnée React et JavaScript.',
+                'experiences' => [
+                    [
+                        'title' => 'Chargée de gestion administrative',
+                        'company' => 'Entreprise commerciale',
+                        'period' => '2 ans',
+                        'bullets' => ['Gestion de dossiers clients.'],
+                    ],
+                ],
+                'projets' => [
+                    [
+                        'title' => 'Développeuse Frontend (Projet Personnel)',
+                        'company' => 'Salon de coiffure',
+                        'period' => 'Projet personnel déployé',
+                        'bullets' => ['Conception d\'une interface de réservation en React.'],
+                    ],
+                ],
+                'formation' => [
+                    [
+                        'degree' => 'Formation intensive Développement Web Frontend',
+                        'school' => 'École de code, Abidjan',
+                        'year' => '2025',
+                    ],
+                ],
+            ],
+        ]);
+
+        // Vérifier la présence du bouton sur la page Outils
+        $pageResponse = $this->actingAs($user)->get(route('jeune.outils'));
+        $pageResponse->assertStatus(200);
+        $pageResponse->assertSee('Relancer l\'analyse', false);
+
+        // Vérifier la normalisation qui fusionne les projets avec les expériences
+        $norm = $initialAnalysis->normalized_cv_data;
+        $this->assertCount(2, $norm['experiences']);
+        $this->assertEquals('Développeuse Frontend (Projet Personnel)', $norm['experiences'][1]['title']);
+
+        // Relancer l'analyse via l'action POST dédiée sans re-téléverser de fichier
+        $reanalyzeResponse = $this->actingAs($user)->postJson(route('jeune.cv.reanalyze'), [
+            'cv_id' => $initialAnalysis->id,
+        ]);
+
+        $reanalyzeResponse->assertStatus(200);
+        $reanalyzeResponse->assertJson([
+            'success' => true,
+        ]);
+
+        // Un nouveau record d'analyse est créé dans l'historique
+        $this->assertEquals(2, $user->cvAnalyses()->count());
+        $newCvId = $reanalyzeResponse->json('new_cv_id');
+        $this->assertNotNull($newCvId);
+        $this->assertNotEquals($initialAnalysis->id, $newCvId);
+
+        $newAnalysis = CvAnalysis::find($newCvId);
+        $this->assertEquals('CV_Aya_Nguessan.pdf', $newAnalysis->original_filename);
+        $this->assertEquals('cv_analyses/test_aya.pdf', $newAnalysis->file_path);
+
+        // Tentative de réanalyse par un autre jeune non autorisé
+        $otherUser = User::factory()->create(['user_type' => 'jeune']);
+        $unauthorizedResponse = $this->actingAs($otherUser)->postJson(route('jeune.cv.reanalyze'), [
+            'cv_id' => $initialAnalysis->id,
+        ]);
+        $unauthorizedResponse->assertStatus(404);
+    }
 }

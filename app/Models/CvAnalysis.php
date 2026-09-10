@@ -143,7 +143,13 @@ class CvAnalysis extends Model
         $isEnglish = $this->detectLanguage($rawText, $parsed);
         $labels = $this->resolveLocalizedLabels($isEnglish);
         $profileSummary = $this->extractCandidateSummary($rawText, $parsed, $isEnglish);
-        $experiences = $this->extractNormalizedExperiences($parsed['experiences'] ?? []);
+        $rawExperiences = (array) ($parsed['experiences'] ?? []);
+        if (! empty($parsed['projets']) && is_array($parsed['projets'])) {
+            $rawExperiences = array_merge($rawExperiences, $parsed['projets']);
+        } elseif (! empty($parsed['projects']) && is_array($parsed['projects'])) {
+            $rawExperiences = array_merge($rawExperiences, $parsed['projects']);
+        }
+        $experiences = $this->extractNormalizedExperiences($rawExperiences);
         $formations = $this->extractNormalizedEducation($parsed['education'] ?? $parsed['formation'] ?? []);
         $rawSkills = (array) ($parsed['skills'] ?? $parsed['competences'] ?? []);
         $categorizedSkills = $this->extractCategorizedSkills($rawText);
