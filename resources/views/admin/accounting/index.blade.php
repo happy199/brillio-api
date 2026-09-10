@@ -58,7 +58,7 @@
     </div>
 
     <!-- Cartes Résumé -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Recettes (Cash In) -->
         <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
             <div class="flex items-center justify-between mb-2">
@@ -109,6 +109,20 @@
             </p>
             <p class="text-xs text-gray-500 mt-2">≈ {{ number_format($estimatedTargetingRevenueFcfa, 0, ',', ' ') }}
                 FCFA (valeur estimée)</p>
+        </div>
+
+        <!-- Gains Outils CV & Templates (100% Société) -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-amber-500">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-gray-500 text-sm font-medium uppercase">Gains CV & Templates</h3>
+                <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full"><i
+                        class="fas fa-file-alt"></i> 100% Société</span>
+            </div>
+            <p class="text-3xl font-bold text-amber-600">{{ number_format($cvRevenueCredits ?? 0, 0, ',', ' ') }}
+                <span class="text-lg text-gray-500">Crédits</span>
+            </p>
+            <p class="text-xs text-gray-500 mt-2">≈ {{ number_format($estimatedCvRevenueFcfa ?? 0, 0, ',', ' ') }}
+                FCFA (templates ATS & exports)</p>
         </div>
 
         <!-- Revenus Organisations -->

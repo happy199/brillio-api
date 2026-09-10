@@ -5,70 +5,91 @@
 
 @section('content')
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
     <!-- Total utilisateurs -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-white rounded-xl shadow-sm p-5">
         <div class="flex items-center">
-            <div class="p-3 bg-indigo-100 rounded-lg">
+            <div class="p-3 bg-indigo-100 rounded-lg shrink-0">
                 <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                 </svg>
             </div>
-            <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Utilisateurs</h3>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_users']) }}</p>
-                <p class="text-xs text-gray-500">{{ $stats['total_jeunes'] }} jeunes, {{ $stats['total_mentors'] }} mentors</p>
+            <div class="ml-3 min-w-0">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">Utilisateurs</h3>
+                <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ number_format($stats['total_users']) }}</p>
+                <p class="text-[11px] text-gray-500 truncate">{{ $stats['total_jeunes'] }} jeunes, {{ $stats['total_mentors'] }} mentors</p>
             </div>
         </div>
     </div>
 
     <!-- Tests complétés -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-white rounded-xl shadow-sm p-5">
         <div class="flex items-center">
-            <div class="p-3 bg-green-100 rounded-lg">
+            <div class="p-3 bg-green-100 rounded-lg shrink-0">
                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
             </div>
-            <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Tests personnalité</h3>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_personality_tests']) }}</p>
-                <p class="text-xs text-gray-500">Tests complétés</p>
+            <div class="ml-3 min-w-0">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">Tests personnalité</h3>
+                <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ number_format($stats['total_personality_tests']) }}</p>
+                <p class="text-[11px] text-gray-500">Tests complétés</p>
             </div>
         </div>
     </div>
 
     <!-- Conversations chat -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-white rounded-xl shadow-sm p-5">
         <div class="flex items-center">
-            <div class="p-3 bg-blue-100 rounded-lg">
+            <div class="p-3 bg-blue-100 rounded-lg shrink-0">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
             </div>
-            <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Messages chat</h3>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_chat_messages']) }}</p>
-                <p class="text-xs text-gray-500">{{ $stats['total_conversations'] }} conversations</p>
+            <div class="ml-3 min-w-0">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">Messages chat</h3>
+                <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ number_format($stats['total_chat_messages']) }}</p>
+                <p class="text-[11px] text-gray-500">{{ $stats['total_conversations'] }} conversations</p>
             </div>
         </div>
     </div>
 
     <!-- Mentors publiés -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-white rounded-xl shadow-sm p-5">
         <div class="flex items-center">
-            <div class="p-3 bg-purple-100 rounded-lg">
+            <div class="p-3 bg-purple-100 rounded-lg shrink-0">
                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
             </div>
-            <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Mentors publiés</h3>
-                <p class="text-2xl font-bold text-gray-900">{{ $stats['published_mentors'] }}</p>
-                <p class="text-xs text-gray-500">{{ $stats['pending_mentors'] }} en attente</p>
+            <div class="ml-3 min-w-0">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">Mentors publiés</h3>
+                <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ $stats['published_mentors'] }}</p>
+                <p class="text-[11px] text-gray-500">{{ $stats['pending_mentors'] }} en attente</p>
             </div>
         </div>
     </div>
+
+    <!-- Analyses de CV -->
+    <a href="{{ route('admin.documents.index', ['type' => 'cv']) }}" class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group border border-transparent hover:border-amber-200">
+        <div class="flex items-center">
+            <div class="p-3 bg-amber-100 rounded-lg shrink-0 group-hover:bg-amber-200 transition-colors">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <div class="ml-3 min-w-0">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total analyses CV</h3>
+                    <span class="text-[10px] text-amber-600 font-bold bg-amber-50 px-1.5 py-0.5 rounded">IA</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ number_format($stats['total_cv_analyses']) }}</p>
+                <p class="text-[11px] text-gray-500 truncate" title="{{ $stats['total_cv_analyses'] }} au total • {{ $stats['cv_analyses_this_week'] }} cette semaine">
+                    Total des CV analysés • {{ $stats['avg_cv_score'] }}/100 moy.
+                </p>
+            </div>
+        </div>
+    </a>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

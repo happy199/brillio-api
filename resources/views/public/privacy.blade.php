@@ -46,8 +46,8 @@
                             données font l'objet d'une protection renforcée.</em></li>
                     <li><strong>Conversations avec le chatbot :</strong> messages échangés avec notre assistant IA
                         d'orientation.</li>
-                    <li><strong>Documents académiques :</strong> bulletins, relevés de notes, diplômes que vous choisissez
-                        de télécharger pour votre dossier d'orientation.</li>
+                    <li><strong>Documents académiques & professionnels :</strong> bulletins, relevés de notes, diplômes et Curriculum Vitae (CV) que vous choisissez de télécharger pour votre orientation et votre insertion.</li>
+                    <li><strong>Données extraites des CV :</strong> coordonnées de contact (téléphone, adresse email, ville, pays), parcours professionnel, projets, compétences techniques, formations et certifications analysées par nos outils d'intelligence artificielle.</li>
                 </ul>
 
                 <h3>2.2 Données collectées automatiquement</h3>
@@ -59,8 +59,10 @@
                 <h2>3. Utilisation des données (Finalités)</h2>
                 <p>Nous utilisons vos données pour des finalités spécifiques et légitimes :</p>
                 <ul>
-                    <li>Fournir et améliorer nos services d'orientation et personnaliser votre expérience.</li>
+                    <li>Fournir et améliorer nos services d'orientation et d'insertion professionnelle, et personnaliser votre expérience.</li>
                     <li>Vous permettre de passer le test de personnalité et consulter vos résultats.</li>
+                    <li>Évaluer la compatibilité ATS de votre CV, générer des recommandations d'optimisation et produire des versions restructurées prêtes à l'emploi.</li>
+                    <li>Permettre à l'équipe d'accompagnement et de placement de Brillio de vous contacter directement afin de vous proposer des opportunités professionnelles, des offres de stage ou d'emploi et des ateliers adaptés à vos compétences.</li>
                     <li>Stocker vos conversations avec le chatbot pour assurer la continuité du conseil.</li>
                     <li>Vous mettre en relation avec des profils de mentors pertinents basés sur votre profil.</li>
                     <li>Analyser l'utilisation de l'application de manière agrégée pour optimiser nos services.</li>

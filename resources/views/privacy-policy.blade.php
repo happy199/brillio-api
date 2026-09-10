@@ -38,10 +38,11 @@
                         <li>Pays et ville de résidence</li>
                     </ul>
 
-                    <p class="mt-4"><strong>Données de profil :</strong></p>
+                    <p class="mt-4"><strong>Données de profil & professionnelles :</strong></p>
                     <ul class="list-disc list-inside ml-4 space-y-1">
                         <li>Résultats des tests de personnalité (MBTI)</li>
-                        <li>Documents académiques uploadés</li>
+                        <li>Documents académiques et Curriculum Vitae (CV) déposés</li>
+                        <li>Données extraites des CV (coordonnées, compétences, parcours, projets, diplômes)</li>
                         <li>Historique des conversations avec l'IA</li>
                         <li>Préférences d'orientation professionnelle</li>
                     </ul>
@@ -60,7 +61,9 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Utilisation des Données</h2>
                 <p class="text-gray-700 mb-3">Nous utilisons vos données pour :</p>
                 <ul class="list-disc list-inside ml-4 space-y-2 text-gray-700">
-                    <li>Fournir nos services d'orientation professionnelle</li>
+                    <li>Fournir nos services d'orientation et d'insertion professionnelle</li>
+                    <li>Évaluer, noter et optimiser les CV selon les critères ATS des recruteurs</li>
+                    <li>Permettre à l'équipe commerciale et de placement de Brillio de vous contacter pour vous proposer des opportunités concrètes d'emploi, de stage ou d'ateliers</li>
                     <li>Personnaliser votre expérience utilisateur</li>
                     <li>Améliorer nos algorithmes de recommandation</li>
                     <li>Communiquer avec vous concernant votre compte</li>

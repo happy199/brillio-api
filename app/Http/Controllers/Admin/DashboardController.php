@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AcademicDocument;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
+use App\Models\CvAnalysis;
 use App\Models\MentorProfile;
 use App\Models\PersonalityTest;
 use App\Models\User;
@@ -31,6 +32,9 @@ class DashboardController extends Controller
             'total_chat_messages' => ChatMessage::count(),
             'total_conversations' => ChatConversation::count(),
             'total_documents' => AcademicDocument::count(),
+            'total_cv_analyses' => CvAnalysis::count(),
+            'cv_analyses_this_week' => CvAnalysis::where('created_at', '>=', now()->subDays(7))->count(),
+            'avg_cv_score' => (int) round(CvAnalysis::avg('global_score') ?? 0),
         ];
 
         // Utilisateurs récents (7 derniers jours)

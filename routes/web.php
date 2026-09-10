@@ -741,6 +741,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         // Gestion des documents
         Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
         Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+        Route::get('documents/{document}/cv-analysis', [DocumentController::class, 'cvAnalysis'])->name('documents.cv-analysis');
+        Route::post('documents/export-candidates', [DocumentController::class, 'exportCandidates'])->name('documents.export-candidates');
         Route::resource('documents', DocumentController::class)->only(['index', 'destroy']);
 
         // Gestion du mentorat
