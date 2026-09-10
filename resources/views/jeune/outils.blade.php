@@ -144,6 +144,22 @@
                         </div>
 
                     <div class="flex items-center gap-3">
+                        <!-- Bouton Relancer l'analyse IA sans ré-uploader le fichier -->
+                        <button type="button"
+                                @click="reanalyzeCurrentCv()"
+                                :disabled="isReanalyzingCv"
+                                class="px-3.5 py-2 rounded-xl border border-primary-200 bg-primary-50 text-primary-700 hover:bg-primary-100 font-semibold text-xs sm:text-sm flex items-center gap-2 transition shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                title="Relancer une analyse IA complète de ce CV sans re-téléverser le fichier">
+                            <svg x-show="!isReanalyzingCv" class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <svg x-show="isReanalyzingCv" class="w-4 h-4 text-primary-600 animate-spin" fill="none" viewBox="0 0 24 24" x-cloak>
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span x-text="isReanalyzingCv ? 'Analyse en cours...' : 'Relancer l\'analyse'">Relancer l'analyse</span>
+                        </button>
+
                         @if($cvAnalyses->count() > 1)
                             <div class="relative" x-data="{ historyOpen: false }">
                                 <button @click="historyOpen = !historyOpen" class="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
@@ -1682,6 +1698,7 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
         selectedTemplate: 0,
         templateCosts: initialTemplateCosts || { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 },
         isProcessingCvAction: false,
+        isReanalyzingCv: false,
         toastMessage: '',
         toastType: 'success',
         showToast: false,
@@ -1810,6 +1827,37 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
                 this.showToastNotification('Une erreur inattendue est survenue.', 'error');
             } finally {
                 this.isProcessingCvAction = false;
+            }
+        },
+
+        async reanalyzeCurrentCv() {
+            if (!this.activeCvId || this.isReanalyzingCv) return;
+            this.isReanalyzingCv = true;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                const response = await fetch('{{ route('jeune.cv.reanalyze') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        cv_id: this.activeCvId
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    this.showToastNotification(data.message || 'Erreur lors de la réanalyse du CV.', 'error');
+                    this.isReanalyzingCv = false;
+                }
+            } catch (err) {
+                console.error('Reanalyze error:', err);
+                this.showToastNotification('Une erreur inattendue est survenue.', 'error');
+                this.isReanalyzingCv = false;
             }
         },
 

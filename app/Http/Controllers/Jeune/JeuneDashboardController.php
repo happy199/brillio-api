@@ -1149,6 +1149,36 @@ class JeuneDashboardController extends Controller
     }
 
     /**
+     * Relance l'analyse IA du CV existant sans re-upload de fichier
+     */
+    public function reanalyzeCv(Request $request, CvAnalysisService $cvService)
+    {
+        $validated = $request->validate([
+            'cv_id' => 'required|integer',
+        ]);
+
+        $user = auth()->user();
+        $cvAnalysis = $user->cvAnalyses()->findOrFail($validated['cv_id']);
+
+        try {
+            $newAnalysis = $cvService->reanalyze($cvAnalysis);
+            $redirectUrl = route('jeune.outils', ['tab' => 'cv', 'cv_id' => $newAnalysis->id]);
+            $message = 'Votre CV a été réanalysé avec succès par l\'IA ! Nouveau score : '.$newAnalysis->global_score.'/100.';
+
+            return $request->expectsJson()
+                ? response()->json(['success' => true, 'message' => $message, 'new_cv_id' => $newAnalysis->id, 'redirect_url' => $redirectUrl])
+                : redirect()->to($redirectUrl)->with('success', $message);
+        } catch (\Exception $e) {
+            Log::error('Erreur réanalyse CV: '.$e->getMessage());
+            $errorMsg = 'Une erreur est survenue lors de la réanalyse de votre CV. Veuillez réessayer.';
+
+            return $request->expectsJson()
+                ? response()->json(['success' => false, 'message' => $errorMsg], 500)
+                : back()->withErrors(['reanalyze' => $errorMsg]);
+        }
+    }
+
+    /**
      * Page des mentors
      */
     public function mentors(Request $request)

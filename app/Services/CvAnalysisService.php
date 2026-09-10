@@ -43,6 +43,66 @@ class CvAnalysisService
         $analysisResult = $this->analyzeWithAI($extractedText, $originalFilename);
 
         // 4. Génération d'un token invité unique et persistance
+        $analysis = $this->persistAnalysisRecord(
+            $user,
+            $originalFilename,
+            $path,
+            $fileSize,
+            $mimeType,
+            $extractedText,
+            $analysisResult
+        );
+
+        if ($user) {
+            $this->storeCvInAcademicDocuments($user, $analysis);
+        }
+
+        return $analysis;
+    }
+
+    /**
+     * Relance l'analyse IA d'un CV existant sans re-upload de fichier
+     */
+    public function reanalyze(CvAnalysis $existingAnalysis): CvAnalysis
+    {
+        $user = $existingAnalysis->user;
+        $originalFilename = $existingAnalysis->original_filename;
+        $filePath = $existingAnalysis->file_path;
+        $extension = pathinfo($originalFilename, PATHINFO_EXTENSION) ?: 'pdf';
+
+        $fullPath = storage_path('app/public/'.$filePath);
+        $extractedText = file_exists($fullPath) ? $this->extractText($fullPath, $extension) : '';
+
+        // Fallback sur le texte brut extrait précédemment si le fichier physique est inaccessible
+        if (empty($extractedText) && ! empty($existingAnalysis->parsed_content['raw_text'])) {
+            $extractedText = (string) $existingAnalysis->parsed_content['raw_text'];
+        }
+
+        $analysisResult = $this->analyzeWithAI($extractedText, $originalFilename);
+
+        return $this->persistAnalysisRecord(
+            $user,
+            $originalFilename,
+            $filePath,
+            $existingAnalysis->file_size ?? 0,
+            $existingAnalysis->mime_type ?? 'application/pdf',
+            $extractedText,
+            $analysisResult
+        );
+    }
+
+    /**
+     * Persiste une analyse de CV et son résultat normalisé
+     */
+    private function persistAnalysisRecord(
+        ?User $user,
+        string $originalFilename,
+        string $filePath,
+        int $fileSize,
+        string $mimeType,
+        string $extractedText,
+        array $analysisResult
+    ): CvAnalysis {
         $guestToken = Str::random(40);
         $globalScore = (int) ($analysisResult['global_score'] ?? 65);
         $globalScore = max(10, min(99, $globalScore));
@@ -53,11 +113,11 @@ class CvAnalysisService
             $parsedContent['raw_text'] = $extractedText;
         }
 
-        $analysis = CvAnalysis::create([
+        return CvAnalysis::create([
             'user_id' => $user?->id,
             'guest_token' => $guestToken,
             'original_filename' => $originalFilename,
-            'file_path' => $path,
+            'file_path' => $filePath,
             'file_size' => $fileSize,
             'mime_type' => $mimeType,
             'candidate_name' => $analysisResult['candidate_name'] ?? self::CANDIDATE_DEFAULT,
@@ -91,12 +151,6 @@ class CvAnalysisService
             'summary' => $analysisResult['summary'] ?? 'Profil prometteur avec de bonnes bases. En structurant davantage les réalisations concrètes, ce CV gagnera significativement en attractivité auprès des recruteurs.',
             'is_claimed' => (bool) $user,
         ]);
-
-        if ($user) {
-            $this->storeCvInAcademicDocuments($user, $analysis);
-        }
-
-        return $analysis;
     }
 
     /**
@@ -203,6 +257,8 @@ Le CV restitué dans 'parsed_content' NE DOIT PAS être une simple copie brute d
 2. Rédige une synthèse professionnelle percutante (2-3 phrases valorisant l'expertise, les réalisations et les compétences clés).
 3. Reformule chaque puce d'expérience avec des verbes d'action puissants selon la formule STAR (Situation, Tâche, Action, Résultat).
 4. Lorsque les données chiffrées ne sont pas précisées dans le CV original, insère obligatoirement une balise explicite entre crochets au format exact : [À compléter : métrique ou résultat, ex: +20% d'efficacité / X clients] pour que le candidat personnalise facilement son document Word.
+5. EXHAUSTIVITÉ ABSOLUE ET INCLUSION IMPÉRATIVE DES PROJETS : Tu ne dois JAMAIS omettre, ignorer ou supprimer les projets du candidat ! Si le CV contient une section 'PROJETS', 'PROJETS PERSONNELS', 'PROJETS DE FORMATION', 'RÉALISATIONS' ou 'PORTFOLIO' (fréquent et capital chez les profils juniors, tech ou reconversions), tu DOIS TOUS les inclure dans la liste 'experiences' en qualifiant le poste (ex: 'Développeuse Frontend (Projet Personnel)' ou 'Développeuse Frontend (Projet de formation)') et en indiquant le nom du projet/client comme 'company'. Chaque projet doit impérativement avoir ses puces détaillant les fonctionnalités, les technologies utilisées et les résultats obtenus.
+6. CONSERVATION DE TOUTES LES EXPÉRIENCES : Veille à restituer l'INTÉGRALITÉ des expériences professionnelles et projets mentionnés dans le CV sans en omettre aucun.
 
 RÈGLE ABSOLUE :
 Réponds UNIQUEMENT avec un objet JSON valide, sans aucune balise markdown, ni texte avant ou après.
@@ -220,11 +276,11 @@ Format JSON attendu :
     \"profil\": \"Synthèse professionnelle percutante en 2-3 phrases valorisant l'expertise et l'impact candidat\",
     \"experiences\": [
       {
-        \"title\": \"Intitulé de poste revalorisé (ex: 'Développeur Web & Mobile (Stagiaire)')\",
-        \"company\": \"Nom de l'entreprise ou Organisation\",
-        \"period\": \"Dates (ex: Janv 2024 - Présent)\",
+        \"title\": \"Intitulé de poste revalorisé (ex: 'Développeur Web & Mobile (Stagiaire)' ou 'Développeuse Frontend (Projet Personnel)')\",
+        \"company\": \"Nom de l'entreprise ou Nom du projet (ex: 'Tech SARL' ou 'Système de réservation en ligne')\",
+        \"period\": \"Dates ou 'Projet personnel'\",
         \"bullets\": [
-          \"Verbe d'action au début + mission menée avec contexte + [À compléter : résultat chiffré, ex: +20% de productivité / X utilisateurs]\",
+          \"Verbe d'action au début + mission ou fonctionnalité menée avec contexte + [À compléter : résultat chiffré, ex: +20% de productivité / X utilisateurs]\",
           \"Action réalisée avec outil ou méthode clé + [À compléter : impact ou livrable mesurable obtenu]\"
         ]
       }
