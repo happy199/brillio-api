@@ -32,7 +32,7 @@
         this.cvData = null;
         this.cvError = '';
         try {
-            const url = '/admin/documents/' + docId + '/cv-analysis';
+            const url = '{{ route('admin.documents.index') }}/' + docId + '/cv-analysis';
             const res = await fetch(url, {
                 headers: {
                     'Accept': 'application/json',
