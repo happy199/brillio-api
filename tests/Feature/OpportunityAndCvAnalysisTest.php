@@ -890,4 +890,92 @@ TXT;
 
         unlink($tempDocx);
     }
+
+    public function test_cv_restructured_content_applies_recommendations_with_placeholders_in_web_and_docx()
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'email' => 'candidat.star@brillio.test',
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_star_restructured',
+            'original_filename' => 'CV_Candidat_Ameliore.pdf',
+            'file_path' => 'cv_analyses/test_star.pdf',
+            'file_size' => 12345,
+            'mime_type' => 'application/pdf',
+            'candidate_name' => 'Amadou Coulibaly',
+            'candidate_title' => 'Développeur Web & Mobile Full-Stack',
+            'candidate_contact' => [
+                'email' => 'amadou.coulibaly@email.com',
+                'phone' => '+225 07 00 00 00 00',
+                'location' => 'Abidjan, Côte d\'Ivoire',
+            ],
+            'parsed_content' => [
+                'profil' => 'Développeur passionné orienté résultats avec expertise en Laravel et Vue.js [À compléter : années d\'expérience ou impact majeur].',
+                'experiences' => [
+                    [
+                        'title' => 'Développeur Web & Mobile (Stagiaire)',
+                        'company' => 'Tech Solutions SARL',
+                        'period' => 'Janv 2024 - Présent',
+                        'bullets' => [
+                            'Conception et développement d\'une API REST sous Laravel permettant de fluidifier les échanges de données [À compléter : +30% de rapidité / 500 requêtes/sec]',
+                            'Optimisation des requêtes SQL et refonte du tableau de bord de suivi [À compléter : temps de réponse divisé par 2]',
+                        ],
+                    ],
+                ],
+                'formation' => [
+                    [
+                        'degree' => 'Master en Ingénierie Logicielle',
+                        'school' => 'INP-HB Yamoussoukro',
+                        'year' => '2023 - 2024',
+                    ],
+                ],
+                'competences' => ['Laravel', 'Vue.js', 'PostgreSQL', 'Docker'],
+                'langues' => ['Français (Courant)', 'Anglais (Professionnel)'],
+            ],
+            'global_score' => 82,
+            'status_label' => 'Très bien',
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        // 1. Vérification de la normalisation des données
+        $norm = $analysis->normalized_cv_data;
+        $this->assertCount(1, $norm['experiences']);
+        $this->assertEquals('Développeur Web & Mobile (Stagiaire)', $norm['experiences'][0]['title']);
+        $this->assertCount(2, $norm['experiences'][0]['bullets']);
+        $this->assertStringContainsString('[À compléter : +30% de rapidité', $norm['experiences'][0]['bullets'][0]);
+
+        // 2. Vérification du rendu Web dans outils.blade.php
+        $webResponse = $this->actingAs($user)->get(route('jeune.outils'));
+        $webResponse->assertStatus(200);
+        $webResponse->assertSee('Contenu restructuré', false);
+        $webResponse->assertSee('Recommandations ATS appliquées', false);
+        $webResponse->assertSee('bg-amber-100 text-amber-900 border border-amber-300', false);
+        $webResponse->assertSee('À compléter : +30% de rapidité', false);
+
+        // 3. Vérification de l'export Word .docx avec balises stylisées en ambre
+        $docxResponse = $this->actingAs($user)->get(route('jeune.cv.download-docx', [
+            'cv' => $analysis->id,
+            'template' => 0,
+        ]));
+        $docxResponse->assertStatus(200);
+
+        $tempDocx = tempnam(sys_get_temp_dir(), 'test_star_docx_').'.docx';
+        file_put_contents($tempDocx, $docxResponse->streamedContent());
+
+        $zip = new \ZipArchive;
+        $this->assertTrue($zip->open($tempDocx));
+        $xml = $zip->getFromName('word/document.xml');
+
+        $this->assertStringContainsString('B45309', $xml); // Couleur ambre des balises
+        $this->assertStringContainsString('À compléter : +30% de rapidité', $xml);
+
+        unlink($tempDocx);
+    }
 }

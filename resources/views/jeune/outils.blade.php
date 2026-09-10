@@ -535,7 +535,36 @@
                         @php
                             $norm = $activeCv->normalized_cv_data;
                             $labels = $norm['labels'] ?? [];
+
+                            $formatPlaceholders = function (?string $text) {
+                                if ($text === null || $text === '') {
+                                    return '';
+                                }
+                                $escaped = e($text);
+                                return preg_replace_callback(
+                                    '/(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\})/iu',
+                                    function ($matches) {
+                                        return '<span class="inline-block mx-0.5 px-1.5 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs select-all" title="À personnaliser avec vos vraies données dans votre fichier Word téléchargeable">'.$matches[0].'</span>';
+                                    },
+                                    $escaped
+                                );
+                            };
                         @endphp
+
+                        <!-- Bannière explicative : Contenu optimisé & Balises à compléter -->
+                        <div class="max-w-4xl mx-auto mb-4 bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900 shadow-2xs">
+                            <div class="w-7 h-7 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                </svg>
+                            </div>
+                            <div class="space-y-1">
+                                <p class="font-bold text-amber-950">Contenu restructuré & Recommandations ATS appliquées</p>
+                                <p class="text-amber-800 leading-relaxed">
+                                    Vos expériences ont été reformulées avec des verbes d'action puissants. Les pastilles comme <span class="inline-block px-1.5 py-0.5 rounded font-semibold bg-amber-200/80 text-amber-950 border border-amber-300">[À compléter : résultat chiffré...]</span> vous indiquent où renseigner vos métriques réelles lors de l'édition dans votre fichier Word téléchargé.
+                                </p>
+                            </div>
+                        </div>
 
                         <!-- Zone d'impression & d'aperçu du CV ATS sélectionné -->
                         <div id="cvEnhancedPrintArea"
@@ -558,7 +587,7 @@
 
                                 <div class="space-y-1.5">
                                     <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">{{ $labels['profile'] ?? 'PROFESSIONAL SUMMARY' }}</h2>
-                                    <p class="text-xs leading-relaxed text-gray-800 text-justify">{{ $norm['profile_summary'] }}</p>
+                                    <p class="text-xs leading-relaxed text-gray-800 text-justify">{!! $formatPlaceholders($norm['profile_summary']) !!}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
@@ -573,11 +602,11 @@
                                                 @if(!empty($exp['bullets']))
                                                     <ul class="list-disc list-inside text-xs text-gray-700 space-y-0.5 pl-1">
                                                         @foreach($exp['bullets'] as $b)
-                                                            <li class="leading-relaxed">{{ $b }}</li>
+                                                            <li class="leading-relaxed">{!! $formatPlaceholders($b) !!}</li>
                                                         @endforeach
                                                     </ul>
                                                 @elseif(!empty($exp['description']))
-                                                    <p class="text-xs text-gray-700 leading-relaxed">{{ $exp['description'] }}</p>
+                                                    <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
                                                 @endif
                                             </div>
                                         @endforeach
@@ -638,7 +667,7 @@
 
                                 <div class="space-y-2">
                                     <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">{{ $labels['profile'] ?? 'PROFESSIONAL SUMMARY' }}</h2>
-                                    <p class="text-xs leading-relaxed text-gray-700 text-justify">{{ $norm['profile_summary'] }}</p>
+                                    <p class="text-xs leading-relaxed text-gray-700 text-justify">{!! $formatPlaceholders($norm['profile_summary']) !!}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
@@ -656,12 +685,12 @@
                                                             @foreach($exp['bullets'] as $bullet)
                                                                 <li class="flex items-start gap-2">
                                                                     <span class="text-gray-400 font-bold">•</span>
-                                                                    <span class="leading-relaxed">{{ $bullet }}</span>
+                                                                    <span class="leading-relaxed">{!! $formatPlaceholders($bullet) !!}</span>
                                                                 </li>
                                                             @endforeach
                                                         </ul>
                                                     @elseif(!empty($exp['description']))
-                                                        <p class="text-xs text-gray-600 leading-relaxed">{{ $exp['description'] }}</p>
+                                                        <p class="text-xs text-gray-600 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
@@ -727,7 +756,7 @@
 
                                 <div class="space-y-2">
                                     <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">{{ $labels['profile'] ?? 'PROFESSIONAL SUMMARY' }}</h2>
-                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $norm['profile_summary'] }}</p>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{!! $formatPlaceholders($norm['profile_summary']) !!}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
@@ -743,9 +772,11 @@
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 pt-1 text-xs text-gray-700">
                                                             @foreach($exp['bullets'] as $b)
-                                                                <li class="flex items-start gap-1.5"><span class="text-indigo-500 font-bold">›</span><span>{{ $b }}</span></li>
+                                                                <li class="flex items-start gap-1.5"><span class="text-indigo-500 font-bold">›</span><span>{!! $formatPlaceholders($b) !!}</span></li>
                                                             @endforeach
                                                         </ul>
+                                                    @elseif(!empty($exp['description']))
+                                                        <p class="text-xs text-gray-600 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
@@ -813,7 +844,7 @@
                                         <!-- RÉSUMÉ -->
                                         <div class="space-y-2">
                                             <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">{{ $labels['profile'] ?? 'PROFESSIONAL SUMMARY' }}</h2>
-                                            <p class="text-xs leading-relaxed text-gray-700 text-justify">{{ $norm['profile_summary'] }}</p>
+                                            <p class="text-xs leading-relaxed text-gray-700 text-justify">{!! $formatPlaceholders($norm['profile_summary']) !!}</p>
                                         </div>
 
                                         <!-- EXPÉRIENCE -->
@@ -835,12 +866,12 @@
                                                                     @foreach($exp['bullets'] as $bullet)
                                                                         <li class="flex items-start gap-2">
                                                                             <span class="text-blue-500 font-bold">•</span>
-                                                                            <span class="leading-relaxed">{{ $bullet }}</span>
+                                                                            <span class="leading-relaxed">{!! $formatPlaceholders($bullet) !!}</span>
                                                                         </li>
                                                                     @endforeach
                                                                 </ul>
                                                             @elseif(!empty($exp['description']))
-                                                                <p class="text-xs text-gray-700 leading-relaxed">{{ $exp['description'] }}</p>
+                                                                <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
                                                             @endif
                                                         </div>
                                                     @endforeach
@@ -947,7 +978,7 @@
 
                                 <div class="space-y-2">
                                     <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">{{ $labels['executive_summary'] ?? 'EXECUTIVE SUMMARY' }}</h2>
-                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $norm['profile_summary'] }}</p>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{!! $formatPlaceholders($norm['profile_summary']) !!}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
@@ -963,9 +994,11 @@
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 text-xs text-gray-600">
                                                             @foreach($exp['bullets'] as $b)
-                                                                <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">✔</span><span>{{ $b }}</span></li>
+                                                                <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">✔</span><span>{!! $formatPlaceholders($b) !!}</span></li>
                                                             @endforeach
                                                         </ul>
+                                                    @elseif(!empty($exp['description']))
+                                                        <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
@@ -1016,7 +1049,7 @@
 
                                 <div class="space-y-2 font-sans">
                                     <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">{{ $labels['leadership'] ?? 'LEADERSHIP PROFILE' }}</h2>
-                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{{ $norm['profile_summary'] }}</p>
+                                    <p class="text-xs text-gray-700 leading-relaxed text-justify">{!! $formatPlaceholders($norm['profile_summary']) !!}</p>
                                 </div>
 
                                 @if(!empty($norm['experiences']))
@@ -1034,10 +1067,12 @@
                                                             @foreach($exp['bullets'] as $b)
                                                                 <li class="flex items-start gap-2">
                                                                     <span class="text-gray-400 font-bold">—</span>
-                                                                    <span class="leading-relaxed">{{ $b }}</span>
+                                                                    <span class="leading-relaxed">{!! $formatPlaceholders($b) !!}</span>
                                                                 </li>
                                                             @endforeach
                                                         </ul>
+                                                    @elseif(!empty($exp['description']))
+                                                        <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
