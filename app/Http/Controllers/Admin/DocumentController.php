@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AcademicDocument;
+use App\Models\CvAnalysis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -150,5 +151,168 @@ class DocumentController extends Controller
         $document->delete();
 
         return back()->with('success', 'Document supprimé avec succès');
+    }
+
+    /**
+     * Retourne les données complètes de l'analyse IA associée à un document CV
+     */
+    public function cvAnalysis(AcademicDocument $document)
+    {
+        $cvAnalysis = $this->findAssociatedCvAnalysis($document);
+
+        if (! $cvAnalysis) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucune analyse IA trouvée pour ce document.',
+            ], 404);
+        }
+
+        $norm = $cvAnalysis->normalized_cv_data;
+
+        return response()->json([
+            'success' => true,
+            'analysis' => [
+                'id' => $cvAnalysis->id,
+                'candidate_name' => $cvAnalysis->candidate_name,
+                'candidate_title' => $cvAnalysis->candidate_title,
+                'contact' => $cvAnalysis->candidate_contact ?? [],
+                'global_score' => $cvAnalysis->global_score,
+                'criteria_scores' => $cvAnalysis->criteria_scores ?? [],
+                'strengths' => $cvAnalysis->strengths ?? [],
+                'weaknesses' => $cvAnalysis->weaknesses ?? [],
+                'recommendations' => $cvAnalysis->recommendations ?? [],
+                'summary' => $cvAnalysis->summary,
+                'profil' => $cvAnalysis->parsed_content['profil'] ?? '',
+                'experiences' => $norm['experiences'] ?? [],
+                'formation' => $norm['formation'] ?? [],
+                'competences' => $norm['competences'] ?? [],
+                'certifications' => $norm['certifications'] ?? [],
+                'langues' => $norm['langues'] ?? [],
+                'created_at' => $cvAnalysis->created_at->format('d/m/Y à H:i'),
+            ],
+        ]);
+    }
+
+    /**
+     * Exporte les données des candidats au format CSV/Excel pour l'équipe commerciale
+     */
+    public function exportCandidates(Request $request)
+    {
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'min_score' => 'nullable|integer|min:0|max:100',
+            'keyword' => 'nullable|string|max:100',
+            'fields' => 'nullable|array',
+            'fields.*' => 'string|in:candidate_name,email,phone,location,candidate_title,skills,global_score,registered_user,analyzed_at',
+        ]);
+
+        $selectedFields = $validated['fields'] ?? [
+            'candidate_name', 'email', 'phone', 'location', 'candidate_title', 'skills', 'global_score', 'analyzed_at',
+        ];
+
+        $query = CvAnalysis::with('user');
+
+        if (! empty($validated['start_date'])) {
+            $query->whereDate('created_at', '>=', $validated['start_date']);
+        }
+        if (! empty($validated['end_date'])) {
+            $query->whereDate('created_at', '<=', $validated['end_date']);
+        }
+        if (isset($validated['min_score']) && $validated['min_score'] !== '') {
+            $query->where('global_score', '>=', (int) $validated['min_score']);
+        }
+        if (! empty($validated['keyword'])) {
+            $kw = $validated['keyword'];
+            $query->where(function ($q) use ($kw) {
+                $q->where('candidate_name', 'like', "%{$kw}%")
+                    ->orWhere('candidate_title', 'like', "%{$kw}%")
+                    ->orWhere('summary', 'like', "%{$kw}%");
+            });
+        }
+
+        $analyses = $query->orderBy('created_at', 'desc')->get();
+        $fileName = 'Candidats_Brillio_'.now()->format('Ymd_His').'.csv';
+
+        return response()->stream(function () use ($analyses, $selectedFields) {
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            $labels = [
+                'candidate_name' => 'Nom et Prénom',
+                'email' => 'Email',
+                'phone' => 'Téléphone',
+                'location' => 'Ville / Pays',
+                'candidate_title' => 'Intitulé du Poste',
+                'skills' => 'Compétences Détectées',
+                'global_score' => 'Score ATS (/100)',
+                'registered_user' => 'Inscrit sur Brillio',
+                'analyzed_at' => 'Date Analyse',
+            ];
+
+            $headerRow = [];
+            foreach ($selectedFields as $f) {
+                $headerRow[] = $labels[$f] ?? $f;
+            }
+            fputcsv($output, $headerRow, ';');
+
+            foreach ($analyses as $cv) {
+                $row = $this->buildCandidateExportRow($cv, $selectedFields);
+                fputcsv($output, $row, ';');
+            }
+
+            fclose($output);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ]);
+    }
+
+    /**
+     * Retrouve l'analyse CV associée à un document académique
+     */
+    private function findAssociatedCvAnalysis(AcademicDocument $document): ?CvAnalysis
+    {
+        if ($document->document_type !== 'cv') {
+            return null;
+        }
+
+        return CvAnalysis::where('file_path', $document->file_path)->first()
+            ?? CvAnalysis::where('user_id', $document->user_id)->where('original_filename', $document->file_name)->latest()->first()
+            ?? CvAnalysis::where('user_id', $document->user_id)->latest()->first();
+    }
+
+    /**
+     * Construit une ligne de données d'export pour un candidat
+     */
+    private function buildCandidateExportRow(CvAnalysis $cv, array $fields): array
+    {
+        $contact = (array) ($cv->candidate_contact ?? []);
+        $user = $cv->user;
+        $norm = $cv->normalized_cv_data;
+
+        $email = $contact['email'] ?? ($user?->email ?? '');
+        $phone = $contact['phone'] ?? ($user?->phone_number ?? ($user?->phone ?? ''));
+        $location = $contact['location'] ?? ($user?->city ?? ($user?->country ?? ''));
+        $skills = implode(', ', (array) ($norm['competences'] ?? []));
+
+        $values = [
+            'candidate_name' => $cv->candidate_name ?: ($user?->name ?? 'Non spécifié'),
+            'email' => $email ?: 'Non spécifié',
+            'phone' => $phone ?: 'Non spécifié',
+            'location' => $location ?: 'Non spécifié',
+            'candidate_title' => $cv->candidate_title ?: 'Non spécifié',
+            'skills' => $skills ?: 'Non spécifié',
+            'global_score' => (string) $cv->global_score,
+            'registered_user' => $user ? 'Oui ('.$user->name.')' : 'Non (Invité)',
+            'analyzed_at' => $cv->created_at->format('d/m/Y H:i'),
+        ];
+
+        $result = [];
+        foreach ($fields as $f) {
+            $result[] = $values[$f] ?? '';
+        }
+
+        return $result;
     }
 }

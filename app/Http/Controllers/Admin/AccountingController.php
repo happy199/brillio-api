@@ -56,6 +56,13 @@ class AccountingController extends Controller
 
         $estimatedTargetingRevenueFcfa = $targetingRevenueCredits * 100;
 
+        // 4b. Revenus Outils CV & Templates (Gains 100% Société)
+        $cvRevenueCredits = WalletTransaction::where('type', 'cv_action')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum(DB::raw('ABS(amount)'));
+
+        $estimatedCvRevenueFcfa = $cvRevenueCredits * 100;
+
         // 5. Revenus Organisations (Achats de packs + Subscriptions via Moneroo)
         $orgRevenue = MonerooTransaction::where('status', 'completed')
             ->where('user_type', 'App\Models\User')
@@ -78,6 +85,8 @@ class AccountingController extends Controller
             'orgRevenue',
             'targetingRevenueCredits',
             'estimatedTargetingRevenueFcfa',
+            'cvRevenueCredits',
+            'estimatedCvRevenueFcfa',
             'chartData',
             'recentTransactions',
             'startDate',
@@ -369,6 +378,8 @@ class AccountingController extends Controller
             fputcsv($file, ['Solde Net (Cash Flow)', number_format($data['netIncome'], 0, '', '').self::FCFA_SUFFIX]);
             fputcsv($file, ['Revenus Services (Crédits)', number_format($data['targetingRevenueCredits'], 0, '', '').' Crédits']);
             fputcsv($file, ['Revenus Services (Est. FCFA)', number_format($data['estimatedTargetingRevenueFcfa'], 0, '', '').self::FCFA_SUFFIX]);
+            fputcsv($file, ['Gains Outils CV & Templates (Crédits)', number_format($data['cvRevenueCredits'] ?? 0, 0, '', '').' Crédits']);
+            fputcsv($file, ['Gains Outils CV & Templates (Est. FCFA)', number_format($data['estimatedCvRevenueFcfa'] ?? 0, 0, '', '').self::FCFA_SUFFIX]);
             fputcsv($file, ['Revenus Organisations', number_format($data['orgRevenue'], 0, '', '').self::FCFA_SUFFIX]);
             fputcsv($file, []);
 
@@ -411,6 +422,12 @@ class AccountingController extends Controller
             ->sum(DB::raw(self::ABS_AMOUNT));
 
         $estimatedTargetingRevenueFcfa = $targetingRevenueCredits * 100;
+
+        $cvRevenueCredits = WalletTransaction::where('type', 'cv_action')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum(DB::raw(self::ABS_AMOUNT));
+
+        $estimatedCvRevenueFcfa = $cvRevenueCredits * 100;
 
         $orgRevenue = MonerooTransaction::where('status', 'completed')
             ->where('user_type', self::USER_MODEL)
@@ -459,6 +476,8 @@ class AccountingController extends Controller
             'netIncome',
             'targetingRevenueCredits',
             'estimatedTargetingRevenueFcfa',
+            'cvRevenueCredits',
+            'estimatedCvRevenueFcfa',
             'orgRevenue',
             'transactions'
         );

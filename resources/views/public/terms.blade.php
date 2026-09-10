@@ -28,7 +28,12 @@
 
                 <h2>2. Description du Service</h2>
                 <p>
-                    Brillio est une plateforme numérique d'orientation professionnelle. Elle propose des services automatisés de test de personnalité (MBTI), d'assistance par intelligence artificielle, de mise en relation avec des mentors et de stockage sécurisé de documents académiques.
+                    Brillio est une plateforme numérique d'orientation et d'insertion professionnelle. Elle propose des services automatisés de test de personnalité (MBTI), d'assistance par intelligence artificielle, d'évaluation et de restructuration de Curriculum Vitae (CV) adaptées aux standards ATS (Applicant Tracking Systems), de mise en relation avec des mentors et des opportunités d'emploi, ainsi que de stockage sécurisé de documents académiques.
+                </p>
+
+                <h3>2.1 Outils d'Analyse de CV, Templates et Crédits</h3>
+                <p>
+                    Les fonctionnalités d'analyse et de restructuration de CV reposent sur des modèles d'intelligence artificielle de pointe. Certains modèles de CV avancés ou options d'export premium nécessitent la consommation de crédits disponibles sur le portefeuille de l'utilisateur. En utilisant ces outils, l'utilisateur autorise l'équipe d'accompagnement et de placement de Brillio à exploiter les coordonnées et compétences extraites afin de lui proposer un suivi personnalisé, des formations adaptées ou des mises en relation avec des recruteurs partenaires.
                 </p>
 
                 <h2>3. Inscription et Consentement Électronique</h2>
@@ -57,8 +62,8 @@
                     Conformément aux Articles 560 et suivants du Code du Numérique sur la responsabilité des prestataires :
                 </p>
                 <ul>
-                    <li><strong>Contenu IA :</strong> Les conseils du chatbot sont générés de manière automatisée. Brillio ne saurait être tenu responsable des décisions d'orientation prises sur cette seule base.</li>
-                    <li><strong>Contenu Utilisateur :</strong> Brillio agit en tant qu'hébergeur pour vos documents académiques. Nous n'exerçons pas de contrôle a priori sur la véracité des documents.</li>
+                    <li><strong>Contenu IA & Diagnostics CV :</strong> Les conseils du chatbot ainsi que les évaluations et suggestions générées pour les CV sont fournis à titre d'aide à la décision. L'utilisateur demeure seul responsable de la véracité des compétences, expériences et données renseignées dans ses documents.</li>
+                    <li><strong>Contenu Utilisateur :</strong> Brillio agit en tant qu'hébergeur pour vos documents académiques et professionnels. Nous n'exerçons pas de contrôle a priori sur l'authenticité des pièces justificatives.</li>
                     <li><strong>Mentorat :</strong> Brillio facilite la mise en relation mais n'intervient pas dans les échanges privés entre mentors et jeunes.</li>
                 </ul>
 
