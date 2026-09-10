@@ -6,7 +6,7 @@
 <div class="space-y-8" x-data="outilsApp('{{ $tab ?? 'cv' }}', {{ $activeCv ? $activeCv->id : 'null' }}, {{ json_encode($templateCosts ?? [0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5]) }})">
 
     <!-- Top Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 no-print">
         <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Outils</h1>
             <p class="text-sm sm:text-base text-gray-500 mt-0.5">Évaluez votre CV, explorez les ressources pédagogiques et gérez votre Drive documentaire.</p>
@@ -37,7 +37,7 @@
 
     <!-- Alertes & Messages flash -->
     @if(session('success'))
-        <div class="p-4 rounded-2xl bg-primary-50 border border-primary-200 text-primary-900 flex items-center gap-3">
+        <div class="p-4 rounded-2xl bg-primary-50 border border-primary-200 text-primary-900 flex items-center gap-3 no-print">
             <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0 text-primary-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -48,7 +48,7 @@
     @endif
 
     @if($errors->any())
-        <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3">
+        <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 no-print">
             <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0 text-red-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -59,7 +59,7 @@
     @endif
 
     <!-- Barre des 3 Sous-onglets Outils : 1. CV (premier), 2. Ressources, 3. Documents -->
-    <div class="border-b border-gray-200">
+    <div class="border-b border-gray-200 no-print">
         <nav class="flex space-x-2 sm:space-x-8 overflow-x-auto pb-1" aria-label="Tabs">
             <!-- 1. CV (En premier, conforme demande) -->
             <button type="button"
@@ -129,17 +129,19 @@
             </div>
         @else
             <!-- Dashboard CV Débloqué -->
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
-                <!-- En-tête CV actif & Sélecteur d'historique -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100 mb-8">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Diagnostic Débloqué</span>
-                            <span class="text-xs text-gray-400">• Évalué le {{ $activeCv->created_at->format('d/m/Y à H:i') }}</span>
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm print:p-0 print:border-none print:shadow-none">
+                <!-- Rapport Diagnostic Complet (Masqué à l'impression) -->
+                <div class="no-print space-y-8">
+                    <!-- En-tête CV actif & Sélecteur d'historique -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100 mb-8">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Diagnostic Débloqué</span>
+                                <span class="text-xs text-gray-400">• Évalué le {{ $activeCv->created_at->format('d/m/Y à H:i') }}</span>
+                            </div>
+                            <h2 class="text-2xl font-extrabold text-gray-900 mt-1">{{ $activeCv->candidate_name }}</h2>
+                            <p class="text-sm text-primary-600 font-semibold">{{ $activeCv->candidate_title }}</p>
                         </div>
-                        <h2 class="text-2xl font-extrabold text-gray-900 mt-1">{{ $activeCv->candidate_name }}</h2>
-                        <p class="text-sm text-primary-600 font-semibold">{{ $activeCv->candidate_title }}</p>
-                    </div>
 
                     <div class="flex items-center gap-3">
                         @if($cvAnalyses->count() > 1)
@@ -325,11 +327,12 @@
                         </ul>
                     </div>
                 </div>
+                </div>
 
                 <!-- SECTION : TOGGLE & AFFICHAGE (CV RESTRUCTURÉ ATS VS CV ORIGINAL) -->
-                <div class="space-y-6 pt-6 border-t border-gray-100">
+                <div class="space-y-6 pt-6 border-t border-gray-100 print:pt-0 print:border-none">
                     <!-- Switcher de vue : CV ATS vs CV Original -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 no-print">
                         <div>
                             <div class="inline-flex p-1 bg-gray-100 rounded-2xl border border-gray-200 mb-2">
                                 <button type="button"
@@ -396,7 +399,7 @@
                     </div>
 
                     <!-- VUE 1 : CV ORIGINAL TÉLÉVERSÉ -->
-                    <div x-show="cvViewMode === 'original'" x-cloak class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-md max-w-4xl mx-auto space-y-6">
+                    <div x-show="cvViewMode === 'original'" x-cloak class="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-md max-w-4xl mx-auto space-y-6 no-print">
                         <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-gray-100">
                             <div>
                                 <h4 class="text-sm font-bold text-gray-900">{{ $activeCv->original_filename }}</h4>
@@ -449,9 +452,9 @@
                     </div>
 
                     <!-- VUE 2 : CV RESTRUCTURÉ ATS + SÉLECTION DE 5 TEMPLATES -->
-                    <div x-show="cvViewMode === 'ats'" class="space-y-6">
+                    <div x-show="cvViewMode === 'ats'" class="space-y-6 print:space-y-0">
                         <!-- Sélecteur de templates ATS (0 Défaut gratuit + 5 Templates au choix tarifés) -->
-                        <div class="space-y-3">
+                        <div class="space-y-3 no-print">
                             <div class="flex items-center justify-between">
                                 <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Sélectionnez un modèle de CV ATS :</h3>
                                 <span class="text-xs text-gray-500">Le modèle par défaut est gratuit. Les modèles avancés valorisent vos compétences clés.</span>
@@ -580,7 +583,7 @@
                         @endphp
 
                         <!-- Bannière explicative : Contenu optimisé & Balises à compléter -->
-                        <div class="max-w-4xl mx-auto mb-4 bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900 shadow-2xs">
+                        <div class="max-w-4xl mx-auto mb-4 bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900 shadow-2xs no-print">
                             <div class="w-7 h-7 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0 mt-0.5">
                                 <svg class="w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -1141,7 +1144,7 @@
     <!-- ========================================================================= -->
     <!-- CONTENU ONGLET 3 : DOCUMENTS (DRIVE PERSONNEL)                            -->
     <!-- ========================================================================= -->
-    <div x-show="currentTab === 'drive'" x-cloak class="space-y-8">
+    <div x-show="currentTab === 'drive'" x-cloak class="space-y-8 no-print">
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -1308,7 +1311,7 @@
     </div>
 
     <!-- MODAL : CHOIX DU FORMAT DE TÉLÉCHARGEMENT (PDF vs WORD) -->
-    <div x-show="showDownloadFormatModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showDownloadFormatModal = false">
+    <div x-show="showDownloadFormatModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto no-print" @keydown.escape.window="showDownloadFormatModal = false">
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" @click="showDownloadFormatModal = false"></div>
             <div class="relative bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl z-10 space-y-6">
@@ -1401,7 +1404,7 @@
     </div>
 
     <!-- MODAL : TÉLÉVERSER UN NOUVEAU CV -->
-    <div x-show="showCvUploadModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="if (!isUploadingCv) showCvUploadModal = false">
+    <div x-show="showCvUploadModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto no-print" @keydown.escape.window="if (!isUploadingCv) showCvUploadModal = false">
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" @click="if (!isUploadingCv) showCvUploadModal = false"></div>
             <div class="relative bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl z-10 space-y-6">
@@ -1455,7 +1458,7 @@
     </div>
 
     <!-- MODAL : AJOUTER UN DOCUMENT DRIVE -->
-    <div x-show="showUploadModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showUploadModal = false">
+    <div x-show="showUploadModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto no-print" @keydown.escape.window="showUploadModal = false">
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" @click="showUploadModal = false"></div>
             <div class="relative bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl z-10 space-y-6">
@@ -1504,7 +1507,7 @@
     </div>
 
     <!-- MODAL : APERÇU DOCUMENT DRIVE -->
-    <div x-show="showPreviewModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showPreviewModal = false">
+    <div x-show="showPreviewModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto no-print" @keydown.escape.window="showPreviewModal = false">
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" @click="showPreviewModal = false"></div>
             <div class="relative bg-white rounded-3xl p-6 max-w-4xl w-full shadow-2xl z-10 space-y-4">
@@ -1534,7 +1537,7 @@
     </div>
 
     <!-- MODAL : SUPPRESSION DOCUMENT DRIVE -->
-    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showDeleteModal = false">
+    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto no-print" @keydown.escape.window="showDeleteModal = false">
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs" @click="showDeleteModal = false"></div>
             <div class="relative bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl z-10 text-center space-y-4">
@@ -1794,10 +1797,12 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
                         this.showToastNotification('Impossible de préparer le fichier Word.', 'error');
                     }
                 } else if (action === 'download_pdf') {
+                    this.currentTab = 'cv';
+                    this.cvViewMode = 'ats';
                     this.showToastNotification('Préparation de votre CV en PDF...', 'success');
                     setTimeout(() => {
                         window.print();
-                    }, 350);
+                    }, 250);
                 }
             } catch (err) {
                 console.error('CV Action error:', err);
@@ -1859,42 +1864,195 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
 
 @media print {
     @page {
-        size: A4;
-        margin: 8mm;
+        size: A4 portrait;
+        margin: 6mm 8mm; /* Marges nettes et optimisées */
     }
+
     html, body {
-        background: #fff !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: #ffffff !important;
+        color: #111827 !important;
+        overflow: visible !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
-    body * {
+
+    /* 1. Masquage strict de tous les éléments hors CV pour éliminer les pages blanches */
+    body > nav,
+    body > footer,
+    body > #cookieBanner,
+    #toast-container,
+    .no-print,
+    .no-print * {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
         visibility: hidden !important;
     }
-    #cvEnhancedPrintArea, #cvEnhancedPrintArea * {
-        visibility: visible !important;
+
+    /* 2. Réinitialisation des conteneurs parents */
+    main {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    main > div,
+    main > div > div {
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    /* 3. Le conteneur du CV devient l'unique élément en flux normal (jamais absolute) */
+    #cvEnhancedPrintArea {
+        display: block !important;
+        position: static !important;
+        float: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
         -webkit-user-select: text !important;
         user-select: text !important;
     }
-    #cvEnhancedPrintArea .no-print, #cvEnhancedPrintArea .no-print * {
-        display: none !important;
-        visibility: hidden !important;
+
+    /* 4. Compactage vertical pour garantir que le CV tienne sur UNE SEULE PAGE */
+    #cvEnhancedPrintArea .space-y-8 > :not([hidden]) ~ :not([hidden]),
+    #cvEnhancedPrintArea .space-y-7 > :not([hidden]) ~ :not([hidden]),
+    #cvEnhancedPrintArea .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-y-reverse: 0;
+        margin-top: 8px !important;
+        margin-bottom: 0 !important;
     }
+
+    #cvEnhancedPrintArea .space-y-4 > :not([hidden]) ~ :not([hidden]),
+    #cvEnhancedPrintArea .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-y-reverse: 0;
+        margin-top: 5px !important;
+        margin-bottom: 0 !important;
+    }
+
+    #cvEnhancedPrintArea .space-y-2 > :not([hidden]) ~ :not([hidden]),
+    #cvEnhancedPrintArea .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-y-reverse: 0;
+        margin-top: 3px !important;
+        margin-bottom: 0 !important;
+    }
+
+    #cvEnhancedPrintArea .space-y-1 > :not([hidden]) ~ :not([hidden]),
+    #cvEnhancedPrintArea .space-y-0\.5 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-y-reverse: 0;
+        margin-top: 1.5px !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Paddings et marges d'en-tête */
+    #cvEnhancedPrintArea .pb-6,
+    #cvEnhancedPrintArea .pb-5,
+    #cvEnhancedPrintArea .pb-4 {
+        padding-bottom: 4px !important;
+    }
+
+    #cvEnhancedPrintArea .mb-10,
+    #cvEnhancedPrintArea .mb-8,
+    #cvEnhancedPrintArea .mb-6 {
+        margin-bottom: 6px !important;
+    }
+
+    #cvEnhancedPrintArea .pt-6,
+    #cvEnhancedPrintArea .pt-4 {
+        padding-top: 4px !important;
+    }
+
+    /* Typographie affinée et interlignage A4 */
+    #cvEnhancedPrintArea h1 {
+        font-size: 1.35rem !important;
+        line-height: 1.15 !important;
+        margin-bottom: 2px !important;
+    }
+
+    #cvEnhancedPrintArea h2 {
+        font-size: 0.72rem !important;
+        line-height: 1.15 !important;
+        padding-bottom: 1.5px !important;
+        margin-bottom: 3px !important;
+    }
+
+    #cvEnhancedPrintArea p,
+    #cvEnhancedPrintArea li,
+    #cvEnhancedPrintArea span {
+        line-height: 1.32 !important;
+        font-size: 0.72rem !important;
+    }
+
+    #cvEnhancedPrintArea .text-sm {
+        font-size: 0.74rem !important;
+    }
+
+    #cvEnhancedPrintArea .text-xs {
+        font-size: 0.7rem !important;
+    }
+
+    #cvEnhancedPrintArea ul {
+        margin-top: 1.5px !important;
+        padding-left: 0.75rem !important;
+    }
+
+    #cvEnhancedPrintArea li {
+        margin-bottom: 1px !important;
+    }
+
+    /* Template 3 (structure 2 colonnes) */
+    #cvEnhancedPrintArea .grid.md\:grid-cols-12 {
+        display: grid !important;
+        grid-template-columns: 7fr 5fr !important;
+        gap: 12px !important;
+    }
+    #cvEnhancedPrintArea .md\:col-span-7 {
+        grid-column: 1 !important;
+    }
+    #cvEnhancedPrintArea .md\:col-span-5 {
+        grid-column: 2 !important;
+    }
+    #cvEnhancedPrintArea .w-16.h-16 {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1.1rem !important;
+    }
+
+    /* Éviter les coupures de sections en milieu d'élément */
+    #cvEnhancedPrintArea h1,
+    #cvEnhancedPrintArea h2,
+    #cvEnhancedPrintArea h3,
+    #cvEnhancedPrintArea li,
+    #cvEnhancedPrintArea ul {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Pastilles de complétion : rendu net en print */
     .cv-filled-text {
         text-decoration: none !important;
-        font-weight: inherit !important;
-    }
-    #cvEnhancedPrintArea {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 8mm !important;
-        border: none !important;
-        box-shadow: none !important;
-        background: white !important;
+        font-weight: 600 !important;
+        color: inherit !important;
     }
 }
 </style>

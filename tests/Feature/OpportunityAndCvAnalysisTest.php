@@ -1133,4 +1133,22 @@ TXT;
             $analysis->parsed_content['experiences'][0]['bullets'][0]
         );
     }
+
+    public function test_cv_print_media_rules_enforce_single_page_and_isolate_print_area(): void
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jeune.outils'));
+        $response->assertStatus(200);
+
+        // Vérifie les règles CSS clés pour l'impression A4 sur 1 page
+        $response->assertSee('@media print', false);
+        $response->assertSee('size: A4 portrait;', false);
+        $response->assertSee('#cvEnhancedPrintArea', false);
+        $response->assertSee('position: static !important;', false);
+        $response->assertSee('page-break-after: avoid !important;', false);
+        $response->assertSee('.no-print', false);
+    }
 }
