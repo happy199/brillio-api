@@ -978,4 +978,159 @@ TXT;
 
         unlink($tempDocx);
     }
+
+    public function test_cv_inline_placeholder_editing_saves_to_model_and_renders_cleanly_in_copy_and_docx(): void
+    {
+        $user = User::factory()->create([
+            'user_type' => 'jeune',
+            'credits_balance' => 10,
+        ]);
+
+        $analysis = CvAnalysis::create([
+            'user_id' => $user->id,
+            'guest_token' => 'token_test_inline_edit',
+            'original_filename' => 'Mon_CV.pdf',
+            'file_path' => 'cv_analyses/test_inline.pdf',
+            'file_size' => 12345,
+            'mime_type' => 'application/pdf',
+            'status' => 'completed',
+            'candidate_name' => 'Kouame Yao',
+            'candidate_title' => 'Développeur Full Stack',
+            'parsed_content' => [
+                'summary' => 'Passionné par le web avec [À compléter : X années] d\'expérience.',
+                'experiences' => [
+                    [
+                        'title' => 'Développeur Full Stack',
+                        'company' => 'Tech SARL',
+                        'dates' => '2022 - 2024',
+                        'location' => 'Abidjan',
+                        'bullets' => [
+                            'Développé une API traitant [À compléter : nombre de] requêtes par jour.',
+                        ],
+                    ],
+                ],
+                'formations' => [],
+                'competences' => ['PHP', 'Laravel'],
+                'langues' => ['Français'],
+            ],
+            'global_score' => 80,
+            'status_label' => 'Bien',
+            'criteria_scores' => [],
+            'strengths' => [],
+            'improvements' => [],
+            'recommendations' => [],
+            'is_claimed' => true,
+        ]);
+
+        // 1. Mise à jour inline du placeholder d'une expérience (bullet 0)
+        $updateResponse = $this->actingAs($user)->postJson(route('jeune.cv.update-placeholder'), [
+            'cv_id' => $analysis->id,
+            'field_type' => 'experience',
+            'exp_index' => 0,
+            'bullet_index' => 0,
+            'original_tag' => '[À compléter : nombre de]',
+            'custom_value' => '15 000',
+        ]);
+
+        $updateResponse->assertStatus(200);
+        $updateResponse->assertJson([
+            'success' => true,
+            'is_filled' => true,
+            'custom_value' => '15 000',
+            'new_tag' => '[rempli:15 000|guide:À compléter : nombre de]',
+        ]);
+
+        // Vérifier la persistance dans le modèle CvAnalysis
+        $analysis->refresh();
+        $updatedBullet = $analysis->parsed_content['experiences'][0]['bullets'][0];
+        $this->assertEquals(
+            'Développé une API traitant [rempli:15 000|guide:À compléter : nombre de] requêtes par jour.',
+            $updatedBullet
+        );
+
+        // 2. Mise à jour inline du résumé (summary)
+        $summaryUpdateResponse = $this->actingAs($user)->postJson(route('jeune.cv.update-placeholder'), [
+            'cv_id' => $analysis->id,
+            'field_type' => 'summary',
+            'original_tag' => '[À compléter : X années]',
+            'custom_value' => '3 années',
+        ]);
+
+        $summaryUpdateResponse->assertStatus(200);
+        $summaryUpdateResponse->assertJson([
+            'success' => true,
+            'is_filled' => true,
+            'custom_value' => '3 années',
+        ]);
+
+        $analysis->refresh();
+        $this->assertEquals(
+            'Passionné par le web avec [rempli:3 années|guide:À compléter : X années] d\'expérience.',
+            $analysis->parsed_content['summary']
+        );
+
+        // 3. Vérification du rendu dans la page Outils (affiche les valeurs complétées)
+        $pageResponse = $this->actingAs($user)->get(route('jeune.outils'));
+        $pageResponse->assertStatus(200);
+        $pageResponse->assertSee('15 000', false);
+        $pageResponse->assertSee('3 années', false);
+
+        // 4. Vérification de l'action "Copier le texte" : les balises [rempli:valeur|guide:...] doivent être nettoyées
+        $copyResponse = $this->actingAs($user)->postJson(route('jeune.cv.action'), [
+            'cv_id' => $analysis->id,
+            'action' => 'copy',
+            'template' => 0,
+        ]);
+
+        $copyResponse->assertStatus(200);
+        $plainText = $copyResponse->json('cv_text');
+        $this->assertStringContainsString('15 000 requêtes par jour', $plainText);
+        $this->assertStringContainsString('3 années d\'expérience', $plainText);
+        $this->assertStringNotContainsString('rempli:', $plainText);
+        $this->assertStringNotContainsString('guide:', $plainText);
+
+        // 5. Vérification de l'export Word (.docx) : la valeur personnalisée est présente sans balises résiduelles
+        $docxResponse = $this->actingAs($user)->get(route('jeune.cv.download-docx', [
+            'cv' => $analysis->id,
+            'template' => 0,
+        ]));
+        $docxResponse->assertStatus(200);
+
+        $tempDocx = tempnam(sys_get_temp_dir(), 'test_filled_docx_').'.docx';
+        file_put_contents($tempDocx, $docxResponse->streamedContent());
+
+        $zip = new \ZipArchive;
+        $this->assertTrue($zip->open($tempDocx));
+        $xml = $zip->getFromName('word/document.xml');
+
+        $this->assertStringContainsString('15 000', $xml);
+        $this->assertStringContainsString('3 années', $xml);
+        $this->assertStringNotContainsString('rempli:', $xml);
+        $this->assertStringNotContainsString('guide:', $xml);
+
+        unlink($tempDocx);
+
+        // 6. Test de réinitialisation (effacer la valeur pour revenir à la balise guide initiale)
+        $resetResponse = $this->actingAs($user)->postJson(route('jeune.cv.update-placeholder'), [
+            'cv_id' => $analysis->id,
+            'field_type' => 'experience',
+            'exp_index' => 0,
+            'bullet_index' => 0,
+            'original_tag' => '[rempli:15 000|guide:À compléter : nombre de]',
+            'custom_value' => '', // valeur vide => rétablissement
+        ]);
+
+        $resetResponse->assertStatus(200);
+        $resetResponse->assertJson([
+            'success' => true,
+            'is_filled' => false,
+            'new_tag' => '[À compléter : nombre de]',
+        ]);
+
+        $analysis->refresh();
+        $this->assertEquals(
+            'Développé une API traitant [À compléter : nombre de] requêtes par jour.',
+            $analysis->parsed_content['experiences'][0]['bullets'][0]
+        );
+    }
 }

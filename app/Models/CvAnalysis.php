@@ -318,7 +318,7 @@ class CvAnalysis extends Model
 
     private function extractCandidateSummary(string $rawText, array $parsed, bool $isEnglish): string
     {
-        $candProfile = trim((string) ($parsed['profil'] ?? $parsed['profile'] ?? $parsed['candidate_summary'] ?? ''));
+        $candProfile = trim((string) ($parsed['profil'] ?? $parsed['profile'] ?? $parsed['summary'] ?? $parsed['candidate_summary'] ?? ''));
         if (! empty($candProfile) && ! preg_match('/^(?:Ce CV|Ce profil|This resume|This CV)\b/iu', $candProfile)) {
             return $candProfile;
         }

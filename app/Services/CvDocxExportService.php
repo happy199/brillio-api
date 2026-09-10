@@ -492,7 +492,7 @@ class CvDocxExportService
 
     private function addFormattedTextWithPlaceholders($container, string $text, string $font, string $defaultColor): void
     {
-        $parts = preg_split('/(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\})/iu', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $parts = preg_split('/(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\}|\[rempli:[^|\]]+\|guide:[^\]]+\])/iu', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
         if (! $parts) {
             $container->addText($text, ['name' => $font, 'size' => 9.5, 'color' => $defaultColor]);
@@ -501,7 +501,15 @@ class CvDocxExportService
         }
 
         foreach ($parts as $part) {
-            if (preg_match('/^(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\})$/iu', $part)) {
+            if (preg_match('/^\[rempli:([^|\]]+)\|guide:[^\]]+\]$/u', $part, $matches)) {
+                // Balise complétée par le candidat : rendue proprement sans crochets dans Word
+                $container->addText($matches[1], [
+                    'name' => $font,
+                    'size' => 9.5,
+                    'color' => self::COLOR_DARK,
+                    'bold' => true,
+                ]);
+            } elseif (preg_match('/^(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\})$/iu', $part)) {
                 $container->addText($part, [
                     'name' => $font,
                     'size' => 9.5,

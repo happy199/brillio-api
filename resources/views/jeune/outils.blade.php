@@ -536,18 +536,46 @@
                             $norm = $activeCv->normalized_cv_data;
                             $labels = $norm['labels'] ?? [];
 
-                            $formatPlaceholders = function (?string $text) {
+                            $formatPlaceholders = function (?string $text, string $fieldType = 'summary', ?int $expIndex = null, ?int $bulletIndex = null) use ($activeCv) {
                                 if ($text === null || $text === '') {
                                     return '';
                                 }
-                                $escaped = e($text);
-                                return preg_replace_callback(
-                                    '/(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\})/iu',
-                                    function ($matches) {
-                                        return '<span class="inline-block mx-0.5 px-1.5 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs select-all" title="À personnaliser avec vos vraies données dans votre fichier Word téléchargeable">'.$matches[0].'</span>';
-                                    },
-                                    $escaped
-                                );
+
+                                $cvId = $activeCv ? (int) $activeCv->id : 0;
+                                $pattern = '/(\[rempli:[^|\]]+\|guide:[^\]]+\]|\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\})/iu';
+                                $parts = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+                                if (! $parts) {
+                                    return e($text);
+                                }
+
+                                $html = '';
+                                foreach ($parts as $part) {
+                                    if (preg_match('/^\[rempli:([^|\]]+)\|guide:([^\]]+)\]$/u', $part, $m)) {
+                                        $html .= view('jeune.partials.cv_placeholder_item', [
+                                            'cvId' => $cvId,
+                                            'fieldType' => $fieldType,
+                                            'expIndex' => $expIndex,
+                                            'bulletIndex' => $bulletIndex,
+                                            'originalTag' => $m[2],
+                                            'currentValue' => $m[1],
+                                            'isFilled' => true,
+                                        ])->render();
+                                    } elseif (preg_match('/^(\[(?:À compléter|Compléter|Insérer|A completer|A renseigner)[^\]]*\]|\{[^\}]+\})$/iu', $part)) {
+                                        $html .= view('jeune.partials.cv_placeholder_item', [
+                                            'cvId' => $cvId,
+                                            'fieldType' => $fieldType,
+                                            'expIndex' => $expIndex,
+                                            'bulletIndex' => $bulletIndex,
+                                            'originalTag' => $part,
+                                            'currentValue' => '',
+                                            'isFilled' => false,
+                                        ])->render();
+                                    } else {
+                                        $html .= e($part);
+                                    }
+                                }
+
+                                return $html;
                             };
                         @endphp
 
@@ -561,7 +589,7 @@
                             <div class="space-y-1">
                                 <p class="font-bold text-amber-950">Contenu restructuré & Recommandations ATS appliquées</p>
                                 <p class="text-amber-800 leading-relaxed">
-                                    Vos expériences ont été reformulées avec des verbes d'action puissants. Les pastilles comme <span class="inline-block px-1.5 py-0.5 rounded font-semibold bg-amber-200/80 text-amber-950 border border-amber-300">[À compléter : résultat chiffré...]</span> vous indiquent où renseigner vos métriques réelles lors de l'édition dans votre fichier Word téléchargé.
+                                    Vos expériences ont été reformulées avec des verbes d'action puissants. <strong>Cliquez directement sur les pastilles jaunes</strong> <span class="inline-block px-1.5 py-0.5 rounded font-semibold bg-amber-200/80 text-amber-950 border border-amber-300">[À compléter : résultat...]</span> pour renseigner vos chiffres réels et les enregistrer instantanément dans votre CV (PDF et Word) !
                                 </p>
                             </div>
                         </div>
@@ -593,7 +621,7 @@
                                 @if(!empty($norm['experiences']))
                                     <div class="space-y-3">
                                         <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-0.5">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
-                                        @foreach($norm['experiences'] as $exp)
+                                        @foreach($norm['experiences'] as $expIndex => $exp)
                                             <div class="space-y-1">
                                                 <div class="flex justify-between text-xs font-semibold">
                                                     <span class="text-gray-900">{{ $exp['title'] }} @if(!empty($exp['company'])) — {{ $exp['company'] }} @endif</span>
@@ -601,12 +629,12 @@
                                                 </div>
                                                 @if(!empty($exp['bullets']))
                                                     <ul class="list-disc list-inside text-xs text-gray-700 space-y-0.5 pl-1">
-                                                        @foreach($exp['bullets'] as $b)
-                                                            <li class="leading-relaxed">{!! $formatPlaceholders($b) !!}</li>
+                                                        @foreach($exp['bullets'] as $bulletIndex => $b)
+                                                            <li class="leading-relaxed">{!! $formatPlaceholders($b, 'experience', $expIndex, $bulletIndex) !!}</li>
                                                         @endforeach
                                                     </ul>
                                                 @elseif(!empty($exp['description']))
-                                                    <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
+                                                    <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description'], 'experience', $expIndex, 0) !!}</p>
                                                 @endif
                                             </div>
                                         @endforeach
@@ -674,7 +702,7 @@
                                     <div class="space-y-4">
                                         <h2 class="text-xs font-black text-gray-900 uppercase tracking-widest border-b border-gray-200 pb-1">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
                                         <div class="space-y-4">
-                                            @foreach($norm['experiences'] as $exp)
+                                            @foreach($norm['experiences'] as $expIndex => $exp)
                                                 <div class="space-y-1">
                                                     <div class="flex items-center justify-between text-xs">
                                                         <h3 class="font-bold text-gray-900">{{ $exp['title'] }} @if(!empty($exp['company'])) — <span class="font-semibold text-gray-700">{{ $exp['company'] }}</span> @endif</h3>
@@ -682,15 +710,15 @@
                                                     </div>
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 pt-1 text-xs text-gray-600">
-                                                            @foreach($exp['bullets'] as $bullet)
+                                                            @foreach($exp['bullets'] as $bulletIndex => $bullet)
                                                                 <li class="flex items-start gap-2">
                                                                     <span class="text-gray-400 font-bold">•</span>
-                                                                    <span class="leading-relaxed">{!! $formatPlaceholders($bullet) !!}</span>
+                                                                    <span class="leading-relaxed">{!! $formatPlaceholders($bullet, 'experience', $expIndex, $bulletIndex) !!}</span>
                                                                 </li>
                                                             @endforeach
                                                         </ul>
                                                     @elseif(!empty($exp['description']))
-                                                        <p class="text-xs text-gray-600 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
+                                                        <p class="text-xs text-gray-600 leading-relaxed">{!! $formatPlaceholders($exp['description'], 'experience', $expIndex, 0) !!}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
@@ -763,7 +791,7 @@
                                     <div class="space-y-4">
                                         <h2 class="text-xs font-black uppercase text-indigo-700 tracking-wider pl-2 border-l-4 border-indigo-600">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
                                         <div class="space-y-4">
-                                            @foreach($norm['experiences'] as $exp)
+                                            @foreach($norm['experiences'] as $expIndex => $exp)
                                                 <div class="space-y-1 bg-gray-50/70 p-3 rounded-xl border border-gray-100">
                                                     <div class="flex items-center justify-between text-xs">
                                                         <h3 class="font-bold text-gray-900">{{ $exp['title'] }} <span class="text-indigo-600 font-semibold">• {{ $exp['company'] }}</span></h3>
@@ -771,12 +799,12 @@
                                                     </div>
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 pt-1 text-xs text-gray-700">
-                                                            @foreach($exp['bullets'] as $b)
-                                                                <li class="flex items-start gap-1.5"><span class="text-indigo-500 font-bold">›</span><span>{!! $formatPlaceholders($b) !!}</span></li>
+                                                            @foreach($exp['bullets'] as $bulletIndex => $b)
+                                                                <li class="flex items-start gap-1.5"><span class="text-indigo-500 font-bold">›</span><span>{!! $formatPlaceholders($b, 'experience', $expIndex, $bulletIndex) !!}</span></li>
                                                             @endforeach
                                                         </ul>
                                                     @elseif(!empty($exp['description']))
-                                                        <p class="text-xs text-gray-600 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
+                                                        <p class="text-xs text-gray-600 leading-relaxed">{!! $formatPlaceholders($exp['description'], 'experience', $expIndex, 0) !!}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
@@ -852,7 +880,7 @@
                                             <div class="space-y-4">
                                                 <h2 class="text-xs font-black text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-900">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
                                                 <div class="space-y-5">
-                                                    @foreach($norm['experiences'] as $exp)
+                                                    @foreach($norm['experiences'] as $expIndex => $exp)
                                                         <div class="space-y-1.5">
                                                             <div class="flex items-baseline justify-between text-xs">
                                                                 <h3 class="font-bold text-gray-900">{{ $exp['title'] }}</h3>
@@ -863,15 +891,15 @@
                                                             @endif
                                                             @if(!empty($exp['bullets']))
                                                                 <ul class="space-y-1.5 pt-1 text-xs text-gray-700">
-                                                                    @foreach($exp['bullets'] as $bullet)
+                                                                    @foreach($exp['bullets'] as $bulletIndex => $bullet)
                                                                         <li class="flex items-start gap-2">
                                                                             <span class="text-blue-500 font-bold">•</span>
-                                                                            <span class="leading-relaxed">{!! $formatPlaceholders($bullet) !!}</span>
+                                                                            <span class="leading-relaxed">{!! $formatPlaceholders($bullet, 'experience', $expIndex, $bulletIndex) !!}</span>
                                                                         </li>
                                                                     @endforeach
                                                                 </ul>
                                                             @elseif(!empty($exp['description']))
-                                                                <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
+                                                                <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description'], 'experience', $expIndex, 0) !!}</p>
                                                             @endif
                                                         </div>
                                                     @endforeach
@@ -985,7 +1013,7 @@
                                     <div class="space-y-4">
                                         <h2 class="text-xs font-bold text-gray-900 uppercase tracking-wider border-b-2 border-emerald-500 pb-1">{{ $labels['achievements'] ?? 'KEY ACHIEVEMENTS' }}</h2>
                                         <div class="space-y-4">
-                                            @foreach($norm['experiences'] as $exp)
+                                            @foreach($norm['experiences'] as $expIndex => $exp)
                                                 <div class="space-y-1.5 border-l-2 border-gray-200 pl-4">
                                                     <div class="flex items-center justify-between text-xs">
                                                         <h3 class="font-bold text-gray-900">{{ $exp['title'] }} — <span class="text-emerald-700">{{ $exp['company'] }}</span></h3>
@@ -993,12 +1021,12 @@
                                                     </div>
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 text-xs text-gray-600">
-                                                            @foreach($exp['bullets'] as $b)
-                                                                <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">✔</span><span>{!! $formatPlaceholders($b) !!}</span></li>
+                                                            @foreach($exp['bullets'] as $bulletIndex => $b)
+                                                                <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">✔</span><span>{!! $formatPlaceholders($b, 'experience', $expIndex, $bulletIndex) !!}</span></li>
                                                             @endforeach
                                                         </ul>
                                                     @elseif(!empty($exp['description']))
-                                                        <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
+                                                        <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description'], 'experience', $expIndex, 0) !!}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
@@ -1056,7 +1084,7 @@
                                     <div class="space-y-4 font-sans">
                                         <h2 class="text-xs font-bold uppercase tracking-widest text-gray-900 border-b border-gray-300 pb-1 font-serif">{{ $labels['experience'] ?? 'PROFESSIONAL EXPERIENCE' }}</h2>
                                         <div class="space-y-4">
-                                            @foreach($norm['experiences'] as $exp)
+                                            @foreach($norm['experiences'] as $expIndex => $exp)
                                                 <div class="space-y-1">
                                                     <div class="flex items-center justify-between text-xs font-serif font-bold text-gray-900">
                                                         <span>{{ $exp['title'] }} — {{ $exp['company'] }}</span>
@@ -1064,15 +1092,15 @@
                                                     </div>
                                                     @if(!empty($exp['bullets']))
                                                         <ul class="space-y-1 pt-1 text-xs text-gray-700">
-                                                            @foreach($exp['bullets'] as $b)
+                                                            @foreach($exp['bullets'] as $bulletIndex => $b)
                                                                 <li class="flex items-start gap-2">
                                                                     <span class="text-gray-400 font-bold">—</span>
-                                                                    <span class="leading-relaxed">{!! $formatPlaceholders($b) !!}</span>
+                                                                    <span class="leading-relaxed">{!! $formatPlaceholders($b, 'experience', $expIndex, $bulletIndex) !!}</span>
                                                                 </li>
                                                             @endforeach
                                                         </ul>
                                                     @elseif(!empty($exp['description']))
-                                                        <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description']) !!}</p>
+                                                        <p class="text-xs text-gray-700 leading-relaxed">{!! $formatPlaceholders($exp['description'], 'experience', $expIndex, 0) !!}</p>
                                                     @endif
                                                 </div>
                                             @endforeach
@@ -1539,6 +1567,110 @@
 
 @push('scripts')
 <script nonce="{{ request()->attributes->get('csp_nonce') }}">
+function cvPlaceholderItem(config) {
+    return {
+        cvId: config.cvId,
+        fieldType: config.fieldType,
+        expIndex: config.expIndex,
+        bulletIndex: config.bulletIndex,
+        originalTag: config.originalTag || '',
+        currentValue: config.currentValue || '',
+        isFilled: Boolean(config.isFilled),
+        isEditing: false,
+        isSaving: false,
+        tempValue: config.currentValue || '',
+
+        get placeholderText() {
+            const clean = (this.originalTag || '').replace(/^\[(?:À compléter|Compléter|Insérer)\s*:\s*/i, '').replace(/\]$/, '').trim();
+            return clean ? `Ex: ${clean}` : 'Saisir une valeur...';
+        },
+
+        get syncKey() {
+            return `${this.cvId}-${this.fieldType}-${this.expIndex}-${this.bulletIndex}-${this.originalTag}`;
+        },
+
+        init() {
+            window.addEventListener('cv-placeholder-synced', (e) => {
+                if (e.detail && e.detail.key === this.syncKey) {
+                    this.currentValue = e.detail.newValue;
+                    this.isFilled = e.detail.isFilled;
+                    this.tempValue = e.detail.newValue;
+                    this.isEditing = false;
+                }
+            });
+        },
+
+        startEdit() {
+            this.tempValue = this.currentValue || '';
+            this.isEditing = true;
+            this.$nextTick(() => {
+                const el = this.$refs.inputField;
+                if (el) {
+                    el.focus();
+                    el.select();
+                }
+            });
+        },
+
+        cancel() {
+            this.tempValue = this.currentValue || '';
+            this.isEditing = false;
+        },
+
+        async save() {
+            if (this.isSaving) return;
+            this.isSaving = true;
+            const val = this.tempValue.trim();
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                const response = await fetch('{{ route('jeune.cv.update-placeholder') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        cv_id: this.cvId,
+                        field_type: this.fieldType,
+                        exp_index: this.expIndex,
+                        bullet_index: this.bulletIndex,
+                        original_tag: this.originalTag,
+                        new_value: val
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    this.currentValue = data.new_value;
+                    this.isFilled = data.is_filled;
+                    this.isEditing = false;
+
+                    window.dispatchEvent(new CustomEvent('cv-placeholder-synced', {
+                        detail: {
+                            key: this.syncKey,
+                            newValue: this.currentValue,
+                            isFilled: this.isFilled
+                        }
+                    }));
+
+                    if (window.outilsAppInstance && typeof window.outilsAppInstance.showToastNotification === 'function') {
+                        window.outilsAppInstance.showToastNotification(data.message, 'success');
+                    }
+                } else {
+                    alert(data.message || 'Erreur lors de l\'enregistrement.');
+                }
+            } catch (err) {
+                console.error('Erreur sauvegarde placeholder:', err);
+                alert('Une erreur est survenue lors de la sauvegarde.');
+            } finally {
+                this.isSaving = false;
+            }
+        }
+    };
+}
+
 function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
     return {
         currentTab: initialTab || 'cv',
@@ -1580,10 +1712,15 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
         },
 
         init() {
+            window.outilsAppInstance = this;
             this.$nextTick(() => {
                 const cvArea = document.getElementById('cvEnhancedPrintArea');
                 if (cvArea) {
                     const preventCopyHandler = (e) => {
+                        // Autoriser les interactions normales avec les champs de formulaire d'édition
+                        if (e.target && (e.target.closest('input, button, [contenteditable="true"]') || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON')) {
+                            return true;
+                        }
                         e.preventDefault();
                         return false;
                     };
@@ -1739,6 +1876,14 @@ function outilsApp(initialTab, initialCvId, initialTemplateCosts) {
         visibility: visible !important;
         -webkit-user-select: text !important;
         user-select: text !important;
+    }
+    #cvEnhancedPrintArea .no-print, #cvEnhancedPrintArea .no-print * {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    .cv-filled-text {
+        text-decoration: none !important;
+        font-weight: inherit !important;
     }
     #cvEnhancedPrintArea {
         position: absolute !important;
