@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-{{-- SEO Met a Tags --}}
+{{-- SEO Meta Tags --}}
 <x-seo-meta page="privacy" />
 
 @section('content')
