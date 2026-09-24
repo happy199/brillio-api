@@ -51,6 +51,7 @@ class WalletController extends V1WalletController
      *     summary="Tarification des fonctionnalités en crédits et prix du crédit",
      *     tags={"Portefeuille"},
      *     security={{"bearerAuth": {}}},
+     *
      *     @OA\Response(response=200, description="Détails des coûts des fonctionnalités")
      * )
      */
