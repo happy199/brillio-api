@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\SessionController;
 use App\Http\Controllers\Api\V1\WalletController;
 use App\Http\Controllers\Api\V2\AccountController;
 use App\Http\Controllers\Api\V2\AuthController;
+use App\Http\Controllers\Api\V2\CvAnalysisController;
 use App\Http\Controllers\Api\V2\EstablishmentController;
 use App\Http\Controllers\Api\V2\MessagesController;
 use App\Http\Controllers\Api\V2\OnboardingController;
@@ -277,6 +278,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/feedback/skip', [UserProfilingController::class, 'skipFeedback']);
         Route::post('/situation', [UserProfilingController::class, 'storeSituation']);
         Route::post('/situation/skip', [UserProfilingController::class, 'skipSituation']);
+
+        // CV Analysis (Analyse IA de CV pour les jeunes)
+        Route::get('/cv', [CvAnalysisController::class, 'index']);
+        Route::post('/cv/analyze', [CvAnalysisController::class, 'analyze']);
+        Route::get('/cv/{id}', [CvAnalysisController::class, 'show'])->where('id', '[0-9]+');
+        Route::post('/cv/{id}/reanalyze', [CvAnalysisController::class, 'reanalyze'])->where('id', '[0-9]+');
+        Route::delete('/cv/{id}', [CvAnalysisController::class, 'destroy'])->where('id', '[0-9]+');
+        Route::post('/cv/{id}/placeholder', [CvAnalysisController::class, 'updatePlaceholder'])->where('id', '[0-9]+');
+        Route::post('/cv/{id}/action', [CvAnalysisController::class, 'action'])->where('id', '[0-9]+');
     });
 });
 
