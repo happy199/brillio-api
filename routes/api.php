@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V2\EstablishmentController;
 use App\Http\Controllers\Api\V2\MessagesController;
 use App\Http\Controllers\Api\V2\OnboardingController;
 use App\Http\Controllers\Api\V2\QuizController;
+use App\Http\Controllers\Api\V2\SocialAuthController;
 use App\Http\Controllers\Api\V2\UserProfilingController;
 use App\Http\Controllers\MonerooWebhookController;
 use App\Http\Controllers\Webhook\JitsiWebhookController;
@@ -66,6 +67,14 @@ Route::prefix('v2')->middleware('throttle:10,1')->group(function () {
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
     Route::post(ROUTE_VERIFY_EMAIL_CODE, [AuthController::class, 'verifyEmailCode']);
     Route::post(ROUTE_RESEND_VERIFICATION_CODE, [AuthController::class, 'resendVerificationCode']);
+
+    // Social OAuth Authentication (Google pour jeunes, LinkedIn pour mentors)
+    // GET  /api/v2/auth/social/{provider}/url  → génère l'URL OAuth Supabase (PKCE mobile)
+    // POST /api/v2/auth/social/{provider}       → échange un provider_token contre un Sanctum token
+    Route::get('/auth/social/{provider}/url', [SocialAuthController::class, 'getOAuthUrl'])
+        ->where('provider', 'google|linkedin');
+    Route::post('/auth/social/{provider}', [SocialAuthController::class, 'authenticate'])
+        ->where('provider', 'google|linkedin');
 });
 
 // V1 Authentication (Guest) - rate limited to 10 requests per minute
