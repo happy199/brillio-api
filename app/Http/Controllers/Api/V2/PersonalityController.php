@@ -143,6 +143,7 @@ class PersonalityController extends V1PersonalityController
      *     summary="Historique des tests de personnalité passés par l'utilisateur",
      *     tags={"Test de personnalité"},
      *     security={{"bearerAuth": {}}},
+     *
      *     @OA\Response(response=200, description="Historique des tests")
      * )
      */
@@ -173,7 +174,9 @@ class PersonalityController extends V1PersonalityController
      *     summary="Détails complets d'un test historique spécifique",
      *     tags={"Test de personnalité"},
      *     security={{"bearerAuth": {}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Détails du test"),
      *     @OA\Response(response=404, description="Test non trouvé")
      * )

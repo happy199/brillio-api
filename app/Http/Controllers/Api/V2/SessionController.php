@@ -502,7 +502,9 @@ class SessionController extends V1SessionController
      *     summary="Pré-remplit le compte rendu via l'IA à partir de la transcription",
      *     tags={"Séances"},
      *     security={{"bearerAuth": {}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Compte rendu pré-rempli avec succès"),
      *     @OA\Response(response=402, description="Crédits insuffisants"),
      *     @OA\Response(response=403, description="Non autorisé"),
@@ -565,7 +567,9 @@ class SessionController extends V1SessionController
      *     summary="Récupère les informations et token JWT Jitsi pour rejoindre la visioconférence",
      *     tags={"Séances"},
      *     security={{"bearerAuth": {}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Paramètres de réunion Jitsi récupérés"),
      *     @OA\Response(response=403, description="Accès refusé"),
      *     @OA\Response(response=404, description="Séance non trouvée")
