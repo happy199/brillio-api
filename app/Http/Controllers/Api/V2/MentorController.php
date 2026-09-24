@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Api\V2;
 use App\Http\Controllers\Api\V1\MentorController as V1MentorController;
 use App\Http\Requests\Mentor\CreateProfileRequest;
 use App\Http\Requests\Mentor\CreateRoadmapStepRequest;
+use App\Http\Requests\Mentor\ImportLinkedInPdfRequest;
 use App\Http\Requests\Mentor\UpdateRoadmapStepRequest;
+use App\Models\MentorProfile;
+use App\Services\MentorLinkedInImportService;
+use App\Traits\FormatsUrls;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -15,6 +19,7 @@ use OpenApi\Annotations as OA;
  */
 class MentorController extends V1MentorController
 {
+    use FormatsUrls;
     /**
      * @OA\Get(
      * path="/api/v2/mentors",
@@ -125,5 +130,45 @@ class MentorController extends V1MentorController
     public function specializations(): JsonResponse
     {
         return parent::specializations();
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v2/mentor/profile/import-linkedin",
+     *     summary="Importe les données du profil mentor depuis un export PDF LinkedIn",
+     *     tags={"Mentors"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"pdf"},
+     *                 @OA\Property(property="pdf", type="string", format="binary", description="Export PDF LinkedIn (max 5MB)")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Profil importé avec succès"),
+     *     @OA\Response(response=403, description="Accès réservé aux mentors"),
+     *     @OA\Response(response=422, description="Erreur de validation ou profil non correspondant"),
+     *     @OA\Response(response=500, description="Erreur de traitement du PDF")
+     * )
+     */
+    public function importLinkedIn(ImportLinkedInPdfRequest $request, MentorLinkedInImportService $importService): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->isMentor()) {
+            return $this->forbidden('Seuls les mentors peuvent importer un profil LinkedIn');
+        }
+
+        $validated = $request->validated();
+        $result = $importService->import($validated['pdf'], $user);
+
+        if (! $result['success']) {
+            return $this->error($result['error'] ?? 'Erreur lors de l\'import', $result['code'] ?? 422);
+        }
+
+        return $this->success($result['data'], $result['message']);
     }
 }

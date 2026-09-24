@@ -33,7 +33,63 @@ class WalletController extends V1WalletController
      */
     public function index(Request $request): JsonResponse
     {
-        return parent::index($request);
+        $response = parent::index($request);
+        $data = $response->getData(true);
+
+        if (isset($data['data'])) {
+            $data['data']['feature_costs'] = $this->getFeatureCosts();
+
+            return response()->json($data);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v2/wallet/pricing",
+     *     summary="Tarification des fonctionnalités en crédits et prix du crédit",
+     *     tags={"Portefeuille"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Détails des coûts des fonctionnalités")
+     * )
+     */
+    public function pricing(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $userType = $user ? ($user->user_type ?? 'jeune') : 'jeune';
+
+        return $this->success([
+            'credit_price_fcfa' => $this->walletService->getCreditPrice($userType),
+            'feature_costs' => $this->getFeatureCosts(),
+        ]);
+    }
+
+    private function getFeatureCosts(): array
+    {
+        return [
+            'ai_report_generation' => $this->walletService->getFeatureCost('ai_report_generation', 5),
+            'compiled_report' => $this->walletService->getFeatureCost('compiled_report', 5),
+            'transcription_download' => $this->walletService->getFeatureCost('transcription_download', 5),
+            'video_recording_download' => $this->walletService->getFeatureCost('video_recording_download', 15),
+            'unlock_history' => $this->walletService->getFeatureCost('unlock_history', 5),
+            'video_call_advisor' => $this->walletService->getFeatureCost('video_call_advisor', 50),
+            'contact_advisor' => $this->walletService->getFeatureCost('contact_advisor', 10),
+            'new_chat' => $this->walletService->getFeatureCost('new_chat', 10),
+            'analysis_tool' => $this->walletService->getFeatureCost('analysis_tool', 5),
+            'cv' => [
+                'copy' => $this->walletService->getFeatureCost('cv_copy', 1),
+                'download_basic' => $this->walletService->getFeatureCost('cv_download', 0),
+                'templates' => [
+                    0 => $this->walletService->getFeatureCost('cv_download', 0),
+                    1 => $this->walletService->getFeatureCost('cv_template_1', 1),
+                    2 => $this->walletService->getFeatureCost('cv_template_2', 2),
+                    3 => $this->walletService->getFeatureCost('cv_template_3', 3),
+                    4 => $this->walletService->getFeatureCost('cv_template_4', 4),
+                    5 => $this->walletService->getFeatureCost('cv_template_5', 5),
+                ],
+            ],
+        ];
     }
 
     /**

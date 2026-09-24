@@ -12,10 +12,12 @@ use App\Http\Controllers\Api\V1\SessionController;
 use App\Http\Controllers\Api\V1\WalletController;
 use App\Http\Controllers\Api\V2\AccountController;
 use App\Http\Controllers\Api\V2\AuthController;
+use App\Http\Controllers\Api\V2\CvAnalysisController;
 use App\Http\Controllers\Api\V2\EstablishmentController;
 use App\Http\Controllers\Api\V2\MessagesController;
 use App\Http\Controllers\Api\V2\OnboardingController;
 use App\Http\Controllers\Api\V2\QuizController;
+use App\Http\Controllers\Api\V2\SocialAuthController;
 use App\Http\Controllers\Api\V2\UserProfilingController;
 use App\Http\Controllers\MonerooWebhookController;
 use App\Http\Controllers\Webhook\JitsiWebhookController;
@@ -66,6 +68,14 @@ Route::prefix('v2')->middleware('throttle:10,1')->group(function () {
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
     Route::post(ROUTE_VERIFY_EMAIL_CODE, [AuthController::class, 'verifyEmailCode']);
     Route::post(ROUTE_RESEND_VERIFICATION_CODE, [AuthController::class, 'resendVerificationCode']);
+
+    // Social OAuth Authentication (Google pour jeunes, LinkedIn pour mentors)
+    // GET  /api/v2/auth/social/{provider}/url  → génère l'URL OAuth Supabase (PKCE mobile)
+    // POST /api/v2/auth/social/{provider}       → échange un provider_token contre un Sanctum token
+    Route::get('/auth/social/{provider}/url', [SocialAuthController::class, 'getOAuthUrl'])
+        ->where('provider', 'google|linkedin');
+    Route::post('/auth/social/{provider}', [SocialAuthController::class, 'authenticate'])
+        ->where('provider', 'google|linkedin');
 });
 
 // V1 Authentication (Guest) - rate limited to 10 requests per minute
@@ -173,6 +183,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/sessions/{id}/accept', [App\Http\Controllers\Api\V2\SessionController::class, 'accept']);
         Route::post('/sessions/{id}/refuse', [App\Http\Controllers\Api\V2\SessionController::class, 'refuse']);
         Route::put('/sessions/{id}/report', [App\Http\Controllers\Api\V2\SessionController::class, 'report']);
+        Route::post('/sessions/{id}/prefill-report', [App\Http\Controllers\Api\V2\SessionController::class, 'prefillReport']);
+        Route::get('/sessions/{id}/meeting', [App\Http\Controllers\Api\V2\SessionController::class, 'meeting']);
         Route::get('/sessions/{id}/download-report', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadReport']);
         Route::get('/sessions/{id}/download-transcription', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadTranscription']);
         Route::get('/sessions/{id}/download-video-recording', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadVideoRecording']);
@@ -180,6 +192,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Wallet
         Route::get('/wallet', [App\Http\Controllers\Api\V2\WalletController::class, 'index']);
         Route::get('/wallet/packs', [App\Http\Controllers\Api\V2\WalletController::class, 'packs']);
+        Route::get('/wallet/pricing', [App\Http\Controllers\Api\V2\WalletController::class, 'pricing']);
         Route::post('/wallet/redeem', [App\Http\Controllers\Api\V2\WalletController::class, 'redeemCoupon']);
         Route::post('/wallet/purchase', [App\Http\Controllers\Api\V2\WalletController::class, 'purchase']);
 
@@ -196,6 +209,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/personality/submit', [App\Http\Controllers\Api\V2\PersonalityController::class, 'submit']);
         Route::get('/personality/result/{userId?}', [App\Http\Controllers\Api\V2\PersonalityController::class, 'result']);
         Route::get('/personality/status', [App\Http\Controllers\Api\V2\PersonalityController::class, 'status']);
+        Route::get('/personality/history', [App\Http\Controllers\Api\V2\PersonalityController::class, 'history']);
+        Route::get('/personality/history/{id}', [App\Http\Controllers\Api\V2\PersonalityController::class, 'historyDetails'])->where('id', '[0-9]+');
 
         // Mentors
         Route::get('/mentors', [App\Http\Controllers\Api\V2\MentorController::class, 'index']);
@@ -205,6 +220,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Mentor Profile & Roadmap
         Route::get('/mentor/profile', [App\Http\Controllers\Api\V2\MentorController::class, 'myProfile']);
         Route::post('/mentor/profile', [App\Http\Controllers\Api\V2\MentorController::class, 'createOrUpdateProfile']);
+        Route::post('/mentor/profile/import-linkedin', [App\Http\Controllers\Api\V2\MentorController::class, 'importLinkedIn']);
         Route::put('/mentor/publish', [App\Http\Controllers\Api\V2\MentorController::class, 'publish']);
         Route::post('/mentor/roadmap/step', [App\Http\Controllers\Api\V2\MentorController::class, 'addRoadmapStep']);
         Route::put('/mentor/roadmap/step/{id}', [App\Http\Controllers\Api\V2\MentorController::class, 'updateRoadmapStep']);
@@ -268,6 +284,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/feedback/skip', [UserProfilingController::class, 'skipFeedback']);
         Route::post('/situation', [UserProfilingController::class, 'storeSituation']);
         Route::post('/situation/skip', [UserProfilingController::class, 'skipSituation']);
+
+        // CV Analysis (Analyse IA de CV pour les jeunes)
+        Route::get('/cv', [CvAnalysisController::class, 'index']);
+        Route::post('/cv/analyze', [CvAnalysisController::class, 'analyze']);
+        Route::get('/cv/{id}', [CvAnalysisController::class, 'show'])->where('id', '[0-9]+');
+        Route::post('/cv/{id}/reanalyze', [CvAnalysisController::class, 'reanalyze'])->where('id', '[0-9]+');
+        Route::delete('/cv/{id}', [CvAnalysisController::class, 'destroy'])->where('id', '[0-9]+');
+        Route::post('/cv/{id}/placeholder', [CvAnalysisController::class, 'updatePlaceholder'])->where('id', '[0-9]+');
+        Route::post('/cv/{id}/action', [CvAnalysisController::class, 'action'])->where('id', '[0-9]+');
     });
 });
 

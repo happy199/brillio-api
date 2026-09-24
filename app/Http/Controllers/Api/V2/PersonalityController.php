@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\V2;
 use App\Http\Controllers\Api\V1\PersonalityController as V1PersonalityController;
 use App\Http\Requests\Personality\SubmitTestRequest;
 use App\Models\PersonalityQuestion;
+use App\Models\PersonalityTest;
 use App\Services\BrillioIAService;
+use App\Services\MbtiCareersService;
+use App\Services\PersonalityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -132,5 +135,84 @@ class PersonalityController extends V1PersonalityController
                 'error' => 'Fallback to original questions due to AI error',
             ]);
         }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v2/personality/history",
+     *     summary="Historique des tests de personnalité passés par l'utilisateur",
+     *     tags={"Test de personnalité"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Historique des tests")
+     * )
+     */
+    public function history(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $tests = PersonalityTest::where('user_id', $user->id)
+            ->whereNotNull('completed_at')
+            ->orderByDesc('completed_at')
+            ->get()
+            ->map(function ($test) {
+                return [
+                    'id' => $test->id,
+                    'personality_type' => $test->personality_type,
+                    'personality_label' => $test->personality_label,
+                    'completed_at' => $test->completed_at?->toISOString(),
+                    'completed_at_formatted' => $test->completed_at?->format('d/m/Y à H:i'),
+                    'is_current' => (bool) $test->is_current,
+                ];
+            });
+
+        return $this->success($tests);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v2/personality/history/{id}",
+     *     summary="Détails complets d'un test historique spécifique",
+     *     tags={"Test de personnalité"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Détails du test"),
+     *     @OA\Response(response=404, description="Test non trouvé")
+     * )
+     */
+    public function historyDetails(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+
+        $test = PersonalityTest::where('user_id', $user->id)
+            ->where('id', $id)
+            ->first();
+
+        if (! $test) {
+            return $this->notFound('Test non trouvé.');
+        }
+
+        $typeInfo = PersonalityService::TYPE_DESCRIPTIONS[$test->personality_type] ?? [
+            'label' => $test->personality_type,
+            'description' => 'Type de personnalité '.$test->personality_type,
+        ];
+
+        $careers = $test->recommended_careers;
+        if (empty($careers)) {
+            $careers = MbtiCareersService::getCareersForType($test->personality_type);
+        }
+
+        $sectors = MbtiCareersService::getSectorsForType($test->personality_type);
+
+        return $this->success([
+            'id' => $test->id,
+            'personality_type' => $test->personality_type,
+            'personality_label' => $test->personality_label ?? $typeInfo['label'],
+            'personality_description' => $test->personality_description ?? $typeInfo['description'],
+            'traits_scores' => $test->traits_scores,
+            'recommended_careers' => $careers,
+            'recommended_sectors' => $sectors,
+            'completed_at' => $test->completed_at ? $test->completed_at->toISOString() : null,
+            'completed_at_formatted' => $test->completed_at ? $test->completed_at->format('d/m/Y à H:i') : null,
+            'is_current' => (bool) $test->is_current,
+        ]);
     }
 }
