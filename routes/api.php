@@ -184,6 +184,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/sessions/{id}/refuse', [App\Http\Controllers\Api\V2\SessionController::class, 'refuse']);
         Route::put('/sessions/{id}/report', [App\Http\Controllers\Api\V2\SessionController::class, 'report']);
         Route::post('/sessions/{id}/prefill-report', [App\Http\Controllers\Api\V2\SessionController::class, 'prefillReport']);
+        Route::get('/sessions/{id}/meeting', [App\Http\Controllers\Api\V2\SessionController::class, 'meeting']);
         Route::get('/sessions/{id}/download-report', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadReport']);
         Route::get('/sessions/{id}/download-transcription', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadTranscription']);
         Route::get('/sessions/{id}/download-video-recording', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadVideoRecording']);
@@ -191,6 +192,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Wallet
         Route::get('/wallet', [App\Http\Controllers\Api\V2\WalletController::class, 'index']);
         Route::get('/wallet/packs', [App\Http\Controllers\Api\V2\WalletController::class, 'packs']);
+        Route::get('/wallet/pricing', [App\Http\Controllers\Api\V2\WalletController::class, 'pricing']);
         Route::post('/wallet/redeem', [App\Http\Controllers\Api\V2\WalletController::class, 'redeemCoupon']);
         Route::post('/wallet/purchase', [App\Http\Controllers\Api\V2\WalletController::class, 'purchase']);
 

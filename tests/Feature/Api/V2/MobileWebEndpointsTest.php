@@ -226,6 +226,88 @@ class MobileWebEndpointsTest extends TestCase
     }
 
     /* =========================================================================
+     * Session Meeting Credentials Endpoint (Jitsi / 8x8 JaaS)
+     * ========================================================================= */
+
+    public function test_session_meeting_requires_authentication(): void
+    {
+        $response = $this->getJson('/api/v2/sessions/1/meeting');
+        $response->assertStatus(401);
+    }
+
+    public function test_session_meeting_forbidden_for_strangers(): void
+    {
+        [$mentor, $jeune, $session] = $this->createSessionWithMentorAndMentee();
+        $stranger = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
+
+        $response = $this->actingAs($stranger)->getJson("/api/v2/sessions/{$session->id}/meeting");
+
+        $response->assertStatus(403);
+    }
+
+    public function test_session_meeting_returns_jwt_and_urls_for_mentor_and_mentee(): void
+    {
+        [$mentor, $jeune, $session] = $this->createSessionWithMentorAndMentee();
+
+        // As Mentor
+        $responseMentor = $this->actingAs($mentor)->getJson("/api/v2/sessions/{$session->id}/meeting");
+        $responseMentor->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.session_id', $session->id)
+            ->assertJsonPath('data.is_moderator', true)
+            ->assertJsonPath('data.server_url', 'https://8x8.vc')
+            ->assertJsonStructure(['data' => ['room_name', 'jaas_app_id', 'jwt', 'meeting_url', 'user']]);
+
+        // As Mentee
+        $responseMentee = $this->actingAs($jeune)->getJson("/api/v2/sessions/{$session->id}/meeting");
+        $responseMentee->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.is_moderator', false);
+    }
+
+    /* =========================================================================
+     * Wallet Pricing & Feature Costs Endpoint
+     * ========================================================================= */
+
+    public function test_wallet_pricing_returns_feature_costs(): void
+    {
+        $user = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
+
+        $response = $this->actingAs($user)->getJson('/api/v2/wallet/pricing');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.credit_price_fcfa', 50)
+            ->assertJsonPath('data.feature_costs.ai_report_generation', 5)
+            ->assertJsonPath('data.feature_costs.video_call_advisor', 50)
+            ->assertJsonPath('data.feature_costs.cv.copy', 1);
+    }
+
+    public function test_wallet_index_includes_feature_costs(): void
+    {
+        $user = User::factory()->create(['user_type' => User::TYPE_JEUNE]);
+
+        $response = $this->actingAs($user)->getJson('/api/v2/wallet');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure([
+                'data' => [
+                    'credits_balance',
+                    'transactions',
+                    'feature_costs' => [
+                        'ai_report_generation',
+                        'compiled_report',
+                        'transcription_download',
+                        'video_recording_download',
+                        'unlock_history',
+                        'video_call_advisor',
+                    ],
+                ],
+            ]);
+    }
+
+    /* =========================================================================
      * LinkedIn PDF Import Endpoint
      * ========================================================================= */
 

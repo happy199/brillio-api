@@ -3530,6 +3530,41 @@
                 ]
             }
         },
+        "/api/v2/sessions/{id}/meeting": {
+            "get": {
+                "tags": [
+                    "Séances"
+                ],
+                "summary": "Récupère les informations et token JWT Jitsi pour rejoindre la visioconférence",
+                "operationId": "4008cba5d6d0d4dd030a747757109a7a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paramètres de réunion Jitsi récupérés"
+                    },
+                    "403": {
+                        "description": "Accès refusé"
+                    },
+                    "404": {
+                        "description": "Séance non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v2/auth/social/{provider}/url": {
             "get": {
                 "tags": [
@@ -3932,6 +3967,25 @@
                         "description": "Détails du portefeuille"
                     }
                 }
+            }
+        },
+        "/api/v2/wallet/pricing": {
+            "get": {
+                "tags": [
+                    "Portefeuille"
+                ],
+                "summary": "Tarification des fonctionnalités en crédits et prix du crédit",
+                "operationId": "42a3c24640a55fdc82eda4715b569450",
+                "responses": {
+                    "200": {
+                        "description": "Détails des coûts des fonctionnalités"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v2/wallet/packs": {
