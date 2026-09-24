@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Api\V1\SessionController as V1SessionController;
 use App\Models\MentoringSession;
+use App\Services\BrillioIAService;
 use App\Services\MentorshipNotificationService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
@@ -492,5 +493,68 @@ class SessionController extends V1SessionController
         $pdf = \PDF::loadView('mentor.reports.compiled_sessions_pdf', compact('sessions'));
 
         return $pdf->download('rapport-seances-compile.pdf');
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v2/sessions/{id}/prefill-report",
+     *     summary="Pré-remplit le compte rendu via l'IA à partir de la transcription",
+     *     tags={"Séances"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Compte rendu pré-rempli avec succès"),
+     *     @OA\Response(response=402, description="Crédits insuffisants"),
+     *     @OA\Response(response=403, description="Non autorisé"),
+     *     @OA\Response(response=404, description="Séance non trouvée"),
+     *     @OA\Response(response=422, description="Transcription non disponible ou erreur IA")
+     * )
+     */
+    public function prefillReport(Request $request, $id, BrillioIAService $brillioIAService): JsonResponse
+    {
+        $session = MentoringSession::findOrFail($id);
+        $user = $request->user();
+
+        if ($session->mentor_id !== $user->id) {
+            return $this->forbidden('Seul le mentor de la séance peut pré-remplir le rapport.');
+        }
+
+        if (! $session->has_transcription) {
+            return $this->error("La transcription n'est pas encore disponible. Vous pourrez pré-remplir le rapport une fois le meeting terminé et la transcription générée.", 422);
+        }
+
+        $cost = $this->walletService->getFeatureCost('ai_report_generation', 5);
+
+        if ($user->credits_balance < $cost) {
+            $missing = $cost - $user->credits_balance;
+
+            return $this->error("Votre solde de crédits est insuffisant ($cost crédits requis). Il vous manque $missing crédits pour utiliser l'IA.", 402);
+        }
+
+        $mentorName = $session->mentor?->name ?? $user->name;
+        $menteeNames = $session->mentees->pluck('name')->join(', ');
+
+        $suggestedReport = $brillioIAService->summarizeTranscription(
+            $session->transcription_raw,
+            $mentorName,
+            $menteeNames
+        );
+
+        if (! $suggestedReport) {
+            return $this->error("L'IA n'a pas pu générer le résumé. Veuillez réessayer ou remplir manuellement.", 422);
+        }
+
+        $this->walletService->deductCredits(
+            $user,
+            $cost,
+            'feature_use',
+            "Pré-remplissage du compte rendu par l'IA : {$session->title}",
+            $session
+        );
+
+        return $this->success([
+            'suggested_report' => $suggestedReport,
+            'credits_deducted' => $cost,
+            'credits_balance' => $user->fresh()->credits_balance,
+        ], "Le compte rendu a été pré-rempli par l'IA avec succès ($cost crédits déduits).");
     }
 }

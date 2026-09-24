@@ -183,6 +183,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/sessions/{id}/accept', [App\Http\Controllers\Api\V2\SessionController::class, 'accept']);
         Route::post('/sessions/{id}/refuse', [App\Http\Controllers\Api\V2\SessionController::class, 'refuse']);
         Route::put('/sessions/{id}/report', [App\Http\Controllers\Api\V2\SessionController::class, 'report']);
+        Route::post('/sessions/{id}/prefill-report', [App\Http\Controllers\Api\V2\SessionController::class, 'prefillReport']);
         Route::get('/sessions/{id}/download-report', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadReport']);
         Route::get('/sessions/{id}/download-transcription', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadTranscription']);
         Route::get('/sessions/{id}/download-video-recording', [App\Http\Controllers\Api\V2\SessionController::class, 'downloadVideoRecording']);
@@ -206,6 +207,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/personality/submit', [App\Http\Controllers\Api\V2\PersonalityController::class, 'submit']);
         Route::get('/personality/result/{userId?}', [App\Http\Controllers\Api\V2\PersonalityController::class, 'result']);
         Route::get('/personality/status', [App\Http\Controllers\Api\V2\PersonalityController::class, 'status']);
+        Route::get('/personality/history', [App\Http\Controllers\Api\V2\PersonalityController::class, 'history']);
+        Route::get('/personality/history/{id}', [App\Http\Controllers\Api\V2\PersonalityController::class, 'historyDetails'])->where('id', '[0-9]+');
 
         // Mentors
         Route::get('/mentors', [App\Http\Controllers\Api\V2\MentorController::class, 'index']);
@@ -215,6 +218,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Mentor Profile & Roadmap
         Route::get('/mentor/profile', [App\Http\Controllers\Api\V2\MentorController::class, 'myProfile']);
         Route::post('/mentor/profile', [App\Http\Controllers\Api\V2\MentorController::class, 'createOrUpdateProfile']);
+        Route::post('/mentor/profile/import-linkedin', [App\Http\Controllers\Api\V2\MentorController::class, 'importLinkedIn']);
         Route::put('/mentor/publish', [App\Http\Controllers\Api\V2\MentorController::class, 'publish']);
         Route::post('/mentor/roadmap/step', [App\Http\Controllers\Api\V2\MentorController::class, 'addRoadmapStep']);
         Route::put('/mentor/roadmap/step/{id}', [App\Http\Controllers\Api\V2\MentorController::class, 'updateRoadmapStep']);

@@ -955,6 +955,530 @@
                 ]
             }
         },
+        "/api/v2/cv": {
+            "get": {
+                "tags": [
+                    "CV Analysis"
+                ],
+                "summary": "Liste toutes les analyses CV de l'utilisateur connecté",
+                "operationId": "59d0ab6fe985e74f1f6f38326d150691",
+                "responses": {
+                    "200": {
+                        "description": "Liste des analyses CV",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "analyses": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 42
+                                                            },
+                                                            "original_filename": {
+                                                                "type": "string",
+                                                                "example": "mon_cv.pdf"
+                                                            },
+                                                            "global_score": {
+                                                                "type": "integer",
+                                                                "example": 78
+                                                            },
+                                                            "status_label": {
+                                                                "type": "string",
+                                                                "example": "Très bien"
+                                                            },
+                                                            "candidate_name": {
+                                                                "type": "string",
+                                                                "example": "Jean Dupont"
+                                                            },
+                                                            "candidate_title": {
+                                                                "type": "string",
+                                                                "example": "Ingénieur logiciel"
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cv/analyze": {
+            "post": {
+                "tags": [
+                    "CV Analysis"
+                ],
+                "summary": "Upload et analyse IA d'un nouveau CV",
+                "description": "Téléverse un fichier CV (PDF, DOCX, JPG, PNG) et lance son analyse IA. Retourne le résultat complet : score global, scores par critère, points forts, axes d'amélioration, recommandations et CV ATS structuré.",
+                "operationId": "5153c56071761a1c214b4923e91436f5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "cv_file"
+                                ],
+                                "properties": {
+                                    "cv_file": {
+                                        "description": "Fichier CV. Formats : PDF, DOCX, JPG, PNG. Max : 5 Mo.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Analyse terminée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CV analysé avec succès ! Score : 78/100"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "analysis": {
+                                                    "$ref": "#/components/schemas/CvAnalysis"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Analyse identique soumise récemment (anti-doublon 30s)"
+                    },
+                    "422": {
+                        "description": "Fichier manquant ou format non supporté"
+                    },
+                    "500": {
+                        "description": "Erreur serveur lors de l'analyse IA"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cv/{id}": {
+            "get": {
+                "tags": [
+                    "CV Analysis"
+                ],
+                "summary": "Détail complet d'une analyse CV",
+                "operationId": "6fef7e61dff2a1f5985323bd37195c7c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détail de l'analyse",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "analysis": {
+                                                    "$ref": "#/components/schemas/CvAnalysis"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CV introuvable ou non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "CV Analysis"
+                ],
+                "summary": "Supprime une analyse CV",
+                "operationId": "2cfba27e69d995e3e821e0f4ab3bb354",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Analyse supprimée"
+                    },
+                    "404": {
+                        "description": "CV introuvable ou non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cv/{id}/reanalyze": {
+            "post": {
+                "tags": [
+                    "CV Analysis"
+                ],
+                "summary": "Relance l'analyse IA d'un CV existant sans re-upload",
+                "description": "Réanalyse le CV avec la dernière version du modèle IA sans avoir à re-téléverser le fichier. Crée une nouvelle entrée d'analyse.",
+                "operationId": "a15fb841e088b20ac3e909c98e06c9f1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Réanalyse terminée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "analysis": {
+                                                    "$ref": "#/components/schemas/CvAnalysis"
+                                                },
+                                                "new_id": {
+                                                    "type": "integer",
+                                                    "example": 43
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CV introuvable ou non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cv/{id}/placeholder": {
+            "post": {
+                "tags": [
+                    "CV Analysis"
+                ],
+                "summary": "Met à jour une balise guidée dans le CV ATS",
+                "description": "Permet à l'utilisateur de remplir les balises de guidage ([guide:...]) générées dans le CV ATS optimisé. Chaque balise peut être remplie avec une valeur personnalisée ou réinitialisée.",
+                "operationId": "bdfc5adbf280a6a459d13add808cc9ba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "field_type",
+                                    "original_tag"
+                                ],
+                                "properties": {
+                                    "field_type": {
+                                        "type": "string",
+                                        "example": "experience",
+                                        "enum": [
+                                            "summary",
+                                            "experience"
+                                        ]
+                                    },
+                                    "exp_index": {
+                                        "description": "Index 0-based de l'expérience (requis si field_type=experience)",
+                                        "type": "integer",
+                                        "example": 0
+                                    },
+                                    "bullet_index": {
+                                        "description": "Index 0-based de la puce dans l'expérience",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "original_tag": {
+                                        "type": "string",
+                                        "example": "[guide:Résultat chiffré obtenu]"
+                                    },
+                                    "new_value": {
+                                        "type": "string",
+                                        "example": "Augmentation de 30% des ventes"
+                                    },
+                                    "custom_value": {
+                                        "description": "Alias de new_value",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Balise mise à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "is_filled": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "new_value": {
+                                                    "type": "string",
+                                                    "example": "Augmentation de 30% des ventes"
+                                                },
+                                                "original_tag": {
+                                                    "type": "string"
+                                                },
+                                                "new_tag": {
+                                                    "type": "string",
+                                                    "example": "[rempli:Augmentation de 30% des ventes|guide:Résultat chiffré obtenu]"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CV introuvable ou non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cv/{id}/action": {
+            "post": {
+                "tags": [
+                    "CV Analysis"
+                ],
+                "summary": "Copier ou télécharger le CV ATS optimisé",
+                "description": "Permet de récupérer le texte du CV ATS ou d'obtenir une URL de téléchargement signée. Certaines actions consomment des crédits (voir `cost` dans la réponse).",
+                "operationId": "bb3c96b4d8c42e1da4218e56cd349795",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "action"
+                                ],
+                                "properties": {
+                                    "action": {
+                                        "description": "copy = texte brut (coûte des crédits). download_docx / download_pdf = URL de téléchargement (coûte des crédits selon le template).",
+                                        "type": "string",
+                                        "example": "copy",
+                                        "enum": [
+                                            "copy",
+                                            "download_docx",
+                                            "download_pdf"
+                                        ]
+                                    },
+                                    "template": {
+                                        "description": "Template visuel pour le téléchargement (0=Basic ATS gratuit, 1-5=templates premium).",
+                                        "type": "integer",
+                                        "example": 0,
+                                        "default": 0,
+                                        "maximum": 5,
+                                        "minimum": 0
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Action exécutée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "action": {
+                                                    "type": "string",
+                                                    "example": "copy"
+                                                },
+                                                "format": {
+                                                    "type": "string",
+                                                    "example": "text",
+                                                    "enum": [
+                                                        "text",
+                                                        "docx",
+                                                        "pdf"
+                                                    ]
+                                                },
+                                                "cost": {
+                                                    "description": "Crédits déduits",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "remaining_balance": {
+                                                    "type": "integer",
+                                                    "example": 9
+                                                },
+                                                "cv_text": {
+                                                    "description": "Texte brut du CV (uniquement pour action=copy)",
+                                                    "type": "string"
+                                                },
+                                                "download_url": {
+                                                    "description": "URL signée valide 60 min (pour download_docx/download_pdf)",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "402": {
+                        "description": "Crédits insuffisants"
+                    },
+                    "404": {
+                        "description": "CV introuvable ou non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v2/establishments/recommended": {
             "get": {
                 "tags": [
@@ -1270,6 +1794,54 @@
                         "description": "Liste des spécialisations"
                     }
                 }
+            }
+        },
+        "/api/v2/mentor/profile/import-linkedin": {
+            "post": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Importe les données du profil mentor depuis un export PDF LinkedIn",
+                "operationId": "789277695b8a24d42ec93c9290b1b576",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "pdf"
+                                ],
+                                "properties": {
+                                    "pdf": {
+                                        "description": "Export PDF LinkedIn (max 5MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil importé avec succès"
+                    },
+                    "403": {
+                        "description": "Accès réservé aux mentors"
+                    },
+                    "422": {
+                        "description": "Erreur de validation ou profil non correspondant"
+                    },
+                    "500": {
+                        "description": "Erreur de traitement du PDF"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v2/mentorships": {
@@ -2055,6 +2627,57 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/personality/history": {
+            "get": {
+                "tags": [
+                    "Test de personnalité"
+                ],
+                "summary": "Historique des tests de personnalité passés par l'utilisateur",
+                "operationId": "a5fe9ddaf9aedbdba9a19482aef4b36e",
+                "responses": {
+                    "200": {
+                        "description": "Historique des tests"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/personality/history/{id}": {
+            "get": {
+                "tags": [
+                    "Test de personnalité"
+                ],
+                "summary": "Détails complets d'un test historique spécifique",
+                "operationId": "42248c3f44a86b5f6247413fd6763552",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails du test"
+                    },
+                    "404": {
+                        "description": "Test non trouvé"
                     }
                 },
                 "security": [
@@ -2866,6 +3489,229 @@
                 ]
             }
         },
+        "/api/v2/sessions/{id}/prefill-report": {
+            "post": {
+                "tags": [
+                    "Séances"
+                ],
+                "summary": "Pré-remplit le compte rendu via l'IA à partir de la transcription",
+                "operationId": "d88ccf558c5f82b6c29904a0112e4cda",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Compte rendu pré-rempli avec succès"
+                    },
+                    "402": {
+                        "description": "Crédits insuffisants"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    },
+                    "404": {
+                        "description": "Séance non trouvée"
+                    },
+                    "422": {
+                        "description": "Transcription non disponible ou erreur IA"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/auth/social/{provider}/url": {
+            "get": {
+                "tags": [
+                    "Authentification Sociale"
+                ],
+                "summary": "Obtenir l'URL OAuth pour initier l'authentification sociale",
+                "description": "Génère l'URL Supabase OAuth pour que l'app mobile puisse ouvrir le navigateur et lancer le flow PKCE. Après l'authentification, Supabase redirige vers le redirect_uri avec un code ou access_token.",
+                "operationId": "4cf7f795f18d82d0764b3ed65b79927d",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "description": "Le provider OAuth (google pour jeune, linkedin pour mentor)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "google",
+                                "linkedin"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "redirect_uri",
+                        "in": "query",
+                        "description": "Deep link de l'app mobile où Supabase redirigera après authentification",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "myapp://auth/callback"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "URL générée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "url": {
+                                                    "type": "string",
+                                                    "example": "https://xxx.supabase.co/auth/v1/authorize?provider=google&..."
+                                                },
+                                                "provider": {
+                                                    "type": "string",
+                                                    "example": "google"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Provider non supporté ou redirect_uri manquant"
+                    },
+                    "422": {
+                        "description": "Paramètres de validation invalides"
+                    }
+                }
+            }
+        },
+        "/api/v2/auth/social/{provider}": {
+            "post": {
+                "tags": [
+                    "Authentification Sociale"
+                ],
+                "summary": "Authentifier via token OAuth social (Google ou LinkedIn)",
+                "description": "Échange un token Supabase OAuth (obtenu côté mobile) contre un token Sanctum de l'API Brillio. Crée le compte si l'utilisateur n'existe pas encore.",
+                "operationId": "934b788a33b3be8ef9cefc372c854743",
+                "parameters": [
+                    {
+                        "name": "provider",
+                        "in": "path",
+                        "description": "Le provider OAuth",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "google",
+                                "linkedin"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "provider_token"
+                                ],
+                                "properties": {
+                                    "provider_token": {
+                                        "description": "Access token Supabase obtenu après le flow OAuth côté mobile",
+                                        "type": "string"
+                                    },
+                                    "user_type": {
+                                        "description": "Type de compte. Défaut : 'jeune' pour Google, 'mentor' pour LinkedIn.",
+                                        "type": "string",
+                                        "example": "jeune",
+                                        "enum": [
+                                            "jeune",
+                                            "mentor"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authentification réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentification réussie"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
+                                                },
+                                                "is_new_user": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "onboarding_required": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Token invalide ou provider non supporté"
+                    },
+                    "401": {
+                        "description": "Compte bloqué ou accès refusé"
+                    },
+                    "409": {
+                        "description": "Conflit de type de compte (compte actif d'un autre type existe déjà)"
+                    },
+                    "422": {
+                        "description": "Paramètres invalides"
+                    }
+                }
+            }
+        },
         "/api/v2/feedback": {
             "post": {
                 "tags": [
@@ -3237,6 +4083,87 @@
     },
     "components": {
         "schemas": {
+            "CvAnalysis": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "original_filename": {
+                        "type": "string",
+                        "example": "mon_cv.pdf"
+                    },
+                    "global_score": {
+                        "description": "Score Career /100",
+                        "type": "integer",
+                        "example": 78
+                    },
+                    "status_label": {
+                        "type": "string",
+                        "example": "Très bien"
+                    },
+                    "candidate_name": {
+                        "type": "string"
+                    },
+                    "candidate_title": {
+                        "type": "string"
+                    },
+                    "candidate_contact": {
+                        "type": "object"
+                    },
+                    "summary": {
+                        "description": "Résumé IA du profil",
+                        "type": "string"
+                    },
+                    "criteria_scores": {
+                        "properties": {
+                            "structure": {
+                                "type": "integer"
+                            },
+                            "clarite": {
+                                "type": "integer"
+                            },
+                            "experiences": {
+                                "type": "integer"
+                            },
+                            "competences": {
+                                "type": "integer"
+                            },
+                            "impact": {
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "strengths": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "improvements": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "recommendations": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "parsed_content": {
+                        "description": "CV ATS structuré avec sections, expériences, compétences, balises guidées",
+                        "type": "object"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "Organization": {
                 "title": "Organization",
                 "description": "Organization model schema",
@@ -3349,12 +4276,20 @@
     },
     "tags": [
         {
+            "name": "CV Analysis",
+            "description": "Analyse IA de CV pour les jeunes"
+        },
+        {
             "name": "Etablissements",
             "description": "Gestion des recommandations et des intérêts pour les établissements"
         },
         {
             "name": "Onboarding",
             "description": "Gestion de l'onboarding utilisateur"
+        },
+        {
+            "name": "Authentification Sociale",
+            "description": "OAuth social pour l'application mobile"
         },
         {
             "name": "UserProfiling",
