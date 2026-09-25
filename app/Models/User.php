@@ -181,6 +181,40 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Evaluations received as a mentor
+     */
+    public function receivedEvaluations()
+    {
+        return $this->hasMany(MentoringSessionEvaluation::class, 'mentor_id');
+    }
+
+    /**
+     * Evaluations given as a mentee
+     */
+    public function givenEvaluations()
+    {
+        return $this->hasMany(MentoringSessionEvaluation::class, 'mentee_id');
+    }
+
+    /**
+     * Get average rating as mentor (rounded to 1 decimal)
+     */
+    public function getAverageRatingAttribute(): ?float
+    {
+        $avg = $this->receivedEvaluations()->avg('rating');
+
+        return $avg ? round((float) $avg, 1) : null;
+    }
+
+    /**
+     * Get number of evaluations received
+     */
+    public function getEvaluationsCountAttribute(): int
+    {
+        return $this->receivedEvaluations()->count();
+    }
+
+    /**
      * Send the email verification notification.
      */
     public function sendEmailVerificationNotification(): void

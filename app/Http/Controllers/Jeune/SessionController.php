@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Jeune;
 
 use App\Http\Controllers\Controller;
 use App\Models\MentoringSession;
+use App\Models\MentoringSessionEvaluation;
 use App\Models\Mentorship;
 use App\Models\User;
 use App\Services\MentorshipNotificationService;
@@ -437,5 +438,42 @@ class SessionController extends Controller
         }
 
         return app(VideoRecordingService::class)->handleSessionVideoDownload($user, $session, 'jeune.wallet.index');
+    }
+
+    /**
+     * Soumettre ou modifier l'évaluation du mentor pour une séance
+     */
+    public function storeEvaluation(Request $request, MentoringSession $session)
+    {
+        $user = auth()->user();
+
+        // 1. Vérifier participant
+        if (! $session->mentees()->where('user_id', $user->id)->exists()) {
+            abort(403, 'Vous ne participez pas à cette séance.');
+        }
+
+        // 2. Vérifier que la séance a un compte-rendu ou est terminée
+        if ($session->status !== 'completed' && empty($session->report_content)) {
+            return redirect()->back()->with('error', 'Vous pourrez évaluer le mentor une fois son compte-rendu de séance rédigé.');
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        MentoringSessionEvaluation::updateOrCreate(
+            [
+                'mentoring_session_id' => $session->id,
+                'mentee_id' => $user->id,
+            ],
+            [
+                'mentor_id' => $session->mentor_id,
+                'rating' => $request->rating,
+                'comment' => $request->comment,
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Votre évaluation a été enregistrée avec succès. Merci pour votre retour !');
     }
 }

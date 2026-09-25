@@ -281,4 +281,20 @@ class MentorProfile extends Model
             ->limit($limit)
             ->get();
     }
+
+    /**
+     * Note moyenne du mentor (sur 5 étoiles)
+     */
+    public function getAverageRatingAttribute(): ?float
+    {
+        return $this->user ? $this->user->average_rating : null;
+    }
+
+    /**
+     * Nombre d'évaluations reçues
+     */
+    public function getEvaluationsCountAttribute(): int
+    {
+        return $this->user ? $this->user->evaluations_count : 0;
+    }
 }

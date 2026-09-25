@@ -144,9 +144,7 @@ class SessionController extends Controller
         $organization = $this->getCurrentOrganization();
         $this->authorizeSessionAccess($session, $organization);
 
-        if ($organization->isPro()) {
-            $session->load(['mentor', 'mentees']);
-        }
+        $session->load(['mentor', 'mentees', 'additionalMentors', 'evaluations.mentee']);
 
         return view('organization.sessions.show', compact('organization', 'session'));
     }

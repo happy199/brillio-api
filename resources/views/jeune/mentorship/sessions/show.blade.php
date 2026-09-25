@@ -247,5 +247,67 @@
                 <p class="text-gray-500 italic">Le compte rendu n'a pas encore été rédigé par le mentor.</p>
             </div>
         @endif
+
+        <!-- Evaluation Section (Youth rating mentor) -->
+        @if($session->report_content || $session->status === 'completed')
+            @php
+                $existingEvaluation = $session->evaluationForMentee(auth()->id());
+            @endphp
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6" x-data="{ rating: {{ $existingEvaluation->rating ?? 5 }}, hoverRating: 0 }">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        Évaluer la séance et votre mentor
+                    </h2>
+                    @if($existingEvaluation)
+                        <span class="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full border border-amber-200">Évaluée</span>
+                    @endif
+                </div>
+
+                <p class="text-sm text-gray-600 mb-6">
+                    Partagez votre avis sur cette séance avec <strong>{{ $session->mentor->name }}</strong>. Votre notation aide à maintenir le haut niveau de qualité du mentorat.
+                </p>
+
+                <form action="{{ route('jeune.sessions.evaluate', $session) }}" method="POST">
+                    @csrf
+                    <!-- Star Rating Select -->
+                    <div class="mb-5">
+                        <label for="rating_hidden" class="block text-sm font-semibold text-gray-700 mb-2">Votre note globale :</label>
+                        <div class="flex items-center gap-2">
+                            <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
+                                <button type="button"
+                                    @click="rating = star"
+                                    @mouseenter="hoverRating = star"
+                                    @mouseleave="hoverRating = 0"
+                                    class="p-1 focus:outline-none transition-transform transform hover:scale-110">
+                                    <svg class="w-8 h-8" :class="(hoverRating ? hoverRating >= star : rating >= star) ? 'text-amber-400 fill-current' : 'text-gray-300 fill-current'" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                </button>
+                            </template>
+                            <span class="ml-2 text-sm font-bold text-gray-700" x-text="rating + ' / 5 étoiles'"></span>
+                        </div>
+                        <input type="hidden" id="rating_hidden" name="rating" :value="rating">
+                    </div>
+
+                    <!-- Comment textarea -->
+                    <div class="mb-5">
+                        <label for="comment" class="block text-sm font-semibold text-gray-700 mb-2">Commentaire & Pertinence du mentorat :</label>
+                        <textarea id="comment" name="comment" rows="3"
+                            class="w-full border-gray-300 rounded-xl shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm p-3"
+                            placeholder="Donnez votre retour sur le déroulement de la séance, les conseils reçus et leur pertinence pour vous...">{{ old('comment', $existingEvaluation->comment ?? '') }}</textarea>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl transition shadow-md flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            {{ $existingEvaluation ? 'Mettre à jour l\'évaluation' : 'Soumettre mon évaluation' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        @endif
     </div>
 @endsection

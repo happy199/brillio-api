@@ -167,6 +167,10 @@
                             class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.mentorship.sessions') ? 'text-white font-bold' : '' }}">
                             Séances de Mentorat
                         </a>
+                        <a href="{{ route('admin.mentorship.evaluations') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.mentorship.evaluations*') ? 'text-white font-bold' : '' }}">
+                            Évaluation des séances
+                        </a>
                         @endif
                     </div>
                 </div>

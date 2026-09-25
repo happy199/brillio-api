@@ -368,6 +368,7 @@ Route::prefix('espace-jeune')->name('jeune.')->middleware(['auth', 'verified', '
         Route::get('/mentorat/seances/{session}/download-video-recording', [SessionController::class, 'downloadVideoRecording'])->name('sessions.download-video-recording');
         Route::post('/mentorat/seances/{session}/cancel', [SessionController::class, 'cancel'])->name('sessions.cancel');
         Route::post('/mentorat/seances/{session}/pay-join', [SessionController::class, 'payAndJoin'])->name('sessions.pay-join');
+        Route::post('/mentorat/seances/{session}/evaluate', [SessionController::class, 'storeEvaluation'])->name('sessions.evaluate');
     }
     );
 
@@ -750,6 +751,10 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('mentorship/requests/{mentorship}', [MentorshipController::class, 'showRequest'])->name('mentorship.requests.show');
         Route::get('mentorship/sessions', [MentorshipController::class, 'sessions'])->name('mentorship.sessions');
         Route::get('mentorship/sessions/{session}', [MentorshipController::class, 'showSession'])->name('mentorship.sessions.show');
+        Route::get('mentorship/evaluations', [MentorshipController::class, 'evaluations'])->name('mentorship.evaluations');
+        Route::get('mentorship/evaluations/{session}', [MentorshipController::class, 'showEvaluation'])->name('mentorship.evaluations.show');
+        Route::post('mentorship/evaluations/{session}/observation', [MentorshipController::class, 'storeAdminObservation'])->name('mentorship.evaluations.observation');
+        Route::post('mentorship/evaluations/{session}/stop-relationship', [MentorshipController::class, 'stopMentorshipRelationship'])->name('mentorship.evaluations.stop-relationship');
 
         // Monitoring des chats de mentorat
         Route::get('mentorship-chat', [MentorshipChatController::class, 'index'])->name('mentorship-chat.index');
