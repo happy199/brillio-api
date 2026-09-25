@@ -25,6 +25,47 @@ class MentoringSession extends Model
                 $session->guest_token = Str::random(64);
             }
         });
+
+        static::created(function ($session) {
+            $session->recalculateFirstSessionFlag();
+        });
+    }
+
+    public function recalculateFirstSessionFlag(): bool
+    {
+        $menteeIds = $this->mentees()->pluck('users.id')->toArray();
+        $earlierExists = false;
+
+        if (! empty($menteeIds)) {
+            $earlierExists = static::where('mentor_id', $this->mentor_id)
+                ->where('id', '<', $this->id)
+                ->where('status', '!=', 'cancelled')
+                ->whereHas('mentees', function ($q) use ($menteeIds) {
+                    $q->whereIn('users.id', $menteeIds);
+                })->exists();
+        } else {
+            $earlierExists = static::where('mentor_id', $this->mentor_id)
+                ->where('id', '<', $this->id)
+                ->where('status', '!=', 'cancelled')
+                ->exists();
+        }
+
+        $isFirst = ! $earlierExists;
+
+        if ($this->is_first_session !== $isFirst) {
+            $this->is_first_session = $isFirst;
+            $this->saveQuietly();
+        }
+
+        return $isFirst;
+    }
+
+    public static function recalculateAllFirstSessionFlags(): void
+    {
+        $sessions = static::with('mentees')->orderBy('id', 'asc')->get();
+        foreach ($sessions as $s) {
+            $s->recalculateFirstSessionFlag();
+        }
     }
 
     protected $fillable = [
@@ -50,6 +91,11 @@ class MentoringSession extends Model
         'timezone',
         'guest_token',
         'scheduled_by_organization_id',
+        'is_first_session',
+        'admin_observation',
+        'admin_evaluation_status',
+        'admin_reviewed_at',
+        'admin_reviewer_id',
     ];
 
     protected $casts = [
@@ -61,7 +107,24 @@ class MentoringSession extends Model
         'report_content' => 'array',
         'transcription_raw' => 'array',
         'has_transcription' => 'boolean',
+        'is_first_session' => 'boolean',
+        'admin_reviewed_at' => 'datetime',
     ];
+
+    public function evaluations()
+    {
+        return $this->hasMany(MentoringSessionEvaluation::class, 'mentoring_session_id');
+    }
+
+    public function adminReviewer()
+    {
+        return $this->belongsTo(User::class, 'admin_reviewer_id');
+    }
+
+    public function evaluationForMentee(int $userId): ?MentoringSessionEvaluation
+    {
+        return $this->evaluations->firstWhere('mentee_id', $userId);
+    }
 
     public function mentor()
     {

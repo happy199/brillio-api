@@ -110,6 +110,14 @@
                             {{ $publicData['years_of_experience'] }} ans d'expérience
                         </span>
                         @endif
+                        @if($mentor->average_rating)
+                        <span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-bold flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-amber-500 fill-current" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            {{ number_format($mentor->average_rating, 1) }} / 5 ({{ $mentor->evaluations_count }} {{ Str::plural('avis', $mentor->evaluations_count) }})
+                        </span>
+                        @endif
                     </div>
 
                     <!-- Social Links -->
@@ -184,6 +192,72 @@
             <p class="text-gray-700 leading-relaxed italic">{{ $publicData['advice'] }}</p>
         </div>
         @endif
+
+        <!-- Public Reviews Section -->
+        @php
+            $mentorEvaluations = $mentor->user ? $mentor->user->receivedEvaluations()->with('mentee')->latest()->get() : collect();
+        @endphp
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-amber-500 fill-current" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        Avis &amp; Évaluations des jeunes
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">Retours d'expérience des étudiants et jeunes accompagnés par ce mentor.</p>
+                </div>
+
+                @if($mentor->average_rating)
+                    <div class="text-right">
+                        <div class="text-3xl font-black text-gray-900 flex items-center gap-1 justify-end">
+                            <span>{{ number_format($mentor->average_rating, 1) }}</span>
+                            <span class="text-sm font-normal text-gray-500">/ 5</span>
+                        </div>
+                        <p class="text-xs text-amber-600 font-bold">{{ $mentor->evaluations_count }} {{ Str::plural('avis', $mentor->evaluations_count) }}</p>
+                    </div>
+                @endif
+            </div>
+
+            <div class="space-y-4">
+                @forelse($mentorEvaluations as $eval)
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-orange-100 text-orange-700 font-bold text-sm flex items-center justify-center">
+                                    {{ strtoupper(substr($eval->mentee->name ?? 'J', 0, 1)) }}
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900">{{ $eval->mentee->name ?? 'Étudiant' }}</h4>
+                                    <p class="text-xs text-gray-500">{{ $eval->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                                <div class="flex text-amber-400">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <svg class="w-4 h-4 {{ $i <= $eval->rating ? 'fill-current' : 'text-gray-300' }}" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    @endfor
+                                </div>
+                                <span class="text-xs font-bold text-amber-700 ml-1">{{ $eval->rating }}/5</span>
+                            </div>
+                        </div>
+                        @if($eval->comment)
+                            <p class="text-gray-700 text-sm italic whitespace-pre-wrap pl-2">« {{ trim($eval->comment) }} »</p>
+                        @endif
+                    </div>
+                @empty
+                    <div class="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                        </svg>
+                        <p class="text-gray-500 text-sm">Aucune évaluation enregistrée pour le moment.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
 
         <!-- Resources Section -->
         @if(isset($resources) && $resources->count() > 0)

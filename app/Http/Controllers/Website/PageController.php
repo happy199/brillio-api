@@ -139,7 +139,7 @@ class PageController extends Controller
         // Incrémenter le compteur de vues
         $mentor->increment('profile_views');
 
-        $mentor->load(['user', 'user.personalityTest', 'specializationModel', 'roadmapSteps']);
+        $mentor->load(['user', 'user.personalityTest', 'specializationModel', 'roadmapSteps', 'user.receivedEvaluations.mentee']);
 
         // Données sécurisées pour affichage public
         $publicData = [

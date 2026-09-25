@@ -40,6 +40,13 @@
                 Ne partagez pas l'URL de cette page.
             </div>
 
+            @if($session->is_first_session)
+                <div class="flex items-center gap-1.5 text-xs text-amber-300 bg-amber-500/20 px-3 py-1 rounded-full border border-amber-400/30 font-semibold" title="Enregistrement automatique qualité admin">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    1ère séance (Enregistrement automatique)
+                </div>
+            @endif
+
             <button id="recording-btn" type="button" onclick="toggleVideoRecording()"
                 class="relative z-50 pointer-events-auto bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer shadow select-none">
                 <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
@@ -238,6 +245,16 @@
                     finishCallAndExit();
                 });
             }
+
+            @if($session->is_first_session)
+                // Auto-start recording for first session quality assurance
+                setTimeout(function() {
+                    if (!mediaRecorder || mediaRecorder.state !== 'recording') {
+                        console.log("Première séance : Démarrage automatique de l'enregistrement vidéo.");
+                        startVideoRecording();
+                    }
+                }, 1500);
+            @endif
         });
 
         (function() {
