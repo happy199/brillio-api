@@ -274,10 +274,10 @@
                     @csrf
                     <!-- Star Rating Select -->
                     <div class="mb-5">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Votre note globale :</label>
+                        <label for="rating_hidden" class="block text-sm font-semibold text-gray-700 mb-2">Votre note globale :</label>
                         <div class="flex items-center gap-2">
                             <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
-                                <button type="button" 
+                                <button type="button"
                                     @click="rating = star"
                                     @mouseenter="hoverRating = star"
                                     @mouseleave="hoverRating = 0"
@@ -289,7 +289,7 @@
                             </template>
                             <span class="ml-2 text-sm font-bold text-gray-700" x-text="rating + ' / 5 étoiles'"></span>
                         </div>
-                        <input type="hidden" name="rating" :value="rating">
+                        <input type="hidden" id="rating_hidden" name="rating" :value="rating">
                     </div>
 
                     <!-- Comment textarea -->

@@ -256,6 +256,8 @@ class MentorshipEvaluationAndQualityTest extends TestCase
             'smart_goals' => 'Prochaine étape définie.',
         ]);
 
+        $reportResponse->assertRedirect();
+
         $session->refresh();
         $this->assertEquals('Objectifs atteints.', $session->report_content['progress']);
     }

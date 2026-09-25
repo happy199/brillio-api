@@ -251,7 +251,7 @@
     <!-- Modal: Stop Mentorship Relationship -->
     @if($mentee)
         <div x-show="stopModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div @click.away="stopModalOpen = false" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div @click.away="stopModalOpen = false" @keydown.escape.window="stopModalOpen = false" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
                 <div class="flex items-center gap-3 text-red-600">
                     <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
