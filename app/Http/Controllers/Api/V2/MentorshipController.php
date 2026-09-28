@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V2;
 use App\Http\Controllers\Api\V1\MentorshipController as V1MentorshipController;
 use App\Jobs\GenerateMentorshipKeywords;
 use App\Models\Mentorship;
-use App\Models\Session;
+use App\Models\MentoringSession;
 use App\Services\MentorshipNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -288,7 +288,7 @@ class MentorshipController extends V1MentorshipController
     {
         $mentor = $request->user();
 
-        $sessions = Session::whereHas('mentorship', function ($query) use ($mentor) {
+        $sessions = MentoringSession::whereHas('mentorship', function ($query) use ($mentor) {
             $query->where('mentor_id', $mentor->id)
                 ->where('status', 'accepted');
         })
