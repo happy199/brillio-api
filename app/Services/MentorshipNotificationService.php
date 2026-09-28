@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Mail\Account\AccountArchivedByUser;
 use App\Mail\Account\AccountDeleted;
-use App\Mail\ResetPasswordMail;
 use App\Mail\Mentorship\MentorshipAccepted;
 use App\Mail\Mentorship\MentorshipCreatedByOrg;
 use App\Mail\Mentorship\MentorshipRefused;
@@ -15,6 +14,7 @@ use App\Mail\Mentorship\MentorshipTerminatedOrgNotification;
 use App\Mail\Messages\NewMessageNotification;
 use App\Mail\Onboarding\WelcomeJeune;
 use App\Mail\Onboarding\WelcomeMentor;
+use App\Mail\ResetPasswordMail;
 use App\Mail\Resource\ResourceGiftedMail;
 use App\Mail\Resource\ResourcePurchased;
 use App\Mail\Resource\ResourceRejected;
