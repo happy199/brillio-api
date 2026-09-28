@@ -44,6 +44,13 @@ class MonerooWebhookController extends Controller
             'payload_length' => strlen($payload),
         ]);
 
+        // Reject immediately if the signature header is missing
+        if (! $signature) {
+            Log::warning('Moneroo webhook: Missing X-Moneroo-Signature header');
+
+            return response()->json(['error' => 'Missing signature'], 401);
+        }
+
         // Verify webhook signature
         if (! $this->monerooService->verifyWebhookSignature($payload, $signature)) {
             Log::warning('Moneroo webhook signature verification failed');
