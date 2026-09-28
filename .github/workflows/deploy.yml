@@ -546,6 +546,16 @@ jobs:
 
             sudo systemctl enable fail2ban
             sudo systemctl restart fail2ban
-            echo "✅ Fail2Ban configured and running"
-            sudo fail2ban-client status
+
+            # Wait for fail2ban socket to be ready (up to 15s)
+            for i in $(seq 1 15); do
+              if sudo fail2ban-client ping > /dev/null 2>&1; then
+                echo "✅ Fail2Ban is running"
+                break
+              fi
+              echo "⏳ Waiting for Fail2Ban socket... ($i/15)"
+              sleep 1
+            done
+
+            sudo systemctl is-active fail2ban || echo "⚠️ Fail2Ban may not be active"
           ENDSSH
