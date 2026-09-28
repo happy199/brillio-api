@@ -525,24 +525,24 @@ jobs:
               echo "✅ Fail2Ban already installed"
             fi
 
-            # Write Laravel jail config
-            sudo tee /etc/fail2ban/filter.d/laravel-auth.conf > /dev/null << 'EOF'
-[Definition]
-failregex = ^<HOST> .* "POST /api/v[12]/\(login\|password/email\|register\).*" 4[0-9][0-9]
-ignoreregex =
-EOF
+            # Write Laravel filter config (using printf to avoid YAML bracket conflicts)
+            printf '%s\n' \
+              '[Definition]' \
+              'failregex = ^<HOST> .* "POST /api/v[12]/(login|password/email|register).*" 4[0-9][0-9]' \
+              'ignoreregex =' \
+              | sudo tee /etc/fail2ban/filter.d/laravel-auth.conf > /dev/null
 
-            sudo tee /etc/fail2ban/jail.d/laravel.conf > /dev/null << 'EOF'
-[laravel-auth]
-enabled  = true
-port     = http,https
-filter   = laravel-auth
-logpath  = /opt/brillio-api/storage/logs/nginx-access.log
-           /var/log/syslog
-maxretry = 10
-findtime = 300
-bantime  = 3600
-EOF
+            # Write Laravel jail config
+            printf '%s\n' \
+              '[laravel-auth]' \
+              'enabled  = true' \
+              'port     = http,https' \
+              'filter   = laravel-auth' \
+              'logpath  = /var/log/syslog' \
+              'maxretry = 10' \
+              'findtime = 300' \
+              'bantime  = 3600' \
+              | sudo tee /etc/fail2ban/jail.d/laravel.conf > /dev/null
 
             sudo systemctl enable fail2ban
             sudo systemctl restart fail2ban
