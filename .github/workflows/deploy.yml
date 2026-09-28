@@ -504,6 +504,48 @@ jobs:
             
             # Cleanup old images
             docker image prune -f
-            
+
             echo "✅ Déploiement via Docker Hub terminé avec succès"
+          ENDSSH
+
+      - name: Install & Configure Fail2Ban
+        env:
+          GCP_VM_USER: ${{ secrets.GCP_VM_USER }}
+          GCP_VM_IP: ${{ secrets.GCP_VM_IP }}
+        run: |
+          ssh "$GCP_VM_USER@$GCP_VM_IP" << 'ENDSSH'
+            set -e
+            echo "🔒 Configuring Fail2Ban..."
+
+            # Install if not present
+            if ! command -v fail2ban-client &> /dev/null; then
+              sudo apt-get update -qq && sudo apt-get install -y fail2ban
+              echo "✅ Fail2Ban installed"
+            else
+              echo "✅ Fail2Ban already installed"
+            fi
+
+            # Write Laravel jail config
+            sudo tee /etc/fail2ban/filter.d/laravel-auth.conf > /dev/null << 'EOF'
+[Definition]
+failregex = ^<HOST> .* "POST /api/v[12]/\(login\|password/email\|register\).*" 4[0-9][0-9]
+ignoreregex =
+EOF
+
+            sudo tee /etc/fail2ban/jail.d/laravel.conf > /dev/null << 'EOF'
+[laravel-auth]
+enabled  = true
+port     = http,https
+filter   = laravel-auth
+logpath  = /opt/brillio-api/storage/logs/nginx-access.log
+           /var/log/syslog
+maxretry = 10
+findtime = 300
+bantime  = 3600
+EOF
+
+            sudo systemctl enable fail2ban
+            sudo systemctl restart fail2ban
+            echo "✅ Fail2Ban configured and running"
+            sudo fail2ban-client status
           ENDSSH

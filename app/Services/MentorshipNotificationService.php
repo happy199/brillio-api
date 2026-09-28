@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\Account\AccountArchivedByUser;
 use App\Mail\Account\AccountDeleted;
+use App\Mail\ResetPasswordMail;
 use App\Mail\Mentorship\MentorshipAccepted;
 use App\Mail\Mentorship\MentorshipCreatedByOrg;
 use App\Mail\Mentorship\MentorshipRefused;
@@ -313,6 +314,14 @@ class MentorshipNotificationService
         } else {
             $this->sendMail($user, new WelcomeJeune($user));
         }
+    }
+
+    /**
+     * Envoyer l'email de réinitialisation de mot de passe
+     */
+    public function sendPasswordResetEmail(User $user, string $token): void
+    {
+        $this->sendMail($user, new ResetPasswordMail($user, $token));
     }
 
     /**
