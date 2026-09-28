@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Api\V1\MentorshipController as V1MentorshipController;
 use App\Jobs\GenerateMentorshipKeywords;
-use App\Models\Mentorship;
 use App\Models\MentoringSession;
+use App\Models\Mentorship;
 use App\Services\MentorshipNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
