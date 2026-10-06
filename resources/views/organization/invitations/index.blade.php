@@ -152,7 +152,7 @@
                     </div>
                     <p class="text-xs {{ $remainingSlots === 0 ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
                         @if($remainingSlots === 0)
-                            ⚠️ Limite atteinte — <a href="{{ route('organization.subscription.index') }}" class="underline hover:text-red-700">Passer à un plan supérieur</a>
+                            ⚠️ Limite atteinte — <a href="{{ route('organization.subscriptions.index') }}" class="underline hover:text-red-700">Passer à un plan supérieur</a>
                         @else
                             {{ $remainingSlots }} place{{ $remainingSlots > 1 ? 's' : '' }} restante{{ $remainingSlots > 1 ? 's' : '' }}
                         @endif

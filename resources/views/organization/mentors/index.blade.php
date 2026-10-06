@@ -59,7 +59,7 @@
                     sur vos jeunes et distribuez des crédits pour encourager l'accompagnement.
                 </p>
                 <div class="flex flex-wrap gap-4 justify-center md:justify-start">
-                    <a href="{{ route('organization.subscription.index') }}"
+                    <a href="{{ route('organization.subscriptions.index') }}"
                         class="px-8 py-4 bg-white text-organization-700 font-bold rounded-xl hover:bg-organization-50 transition-all shadow-lg hover:shadow-xl active:scale-95">
                         Passer à l'offre Pro
                     </a>
