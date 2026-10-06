@@ -61,7 +61,7 @@
                     L'accès détaillé au profil des mentors, incluant leurs spécialisations et l'historique de leurs
                     séances avec vos jeunes, est réservé au plan Pro.
                 </p>
-                <a href="{{ route('organization.subscription.index') }}"
+                <a href="{{ route('organization.subscriptions.index') }}"
                     class="inline-flex w-full justify-center items-center rounded-md bg-organization-600 px-5 py-3 text-base font-semibold text-white shadow-sm hover:bg-organization-700 transition-colors">
                     Passer au plan Pro
                 </a>
