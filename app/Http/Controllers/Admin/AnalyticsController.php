@@ -358,19 +358,11 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Calcule les statistiques d'onboarding et d'engagement exhaustives
+     * Initialise la structure des statistiques d'engagement des jeunes
      */
-    private function getYouthEngagementStats(Carbon $start, Carbon $end): array
+    private function getInitialYouthEngagementStats(): array
     {
-        $youths = User::where('user_type', 'jeune')
-            ->where('is_admin', false)
-            ->whereBetween('created_at', [$start, $end])
-            ->with(['detailedProfiles' => function ($q) {
-                $q->latest();
-            }])
-            ->get();
-
-        $stats = [
+        return [
             'age_distribution' => [
                 'under_15' => 0,
                 '15_17' => 0,
@@ -414,6 +406,122 @@ class AnalyticsController extends Controller
             ],
             'mentorship_intent_rate' => 0,
         ];
+    }
+
+    private function resolveAgeBracket(?int $age): string
+    {
+        if ($age === null) {
+            return 'non_renseigne';
+        }
+        if ($age < 15) {
+            return 'under_15';
+        }
+        if ($age <= 17) {
+            return '15_17';
+        }
+        if ($age <= 21) {
+            return '18_21';
+        }
+        if ($age <= 25) {
+            return '22_25';
+        }
+        if ($age <= 30) {
+            return '26_30';
+        }
+
+        return 'over_30';
+    }
+
+    private function resolveTuitionBracket(string $rawTuition): string
+    {
+        $tuitionMap = [
+            '-200000' => 'under_200',
+            '200000-500000' => '200_500',
+            '500000-1000000' => '500_1m',
+            '1000000-2000000' => '1m_2m',
+            '+2000000' => 'over_2m',
+            'non_renseigne' => 'non_renseigne',
+        ];
+
+        return $tuitionMap[$rawTuition] ?? 'non_renseigne';
+    }
+
+    private function resolveSalaryBracket(string $rawSalary): string
+    {
+        $salaryMap = [
+            '-50000' => 'under_50',
+            '50000-100000' => '50_100',
+            '100000-250000' => '100_250',
+            '250000-500000' => '250_500',
+            '500000-1000000' => '500_1m',
+            '1000000-3000000' => '1m_3m',
+            '+3000000' => 'over_3m',
+            'non_renseigne' => 'non_renseigne',
+        ];
+
+        return $salaryMap[$rawSalary] ?? 'non_renseigne';
+    }
+
+    private function aggregateSingleYouth(User $user, array &$stats, array &$interestCount, int &$mentorGoalCount): void
+    {
+        $onboarding = $user->onboarding_data ?? [];
+        $latestDetailed = $user->detailedProfiles->first();
+        $data = $latestDetailed ? array_merge($onboarding, $latestDetailed->data ?? []) : $onboarding;
+
+        // Tranche d'âge
+        $ageCategory = $this->resolveAgeBracket($user->age);
+        $stats['age_distribution'][$ageCategory]++;
+
+        // Situation
+        $sit = $latestDetailed->status ?? ($onboarding['current_situation'] ?? 'non_renseigne');
+        $stats['situations'][$sit] = ($stats['situations'][$sit] ?? 0) + 1;
+
+        // Source
+        $src = $onboarding['how_found_us'] ?? 'non_renseigne';
+        $stats['sources'][$src] = ($stats['sources'][$src] ?? 0) + 1;
+
+        // Tuition
+        $tuitionKey = $this->resolveTuitionBracket($data['tuition_range'] ?? 'non_renseigne');
+        $stats['tuition_ranges'][$tuitionKey] = ($stats['tuition_ranges'][$tuitionKey] ?? 0) + 1;
+
+        // Salary
+        $salaryKey = $this->resolveSalaryBracket($data['salary_range'] ?? 'non_renseigne');
+        if (in_array($sit, ['emploi', 'entrepreneur'], true)) {
+            $stats['actual_salary_ranges'][$salaryKey] = ($stats['actual_salary_ranges'][$salaryKey] ?? 0) + 1;
+        } elseif ($sit === 'recherche_emploi') {
+            $stats['target_salary_ranges'][$salaryKey] = ($stats['target_salary_ranges'][$salaryKey] ?? 0) + 1;
+        }
+
+        // Goals
+        $goals = $data['goals'] ?? [];
+        foreach ($goals as $goal) {
+            $stats['goals'][$goal] = ($stats['goals'][$goal] ?? 0) + 1;
+            if ($goal === 'mentor') {
+                $mentorGoalCount++;
+            }
+        }
+
+        // Interests
+        $interests = $data['interests'] ?? [];
+        foreach ($interests as $interest) {
+            $interestCount[$interest] = ($interestCount[$interest] ?? 0) + 1;
+        }
+    }
+
+    /**
+     * Calcule les statistiques d'onboarding et d'engagement exhaustives
+     */
+    private function getYouthEngagementStats(Carbon $start, Carbon $end): array
+    {
+        $youths = User::where('user_type', 'jeune')
+            ->where('is_admin', false)
+            ->whereBetween('created_at', [$start, $end])
+            ->with(['detailedProfiles' => function ($q) {
+                $q->latest();
+            }])
+            ->get();
+
+        $stats = $this->getInitialYouthEngagementStats();
 
         if ($youths->isEmpty()) {
             return $stats;
@@ -423,92 +531,7 @@ class AnalyticsController extends Controller
         $mentorGoalCount = 0;
 
         foreach ($youths as $user) {
-            $onboarding = $user->onboarding_data ?? [];
-            $latestDetailed = $user->detailedProfiles->first();
-
-            // On unifie la donnée : Le profil détaillé (modale profilage) est prioritaire sur l'onboarding initial
-            $data = $latestDetailed ? array_merge($onboarding, $latestDetailed->data ?? []) : $onboarding;
-
-            // Distribution par tranche d'âge
-            $dob = $user->date_of_birth ?? (isset($onboarding['birth_date']) && ! empty($onboarding['birth_date']) ? Carbon::parse($onboarding['birth_date']) : null);
-            if ($dob) {
-                try {
-                    $age = $dob instanceof Carbon ? $dob->age : Carbon::parse($dob)->age;
-                    if ($age < 15) {
-                        $stats['age_distribution']['under_15']++;
-                    } elseif ($age <= 17) {
-                        $stats['age_distribution']['15_17']++;
-                    } elseif ($age <= 21) {
-                        $stats['age_distribution']['18_21']++;
-                    } elseif ($age <= 25) {
-                        $stats['age_distribution']['22_25']++;
-                    } elseif ($age <= 30) {
-                        $stats['age_distribution']['26_30']++;
-                    } else {
-                        $stats['age_distribution']['over_30']++;
-                    }
-                } catch (\Throwable $e) {
-                    $stats['age_distribution']['non_renseigne']++;
-                }
-            } else {
-                $stats['age_distribution']['non_renseigne']++;
-            }
-
-            // Situation
-            $sit = $latestDetailed->status ?? ($onboarding['current_situation'] ?? 'non_renseigne');
-            $stats['situations'][$sit] = ($stats['situations'][$sit] ?? 0) + 1;
-
-            // Source
-            $src = $onboarding['how_found_us'] ?? 'non_renseigne';
-            $stats['sources'][$src] = ($stats['sources'][$src] ?? 0) + 1;
-
-            // Tuition Mapping
-            $rawTuition = $data['tuition_range'] ?? 'non_renseigne';
-            $tuitionMap = [
-                '-200000' => 'under_200',
-                '200000-500000' => '200_500',
-                '500000-1000000' => '500_1m',
-                '1000000-2000000' => '1m_2m',
-                '+2000000' => 'over_2m',
-                'non_renseigne' => 'non_renseigne',
-            ];
-            $tuitionKey = $tuitionMap[$rawTuition] ?? 'non_renseigne';
-            $stats['tuition_ranges'][$tuitionKey] = ($stats['tuition_ranges'][$tuitionKey] ?? 0) + 1;
-
-            // Salary Mapping (Target vs Actual)
-            $rawSalary = $data['salary_range'] ?? 'non_renseigne';
-            $salaryMap = [
-                '-50000' => 'under_50',
-                '50000-100000' => '50_100',
-                '100000-250000' => '100_250',
-                '250000-500000' => '250_500',
-                '500000-1000000' => '500_1m',
-                '1000000-3000000' => '1m_3m',
-                '+3000000' => 'over_3m',
-                'non_renseigne' => 'non_renseigne',
-            ];
-            $salaryKey = $salaryMap[$rawSalary] ?? 'non_renseigne';
-
-            if (in_array($sit, ['emploi', 'entrepreneur'])) {
-                $stats['actual_salary_ranges'][$salaryKey] = ($stats['actual_salary_ranges'][$salaryKey] ?? 0) + 1;
-            } elseif ($sit === 'recherche_emploi') {
-                $stats['target_salary_ranges'][$salaryKey] = ($stats['target_salary_ranges'][$salaryKey] ?? 0) + 1;
-            }
-
-            // Goals
-            $goals = $data['goals'] ?? [];
-            foreach ($goals as $goal) {
-                $stats['goals'][$goal] = ($stats['goals'][$goal] ?? 0) + 1;
-                if ($goal === 'mentor') {
-                    $mentorGoalCount++;
-                }
-            }
-
-            // Interests
-            $interests = $data['interests'] ?? [];
-            foreach ($interests as $interest) {
-                $interestCount[$interest] = ($interestCount[$interest] ?? 0) + 1;
-            }
+            $this->aggregateSingleYouth($user, $stats, $interestCount, $mentorGoalCount);
         }
 
         arsort($interestCount);

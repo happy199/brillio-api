@@ -27,13 +27,13 @@
     <div class="bg-white rounded-xl shadow-sm p-4">
         <form method="GET" action="{{ route('admin.mentorship-chat.index') }}" class="flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-[180px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nom du mentor</label>
-                <input type="text" name="mentor_name" value="{{ request('mentor_name') }}"
+                <label for="mentor_name_filter" class="block text-sm font-medium text-gray-700 mb-1">Nom du mentor</label>
+                <input type="text" id="mentor_name_filter" name="mentor_name" value="{{ request('mentor_name') }}"
                     placeholder="Nom du mentor..." class="w-full rounded-lg border-gray-300 text-sm">
             </div>
             <div class="flex-1 min-w-[180px]">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Recherche globale</label>
-                <input type="text" name="search" value="{{ request('search') }}"
+                <label for="search_chat_filter" class="block text-sm font-medium text-gray-700 mb-1">Recherche globale</label>
+                <input type="text" id="search_chat_filter" name="search" value="{{ request('search') }}"
                     placeholder="Nom du mentor ou du jeune..." class="w-full rounded-lg border-gray-300 text-sm">
             </div>
             <div class="w-48">

@@ -8,6 +8,27 @@ use Illuminate\Support\Facades\DB;
 
 class KidsGameController extends Controller
 {
+    private const DEFAULT_FAVORITE_COLOR = '#4f46e5';
+
+    private const DEFAULT_AVATAR_KEY = 'avatarHero';
+
+    private function createDefaultProfile(): int
+    {
+        return DB::table('kids_profiles')->insertGetId([
+            'name' => 'Maya',
+            'age' => 6,
+            'avatar_key' => self::DEFAULT_AVATAR_KEY,
+            'favorite_color' => self::DEFAULT_FAVORITE_COLOR,
+            'stars_count' => 280,
+            'gems_count' => 14,
+            'streak_days' => 5,
+            'current_world' => 1,
+            'current_step' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
     /**
      * Get or create active child profile
      */
@@ -16,19 +37,7 @@ class KidsGameController extends Controller
         $profile = DB::table('kids_profiles')->first();
 
         if (! $profile) {
-            $id = DB::table('kids_profiles')->insertGetId([
-                'name' => 'Maya',
-                'age' => 6,
-                'avatar_key' => 'avatarHero',
-                'favorite_color' => '#4f46e5',
-                'stars_count' => 280,
-                'gems_count' => 14,
-                'streak_days' => 5,
-                'current_world' => 1,
-                'current_step' => 2,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $id = $this->createDefaultProfile();
             $profile = DB::table('kids_profiles')->where('id', $id)->first();
         }
 
@@ -269,19 +278,7 @@ class KidsGameController extends Controller
         $children = DB::table('kids_profiles')->get();
 
         if ($children->isEmpty()) {
-            $id = DB::table('kids_profiles')->insertGetId([
-                'name' => 'Maya',
-                'age' => 6,
-                'avatar_key' => 'avatarHero',
-                'favorite_color' => '#4f46e5',
-                'stars_count' => 280,
-                'gems_count' => 14,
-                'streak_days' => 5,
-                'current_world' => 1,
-                'current_step' => 2,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $id = $this->createDefaultProfile();
             $children = DB::table('kids_profiles')->where('id', $id)->get();
         }
 
@@ -306,8 +303,8 @@ class KidsGameController extends Controller
         $id = DB::table('kids_profiles')->insertGetId([
             'name' => $validated['name'],
             'age' => $validated['age'],
-            'avatar_key' => $validated['avatar_key'] ?? 'avatarHero',
-            'favorite_color' => $validated['favorite_color'] ?? '#4f46e5',
+            'avatar_key' => $validated['avatar_key'] ?? self::DEFAULT_AVATAR_KEY,
+            'favorite_color' => $validated['favorite_color'] ?? self::DEFAULT_FAVORITE_COLOR,
             'stars_count' => 0,
             'gems_count' => 0,
             'streak_days' => 1,

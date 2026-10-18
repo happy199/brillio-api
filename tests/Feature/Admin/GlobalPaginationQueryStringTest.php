@@ -13,6 +13,19 @@ class GlobalPaginationQueryStringTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const PAGE_TWO_QUERY = 'page=2';
+
+    private function assertPaginationPreserved($user, string $routeName, array $params, array $expectedStrings): void
+    {
+        $response = $this->actingAs($user)->get(route($routeName, $params));
+        $response->assertStatus(200);
+        $content = $response->getContent();
+        foreach ($expectedStrings as $expected) {
+            $this->assertStringContainsString($expected, $content);
+        }
+        $this->assertStringContainsString(self::PAGE_TWO_QUERY, $content);
+    }
+
     public function test_admin_users_pagination_preserves_filter_query_strings()
     {
         $admin = User::factory()->admin()->create();
@@ -25,16 +38,10 @@ class GlobalPaginationQueryStringTest extends TestCase
             ]);
         }
 
-        $response = $this->actingAs($admin)->get(route('admin.users.index', [
+        $this->assertPaginationPreserved($admin, 'admin.users.index', [
             'user_type' => 'jeune',
             'search' => 'Utilisateur',
-        ]));
-
-        $response->assertStatus(200);
-        $content = $response->getContent();
-        $this->assertStringContainsString('user_type=jeune', $content);
-        $this->assertStringContainsString('search=Utilisateur', $content);
-        $this->assertStringContainsString('page=2', $content);
+        ], ['user_type=jeune', 'search=Utilisateur']);
     }
 
     public function test_jeune_mentors_pagination_preserves_filter_query_strings()
@@ -57,15 +64,10 @@ class GlobalPaginationQueryStringTest extends TestCase
             ]);
         }
 
-        $response = $this->actingAs($jeune)->get(route('jeune.mentors', [
+        $this->assertPaginationPreserved($jeune, 'jeune.mentors', [
             'search' => 'Mentor',
             'specialization' => 'Technologie & IT',
-        ]));
-
-        $response->assertStatus(200);
-        $content = $response->getContent();
-        $this->assertStringContainsString('search=Mentor', $content);
-        $this->assertStringContainsString('page=2', $content);
+        ], ['search=Mentor']);
     }
 
     public function test_admin_contact_messages_pagination_preserves_query_strings()
@@ -82,16 +84,10 @@ class GlobalPaginationQueryStringTest extends TestCase
             ]);
         }
 
-        $response = $this->actingAs($admin)->get(route('admin.contact-messages.index', [
+        $this->assertPaginationPreserved($admin, 'admin.contact-messages.index', [
             'status' => 'new',
             'search' => 'Demande',
-        ]));
-
-        $response->assertStatus(200);
-        $content = $response->getContent();
-        $this->assertStringContainsString('status=new', $content);
-        $this->assertStringContainsString('search=Demande', $content);
-        $this->assertStringContainsString('page=2', $content);
+        ], ['status=new', 'search=Demande']);
     }
 
     public function test_organization_users_pagination_preserves_query_strings()
@@ -118,11 +114,8 @@ class GlobalPaginationQueryStringTest extends TestCase
             $org->users()->attach($user->id, ['role' => 'jeune']);
         }
 
-        $response = $this->actingAs($orgAdmin)->get(route('organization.users.index', ['search' => 'Talent']));
-
-        $response->assertStatus(200);
-        $content = $response->getContent();
-        $this->assertStringContainsString('search=Talent', $content);
-        $this->assertStringContainsString('page=2', $content);
+        $this->assertPaginationPreserved($orgAdmin, 'organization.users.index', [
+            'search' => 'Talent',
+        ], ['search=Talent']);
     }
 }

@@ -10,6 +10,8 @@ class OnboardingTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const VALID_SENEGAL_PHONE = '771234567';
+
     /**
      * Test the index page loads for uncompleted onboarding user
      */
@@ -40,7 +42,7 @@ class OnboardingTest extends TestCase
             'birth_date' => '2005-05-12',
             'country' => 'Senegal',
             'city' => 'Dakar',
-            'phone' => '771234567', // Valid Senegal: 9 digits local
+            'phone' => self::VALID_SENEGAL_PHONE, // Valid Senegal: 9 digits local
             'education_level' => 'bac',
             'current_situation' => 'etudiant',
             'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
@@ -150,7 +152,7 @@ class OnboardingTest extends TestCase
         $response = $this->actingAs($user)->post(route('jeune.onboarding.complete'), [
             'country' => 'Senegal',
             'city' => 'Dakar',
-            'phone' => '771234567',
+            'phone' => self::VALID_SENEGAL_PHONE,
             'education_level' => 'bac',
             'current_situation' => 'etudiant',
             'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
@@ -177,7 +179,7 @@ class OnboardingTest extends TestCase
             'birth_date' => now()->subYears(8)->format('Y-m-d'), // 8 years old
             'country' => 'Senegal',
             'city' => 'Dakar',
-            'phone' => '771234567',
+            'phone' => self::VALID_SENEGAL_PHONE,
             'education_level' => 'bac',
             'current_situation' => 'etudiant',
             'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
@@ -204,7 +206,7 @@ class OnboardingTest extends TestCase
             'birth_date' => now()->subYears(10)->format('Y-m-d'), // Exactly 10 years old
             'country' => 'Senegal',
             'city' => 'Dakar',
-            'phone' => '771234567',
+            'phone' => self::VALID_SENEGAL_PHONE,
             'education_level' => 'bac',
             'current_situation' => 'etudiant',
             'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],

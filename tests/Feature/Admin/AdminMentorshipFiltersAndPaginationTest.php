@@ -13,6 +13,12 @@ class AdminMentorshipFiltersAndPaginationTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const ALICE_NAME = 'Alice Martin Mentor';
+
+    private const BOB_NAME = 'Bob Dupont Mentor';
+
+    private const PAGE_TWO_QUERY = 'page=2';
+
     protected $admin;
 
     protected function setUp(): void
@@ -21,25 +27,36 @@ class AdminMentorshipFiltersAndPaginationTest extends TestCase
         $this->admin = User::factory()->admin()->create();
     }
 
+    private function assertPaginationPreserved(string $routeName, array $params, array $expectedStrings): void
+    {
+        $response = $this->actingAs($this->admin)->get(route($routeName, $params));
+        $response->assertStatus(200);
+        $content = $response->getContent();
+        foreach ($expectedStrings as $expected) {
+            $this->assertStringContainsString($expected, $content);
+        }
+        $this->assertStringContainsString(self::PAGE_TWO_QUERY, $content);
+    }
+
     public function test_mentors_index_filters_by_mentor_name_and_preserves_query_string()
     {
-        $user1 = User::factory()->create(['name' => 'Alice Martin Mentor', 'user_type' => 'mentor']);
+        $user1 = User::factory()->create(['name' => self::ALICE_NAME, 'user_type' => 'mentor']);
         MentorProfile::factory()->create(['user_id' => $user1->id, 'is_published' => true]);
 
-        $user2 = User::factory()->create(['name' => 'Bob Dupont Mentor', 'user_type' => 'mentor']);
+        $user2 = User::factory()->create(['name' => self::BOB_NAME, 'user_type' => 'mentor']);
         MentorProfile::factory()->create(['user_id' => $user2->id, 'is_published' => false]);
 
         // 1. Search by name
         $response = $this->actingAs($this->admin)->get(route('admin.mentors.index', ['search' => 'Alice']));
         $response->assertStatus(200);
-        $response->assertSee('Alice Martin Mentor');
-        $response->assertDontSee('Bob Dupont Mentor');
+        $response->assertSee(self::ALICE_NAME);
+        $response->assertDontSee(self::BOB_NAME);
 
         // 2. Search by mentor_name param
         $response = $this->actingAs($this->admin)->get(route('admin.mentors.index', ['mentor_name' => 'Bob']));
         $response->assertStatus(200);
-        $response->assertSee('Bob Dupont Mentor');
-        $response->assertDontSee('Alice Martin Mentor');
+        $response->assertSee(self::BOB_NAME);
+        $response->assertDontSee(self::ALICE_NAME);
 
         // 3. Create enough mentors to have multiple pages with status filter
         for ($i = 0; $i < 20; $i++) {
@@ -47,17 +64,10 @@ class AdminMentorshipFiltersAndPaginationTest extends TestCase
             MentorProfile::factory()->create(['user_id' => $u->id, 'is_published' => true]);
         }
 
-        $response = $this->actingAs($this->admin)->get(route('admin.mentors.index', [
+        $this->assertPaginationPreserved('admin.mentors.index', [
             'status' => 'published',
             'search' => 'Mentor',
-        ]));
-        $response->assertStatus(200);
-
-        // Check that pagination links contain status and search
-        $content = $response->getContent();
-        $this->assertStringContainsString('status=published', $content);
-        $this->assertStringContainsString('search=Mentor', $content);
-        $this->assertStringContainsString('page=2', $content);
+        ], ['status=published', 'search=Mentor']);
     }
 
     public function test_mentorship_requests_filters_by_mentor_name_and_preserves_pagination()
@@ -93,16 +103,10 @@ class AdminMentorshipFiltersAndPaginationTest extends TestCase
             ]);
         }
 
-        $response = $this->actingAs($this->admin)->get(route('admin.mentorship.requests', [
+        $this->assertPaginationPreserved('admin.mentorship.requests', [
             'status' => 'pending',
             'mentor_name' => 'BatchMentor',
-        ]));
-        $response->assertStatus(200);
-
-        $content = $response->getContent();
-        $this->assertStringContainsString('status=pending', $content);
-        $this->assertStringContainsString('mentor_name=BatchMentor', $content);
-        $this->assertStringContainsString('page=2', $content);
+        ], ['status=pending', 'mentor_name=BatchMentor']);
     }
 
     public function test_mentorship_sessions_filters_by_mentor_name_and_preserves_pagination()
@@ -147,16 +151,10 @@ class AdminMentorshipFiltersAndPaginationTest extends TestCase
             $sess->mentees()->attach($mentee->id);
         }
 
-        $response = $this->actingAs($this->admin)->get(route('admin.mentorship.sessions', [
+        $this->assertPaginationPreserved('admin.mentorship.sessions', [
             'status' => 'completed',
             'mentor_name' => 'Carlos',
-        ]));
-        $response->assertStatus(200);
-
-        $content = $response->getContent();
-        $this->assertStringContainsString('status=completed', $content);
-        $this->assertStringContainsString('mentor_name=Carlos', $content);
-        $this->assertStringContainsString('page=2', $content);
+        ], ['status=completed', 'mentor_name=Carlos']);
     }
 
     public function test_mentorship_evaluations_filters_by_mentor_name_and_preserves_pagination()
@@ -176,15 +174,9 @@ class AdminMentorshipFiltersAndPaginationTest extends TestCase
             $s->mentees()->attach($mentee->id);
         }
 
-        $response = $this->actingAs($this->admin)->get(route('admin.mentorship.evaluations', [
+        $this->assertPaginationPreserved('admin.mentorship.evaluations', [
             'first_only' => 0,
             'mentor_name' => 'Professeur',
-        ]));
-        $response->assertStatus(200);
-
-        $content = $response->getContent();
-        $this->assertStringContainsString('mentor_name=Professeur', $content);
-        $this->assertStringContainsString('first_only=0', $content);
-        $this->assertStringContainsString('page=2', $content);
+        ], ['mentor_name=Professeur', 'first_only=0']);
     }
 }

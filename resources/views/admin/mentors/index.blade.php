@@ -12,7 +12,8 @@
         </div>
         <form method="GET" action="{{ route('admin.mentors.index') }}" class="flex flex-wrap items-center gap-3">
             <div class="relative">
-                <input type="text" name="search" value="{{ request('search') }}"
+                <label for="mentor_search_input" class="sr-only">Rechercher par nom de mentor</label>
+                <input type="text" id="mentor_search_input" name="search" value="{{ request('search') }}"
                     placeholder="Rechercher par nom de mentor..."
                     class="w-64 pl-9 pr-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -22,20 +23,26 @@
                 </div>
             </div>
 
-            <select name="status" onchange="this.form.submit()"
-                class="rounded-lg border-gray-300 text-sm py-2 focus:ring-indigo-500 focus:border-indigo-500 {{ auth()->user()->isCoach() ? 'hidden' : '' }}">
-                <option value="">Tous les statuts</option>
-                <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publiés</option>
-                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Brouillons</option>
-            </select>
+            <div>
+                <label for="mentor_status_select" class="sr-only">Filtrer par statut</label>
+                <select id="mentor_status_select" name="status" onchange="this.form.submit()"
+                    class="rounded-lg border-gray-300 text-sm py-2 focus:ring-indigo-500 focus:border-indigo-500 {{ auth()->user()->isCoach() ? 'hidden' : '' }}">
+                    <option value="">Tous les statuts</option>
+                    <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publiés</option>
+                    <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Brouillons</option>
+                </select>
+            </div>
 
-            <select name="specialization" onchange="this.form.submit()"
-                class="rounded-lg border-gray-300 text-sm py-2 focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="">Toutes spécialisations</option>
-                @foreach($specializations as $key => $label)
-                <option value="{{ $key }}" {{ request('specialization') === $key ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </select>
+            <div>
+                <label for="mentor_specialization_select" class="sr-only">Filtrer par spécialisation</label>
+                <select id="mentor_specialization_select" name="specialization" onchange="this.form.submit()"
+                    class="rounded-lg border-gray-300 text-sm py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Toutes spécialisations</option>
+                    @foreach($specializations as $key => $label)
+                    <option value="{{ $key }}" {{ request('specialization') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
 
             <button type="submit"
                 class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm">

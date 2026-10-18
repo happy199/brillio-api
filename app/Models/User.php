@@ -224,15 +224,17 @@ class User extends Authenticatable implements MustVerifyEmail
             return $this->date_of_birth;
         }
 
-        if (isset($this->onboarding_data['birth_date']) && ! empty($this->onboarding_data['birth_date'])) {
+        $date = null;
+        $rawBirthDate = $this->onboarding_data['birth_date'] ?? null;
+        if (! empty($rawBirthDate)) {
             try {
-                return Carbon::parse($this->onboarding_data['birth_date']);
+                $date = Carbon::parse($rawBirthDate);
             } catch (\Throwable $e) {
-                return null;
+                $date = null;
             }
         }
 
-        return null;
+        return $date;
     }
 
     /**
