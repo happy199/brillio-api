@@ -4,29 +4,17 @@ namespace Tests\Feature\Admin;
 
 use App\Models\CronAutomation;
 use App\Models\ScheduledTaskLog;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AdminCronAutomationsTest extends TestCase
 {
+    use CreatesAdminUser;
     use RefreshDatabase;
-
-    private function createAdmin(): User
-    {
-        $admin = User::factory()->create([
-            'user_type' => 'admin',
-            'is_admin' => true,
-        ]);
-
-        session(['admin_2fa_passed' => true]);
-
-        return $admin;
-    }
 
     public function test_admin_can_view_automations_list(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
 
         $response = $this->actingAs($admin)
             ->withSession(['admin_2fa_passed' => true])
@@ -42,7 +30,7 @@ class AdminCronAutomationsTest extends TestCase
 
     public function test_admin_can_filter_automations_by_category(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
 
         $response = $this->actingAs($admin)
             ->withSession(['admin_2fa_passed' => true])
@@ -54,7 +42,7 @@ class AdminCronAutomationsTest extends TestCase
 
     public function test_admin_can_toggle_automation_status(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
         CronAutomation::syncAutomations();
 
         $this->assertTrue(CronAutomation::isEnabled('inactivity_reminders'));
@@ -78,7 +66,7 @@ class AdminCronAutomationsTest extends TestCase
 
     public function test_admin_can_view_technical_logs_tab(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
 
         ScheduledTaskLog::create([
             'command' => 'emails:process-bounces',

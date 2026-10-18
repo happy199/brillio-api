@@ -79,7 +79,7 @@ class MentorshipController extends Controller
     {
         $validated = $request->validate([
             'status' => 'nullable|string|max:50',
-            'is_paid' => 'nullable',
+            'is_paid' => 'nullable|boolean',
             'search' => 'nullable|string|max:255',
             'mentor_name' => 'nullable|string|max:255',
             'mentee_name' => 'nullable|string|max:255',
@@ -93,8 +93,8 @@ class MentorshipController extends Controller
         if (! empty($validated['status'])) {
             $query->where('status', $validated['status']);
         }
-        if ($request->filled('is_paid')) {
-            $query->where('is_paid', $request->boolean('is_paid'));
+        if (isset($validated['is_paid'])) {
+            $query->where('is_paid', (bool) $validated['is_paid']);
         }
 
         // Filtre Global (Recherche texte) - Recherche dans titre ou noms
@@ -156,7 +156,7 @@ class MentorshipController extends Controller
     public function evaluations(Request $request)
     {
         $validated = $request->validate([
-            'first_only' => 'nullable',
+            'first_only' => 'nullable|boolean',
             'review_status' => 'nullable|string|max:50',
             'mentor_name' => 'nullable|string|max:255',
             'search' => 'nullable|string|max:255',
@@ -165,7 +165,7 @@ class MentorshipController extends Controller
         $query = MentoringSession::with(['mentor', 'mentees', 'evaluations', 'adminReviewer']);
 
         // Par défaut, afficher les premières séances sauf si filtre désactivé
-        $firstSessionsOnly = $request->has('first_only') ? $request->boolean('first_only') : true;
+        $firstSessionsOnly = isset($validated['first_only']) ? (bool) $validated['first_only'] : true;
 
         if ($firstSessionsOnly) {
             $query->where('is_first_session', true);

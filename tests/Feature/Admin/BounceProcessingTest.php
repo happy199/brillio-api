@@ -3,7 +3,6 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\EmailSuppression;
-use App\Models\User;
 use App\Services\BounceProcessingService;
 use App\Services\BrillioIAService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,19 +11,8 @@ use Tests\TestCase;
 
 class BounceProcessingTest extends TestCase
 {
+    use CreatesAdminUser;
     use RefreshDatabase;
-
-    private function createAdmin(): User
-    {
-        $admin = User::factory()->create([
-            'user_type' => 'admin',
-            'is_admin' => true,
-        ]);
-
-        session(['admin_2fa_passed' => true]);
-
-        return $admin;
-    }
 
     public function test_parses_google_550_hard_bounce_and_suppresses_immediately(): void
     {
@@ -86,7 +74,7 @@ TXT;
 
     public function test_admin_can_import_bounces_via_web_interface(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
 
         $bounceInput = 'Delivery to the following recipient failed permanently: user.test.bounce@gmail.com 550-5.1.1 NoSuchUser';
 
@@ -105,7 +93,7 @@ TXT;
 
     public function test_admin_can_trigger_domain_scan(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
 
         $response = $this->actingAs($admin)
             ->withSession(['admin_2fa_passed' => true])

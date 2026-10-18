@@ -13,25 +13,14 @@ use Tests\TestCase;
 
 class EmailSuppressionTest extends TestCase
 {
+    use CreatesAdminUser;
     use RefreshDatabase;
 
     private const ACTIVE_USER_EMAIL = 'activeuser@example.com';
 
-    private function createAdmin(): User
-    {
-        $admin = User::factory()->create([
-            'user_type' => 'admin',
-            'is_admin' => true,
-        ]);
-
-        session(['admin_2fa_passed' => true]);
-
-        return $admin;
-    }
-
     public function test_admin_can_view_suppression_list(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
 
         EmailSuppression::create([
             'email' => 'bouncing@example.com',
@@ -48,7 +37,7 @@ class EmailSuppressionTest extends TestCase
 
     public function test_admin_can_add_suppression_manually(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
 
         $response = $this->actingAs($admin)->withSession(['admin_2fa_passed' => true])->post(route('admin.audits.suppressions.store'), [
             'email' => 'spam@example.com',
@@ -64,7 +53,7 @@ class EmailSuppressionTest extends TestCase
 
     public function test_admin_can_delete_suppression(): void
     {
-        $admin = $this->createAdmin();
+        $admin = $this->createAdminUser();
 
         $suppression = EmailSuppression::create([
             'email' => 'to_restore@example.com',

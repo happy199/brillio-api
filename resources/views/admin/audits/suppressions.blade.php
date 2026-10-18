@@ -257,8 +257,8 @@
     </div>
 
     <!-- Modal d'Importation / Scan de Rejets NDR (Bounces) -->
-    <div x-show="showImportModal" x-cloak style="display: none;" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showImportModal = false" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-2xl border border-slate-200">
+    <div x-show="showImportModal" x-cloak style="display: none;" @keydown.escape.window="showImportModal = false" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="showImportModal = false" @keydown.escape="showImportModal = false" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-2xl border border-slate-200">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
@@ -309,8 +309,8 @@ Technical details of permanent failure:
     </div>
 
     <!-- Modal d'ajout d'exclusion manuelle -->
-    <div x-show="showAddModal" x-cloak style="display: none;" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div @click.away="showAddModal = false" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-lg border border-slate-200">
+    <div x-show="showAddModal" x-cloak style="display: none;" @keydown.escape.window="showAddModal = false" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="showAddModal = false" @keydown.escape="showAddModal = false" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-lg border border-slate-200">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 class="font-bold text-slate-800 text-base">Ajouter une exclusion manuelle</h3>
                 <button type="button" @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>

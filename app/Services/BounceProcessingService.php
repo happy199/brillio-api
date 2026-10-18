@@ -4,9 +4,22 @@ namespace App\Services;
 
 use App\Models\EmailSuppression;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class BounceProcessingService
 {
+    public const SYSTEM_EMAIL_CONTACT = 'contact@brillio.africa';
+
+    public const SYSTEM_EMAIL_NOREPLY = 'noreply@brillio.africa';
+
+    public const SYSTEM_EMAIL_ADMIN = 'admin@brillio.com';
+
+    private const SYSTEM_EMAILS = [
+        self::SYSTEM_EMAIL_CONTACT,
+        self::SYSTEM_EMAIL_NOREPLY,
+        self::SYSTEM_EMAIL_ADMIN,
+    ];
+
     /**
      * Analyse un texte brut d'e-mail de rejet (NDR) ou un lot de notifications de rebonds.
      * Extrait les adresses e-mails en échec, les codes d'erreurs et met à jour les exclusions.
@@ -20,118 +33,147 @@ class BounceProcessingService
         $hardCount = 0;
         $softCount = 0;
 
-        // Découper par blocs d'e-mails ou analyser globalement
-        $blocks = preg_split('/(?=Delivery to the following recipient|Delivery incomplete|Final-Recipient:|Action:\s*failed)/i', $rawText);
-
-        if (count($blocks) <= 1) {
-            $blocks = [$rawText];
-        }
+        $blocks = $this->splitIntoBlocks($rawText);
 
         foreach ($blocks as $block) {
-            $emails = $this->extractEmailsFromBlock($block);
-            if (empty($emails)) {
+            $this->processBlock($block, $details, $suppressed, $hardCount, $softCount);
+        }
+
+        if (empty($suppressed)) {
+            $this->processFallback($rawText, $details, $suppressed);
+        }
+
+        $uniqueSuppressed = array_values(array_unique($suppressed));
+
+        return [
+            'total_found' => count($uniqueSuppressed),
+            'hard_bounced' => $hardCount,
+            'soft_bounced' => $softCount,
+            'suppressed' => $uniqueSuppressed,
+            'details' => $details,
+        ];
+    }
+
+    /**
+     * Découpe le texte en blocs distincts de notifications NDR.
+     */
+    private function splitIntoBlocks(string $rawText): array
+    {
+        $blocks = preg_split('/(?=Delivery to the following recipient|Delivery incomplete|Final-Recipient:|Action:\s*failed)/i', $rawText);
+
+        return (empty($blocks) || count($blocks) <= 1) ? [$rawText] : $blocks;
+    }
+
+    /**
+     * Traite un bloc individuel d'erreur NDR.
+     */
+    private function processBlock(string $block, array &$details, array &$suppressed, int &$hardCount, int &$softCount): void
+    {
+        $emails = $this->extractEmailsFromBlock($block);
+        if (empty($emails)) {
+            return;
+        }
+
+        $classification = $this->classifyBounceReason($block);
+
+        foreach ($emails as $email) {
+            $normalized = strtolower(trim($email));
+            if ($this->isSystemEmail($normalized)) {
                 continue;
             }
 
-            $classification = $this->classifyBounceReason($block);
-            $reason = $classification['reason'];
-            $isHard = $classification['is_hard'];
+            $this->processSingleEmailBounce($normalized, $classification, $details, $suppressed, $hardCount, $softCount);
+        }
+    }
 
-            foreach ($emails as $email) {
-                $email = strtolower(trim($email));
+    /**
+     * Enregistre le rejet pour une adresse e-mail unique (Hard ou Soft).
+     */
+    private function processSingleEmailBounce(
+        string $email,
+        array $classification,
+        array &$details,
+        array &$suppressed,
+        int &$hardCount,
+        int &$softCount
+    ): void {
+        $record = EmailSuppression::where('email', $email)->first();
+        $isHard = (bool) $classification['is_hard'];
+        $reason = (string) $classification['reason'];
 
-                // Ne pas exclure nos propres adresses système
-                if (in_array($email, ['contact@brillio.africa', 'noreply@brillio.africa', 'admin@brillio.com'], true)) {
-                    continue;
-                }
-
-                $record = EmailSuppression::where('email', $email)->first();
-
-                if ($isHard) {
-                    $hardCount++;
-                    EmailSuppression::updateOrCreate(
-                        ['email' => $email],
-                        [
-                            'reason' => mb_strimwidth($reason, 0, 250, '...'),
-                            'source' => 'system_auto',
-                            'bounce_type' => 'hard',
-                            'bounce_count' => ($record ? $record->bounce_count : 0) + 1,
-                            'last_bounce_at' => now(),
-                        ]
-                    );
-
-                    $suppressed[] = $email;
-                    $details[] = [
-                        'email' => $email,
-                        'type' => 'hard',
-                        'status' => 'Exclusion immédiate',
-                        'reason' => $reason,
-                    ];
-                } else {
-                    // Soft bounce (ex: boîte pleine 452 4.2.2)
-                    $softCount++;
-                    $count = ($record ? $record->bounce_count : 0) + 1;
-                    $isExcludedNow = $count >= 3;
-
-                    EmailSuppression::updateOrCreate(
-                        ['email' => $email],
-                        [
-                            'reason' => mb_strimwidth($reason, 0, 250, '...'),
-                            'source' => 'system_auto',
-                            'bounce_type' => 'soft',
-                            'bounce_count' => $count,
-                            'last_bounce_at' => now(),
-                        ]
-                    );
-
-                    $suppressed[] = $email;
-                    $details[] = [
-                        'email' => $email,
-                        'type' => 'soft',
-                        'status' => $isExcludedNow ? "Exclu (seuil de {$count}/3 atteint)" : "Avertissement (rebond {$count}/3)",
-                        'reason' => $reason,
-                    ];
-                }
-            }
+        if ($isHard) {
+            $hardCount++;
+            $this->recordSuppression($email, $reason, 'hard', ($record ? $record->bounce_count : 0) + 1);
+            $status = 'Exclusion immédiate';
+        } else {
+            $softCount++;
+            $count = ($record ? $record->bounce_count : 0) + 1;
+            $this->recordSuppression($email, $reason, 'soft', $count);
+            $status = $count >= 3 ? "Exclu (seuil de {$count}/3 atteint)" : "Avertissement (rebond {$count}/3)";
         }
 
-        // Si aucun format structuré n'a fonctionné, extraction de secours par motif regex d'e-mails
-        if (empty($suppressed)) {
-            $fallbackEmails = $this->extractAllValidEmails($rawText);
-            foreach ($fallbackEmails as $email) {
-                if (in_array($email, ['contact@brillio.africa', 'noreply@brillio.africa', 'admin@brillio.com'], true)) {
-                    continue;
-                }
-
-                $classification = $this->classifyBounceReason($rawText);
-                EmailSuppression::updateOrCreate(
-                    ['email' => $email],
-                    [
-                        'reason' => mb_strimwidth($classification['reason'], 0, 250, '...'),
-                        'source' => 'system_auto',
-                        'bounce_type' => $classification['is_hard'] ? 'hard' : 'soft',
-                        'bounce_count' => 1,
-                        'last_bounce_at' => now(),
-                    ]
-                );
-
-                $suppressed[] = $email;
-                $details[] = [
-                    'email' => $email,
-                    'type' => $classification['is_hard'] ? 'hard' : 'soft',
-                    'status' => 'Exclusion enregistrée',
-                    'reason' => $classification['reason'],
-                ];
-            }
-        }
-
-        return [
-            'total_found' => count(array_unique($suppressed)),
-            'hard_bounced' => $hardCount,
-            'soft_bounced' => $softCount,
-            'suppressed' => array_values(array_unique($suppressed)),
-            'details' => $details,
+        $suppressed[] = $email;
+        $details[] = [
+            'email' => $email,
+            'type' => $isHard ? 'hard' : 'soft',
+            'status' => $status,
+            'reason' => $reason,
         ];
+    }
+
+    /**
+     * Extraction de secours si aucun motif de bloc standard n'a été identifié.
+     */
+    private function processFallback(string $rawText, array &$details, array &$suppressed): void
+    {
+        $fallbackEmails = $this->extractAllValidEmails($rawText);
+        $classification = $this->classifyBounceReason($rawText);
+        $type = $classification['is_hard'] ? 'hard' : 'soft';
+
+        foreach ($fallbackEmails as $email) {
+            $normalized = strtolower(trim($email));
+            if ($this->isSystemEmail($normalized)) {
+                continue;
+            }
+
+            $this->recordSuppression($normalized, $classification['reason'], $type);
+            $suppressed[] = $normalized;
+            $details[] = [
+                'email' => $normalized,
+                'type' => $type,
+                'status' => 'Exclusion enregistrée',
+                'reason' => $classification['reason'],
+            ];
+        }
+    }
+
+    /**
+     * Vérifie si une adresse e-mail correspond à une adresse système protégée.
+     */
+    private function isSystemEmail(string $email): bool
+    {
+        return in_array($email, self::SYSTEM_EMAILS, true);
+    }
+
+    /**
+     * Enregistre ou met à jour une exclusion e-mail avec décompte.
+     */
+    private function recordSuppression(
+        string $email,
+        string $reason,
+        string $type = 'hard',
+        int $bounceCount = 1
+    ): EmailSuppression {
+        return EmailSuppression::updateOrCreate(
+            ['email' => $email],
+            [
+                'reason' => mb_strimwidth($reason, 0, 250, '...'),
+                'source' => 'system_auto',
+                'bounce_type' => $type,
+                'bounce_count' => $bounceCount,
+                'last_bounce_at' => now(),
+            ]
+        );
     }
 
     /**
@@ -140,52 +182,45 @@ class BounceProcessingService
      */
     public function hasValidMxRecord(string $email): bool
     {
-        $email = strtolower(trim($email));
+        $normalized = strtolower(trim($email));
+        $domain = substr(strrchr($normalized, '@') ?: '', 1);
 
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($normalized, FILTER_VALIDATE_EMAIL) || empty($domain)) {
             return false;
         }
 
-        $parts = explode('@', $email);
-        $domain = end($parts);
-
-        if (! $domain) {
-            return false;
-        }
-
-        // En environnement de test ou pour les domaines réservés RFC, considérer comme valide
-        $reservedTestDomains = ['example.com', 'example.org', 'example.net', 'test.com', 'localhost'];
-        if (in_array($domain, $reservedTestDomains, true) || app()->environment('testing')) {
+        $reserved = ['example.com', 'example.org', 'example.net', 'test.com', 'localhost'];
+        if (in_array($domain, $reserved, true) || app()->environment('testing')) {
             return true;
         }
 
-        // Vérifier l'existence d'enregistrements MX ou A sur le domaine
-        if (function_exists('checkdnsrr')) {
-            try {
-                if (checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A')) {
-                    return true;
-                }
+        return $this->verifyDnsRecord($normalized, $domain);
+    }
 
-                // Auto-exclusion préventive pour éviter de surcharger Namecheap
-                EmailSuppression::updateOrCreate(
-                    ['email' => $email],
-                    [
-                        'reason' => "Domaine invalide ou sans serveur de messagerie MX ({$domain})",
-                        'source' => 'system_auto',
-                        'bounce_type' => 'preflight_dns',
-                        'bounce_count' => 1,
-                        'last_bounce_at' => now(),
-                    ]
-                );
-
-                return false;
-            } catch (\Throwable $e) {
-                // En cas d'indisponibilité DNS locale temporaire, ne pas bloquer
-                return true;
-            }
+    /**
+     * Effectue la vérification réseau DNS MX / A sur le domaine.
+     */
+    private function verifyDnsRecord(string $email, string $domain): bool
+    {
+        if (! function_exists('checkdnsrr')) {
+            return true;
         }
 
-        return true;
+        try {
+            if (checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A')) {
+                return true;
+            }
+
+            $this->recordSuppression(
+                $email,
+                "Domaine invalide ou sans serveur de messagerie MX ({$domain})",
+                'preflight_dns'
+            );
+
+            return false;
+        } catch (\Throwable $e) {
+            return true;
+        }
     }
 
     /**
@@ -248,22 +283,21 @@ class BounceProcessingService
     }
 
     /**
-     * Extrait toutes les adresses e-mails valides d'un texte.
+     * Extrait toutes les adresses e-mails trouvées dans un texte sans restriction de contexte.
      */
     private function extractAllValidEmails(string $text): array
     {
-        $found = [];
+        $emails = [];
         if (preg_match_all('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', $text, $matches)) {
-            foreach ($matches[0] as $email) {
-                $email = strtolower(trim($email));
-                // Filtrer les adresses d'infrastructure de rebond
-                if (! str_contains($email, 'mailer-daemon') && ! str_contains($email, 'jellyfish.systems')) {
-                    $found[] = $email;
+            foreach ($matches[0] as $candidate) {
+                $candidate = strtolower(trim($candidate));
+                if (filter_var($candidate, FILTER_VALIDATE_EMAIL)) {
+                    $emails[] = $candidate;
                 }
             }
         }
 
-        return array_values(array_unique($found));
+        return array_values(array_unique($emails));
     }
 
     /**
@@ -272,48 +306,64 @@ class BounceProcessingService
     private function classifyBounceReason(string $text): array
     {
         $lower = strtolower($text);
+        $isHard = true;
+        $reason = 'Échec définitif de livraison signalé par Mail Delivery Subsystem';
 
-        // Motifs Soft Bounce (Erreurs temporaires / Boîte saturée)
-        if (str_contains($lower, '452-4.2.2') || str_contains($lower, '452 4.2.2') || str_contains($lower, 'overquotatemp') || str_contains($lower, 'out of storage space') || str_contains($lower, 'mailbox full')) {
-            return [
-                'is_hard' => false,
-                'reason' => 'Boîte e-mail saturée / quota dépassé (Erreur SMTP 452 4.2.2 OverQuotaTemp)',
-            ];
-        }
-
-        if (str_contains($lower, '451') || str_contains($lower, '421') || str_contains($lower, 'temporarily deferred')) {
-            return [
-                'is_hard' => false,
-                'reason' => 'Serveur destinataire temporairement inaccessible (Erreur SMTP 4xx)',
-            ];
-        }
-
-        // Motifs Hard Bounce (Compte inexistant / Rejet définitif)
-        if (str_contains($lower, '550-5.1.1') || str_contains($lower, '550 5.1.1') || str_contains($lower, 'nosuchuser') || str_contains($lower, 'does not exist')) {
-            return [
-                'is_hard' => true,
-                'reason' => 'Compte e-mail inexistant / adresse introuvable (Erreur SMTP 550 5.1.1 NoSuchUser)',
-            ];
-        }
-
-        if (str_contains($lower, 'user unknown') || str_contains($lower, 'invalid recipient') || str_contains($lower, 'recipient address rejected')) {
-            return [
-                'is_hard' => true,
-                'reason' => 'Destinataire invalide ou refusé par le serveur de messagerie (550 User Unknown)',
-            ];
-        }
-
-        if (str_contains($lower, 'account disabled') || str_contains($lower, 'mailbox unavailable')) {
-            return [
-                'is_hard' => true,
-                'reason' => 'Compte désactivé ou indisponible auprès du fournisseur',
-            ];
+        if ($this->isMailboxFullPattern($lower)) {
+            $isHard = false;
+            $reason = 'Boîte e-mail saturée / quota dépassé (Erreur SMTP 452 4.2.2 OverQuotaTemp)';
+        } elseif ($this->isTemporaryDeferralPattern($lower)) {
+            $isHard = false;
+            $reason = 'Serveur destinataire temporairement inaccessible (Erreur SMTP 4xx)';
+        } elseif ($this->isNoSuchUserPattern($lower)) {
+            $reason = 'Compte e-mail inexistant / adresse introuvable (Erreur SMTP 550 5.1.1 NoSuchUser)';
+        } elseif ($this->isInvalidRecipientPattern($lower)) {
+            $reason = 'Destinataire invalide ou refusé par le serveur de messagerie (550 User Unknown)';
+        } elseif ($this->isDisabledAccountPattern($lower)) {
+            $reason = 'Compte désactivé ou indisponible auprès du fournisseur';
         }
 
         return [
-            'is_hard' => true,
-            'reason' => 'Échec définitif de livraison signalé par Mail Delivery Subsystem',
+            'is_hard' => $isHard,
+            'reason' => $reason,
         ];
+    }
+
+    private function isMailboxFullPattern(string $lower): bool
+    {
+        return str_contains($lower, '452-4.2.2')
+            || str_contains($lower, '452 4.2.2')
+            || str_contains($lower, 'overquotatemp')
+            || str_contains($lower, 'out of storage space')
+            || str_contains($lower, 'mailbox full');
+    }
+
+    private function isTemporaryDeferralPattern(string $lower): bool
+    {
+        return str_contains($lower, '451')
+            || str_contains($lower, '421')
+            || str_contains($lower, 'temporarily deferred');
+    }
+
+    private function isNoSuchUserPattern(string $lower): bool
+    {
+        return str_contains($lower, '550-5.1.1')
+            || str_contains($lower, '550 5.1.1')
+            || str_contains($lower, 'nosuchuser')
+            || str_contains($lower, 'does not exist');
+    }
+
+    private function isInvalidRecipientPattern(string $lower): bool
+    {
+        return str_contains($lower, 'user unknown')
+            || str_contains($lower, 'invalid recipient')
+            || str_contains($lower, 'recipient address rejected');
+    }
+
+    private function isDisabledAccountPattern(string $lower): bool
+    {
+        return str_contains($lower, 'account disabled')
+            || str_contains($lower, 'mailbox unavailable');
     }
 
     /**
@@ -324,17 +374,36 @@ class BounceProcessingService
      */
     public function analyzeBounceWithAi(string $rawText): array
     {
+        $result = [
+            'success' => false,
+            'message' => 'Initialisation',
+        ];
+
         try {
             $iaService = app(BrillioIAService::class);
 
             if (! $iaService->isApiKeyConfigured()) {
-                return [
-                    'success' => false,
-                    'message' => "La clé API de l'IA (OpenRouter / Gemini) n'est pas configurée.",
-                ];
+                $result['message'] = "La clé API de l'IA (OpenRouter / Gemini) n'est pas configurée.";
+            } else {
+                $result = $this->executeAiBounceAnalysis($iaService, $rawText);
             }
+        } catch (\Throwable $e) {
+            Log::error("Erreur lors de l'analyse du bounce par l'IA Brillio: ".$e->getMessage());
+            $result = [
+                'success' => false,
+                'message' => "Erreur lors de l'appel à l'IA : ".$e->getMessage(),
+            ];
+        }
 
-            $systemPrompt = "Tu es un ingénieur expert en délivrabilité d'e-mails et protocoles SMTP.
+        return $result;
+    }
+
+    /**
+     * Exécute l'analyse IA via OpenRouter et applique les exclusions recommandées.
+     */
+    private function executeAiBounceAnalysis(BrillioIAService $iaService, string $rawText): array
+    {
+        $systemPrompt = "Tu es un ingénieur expert en délivrabilité d'e-mails et protocoles SMTP.
 Ta tâche est d'analyser un message d'erreur ou notification de rejet d'e-mail (NDR/Bounce).
 Extrais les informations au format JSON strict suivant :
 {
@@ -347,53 +416,46 @@ Extrais les informations au format JSON strict suivant :
 }
 Réponds UNIQUEMENT avec un JSON valide, sans balises markdown ``` ni texte autour.";
 
-            $response = $iaService->analyzeText($rawText, $systemPrompt);
-            $cleanJson = $iaService->cleanJson($response);
-            $data = json_decode($cleanJson, true);
+        $response = $iaService->analyzeText($rawText, $systemPrompt);
+        $cleanJson = $iaService->cleanJson($response);
+        $data = json_decode($cleanJson, true);
 
-            if (! is_array($data) || empty($data['recipients'])) {
-                return [
-                    'success' => false,
-                    'message' => "L'IA n'a pas pu identifier d'adresse en échec dans ce message.",
-                    'raw_response' => $response,
-                ];
-            }
-
-            $suppressedCount = 0;
-            $recipients = (array) $data['recipients'];
-
-            foreach ($recipients as $email) {
-                $email = strtolower(trim((string) $email));
-                if (filter_var($email, FILTER_VALIDATE_EMAIL) && ! in_array($email, ['contact@brillio.africa', 'noreply@brillio.africa', 'admin@brillio.com'], true)) {
-                    $isHard = ($data['bounce_type'] ?? '') === 'hard' || ($data['recommended_action'] ?? '') === 'exclude_immediately';
-                    $reason = ($data['smtp_code'] ?? 'IA').' : '.($data['diagnostic'] ?? 'Rejet identifié par IA');
-
-                    EmailSuppression::updateOrCreate(
-                        ['email' => $email],
-                        [
-                            'reason' => mb_strimwidth($reason, 0, 250, '...'),
-                            'source' => 'system_auto',
-                            'bounce_type' => $isHard ? 'hard' : 'soft',
-                            'bounce_count' => 1,
-                            'last_bounce_at' => now(),
-                        ]
-                    );
-                    $suppressedCount++;
-                }
-            }
-
-            return [
-                'success' => true,
-                'data' => $data,
-                'suppressed_count' => $suppressedCount,
-            ];
-        } catch (\Throwable $e) {
-            Log::error("Erreur lors de l'analyse du bounce par l'IA Brillio: ".$e->getMessage());
-
+        if (! is_array($data) || empty($data['recipients'])) {
             return [
                 'success' => false,
-                'message' => "Erreur lors de l'appel à l'IA : ".$e->getMessage(),
+                'message' => "L'IA n'a pas pu identifier d'adresse en échec dans ce message.",
+                'raw_response' => $response,
             ];
         }
+
+        $suppressedCount = $this->applyAiExclusions($data);
+
+        return [
+            'success' => true,
+            'data' => $data,
+            'suppressed_count' => $suppressedCount,
+        ];
+    }
+
+    /**
+     * Applique les exclusions retournées par l'IA.
+     */
+    private function applyAiExclusions(array $data): int
+    {
+        $suppressedCount = 0;
+        $recipients = (array) ($data['recipients'] ?? []);
+        $isHard = ($data['bounce_type'] ?? '') === 'hard' || ($data['recommended_action'] ?? '') === 'exclude_immediately';
+        $reason = ($data['smtp_code'] ?? 'IA').' : '.($data['diagnostic'] ?? 'Rejet identifié par IA');
+        $type = $isHard ? 'hard' : 'soft';
+
+        foreach ($recipients as $email) {
+            $normalized = strtolower(trim((string) $email));
+            if (filter_var($normalized, FILTER_VALIDATE_EMAIL) && ! $this->isSystemEmail($normalized)) {
+                $this->recordSuppression($normalized, $reason, $type);
+                $suppressedCount++;
+            }
+        }
+
+        return $suppressedCount;
     }
 }

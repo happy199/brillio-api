@@ -12,9 +12,9 @@ class ProcessEmailBounces extends Command
      *
      * @var string
      */
-    protected $signature = 'emails:process-bounces 
-                            {--file= : Chemin vers un fichier contenant des retours de rebond NDR}
-                            {--scan-domains : Vérifie également la validité DNS MX des adresses utilisateurs}';
+    protected $signature = 'emails:process-bounces'
+        .' {--file= : Chemin vers un fichier contenant des retours de rebond NDR}'
+        .' {--scan-domains : Vérifie également la validité DNS MX des adresses utilisateurs}';
 
     /**
      * The console command description.

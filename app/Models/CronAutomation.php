@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\CronAutomationException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Schema;
 class CronAutomation extends Model
 {
     use HasFactory;
+
+    public const FREQ_HOURLY = 'Toutes les heures';
 
     protected $fillable = [
         'key',
@@ -58,7 +61,7 @@ class CronAutomation extends Model
                 'name' => 'Rappels des séances de mentorat',
                 'category' => 'mentorship',
                 'description' => 'Envoie des alertes par email 24 heures et 1 heure avant le début de chaque séance planifiée afin d\'éviter les oublis et les absences.',
-                'frequency_label' => 'Toutes les heures',
+                'frequency_label' => self::FREQ_HOURLY,
                 'target' => 'Mentors et mentorés ayant une séance confirmée prévue dans les 24h ou dans l\'heure qui suit',
                 'action_type' => 'command',
                 'action_class' => 'sessions:send-reminders',
@@ -112,7 +115,7 @@ class CronAutomation extends Model
                 'name' => 'Traitement des campagnes d\'e-mails programmées',
                 'category' => 'emails',
                 'description' => 'Prend en charge l\'envoi progressif et par lots des newsletters et campagnes de communication créées par les administrateurs.',
-                'frequency_label' => 'Toutes les heures',
+                'frequency_label' => self::FREQ_HOURLY,
                 'target' => 'Campagnes e-mails en cours avec abonnés à délivrer',
                 'action_type' => 'command',
                 'action_class' => 'campaigns:process-recurring',
@@ -121,7 +124,7 @@ class CronAutomation extends Model
                 'name' => 'Surveillance & Exclusion des rejets d\'e-mails (Bounces)',
                 'category' => 'emails',
                 'description' => 'Détecte les erreurs SMTP (comptes inexistants, boîtes saturées, 550, 452) et exclut immédiatement les adresses en échec pour protéger Namecheap.',
-                'frequency_label' => 'Toutes les heures',
+                'frequency_label' => self::FREQ_HOURLY,
                 'target' => 'Boîtes mails rejetées ou domaines invalides sans enregistrement MX',
                 'action_type' => 'command',
                 'action_class' => 'emails:process-bounces',
@@ -269,7 +272,7 @@ class CronAutomation extends Model
                     dispatch_sync(new $jobClass);
                     $output = "Le job {$record->name} a été exécuté avec succès.";
                 } else {
-                    throw new \RuntimeException("La classe Job {$jobClass} n'existe pas.");
+                    throw new CronAutomationException("La classe Job {$jobClass} n'existe pas.");
                 }
             }
         } catch (\Throwable $e) {
