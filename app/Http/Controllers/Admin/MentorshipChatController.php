@@ -22,6 +22,12 @@ class MentorshipChatController extends Controller
                 $q->latest()->limit(1);
             }]);
 
+        $validated = $request->validate([
+            'flagged' => 'nullable',
+            'mentor_name' => 'nullable|string|max:255',
+            'search' => 'nullable|string|max:255',
+        ]);
+
         // Filtrer par signalement (automatique ou manuel)
         if ($request->has('flagged')) {
             $query->where(function ($q) {
@@ -33,16 +39,16 @@ class MentorshipChatController extends Controller
         }
 
         // Recherche par nom de mentor
-        if ($request->filled('mentor_name')) {
-            $mentorName = $request->mentor_name;
+        if (! empty($validated['mentor_name'])) {
+            $mentorName = $validated['mentor_name'];
             $query->whereHas('mentor', function ($sq) use ($mentorName) {
                 $sq->where('name', 'like', "%{$mentorName}%");
             });
         }
 
         // Recherche par utilisateur (global)
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->whereHas('mentor', function ($sq) use ($search) {
                     $sq->where('name', 'like', "%{$search}%");
