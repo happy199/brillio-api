@@ -14,6 +14,9 @@ class EmailSuppression extends Model
         'email',
         'reason',
         'source',
+        'bounce_count',
+        'bounce_type',
+        'last_bounce_at',
         'created_by',
     ];
 

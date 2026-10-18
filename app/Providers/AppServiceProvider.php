@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\CronAutomation;
 use App\Models\EmailLog;
 use App\Models\ScheduledTaskLog;
 use App\Services\EmailDeliveryService;
@@ -13,6 +14,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -93,24 +95,49 @@ class AppServiceProvider extends ServiceProvider
 
         // 2. CRONs (Success)
         Event::listen(ScheduledTaskFinished::class, function (ScheduledTaskFinished $event) {
+            $cmd = $event->task->command ?: $event->task->description;
+
             ScheduledTaskLog::create([
-                'command' => $event->task->command ?: $event->task->description,
+                'command' => $cmd,
                 'status' => $event->task->exitCode === 0 ? 'success' : 'failed',
                 'duration' => $event->runtime ?? 0,
                 'output' => null,
                 'run_at' => now(),
             ]);
+
+            if (Schema::hasTable('cron_automations') && $cmd) {
+                CronAutomation::where('action_class', 'like', "%{$cmd}%")
+                    ->orWhere('key', $cmd)
+                    ->update([
+                        'last_run_at' => now(),
+                        'last_run_status' => $event->task->exitCode === 0 ? 'success' : 'failed',
+                        'last_run_duration' => $event->runtime ?? 0,
+                    ]);
+            }
         });
 
         // 3. CRONs (Failed)
         Event::listen(ScheduledTaskFailed::class, function (ScheduledTaskFailed $event) {
+            $cmd = $event->task->command ?: $event->task->description;
+            $msg = substr($event->exception->getMessage(), 0, 10000);
+
             ScheduledTaskLog::create([
-                'command' => $event->task->command ?: $event->task->description,
+                'command' => $cmd,
                 'status' => 'failed',
                 'duration' => 0,
-                'output' => substr($event->exception->getMessage(), 0, 10000),
+                'output' => $msg,
                 'run_at' => now(),
             ]);
+
+            if (Schema::hasTable('cron_automations') && $cmd) {
+                CronAutomation::where('action_class', 'like', "%{$cmd}%")
+                    ->orWhere('key', $cmd)
+                    ->update([
+                        'last_run_at' => now(),
+                        'last_run_status' => 'failed',
+                        'last_run_output' => substr($msg, 0, 1000),
+                    ]);
+            }
         });
     }
 }
