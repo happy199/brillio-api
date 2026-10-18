@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\CronAutomation;
 use App\Models\EmailLog;
 use App\Models\ScheduledTaskLog;
 use App\Services\EmailDeliveryService;
@@ -13,6 +14,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,10 +32,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Configurer la pagination par défaut
+        $this->configurePagination();
+        $this->registerMailEvents();
+        $this->registerCronEvents();
+    }
+
+    /**
+     * Configuration globale de la pagination et conservation des paramètres URL.
+     */
+    private function configurePagination(): void
+    {
         Paginator::defaultView('pagination.modern-pagination');
 
-        // Garantir que tous les paginateurs conservent automatiquement les paramètres d'URL (filtres, recherche, tri, onglets)
         $this->app->bind(LengthAwarePaginator::class, function ($app, $parameters) {
             $paginator = new LengthAwarePaginator(
                 $parameters['items'] ?? [],
@@ -56,14 +66,17 @@ class AppServiceProvider extends ServiceProvider
 
             return $paginator->withQueryString();
         });
+    }
 
-        // === AUDIT LOGS & MAIL SUPPRESSION EVENTS ===
-
-        // 0. Global Suppression Guard (MessageSending) - Annule instantanément tout envoi vers une adresse exclue
+    /**
+     * Enregistre les écouteurs d'événements relatifs aux e-mails (Garde-fou et audit).
+     */
+    private function registerMailEvents(): void
+    {
+        // Garde-fou d'envoi : intercepte tout e-mail vers une adresse exclue avant transmission SMTP
         Event::listen(MessageSending::class, function (MessageSending $event) {
             $message = $event->message;
             $recipients = collect($message->getTo())->map(fn ($address) => strtolower(trim($address->getAddress())));
-
             $deliveryService = app(EmailDeliveryService::class);
 
             foreach ($recipients as $email) {
@@ -78,7 +91,7 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        // 1. Emails (MessageSent)
+        // Journalisation de l'e-mail envoyé
         Event::listen(MessageSent::class, function (MessageSent $event) {
             $message = $event->message;
             $to = collect($message->getTo())->map(fn ($address) => $address->getAddress())->implode(', ');
@@ -90,27 +103,65 @@ class AppServiceProvider extends ServiceProvider
                 'sent_at' => now(),
             ]);
         });
+    }
 
-        // 2. CRONs (Success)
+    /**
+     * Enregistre les écouteurs d'événements pour les tâches planifiées CRON.
+     */
+    private function registerCronEvents(): void
+    {
         Event::listen(ScheduledTaskFinished::class, function (ScheduledTaskFinished $event) {
+            $cmd = $event->task->command ?: $event->task->description;
+            $isSuccess = $event->task->exitCode === 0;
+
             ScheduledTaskLog::create([
-                'command' => $event->task->command ?: $event->task->description,
-                'status' => $event->task->exitCode === 0 ? 'success' : 'failed',
+                'command' => $cmd,
+                'status' => $isSuccess ? 'success' : 'failed',
                 'duration' => $event->runtime ?? 0,
                 'output' => null,
                 'run_at' => now(),
             ]);
+
+            $this->updateCronAutomationRecord($cmd, $isSuccess ? 'success' : 'failed', $event->runtime ?? 0);
         });
 
-        // 3. CRONs (Failed)
         Event::listen(ScheduledTaskFailed::class, function (ScheduledTaskFailed $event) {
+            $cmd = $event->task->command ?: $event->task->description;
+            $msg = substr($event->exception->getMessage(), 0, 10000);
+
             ScheduledTaskLog::create([
-                'command' => $event->task->command ?: $event->task->description,
+                'command' => $cmd,
                 'status' => 'failed',
                 'duration' => 0,
-                'output' => substr($event->exception->getMessage(), 0, 10000),
+                'output' => $msg,
                 'run_at' => now(),
             ]);
+
+            $this->updateCronAutomationRecord($cmd, 'failed', 0, substr($msg, 0, 1000));
         });
+    }
+
+    /**
+     * Met à jour les métriques de la tâche dans la table cron_automations si applicable.
+     */
+    private function updateCronAutomationRecord(?string $cmd, string $status, float $duration, ?string $output = null): void
+    {
+        if (! $cmd || ! Schema::hasTable('cron_automations')) {
+            return;
+        }
+
+        $attributes = [
+            'last_run_at' => now(),
+            'last_run_status' => $status,
+            'last_run_duration' => $duration,
+        ];
+
+        if ($output !== null) {
+            $attributes['last_run_output'] = $output;
+        }
+
+        CronAutomation::where('action_class', 'like', "%{$cmd}%")
+            ->orWhere('key', $cmd)
+            ->update($attributes);
     }
 }
