@@ -86,26 +86,10 @@ class MentorshipController extends Controller
         }
 
         // Filtre Global (Recherche texte) - Recherche dans titre ou noms
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhereHas('mentor', function ($sub) use ($search) {
-                        $sub->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('mentees', function ($sub) use ($search) {
-                        $sub->where('name', 'like', "%{$search}%");
-                    });
-            });
-        }
+        $this->applySessionSearch($query, $request->input('search'));
 
         // Filtres Spécifiques (Mentor / Menté)
-        if ($request->filled('mentor_name')) {
-            $mentorName = $request->mentor_name;
-            $query->whereHas('mentor', function ($q) use ($mentorName) {
-                $q->where('name', 'like', "%{$mentorName}%");
-            });
-        }
+        $this->applyMentorFilter($query, $request->input('mentor_name'));
         if ($request->filled('mentee_name')) {
             $menteeName = $request->mentee_name;
             $query->whereHas('mentees', function ($q) use ($menteeName) {
@@ -180,26 +164,10 @@ class MentorshipController extends Controller
         }
 
         // Filtre spécifique mentor (Nom)
-        if ($request->filled('mentor_name')) {
-            $mentorName = $request->mentor_name;
-            $query->whereHas('mentor', function ($q) use ($mentorName) {
-                $q->where('name', 'like', "%{$mentorName}%");
-            });
-        }
+        $this->applyMentorFilter($query, $request->input('mentor_name'));
 
         // Recherche texte (nom du mentor ou du menté ou titre)
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhereHas('mentor', function ($sub) use ($search) {
-                        $sub->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('mentees', function ($sub) use ($search) {
-                        $sub->where('name', 'like', "%{$search}%");
-                    });
-            });
-        }
+        $this->applySessionSearch($query, $request->input('search'));
 
         $sessions = $query->latest('scheduled_at')->paginate(15)->withQueryString();
 
@@ -282,5 +250,23 @@ class MentorshipController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'La relation de mentorat entre ce mentor et ce jeune a été interrompue.');
+    }
+
+    private function applySessionSearch($query, ?string $search): void
+    {
+        if (filled($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhereHas('mentor', fn ($sub) => $sub->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('mentees', fn ($sub) => $sub->where('name', 'like', "%{$search}%"));
+            });
+        }
+    }
+
+    private function applyMentorFilter($query, ?string $mentorName): void
+    {
+        if (filled($mentorName)) {
+            $query->whereHas('mentor', fn ($q) => $q->where('name', 'like', "%{$mentorName}%"));
+        }
     }
 }

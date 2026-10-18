@@ -149,16 +149,10 @@ class OnboardingTest extends TestCase
             'onboarding_completed' => false,
         ]);
 
-        $response = $this->actingAs($user)->post(route('jeune.onboarding.complete'), [
-            'country' => 'Senegal',
-            'city' => 'Dakar',
-            'phone' => self::VALID_SENEGAL_PHONE,
-            'education_level' => 'bac',
-            'current_situation' => 'etudiant',
-            'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
-            'goals' => ['orientation'],
-            'how_found_us' => 'social_media',
-        ]);
+        $response = $this->actingAs($user)->post(
+            route('jeune.onboarding.complete'),
+            $this->buildOnboardingPayload()
+        );
 
         $response->assertSessionHasErrors('birth_date');
         $user->refresh();
@@ -175,17 +169,10 @@ class OnboardingTest extends TestCase
             'onboarding_completed' => false,
         ]);
 
-        $response = $this->actingAs($user)->post(route('jeune.onboarding.complete'), [
-            'birth_date' => now()->subYears(8)->format('Y-m-d'), // 8 years old
-            'country' => 'Senegal',
-            'city' => 'Dakar',
-            'phone' => self::VALID_SENEGAL_PHONE,
-            'education_level' => 'bac',
-            'current_situation' => 'etudiant',
-            'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
-            'goals' => ['orientation'],
-            'how_found_us' => 'social_media',
-        ]);
+        $response = $this->actingAs($user)->post(
+            route('jeune.onboarding.complete'),
+            $this->buildOnboardingPayload(['birth_date' => now()->subYears(8)->toDateString()])
+        );
 
         $response->assertSessionHasErrors('birth_date');
         $user->refresh();
@@ -202,8 +189,19 @@ class OnboardingTest extends TestCase
             'onboarding_completed' => false,
         ]);
 
-        $response = $this->actingAs($user)->post(route('jeune.onboarding.complete'), [
-            'birth_date' => now()->subYears(10)->format('Y-m-d'), // Exactly 10 years old
+        $response = $this->actingAs($user)->post(
+            route('jeune.onboarding.complete'),
+            $this->buildOnboardingPayload(['birth_date' => now()->subYears(10)->toDateString()])
+        );
+
+        $response->assertRedirect(route('jeune.dashboard'));
+        $user->refresh();
+        $this->assertTrue($user->onboarding_completed);
+    }
+
+    private function buildOnboardingPayload(array $attributes = []): array
+    {
+        return array_merge([
             'country' => 'Senegal',
             'city' => 'Dakar',
             'phone' => self::VALID_SENEGAL_PHONE,
@@ -212,10 +210,6 @@ class OnboardingTest extends TestCase
             'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
             'goals' => ['orientation'],
             'how_found_us' => 'social_media',
-        ]);
-
-        $response->assertRedirect(route('jeune.dashboard'));
-        $user->refresh();
-        $this->assertTrue($user->onboarding_completed);
+        ], $attributes);
     }
 }

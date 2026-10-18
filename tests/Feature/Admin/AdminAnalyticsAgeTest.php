@@ -75,41 +75,14 @@ class AdminAnalyticsAgeTest extends TestCase
     public function test_analytics_dashboard_contains_age_distribution_and_chart()
     {
         // Create youth users in different age categories
-        User::factory()->create([
-            'user_type' => 'jeune',
-            'is_admin' => false,
-            'date_of_birth' => Carbon::now()->subYears(14)->format('Y-m-d'), // < 15
-        ]);
-        User::factory()->create([
-            'user_type' => 'jeune',
-            'is_admin' => false,
-            'date_of_birth' => Carbon::now()->subYears(16)->format('Y-m-d'), // 15-17
-        ]);
-        User::factory()->create([
-            'user_type' => 'jeune',
-            'is_admin' => false,
-            'date_of_birth' => Carbon::now()->subYears(20)->format('Y-m-d'), // 18-21
-        ]);
-        User::factory()->create([
-            'user_type' => 'jeune',
-            'is_admin' => false,
-            'date_of_birth' => Carbon::now()->subYears(24)->format('Y-m-d'), // 22-25
-        ]);
-        User::factory()->create([
-            'user_type' => 'jeune',
-            'is_admin' => false,
-            'date_of_birth' => Carbon::now()->subYears(28)->format('Y-m-d'), // 26-30
-        ]);
-        User::factory()->create([
-            'user_type' => 'jeune',
-            'is_admin' => false,
-            'date_of_birth' => Carbon::now()->subYears(35)->format('Y-m-d'), // > 30
-        ]);
-        User::factory()->create([
-            'user_type' => 'jeune',
-            'is_admin' => false,
-            'date_of_birth' => null, // non renseigné
-        ]);
+        $ages = [14, 16, 20, 24, 28, 35, null];
+        foreach ($ages as $age) {
+            User::factory()->create([
+                'user_type' => 'jeune',
+                'is_admin' => false,
+                'date_of_birth' => $age !== null ? Carbon::now()->subYears($age)->toDateString() : null,
+            ]);
+        }
 
         $response = $this->actingAs($this->admin)->get(route('admin.analytics.index', ['preset' => 'all']));
         $response->assertStatus(200);

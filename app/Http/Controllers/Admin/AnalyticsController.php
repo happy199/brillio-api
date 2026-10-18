@@ -410,26 +410,15 @@ class AnalyticsController extends Controller
 
     private function resolveAgeBracket(?int $age): string
     {
-        if ($age === null) {
-            return 'non_renseigne';
-        }
-        if ($age < 15) {
-            return 'under_15';
-        }
-        if ($age <= 17) {
-            return '15_17';
-        }
-        if ($age <= 21) {
-            return '18_21';
-        }
-        if ($age <= 25) {
-            return '22_25';
-        }
-        if ($age <= 30) {
-            return '26_30';
-        }
-
-        return 'over_30';
+        return match (true) {
+            $age === null => 'non_renseigne',
+            $age < 15 => 'under_15',
+            $age <= 17 => '15_17',
+            $age <= 21 => '18_21',
+            $age <= 25 => '22_25',
+            $age <= 30 => '26_30',
+            default => 'over_30',
+        };
     }
 
     private function resolveTuitionBracket(string $rawTuition): string

@@ -29,7 +29,7 @@ class RegisterRequest extends FormRequest
             'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
             'user_type' => ['required', 'string', 'in:'.User::TYPE_JEUNE.','.User::TYPE_MENTOR],
             'phone' => ['nullable', 'string', 'max:20'],
-            'date_of_birth' => ['nullable', 'date', 'before_or_equal:'.now()->subYears(10)->format('Y-m-d')],
+            'date_of_birth' => ['nullable', 'date', 'before_or_equal:-10 years'],
             'country' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
         ];
@@ -47,7 +47,7 @@ class RegisterRequest extends FormRequest
             'password.min' => 'Le mot de passe doit contenir au moins 8 caractères',
             'user_type.required' => 'Le type d\'utilisateur est obligatoire',
             'user_type.in' => 'Le type d\'utilisateur doit être "jeune" ou "mentor"',
-            'date_of_birth.before_or_equal' => 'Vous devez avoir au moins 10 ans pour utiliser la plateforme',
+            'date_of_birth.before_or_equal' => 'L\'inscription est réservée aux personnes d\'au moins 10 ans',
         ];
     }
 }

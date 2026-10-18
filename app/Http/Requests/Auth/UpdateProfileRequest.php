@@ -28,7 +28,7 @@ class UpdateProfileRequest extends FormRequest
             ],
             'password' => ['sometimes', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
             'phone' => ['nullable', 'string', 'max:20'],
-            'date_of_birth' => ['nullable', 'date', 'before_or_equal:'.now()->subYears(10)->format('Y-m-d')],
+            'date_of_birth' => ['nullable', 'date', 'before_or_equal:'.now()->subDecade()->toDateString()],
             'country' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
             'linkedin_url' => ['nullable', 'url', 'max:500'],
@@ -42,7 +42,7 @@ class UpdateProfileRequest extends FormRequest
             'email.email' => 'L\'email n\'est pas valide',
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas',
             'linkedin_url.url' => 'L\'URL LinkedIn n\'est pas valide',
-            'date_of_birth.before_or_equal' => 'Vous devez avoir au moins 10 ans pour utiliser la plateforme',
+            'date_of_birth.before_or_equal' => 'La date de naissance doit correspondre à un âge minimal de 10 ans',
         ];
     }
 }

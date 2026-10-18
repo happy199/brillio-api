@@ -120,98 +120,7 @@ class KidsGameController extends Controller
         ];
 
         // Dynamic activities with localized places recommendation (city, neighborhood, venue)
-        $activities = [
-            [
-                'id' => 1,
-                'title' => 'Atelier Éveil Rythmique & Percussions',
-                'dimension' => 'Musicale',
-                'duration' => '45 min',
-                'age_range' => '4-8 ans',
-                'description' => 'Découverte des percussions corporelles, maracas et djembé pour développer la pulsation naturelle et la synchronisation auditive.',
-                'home_tip' => 'Utilisez deux cuillères en bois et un saladier pour marquer le tempo de sa chanson préférée.',
-                'image_url' => 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&auto=format&fit=crop&q=80',
-                'recommended_places' => [
-                    [
-                        'name' => 'Conservatoire Municipal & Maison des Arts',
-                        'city' => 'Paris / Île-de-France',
-                        'type' => 'Atelier Pédagogique Public',
-                        'distance' => '1.2 km',
-                        'address' => '14 rue des Écoles',
-                        'phone' => '+33 1 42 68 00 12',
-                        'website' => 'https://conservatoire-musique.fr',
-                    ],
-                    [
-                        'name' => 'Philharmonie des Enfants - Espace Rythme',
-                        'city' => 'Paris 19e',
-                        'type' => 'Musée Interactif Découverte',
-                        'distance' => '3.5 km',
-                        'address' => '221 Avenue Jean Jaurès',
-                        'phone' => '+33 1 44 84 44 84',
-                        'website' => 'https://philharmoniedeparis.fr/enfants',
-                    ],
-                    [
-                        'name' => 'Médiathèque & Club des P’tits Musiciens',
-                        'city' => 'Centre-Ville',
-                        'type' => 'Médiathèque Municipale',
-                        'distance' => '800 m',
-                        'address' => 'Place de la Mairie',
-                        'phone' => '+33 1 48 00 11 22',
-                        'website' => 'https://mediatheque.fr',
-                    ],
-                ],
-            ],
-            [
-                'id' => 2,
-                'title' => 'Parcours de Motricité & Danse Sensorielle',
-                'dimension' => 'Kinesthésique',
-                'duration' => '1 h',
-                'age_range' => '5-9 ans',
-                'description' => 'Parcours d\'équilibre, sauts guidés et jeux d\'esquive pour perfectionner le réflexe moteur et la proprioception spatiale.',
-                'home_tip' => 'Tracez une ligne au sol avec du ruban adhésif pour jouer au funambule et faire des bonds chrono.',
-                'image_url' => 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=600&auto=format&fit=crop&q=80',
-                'recommended_places' => [
-                    [
-                        'name' => 'Gymnase Énergie & Kids Parkour',
-                        'city' => 'Métropole Régionale',
-                        'type' => 'Club de Gymnastique & Motricité',
-                        'distance' => '1.8 km',
-                        'address' => '45 Boulevard des Sports',
-                        'phone' => '+33 1 43 90 20 10',
-                        'website' => 'https://gymkidsparkour.fr',
-                    ],
-                    [
-                        'name' => 'Parc Aventure & Forêt Ludique',
-                        'city' => 'Environs / Plein Air',
-                        'type' => 'Parc Nature & Sentier Équilibre',
-                        'distance' => '4.2 km',
-                        'address' => 'Allée des Grands Pins',
-                        'phone' => '+33 1 45 60 70 80',
-                        'website' => 'https://parcaventure-nature.fr',
-                    ],
-                ],
-            ],
-            [
-                'id' => 3,
-                'title' => 'Club Petits Bâtisseurs & Architecture 3D',
-                'dimension' => 'Spatiale',
-                'duration' => '1 h 15',
-                'age_range' => '6-10 ans',
-                'description' => 'Assemblage de maquettes géométriques, ponts en bois et structures d\'équilibre pour développer la visualisation 3D.',
-                'home_tip' => 'Construisez une tour solide avec des boîtes de carton et testez sa résistance au vent avec un éventail.',
-                'image_url' => 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&auto=format&fit=crop&q=80',
-                'recommended_places' => [
-                    [
-                        'name' => 'FabLab Junior & Cité des Bâtisseurs',
-                        'city' => 'Pôle Innovation',
-                        'type' => 'Atelier Makers & STEAM',
-                        'distance' => '2.5 km',
-                        'address' => '8 rue de l\'Avenir',
-                        'phone' => '+33 1 49 88 77 66',
-                        'website' => 'https://fablabjunior.fr',
-                    ],
-                ],
-            ],
-        ];
+        $activities = $this->getTailoredActivities();
 
         return response()->json([
             'status' => 'success',
@@ -382,5 +291,82 @@ class KidsGameController extends Controller
             'status' => 'success',
             'message' => 'Observation enregistrée',
         ]);
+    }
+
+    private function buildPlace(string $name, string $city, string $type, string $distance, string $address, string $phone, string $website): array
+    {
+        return compact('name', 'city', 'type', 'distance', 'address', 'phone', 'website');
+    }
+
+    private function formatActivity(
+        int $id,
+        string $title,
+        string $dimension,
+        string $duration,
+        string $ageRange,
+        string $description,
+        string $homeTip,
+        string $imageUrl,
+        array $places
+    ): array {
+        return [
+            'id' => $id,
+            'title' => $title,
+            'dimension' => $dimension,
+            'duration' => $duration,
+            'age_range' => $ageRange,
+            'description' => $description,
+            'home_tip' => $homeTip,
+            'image_url' => $imageUrl,
+            'recommended_places' => $places,
+        ];
+    }
+
+    private function getTailoredActivities(): array
+    {
+        return [
+            $this->formatActivity(
+                1,
+                'Atelier Éveil Rythmique & Percussions',
+                'Musicale',
+                '45 min',
+                '4-8 ans',
+                'Découverte des percussions corporelles, maracas et djembé pour développer la pulsation naturelle et la synchronisation auditive.',
+                'Utilisez deux cuillères en bois et un saladier pour marquer le tempo de sa chanson préférée.',
+                'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&auto=format&fit=crop&q=80',
+                [
+                    $this->buildPlace('Conservatoire Municipal & Maison des Arts', 'Paris / Île-de-France', 'Atelier Pédagogique Public', '1.2 km', '14 rue des Écoles', '+33 1 42 68 00 12', 'https://conservatoire-musique.fr'),
+                    $this->buildPlace('Philharmonie des Enfants - Espace Rythme', 'Paris 19e', 'Musée Interactif Découverte', '3.5 km', '221 Avenue Jean Jaurès', '+33 1 44 84 44 84', 'https://philharmoniedeparis.fr/enfants'),
+                    $this->buildPlace('Médiathèque & Club des P’tits Musiciens', 'Centre-Ville', 'Médiathèque Municipale', '800 m', 'Place de la Mairie', '+33 1 48 00 11 22', 'https://mediatheque.fr'),
+                ]
+            ),
+            $this->formatActivity(
+                2,
+                'Parcours de Motricité & Danse Sensorielle',
+                'Kinesthésique',
+                '1 h',
+                '5-9 ans',
+                'Parcours d\'équilibre, sauts guidés et jeux d\'esquive pour perfectionner le réflexe moteur et la proprioception spatiale.',
+                'Tracez une ligne au sol avec du ruban adhésif pour jouer au funambule et faire des bonds chrono.',
+                'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=600&auto=format&fit=crop&q=80',
+                [
+                    $this->buildPlace('Gymnase Énergie & Kids Parkour', 'Métropole Régionale', 'Club de Gymnastique & Motricité', '1.8 km', '45 Boulevard des Sports', '+33 1 43 90 20 10', 'https://gymkidsparkour.fr'),
+                    $this->buildPlace('Parc Aventure & Forêt Ludique', 'Environs / Plein Air', 'Parc Nature & Sentier Équilibre', '4.2 km', 'Allée des Grands Pins', '+33 1 45 60 70 80', 'https://parcaventure-nature.fr'),
+                ]
+            ),
+            $this->formatActivity(
+                3,
+                'Club Petits Bâtisseurs & Architecture 3D',
+                'Spatiale',
+                '1 h 15',
+                '6-10 ans',
+                'Assemblage de maquettes géométriques, ponts en bois et structures d\'équilibre pour développer la visualisation 3D.',
+                'Construisez une tour solide avec des boîtes de carton et testez sa résistance au vent avec un éventail.',
+                'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&auto=format&fit=crop&q=80',
+                [
+                    $this->buildPlace('FabLab Junior & Cité des Bâtisseurs', 'Pôle Innovation', 'Atelier Makers & STEAM', '2.5 km', '8 rue de l\'Avenir', '+33 1 49 88 77 66', 'https://fablabjunior.fr'),
+                ]
+            ),
+        ];
     }
 }
