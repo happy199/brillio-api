@@ -118,4 +118,43 @@ class GlobalPaginationQueryStringTest extends TestCase
             'search' => 'Talent',
         ], ['search=Talent']);
     }
+
+    public function test_multi_page_navigation_preserves_filters_from_page_two_to_page_three()
+    {
+        $admin = User::factory()->admin()->create();
+
+        // Create 80 young users to have 4 pages (25 per page in UserController)
+        for ($i = 0; $i < 80; $i++) {
+            User::factory()->create([
+                'name' => "Jeune Multipage {$i}",
+                'user_type' => User::TYPE_JEUNE,
+            ]);
+        }
+
+        // 1. Navigate to Page 2 with filters
+        $responsePage2 = $this->actingAs($admin)->get(route('admin.users.index', [
+            'user_type' => 'jeune',
+            'search' => 'Multipage',
+            'page' => 2,
+        ]));
+        $responsePage2->assertStatus(200);
+        $contentPage2 = $responsePage2->getContent();
+
+        $this->assertStringContainsString('user_type=jeune', $contentPage2);
+        $this->assertStringContainsString('search=Multipage', $contentPage2);
+        $this->assertStringContainsString('page=3', $contentPage2);
+
+        // 2. Navigate to Page 3 with filters
+        $responsePage3 = $this->actingAs($admin)->get(route('admin.users.index', [
+            'user_type' => 'jeune',
+            'search' => 'Multipage',
+            'page' => 3,
+        ]));
+        $responsePage3->assertStatus(200);
+        $contentPage3 = $responsePage3->getContent();
+
+        $this->assertStringContainsString('user_type=jeune', $contentPage3);
+        $this->assertStringContainsString('search=Multipage', $contentPage3);
+        $this->assertStringContainsString('page=4', $contentPage3);
+    }
 }
