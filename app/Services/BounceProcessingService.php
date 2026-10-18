@@ -190,11 +190,9 @@ class BounceProcessingService
         }
 
         $reserved = ['example.com', 'example.org', 'example.net', 'test.com', 'localhost'];
-        if (in_array($domain, $reserved, true) || app()->environment('testing')) {
-            return true;
-        }
+        $isBypassed = in_array($domain, $reserved, true) || app()->environment('testing');
 
-        return $this->verifyDnsRecord($normalized, $domain);
+        return $isBypassed || $this->verifyDnsRecord($normalized, $domain);
     }
 
     /**
@@ -202,25 +200,22 @@ class BounceProcessingService
      */
     private function verifyDnsRecord(string $email, string $domain): bool
     {
-        if (! function_exists('checkdnsrr')) {
-            return true;
-        }
+        $hasRecord = true;
 
         try {
-            if (checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A')) {
-                return true;
+            if (function_exists('checkdnsrr') && ! (checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A'))) {
+                $hasRecord = false;
+                $this->recordSuppression(
+                    $email,
+                    "Domaine invalide ou sans serveur de messagerie MX ({$domain})",
+                    'preflight_dns'
+                );
             }
-
-            $this->recordSuppression(
-                $email,
-                "Domaine invalide ou sans serveur de messagerie MX ({$domain})",
-                'preflight_dns'
-            );
-
-            return false;
         } catch (\Throwable $e) {
-            return true;
+            $hasRecord = true;
         }
+
+        return $hasRecord;
     }
 
     /**
@@ -309,17 +304,39 @@ class BounceProcessingService
         $isHard = true;
         $reason = 'Échec définitif de livraison signalé par Mail Delivery Subsystem';
 
-        if ($this->isMailboxFullPattern($lower)) {
+        $isMailboxFull = str_contains($lower, '452-4.2.2')
+            || str_contains($lower, '452 4.2.2')
+            || str_contains($lower, 'overquotatemp')
+            || str_contains($lower, 'out of storage space')
+            || str_contains($lower, 'mailbox full');
+
+        $isDeferral = str_contains($lower, '451')
+            || str_contains($lower, '421')
+            || str_contains($lower, 'temporarily deferred');
+
+        $isNoSuchUser = str_contains($lower, '550-5.1.1')
+            || str_contains($lower, '550 5.1.1')
+            || str_contains($lower, 'nosuchuser')
+            || str_contains($lower, 'does not exist');
+
+        $isInvalidRecipient = str_contains($lower, 'user unknown')
+            || str_contains($lower, 'invalid recipient')
+            || str_contains($lower, 'recipient address rejected');
+
+        $isDisabledAccount = str_contains($lower, 'account disabled')
+            || str_contains($lower, 'mailbox unavailable');
+
+        if ($isMailboxFull) {
             $isHard = false;
             $reason = 'Boîte e-mail saturée / quota dépassé (Erreur SMTP 452 4.2.2 OverQuotaTemp)';
-        } elseif ($this->isTemporaryDeferralPattern($lower)) {
+        } elseif ($isDeferral) {
             $isHard = false;
             $reason = 'Serveur destinataire temporairement inaccessible (Erreur SMTP 4xx)';
-        } elseif ($this->isNoSuchUserPattern($lower)) {
+        } elseif ($isNoSuchUser) {
             $reason = 'Compte e-mail inexistant / adresse introuvable (Erreur SMTP 550 5.1.1 NoSuchUser)';
-        } elseif ($this->isInvalidRecipientPattern($lower)) {
+        } elseif ($isInvalidRecipient) {
             $reason = 'Destinataire invalide ou refusé par le serveur de messagerie (550 User Unknown)';
-        } elseif ($this->isDisabledAccountPattern($lower)) {
+        } elseif ($isDisabledAccount) {
             $reason = 'Compte désactivé ou indisponible auprès du fournisseur';
         }
 
@@ -327,43 +344,6 @@ class BounceProcessingService
             'is_hard' => $isHard,
             'reason' => $reason,
         ];
-    }
-
-    private function isMailboxFullPattern(string $lower): bool
-    {
-        return str_contains($lower, '452-4.2.2')
-            || str_contains($lower, '452 4.2.2')
-            || str_contains($lower, 'overquotatemp')
-            || str_contains($lower, 'out of storage space')
-            || str_contains($lower, 'mailbox full');
-    }
-
-    private function isTemporaryDeferralPattern(string $lower): bool
-    {
-        return str_contains($lower, '451')
-            || str_contains($lower, '421')
-            || str_contains($lower, 'temporarily deferred');
-    }
-
-    private function isNoSuchUserPattern(string $lower): bool
-    {
-        return str_contains($lower, '550-5.1.1')
-            || str_contains($lower, '550 5.1.1')
-            || str_contains($lower, 'nosuchuser')
-            || str_contains($lower, 'does not exist');
-    }
-
-    private function isInvalidRecipientPattern(string $lower): bool
-    {
-        return str_contains($lower, 'user unknown')
-            || str_contains($lower, 'invalid recipient')
-            || str_contains($lower, 'recipient address rejected');
-    }
-
-    private function isDisabledAccountPattern(string $lower): bool
-    {
-        return str_contains($lower, 'account disabled')
-            || str_contains($lower, 'mailbox unavailable');
     }
 
     /**

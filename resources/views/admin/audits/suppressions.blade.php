@@ -257,7 +257,7 @@
     </div>
 
     <!-- Modal d'Importation / Scan de Rejets NDR (Bounces) -->
-    <div x-show="showImportModal" x-cloak style="display: none;" @keydown.escape.window="showImportModal = false" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <dialog :open="showImportModal" x-show="showImportModal" x-cloak style="display: none;" @keydown.escape.window="showImportModal = false" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 m-0 max-w-none max-h-none w-full h-full border-0">
         <div @click.away="showImportModal = false" @keydown.escape="showImportModal = false" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-2xl border border-slate-200">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <div class="flex items-center gap-2">
@@ -306,10 +306,10 @@ Technical details of permanent failure:
                 </div>
             </form>
         </div>
-    </div>
+    </dialog>
 
     <!-- Modal d'ajout d'exclusion manuelle -->
-    <div x-show="showAddModal" x-cloak style="display: none;" @keydown.escape.window="showAddModal = false" role="dialog" aria-modal="true" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <dialog :open="showAddModal" x-show="showAddModal" x-cloak style="display: none;" @keydown.escape.window="showAddModal = false" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 m-0 max-w-none max-h-none w-full h-full border-0">
         <div @click.away="showAddModal = false" @keydown.escape="showAddModal = false" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-lg border border-slate-200">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 class="font-bold text-slate-800 text-base">Ajouter une exclusion manuelle</h3>
@@ -331,7 +331,7 @@ Technical details of permanent failure:
                 </div>
             </form>
         </div>
-    </div>
+    </dialog>
 
 </div>
 @endsection
