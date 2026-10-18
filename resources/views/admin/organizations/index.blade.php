@@ -137,7 +137,7 @@
             </table>
         </div>
         <div class="mt-4">
-            {{ $organizations->links() }}
+            {{ $organizations->withQueryString()->links() }}
         </div>
     </div>
 </div>

@@ -45,7 +45,7 @@ class OnboardingController extends Controller
         $country = $validatedCountry['country'];
 
         $rules = [
-            'birth_date' => 'required|date|before:today',
+            'birth_date' => ['required', 'date', 'before_or_equal:'.now()->subYears(10)->format('Y-m-d')],
             'city' => 'required|string|max:100',
             'phone' => [
                 'required',
@@ -56,6 +56,14 @@ class OnboardingController extends Controller
                     }
                 },
             ],
+        ];
+
+        $messages = [
+            'birth_date.required' => 'La date de naissance est obligatoire.',
+            'birth_date.date' => 'La date de naissance doit être une date valide.',
+            'birth_date.before_or_equal' => 'Vous devez avoir au moins 10 ans pour utiliser la plateforme.',
+            'city.required' => 'La ville est obligatoire.',
+            'phone.required' => 'Le numéro de téléphone est obligatoire.',
         ];
 
         if (! $skipExtra) {
@@ -70,7 +78,7 @@ class OnboardingController extends Controller
             $rules['how_found_us_other'] = 'nullable|string|max:255';
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, $messages);
         $validated['country'] = $country;
 
         $user = auth()->user();

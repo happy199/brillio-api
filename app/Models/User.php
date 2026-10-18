@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Notifications\VerifyEmail;
 use App\Notifications\VerifyOrganizationEmail;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -212,6 +213,38 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getEvaluationsCountAttribute(): int
     {
         return $this->receivedEvaluations()->count();
+    }
+
+    /**
+     * Alias pour birth_date renvoyant date_of_birth (avec fallback sur onboarding_data).
+     */
+    public function getBirthDateAttribute()
+    {
+        if ($this->date_of_birth) {
+            return $this->date_of_birth;
+        }
+
+        $date = null;
+        $rawBirthDate = $this->onboarding_data['birth_date'] ?? null;
+        if (! empty($rawBirthDate)) {
+            try {
+                $date = Carbon::parse($rawBirthDate);
+            } catch (\Throwable $e) {
+                $date = null;
+            }
+        }
+
+        return $date;
+    }
+
+    /**
+     * Calcule l'âge de l'utilisateur à partir de sa date de naissance.
+     */
+    public function getAgeAttribute(): ?int
+    {
+        $dob = $this->birth_date;
+
+        return $dob ? (int) $dob->age : null;
     }
 
     /**

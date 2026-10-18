@@ -22,6 +22,12 @@ class MentorshipChatController extends Controller
                 $q->latest()->limit(1);
             }]);
 
+        $validated = $request->validate([
+            'flagged' => 'nullable',
+            'mentor_name' => 'nullable|string|max:255',
+            'search' => 'nullable|string|max:255',
+        ]);
+
         // Filtrer par signalement (automatique ou manuel)
         if ($request->has('flagged')) {
             $query->where(function ($q) {
@@ -32,9 +38,17 @@ class MentorshipChatController extends Controller
             });
         }
 
-        // Recherche par utilisateur
-        if ($request->filled('search')) {
-            $search = $request->search;
+        // Recherche par nom de mentor
+        if (! empty($validated['mentor_name'])) {
+            $mentorName = $validated['mentor_name'];
+            $query->whereHas('mentor', function ($sq) use ($mentorName) {
+                $sq->where('name', 'like', "%{$mentorName}%");
+            });
+        }
+
+        // Recherche par utilisateur (global)
+        if (! empty($validated['search'])) {
+            $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->whereHas('mentor', function ($sq) use ($search) {
                     $sq->where('name', 'like', "%{$search}%");
@@ -46,7 +60,7 @@ class MentorshipChatController extends Controller
             });
         }
 
-        $mentorships = $query->latest('updated_at')->paginate(20);
+        $mentorships = $query->latest('updated_at')->paginate(20)->withQueryString();
 
         return view('admin.mentorship-chat.index', compact('mentorships'));
     }

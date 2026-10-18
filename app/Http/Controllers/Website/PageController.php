@@ -72,7 +72,8 @@ class PageController extends Controller
         $resources = \App\Models\Resource::where('is_published', true)
             ->where('is_validated', true)
             ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
         return view('public.resources', compact('resources'));
     }

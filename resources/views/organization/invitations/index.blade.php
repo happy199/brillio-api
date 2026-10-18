@@ -251,7 +251,7 @@
 
         <!-- Pagination -->
         <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-            {{ $invitations->links() }}
+            {{ $invitations->withQueryString()->links() }}
         </div>
         @else
         <div class="text-center py-12">

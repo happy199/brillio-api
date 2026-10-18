@@ -36,7 +36,7 @@ trait HasWallet
         $config = $this->getWalletConfig();
         $userType = $config['user_type'];
 
-        $transactions = $user->walletTransactions()->latest()->paginate(10);
+        $transactions = $user->walletTransactions()->latest()->paginate(10)->withQueryString();
 
         $creditPrice = $this->walletService->getCreditPrice($userType);
 

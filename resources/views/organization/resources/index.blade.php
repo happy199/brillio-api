@@ -281,7 +281,7 @@
 
     <!-- Pagination -->
     <div class="mt-8">
-        {{ $resources->links() }}
+        {{ $resources->withQueryString()->links() }}
     </div>
     @endif
 </div>

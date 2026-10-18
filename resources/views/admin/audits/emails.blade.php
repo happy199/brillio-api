@@ -131,7 +131,7 @@
 
     <!-- Pagination -->
     <div class="mt-8">
-        {{ $logs->links() }}
+        {{ $logs->withQueryString()->links() }}
     </div>
 </div>
 @endsection

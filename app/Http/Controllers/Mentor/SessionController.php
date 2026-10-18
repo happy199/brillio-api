@@ -46,7 +46,7 @@ class SessionController extends Controller
         $hasUnlockedHistory = $profile && $profile->has_unlocked_session_history;
 
         if ($hasUnlockedHistory) {
-            $pastSessions = $pastSessionsQuery->paginate(10);
+            $pastSessions = $pastSessionsQuery->paginate(10)->withQueryString();
         } else {
             $pastSessions = $pastSessionsQuery->take(10)->get();
         }

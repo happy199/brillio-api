@@ -22,7 +22,7 @@ class OrganizationController extends Controller
             'sponsoredUsers',
             'users as jeunes_count' => fn ($q) => $q->where('users.user_type', 'jeune'),
             'users as mentors_count' => fn ($q) => $q->where('users.user_type', 'mentor'),
-        ])->latest()->paginate(10);
+        ])->latest()->paginate(10)->withQueryString();
 
         return view('admin.organizations.index', compact('organizations'));
     }

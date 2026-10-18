@@ -129,7 +129,7 @@
 
         <!-- Pagination -->
         <div class="mt-4">
-            {{ $specializations->links() }}
+            {{ $specializations->withQueryString()->links() }}
         </div>
     </div>
 @endsection

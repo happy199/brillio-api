@@ -62,7 +62,7 @@ class ResourceController extends Controller
             });
         }
 
-        $resources = $query->orderBy('created_at', 'desc')->paginate(15);
+        $resources = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         return view('admin.resources.index', compact('resources'));
     }

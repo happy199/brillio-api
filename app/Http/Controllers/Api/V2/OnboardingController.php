@@ -102,7 +102,7 @@ class OnboardingController extends Controller
         $country = $validatedCountry['country'];
 
         $validated = $request->validate([
-            'birth_date' => 'required|date|before:today',
+            'birth_date' => ['required', 'date', 'before_or_equal:'.now()->subYears(10)->format('Y-m-d')],
             'city' => 'required|string|max:100',
             'phone' => [
                 'required',
@@ -122,6 +122,10 @@ class OnboardingController extends Controller
             'goals.*' => 'string',
             'how_found_us' => 'required|string',
             'how_found_us_other' => 'nullable|string|max:255',
+        ], [
+            'birth_date.required' => 'La date de naissance est obligatoire.',
+            'birth_date.date' => 'La date de naissance doit être une date valide.',
+            'birth_date.before_or_equal' => 'Vous devez avoir au moins 10 ans pour utiliser la plateforme.',
         ]);
 
         $validated['country'] = $country;

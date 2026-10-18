@@ -423,7 +423,7 @@
                         <div class="mt-6 pt-4 border-t border-gray-100">
                             @if($hasUnlockedHistory)
                                 <div class="mt-4">
-                                    {{ $pastSessions->links() }}
+                                    {{ $pastSessions->withQueryString()->links() }}
                                 </div>
                             @else
                                 @if($pastSessions->count() >= 10)

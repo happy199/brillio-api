@@ -203,7 +203,7 @@
             </tbody>
         </table>
         <div class="px-6 py-4 border-t border-gray-200">
-            {{ $sessions->links() }}
+            {{ $sessions->withQueryString()->links() }}
         </div>
     </div>
 </div>

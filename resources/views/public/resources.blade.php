@@ -79,7 +79,7 @@
 
             <!-- Pagination -->
             <div class="mt-12 flex justify-center">
-                {{ $resources->links() }}
+                {{ $resources->withQueryString()->links() }}
             </div>
         @else
             <div class="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-100 max-w-2xl mx-auto">

@@ -213,7 +213,7 @@ class MonetizationController extends Controller
      */
     public function coupons()
     {
-        $coupons = Coupon::latest()->paginate(20);
+        $coupons = Coupon::latest()->paginate(20)->withQueryString();
 
         return view('admin.monetization.coupons', compact('coupons'));
     }

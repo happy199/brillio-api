@@ -229,7 +229,7 @@
 
     <!-- Pagination -->
     <div class="mt-6">
-        {{ $mentorships->links() }}
+        {{ $mentorships->withQueryString()->links() }}
     </div>
 
 <!-- Terminate Modal -->

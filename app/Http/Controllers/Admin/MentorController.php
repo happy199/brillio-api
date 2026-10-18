@@ -77,15 +77,19 @@ class MentorController extends Controller
             $query->where('specialization', $request->specialization);
         }
 
-        $validatedSearch = $request->validate(['search' => 'nullable|string|max:255']);
-        if ($search = $validatedSearch['search'] ?? null) {
+        $validatedSearch = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'mentor_name' => 'nullable|string|max:255',
+        ]);
+        $search = $validatedSearch['search'] ?? $validatedSearch['mentor_name'] ?? null;
+        if ($search) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        $mentors = $query->orderBy('created_at', 'desc')->paginate(15);
+        $mentors = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         // Statistiques
         if ($isCoach) {

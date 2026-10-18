@@ -131,7 +131,7 @@
 
         <!-- Pagination -->
         <div class="mt-4">
-            {{ $messages->links() }}
+            {{ $messages->withQueryString()->links() }}
         </div>
     </div>
 @endsection

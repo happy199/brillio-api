@@ -27,7 +27,7 @@ class ContactMessageController extends Controller
             });
         }
 
-        $messages = $query->latest()->paginate(20);
+        $messages = $query->latest()->paginate(20)->withQueryString();
         $stats = [
             'total' => ContactMessage::count(),
             'new' => ContactMessage::new()->count(),

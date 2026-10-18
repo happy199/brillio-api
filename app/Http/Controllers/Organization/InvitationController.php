@@ -25,7 +25,8 @@ class InvitationController extends Controller
 
         $invitations = $organization->invitations()
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         $memberCount = $organization->getMemberCount();
         $memberLimit = $organization->getMemberLimit();

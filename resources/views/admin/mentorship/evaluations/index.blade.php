@@ -98,10 +98,17 @@
     <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
         <form action="{{ route('admin.mentorship.evaluations') }}" method="GET" class="grid md:grid-cols-4 gap-4">
             <input type="hidden" name="first_only" value="{{ $firstSessionsOnly ? 1 : 0 }}">
-            <div class="md:col-span-2">
-                <label for="search" class="block text-xs font-semibold text-gray-600 mb-1">Recherche (Nom mentor, jeune ou titre)</label>
+            <div>
+                <label for="mentor_name" class="block text-xs font-semibold text-gray-600 mb-1">Nom du mentor</label>
+                <input type="text" id="mentor_name" name="mentor_name" value="{{ request('mentor_name') }}"
+                    placeholder="Nom du mentor..."
+                    class="w-full border-gray-300 rounded-xl text-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500">
+            </div>
+
+            <div>
+                <label for="search" class="block text-xs font-semibold text-gray-600 mb-1">Recherche (Jeune ou titre)</label>
                 <input type="text" id="search" name="search" value="{{ request('search') }}"
-                    placeholder="Chercher par nom de mentor ou de jeune..."
+                    placeholder="Nom du jeune ou titre..."
                     class="w-full border-gray-300 rounded-xl text-sm p-2.5 focus:border-indigo-500 focus:ring-indigo-500">
             </div>
 
@@ -292,7 +299,7 @@
         </div>
 
         <div class="p-4 border-t border-gray-100">
-            {{ $sessions->links() }}
+            {{ $sessions->withQueryString()->links() }}
         </div>
     </div>
 </div>

@@ -27,7 +27,7 @@ class SpecializationController extends Controller
             $query->where('name', 'like', '%'.$request->search.'%');
         }
 
-        $specializations = $query->orderBy('name')->paginate(20);
+        $specializations = $query->orderBy('name')->paginate(20)->withQueryString();
 
         return view('admin.specializations.index', compact('specializations'));
     }

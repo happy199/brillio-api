@@ -78,7 +78,8 @@ class ChatController extends Controller
         $conversations = $query->orderByDesc('needs_human_support')
             ->orderByDesc('human_support_active')
             ->latest('updated_at')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         // Statistiques (ajustées pour le coach)
         $stats = [

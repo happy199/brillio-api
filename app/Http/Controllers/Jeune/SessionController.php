@@ -45,7 +45,7 @@ class SessionController extends Controller
             ->orderBy('mentoring_sessions.scheduled_at', 'desc');
 
         if ($hasUnlockedHistory) {
-            $pastSessions = $pastSessionsQuery->paginate(10);
+            $pastSessions = $pastSessionsQuery->paginate(10)->withQueryString();
         } else {
             $pastSessions = $pastSessionsQuery->take(10)->get();
             // To maintain compatibility with `$pastSessions->links()` in the view if it gets called,

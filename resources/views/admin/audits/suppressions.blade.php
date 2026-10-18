@@ -141,7 +141,7 @@
 
         @if($suppressions->hasPages())
         <div class="px-4 py-3 border-t border-slate-200">
-            {{ $suppressions->links() }}
+            {{ $suppressions->withQueryString()->links() }}
         </div>
         @endif
     </div>

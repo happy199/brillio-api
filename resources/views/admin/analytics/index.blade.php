@@ -437,7 +437,16 @@
     </div>
 
     <!-- Main Demographic Charts -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-6">
+        <!-- Chart Âge des Jeunes -->
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col border border-transparent hover:border-gray-100 transition-colors">
+            <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Âge des Jeunes</h3>
+            <p class="text-xs text-gray-500 mb-4">Répartition par tranche d'âge</p>
+            <div class="h-64 mt-auto">
+                <canvas id="ageChart"></canvas>
+            </div>
+        </div>
+
         <!-- Chart Situation -->
         <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col border border-transparent hover:border-gray-100 transition-colors">
             <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Démographie</h3>
@@ -1057,6 +1066,48 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+            }
+        }
+    });
+
+    // Chart Âge des Jeunes
+    const ageCtx = document.getElementById('ageChart').getContext('2d');
+    const ageDistribution = @json($stats['youth_engagement']['age_distribution'] ?? []);
+    const ageLabels = {
+        'under_15': '< 15 ans',
+        '15_17': '15-17 ans',
+        '18_21': '18-21 ans',
+        '22_25': '22-25 ans',
+        '26_30': '26-30 ans',
+        'over_30': '+30 ans',
+        'non_renseigne': 'Non renseigné'
+    };
+
+    new Chart(ageCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(ageDistribution).map(k => ageLabels[k] || k),
+            datasets: [{
+                data: Object.values(ageDistribution),
+                backgroundColor: [
+                    '#38BDF8', // sky-400 (<15)
+                    '#6366F1', // indigo-500 (15-17)
+                    '#8B5CF6', // purple-500 (18-21)
+                    '#EC4899', // pink-500 (22-25)
+                    '#F59E0B', // amber-500 (26-30)
+                    '#10B981', // emerald-500 (>30)
+                    '#CBD5E1'  // slate-300 (non renseigné)
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
             }

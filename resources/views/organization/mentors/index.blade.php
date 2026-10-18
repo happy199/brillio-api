@@ -230,7 +230,7 @@
     @if($organization->isPro())
     <!-- Pagination -->
     <div class="mt-6">
-        {{ $mentors->links() }}
+        {{ $mentors->withQueryString()->links() }}
     </div>
     @endif
 

@@ -150,7 +150,7 @@
     <!-- Pagination -->
     @if($payouts->hasPages())
     <div class="border-t border-gray-200 px-6 py-4">
-        {{ $payouts->links() }}
+        {{ $payouts->withQueryString()->links() }}
     </div>
     @endif
 </div>

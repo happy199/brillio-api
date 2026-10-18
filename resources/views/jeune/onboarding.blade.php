@@ -127,8 +127,8 @@
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
-                    <input type="date" name="birth_date" x-model="formData.birth_date" @change="validateAge()"
+                    <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-1">Date de naissance <span class="text-red-500">*</span></label>
+                    <input type="date" id="birth_date" name="birth_date" x-model="formData.birth_date" @change="validateAge()"
                         :max="maxDate" :min="minDate" required
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
                     @error('birth_date')
@@ -493,7 +493,7 @@
                 showCitySuggestions: false,
                 filteredCities: [],
                 ageError: false,
-                maxDate: new Date().toISOString().split('T')[0], // Aujourd'hui
+                maxDate: new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split('T')[0], // Au moins 10 ans
                 minDate: new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0], // 100 ans en arrière
 
                 phonePrefix: '+',

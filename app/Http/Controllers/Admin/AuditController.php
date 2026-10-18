@@ -19,7 +19,7 @@ class AuditController extends Controller
                 ->orWhere('subject', 'like', '%'.$request->search.'%');
         }
 
-        $logs = $query->latest('sent_at')->paginate(20);
+        $logs = $query->latest('sent_at')->paginate(20)->withQueryString();
 
         return view('admin.audits.emails', compact('logs'));
     }
@@ -36,7 +36,7 @@ class AuditController extends Controller
             $query->where('command', 'like', '%'.$request->search.'%');
         }
 
-        $logs = $query->latest('run_at')->paginate(20);
+        $logs = $query->latest('run_at')->paginate(20)->withQueryString();
 
         return view('admin.audits.crons', compact('logs'));
     }
@@ -57,7 +57,7 @@ class AuditController extends Controller
             $query->where('source', $request->source);
         }
 
-        $suppressions = $query->latest()->paginate(20);
+        $suppressions = $query->latest()->paginate(20)->withQueryString();
 
         return view('admin.audits.suppressions', compact('suppressions'));
     }

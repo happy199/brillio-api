@@ -36,7 +36,7 @@ class GuestController extends Controller
             });
         }
 
-        $mentors = $query->latest()->paginate(15);
+        $mentors = $query->latest()->paginate(15)->withQueryString();
         $type = 'guest';
 
         return view('organization.mentors.index', compact('mentors', 'organization', 'type'));
