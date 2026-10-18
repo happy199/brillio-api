@@ -315,4 +315,85 @@ class BounceProcessingService
             'reason' => 'Échec définitif de livraison signalé par Mail Delivery Subsystem',
         ];
     }
+
+    /**
+     * Analyse un rejet complexe ou non standard via l'IA Brillio (OpenRouter / Gemini).
+     * Recommande l'action à mener et extrait les adresses en échec.
+     *
+     * @return array{success: bool, message?: string, data?: array, suppressed_count?: int}
+     */
+    public function analyzeBounceWithAi(string $rawText): array
+    {
+        try {
+            $iaService = app(BrillioIAService::class);
+
+            if (! $iaService->isApiKeyConfigured()) {
+                return [
+                    'success' => false,
+                    'message' => "La clé API de l'IA (OpenRouter / Gemini) n'est pas configurée.",
+                ];
+            }
+
+            $systemPrompt = "Tu es un ingénieur expert en délivrabilité d'e-mails et protocoles SMTP.
+Ta tâche est d'analyser un message d'erreur ou notification de rejet d'e-mail (NDR/Bounce).
+Extrais les informations au format JSON strict suivant :
+{
+    \"recipients\": [\"adresse@example.com\"],
+    \"diagnostic\": \"Explication claire en français de la cause du rejet\",
+    \"bounce_type\": \"hard\" (compte inexistant, faux domaine) OU \"soft\" (boîte pleine, temporaire) OU \"spam_block\",
+    \"smtp_code\": \"ex: 550 5.1.1 ou 452 4.2.2\",
+    \"recommended_action\": \"exclude_immediately\" OU \"retry_later\" OU \"check_spf_dkim\",
+    \"action_explanation\": \"Conseil précis en français sur l'action à entreprendre\"
+}
+Réponds UNIQUEMENT avec un JSON valide, sans balises markdown ``` ni texte autour.";
+
+            $response = $iaService->analyzeText($rawText, $systemPrompt);
+            $cleanJson = $iaService->cleanJson($response);
+            $data = json_decode($cleanJson, true);
+
+            if (! is_array($data) || empty($data['recipients'])) {
+                return [
+                    'success' => false,
+                    'message' => "L'IA n'a pas pu identifier d'adresse en échec dans ce message.",
+                    'raw_response' => $response,
+                ];
+            }
+
+            $suppressedCount = 0;
+            $recipients = (array) $data['recipients'];
+
+            foreach ($recipients as $email) {
+                $email = strtolower(trim((string) $email));
+                if (filter_var($email, FILTER_VALIDATE_EMAIL) && ! in_array($email, ['contact@brillio.africa', 'noreply@brillio.africa', 'admin@brillio.com'], true)) {
+                    $isHard = ($data['bounce_type'] ?? '') === 'hard' || ($data['recommended_action'] ?? '') === 'exclude_immediately';
+                    $reason = ($data['smtp_code'] ?? 'IA').' : '.($data['diagnostic'] ?? 'Rejet identifié par IA');
+
+                    EmailSuppression::updateOrCreate(
+                        ['email' => $email],
+                        [
+                            'reason' => mb_strimwidth($reason, 0, 250, '...'),
+                            'source' => 'system_auto',
+                            'bounce_type' => $isHard ? 'hard' : 'soft',
+                            'bounce_count' => 1,
+                            'last_bounce_at' => now(),
+                        ]
+                    );
+                    $suppressedCount++;
+                }
+            }
+
+            return [
+                'success' => true,
+                'data' => $data,
+                'suppressed_count' => $suppressedCount,
+            ];
+        } catch (\Throwable $e) {
+            Log::error("Erreur lors de l'analyse du bounce par l'IA Brillio: ".$e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => "Erreur lors de l'appel à l'IA : ".$e->getMessage(),
+            ];
+        }
+    }
 }

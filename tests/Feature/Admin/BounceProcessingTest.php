@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\EmailSuppression;
 use App\Models\User;
 use App\Services\BounceProcessingService;
+use App\Services\BrillioIAService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
@@ -117,5 +118,25 @@ TXT;
     {
         $exitCode = Artisan::call('emails:process-bounces');
         $this->assertEquals(0, $exitCode);
+    }
+
+    public function test_ai_bounce_analysis_extracts_and_suppresses_complex_bounce(): void
+    {
+        $mockIa = $this->createMock(BrillioIAService::class);
+        $mockIa->method('isApiKeyConfigured')->willReturn(true);
+        $mockIa->method('analyzeText')->willReturn('{"recipients":["complex.bounce@domain.org"],"diagnostic":"Serveur distant injoignable après 5 tentatives","bounce_type":"hard","smtp_code":"554","recommended_action":"exclude_immediately","action_explanation":"Exclusion immédiate recommandée"}');
+        $mockIa->method('cleanJson')->willReturn('{"recipients":["complex.bounce@domain.org"],"diagnostic":"Serveur distant injoignable après 5 tentatives","bounce_type":"hard","smtp_code":"554","recommended_action":"exclude_immediately","action_explanation":"Exclusion immédiate recommandée"}');
+
+        $this->app->instance(BrillioIAService::class, $mockIa);
+
+        $service = app(BounceProcessingService::class);
+        $result = $service->analyzeBounceWithAi('Exotic bounce log from relay');
+
+        $this->assertTrue($result['success']);
+        $this->assertEquals(1, $result['suppressed_count']);
+        $this->assertDatabaseHas('email_suppressions', [
+            'email' => 'complex.bounce@domain.org',
+            'bounce_type' => 'hard',
+        ]);
     }
 }

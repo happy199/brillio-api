@@ -219,12 +219,13 @@ class AuditController extends Controller
     }
 
     /**
-     * Analyse et importe un texte brut de rejet (NDR) ou rapport de rebond
+     * Analyse et importe un texte brut de rejet (NDR) ou rapport de rebond (avec option IA)
      */
     public function importBounces(Request $request)
     {
         $validated = $request->validate([
             'bounce_text' => 'required|string|max:500000',
+            'use_ai' => 'nullable|boolean',
         ], [
             'bounce_text.required' => 'Veuillez coller le texte ou le message de rejet (NDR) reçu.',
         ]);
@@ -232,8 +233,27 @@ class AuditController extends Controller
         $service = app(BounceProcessingService::class);
         $result = $service->parseBounceText($validated['bounce_text']);
 
-        if ($result['total_found'] === 0) {
-            return redirect()->back()->with('error', 'Aucune adresse e-mail en échec ou format de rejet valide n\'a été détecté dans le texte fourni.');
+        // Si l'administrateur demande explicitement l'IA ou si l'analyse par regex ne trouve rien
+        if (! empty($validated['use_ai']) || $result['total_found'] === 0) {
+            $aiResult = $service->analyzeBounceWithAi($validated['bounce_text']);
+
+            if ($aiResult['success'] && ($aiResult['suppressed_count'] ?? 0) > 0) {
+                $diag = $aiResult['data']['diagnostic'] ?? 'Analyse effectuée';
+                $action = $aiResult['data']['action_explanation'] ?? 'Exclusion appliquée';
+
+                return redirect()->back()->with('success', sprintf(
+                    'Analyse par l\'IA Brillio réussie : %d adresse(s) traitée(s). Diagnostic : %s. Action : %s',
+                    $aiResult['suppressed_count'],
+                    $diag,
+                    $action
+                ));
+            }
+
+            if ($result['total_found'] === 0) {
+                $errMsg = $aiResult['message'] ?? 'Aucune adresse e-mail en échec ou format de rejet valide n\'a pu être identifié par le système ni par l\'IA.';
+
+                return redirect()->back()->with('error', $errMsg);
+            }
         }
 
         $msg = sprintf(

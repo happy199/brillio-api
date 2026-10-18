@@ -291,6 +291,13 @@ Technical details of permanent failure:
                         class="w-full form-textarea bg-slate-50 border-slate-300 focus:bg-white focus:border-rose-500 rounded-lg text-xs font-mono"></textarea>
                 </div>
 
+                <div class="mb-4 flex items-start gap-2.5 bg-indigo-50/70 border border-indigo-100 p-3 rounded-xl">
+                    <input type="checkbox" id="use_ai" name="use_ai" value="1" checked class="mt-0.5 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500">
+                    <label for="use_ai" class="text-xs text-indigo-950 leading-relaxed">
+                        <span class="font-bold text-indigo-900">Analyse intelligente par l'IA Brillio :</span> En cas de message d'erreur complexe ou tronqué, notre IA diagnostique la cause SMTP, extrait le destinataire et recommande l'action à mener pour préserver votre serveur Namecheap.
+                    </label>
+                </div>
+
                 <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
                     <button type="button" @click="showImportModal = false" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm font-medium">Annuler</button>
                     <button type="submit" class="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 text-sm font-semibold shadow-sm transition-colors">
