@@ -104,7 +104,7 @@
                         </table>
                     </div>
                     <div class="p-4">
-                        {{ $coupons->links() }}
+                        {{ $coupons->withQueryString()->links() }}
                     </div>
                 </div>
             </div>

@@ -27,12 +27,14 @@ class WalletController extends Controller
         $walletTransactions = $user->walletTransactions()
             ->whereIn('type', ['purchase', 'expense', 'coupon', 'service_fee'])
             ->latest()
-            ->paginate(10, ['*'], 'wallet_page');
+            ->paginate(10, ['*'], 'wallet_page')
+            ->withQueryString();
 
         $incomeTransactions = $user->walletTransactions()
             ->where('type', 'income')
             ->latest()
-            ->paginate(10, ['*'], 'income_page');
+            ->paginate(10, ['*'], 'income_page')
+            ->withQueryString();
 
         $totalCreditsEarned = $user->walletTransactions()->where('type', 'income')->sum('amount');
         $estimatedValueFcfa = $totalCreditsEarned * $creditPrice;

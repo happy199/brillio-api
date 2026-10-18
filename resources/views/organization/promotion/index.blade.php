@@ -178,7 +178,7 @@
                 </div>
                 @if($interests->hasPages())
                 <div class="px-6 py-4 border-t border-gray-100">
-                    {{ $interests->links() }}
+                    {{ $interests->withQueryString()->links() }}
                 </div>
                 @endif
             </div>
@@ -268,7 +268,7 @@
                 </div>
                 @if($clicks->hasPages())
                 <div class="px-6 py-4 border-t border-gray-100">
-                    {{ $clicks->links() }}
+                    {{ $clicks->withQueryString()->links() }}
                 </div>
                 @endif
             </div>

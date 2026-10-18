@@ -31,7 +31,7 @@ class CoachController extends Controller
             });
         }
 
-        $coaches = $query->paginate(25);
+        $coaches = $query->paginate(25)->withQueryString();
 
         // Liste des mentors non-coachs pour la promotion
         $availableMentors = User::where('user_type', User::TYPE_MENTOR)

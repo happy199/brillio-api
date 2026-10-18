@@ -263,7 +263,7 @@
         <!-- Pagination or Unlock -->
         <div class="mt-6 flex justify-center">
             @if($hasUnlockedHistory)
-                {{ $pastSessions->links() }}
+                {{ $pastSessions->withQueryString()->links() }}
             @else
                 @if(count($pastSessions) >= 10)
                 <div class="w-full sm:w-auto">

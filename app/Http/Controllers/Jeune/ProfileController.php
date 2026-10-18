@@ -39,7 +39,7 @@ class ProfileController extends Controller
             // Champs User
             'name' => 'sometimes|required|string|max:255',
             'phone' => 'sometimes|nullable|string|max:20',
-            'date_of_birth' => 'sometimes|nullable|date|before:today',
+            'date_of_birth' => ['sometimes', 'nullable', 'date', 'before_or_equal:'.now()->subYears(10)->format('Y-m-d')],
             'city' => 'sometimes|nullable|string|max:100',
             'linkedin_url' => 'sometimes|nullable|url|max:255',
 
@@ -55,6 +55,8 @@ class ProfileController extends Controller
             'interests' => 'sometimes|required|array|size:5',
             'interests.*' => 'string',
             'tuition_range' => 'sometimes|nullable|string|max:50',
+        ], [
+            'date_of_birth.before_or_equal' => 'Vous devez avoir au moins 10 ans pour utiliser la plateforme.',
         ]);
 
         // Mise à jour User (seulement les champs présents)

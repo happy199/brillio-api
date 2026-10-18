@@ -40,7 +40,8 @@ class ChatLogController extends Controller
 
         $conversations = $query->withCount('messages')
             ->orderBy('updated_at', 'desc')
-            ->paginate(25);
+            ->paginate(25)
+            ->withQueryString();
 
         return view('admin.chat.index', compact('conversations'));
     }

@@ -9,6 +9,7 @@ use Illuminate\Console\Events\ScheduledTaskFailed;
 use Illuminate\Console\Events\ScheduledTaskFinished;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
@@ -31,6 +32,30 @@ class AppServiceProvider extends ServiceProvider
     {
         // Configurer la pagination par défaut
         Paginator::defaultView('pagination.modern-pagination');
+
+        // Garantir que tous les paginateurs conservent automatiquement les paramètres d'URL (filtres, recherche, tri, onglets)
+        $this->app->bind(LengthAwarePaginator::class, function ($app, $parameters) {
+            $paginator = new LengthAwarePaginator(
+                $parameters['items'] ?? [],
+                $parameters['total'] ?? 0,
+                $parameters['perPage'] ?? 15,
+                $parameters['currentPage'] ?? null,
+                $parameters['options'] ?? []
+            );
+
+            return $paginator->withQueryString();
+        });
+
+        $this->app->bind(Paginator::class, function ($app, $parameters) {
+            $paginator = new Paginator(
+                $parameters['items'] ?? [],
+                $parameters['perPage'] ?? 15,
+                $parameters['currentPage'] ?? null,
+                $parameters['options'] ?? []
+            );
+
+            return $paginator->withQueryString();
+        });
 
         // === AUDIT LOGS & MAIL SUPPRESSION EVENTS ===
 

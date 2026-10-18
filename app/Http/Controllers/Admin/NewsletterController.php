@@ -27,7 +27,7 @@ class NewsletterController extends Controller
             $query->where('email', 'like', '%'.$request->search.'%');
         }
 
-        $subscribers = $query->latest()->paginate(50);
+        $subscribers = $query->latest()->paginate(50)->withQueryString();
         $stats = [
             'total' => NewsletterSubscriber::count(),
             'active' => NewsletterSubscriber::active()->count(),
@@ -43,7 +43,7 @@ class NewsletterController extends Controller
 
     public function campaigns()
     {
-        $campaigns = EmailCampaign::latest()->paginate(20);
+        $campaigns = EmailCampaign::latest()->paginate(20)->withQueryString();
 
         return view('admin.newsletter.campaigns', compact('campaigns'));
     }

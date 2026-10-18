@@ -57,7 +57,7 @@ class CareerController extends Controller
             });
         }
 
-        $careers = $query->orderBy('title')->paginate(20);
+        $careers = $query->orderBy('title')->paginate(20)->withQueryString();
 
         // Liste des niveaux de demande uniques pour le filtre (traduits)
         $demandLevels = Career::whereNotNull('demand_level')

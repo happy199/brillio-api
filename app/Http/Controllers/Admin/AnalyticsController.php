@@ -363,6 +363,7 @@ class AnalyticsController extends Controller
     private function getYouthEngagementStats(Carbon $start, Carbon $end): array
     {
         $youths = User::where('user_type', 'jeune')
+            ->where('is_admin', false)
             ->whereBetween('created_at', [$start, $end])
             ->with(['detailedProfiles' => function ($q) {
                 $q->latest();
@@ -370,6 +371,15 @@ class AnalyticsController extends Controller
             ->get();
 
         $stats = [
+            'age_distribution' => [
+                'under_15' => 0,
+                '15_17' => 0,
+                '18_21' => 0,
+                '22_25' => 0,
+                '26_30' => 0,
+                'over_30' => 0,
+                'non_renseigne' => 0,
+            ],
             'situations' => [],
             'sources' => [],
             'goals' => [],
@@ -418,6 +428,31 @@ class AnalyticsController extends Controller
 
             // On unifie la donnée : Le profil détaillé (modale profilage) est prioritaire sur l'onboarding initial
             $data = $latestDetailed ? array_merge($onboarding, $latestDetailed->data ?? []) : $onboarding;
+
+            // Distribution par tranche d'âge
+            $dob = $user->date_of_birth ?? (isset($onboarding['birth_date']) && ! empty($onboarding['birth_date']) ? Carbon::parse($onboarding['birth_date']) : null);
+            if ($dob) {
+                try {
+                    $age = $dob instanceof Carbon ? $dob->age : Carbon::parse($dob)->age;
+                    if ($age < 15) {
+                        $stats['age_distribution']['under_15']++;
+                    } elseif ($age <= 17) {
+                        $stats['age_distribution']['15_17']++;
+                    } elseif ($age <= 21) {
+                        $stats['age_distribution']['18_21']++;
+                    } elseif ($age <= 25) {
+                        $stats['age_distribution']['22_25']++;
+                    } elseif ($age <= 30) {
+                        $stats['age_distribution']['26_30']++;
+                    } else {
+                        $stats['age_distribution']['over_30']++;
+                    }
+                } catch (\Throwable $e) {
+                    $stats['age_distribution']['non_renseigne']++;
+                }
+            } else {
+                $stats['age_distribution']['non_renseigne']++;
+            }
 
             // Situation
             $sit = $latestDetailed->status ?? ($onboarding['current_situation'] ?? 'non_renseigne');

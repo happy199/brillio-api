@@ -52,7 +52,24 @@
                     <dl class="space-y-3">
                         <div class="flex justify-between">
                             <dt class="text-gray-500">Date de naissance</dt>
-                            <dd class="text-gray-900">{{ $user->birth_date ? $user->birth_date->format('d/m/Y') : '-' }}
+                            <dd class="text-gray-900">
+                                @if($user->date_of_birth)
+                                    {{ $user->date_of_birth->format('d/m/Y') }}
+                                @elseif($user->birth_date)
+                                    {{ $user->birth_date->format('d/m/Y') }}
+                                @else
+                                    <span class="text-gray-400">Non renseignée</span>
+                                @endif
+                            </dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-gray-500">Âge</dt>
+                            <dd class="text-gray-900">
+                                @if($user->age)
+                                    <span class="font-medium text-gray-900">{{ $user->age }} ans</span>
+                                @else
+                                    -
+                                @endif
                             </dd>
                         </div>
                         <div class="flex justify-between">

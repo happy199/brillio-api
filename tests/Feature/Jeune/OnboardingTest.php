@@ -136,4 +136,84 @@ class OnboardingTest extends TestCase
         $user->refresh();
         $this->assertFalse($user->onboarding_completed);
     }
+
+    /**
+     * Test validation fails when birth_date is missing
+     */
+    public function test_complete_onboarding_fails_missing_birth_date()
+    {
+        $user = User::factory()->create([
+            'user_type' => User::TYPE_JEUNE,
+            'onboarding_completed' => false,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('jeune.onboarding.complete'), [
+            'country' => 'Senegal',
+            'city' => 'Dakar',
+            'phone' => '771234567',
+            'education_level' => 'bac',
+            'current_situation' => 'etudiant',
+            'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
+            'goals' => ['orientation'],
+            'how_found_us' => 'social_media',
+        ]);
+
+        $response->assertSessionHasErrors('birth_date');
+        $user->refresh();
+        $this->assertFalse($user->onboarding_completed);
+    }
+
+    /**
+     * Test validation fails when user is under 10 years old
+     */
+    public function test_complete_onboarding_fails_when_under_10_years_old()
+    {
+        $user = User::factory()->create([
+            'user_type' => User::TYPE_JEUNE,
+            'onboarding_completed' => false,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('jeune.onboarding.complete'), [
+            'birth_date' => now()->subYears(8)->format('Y-m-d'), // 8 years old
+            'country' => 'Senegal',
+            'city' => 'Dakar',
+            'phone' => '771234567',
+            'education_level' => 'bac',
+            'current_situation' => 'etudiant',
+            'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
+            'goals' => ['orientation'],
+            'how_found_us' => 'social_media',
+        ]);
+
+        $response->assertSessionHasErrors('birth_date');
+        $user->refresh();
+        $this->assertFalse($user->onboarding_completed);
+    }
+
+    /**
+     * Test validation succeeds when user is 10 years old or older
+     */
+    public function test_complete_onboarding_succeeds_when_10_years_old_or_older()
+    {
+        $user = User::factory()->create([
+            'user_type' => User::TYPE_JEUNE,
+            'onboarding_completed' => false,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('jeune.onboarding.complete'), [
+            'birth_date' => now()->subYears(10)->format('Y-m-d'), // Exactly 10 years old
+            'country' => 'Senegal',
+            'city' => 'Dakar',
+            'phone' => '771234567',
+            'education_level' => 'bac',
+            'current_situation' => 'etudiant',
+            'interests' => ['Technologie', 'Finance', 'Marketing', 'Design', 'Sante'],
+            'goals' => ['orientation'],
+            'how_found_us' => 'social_media',
+        ]);
+
+        $response->assertRedirect(route('jeune.dashboard'));
+        $user->refresh();
+        $this->assertTrue($user->onboarding_completed);
+    }
 }

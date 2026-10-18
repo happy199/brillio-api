@@ -40,7 +40,7 @@ class ResourceController extends Controller
         // On réinitialise le déblocage des stats quand on revient à la liste
         session()->forget('resource_stats_unlocked');
 
-        $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12);
+        $resources = auth()->user()->resources()->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
 
         return view('mentor.resources.index', compact('resources'));
     }
@@ -83,7 +83,7 @@ class ResourceController extends Controller
             }
         }
 
-        $resources = $query->with('user')->latest()->paginate(12);
+        $resources = $query->with('user')->latest()->paginate(12)->withQueryString();
         $totalCount = $query->count();
 
         $purchasedIds = Purchase::where('user_id', auth()->id())

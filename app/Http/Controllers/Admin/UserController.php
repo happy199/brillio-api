@@ -79,7 +79,7 @@ class UserController extends Controller
         $sortOrder = $validated['order'] ?? 'desc';
         $query->orderBy($sortBy, $sortOrder);
 
-        $users = $query->paginate(25);
+        $users = $query->paginate(25)->withQueryString();
 
         // Liste des pays pour le filtre
         $countries = User::whereNotNull('country')

@@ -207,7 +207,7 @@
                         @endforelse
                     </div>
                     <div class="p-2 bg-gray-50 border-t border-gray-100 text-center">
-                        {{ $transactions->links('pagination.simple-indigo') }}
+                        {{ $transactions->withQueryString()->links('pagination.simple-indigo') }}
                     </div>
                 </div>
             </div>

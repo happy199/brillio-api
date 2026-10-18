@@ -164,7 +164,7 @@
             </div>
 
             <div class="mt-8">
-                {{ $jeunes->links() }}
+                {{ $jeunes->withQueryString()->links() }}
             </div>
             @endif
         </div>

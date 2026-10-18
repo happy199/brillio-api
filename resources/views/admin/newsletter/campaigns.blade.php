@@ -145,7 +145,7 @@
 
         <!-- Pagination -->
         <div class="mt-4">
-            {{ $campaigns->links() }}
+            {{ $campaigns->withQueryString()->links() }}
         </div>
     </div>
 

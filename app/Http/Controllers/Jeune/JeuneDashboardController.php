@@ -1240,7 +1240,8 @@ class JeuneDashboardController extends Controller
 
         $mentors = $query->orderByDesc('is_validated')
             ->inRandomOrder()
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
         $specializations = MentorProfile::SPECIALIZATIONS;
         $sectors = MbtiCareersService::getAllSectors();

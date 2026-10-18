@@ -42,7 +42,7 @@ class DocumentController extends Controller
             $query->where('file_name', 'like', "%{$search}%");
         }
 
-        $documents = $query->latest()->paginate(15);
+        $documents = $query->latest()->paginate(15)->withQueryString();
 
         $documentTypes = AcademicDocument::DOCUMENT_TYPES;
 

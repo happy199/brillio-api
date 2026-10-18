@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Mentor\PayoutController;
 use App\Http\Controllers\Api\V1\AcademicDocumentController;
 use App\Http\Controllers\Api\V1\ChatController;
+use App\Http\Controllers\Api\V1\KidsGameController;
 use App\Http\Controllers\Api\V1\MentorController;
 use App\Http\Controllers\Api\V1\MentorshipController;
 use App\Http\Controllers\Api\V1\OrganizationController;
@@ -306,3 +307,19 @@ Route::post('/webhooks/moneroo', [MonerooWebhookController::class, 'handle'])
 
 Route::post('/webhooks/jitsi', [JitsiWebhookController::class, 'handle'])
     ->name('api.webhooks.jitsi');
+
+/*
+ |--------------------------------------------------------------------------
+ | Brillio Kids MVP API Endpoints
+ |--------------------------------------------------------------------------
+ */
+Route::prefix('v1/kids')->group(function () {
+    Route::get('/profile', [KidsGameController::class, 'getProfile']);
+    Route::post('/sessions', [KidsGameController::class, 'submitGameSession']);
+    Route::get('/parent/report', [KidsGameController::class, 'getParentReport']);
+    Route::post('/parent/observations', [KidsGameController::class, 'submitObservation']);
+    Route::post('/parent/register', [KidsGameController::class, 'registerParent']);
+    Route::get('/parent/children', [KidsGameController::class, 'getChildren']);
+    Route::post('/parent/children', [KidsGameController::class, 'createChild']);
+    Route::post('/parent/subscribe', [KidsGameController::class, 'subscribePlan']);
+});

@@ -183,7 +183,7 @@
 
 <!-- Pagination -->
 <div class="mt-6">
-    {{ $sessions->links() }}
+    {{ $sessions->withQueryString()->links() }}
 </div>
 </div>
 @endsection

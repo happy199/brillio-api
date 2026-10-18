@@ -195,7 +195,7 @@
 
     <!-- Pagination -->
     <div class="mt-6">
-        {{ $users->links() }}
+        {{ $users->withQueryString()->links() }}
     </div>
 </div>
 @endsection

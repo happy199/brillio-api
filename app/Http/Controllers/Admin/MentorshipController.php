@@ -47,7 +47,7 @@ class MentorshipController extends Controller
             });
         }
 
-        $requests = $query->latest()->paginate(20);
+        $requests = $query->latest()->paginate(20)->withQueryString();
 
         // Stats
         $stats = [
@@ -99,6 +99,20 @@ class MentorshipController extends Controller
             });
         }
 
+        // Filtres Spécifiques (Mentor / Menté)
+        if ($request->filled('mentor_name')) {
+            $mentorName = $request->mentor_name;
+            $query->whereHas('mentor', function ($q) use ($mentorName) {
+                $q->where('name', 'like', "%{$mentorName}%");
+            });
+        }
+        if ($request->filled('mentee_name')) {
+            $menteeName = $request->mentee_name;
+            $query->whereHas('mentees', function ($q) use ($menteeName) {
+                $q->where('name', 'like', "%{$menteeName}%");
+            });
+        }
+
         // Filtre par organisation (Séances planifiées par une organisation)
         if ($request->filled('organization_id')) {
             $query->where('scheduled_by_organization_id', $request->organization_id);
@@ -117,7 +131,7 @@ class MentorshipController extends Controller
             }
         }
 
-        $sessions = $query->latest('scheduled_at')->paginate(20);
+        $sessions = $query->latest('scheduled_at')->paginate(20)->withQueryString();
 
         // Stats pour les séances
         $stats = [
@@ -165,7 +179,15 @@ class MentorshipController extends Controller
             }
         }
 
-        // Recherche texte (nom du mentor ou du menté)
+        // Filtre spécifique mentor (Nom)
+        if ($request->filled('mentor_name')) {
+            $mentorName = $request->mentor_name;
+            $query->whereHas('mentor', function ($q) use ($mentorName) {
+                $q->where('name', 'like', "%{$mentorName}%");
+            });
+        }
+
+        // Recherche texte (nom du mentor ou du menté ou titre)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {

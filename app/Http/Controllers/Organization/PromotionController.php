@@ -38,7 +38,8 @@ class PromotionController extends Controller
         $interests = EstablishmentInterest::whereIn('establishment_id', $establishmentIds)
             ->with(['user.jeuneProfile', 'user.personalityTest', 'establishment'])
             ->latest()
-            ->paginate(25, ['*'], 'interests_page');
+            ->paginate(25, ['*'], 'interests_page')
+            ->withQueryString();
 
         // Liste 2: Simples clics et vues (Clicks)
         $clicks = User::select('users.*')
@@ -57,7 +58,8 @@ class PromotionController extends Controller
             ->whereHas('establishmentClicks', fn ($q) => $q->whereIn('establishment_id', $establishmentIds))
             ->with(['jeuneProfile', 'personalityTest'])
             ->orderBy('last_click_at', 'DESC')
-            ->paginate(25, ['*'], 'clicks_page');
+            ->paginate(25, ['*'], 'clicks_page')
+            ->withQueryString();
 
         $mbtiDescriptions = PersonalityService::TYPE_DESCRIPTIONS;
 

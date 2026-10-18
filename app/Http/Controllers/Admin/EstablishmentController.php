@@ -108,7 +108,8 @@ class EstablishmentController extends Controller
     {
         $establishments = Establishment::withCount(['interests', 'clicks'])
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.establishments.index', compact('establishments'));
     }
@@ -118,14 +119,15 @@ class EstablishmentController extends Controller
      */
     public function interests(Establishment $establishment)
     {
-        $interests = $establishment->interests()->with('user')->orderBy('created_at', 'desc')->paginate(20);
+        $interests = $establishment->interests()->with('user')->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
         $clicks = $establishment->clicks()
             ->select('user_id', \DB::raw('count(*) as clicks_count'), \DB::raw('max(created_at) as last_click_at'), \DB::raw('max(ip_address) as last_ip'), \DB::raw('max(user_agent) as last_agent'))
             ->with('user.personalityTest')
             ->groupBy('user_id')
             ->orderBy('last_click_at', 'desc')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         $clicksCount = $establishment->clicks()->count();
 
