@@ -1,6 +1,9 @@
 # Stage 1: Build
 FROM php:8.4-fpm-alpine AS builder
 
+# Update system & security libraries
+RUN apk update && apk upgrade --no-cache
+
 # Install extensions using the official installer script
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \
@@ -47,6 +50,9 @@ USER www-data
 # Stage 2: Production
 FROM php:8.4-fpm-alpine
 
+# Update system & security libraries
+RUN apk update && apk upgrade --no-cache
+
 # Install extensions using the official installer script (much faster and reliable)
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
@@ -71,8 +77,10 @@ COPY docker/default.conf /etc/nginx/http.d/default.conf
 # Copy supervisor configuration
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Copy PHP configuration
+# Copy PHP configurations & FPM security hardening (mitigates CVE-2026-109618 & CVE-2026-109619)
 COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+COPY docker/php/security.ini /usr/local/etc/php/conf.d/security.ini
+COPY docker/php/fpm-pool.conf /usr/local/etc/php-fpm.d/zz-security.conf
 
 # Set permissions and prepare folders for non-root execution
 RUN mkdir -p /run/nginx /var/lib/nginx/tmp /var/log/nginx /var/log/supervisor && \
