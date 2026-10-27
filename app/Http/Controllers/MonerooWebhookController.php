@@ -133,24 +133,12 @@ class MonerooWebhookController extends Controller
             ->lockForUpdate()
             ->first();
 
-        if (! $transaction) {
-            Log::error('Moneroo transaction not found', ['moneroo_transaction_id' => $monerooTransactionId]);
-
-            return response()->json(['error' => 'Transaction not found'], 404);
-        }
-
-        if ($transaction->status === 'completed') {
-            Log::info('Moneroo transaction already completed', ['transaction_id' => $transaction->id]);
-
-            return response()->json(['message' => 'Already processed'], 200);
+        $errorResponse = $this->validatePaymentTransaction($transaction, $monerooTransactionId);
+        if ($errorResponse) {
+            return $errorResponse;
         }
 
         $user = $transaction->user;
-        if (! $user) {
-            Log::error('User not found for transaction', ['transaction_id' => $transaction->id]);
-
-            return response()->json(['error' => 'User not found'], 404);
-        }
 
         $isOrgTransaction = ($transaction->metadata['user_type'] ?? '') === 'organization';
         $entity = ($isOrgTransaction && $user->organization) ? $user->organization : $user;
@@ -175,6 +163,32 @@ class MonerooWebhookController extends Controller
         $this->sendPaymentSuccessNotifications($transaction, $entity, $user);
 
         return response()->json(['message' => 'Payment processed'], 200);
+    }
+
+    /**
+     * Valide l'état initial de la transaction avant traitement
+     */
+    private function validatePaymentTransaction(?MonerooTransaction $transaction, string $monerooTransactionId): ?JsonResponse
+    {
+        if (! $transaction) {
+            Log::error('Moneroo transaction not found', ['moneroo_transaction_id' => $monerooTransactionId]);
+
+            return response()->json(['error' => 'Transaction not found'], 404);
+        }
+
+        if ($transaction->status === 'completed') {
+            Log::info('Moneroo transaction already completed', ['transaction_id' => $transaction->id]);
+
+            return response()->json(['message' => 'Already processed'], 200);
+        }
+
+        if (! $transaction->user) {
+            Log::error('User not found for transaction', ['transaction_id' => $transaction->id]);
+
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        return null;
     }
 
     /**

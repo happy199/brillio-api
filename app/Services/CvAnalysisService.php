@@ -251,30 +251,25 @@ class CvAnalysisService
       */
      private function extractBrillioDocProps(string $filePath): ?array
      {
+         $props = null;
          try {
              $zip = new \ZipArchive;
-             if ($zip->open($filePath) !== true) {
-                 return null;
-             }
+             if ($zip->open($filePath) === true) {
+                 $customXml = $zip->getFromName('docProps/custom.xml');
+                 $zip->close();
 
-             $customXml = $zip->getFromName('docProps/custom.xml');
-             $zip->close();
+                 $hasToken = $customXml && preg_match('/name=["\']BrillioCertToken["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mToken);
+                 $hasSig = $customXml && preg_match('/name=["\']BrillioCertSignature["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mSig);
 
-             if (! $customXml) {
-                 return null;
-             }
-
-             $hasToken = preg_match('/name=["\']BrillioCertToken["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mToken);
-             $hasSig = preg_match('/name=["\']BrillioCertSignature["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mSig);
-
-             if ($hasToken && $hasSig) {
-                 return ['token' => $mToken[1], 'signature' => $mSig[1]];
+                 if ($hasToken && $hasSig) {
+                     $props = ['token' => $mToken[1], 'signature' => $mSig[1]];
+                 }
              }
          } catch (\Exception $e) {
              Log::warning('Provenance extraction error: '.$e->getMessage());
          }
 
-         return null;
+         return $props;
      }
 
      /**
