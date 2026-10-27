@@ -141,22 +141,7 @@ class JitsiWebhookController extends Controller
      */
      public function appendTranscription(Request $request, MentoringSession $session)
      {
-         $user = Auth::user();
-         $guestAuth = session("guest_auth_{$session->id}");
-
-         $isMentor = $user && $session->all_mentors->pluck('id')->contains($user->id);
-         $isMentee = $user && $session->mentees()->where('user_id', $user->id)->exists();
-         $isOrganizationMember = $user && ($user->organization_id === $session->scheduled_by_organization_id ||
-             $session->mentees()->where('sponsored_by_organization_id', $user->organization_id)->exists());
-
-         $isAuthorizedGuest = false;
-         if ($guestAuth && ! empty($guestAuth['email'])) {
-             $guestEmail = strtolower($guestAuth['email']);
-             $mentorEmails = $session->all_mentors->pluck('email')->map(fn ($e) => strtolower($e))->toArray();
-             $isAuthorizedGuest = in_array($guestEmail, $mentorEmails, true);
-         }
-
-         if (! $isMentor && ! $isMentee && ! $isOrganizationMember && ! $isAuthorizedGuest) {
+         if (! $this->isParticipantAuthorized($session)) {
              return response()->json(['error' => 'Non autorisé à modifier cette séance.'], 403);
          }
 
@@ -205,22 +190,7 @@ class JitsiWebhookController extends Controller
       */
      public function uploadRecording(Request $request, MentoringSession $session)
      {
-         $user = Auth::user();
-         $guestAuth = session("guest_auth_{$session->id}");
-
-         $isMentor = $user && $session->all_mentors->pluck('id')->contains($user->id);
-         $isMentee = $user && $session->mentees()->where('user_id', $user->id)->exists();
-         $isOrganizationMember = $user && ($user->organization_id === $session->scheduled_by_organization_id ||
-             $session->mentees()->where('sponsored_by_organization_id', $user->organization_id)->exists());
-
-         $isAuthorizedGuest = false;
-         if ($guestAuth && ! empty($guestAuth['email'])) {
-             $guestEmail = strtolower($guestAuth['email']);
-             $mentorEmails = $session->all_mentors->pluck('email')->map(fn ($e) => strtolower($e))->toArray();
-             $isAuthorizedGuest = in_array($guestEmail, $mentorEmails, true);
-         }
-
-         if (! $isMentor && ! $isMentee && ! $isOrganizationMember && ! $isAuthorizedGuest) {
+         if (! $this->isParticipantAuthorized($session)) {
              return response()->json(['error' => 'Non autorisé à modifier cette séance.'], 403);
          }
 
@@ -235,5 +205,33 @@ class JitsiWebhookController extends Controller
          ]);
 
          return response()->json(['status' => 'success', 'url' => $url]);
+     }
+
+     /**
+      * Vérifie si l'utilisateur connecté ou l'invité en session est autorisé
+      */
+     private function isParticipantAuthorized(MentoringSession $session): bool
+     {
+         $user = Auth::user();
+         if ($user) {
+             $isMentor = $session->all_mentors->pluck('id')->contains($user->id);
+             $isMentee = $session->mentees()->where('user_id', $user->id)->exists();
+             $isOrgMember = $user->organization_id === $session->scheduled_by_organization_id ||
+                 $session->mentees()->where('sponsored_by_organization_id', $user->organization_id)->exists();
+
+             if ($isMentor || $isMentee || $isOrgMember) {
+                 return true;
+             }
+         }
+
+         $guestAuth = session("guest_auth_{$session->id}");
+         if ($guestAuth && ! empty($guestAuth['email'])) {
+             $guestEmail = strtolower($guestAuth['email']);
+             $mentorEmails = $session->all_mentors->pluck('email')->map(fn ($e) => strtolower($e))->toArray();
+
+             return in_array($guestEmail, $mentorEmails, true);
+         }
+
+         return false;
      }
 }

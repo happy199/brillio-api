@@ -234,65 +234,74 @@ class CvAnalysisService
      */
      private function verifyBrillioProvenance(string $filePath, string $extension): bool
      {
-         if (! in_array(strtolower($extension), ['docx', 'doc'])) {
+         if (! in_array(strtolower($extension), ['docx', 'doc'], true) || ! class_exists('ZipArchive') || ! file_exists($filePath)) {
              return false;
          }
 
-         if (! class_exists('ZipArchive') || ! file_exists($filePath)) {
+         $props = $this->extractBrillioDocProps($filePath);
+         if (! $props) {
              return false;
          }
 
+         return $this->validateBrillioHmac($props['token'], $props['signature']);
+     }
+
+     /**
+      * Extrait le token et la signature depuis docProps/custom.xml
+      */
+     private function extractBrillioDocProps(string $filePath): ?array
+     {
          try {
              $zip = new \ZipArchive;
-             if ($zip->open($filePath) === true) {
-                 $customXml = $zip->getFromName('docProps/custom.xml');
-                 $zip->close();
+             if ($zip->open($filePath) !== true) {
+                 return null;
+             }
 
-                 if (! $customXml) {
-                     return false;
-                 }
+             $customXml = $zip->getFromName('docProps/custom.xml');
+             $zip->close();
 
-                 // Extraire BrillioCertToken et BrillioCertSignature
-                 $token = null;
-                 $signature = null;
+             if (! $customXml) {
+                 return null;
+             }
 
-                 if (preg_match('/name=["\']BrillioCertToken["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mToken)) {
-                     $token = $mToken[1];
-                 }
-                 if (preg_match('/name=["\']BrillioCertSignature["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mSig)) {
-                     $signature = $mSig[1];
-                 }
+             $hasToken = preg_match('/name=["\']BrillioCertToken["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mToken);
+             $hasSig = preg_match('/name=["\']BrillioCertSignature["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mSig);
 
-                 if (! $token || ! $signature) {
-                     return false;
-                 }
-
-                 // Vérification en base de données de l'existence du token ou de l'analyse correspondante
-                 $matchedCv = CvAnalysis::where('guest_token', $token)->first();
-                 if (! $matchedCv && str_starts_with($token, 'brillio_cv_')) {
-                     $cvId = (int) str_replace('brillio_cv_', '', $token);
-                     $matchedCv = CvAnalysis::find($cvId);
-                 }
-
-                 if (! $matchedCv) {
-                     return false;
-                 }
-
-                 // Vérifier la signature HMAC
-                 $appSecret = config('app.key') ?: 'brillio-ats-secret';
-                 $expectedSig = hash_hmac('sha256', $token.'|'.$matchedCv->id, $appSecret);
-
-                 if (hash_equals($expectedSig, $signature)) {
-                     Log::info('Authentic Brillio Pro ATS CV verified cryptographically', [
-                         'cv_id' => $matchedCv->id,
-                         'token' => $token,
-                     ]);
-
-                     return true;
-                 }
+             if ($hasToken && $hasSig) {
+                 return ['token' => $mToken[1], 'signature' => $mSig[1]];
              }
          } catch (\Exception $e) {
-             Log::warning('Provenance verification check error: '.$e->getMessage());
+             Log::warning('Provenance extraction error: '.$e->getMessage());
+         }
+
+         return null;
+     }
+
+     /**
+      * Valide l'existence en base et la signature HMAC du document
+      */
+     private function validateBrillioHmac(string $token, string $signature): bool
+     {
+         $matchedCv = CvAnalysis::where('guest_token', $token)->first();
+         if (! $matchedCv && str_starts_with($token, 'brillio_cv_')) {
+             $cvId = (int) str_replace('brillio_cv_', '', $token);
+             $matchedCv = CvAnalysis::find($cvId);
+         }
+
+         if (! $matchedCv) {
+             return false;
+         }
+
+         $appSecret = config('app.key') ?: 'brillio-ats-secret';
+         $expectedSig = hash_hmac('sha256', $token.'|'.$matchedCv->id, $appSecret);
+
+         if (hash_equals($expectedSig, $signature)) {
+             Log::info('Authentic Brillio Pro ATS CV verified cryptographically', [
+                 'cv_id' => $matchedCv->id,
+                 'token' => $token,
+             ]);
+
+             return true;
          }
 
          return false;

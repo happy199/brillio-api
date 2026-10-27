@@ -14,9 +14,7 @@ use Illuminate\Support\Facades\Response;
 
 class MentorsController extends Controller
 {
-    /**
-     * Get current organization
-     */
+    private const UNAUTHORIZED_ACCESS = 'Accès non autorisé';
 
     /**
      * List mentors linked to the organization
@@ -89,7 +87,7 @@ class MentorsController extends Controller
             })->exists();
 
         if (! $isLinked && ! $hasSessionsWithYouths) {
-            abort(403, 'Accès non autorisé');
+            abort(403, self::UNAUTHORIZED_ACCESS);
         }
 
         if (! $organization->isPro()) {
@@ -146,7 +144,7 @@ class MentorsController extends Controller
             })->exists();
 
         if (! $isLinked && ! $hasSessionsWithYouths) {
-            abort(403, 'Accès non autorisé');
+            abort(403, self::UNAUTHORIZED_ACCESS);
         }
 
         if (! $organization->isPro()) {
@@ -177,7 +175,7 @@ class MentorsController extends Controller
             })->exists();
 
         if (! $isLinked && ! $hasSessionsWithYouths) {
-            abort(403, 'Accès non autorisé');
+            abort(403, self::UNAUTHORIZED_ACCESS);
         }
 
         if (! $organization->isPro()) {
