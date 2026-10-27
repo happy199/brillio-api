@@ -170,25 +170,20 @@ class MonerooWebhookController extends Controller
      */
     private function validatePaymentTransaction(?MonerooTransaction $transaction, string $monerooTransactionId): ?JsonResponse
     {
+        $response = null;
+
         if (! $transaction) {
             Log::error('Moneroo transaction not found', ['moneroo_transaction_id' => $monerooTransactionId]);
-
-            return response()->json(['error' => 'Transaction not found'], 404);
-        }
-
-        if ($transaction->status === 'completed') {
+            $response = response()->json(['error' => 'Transaction not found'], 404);
+        } elseif ($transaction->status === 'completed') {
             Log::info('Moneroo transaction already completed', ['transaction_id' => $transaction->id]);
-
-            return response()->json(['message' => 'Already processed'], 200);
-        }
-
-        if (! $transaction->user) {
+            $response = response()->json(['message' => 'Already processed'], 200);
+        } elseif (! $transaction->user) {
             Log::error('User not found for transaction', ['transaction_id' => $transaction->id]);
-
-            return response()->json(['error' => 'User not found'], 404);
+            $response = response()->json(['error' => 'User not found'], 404);
         }
 
-        return null;
+        return $response;
     }
 
     /**
