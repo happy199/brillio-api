@@ -74,7 +74,13 @@ class QuizController extends Controller
         $totalQuestions = $quiz->questions()->count();
 
         foreach ($request->answers as $questionId => $optionId) {
-            $option = QuizOption::find($optionId);
+            $question = $quiz->questions()->find($questionId);
+            if (! $question) {
+                continue;
+            }
+
+            // Vérifier que l'option appartient bien à la question correspondante
+            $option = $question->options()->find($optionId);
             if ($option && $option->is_correct) {
                 $score++;
             }

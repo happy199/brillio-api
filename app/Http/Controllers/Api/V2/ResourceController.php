@@ -122,7 +122,7 @@ class ResourceController extends V1ResourceController
             'type' => 'required|in:article,video,tool,exercise,template,script',
             'price' => 'required|numeric|min:0',
             'external_url' => 'nullable|url',
-            'file' => 'nullable|file|max:51200', // NOSONAR
+            'file' => 'nullable|file|max:51200|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,mp4,webm,zip',
         ]);
 
         if (isset($validated['file'])) {

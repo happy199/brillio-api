@@ -58,7 +58,7 @@ Route::get('/health', function () {
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    return new \App\Http\Resources\V1\UserResource($request->user());
 });
 
 // V2 Authentication (Guest) - rate limited to 10 requests per minute

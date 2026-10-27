@@ -103,7 +103,9 @@ Route::post('/publicite/{advertisement}/click', [PageController::class, 'trackAd
 
 // Section Évaluation & Analyse de CV
 Route::get('/analysemoncv', [OpportunityController::class, 'index'])->name('public.opportunities');
-Route::post('/analysemoncv/analyser-cv', [OpportunityController::class, 'analyzeCv'])->name('public.opportunities.analyze');
+Route::post('/analysemoncv/analyser-cv', [OpportunityController::class, 'analyzeCv'])
+    ->middleware('throttle:5,1')
+    ->name('public.opportunities.analyze');
 Route::get('/analysemoncv/score/{token}', [OpportunityController::class, 'showScore'])->name('public.opportunities.score');
 
 // Redirections pour rétrocompatibilité
@@ -574,7 +576,7 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
     });
 
     // === Routes Partagées (Admin & Coach) ===
-    Route::middleware(['auth', EnsureAdminOrCoach::class])->group(function () {
+    Route::middleware(['auth', EnsureAdminOrCoach::class, 'admin_2fa'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
         // Chat conversations

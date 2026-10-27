@@ -40,8 +40,8 @@ class MeetingController extends Controller
             // 3. Reconstituer le lien ou chercher via room name
             // On suppose que meeting_link = https://meet.jit.si/$meetingId
             // Recherche de la session correspondante
-            // Note: LIKE est plus sûr si jamais le préfixe change un jour, mais ici exact match sur fin de chaine
-            $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$meetingId)->firstOrFail();
+            $escapedMeetingId = addcslashes($meetingId, '%_');
+            $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$escapedMeetingId)->firstOrFail();
 
             // 1. Vérifier si l'utilisateur est participant (Mentor, Menté, ou Organisation)
             $isMentor = $session->all_mentors->pluck('id')->contains($user->id);
@@ -97,7 +97,8 @@ class MeetingController extends Controller
 
         try {
             // 1. Trouver la session par le room name (meetingId)
-            $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$meetingId)
+            $escapedMeetingId = addcslashes($meetingId, '%_');
+            $session = MentoringSession::where('meeting_link', 'LIKE', '%'.$escapedMeetingId)
                 ->where('guest_token', $guestToken)
                 ->firstOrFail();
 
@@ -118,9 +119,9 @@ class MeetingController extends Controller
                     ->with('error', 'Veuillez confirmer votre identité pour accéder à la séance.');
             }
 
-            // 3. Ici, on simule l'utilisateur mentor (celui qui est authentifié par sa session)
+            // 3. Récupérer l'utilisateur correspondant et vérifier si c'est réellement un mentor
             $user = User::where('email', $guestAuth['email'])->first();
-            $isMentor = true;
+            $isMentor = $user ? $session->all_mentors->pluck('id')->contains($user->id) : in_array(strtolower($guestAuth['email']), $mentorEmails, true);
 
             // Generate JWT for JaaS
             $roomName = basename($session->meeting_link);

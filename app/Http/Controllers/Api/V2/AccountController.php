@@ -27,10 +27,23 @@ class AccountController extends Controller
     {
         $user = $request->user();
 
-        // Soft delete the user
-        $user->update(['is_archived' => true]);
+        // Si un mot de passe actuel est fourni, vérifier qu'il est correct
+        if ($request->filled('current_password')) {
+            $request->validate([
+                'current_password' => ['current_password'],
+            ], [
+                'current_password.current_password' => 'Le mot de passe actuel est incorrect.',
+            ]);
+        }
 
-        // Optional: revoke tokens
+        // Soft delete / archive the user
+        $user->update([
+            'is_archived' => true,
+            'archived_at' => now(),
+            'archived_reason' => 'Compte archivé à la demande de l\'utilisateur.',
+        ]);
+
+        // Revoke all tokens
         $user->tokens()->delete();
 
         return $this->success(null, 'Compte archivé avec succès.');

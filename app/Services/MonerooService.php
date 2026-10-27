@@ -166,10 +166,7 @@ class MonerooService
         $isValid = hash_equals($computedSignature, $signature);
 
         if (! $isValid) {
-            Log::warning('Moneroo: Invalid webhook signature', [
-                'expected' => $computedSignature,
-                'received' => $signature,
-            ]);
+            Log::warning('Moneroo: Invalid webhook signature mismatch');
         }
 
         return $isValid;

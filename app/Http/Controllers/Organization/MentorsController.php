@@ -137,6 +137,18 @@ class MentorsController extends Controller
         $mentorUser = $mentor->user;
         $organization = $this->getCurrentOrganization();
 
+        // Check if mentor is linked to organization or has sessions with its youths
+        $isLinked = $organization->users()->where('users.id', $mentorUser->id)->exists();
+        $hasSessionsWithYouths = MentoringSession::where('mentor_id', $mentorUser->id)
+            ->whereHas('mentees', function ($q) use ($organization) {
+                $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                    ->where('organization_user.organization_id', $organization->id);
+            })->exists();
+
+        if (! $isLinked && ! $hasSessionsWithYouths) {
+            abort(403, 'Accès non autorisé');
+        }
+
         if (! $organization->isPro()) {
             abort(403, 'Plan Pro requis pour l\'export');
         }
@@ -155,6 +167,18 @@ class MentorsController extends Controller
     {
         $mentorUser = $mentor->user;
         $organization = $this->getCurrentOrganization();
+
+        // Check if mentor is linked to organization or has sessions with its youths
+        $isLinked = $organization->users()->where('users.id', $mentorUser->id)->exists();
+        $hasSessionsWithYouths = MentoringSession::where('mentor_id', $mentorUser->id)
+            ->whereHas('mentees', function ($q) use ($organization) {
+                $q->join('organization_user', 'users.id', '=', 'organization_user.user_id')
+                    ->where('organization_user.organization_id', $organization->id);
+            })->exists();
+
+        if (! $isLinked && ! $hasSessionsWithYouths) {
+            abort(403, 'Accès non autorisé');
+        }
 
         if (! $organization->isPro()) {
             abort(403, 'Plan Pro requis pour l\'export');

@@ -1319,6 +1319,6 @@
         }
     }
 
-    const oldQuizzes = {!! old('quizzes_data') ?: 'null' !!};
+    const oldQuizzes = {!! json_encode(json_decode(old('quizzes_data') ?: 'null')) !!};
 </script>
 @endpush

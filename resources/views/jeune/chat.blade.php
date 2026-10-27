@@ -725,32 +725,37 @@
                         const videoLinkMatch = cleanText.match(/(?:🎥\s*Enregistrement vidéo[^\n]*?\[[^\]]+\]\(([^\)]+)\)|https?:\/\/[^\s\)]+video_recordings[^\s\)]+|\/storage\/video_recordings[^\s\)]+|https?:\/\/res\.cloudinary\.com[^\s\)]+video[^\s\)]+)/i);
 
                         if (videoLinkMatch) {
-                            const videoUrl = videoLinkMatch[1] || videoLinkMatch[0];
-                            videoCardHtml = `
-                                <div class="my-3 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white p-4 rounded-xl shadow-lg border border-indigo-500/30 space-y-3 not-prose">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-400/30">
-                                            <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                            </svg>
+                            let rawUrl = (videoLinkMatch[1] || videoLinkMatch[0]).trim();
+                            // Sanitize URL: accept only http(s) or /storage/
+                            let isValidProtocol = /^https?:\/\//i.test(rawUrl) || rawUrl.startsWith('/storage/');
+                            if (isValidProtocol) {
+                                const escapedUrl = encodeURI(rawUrl).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                                videoCardHtml = `
+                                    <div class="my-3 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white p-4 rounded-xl shadow-lg border border-indigo-500/30 space-y-3 not-prose">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-400/30">
+                                                <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-xs text-indigo-200 uppercase tracking-wider">Enregistrement de l'Entretien Vidéo</h4>
+                                                <p class="text-[11px] text-gray-300">Vidéo disponible pour consultation et réécoute</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 class="font-bold text-xs text-indigo-200 uppercase tracking-wider">Enregistrement de l'Entretien Vidéo</h4>
-                                            <p class="text-[11px] text-gray-300">Vidéo disponible pour consultation et réécoute</p>
+                                        <div class="flex items-center gap-2 pt-1">
+                                            <button type="button" data-video-url="${escapedUrl}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition shadow cursor-pointer">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                Visionner la vidéo
+                                            </button>
+                                            <a href="${escapedUrl}" download target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-gray-200 font-semibold rounded-lg text-xs transition cursor-pointer">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                Télécharger
+                                            </a>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 pt-1">
-                                        <button type="button" data-video-url="${videoUrl}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition shadow cursor-pointer">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                            Visionner la vidéo
-                                        </button>
-                                        <a href="${videoUrl}" download target="_blank" class="inline-flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-gray-200 font-semibold rounded-lg text-xs transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                            Télécharger
-                                        </a>
-                                    </div>
-                                </div>
-                            `;
+                                `;
+                            }
 
                             // Nettoyer la phrase brute du message pour éviter le texte doublon
                             cleanText = cleanText.replace(/🎥\s*Enregistrement vidéo[^\n]*?(\[[^\]]+\]\([^\)]+\)|\/storage[^\s]+|https?:\/\/[^\s]+)/gi, '').trim();

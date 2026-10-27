@@ -771,7 +771,7 @@
         window.dispatchEvent(new CustomEvent('select-all-interests'));
     }
 
-    let oldQuizzes = {!! old('quizzes_data') ?: 'null' !!};
+    let oldQuizzes = {!! json_encode(json_decode(old('quizzes_data') ?: 'null')) !!};
 
     function quizManager() {
         return {

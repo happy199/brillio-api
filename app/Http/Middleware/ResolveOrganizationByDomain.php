@@ -31,15 +31,38 @@ class ResolveOrganizationByDomain
         $organization = null;
 
         // 1. Is it a subdomain? (e.g., orgname.brillio.africa)
-        if ($host !== $baseDomain && str_ends_with($host, '.'.$baseDomain)) {
-            $subdomain = str_replace('.'.$baseDomain, '', $host);
-            $organization = Organization::active()
-                ->where('slug', $subdomain)
-                ->orWhere('custom_domain', $host)
-                ->first();
+        $isSubdomain = ($host !== $baseDomain && str_ends_with($host, '.'.$baseDomain))
+            || ($host !== 'brillio.africa' && str_ends_with($host, '.brillio.africa'));
+
+        if ($isSubdomain) {
+            $cleaned = str_ends_with($host, '.'.$baseDomain)
+                ? str_replace('.'.$baseDomain, '', $host)
+                : str_replace('.brillio.africa', '', $host);
+
+            // In case of nested/repeated subdomains in tests or proxies, use the first segment as slug
+            $subdomainParts = explode('.', $cleaned);
+            $subdomain = $cleaned;
+            $slugCandidate = $subdomainParts[0];
+
+            // Ignorer les sous-domaines techniques réservés
+            $reservedSubdomains = ['api', 'admin', 'mail', 'staging', 'dev'];
+            if (! in_array($slugCandidate, $reservedSubdomains, true)) {
+                $organization = Organization::active()
+                    ->where(function ($query) use ($subdomain, $slugCandidate, $host) {
+                        $query->where('slug', $subdomain)
+                            ->orWhere('slug', $slugCandidate)
+                            ->orWhere('custom_domain', $host);
+                    })
+                    ->first();
+
+                // Si le sous-domaine n'appartient à aucune organisation active, bloquer pour éviter l'abus de wildcard
+                if (! $organization) {
+                    abort(404, 'Organisation introuvable ou inactive.');
+                }
+            }
         }
         // 2. Is it a completely custom domain mapping? (e.g., members.myorg.com)
-        elseif ($host !== $baseDomain && $host !== 'localhost' && $host !== '127.0.0.1') {
+        elseif ($host !== $baseDomain && $host !== 'brillio.africa' && $host !== 'localhost' && $host !== '127.0.0.1') {
             $organization = Organization::active()->where('custom_domain', $host)->first();
         }
 

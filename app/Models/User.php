@@ -119,6 +119,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
         'two_factor_secret',
+        'verification_code',
+        'verification_code_expires_at',
     ];
 
     /**
@@ -261,15 +263,10 @@ class User extends Authenticatable implements MustVerifyEmail
                 $this->notify(new VerifyEmail);
             }
         } catch (\Throwable $e) {
-            Log::error('Échec d’envoi de la notification de vérification e-mail (Validation automatique du compte) : '.$e->getMessage(), [
+            Log::error('Échec d’envoi de la notification de vérification e-mail : '.$e->getMessage(), [
                 'user_id' => $this->id,
                 'email' => $this->email,
             ]);
-
-            // Si le serveur mail est indisponible, on valide automatiquement l'e-mail pour ne pas bloquer l'accès utilisateur
-            if (is_null($this->email_verified_at)) {
-                $this->forceFill(['email_verified_at' => now()])->save();
-            }
         }
     }
 
@@ -719,13 +716,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $orgs = collect();
 
-        if (app()->bound('current_organization')) {
-            $currentOrg = app('current_organization');
-            if ($currentOrg) {
-                $orgs->push($currentOrg);
-            }
-        }
-
         if ($this->sponsored_by_organization_id && $this->sponsoringOrganization) {
             $orgs->push($this->sponsoringOrganization);
         }
@@ -741,6 +731,14 @@ class User extends Authenticatable implements MustVerifyEmail
         } else {
             foreach ($this->organizations()->get() as $org) {
                 $orgs->push($org);
+            }
+        }
+
+        // Si une organisation courante est injectée via domaine, s'assurer que l'utilisateur en est bien membre
+        if (app()->bound('current_organization')) {
+            $currentOrg = app('current_organization');
+            if ($currentOrg && $orgs->contains('id', $currentOrg->id)) {
+                $orgs->prepend($currentOrg);
             }
         }
 
