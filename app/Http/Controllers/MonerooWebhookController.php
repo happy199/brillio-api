@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Mail;
 
 class MonerooWebhookController extends Controller
 {
+    private const MSG_ALREADY_PROCESSED = 'Already processed';
+
     protected MonerooService $monerooService;
 
     protected WalletService $walletService;
@@ -177,7 +179,7 @@ class MonerooWebhookController extends Controller
             $response = response()->json(['error' => 'Transaction not found'], 404);
         } elseif ($transaction->status === 'completed') {
             Log::info('Moneroo transaction already completed', ['transaction_id' => $transaction->id]);
-            $response = response()->json(['message' => 'Already processed'], 200);
+            $response = response()->json(['message' => self::MSG_ALREADY_PROCESSED], 200);
         } elseif (! $transaction->user) {
             Log::error('User not found for transaction', ['transaction_id' => $transaction->id]);
             $response = response()->json(['error' => 'User not found'], 404);
@@ -256,7 +258,7 @@ class MonerooWebhookController extends Controller
         if ($payoutRequest->status === PayoutRequest::STATUS_COMPLETED) {
             Log::info('Moneroo payout already completed', ['payout_id' => $payoutRequest->id]);
 
-            return response()->json(['message' => 'Already processed'], 200);
+            return response()->json(['message' => self::MSG_ALREADY_PROCESSED], 200);
         }
 
         try {
@@ -308,7 +310,7 @@ class MonerooWebhookController extends Controller
         if ($payoutRequest->status === PayoutRequest::STATUS_FAILED) {
             Log::info('Moneroo payout already failed', ['payout_id' => $payoutRequest->id]);
 
-            return response()->json(['message' => 'Already processed'], 200);
+            return response()->json(['message' => self::MSG_ALREADY_PROCESSED], 200);
         }
 
         try {
