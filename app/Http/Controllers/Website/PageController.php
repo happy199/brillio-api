@@ -7,6 +7,7 @@ use App\Models\Advertisement;
 use App\Models\JeuneProfile;
 use App\Models\MentorProfile;
 use App\Models\Organization;
+use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -48,10 +49,39 @@ class PageController extends Controller
      */
     public function about()
     {
-        $partners = Organization::active()
+        $orgPartners = Organization::active()
             ->whereNotNull('logo_url')
             ->where('private_circle_plus_enabled', false)
-            ->get();
+            ->get()
+            ->filter(fn ($org) => ! empty($org->logo_url))
+            ->map(function ($org) {
+                return (object) [
+                    'id' => 'org_'.$org->id,
+                    'name' => $org->name,
+                    'logo_url' => $org->logo_url,
+                    'website' => $org->website,
+                    'type' => 'organization',
+                    'order' => 100,
+                ];
+            });
+
+        $customPartners = Partner::active()
+            ->ordered()
+            ->get()
+            ->filter(fn ($partner) => ! empty($partner->logo_url))
+            ->map(function ($partner) {
+                return (object) [
+                    'id' => 'partner_'.$partner->id,
+                    'name' => $partner->name,
+                    'logo_url' => $partner->logo_url,
+                    'website' => $partner->website,
+                    'type' => 'partner',
+                    'order' => $partner->display_order ?? 0,
+                ];
+            });
+
+        // Combined partners collection (custom partners prioritized by display order, then orgs)
+        $partners = $customPartners->concat($orgPartners)->values();
 
         return view('public.about', compact('partners'));
     }

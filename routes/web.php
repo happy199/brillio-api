@@ -773,6 +773,10 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::resource('organizations', OrganizationController::class);
         Route::post('organizations/{organization}/credits', [OrganizationController::class, 'updateCredits'])->name('organizations.credits');
 
+        // Gestion des partenaires
+        Route::resource('partners', App\Http\Controllers\Admin\PartnerController::class);
+        Route::patch('partners/{partner}/toggle-status', [App\Http\Controllers\Admin\PartnerController::class, 'toggleStatus'])->name('partners.toggle-status');
+
         // Gestion des recommandations (Établissements)
         Route::resource('establishments', App\Http\Controllers\Admin\EstablishmentController::class);
         Route::post('establishments/auto-generate', [App\Http\Controllers\Admin\EstablishmentController::class, 'autoGenerate'])->name('establishments.auto-generate');

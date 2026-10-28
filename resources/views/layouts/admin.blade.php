@@ -121,17 +121,36 @@
                     </div>
                 </div>
 
-                <a href="{{ route('admin.organizations.index') }}"
-                    class="block px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.organizations.*') ? 'bg-indigo-800' : '' }}">
-                    <span class="flex items-center">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                <!-- Organisations Dropdown -->
+                <div
+                    x-data="{ open: {{ request()->routeIs('admin.organizations.*') || request()->routeIs('admin.partners.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open"
+                        class="w-full flex justify-between items-center px-4 py-3 hover:bg-indigo-600 {{ request()->routeIs('admin.organizations.*') || request()->routeIs('admin.partners.*') ? 'bg-indigo-800' : '' }}">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                                </path>
+                            </svg>
+                            Organisations
+                        </span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': open}" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
                             </path>
                         </svg>
-                        Organisations
-                    </span>
-                </a>
+                    </button>
+                    <div x-show="open" x-cloak class="bg-indigo-900 border-t border-indigo-800">
+                        <a href="{{ route('admin.organizations.index') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.organizations.*') ? 'text-white font-bold' : '' }}">
+                            Organisations
+                        </a>
+                        <a href="{{ route('admin.partners.index') }}"
+                            class="block px-4 py-2 text-sm hover:bg-indigo-800 pl-12 text-indigo-200 hover:text-white {{ request()->routeIs('admin.partners.*') ? 'text-white font-bold' : '' }}">
+                            Partenaires
+                        </a>
+                    </div>
+                </div>
                 @endif
 
                 <!-- Mentorat Dropdown -->
