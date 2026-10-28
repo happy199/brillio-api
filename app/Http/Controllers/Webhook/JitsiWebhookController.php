@@ -17,9 +17,9 @@ class JitsiWebhookController extends Controller
      */
     public function handle(Request $request)
     {
-        // Vérification de la sécurité si un secret est configuré
+        // Vérification de la sécurité obligatoire
         $secret = config('services.jitsi.webhook_secret');
-        if ($secret && $request->header('Authorization') !== $secret) {
+        if (empty($secret) || $request->header('Authorization') !== $secret) {
             Log::warning('Jitsi Webhook: Unauthorized access attempt', [
                 'provided' => $request->header('Authorization'),
                 'ip' => $request->ip(),
@@ -78,9 +78,30 @@ class JitsiWebhookController extends Controller
             return response()->json(['status' => 'error', 'message' => 'No URL'], 400);
         }
 
+        // SSRF protection: validate URL scheme, host and ensure IP is public
+        $parsedUrl = parse_url($transcriptionUrl);
+        $scheme = strtolower($parsedUrl['scheme'] ?? '');
+        $host = $parsedUrl['host'] ?? '';
+
+        if (! in_array($scheme, ['http', 'https'], true) || empty($host)) {
+            Log::error('Jitsi Webhook: Invalid transcription URL scheme or host', ['url' => $transcriptionUrl]);
+
+            return response()->json(['status' => 'error', 'message' => 'Invalid URL scheme or host'], 400);
+        }
+
+        $ip = filter_var($host, FILTER_VALIDATE_IP) ? $host : gethostbyname($host);
+        if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            Log::error('Jitsi Webhook: Blocked SSRF attempt to private/reserved IP', [
+                'url' => $transcriptionUrl,
+                'resolved_ip' => $ip,
+            ]);
+
+            return response()->json(['status' => 'error', 'message' => 'Access to private or reserved IP address is forbidden'], 403);
+        }
+
         try {
             // Download the transcription file
-            $response = Http::get($transcriptionUrl);
+            $response = Http::timeout(15)->get($transcriptionUrl);
 
             if ($response->successful()) {
                 $content = $response->body();
@@ -118,63 +139,99 @@ class JitsiWebhookController extends Controller
     /**
      * Termine et enregistre les données de transcription via l'API Web Speech (Client-side)
      */
-    public function appendTranscription(Request $request, MentoringSession $session)
-    {
-        $request->validate([
-            'text' => 'required|string',
-            'speaker' => 'required|string',
-            'timestamp' => 'required|numeric',
-        ]);
+     public function appendTranscription(Request $request, MentoringSession $session)
+     {
+         if (! $this->isParticipantAuthorized($session)) {
+             return response()->json(['error' => 'Non autorisé à modifier cette séance.'], 403);
+         }
 
-        Log::info('Transcription Fragment Received', [
-            'session_id' => $session->id,
-            'speaker' => $request->speaker,
-            'text' => $request->text,
-        ]);
+         $request->validate([
+             'text' => 'required|string',
+             'speaker' => 'required|string',
+             'timestamp' => 'required|numeric',
+         ]);
 
-        $currentTranscription = $session->transcription_raw ?: [];
+         Log::info('Transcription Fragment Received', [
+             'session_id' => $session->id,
+             'speaker' => $request->speaker,
+             'text' => $request->text,
+         ]);
 
-        // Si c'était du texte brut (ancien format), on convertit en tableau
-        if (! is_array($currentTranscription)) {
-            $currentTranscription = [['text' => (string) $currentTranscription, 'speaker' => 'Système', 'timestamp' => time()]];
-        }
+         $currentTranscription = $session->transcription_raw ?: [];
 
-        // Éviter les doublons quasi-identiques (ex: deux participants captant la même phrase)
-        $lastFragment = end($currentTranscription);
-        if ($lastFragment && $lastFragment['text'] === $request->text && (time() - $lastFragment['timestamp'] < 3)) {
-            return response()->json(['status' => 'ignored_duplicate']);
-        }
+         // Si c'était du texte brut (ancien format), on convertit en tableau
+         if (! is_array($currentTranscription)) {
+             $currentTranscription = [['text' => (string) $currentTranscription, 'speaker' => 'Système', 'timestamp' => time()]];
+         }
 
-        // Ajouter le nouveau fragment
-        $currentTranscription[] = [
-            'speaker' => $request->speaker,
-            'text' => $request->text,
-            'timestamp' => $request->timestamp,
-        ];
+         // Éviter les doublons quasi-identiques (ex: deux participants captant la même phrase)
+         $lastFragment = end($currentTranscription);
+         if ($lastFragment && $lastFragment['text'] === $request->text && (time() - $lastFragment['timestamp'] < 3)) {
+             return response()->json(['status' => 'ignored_duplicate']);
+         }
 
-        $session->update([
-            'transcription_raw' => $currentTranscription,
-            'has_transcription' => true,
-        ]);
+         // Ajouter le nouveau fragment
+         $currentTranscription[] = [
+             'speaker' => $request->speaker,
+             'text' => $request->text,
+             'timestamp' => $request->timestamp,
+         ];
 
-        return response()->json(['status' => 'success']);
-    }
+         $session->update([
+             'transcription_raw' => $currentTranscription,
+             'has_transcription' => true,
+         ]);
 
-    /**
-     * Enregistrer la vidéo de la séance de mentorat
-     */
-    public function uploadRecording(Request $request, MentoringSession $session)
-    {
-        $url = app(VideoRecordingService::class)->processUploadRequest($request, 'mentoring_session_'.$session->id);
+         return response()->json(['status' => 'success']);
+     }
 
-        if (! $url) {
-            return response()->json(['error' => 'Aucun fichier vidéo transmis.'], 400);
-        }
+     /**
+      * Enregistrer la vidéo de la séance de mentorat
+      */
+     public function uploadRecording(Request $request, MentoringSession $session)
+     {
+         if (! $this->isParticipantAuthorized($session)) {
+             return response()->json(['error' => 'Non autorisé à modifier cette séance.'], 403);
+         }
 
-        $session->update([
-            'video_recording_url' => $url,
-        ]);
+         $url = app(VideoRecordingService::class)->processUploadRequest($request, 'mentoring_session_'.$session->id);
 
-        return response()->json(['status' => 'success', 'url' => $url]);
-    }
+         if (! $url) {
+             return response()->json(['error' => 'Aucun fichier vidéo transmis.'], 400);
+         }
+
+         $session->update([
+             'video_recording_url' => $url,
+         ]);
+
+         return response()->json(['status' => 'success', 'url' => $url]);
+     }
+
+     /**
+      * Vérifie si l'utilisateur connecté ou l'invité en session est autorisé
+      */
+     private function isParticipantAuthorized(MentoringSession $session): bool
+     {
+         $user = Auth::user();
+         if ($user) {
+             $isMentor = $session->all_mentors->pluck('id')->contains($user->id);
+             $isMentee = $session->mentees()->where('user_id', $user->id)->exists();
+             $isOrgMember = $user->organization_id === $session->scheduled_by_organization_id ||
+                 $session->mentees()->where('sponsored_by_organization_id', $user->organization_id)->exists();
+
+             if ($isMentor || $isMentee || $isOrgMember) {
+                 return true;
+             }
+         }
+
+         $guestAuth = session("guest_auth_{$session->id}");
+         if ($guestAuth && ! empty($guestAuth['email'])) {
+             $guestEmail = strtolower($guestAuth['email']);
+             $mentorEmails = $session->all_mentors->pluck('email')->map(fn ($e) => strtolower($e))->toArray();
+
+             return in_array($guestEmail, $mentorEmails, true);
+         }
+
+         return false;
+     }
 }

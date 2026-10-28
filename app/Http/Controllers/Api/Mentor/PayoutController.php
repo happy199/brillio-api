@@ -114,62 +114,69 @@ class PayoutController extends Controller
 
         $amount = $request->input('amount');
 
-        // Vérifier le solde disponible
-        if ($mentorProfile->available_balance < $amount) {
-            return response()->json([
-                'message' => 'Solde insuffisant',
-                'available_balance' => (float) $mentorProfile->available_balance,
-                'requested_amount' => (float) $amount,
-            ], 422);
-        }
-
-        // Calculer les frais
-        $fee = $this->monerooService->calculateFee($amount);
-        $netAmount = $amount - $fee;
-
         // Détecter si le retrait doit être manuel (Hors Bénin ou méthode non locale)
         $isManual = ($request->input('country_code') !== 'BJ' ||
                     ! in_array($request->input('payment_method'), ['mtn_bj', 'moov_bj']));
 
-        // Créer la demande de payout
-        $payout = PayoutRequest::create([
-            'mentor_profile_id' => $mentorProfile->id,
-            'amount' => $amount,
-            'fee' => $fee,
-            'net_amount' => $netAmount,
-            'payment_method' => $request->input('payment_method'),
-            'phone_number' => $request->input('phone_number'),
-            'country_code' => $request->input('country_code'),
-            'dial_code' => $request->input('dial_code'),
-            'status' => PayoutRequest::STATUS_PENDING,
-            'is_manual' => $isManual,
-        ]);
-
-        // Déduire du solde disponible immédiatement (FCFA)
-        $mentorProfile->decrement('available_balance', $amount);
-
-        // Déduire les crédits correspondants (Conversion inverse)
-        $creditPrice = $this->walletService->getCreditPrice('mentor');
-        $creditsToDeduct = intval($amount / $creditPrice); // ex: 5000 / 100 = 50 crédits
+        $fee = $this->monerooService->calculateFee($amount);
+        $netAmount = $amount - $fee;
 
         try {
-            // On déduit les crédits avec le type 'payout'
-            $this->walletService->deductCredits(
-                $request->user(),
-                $creditsToDeduct,
-                'payout',
-                'Retrait de '.number_format($amount, 0, ',', ' ').' FCFA',
-                $payout
-            );
+            return DB::transaction(function () use ($request, $mentorProfile, $amount, $fee, $netAmount, $isManual) {
+                // Re-charger avec verrouillage pessimiste
+                $lockedProfile = MentorProfile::where('id', $mentorProfile->id)->lockForUpdate()->first();
+
+                // Vérifier le solde disponible sous verrou
+                if ($lockedProfile->available_balance < $amount) {
+                    return response()->json([
+                        'message' => 'Solde insuffisant',
+                        'available_balance' => (float) $lockedProfile->available_balance,
+                        'requested_amount' => (float) $amount,
+                    ], 422);
+                }
+
+                // Créer la demande de payout
+                $payout = PayoutRequest::create([
+                    'mentor_profile_id' => $lockedProfile->id,
+                    'amount' => $amount,
+                    'fee' => $fee,
+                    'net_amount' => $netAmount,
+                    'payment_method' => $request->input('payment_method'),
+                    'phone_number' => $request->input('phone_number'),
+                    'country_code' => $request->input('country_code'),
+                    'dial_code' => $request->input('dial_code'),
+                    'status' => PayoutRequest::STATUS_PENDING,
+                    'is_manual' => $isManual,
+                ]);
+
+                // Déduire du solde disponible immédiatement (FCFA)
+                $lockedProfile->decrement('available_balance', $amount);
+
+                // Déduire les crédits correspondants (Conversion inverse)
+                $creditPrice = $this->walletService->getCreditPrice('mentor');
+                $creditsToDeduct = intval($amount / $creditPrice); // ex: 5000 / 100 = 50 crédits
+
+                // On déduit les crédits avec le type 'payout'
+                $this->walletService->deductCredits(
+                    $request->user(),
+                    $creditsToDeduct,
+                    'payout',
+                    'Retrait de '.number_format($amount, 0, ',', ' ').' FCFA',
+                    $payout
+                );
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Demande de payout enregistrée avec succès',
+                    'payout' => $payout,
+                    'remaining_balance' => (float) $lockedProfile->fresh()->available_balance,
+                ]);
+            });
         } catch (\Exception $e) {
-            // En cas d'erreur (ex: incohérence solde crédits vs solde FCFA), on annule tout
-            // On re-crédite le solde FCFA
-            $mentorProfile->increment('available_balance', $amount);
-            // On supprime la demande de payout
-            $payout->delete();
+            Log::error('Erreur lors du traitement du payout : '.$e->getMessage());
 
             return response()->json([
-                'message' => 'Erreur de cohérence: Solde de crédits insuffisant pour ce retrait.',
+                'message' => 'Erreur lors du traitement de la demande de retrait.',
                 'error' => $e->getMessage(),
             ], 422);
         }

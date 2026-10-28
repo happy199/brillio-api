@@ -389,7 +389,7 @@ class ResourceController extends Controller
 
             'price' => 'nullable|integer',
             'is_premium' => 'required|in:0,1',
-            'file' => 'nullable|file|max:20480', // 20MB
+            'file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,mp4,webm,zip', // 20MB
             'preview_image' => 'nullable|image|max:5120', // 5MB
             'metadata' => 'nullable|array',
             'mbti_types' => 'nullable|array',

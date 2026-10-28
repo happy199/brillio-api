@@ -345,6 +345,9 @@ class UserController extends Controller
             'blocked_reason' => $reason,
         ]);
 
+        // Révoquer immédiatement tous les tokens API actifs
+        $user->tokens()->delete();
+
         try {
             Mail::to($user->email)
                 ->send(new AccountBlockedMail($user->name, $reason));

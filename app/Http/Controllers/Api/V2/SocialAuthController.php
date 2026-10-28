@@ -86,6 +86,25 @@ class SocialAuthController extends WebAuthController
 
         $redirectUri = $validated['redirect_uri'];
 
+        // Validation stricte du domaine de redirection (protection Open Redirect)
+        $parsed = parse_url($redirectUri);
+        $scheme = strtolower($parsed['scheme'] ?? '');
+        $host = strtolower($parsed['host'] ?? '');
+
+        $isAllowed = false;
+        // Deep link mobile officiel (ex: brillio://, myapp:// en test/mobile, ou io.supabase.brillio://)
+        if (in_array($scheme, ['brillio', 'africa.brillio', 'com.brillio.app', 'myapp'], true)) {
+            $isAllowed = true;
+        } elseif (in_array($scheme, ['http', 'https'], true)) {
+            if ($host === 'brillio.africa' || str_ends_with($host, '.brillio.africa') || $host === 'localhost' || $host === '127.0.0.1') {
+                $isAllowed = true;
+            }
+        }
+
+        if (! $isAllowed) {
+            return $this->error('Domaine de redirection non autorisé.', 422);
+        }
+
         if ($provider === 'linkedin') {
             $scopes = ['openid', 'profile', 'email'];
             $supabaseProvider = 'linkedin_oidc';

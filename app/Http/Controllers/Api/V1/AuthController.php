@@ -157,6 +157,12 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated['email'])->first();
 
+        if ($user && $user->is_blocked) {
+            Auth::logout();
+
+            return $this->error('Votre compte a été suspendu. Veuillez contacter l\'administrateur.', 403);
+        }
+
         // Supprimer les anciens tokens si demandé (connexion unique)
         if ($request->boolean('logout_other_devices', false)) {
             $user->tokens()->delete();
@@ -247,6 +253,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
+        $originalEmail = $user->email;
 
         // Mise à jour des champs autorisés
         $user->fill($validated);
@@ -256,11 +263,22 @@ class AuthController extends Controller
             $user->password = Hash::make($validated['password']);
         }
 
+        // Si l'email a été modifié, réinitialiser la vérification d'email
+        $emailChanged = isset($validated['email']) && strtolower($validated['email']) !== strtolower($originalEmail);
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
+
         $user->save();
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return $this->success([
             'user' => $this->formatUser($user),
-        ], 'Profil mis à jour avec succès');
+            'email_verification_required' => $emailChanged,
+        ], $emailChanged ? 'Profil mis à jour. Un email de confirmation a été envoyé à votre nouvelle adresse.' : 'Profil mis à jour avec succès');
     }
 
     /**

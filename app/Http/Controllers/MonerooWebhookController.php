@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Mail;
 
 class MonerooWebhookController extends Controller
 {
+    private const MSG_ALREADY_PROCESSED = 'Already processed';
+
     protected MonerooService $monerooService;
 
     protected WalletService $walletService;
@@ -108,97 +110,102 @@ class MonerooWebhookController extends Controller
      */
     protected function handlePaymentSuccess(array $paymentData): JsonResponse
     {
-        $monerooTransactionId = $paymentData['id'];
-        $transaction = MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)->first();
-
-        if (! $transaction) {
-            Log::error('Moneroo transaction not found', ['moneroo_transaction_id' => $monerooTransactionId]);
-
-            return response()->json(['error' => 'Transaction not found'], 404);
-        }
-
-        if ($transaction->status === 'completed') {
-            Log::info('Moneroo transaction already completed', ['transaction_id' => $transaction->id]);
-
-            return response()->json(['message' => 'Already processed'], 200);
-        }
-
+        $monerooTransactionId = $paymentData['id'] ?? '';
         try {
-            // Get user
-            $user = $transaction->user;
-
-            if (! $user) {
-                Log::error('User not found for transaction', ['transaction_id' => $transaction->id]);
-
-                return response()->json(['error' => 'User not found'], 404);
-            }
-
-            // Determine if this is an organization transaction
-            $isOrgTransaction = ($transaction->metadata['user_type'] ?? '') === 'organization';
-            $entity = $user;
-
-            if ($isOrgTransaction && $user->organization) {
-                $entity = $user->organization;
-                Log::info('Target entity for transaction', ['entity_id' => $entity->id, 'entity_type' => get_class($entity)]);
-            }
-
-            // 1. Handle Subscription Activation if applicable
-            $reference = $transaction->metadata['reference'] ?? '';
-            if (str_starts_with($reference, 'SUB-')) {
-                $this->handleSubscriptionActivation($transaction, $entity);
-            }
-
-            // 2. Add credits if amount > 0
-            if ($transaction->credits_amount > 0) {
-                $this->walletService->addCredits(
-                    $entity,
-                    $transaction->credits_amount,
-                    'purchase',
-                    "Achat de {$transaction->credits_amount} crédits via Moneroo",
-                    $transaction
-                );
-            }
-
-            // Mark transaction as completed
-            if ($transaction->status !== 'completed') {
-                $transaction->markAsCompleted();
-            }
-
-            Log::info('Moneroo payment processed successfully', [
-                'transaction_id' => $transaction->id,
-                'entity_id' => $entity->id,
-                'entity_type' => get_class($entity),
-                'credits' => $transaction->credits_amount,
-            ]);
-
-            // Notification email for credits (existing system logic)
-            $this->notificationService->sendCreditRecharge($user, $transaction->credits_amount);
-
-            // Send Official Invoice & Receipt to Client
-            try {
-                $recipientEmail = $entity->email ?: ($entity->contact_email ?? $user->email);
-                Mail::to($recipientEmail)->send(new PaymentReceiptMail($transaction, $entity));
-            } catch (\Exception $e) {
-                Log::error('Erreur envoi facture client', ['error' => $e->getMessage()]);
-            }
-
-            // Send Alert to Admin
-            try {
-                Mail::to('contact@brillio.africa')->send(new AdminPaymentNotificationMail($transaction, $entity));
-            } catch (\Exception $e) {
-                Log::error('Erreur envoi notification admin', ['error' => $e->getMessage()]);
-            }
-
-            return response()->json(['message' => 'Payment processed'], 200);
-
+            return DB::transaction(function () use ($monerooTransactionId) {
+                return $this->processPaymentSuccessTransaction($monerooTransactionId);
+            });
         } catch (\Exception $e) {
             Log::error('Error processing Moneroo payment', [
-                'transaction_id' => $transaction->id,
+                'moneroo_transaction_id' => $monerooTransactionId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json(['error' => 'Processing failed'], 500);
+        }
+    }
+
+    /**
+     * Traite la transaction Moneroo avec verrouillage pessimiste
+     */
+    private function processPaymentSuccessTransaction(string $monerooTransactionId): JsonResponse
+    {
+        $transaction = MonerooTransaction::where('moneroo_transaction_id', $monerooTransactionId)
+            ->lockForUpdate()
+            ->first();
+
+        $errorResponse = $this->validatePaymentTransaction($transaction, $monerooTransactionId);
+        if ($errorResponse) {
+            return $errorResponse;
+        }
+
+        $user = $transaction->user;
+
+        $isOrgTransaction = ($transaction->metadata['user_type'] ?? '') === 'organization';
+        $entity = ($isOrgTransaction && $user->organization) ? $user->organization : $user;
+
+        $reference = $transaction->metadata['reference'] ?? '';
+        if (str_starts_with($reference, 'SUB-')) {
+            $this->handleSubscriptionActivation($transaction, $entity);
+        }
+
+        if ($transaction->credits_amount > 0) {
+            $this->walletService->addCredits(
+                $entity,
+                $transaction->credits_amount,
+                'purchase',
+                "Achat de {$transaction->credits_amount} crédits via Moneroo",
+                $transaction
+            );
+        }
+
+        $transaction->markAsCompleted();
+
+        $this->sendPaymentSuccessNotifications($transaction, $entity, $user);
+
+        return response()->json(['message' => 'Payment processed'], 200);
+    }
+
+    /**
+     * Valide l'état initial de la transaction avant traitement
+     */
+    private function validatePaymentTransaction(?MonerooTransaction $transaction, string $monerooTransactionId): ?JsonResponse
+    {
+        $response = null;
+
+        if (! $transaction) {
+            Log::error('Moneroo transaction not found', ['moneroo_transaction_id' => $monerooTransactionId]);
+            $response = response()->json(['error' => 'Transaction not found'], 404);
+        } elseif ($transaction->status === 'completed') {
+            Log::info('Moneroo transaction already completed', ['transaction_id' => $transaction->id]);
+            $response = response()->json(['message' => self::MSG_ALREADY_PROCESSED], 200);
+        } elseif (! $transaction->user) {
+            Log::error('User not found for transaction', ['transaction_id' => $transaction->id]);
+            $response = response()->json(['error' => 'User not found'], 404);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Envoie les notifications et factures suite à un paiement réussi
+     */
+    private function sendPaymentSuccessNotifications(MonerooTransaction $transaction, $entity, User $user): void
+    {
+        $this->notificationService->sendCreditRecharge($user, $transaction->credits_amount);
+
+        try {
+            $recipientEmail = $entity->email ?: ($entity->contact_email ?? $user->email);
+            Mail::to($recipientEmail)->send(new PaymentReceiptMail($transaction, $entity));
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi facture client', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            Mail::to('contact@brillio.africa')->send(new AdminPaymentNotificationMail($transaction, $entity));
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi notification admin', ['error' => $e->getMessage()]);
         }
     }
 
@@ -251,7 +258,7 @@ class MonerooWebhookController extends Controller
         if ($payoutRequest->status === PayoutRequest::STATUS_COMPLETED) {
             Log::info('Moneroo payout already completed', ['payout_id' => $payoutRequest->id]);
 
-            return response()->json(['message' => 'Already processed'], 200);
+            return response()->json(['message' => self::MSG_ALREADY_PROCESSED], 200);
         }
 
         try {
@@ -303,7 +310,7 @@ class MonerooWebhookController extends Controller
         if ($payoutRequest->status === PayoutRequest::STATUS_FAILED) {
             Log::info('Moneroo payout already failed', ['payout_id' => $payoutRequest->id]);
 
-            return response()->json(['message' => 'Already processed'], 200);
+            return response()->json(['message' => self::MSG_ALREADY_PROCESSED], 200);
         }
 
         try {

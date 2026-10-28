@@ -191,7 +191,10 @@ class ResourceController extends Controller
     public function unlock(int $id): JsonResponse
     {
         $user = Auth::user();
-        $resource = Resource::findOrFail($id);
+        $resource = Resource::where('id', $id)
+            ->where('is_published', true)
+            ->where('is_validated', true)
+            ->firstOrFail();
 
         if (! $resource->is_premium) {
             return $this->error('Cette ressource est déjà gratuite', 400);

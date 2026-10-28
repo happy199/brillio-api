@@ -17,47 +17,85 @@ class ResolveOrganizationByDomain
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $host = $request->getHost();
+        $host = str_replace('www.', '', $request->getHost());
 
-        // Configured base domain (fallback to brillio.africa)
         $baseDomain = config('app.url') ? parse_url(config('app.url'), PHP_URL_HOST) : 'brillio.africa';
-        if (! $baseDomain) {
-            $baseDomain = 'brillio.africa';
-        }
+        $baseDomain = $baseDomain ?: 'brillio.africa';
 
-        // Remove 'www.' if present
-        $host = str_replace('www.', '', $host);
-
-        $organization = null;
-
-        // 1. Is it a subdomain? (e.g., orgname.brillio.africa)
-        if ($host !== $baseDomain && str_ends_with($host, '.'.$baseDomain)) {
-            $subdomain = str_replace('.'.$baseDomain, '', $host);
-            $organization = Organization::active()
-                ->where('slug', $subdomain)
-                ->orWhere('custom_domain', $host)
-                ->first();
-        }
-        // 2. Is it a completely custom domain mapping? (e.g., members.myorg.com)
-        elseif ($host !== $baseDomain && $host !== 'localhost' && $host !== '127.0.0.1') {
-            $organization = Organization::active()->where('custom_domain', $host)->first();
-        }
+        $organization = $this->resolveSubdomain($host, $baseDomain)
+            ?? $this->resolveCustomDomain($host, $baseDomain);
 
         if ($organization) {
-            // Bind to service container (can be resolved anywhere via app('current_organization'))
-            app()->instance('current_organization', $organization);
-
-            // Share with all Blade views directly
-            View::share('current_organization', $organization);
-
-            // Override SEO Configs for whitelabeling
-            config(['seo.site.name' => $organization->name]);
-            if ($organization->logo_url) {
-                config(['seo.organization.logo' => $organization->logo_url]);
-                config(['seo.default.image' => $organization->logo_url]);
-            }
+            $this->applyOrganizationContext($organization);
         }
 
         return $next($request);
+    }
+
+    /**
+     * Résout l'organisation si le host est un sous-domaine
+     */
+    private function resolveSubdomain(string $host, string $baseDomain): ?Organization
+    {
+        $isSubdomain = ($host !== $baseDomain && str_ends_with($host, '.'.$baseDomain))
+            || ($host !== 'brillio.africa' && str_ends_with($host, '.brillio.africa'));
+
+        if (! $isSubdomain) {
+            return null;
+        }
+
+        $cleaned = str_ends_with($host, '.'.$baseDomain)
+            ? str_replace('.'.$baseDomain, '', $host)
+            : str_replace('.brillio.africa', '', $host);
+
+        $subdomainParts = explode('.', $cleaned);
+        $slugCandidate = $subdomainParts[0];
+
+        $reservedSubdomains = ['api', 'admin', 'mail', 'staging', 'dev'];
+        if (in_array($slugCandidate, $reservedSubdomains, true)) {
+            return null;
+        }
+
+        $organization = Organization::active()
+            ->where(function ($query) use ($cleaned, $slugCandidate, $host) {
+                $query->where('slug', $cleaned)
+                    ->orWhere('slug', $slugCandidate)
+                    ->orWhere('custom_domain', $host);
+            })
+            ->first();
+
+        if (! $organization) {
+            abort(404, 'Organisation introuvable ou inactive.');
+        }
+
+        return $organization;
+    }
+
+    /**
+     * Résout l'organisation si le host est un domaine personnalisé externe
+     */
+    private function resolveCustomDomain(string $host, string $baseDomain): ?Organization
+    {
+        $excluded = [$baseDomain, 'brillio.africa', 'localhost', '127.0.0.1'];
+        if (in_array($host, $excluded, true)) {
+            return null;
+        }
+
+        return Organization::active()->where('custom_domain', $host)->first();
+    }
+
+    /**
+     * Injecte le contexte de l'organisation dans le conteneur, les vues et la config SEO
+     */
+    private function applyOrganizationContext(Organization $organization): void
+    {
+        app()->instance('current_organization', $organization);
+        View::share('current_organization', $organization);
+
+        config(['seo.site.name' => $organization->name]);
+        if ($organization->logo_url) {
+            config(['seo.organization.logo' => $organization->logo_url]);
+            config(['seo.default.image' => $organization->logo_url]);
+        }
     }
 }

@@ -52,6 +52,17 @@ class CvDocxExportService
 
         try {
             $phpWord = new PhpWord;
+
+            // Embedding secure cryptographic provenance metadata in document properties
+            $docProps = $phpWord->getDocInfo();
+            $docProps->setCompany('Brillio Pro ATS');
+            $certToken = $analysis->guest_token ?: ('brillio_cv_'.$analysis->id);
+            $appSecret = config('app.key') ?: 'brillio-ats-secret';
+            $certSignature = hash_hmac('sha256', $certToken.'|'.$analysis->id, $appSecret);
+
+            $docProps->setCustomProperty('BrillioCertToken', $certToken);
+            $docProps->setCustomProperty('BrillioCertSignature', $certSignature);
+
             $norm = $analysis->normalized_cv_data;
             $labels = $norm['labels'] ?? [];
 

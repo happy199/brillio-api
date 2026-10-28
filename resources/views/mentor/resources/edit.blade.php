@@ -1258,7 +1258,7 @@
     }
 
     // Pass old quizzes if any
-    let oldQuizzes = {!! old('quizzes_data') ?: 'null' !!};
+    let oldQuizzes = {!! json_encode(json_decode(old('quizzes_data') ?: 'null')) !!};
 
     // Initialize quizzes if we are editing an existing resource and there's no old data
     if (!oldQuizzes && {!! $resource->quizzes->count() > 0 ? 'true' : 'false' !!}) {

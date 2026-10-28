@@ -27,6 +27,7 @@ class UpdateProfileRequest extends FormRequest
                 Rule::unique('users')->ignore($userId),
             ],
             'password' => ['sometimes', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
+            'current_password' => ['required_with:password', 'current_password'],
             'phone' => ['nullable', 'string', 'max:20'],
             'date_of_birth' => ['nullable', 'date', 'before_or_equal:'.now()->subDecade()->toDateString()],
             'country' => ['nullable', 'string', 'max:100'],
