@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\MentorshipController;
 use App\Http\Controllers\Admin\MonetizationController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\OrganizationController;
+use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\SpecializationController;
 use App\Http\Controllers\Admin\SubscriptionPlanController;
@@ -774,8 +775,8 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::post('organizations/{organization}/credits', [OrganizationController::class, 'updateCredits'])->name('organizations.credits');
 
         // Gestion des partenaires
-        Route::resource('partners', App\Http\Controllers\Admin\PartnerController::class);
-        Route::patch('partners/{partner}/toggle-status', [App\Http\Controllers\Admin\PartnerController::class, 'toggleStatus'])->name('partners.toggle-status');
+        Route::resource('partners', PartnerController::class);
+        Route::patch('partners/{partner}/toggle-status', [PartnerController::class, 'toggleStatus'])->name('partners.toggle-status');
 
         // Gestion des recommandations (Établissements)
         Route::resource('establishments', App\Http\Controllers\Admin\EstablishmentController::class);

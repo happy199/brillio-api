@@ -15,8 +15,13 @@ class PartnerController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->query('search');
-        $tab = $request->query('tab', 'all'); // 'all', 'external', 'organizations'
+        $validated = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'tab' => 'nullable|string|in:all,external,organizations',
+        ]);
+
+        $search = $validated['search'] ?? null;
+        $tab = $validated['tab'] ?? 'all';
 
         // 1. External Partners
         $externalPartnersQuery = Partner::ordered();
@@ -87,8 +92,8 @@ class PartnerController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('partners/logos', 'public');
+        if ($request->hasFile('logo') && isset($validated['logo'])) {
+            $path = $validated['logo']->store('partners/logos', 'public');
             $validated['logo_path'] = $path;
         }
 
@@ -125,13 +130,13 @@ class PartnerController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        if ($request->hasFile('logo')) {
+        if ($request->hasFile('logo') && isset($validated['logo'])) {
             // Delete old logo if exists
             if ($partner->logo_path && ! str_starts_with($partner->logo_path, 'http')) {
                 Storage::disk('public')->delete($partner->logo_path);
             }
 
-            $path = $request->file('logo')->store('partners/logos', 'public');
+            $path = $validated['logo']->store('partners/logos', 'public');
             $validated['logo_path'] = $path;
         }
 

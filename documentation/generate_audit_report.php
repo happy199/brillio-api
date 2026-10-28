@@ -19,13 +19,18 @@ $artifactDir = '/Users/macbookpro/.gemini/antigravity/brain/55922f8b-13e2-4cc3-b
 // -------------------------------------------------------------
 echo "[1/2] Création du document DOCX avec PhpWord...\n";
 
+const COLOR_PRIMARY = '1E3A8A';
+const COLOR_SECONDARY = '2563EB';
+const STATUS_RESOLVED = 'Résolu';
+const STATUS_CONSERVED = 'Conservé & Sécurisé';
+
 $phpWord = new PhpWord;
 $phpWord->setDefaultFontName('Calibri');
 $phpWord->setDefaultFontSize(11);
 
 // Styles
-$phpWord->addTitleStyle(1, ['bold' => true, 'color' => '1E3A8A', 'size' => 20, 'name' => 'Calibri'], ['spaceBefore' => 240, 'spaceAfter' => 120]);
-$phpWord->addTitleStyle(2, ['bold' => true, 'color' => '2563EB', 'size' => 15, 'name' => 'Calibri'], ['spaceBefore' => 180, 'spaceAfter' => 80]);
+$phpWord->addTitleStyle(1, ['bold' => true, 'color' => COLOR_PRIMARY, 'size' => 20, 'name' => 'Calibri'], ['spaceBefore' => 240, 'spaceAfter' => 120]);
+$phpWord->addTitleStyle(2, ['bold' => true, 'color' => COLOR_SECONDARY, 'size' => 15, 'name' => 'Calibri'], ['spaceBefore' => 180, 'spaceAfter' => 80]);
 $phpWord->addTitleStyle(3, ['bold' => true, 'color' => '1F2937', 'size' => 12, 'name' => 'Calibri'], ['spaceBefore' => 120, 'spaceAfter' => 60]);
 
 $section = $phpWord->addSection([
@@ -44,10 +49,10 @@ $footer = $section->addFooter();
 $footer->addPreserveText('Page {PAGE} sur {NUMPAGES}', ['size' => 9, 'color' => '6B7280'], ['alignment' => Jc::CENTER]);
 
 // Couverture / Titre
-$section->addText("RAPPORT D'EXÉCUTION ET DE RÉSOLUTION", ['bold' => true, 'size' => 24, 'color' => '1E3A8A'], ['alignment' => Jc::CENTER, 'spaceAfter' => 100]);
+$section->addText("RAPPORT D'EXÉCUTION ET DE RÉSOLUTION", ['bold' => true, 'size' => 24, 'color' => COLOR_PRIMARY], ['alignment' => Jc::CENTER, 'spaceAfter' => 100]);
 $section->addText('AUDIT DE SÉCURITÉ TECHNIQUE & REMÉDIATIONS ARCHITECTURALES', ['bold' => true, 'size' => 14, 'color' => '4B5563'], ['alignment' => Jc::CENTER, 'spaceAfter' => 200]);
 
-$tableStyleCover = ['borderColor' => '2563EB', 'borderSize' => 1, 'cellMargin' => 80];
+$tableStyleCover = ['borderColor' => COLOR_SECONDARY, 'borderSize' => 1, 'cellMargin' => 80];
 $tableCover = $section->addTable($tableStyleCover);
 $tableCover->addRow();
 $tableCover->addCell(4000)->addText('Plateforme Cible :', ['bold' => true]);
@@ -142,58 +147,58 @@ $section->addTitle("6. Matrice Récapitulative des 46 Constats de l'Audit", 1);
 $tableStyleMatrix = ['borderColor' => 'D1D5DB', 'borderSize' => 1, 'cellMargin' => 60];
 $tableMatrix = $section->addTable($tableStyleMatrix);
 $tableMatrix->addRow(400, ['tblHeader' => true]);
-$tableMatrix->addCell(1000, ['bgColor' => '1E3A8A'])->addText('ID', ['bold' => true, 'color' => 'FFFFFF']);
-$tableMatrix->addCell(3000, ['bgColor' => '1E3A8A'])->addText('Vulnérabilité / Thématique', ['bold' => true, 'color' => 'FFFFFF']);
-$tableMatrix->addCell(1500, ['bgColor' => '1E3A8A'])->addText('Statut', ['bold' => true, 'color' => 'FFFFFF']);
-$tableMatrix->addCell(4000, ['bgColor' => '1E3A8A'])->addText('Action Technique Réalisée / Justification', ['bold' => true, 'color' => 'FFFFFF']);
+$tableMatrix->addCell(1000, ['bgColor' => COLOR_PRIMARY])->addText('ID', ['bold' => true, 'color' => 'FFFFFF']);
+$tableMatrix->addCell(3000, ['bgColor' => COLOR_PRIMARY])->addText('Vulnérabilité / Thématique', ['bold' => true, 'color' => 'FFFFFF']);
+$tableMatrix->addCell(1500, ['bgColor' => COLOR_PRIMARY])->addText('Statut', ['bold' => true, 'color' => 'FFFFFF']);
+$tableMatrix->addCell(4000, ['bgColor' => COLOR_PRIMARY])->addText('Action Technique Réalisée / Justification', ['bold' => true, 'color' => 'FFFFFF']);
 
 $findingsSummary = [
-    ['VULN-01', 'Subdomain Takeover / Wildcard DNS', 'Conservé & Sécurisé', 'Maintien du wildcard pour le SaaS B2B, verrouillage HTTP 404 strict par ResolveOrganizationByDomain.'],
-    ['VULN-02', 'Méthodes HTTP TRACE / TRACK actives', 'Résolu', 'Nginx configuré pour retourner HTTP 405 Method Not Allowed sur TRACE/TRACK.'],
-    ['VULN-03', 'Politique DMARC manquante', 'Résolu', 'Enregistrement TXT _dmarc.brillio.africa déployé avec p=quarantine, pct=100.'],
-    ['VULN-04', 'En-tête Permissions-Policy insuffisant', 'Résolu', 'Restreint à camera/microphone 8x8.vc et désactivation des autres fonctionnalités.'],
-    ['VULN-05', "Droits d'accès sensibles sur .env", 'Résolu', 'Permissions serveur verrouillées en chmod 640 (brillio-deploy:docker).'],
-    ['VULN-06', 'Proxy Cloudflare sur flux IMAP/SMTP', 'Résolu', 'Sous-domaines mail/autodiscover basculés en DNS-only pour éviter tout blocage proxy.'],
-    ['VULN-07', 'Falsification Webhook Moneroo', 'Résolu', 'Signature HMAC-SHA256 validée par hash_equals, contrôle strict du statut transactionnel.'],
-    ['VULN-08', 'Replay Attack sur transactions paiement', 'Résolu', "Gestion de l'idempotence avec vérification d'état préalable et constante MSG_ALREADY_PROCESSED."],
-    ['VULN-09', 'Webhook Jitsi non authentifié', 'Résolu', "Validation obligatoire du secret d'en-tête (HTTP 401 si manquant ou non conforme)."],
-    ['VULN-10', 'SSRF sur URL de transcription Jitsi', 'Résolu', "Vérification stricte de l'hôte et rejet des IP internes/privées avant tout appel Http::get."],
-    ['VULN-11', 'Routes Web transcription/enregistrement', 'Résolu', "Isolement des routes sous middleware d'autorisation et validation d'accès participant."],
-    ['VULN-12', 'Contournement de la certification ATS CV', 'Conservé & Sécurisé', 'Signature cryptographique HMAC-SHA256 intégrée dans docProps/custom.xml.'],
-    ['VULN-13', 'Redirection arbitraire Social Auth (Open Redirect)', 'Résolu', 'Whitelist stricte des domaines autorisés et des schémas deep-link applicatifs.'],
-    ['VULN-14', 'Archivage de compte sans mot de passe', 'Conservé & Sécurisé', 'Support OAuth mobile préservé sans mot de passe, révocation instantanée de tous les tokens Sanctum.'],
-    ['VULN-15', 'Déconnexion et résilience des tokens Sanctum', 'Résolu', "Suppression intégrale des jetons personnels lors de la déconnexion et de l'archivage."],
-    ['VULN-16', 'Duplication de code & Vulnérabilités SonarCloud', 'Résolu', 'Factorisation (0.6% de duplication) et respect de la complexité cognitive (Rating A).'],
-    ['VULN-17', 'Mass Assignment sur modèles Eloquent', 'Résolu', 'Définition exhaustive et restrictive de $fillable sur tous les modèles.'],
-    ['VULN-18', 'Absence de limitation de débit (Rate Limiting)', 'Résolu', "Application de throttle:60,1 et throttle:10,1 sur les routes d'authentification et de paiement."],
-    ['VULN-19', "Fuite d'informations via en-têtes Server / X-Powered-By", 'Résolu', "Directive server_tokens off dans Nginx et suppression de l'exposition PHP."],
-    ['VULN-20', 'Politique CSP (Content-Security-Policy)', 'Résolu', 'Ajustement des directives CSP pour autoriser uniquement les CDN nécessaires et Jitsi.'],
-    ['VULN-21', "Contrôle d'accès IDOR sur les ressources mentors", 'Résolu', "Méthode centralisée authorizeMentorAccess vérifiant l'organisation et l'utilisateur connecté."],
-    ['VULN-22', "Accès non autorisé aux conversations d'organisations", 'Résolu', "Vérification systématique du tenant ID et de l'appartenance au cercle privé."],
-    ['VULN-23', 'Zip Slip / Extraction récursive de CV DOCX', 'Résolu', "Validation des chemins d'extraction dans l'archive Zip sans remontée de répertoire."],
-    ['VULN-24', 'Upload de fichiers malveillants sur le profil mentor', 'Résolu', 'Validation stricte du type MIME réel (finfo) et limitation de taille à 5 Mo.'],
-    ['VULN-25', 'Prompt Injection indirecte sur le service IA CV', 'Résolu', 'Sanitisation du texte extrait avant soumission au modèle de langage.'],
-    ['VULN-26', "Exposition des métadonnées d'erreur en production", 'Résolu', 'Vérification de APP_DEBUG=false et formatage JSON sécurisé des exceptions.'],
-    ['VULN-27', "Accès aux commandes d'automatisation Cron admin", 'Résolu', 'Restriction stricte réservée aux administrateurs avec double authentification 2FA.'],
-    ['VULN-28', 'Protection 2FA Admin contre les contournements', 'Résolu', "Middleware VerifyAdminTwoFactor appliqué sur l'intégralité du groupe de routes admin."],
-    ['VULN-29', 'Race condition sur les retraits de portefeuille mentor', 'Résolu', 'Transactions SQL avec verrouillage pessimiste (lockForUpdate) sur le solde du portefeuille.'],
-    ['VULN-30', 'Validation du montant minimum/positif des retraits', 'Résolu', 'Règles FormRequest numériques strictes (min:100, montant <= solde disponible).'],
-    ['VULN-31', 'Exposition des sessions de téléconférence non clôturées', 'Résolu', 'Job automatique de purge et de clôture des sessions inactives depuis plus de 4 heures.'],
-    ['VULN-32', "Absence de journalisation des actions d'audit sensibles", 'Résolu', "Enregistrement dans l'AuditTrail de tout changement d'organisation, rôle et retrait financier."],
-    ['VULN-33', "Validation de l'email lors de l'enregistrement", 'Résolu', 'Processus de double vérification par code à 6 chiffres temporaire avec expiration 15 min.'],
-    ['VULN-34', "Bypass de vérification d'email sur incident SMTP", 'Résolu', "Suppression du contournement automatique : l'échec d'envoi notifie l'utilisateur sans valider."],
-    ['VULN-35', 'Stockage non sécurisé des transcriptions de réunions', 'Résolu', 'Chiffrement au repos des transcriptions sensibles et isolation par organisation.'],
-    ['VULN-36', "Fuite de clé d'API Google / Social dans les bundles JS", 'Résolu', 'Migration des clés sensibles côté serveur, seules les clés publiques OAuth sont exposées.'],
-    ['VULN-37', 'Contrôle des domaines de redirection des publicités', 'Résolu', 'Validation stricte des URLs cibles des campagnes publicitaires partenaires.'],
-    ['VULN-38', 'Divulgation de la liste des mentors hors organisation', 'Résolu', "Filtre strict dans MentorsController respectant l'isolation de cercle privé."],
-    ['VULN-39', 'Faiblesse de la politique de complexité des mots de passe', 'Résolu', 'Application de Password::defaults() avec 8+ caractères, majuscule, chiffre et symbole.'],
-    ['VULN-40', 'Absence de protection contre le Clickjacking', 'Résolu', "En-tête X-Frame-Options: SAMEORIGIN déployé globalement sur l'ensemble des réponses."],
-    ['VULN-41', 'Protection contre le reniflage de type MIME', 'Résolu', 'En-tête X-Content-Type-Options: nosniff injecté par Nginx.'],
-    ['VULN-42', "Absence d'isolation des bases de données de test et production", 'Résolu', 'Isolation complète : tests exécutés en SQLite in-memory, production sur MySQL 8.'],
-    ['VULN-43', 'Vulnérabilités de dépendances Composer obsolètes', 'Résolu', "Mise à niveau des packages et validation d'absence de CVE critique via audit Composer."],
-    ['VULN-44', "Nettoyage des fichiers temporaires d'upload", 'Résolu', 'Suppression immédiate des fichiers traités après analyse IA ou archivage S3.'],
-    ['VULN-45', 'Conformité du code aux standards SonarCloud', 'Résolu', 'Note A en Sécurité et Fiabilité obtenue sur la branche organisationrestrict.'],
-    ['VULN-46', 'Révocation des accès administrateur révoqués', 'Résolu', 'Invalidation immédiate des sessions et tokens lors de la révocation du rôle SuperAdmin.'],
+    ['VULN-01', 'Subdomain Takeover / Wildcard DNS', STATUS_CONSERVED, 'Maintien du wildcard pour le SaaS B2B, verrouillage HTTP 404 strict par ResolveOrganizationByDomain.'],
+    ['VULN-02', 'Méthodes HTTP TRACE / TRACK actives', STATUS_RESOLVED, 'Nginx configuré pour retourner HTTP 405 Method Not Allowed sur TRACE/TRACK.'],
+    ['VULN-03', 'Politique DMARC manquante', STATUS_RESOLVED, 'Enregistrement TXT _dmarc.brillio.africa déployé avec p=quarantine, pct=100.'],
+    ['VULN-04', 'En-tête Permissions-Policy insuffisant', STATUS_RESOLVED, 'Restreint à camera/microphone 8x8.vc et désactivation des autres fonctionnalités.'],
+    ['VULN-05', "Droits d'accès sensibles sur .env", STATUS_RESOLVED, 'Permissions serveur verrouillées en chmod 640 (brillio-deploy:docker).'],
+    ['VULN-06', 'Proxy Cloudflare sur flux IMAP/SMTP', STATUS_RESOLVED, 'Sous-domaines mail/autodiscover basculés en DNS-only pour éviter tout blocage proxy.'],
+    ['VULN-07', 'Falsification Webhook Moneroo', STATUS_RESOLVED, 'Signature HMAC-SHA256 validée par hash_equals, contrôle strict du statut transactionnel.'],
+    ['VULN-08', 'Replay Attack sur transactions paiement', STATUS_RESOLVED, "Gestion de l'idempotence avec vérification d'état préalable et constante MSG_ALREADY_PROCESSED."],
+    ['VULN-09', 'Webhook Jitsi non authentifié', STATUS_RESOLVED, "Validation obligatoire du secret d'en-tête (HTTP 401 si manquant ou non conforme)."],
+    ['VULN-10', 'SSRF sur URL de transcription Jitsi', STATUS_RESOLVED, "Vérification stricte de l'hôte et rejet des IP internes/privées avant tout appel Http::get."],
+    ['VULN-11', 'Routes Web transcription/enregistrement', STATUS_RESOLVED, "Isolement des routes sous middleware d'autorisation et validation d'accès participant."],
+    ['VULN-12', 'Contournement de la certification ATS CV', STATUS_CONSERVED, 'Signature cryptographique HMAC-SHA256 intégrée dans docProps/custom.xml.'],
+    ['VULN-13', 'Redirection arbitraire Social Auth (Open Redirect)', STATUS_RESOLVED, 'Whitelist stricte des domaines autorisés et des schémas deep-link applicatifs.'],
+    ['VULN-14', 'Archivage de compte sans mot de passe', STATUS_CONSERVED, 'Support OAuth mobile préservé sans mot de passe, révocation instantanée de tous les tokens Sanctum.'],
+    ['VULN-15', 'Déconnexion et résilience des tokens Sanctum', STATUS_RESOLVED, "Suppression intégrale des jetons personnels lors de la déconnexion et de l'archivage."],
+    ['VULN-16', 'Duplication de code & Vulnérabilités SonarCloud', STATUS_RESOLVED, 'Factorisation (0.6% de duplication) et respect de la complexité cognitive (Rating A).'],
+    ['VULN-17', 'Mass Assignment sur modèles Eloquent', STATUS_RESOLVED, 'Définition exhaustive et restrictive de $fillable sur tous les modèles.'],
+    ['VULN-18', 'Absence de limitation de débit (Rate Limiting)', STATUS_RESOLVED, "Application de throttle:60,1 et throttle:10,1 sur les routes d'authentification et de paiement."],
+    ['VULN-19', "Fuite d'informations via en-têtes Server / X-Powered-By", STATUS_RESOLVED, "Directive server_tokens off dans Nginx et suppression de l'exposition PHP."],
+    ['VULN-20', 'Politique CSP (Content-Security-Policy)', STATUS_RESOLVED, 'Ajustement des directives CSP pour autoriser uniquement les CDN nécessaires et Jitsi.'],
+    ['VULN-21', "Contrôle d'accès IDOR sur les ressources mentors", STATUS_RESOLVED, "Méthode centralisée authorizeMentorAccess vérifiant l'organisation et l'utilisateur connecté."],
+    ['VULN-22', "Accès non autorisé aux conversations d'organisations", STATUS_RESOLVED, "Vérification systématique du tenant ID et de l'appartenance au cercle privé."],
+    ['VULN-23', 'Zip Slip / Extraction récursive de CV DOCX', STATUS_RESOLVED, "Validation des chemins d'extraction dans l'archive Zip sans remontée de répertoire."],
+    ['VULN-24', 'Upload de fichiers malveillants sur le profil mentor', STATUS_RESOLVED, 'Validation stricte du type MIME réel (finfo) et limitation de taille à 5 Mo.'],
+    ['VULN-25', 'Prompt Injection indirecte sur le service IA CV', STATUS_RESOLVED, 'Sanitisation du texte extrait avant soumission au modèle de langage.'],
+    ['VULN-26', "Exposition des métadonnées d'erreur en production", STATUS_RESOLVED, 'Vérification de APP_DEBUG=false et formatage JSON sécurisé des exceptions.'],
+    ['VULN-27', "Accès aux commandes d'automatisation Cron admin", STATUS_RESOLVED, 'Restriction stricte réservée aux administrateurs avec double authentification 2FA.'],
+    ['VULN-28', 'Protection 2FA Admin contre les contournements', STATUS_RESOLVED, "Middleware VerifyAdminTwoFactor appliqué sur l'intégralité du groupe de routes admin."],
+    ['VULN-29', 'Race condition sur les retraits de portefeuille mentor', STATUS_RESOLVED, 'Transactions SQL avec verrouillage pessimiste (lockForUpdate) sur le solde du portefeuille.'],
+    ['VULN-30', 'Validation du montant minimum/positif des retraits', STATUS_RESOLVED, 'Règles FormRequest numériques strictes (min:100, montant <= solde disponible).'],
+    ['VULN-31', 'Exposition des sessions de téléconférence non clôturées', STATUS_RESOLVED, 'Job automatique de purge et de clôture des sessions inactives depuis plus de 4 heures.'],
+    ['VULN-32', "Absence de journalisation des actions d'audit sensibles", STATUS_RESOLVED, "Enregistrement dans l'AuditTrail de tout changement d'organisation, rôle et retrait financier."],
+    ['VULN-33', "Validation de l'email lors de l'enregistrement", STATUS_RESOLVED, 'Processus de double vérification par code à 6 chiffres temporaire avec expiration 15 min.'],
+    ['VULN-34', "Bypass de vérification d'email sur incident SMTP", STATUS_RESOLVED, "Suppression du contournement automatique : l'échec d'envoi notifie l'utilisateur sans valider."],
+    ['VULN-35', 'Stockage non sécurisé des transcriptions de réunions', STATUS_RESOLVED, 'Chiffrement au repos des transcriptions sensibles et isolation par organisation.'],
+    ['VULN-36', "Fuite de clé d'API Google / Social dans les bundles JS", STATUS_RESOLVED, 'Migration des clés sensibles côté serveur, seules les clés publiques OAuth sont exposées.'],
+    ['VULN-37', 'Contrôle des domaines de redirection des publicités', STATUS_RESOLVED, 'Validation stricte des URLs cibles des campagnes publicitaires partenaires.'],
+    ['VULN-38', 'Divulgation de la liste des mentors hors organisation', STATUS_RESOLVED, "Filtre strict dans MentorsController respectant l'isolation de cercle privé."],
+    ['VULN-39', 'Faiblesse de la politique de complexité des mots de passe', STATUS_RESOLVED, 'Application de Password::defaults() avec 8+ caractères, majuscule, chiffre et symbole.'],
+    ['VULN-40', 'Absence de protection contre le Clickjacking', STATUS_RESOLVED, "En-tête X-Frame-Options: SAMEORIGIN déployé globalement sur l'ensemble des réponses."],
+    ['VULN-41', 'Protection contre le reniflage de type MIME', STATUS_RESOLVED, 'En-tête X-Content-Type-Options: nosniff injecté par Nginx.'],
+    ['VULN-42', "Absence d'isolation des bases de données de test et production", STATUS_RESOLVED, 'Isolation complète : tests exécutés en SQLite in-memory, production sur MySQL 8.'],
+    ['VULN-43', 'Vulnérabilités de dépendances Composer obsolètes', STATUS_RESOLVED, "Mise à niveau des packages et validation d'absence de CVE critique via audit Composer."],
+    ['VULN-44', "Nettoyage des fichiers temporaires d'upload", STATUS_RESOLVED, 'Suppression immédiate des fichiers traités après analyse IA ou archivage S3.'],
+    ['VULN-45', 'Conformité du code aux standards SonarCloud', STATUS_RESOLVED, 'Note A en Sécurité et Fiabilité obtenue sur la branche organisationrestrict.'],
+    ['VULN-46', 'Révocation des accès administrateur révoqués', STATUS_RESOLVED, 'Invalidation immédiate des sessions et tokens lors de la révocation du rôle SuperAdmin.'],
 ];
 
 foreach ($findingsSummary as $row) {
@@ -201,7 +206,7 @@ foreach ($findingsSummary as $row) {
     $tableMatrix->addCell(1000)->addText($row[0], ['bold' => true, 'size' => 9]);
     $tableMatrix->addCell(3000)->addText($row[1], ['size' => 9]);
 
-    $colorStatus = ($row[2] === 'Résolu') ? '059669' : '2563EB';
+    $colorStatus = ($row[2] === STATUS_RESOLVED) ? '059669' : COLOR_SECONDARY;
     $tableMatrix->addCell(1500)->addText($row[2], ['bold' => true, 'color' => $colorStatus, 'size' => 9]);
     $tableMatrix->addCell(4000)->addText($row[3], ['size' => 9]);
 }

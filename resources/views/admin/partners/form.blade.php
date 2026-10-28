@@ -112,7 +112,7 @@
 
                     <!-- Logo Upload -->
                     <div>
-                        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                        <label for="logo" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
                             Logo du Partenaire {{ !isset($partner) ? '*' : '' }}
                         </label>
 

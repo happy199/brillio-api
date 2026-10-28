@@ -20,6 +20,8 @@ class PartnerManagementTest extends TestCase
         Storage::fake('public');
     }
 
+    private const TEST_PARTNER_NAME = 'Partenaire Externe Test';
+
     public function test_guest_or_regular_user_cannot_access_admin_partners(): void
     {
         $response = $this->get(route('admin.partners.index'));
@@ -38,7 +40,7 @@ class PartnerManagementTest extends TestCase
     {
         $admin = $this->createAdminUser();
 
-        $partner = Partner::create([
+        Partner::create([
             'name' => 'Campus France',
             'website' => 'https://campusfrance.org',
             'logo_path' => 'partners/logos/campus.png',
@@ -63,7 +65,7 @@ class PartnerManagementTest extends TestCase
         $response = $this->actingAs($admin)
             ->withSession(['admin_2fa_passed' => true])
             ->post(route('admin.partners.store'), [
-                'name' => 'Partenaire Externe Test',
+                'name' => self::TEST_PARTNER_NAME,
                 'website' => 'https://partner-test.com',
                 'logo' => $file,
                 'display_order' => 1,
@@ -74,12 +76,12 @@ class PartnerManagementTest extends TestCase
 
         $response->assertRedirect(route('admin.partners.index', ['tab' => 'external']));
         $this->assertDatabaseHas('partners', [
-            'name' => 'Partenaire Externe Test',
+            'name' => self::TEST_PARTNER_NAME,
             'website' => 'https://partner-test.com',
             'is_active' => true,
         ]);
 
-        $partner = Partner::where('name', 'Partenaire Externe Test')->first();
+        $partner = Partner::where('name', self::TEST_PARTNER_NAME)->first();
         $this->assertNotNull($partner->logo_path);
         Storage::disk('public')->assertExists($partner->logo_path);
     }
@@ -163,7 +165,7 @@ class PartnerManagementTest extends TestCase
     public function test_about_page_displays_both_brillio_organizations_and_external_partners(): void
     {
         // 1. Create external active partner
-        $partner = Partner::create([
+        Partner::create([
             'name' => 'Partenaire Externe Public',
             'website' => 'https://external-public.com',
             'logo_path' => 'partners/logos/public.png',
@@ -171,7 +173,7 @@ class PartnerManagementTest extends TestCase
         ]);
 
         // 2. Create inactive external partner
-        $inactivePartner = Partner::create([
+        Partner::create([
             'name' => 'Partenaire Cache Inactif',
             'website' => 'https://hidden.com',
             'logo_path' => 'partners/logos/hidden.png',
@@ -179,7 +181,7 @@ class PartnerManagementTest extends TestCase
         ]);
 
         // 3. Create active organization with logo
-        $org = Organization::create([
+        Organization::create([
             'name' => 'Organisation Brillio Partenaire',
             'contact_email' => 'contact@org-partenaire.com',
             'status' => 'active',
