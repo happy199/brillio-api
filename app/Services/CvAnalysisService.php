@@ -232,92 +232,92 @@ class CvAnalysisService
      * Vérification cryptographique de provenance (CV généré par Brillio Pro)
      * Lit les métadonnées docProps/custom.xml pour valider le token et sa signature HMAC.
      */
-     private function verifyBrillioProvenance(string $filePath, string $extension): bool
-     {
-         if (! in_array(strtolower($extension), ['docx', 'doc'], true) || ! class_exists('ZipArchive') || ! file_exists($filePath)) {
-             return false;
-         }
+    private function verifyBrillioProvenance(string $filePath, string $extension): bool
+    {
+        if (! in_array(strtolower($extension), ['docx', 'doc'], true) || ! class_exists('ZipArchive') || ! file_exists($filePath)) {
+            return false;
+        }
 
-         $props = $this->extractBrillioDocProps($filePath);
-         if (! $props) {
-             return false;
-         }
+        $props = $this->extractBrillioDocProps($filePath);
+        if (! $props) {
+            return false;
+        }
 
-         return $this->validateBrillioHmac($props['token'], $props['signature']);
-     }
+        return $this->validateBrillioHmac($props['token'], $props['signature']);
+    }
 
-     /**
-      * Extrait le token et la signature depuis docProps/custom.xml
-      */
-     private function extractBrillioDocProps(string $filePath): ?array
-     {
-         $props = null;
-         try {
-             $zip = new \ZipArchive;
-             if ($zip->open($filePath) === true) {
-                 $customXml = $zip->getFromName('docProps/custom.xml');
-                 $zip->close();
+    /**
+     * Extrait le token et la signature depuis docProps/custom.xml
+     */
+    private function extractBrillioDocProps(string $filePath): ?array
+    {
+        $props = null;
+        try {
+            $zip = new \ZipArchive;
+            if ($zip->open($filePath) === true) {
+                $customXml = $zip->getFromName('docProps/custom.xml');
+                $zip->close();
 
-                 $hasToken = $customXml && preg_match('/name=["\']BrillioCertToken["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mToken);
-                 $hasSig = $customXml && preg_match('/name=["\']BrillioCertSignature["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mSig);
+                $hasToken = $customXml && preg_match('/name=["\']BrillioCertToken["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mToken);
+                $hasSig = $customXml && preg_match('/name=["\']BrillioCertSignature["\'][^>]*><vt:lpwstr>([^<]+)<\/vt:lpwstr>/i', $customXml, $mSig);
 
-                 if ($hasToken && $hasSig) {
-                     $props = ['token' => $mToken[1], 'signature' => $mSig[1]];
-                 }
-             }
-         } catch (\Exception $e) {
-             Log::warning('Provenance extraction error: '.$e->getMessage());
-         }
+                if ($hasToken && $hasSig) {
+                    $props = ['token' => $mToken[1], 'signature' => $mSig[1]];
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Provenance extraction error: '.$e->getMessage());
+        }
 
-         return $props;
-     }
+        return $props;
+    }
 
-     /**
-      * Valide l'existence en base et la signature HMAC du document
-      */
-     private function validateBrillioHmac(string $token, string $signature): bool
-     {
-         $matchedCv = CvAnalysis::where('guest_token', $token)->first();
-         if (! $matchedCv && str_starts_with($token, 'brillio_cv_')) {
-             $cvId = (int) str_replace('brillio_cv_', '', $token);
-             $matchedCv = CvAnalysis::find($cvId);
-         }
+    /**
+     * Valide l'existence en base et la signature HMAC du document
+     */
+    private function validateBrillioHmac(string $token, string $signature): bool
+    {
+        $matchedCv = CvAnalysis::where('guest_token', $token)->first();
+        if (! $matchedCv && str_starts_with($token, 'brillio_cv_')) {
+            $cvId = (int) str_replace('brillio_cv_', '', $token);
+            $matchedCv = CvAnalysis::find($cvId);
+        }
 
-         if (! $matchedCv) {
-             return false;
-         }
+        if (! $matchedCv) {
+            return false;
+        }
 
-         $appSecret = config('app.key') ?: 'brillio-ats-secret';
-         $expectedSig = hash_hmac('sha256', $token.'|'.$matchedCv->id, $appSecret);
+        $appSecret = config('app.key') ?: 'brillio-ats-secret';
+        $expectedSig = hash_hmac('sha256', $token.'|'.$matchedCv->id, $appSecret);
 
-         if (hash_equals($expectedSig, $signature)) {
-             Log::info('Authentic Brillio Pro ATS CV verified cryptographically', [
-                 'cv_id' => $matchedCv->id,
-                 'token' => $token,
-             ]);
+        if (hash_equals($expectedSig, $signature)) {
+            Log::info('Authentic Brillio Pro ATS CV verified cryptographically', [
+                'cv_id' => $matchedCv->id,
+                'token' => $token,
+            ]);
 
-             return true;
-         }
+            return true;
+        }
 
-         return false;
-     }
+        return false;
+    }
 
-     /**
-      * Analyse le texte du CV via l'IA ou produit une analyse basée sur des heuristiques
-      */
-     private function analyzeWithAI(string $text, string $originalFilename, bool $isBrillioCertified = false): array
-     {
-         // Limiter la taille du texte pour éviter de dépasser les quotas de tokens
-         $sampleText = mb_substr($text, 0, 8000);
+    /**
+     * Analyse le texte du CV via l'IA ou produit une analyse basée sur des heuristiques
+     */
+    private function analyzeWithAI(string $text, string $originalFilename, bool $isBrillioCertified = false): array
+    {
+        // Limiter la taille du texte pour éviter de dépasser les quotas de tokens
+        $sampleText = mb_substr($text, 0, 8000);
 
-         // CV certifié Brillio Pro validé par signature cryptographique
-         if ($isBrillioCertified) {
-             return $this->generateBrillioProAnalysis($sampleText);
-         }
+        // CV certifié Brillio Pro validé par signature cryptographique
+        if ($isBrillioCertified) {
+            return $this->generateBrillioProAnalysis($sampleText);
+        }
 
-         if (mb_strlen($sampleText) < 40) {
-             return $this->generateFallbackAnalysis($originalFilename);
-         }
+        if (mb_strlen($sampleText) < 40) {
+            return $this->generateFallbackAnalysis($originalFilename);
+        }
 
         $systemPrompt = "Tu es un expert mondial en recrutement et spécialiste des systèmes ATS (Applicant Tracking Systems tels que Workday, Taleo, Greenhouse, Lever, SmartRecruiters). Tu analyses un CV pour évaluer sa compatibilité ATS, sa structure, sa lisibilité algorithmique et son impact humain auprès des recruteurs, quel que soit le secteur d'activité (Tech, Finance, Marketing, Droit, Santé, Logistique, Enseignement, Commerce, etc.) et quel que soit le niveau d'expérience (débutant, intermédiaire, senior).
 

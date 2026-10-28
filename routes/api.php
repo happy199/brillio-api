@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V2\SocialAuthController;
 use App\Http\Controllers\Api\V2\UserProfilingController;
 use App\Http\Controllers\MonerooWebhookController;
 use App\Http\Controllers\Webhook\JitsiWebhookController;
+use App\Http\Resources\V1\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -58,7 +59,7 @@ Route::get('/health', function () {
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return new \App\Http\Resources\V1\UserResource($request->user());
+    return new UserResource($request->user());
 });
 
 // V2 Authentication (Guest) - rate limited to 10 requests per minute
