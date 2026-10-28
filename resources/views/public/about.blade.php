@@ -508,14 +508,21 @@
 
         <div class="relative overflow-hidden mb-16" data-aos="fade-up">
             @if($partners->count() > 0)
-            <div class="flex {{ $partners->count() >= 6 ? 'animate-scroll' : 'justify-center' }} whitespace-nowrap">
+            <div class="flex {{ $partners->count() >= 6 ? 'animate-scroll' : 'justify-center flex-wrap gap-6' }} whitespace-nowrap">
                 <!-- First set of logos -->
                 <div class="flex space-x-12 items-center mx-6">
                     @foreach($partners as $partner)
                     <div
                         class="flex-shrink-0 bg-gray-50 rounded-xl p-4 flex items-center justify-center w-48 h-24 shadow-sm hover:shadow-md transition-shadow grayscale hover:grayscale-0">
-                        <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
-                            class="max-w-full max-h-full object-contain">
+                        @if(!empty($partner->website))
+                            <a href="{{ $partner->website }}" target="_blank" rel="noopener noreferrer" title="{{ $partner->name }}" class="flex items-center justify-center w-full h-full">
+                                <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
+                                    class="max-w-full max-h-full object-contain">
+                            </a>
+                        @else
+                            <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
+                                class="max-w-full max-h-full object-contain" title="{{ $partner->name }}">
+                        @endif
                     </div>
                     @endforeach
                 </div>
@@ -526,8 +533,15 @@
                     @foreach($partners as $partner)
                     <div
                         class="flex-shrink-0 bg-gray-50 rounded-xl p-4 flex items-center justify-center w-48 h-24 shadow-sm hover:shadow-md transition-shadow grayscale hover:grayscale-0">
-                        <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
-                            class="max-w-full max-h-full object-contain">
+                        @if(!empty($partner->website))
+                            <a href="{{ $partner->website }}" target="_blank" rel="noopener noreferrer" title="{{ $partner->name }}" class="flex items-center justify-center w-full h-full">
+                                <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
+                                    class="max-w-full max-h-full object-contain">
+                            </a>
+                        @else
+                            <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}"
+                                class="max-w-full max-h-full object-contain" title="{{ $partner->name }}">
+                        @endif
                     </div>
                     @endforeach
                 </div>

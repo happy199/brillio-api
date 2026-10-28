@@ -139,99 +139,99 @@ class JitsiWebhookController extends Controller
     /**
      * Termine et enregistre les données de transcription via l'API Web Speech (Client-side)
      */
-     public function appendTranscription(Request $request, MentoringSession $session)
-     {
-         if (! $this->isParticipantAuthorized($session)) {
-             return response()->json(['error' => 'Non autorisé à modifier cette séance.'], 403);
-         }
+    public function appendTranscription(Request $request, MentoringSession $session)
+    {
+        if (! $this->isParticipantAuthorized($session)) {
+            return response()->json(['error' => 'Non autorisé à modifier cette séance.'], 403);
+        }
 
-         $request->validate([
-             'text' => 'required|string',
-             'speaker' => 'required|string',
-             'timestamp' => 'required|numeric',
-         ]);
+        $request->validate([
+            'text' => 'required|string',
+            'speaker' => 'required|string',
+            'timestamp' => 'required|numeric',
+        ]);
 
-         Log::info('Transcription Fragment Received', [
-             'session_id' => $session->id,
-             'speaker' => $request->speaker,
-             'text' => $request->text,
-         ]);
+        Log::info('Transcription Fragment Received', [
+            'session_id' => $session->id,
+            'speaker' => $request->speaker,
+            'text' => $request->text,
+        ]);
 
-         $currentTranscription = $session->transcription_raw ?: [];
+        $currentTranscription = $session->transcription_raw ?: [];
 
-         // Si c'était du texte brut (ancien format), on convertit en tableau
-         if (! is_array($currentTranscription)) {
-             $currentTranscription = [['text' => (string) $currentTranscription, 'speaker' => 'Système', 'timestamp' => time()]];
-         }
+        // Si c'était du texte brut (ancien format), on convertit en tableau
+        if (! is_array($currentTranscription)) {
+            $currentTranscription = [['text' => (string) $currentTranscription, 'speaker' => 'Système', 'timestamp' => time()]];
+        }
 
-         // Éviter les doublons quasi-identiques (ex: deux participants captant la même phrase)
-         $lastFragment = end($currentTranscription);
-         if ($lastFragment && $lastFragment['text'] === $request->text && (time() - $lastFragment['timestamp'] < 3)) {
-             return response()->json(['status' => 'ignored_duplicate']);
-         }
+        // Éviter les doublons quasi-identiques (ex: deux participants captant la même phrase)
+        $lastFragment = end($currentTranscription);
+        if ($lastFragment && $lastFragment['text'] === $request->text && (time() - $lastFragment['timestamp'] < 3)) {
+            return response()->json(['status' => 'ignored_duplicate']);
+        }
 
-         // Ajouter le nouveau fragment
-         $currentTranscription[] = [
-             'speaker' => $request->speaker,
-             'text' => $request->text,
-             'timestamp' => $request->timestamp,
-         ];
+        // Ajouter le nouveau fragment
+        $currentTranscription[] = [
+            'speaker' => $request->speaker,
+            'text' => $request->text,
+            'timestamp' => $request->timestamp,
+        ];
 
-         $session->update([
-             'transcription_raw' => $currentTranscription,
-             'has_transcription' => true,
-         ]);
+        $session->update([
+            'transcription_raw' => $currentTranscription,
+            'has_transcription' => true,
+        ]);
 
-         return response()->json(['status' => 'success']);
-     }
+        return response()->json(['status' => 'success']);
+    }
 
-     /**
-      * Enregistrer la vidéo de la séance de mentorat
-      */
-     public function uploadRecording(Request $request, MentoringSession $session)
-     {
-         if (! $this->isParticipantAuthorized($session)) {
-             return response()->json(['error' => 'Non autorisé à modifier cette séance.'], 403);
-         }
+    /**
+     * Enregistrer la vidéo de la séance de mentorat
+     */
+    public function uploadRecording(Request $request, MentoringSession $session)
+    {
+        if (! $this->isParticipantAuthorized($session)) {
+            return response()->json(['error' => 'Non autorisé à modifier cette séance.'], 403);
+        }
 
-         $url = app(VideoRecordingService::class)->processUploadRequest($request, 'mentoring_session_'.$session->id);
+        $url = app(VideoRecordingService::class)->processUploadRequest($request, 'mentoring_session_'.$session->id);
 
-         if (! $url) {
-             return response()->json(['error' => 'Aucun fichier vidéo transmis.'], 400);
-         }
+        if (! $url) {
+            return response()->json(['error' => 'Aucun fichier vidéo transmis.'], 400);
+        }
 
-         $session->update([
-             'video_recording_url' => $url,
-         ]);
+        $session->update([
+            'video_recording_url' => $url,
+        ]);
 
-         return response()->json(['status' => 'success', 'url' => $url]);
-     }
+        return response()->json(['status' => 'success', 'url' => $url]);
+    }
 
-     /**
-      * Vérifie si l'utilisateur connecté ou l'invité en session est autorisé
-      */
-     private function isParticipantAuthorized(MentoringSession $session): bool
-     {
-         $user = Auth::user();
-         if ($user) {
-             $isMentor = $session->all_mentors->pluck('id')->contains($user->id);
-             $isMentee = $session->mentees()->where('user_id', $user->id)->exists();
-             $isOrgMember = $user->organization_id === $session->scheduled_by_organization_id ||
-                 $session->mentees()->where('sponsored_by_organization_id', $user->organization_id)->exists();
+    /**
+     * Vérifie si l'utilisateur connecté ou l'invité en session est autorisé
+     */
+    private function isParticipantAuthorized(MentoringSession $session): bool
+    {
+        $user = Auth::user();
+        if ($user) {
+            $isMentor = $session->all_mentors->pluck('id')->contains($user->id);
+            $isMentee = $session->mentees()->where('user_id', $user->id)->exists();
+            $isOrgMember = $user->organization_id === $session->scheduled_by_organization_id ||
+                $session->mentees()->where('sponsored_by_organization_id', $user->organization_id)->exists();
 
-             if ($isMentor || $isMentee || $isOrgMember) {
-                 return true;
-             }
-         }
+            if ($isMentor || $isMentee || $isOrgMember) {
+                return true;
+            }
+        }
 
-         $guestAuth = session("guest_auth_{$session->id}");
-         if ($guestAuth && ! empty($guestAuth['email'])) {
-             $guestEmail = strtolower($guestAuth['email']);
-             $mentorEmails = $session->all_mentors->pluck('email')->map(fn ($e) => strtolower($e))->toArray();
+        $guestAuth = session("guest_auth_{$session->id}");
+        if ($guestAuth && ! empty($guestAuth['email'])) {
+            $guestEmail = strtolower($guestAuth['email']);
+            $mentorEmails = $session->all_mentors->pluck('email')->map(fn ($e) => strtolower($e))->toArray();
 
-             return in_array($guestEmail, $mentorEmails, true);
-         }
+            return in_array($guestEmail, $mentorEmails, true);
+        }
 
-         return false;
-     }
+        return false;
+    }
 }
