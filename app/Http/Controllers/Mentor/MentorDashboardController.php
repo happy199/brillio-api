@@ -417,13 +417,17 @@ class MentorDashboardController extends Controller
         }
 
         // Email to User
-        Mail::to($user->email)->send(new UserUnlinkedConfirmationMail($org));
+        Mail::to($user->email)->send(new UserUnlinkedConfirmationMail($org, $user));
 
         // Detach
         $user->organization_id = null;
+        $user->sponsored_by_organization_id = null;
         $user->save();
         $user->organizations()->detach($org->id);
 
-        return back()->with('success', 'La relation de mentorat avec l\'organisation a été rompue avec succès.');
+        $baseUrl = config('app.url') ? rtrim(config('app.url'), '/') : 'https://brillio.africa';
+        $redirectUrl = $baseUrl.'/espace-mentor/statistiques';
+
+        return redirect()->away($redirectUrl)->with('success', 'La relation de mentorat avec l\'organisation a été rompue avec succès.');
     }
 }

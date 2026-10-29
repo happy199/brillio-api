@@ -234,13 +234,16 @@ class ProfileController extends Controller
         }
 
         // Email to User
-        Mail::to($user->email)->send(new UserUnlinkedConfirmationMail($org));
+        Mail::to($user->email)->send(new UserUnlinkedConfirmationMail($org, $user));
 
         // Detach
         $user->sponsored_by_organization_id = null;
         $user->save();
         $user->organizations()->detach($org->id);
 
-        return back()->with('success', 'La relation de mentorat avec l\'organisation a été rompue avec succès.');
+        $baseUrl = config('app.url') ? rtrim(config('app.url'), '/') : 'https://brillio.africa';
+        $redirectUrl = $baseUrl.'/espace-jeune/profil';
+
+        return redirect()->away($redirectUrl)->with('success', 'La relation de mentorat avec l\'organisation a été rompue avec succès.');
     }
 }

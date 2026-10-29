@@ -2,6 +2,9 @@
 <html lang="fr">
 @php
     $displayOrg = $current_organization ?? (auth()->check() ? (auth()->user()->organization ?? auth()->user()->organizations->first()) : null);
+    $primaryColor = $displayOrg?->primary_color ?? '#f97316';
+    $secondaryColor = $displayOrg?->secondary_color ?? '#ea580c';
+    $accentColor = $displayOrg?->accent_color ?? '#dc2626';
 @endphp
 <head>
     <meta charset="UTF-8">
@@ -18,7 +21,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#f97316">
+    <meta name="theme-color" content="{{ $primaryColor }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,8 +54,8 @@
                             200: '#fed7aa',
                             300: '#fdba74',
                             400: '#fb923c',
-                            500: '#f97316',
-                            600: '#ea580c',
+                            500: '{{ $primaryColor }}',
+                            600: '{{ $secondaryColor }}',
                             700: '#c2410c',
                             800: '#9a3412',
                             900: '#7c2d12',
@@ -76,8 +79,8 @@
         }
 
         .nav-item.active {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            color: white;
+            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%) !important;
+            color: white !important;
         }
 
         .card-hover {
@@ -90,10 +93,14 @@
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%);
+            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 50%, {{ $accentColor }} 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .org-gradient-banner {
+            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 50%, {{ $accentColor }} 100%) !important;
         }
     </style>
 
