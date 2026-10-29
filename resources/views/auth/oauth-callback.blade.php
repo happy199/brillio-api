@@ -1,3 +1,9 @@
+@php
+    $displayOrg = $current_organization ?? (auth()->check() ? (auth()->user()->sponsoringOrganization ?? (auth()->user()->organization ?? auth()->user()->organizations->first())) : null);
+    $primaryColor = $displayOrg?->primary_color ?? '#6366f1';
+    $secondaryColor = $displayOrg?->secondary_color ?? '#a855f7';
+    $accentColor = $displayOrg?->accent_color ?? '#ec4899';
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -5,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Connexion en cours - Brillio</title>
+    <title>Connexion en cours - {{ $displayOrg ? $displayOrg->name : 'Brillio' }}</title>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://cdn.tailwindcss.com"></script>
     <style>
         .loader {
@@ -32,7 +38,8 @@
 </head>
 
 <body
-    class="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center">
+    style="background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 50%, {{ $accentColor }} 100%);"
+    class="min-h-screen flex items-center justify-center">
     <div class="text-center text-white max-w-md px-4">
         <div class="loader mx-auto mb-6"></div>
         <h1 class="text-2xl font-bold mb-2">Connexion en cours...</h1>

@@ -5,7 +5,7 @@
 @section('content')
 <div class="space-y-8">
     <!-- Welcome Header -->
-    <div class="bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 rounded-3xl p-8 text-white">
+    <div class="org-gradient-banner rounded-3xl p-8 text-white">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
                 <h1 class="text-3xl font-bold">Bonjour, {{ explode(' ', $user->name)[0] }} !</h1>

@@ -7,7 +7,7 @@
     <div class="space-y-8">
         <!-- Header -->
         <div
-            class="bg-gradient-to-r from-primary-600 to-purple-600 rounded-3xl p-8 text-white flex justify-between items-center">
+            class="org-gradient-banner rounded-3xl p-8 text-white flex justify-between items-center">
             <div>
                 <h1 class="text-3xl font-bold">Mon Profil</h1>
                 <p class="text-white/80 mt-2">Gérez vos informations et votre visibilité.</p>

@@ -15,12 +15,15 @@ class UserUnlinkedConfirmationMail extends Mailable
 
     public $organization;
 
+    public $user;
+
     /**
      * Create a new message instance.
      */
-    public function __construct($organization)
+    public function __construct($organization, $user = null)
     {
         $this->organization = $organization;
+        $this->user = $user;
     }
 
     /**
