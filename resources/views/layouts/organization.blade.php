@@ -258,7 +258,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 md:pb-8">
         @if(session('success'))
         <div class="mb-6 bg-organization-50 border border-organization-200 text-organization-800 px-4 py-3 rounded-lg">
             {{ session('success') }}

@@ -1,5 +1,5 @@
 <!-- Bannière d'installation PWA Mobile (Android & Navigateurs compatibles) -->
-<div id="pwa-install-banner" data-pwa-install-banner class="hidden fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-50 animate-fade-in-up">
+<div id="pwa-install-banner" data-pwa-install-banner class="hidden fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-[70] animate-fade-in-up">
     <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200/80 dark:border-gray-800 rounded-3xl p-4 shadow-2xl flex items-center gap-3.5 ring-1 ring-black/5">
         <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-0.5 flex-shrink-0 shadow-md">
             <div class="w-full h-full bg-white dark:bg-gray-900 rounded-[14px] flex items-center justify-center overflow-hidden">

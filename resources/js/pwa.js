@@ -144,6 +144,7 @@ class BrillioPWA {
 
     listenInstallPrompt() {
         window.addEventListener('beforeinstallprompt', (e) => {
+            if (this.isStandalone) return;
             e.preventDefault();
             this.deferredPrompt = e;
 
@@ -206,6 +207,7 @@ class BrillioPWA {
     }
 
     showInstallPrompts() {
+        if (this.isStandalone) return;
         const lastDismissed = localStorage.getItem('brillio_pwa_prompt_dismissed');
         const now = Date.now();
         if (lastDismissed && (now - parseInt(lastDismissed, 10)) < 48 * 3600 * 1000) {

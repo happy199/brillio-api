@@ -1,6 +1,8 @@
 <!-- Bottom Navigation Bar pour Mobile (Espace Organisation) -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-gray-200/80 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]" aria-label="Navigation principale mobile organisation">
-    <div class="grid grid-cols-5 h-16 max-w-lg mx-auto">
+<nav class="md:hidden fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-slate-200/90 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] pb-[calc(env(safe-area-inset-bottom)+0.35rem)] select-none"
+     style="background-color: #ffffff !important; pointer-events: auto !important;"
+     aria-label="Navigation principale mobile organisation">
+    <div class="grid grid-cols-5 h-16 max-w-lg mx-auto items-center px-1">
         <!-- Dashboard -->
         <a href="{{ route('organization.dashboard') }}"
            class="flex flex-col items-center justify-center gap-1 transition-all {{ request()->routeIs('organization.dashboard') ? 'text-organization-600 font-semibold' : 'text-gray-500 hover:text-gray-900' }}">
