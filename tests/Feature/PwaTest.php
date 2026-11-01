@@ -23,8 +23,47 @@ class PwaTest extends TestCase
         $this->assertIsArray($manifest);
         $this->assertEquals('Brillio', $manifest['short_name']);
         $this->assertEquals('standalone', $manifest['display']);
+        $this->assertEquals('/app', $manifest['start_url']);
         $this->assertNotEmpty($manifest['icons']);
         $this->assertNotEmpty($manifest['shortcuts']);
+    }
+
+    #[Test]
+    public function pwa_source_redirects_to_app_welcome()
+    {
+        $response = $this->get('/?source=pwa');
+        $response->assertRedirect('/app');
+    }
+
+    #[Test]
+    public function app_welcome_screen_displays_figma_onboarding_for_guests()
+    {
+        $response = $this->get('/app');
+
+        $response->assertStatus(200);
+        $response->assertSee('Bienvenue sur Brillio');
+        $response->assertSee('Inspire-toi de modèles');
+        $response->assertSee('Commence maintenant');
+        $response->assertSee('Rejoins maintenant');
+    }
+
+    #[Test]
+    public function app_welcome_redirects_authenticated_users_to_dashboard()
+    {
+        $jeune = User::factory()->create([
+            'user_type' => User::TYPE_JEUNE,
+            'onboarding_completed' => true,
+        ]);
+
+        $response = $this->actingAs($jeune)->get('/app');
+        $response->assertRedirect(route('jeune.dashboard'));
+
+        $mentor = User::factory()->mentor()->create([
+            'onboarding_completed' => true,
+        ]);
+
+        $response = $this->actingAs($mentor)->get('/app');
+        $response->assertRedirect(route('mentor.dashboard'));
     }
 
     #[Test]

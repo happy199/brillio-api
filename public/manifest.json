@@ -1,9 +1,9 @@
 {
-    "id": "/?source=pwa",
+    "id": "/app",
     "name": "Brillio - Orientation & Mentorat en Afrique",
     "short_name": "Brillio",
     "description": "Plateforme d'orientation professionnelle et de mentorat connectant jeunes talents et professionnels chevronnés en Afrique.",
-    "start_url": "/?source=pwa",
+    "start_url": "/app",
     "scope": "/",
     "display": "standalone",
     "display_override": [

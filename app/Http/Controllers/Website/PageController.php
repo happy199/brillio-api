@@ -18,6 +18,32 @@ use Illuminate\Support\Facades\Log;
 class PageController extends Controller
 {
     /**
+     * Écran d'accueil mobile & Onboarding (Figma)
+     */
+    public function appWelcome()
+    {
+        if (auth()->check()) {
+            $user = auth()->user();
+            if ($user->isJeune()) {
+                return redirect()->route($user->onboarding_completed ? 'jeune.dashboard' : 'jeune.onboarding');
+            }
+            if ($user->isMentor()) {
+                return redirect()->route('mentor.dashboard');
+            }
+            if ($user->isAdmin() || $user->user_type === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+            if ($user->user_type === 'coach') {
+                return redirect()->route('coach.dashboard');
+            }
+
+            return redirect()->route('auth.choice');
+        }
+
+        return view('public.app-welcome');
+    }
+
+    /**
      * Page d'accueil
      */
     public function home()

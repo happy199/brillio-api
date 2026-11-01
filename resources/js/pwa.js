@@ -31,6 +31,11 @@ class BrillioPWA {
         if (this.isStandalone) {
             document.documentElement.classList.add('is-pwa-standalone');
             localStorage.setItem('brillio_pwa_installed', 'true');
+
+            // Si l'application installée est lancée sur la racine vitrine '/', basculer vers l'accueil mobile /app
+            if ((window.location.pathname === '/' || window.location.pathname === '') && !window.location.search.includes('web=1')) {
+                window.location.replace('/app');
+            }
         }
     }
 

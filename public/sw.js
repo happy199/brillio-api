@@ -5,12 +5,13 @@
  * Background Sync, Web Push & Caching sécurisé.
  */
 
-const CACHE_NAME = 'brillio-pwa-v1.1.0';
+const CACHE_NAME = 'brillio-pwa-v1.2.0';
 const OFFLINE_URL = '/offline.html';
 
 // Ressources critiques pré-mises en cache à l'installation
 const PRECACHE_ASSETS = [
     '/',
+    '/app',
     OFFLINE_URL,
     '/manifest.json',
     '/favicon-32x32.png',
@@ -18,7 +19,10 @@ const PRECACHE_ASSETS = [
     '/apple-touch-icon.png',
     '/android-chrome-192x192.png',
     '/android-chrome-512x512.png',
-    '/LOGOBRILLIONOIR.png'
+    '/LOGOBRILLIONOIR.png',
+    '/images/onboarding/students.jpg',
+    '/images/onboarding/mentor.jpg',
+    '/images/onboarding/start.jpg'
 ];
 
 // Routes à ne JAMAIS mettre en cache

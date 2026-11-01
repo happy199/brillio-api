@@ -87,13 +87,20 @@ Route::middleware(['auth'])->post('/export-data', [DataExportController::class, 
  */
 
 // Page d'accueil
-Route::get('/', function () {
+Route::get('/', function (Request $request) {
     if (app()->bound('current_organization')) {
         return redirect()->route('auth.choice');
     }
 
+    if ($request->query('source') === 'pwa' || $request->query('mode') === 'app') {
+        return redirect()->route('app.welcome');
+    }
+
     return app(PageController::class)->home();
 })->name('home');
+
+// Application Mobile / Écran d'accueil & Onboarding (Figma)
+Route::get('/app', [PageController::class, 'appWelcome'])->name('app.welcome');
 
 // Pages informatives
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
