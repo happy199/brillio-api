@@ -123,7 +123,7 @@
                                         <div class="flex items-center justify-between px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200/80 text-[9px] font-bold text-emerald-800">
                                             <span class="flex items-center gap-1">
                                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                                Application PWA active
+                                                Application mobile active
                                             </span>
                                             <span class="text-emerald-700 font-extrabold text-[8px] bg-emerald-100/70 px-1.5 py-0.5 rounded">En ligne</span>
                                         </div>
