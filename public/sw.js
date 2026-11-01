@@ -5,7 +5,7 @@
  * Background Sync, Web Push & Caching sécurisé.
  */
 
-const CACHE_NAME = 'brillio-pwa-v1.3.0';
+const CACHE_NAME = 'brillio-pwa-v1.3.1';
 const OFFLINE_URL = '/offline.html';
 
 // Ressources critiques pré-mises en cache à l'installation
@@ -64,6 +64,12 @@ self.addEventListener('activate', (event) => {
                     })
                 );
             }),
+            // Activer Navigation Preload si supporté
+            (async () => {
+                if (self.registration.navigationPreload) {
+                    await self.registration.navigationPreload.enable();
+                }
+            })(),
             // Prise de contrôle immédiate des clients
             self.clients.claim()
         ])
@@ -149,10 +155,17 @@ self.addEventListener('fetch', (event) => {
         }
     }
 
-    // 1. NAVIGATION REQUESTS (Pages HTML Laravel) : Network direct ultra-rapide avec fallback Offline instantané
+    // 1. NAVIGATION REQUESTS (Pages HTML Laravel) : Network direct ultra-rapide avec preload et fallback Offline
     if (request.mode === 'navigate' || (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
-        event.respondWith(
-            fetch(request).catch(async () => {
+        event.respondWith((async () => {
+            try {
+                // Utiliser la réponse préchargée en parallèle pour éliminer toute latence de réveil du worker
+                const preloadResponse = await event.preloadResponse;
+                if (preloadResponse) {
+                    return preloadResponse;
+                }
+                return await fetch(request);
+            } catch (error) {
                 const cachedResponse = await caches.match(request);
                 if (cachedResponse) {
                     return cachedResponse;
@@ -163,8 +176,8 @@ self.addEventListener('fetch', (event) => {
                     statusText: 'Service Unavailable',
                     headers: { 'Content-Type': 'text/plain; charset=utf-8' }
                 });
-            })
-        );
+            }
+        })());
         return;
     }
 

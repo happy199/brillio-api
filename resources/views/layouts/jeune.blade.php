@@ -403,7 +403,7 @@
 
     <!-- Cookie Consent Banner -->
     <div id="cookieBanner"
-        class="hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-primary-500 shadow-2xl z-50 p-4 sm:p-6">
+        class="hidden fixed bottom-16 md:bottom-0 left-0 right-0 bg-white border-t-2 border-primary-500 shadow-2xl z-50 p-4 sm:p-6">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-start gap-3 flex-1">
                 <svg class="w-6 h-6 text-primary-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
