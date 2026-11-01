@@ -1,12 +1,26 @@
 {
-    "name": "Brillio - Plateforme de Mentorat en Afrique",
+    "id": "/?source=pwa",
+    "name": "Brillio - Orientation & Mentorat en Afrique",
     "short_name": "Brillio",
-    "description": "Plateforme de mentorat connectant jeunes talents et mentors expérimentés en Afrique pour l'orientation professionnelle et le développement de carrière",
-    "start_url": "/",
+    "description": "Plateforme d'orientation professionnelle et de mentorat connectant jeunes talents et professionnels chevronnés en Afrique.",
+    "start_url": "/?source=pwa",
+    "scope": "/",
     "display": "standalone",
+    "display_override": [
+        "window-controls-overlay",
+        "standalone",
+        "minimal-ui"
+    ],
     "background_color": "#ffffff",
     "theme_color": "#6366f1",
     "orientation": "portrait-primary",
+    "lang": "fr",
+    "dir": "ltr",
+    "categories": [
+        "education",
+        "business",
+        "productivity"
+    ],
     "icons": [
         {
             "src": "/favicon-16x16.png",
@@ -19,22 +33,103 @@
             "type": "image/png"
         },
         {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        },
+        {
             "src": "/android-chrome-192x192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
         },
         {
             "src": "/android-chrome-512x512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
-            "src": "/apple-touch-icon.png",
-            "sizes": "180x180",
-            "type": "image/png"
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
-    "categories": ["education", "business", "lifestyle"],
-    "lang": "fr",
-    "dir": "ltr"
+    "shortcuts": [
+        {
+            "name": "Orientation & Chat IA",
+            "short_name": "Orientation",
+            "description": "Échanger avec votre conseiller d'orientation IA",
+            "url": "/espace-jeune/chat?source=pwa_shortcut",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Trouver un mentor",
+            "short_name": "Mentors",
+            "description": "Découvrir des mentors d'exception",
+            "url": "/espace-jeune/mentors?source=pwa_shortcut",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Mes Messages",
+            "short_name": "Messages",
+            "description": "Consulter vos échanges avec vos mentors",
+            "url": "/espace-jeune/messages?source=pwa_shortcut",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Mon Profil & Portefeuille",
+            "short_name": "Profil",
+            "description": "Accéder à vos informations et vos crédits",
+            "url": "/espace-jeune/profile?source=pwa_shortcut",
+            "icons": [
+                {
+                    "src": "/android-chrome-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/desktop.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Tableau de bord et orientation professionnelle Brillio"
+        },
+        {
+            "src": "/screenshots/mobile.png",
+            "sizes": "750x1334",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Application mobile Brillio avec mentors et chat IA"
+        }
+    ]
 }

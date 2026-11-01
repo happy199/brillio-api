@@ -35,6 +35,8 @@ class SecurityHeadersMiddleware
         $csp .= "form-action 'self' *.brillio.africa brillio.africa *.moneroo.io moneroo.io; ";
         $csp .= "connect-src 'self' https: wss:; ";
         $csp .= "frame-src 'self' https:; ";
+        $csp .= "worker-src 'self' blob:; ";
+        $csp .= "manifest-src 'self'; ";
         $csp .= "base-uri 'self'; ";
         $csp .= "object-src 'none';";
 
@@ -48,6 +50,7 @@ class SecurityHeadersMiddleware
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
         $response->headers->set('Permissions-Policy', 'camera=(self "https://8x8.vc"), microphone=(self "https://8x8.vc"), geolocation=(), browsing-topics=()');
 
         return $response;

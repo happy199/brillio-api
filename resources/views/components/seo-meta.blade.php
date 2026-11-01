@@ -69,6 +69,10 @@ $hreflangs = $seoService->getHreflangTags(app()->getLocale());
 <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('android-chrome-512x512.png') }}?v=2">
 <link rel="manifest" href="{{ asset('manifest.json') }}">
 <meta name="theme-color" content="#6366f1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Brillio">
 
 {{-- CSRF Token --}}
 <meta name="csrf-token" content="{{ csrf_token() }}">

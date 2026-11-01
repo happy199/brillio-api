@@ -1192,6 +1192,7 @@
                                                     @if($mentorInfo->user->profile_photo_path || $mentorInfo->user->profile_photo_url)
                                                     <img src="{{ $mentorInfo->user->avatar_url }}"
                                                          alt="{{ $mentorInfo->user->name }}"
+                                                         width="64" height="64" loading="lazy"
                                                          class="absolute inset-0 w-full h-full object-cover z-10 bg-white"
                                                          onerror="this.style.display='none'">
                                                     @endif
@@ -1453,22 +1454,33 @@
                 <!-- Emoji/Icon -->
                 <div class="relative text-center mb-4">
                     <div class="inline-block animate-bounce">
-                        <div class="text-7xl mb-2">🚀</div>
+                        <div class="text-7xl mb-2">📱</div>
                     </div>
                 </div>
 
                 <!-- Title -->
-                <h3 class="relative text-3xl font-bold text-center mb-3">
-                    L'app arrive bientôt !
+                <h3 class="relative text-3xl font-bold text-center mb-2">
+                    L'app mobile est là !
                 </h3>
 
-                <p class="relative text-center text-white/90 text-lg font-medium">
-                    Aidons-nous à atteindre <span class="font-bold">5000 utilisateurs</span>
+                <p class="relative text-center text-white/95 text-base font-medium">
+                    Installe <span class="font-bold underline decoration-pink-300">Brillio</span> en 1 clic sur ton écran d'accueil sans passer par les stores !
                 </p>
             </div>
 
             <!-- Content -->
             <div class="p-8 overflow-y-auto">
+                <!-- Direct Install CTA Button -->
+                <div class="mb-8">
+                    <button type="button" data-pwa-install
+                        @click="showAppModal = false"
+                        class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-extrabold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all duration-200 text-base">
+                        <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Installer l'application mobile
+                    </button>
+                    <p class="text-center text-xs text-gray-500 mt-2">Compatible iPhone (iOS Safari) et Android (Chrome / Samsung Internet)</p>
+                </div>
+
                 <!-- Progress Section -->
                 @php
                 $totalUsers = $jeunesCount + $mentorsCount;
@@ -1476,13 +1488,13 @@
                 $progressPercentage = min(($totalUsers / $targetUsers) * 100, 100);
                 @endphp
 
-                <div class="mb-8">
+                <div class="mb-6 pt-6 border-t border-gray-100">
                     <div class="flex justify-between items-baseline mb-3">
                         <span
                             class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                             {{ $totalUsers }} utilisateurs
                         </span>
-                        <span class="text-gray-500 font-medium">Objectif : {{ $targetUsers }}</span>
+                        <span class="text-gray-500 font-medium">Objectif communauté : {{ $targetUsers }}</span>
                     </div>
 
                     <!-- Progress Bar -->
@@ -1497,15 +1509,15 @@
 
                     <p class="text-center text-sm text-gray-600 mt-3">
                         Plus que <span class="font-bold text-purple-600">{{ max($targetUsers - $totalUsers, 0) }}
-                            utilisateurs</span> pour débloquer l'application mobile ! 🎉
+                            utilisateurs</span> pour célébrer le cap des 5 000 talents ! 🎉
                     </p>
                 </div>
 
                 <!-- Call to Action Text -->
-                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 mb-6 border border-purple-100">
-                    <p class="text-gray-700 text-center leading-relaxed">
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-5 mb-6 border border-purple-100">
+                    <p class="text-gray-700 text-center leading-relaxed text-sm">
                         <span class="font-semibold text-purple-700">Partage Brillio</span> avec tes proches et tes amis
-                        pour accélérer le lancement de l'application mobile !
+                        pour faire grandir la communauté !
                         <span class="inline-block animate-pulse">✨</span>
                     </p>
                 </div>
@@ -1513,7 +1525,7 @@
                 <!-- Share Buttons -->
                 <div class="space-y-3">
                     <!-- Native Share -->
-                    <button onclick="shareViaWebAPI()"
+                    <button type="button" @click="shareViaWebAPI()"
                         class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1523,7 +1535,7 @@
                     </button>
 
                     <!-- Copy Link Button -->
-                    <button onclick="copyShareLink()"
+                    <button type="button" @click="copyShareLink()"
                         class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-purple-200 text-purple-700 font-semibold rounded-xl hover:bg-purple-50 hover:border-purple-300 transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
