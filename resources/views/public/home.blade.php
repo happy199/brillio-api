@@ -1490,7 +1490,7 @@
                     class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                     @csrf
                     <input type="email" name="email" placeholder="Ton adresse email" required
-                        class="flex-1 px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        class="flex-1 px-6 py-3 bg-white text-gray-900 placeholder-gray-400 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                     <button type="submit"
                         class="px-8 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-full hover:shadow-lg transition-all duration-300">
                         S'inscrire

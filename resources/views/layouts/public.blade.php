@@ -132,6 +132,14 @@
             font-family: 'Poppins', sans-serif;
         }
 
+        /* Forcer un fond blanc normal sur les champs de saisie */
+        input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="color"]):not([type="range"]),
+        select,
+        textarea {
+            background-color: #ffffff;
+            color: #111827;
+        }
+
         /* Gradient backgrounds */
         .gradient-hero {
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #c026d3 100%);

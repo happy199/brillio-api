@@ -4,7 +4,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Brillio">
 <meta name="application-name" content="Brillio">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="light">
 <meta name="msapplication-TileColor" content="{{ $primaryColor ?? '#6366f1' }}">
 <meta name="msapplication-TileImage" content="{{ asset('android-chrome-192x192.png') }}">
 <meta name="theme-color" content="{{ $primaryColor ?? '#6366f1' }}">
