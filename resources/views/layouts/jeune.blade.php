@@ -110,9 +110,60 @@
 
 <body class="font-sans antialiased bg-gray-50 min-h-screen">
     <!-- Navigation Top -->
-    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
+    <nav class="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+            <!-- Mobile App Bar (Figma-Harmonized) -->
+            <div class="flex md:hidden items-center justify-between h-16">
+                <!-- User Greeting & Avatar -->
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('jeune.profile') }}" class="relative group">
+                        <div class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-indigo-500/30 flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-sm">
+                            @if(auth()->user()->avatar_url)
+                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
+                            @else
+                                <span class="text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                            @endif
+                        </div>
+                    </a>
+                    <div class="leading-tight">
+                        <p class="text-[11px] font-medium text-slate-400">Bonjour 👋</p>
+                        <h2 class="text-sm font-bold text-slate-800 tracking-tight truncate max-w-[150px]">{{ explode(' ', auth()->user()->name)[0] }}</h2>
+                    </div>
+                </div>
+
+                <!-- Right Actions: Balance & Notification Bell -->
+                <div class="flex items-center gap-2">
+                    <!-- Credits Pill -->
+                    <a href="{{ route('jeune.wallet.index') }}"
+                       class="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100/80 rounded-full text-indigo-700 font-bold text-xs shadow-xs hover:border-indigo-200 active:scale-95 transition">
+                        <span class="text-xs">💎</span>
+                        <span>{{ auth()->user()->credits_balance ?? 0 }}</span>
+                    </a>
+
+                    <!-- Notification Bell -->
+                    @php
+                        $mobileUnread = \App\Models\Message::whereHas('mentorship', fn($q) =>
+                            $q->where('mentee_id', auth()->id())->where('status','accepted'))
+                            ->where('sender_id', '!=', auth()->id())->whereNull('read_at')->count();
+                    @endphp
+                    <a href="{{ route('jeune.messages.index') }}"
+                       class="relative p-2 rounded-xl text-slate-600 hover:bg-slate-100 active:scale-95 transition"
+                       aria-label="Messages et notifications">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        @if($mobileUnread > 0)
+                            <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-600"></span>
+                            </span>
+                        @endif
+                    </a>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation Bar -->
+            <div class="hidden md:flex justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('jeune.dashboard') }}" class="flex items-center gap-2">
@@ -128,13 +179,12 @@
                 </div>
 
                 <!-- Navigation Items (Desktop) -->
-                <div class="hidden md:flex items-center gap-2">
+                <div class="flex items-center gap-2">
                     <!-- Menus directs -->
                     <a href="{{ route('jeune.dashboard') }}"
                         class="nav-item px-4 py-2 rounded-xl text-sm font-medium {{ request()->routeIs('jeune.dashboard') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                         Accueil
                     </a>
-
 
                     <!-- Autres menus -->
                     <a href="{{ route('jeune.personality') }}"
@@ -228,7 +278,7 @@
                     </div>
                 </div>
 
-                <!-- Profile Dropdown -->
+                <!-- Profile Dropdown (Desktop) -->
                 <div class="flex items-center gap-4">
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open"
@@ -243,8 +293,7 @@
                                     strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                                 @endif
                             </div>
-                            <span class="hidden sm:block text-sm font-medium text-gray-700">{{ auth()->user()->name
-                                }}</span>
+                            <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
@@ -275,52 +324,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Mobile Navigation -->
-        <div class="md:hidden border-t border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
-            <a href="{{ route('jeune.dashboard') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.dashboard') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Accueil
-            </a>
-            <a href="{{ route('jeune.personality') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.personality') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Personnalité
-            </a>
-            <a href="{{ route('jeune.chat') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.chat') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Orientation
-            </a>
-            <a href="{{ route('jeune.opportunities') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1 {{ request()->routeIs('jeune.opportunities*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                <span>Opportunités</span>
-                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500 text-white animate-pulse">Soon</span>
-            </a>
-            <a href="{{ route('jeune.outils') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1 {{ request()->routeIs('jeune.outils*', 'jeune.documents*', 'jeune.resources*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                <span>Outils</span>
-                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-primary-600 text-white animate-pulse">New</span>
-            </a>
-            <a href="{{ route('jeune.messages.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.messages.*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Messages
-            </a>
-            <a href="{{ route('jeune.mentors') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentors') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Trouver un mentor
-            </a>
-            <a href="{{ route('jeune.mentorship.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.mentorship.index') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Mes Mentors
-            </a>
-            <a href="{{ route('jeune.sessions.calendar') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->routeIs('jeune.sessions.calendar') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Mon Calendrier
-            </a>
-            <a href="{{ route('jeune.sessions.index') }}"
-                class="nav-item flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium {{ request()->is('espace-jeune/mentorat/seances*') ? 'active' : 'text-gray-600 bg-gray-100' }}">
-                Mes Séances
-            </a>
         </div>
     </nav>
 

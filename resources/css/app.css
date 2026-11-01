@@ -70,3 +70,107 @@
         cursor: pointer;
     }
 }
+
+/* ==========================================================================
+   Brillio Mobile & PWA Design System (Figma-Harmonized)
+   ========================================================================== */
+
+@layer components {
+    /* Hero Banner with Indigo-Purple Gradient */
+    .pwa-hero-card {
+        background: linear-gradient(135deg, #4338ca 0%, #4f46e5 35%, #6366f1 70%, #7c3aed 100%);
+        border-radius: 1.5rem;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 14px 34px -10px rgba(79, 70, 229, 0.45);
+    }
+
+    .pwa-hero-pattern {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.18) 0%, transparent 45%),
+                          radial-gradient(circle at 10% 85%, rgba(124, 58, 237, 0.28) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    /* Pastel Balance & Metrics Card */
+    .pwa-balance-card {
+        background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
+        border: 1px solid #e0e7ff;
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 16px -2px rgba(99, 102, 241, 0.08);
+    }
+
+    /* 2x2 Services Grid Tiles */
+    .pwa-tile-card {
+        border-radius: 1.25rem;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 120px;
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+        border-width: 1px;
+    }
+
+    .pwa-tile-card:active {
+        transform: scale(0.97);
+    }
+
+    .pwa-tile-purple {
+        background-color: #faf5ff;
+        border-color: #f3e8ff;
+    }
+    .pwa-tile-purple:hover {
+        border-color: #d8b4fe;
+        box-shadow: 0 8px 20px -6px rgba(168, 85, 247, 0.2);
+    }
+
+    .pwa-tile-blue {
+        background-color: #eff6ff;
+        border-color: #dbeafe;
+    }
+    .pwa-tile-blue:hover {
+        border-color: #93c5fd;
+        box-shadow: 0 8px 20px -6px rgba(59, 130, 246, 0.2);
+    }
+
+    .pwa-tile-emerald {
+        background-color: #ecfdf5;
+        border-color: #d1fae5;
+    }
+    .pwa-tile-emerald:hover {
+        border-color: #6ee7b7;
+        box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.2);
+    }
+
+    .pwa-tile-amber {
+        background-color: #fffbeb;
+        border-color: #fef3c7;
+    }
+    .pwa-tile-amber:hover {
+        border-color: #fcd34d;
+        box-shadow: 0 8px 20px -6px rgba(245, 158, 11, 0.2);
+    }
+
+    /* Floating Frosted Bottom Navigation Dock */
+    .pwa-bottom-dock {
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.07);
+        border-top-left-radius: 1.25rem;
+        border-top-right-radius: 1.25rem;
+    }
+
+    /* Active Dot Indicator */
+    .pwa-nav-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 9999px;
+        background-color: #4f46e5;
+        margin: 2px auto 0;
+    }
+}
