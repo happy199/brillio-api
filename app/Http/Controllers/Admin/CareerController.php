@@ -42,7 +42,7 @@ class CareerController extends Controller
             $query->whereExists(function ($q) use ($request) {
                 $q->select(DB::raw(1))
                     ->from('career_mbti')
-                    ->whereRaw('career_mbti.career_id = careers.id')
+                    ->whereColumn('career_mbti.career_id', 'careers.id')
                     ->where('mbti_type', strtoupper($request->mbti));
             });
         }
@@ -52,7 +52,7 @@ class CareerController extends Controller
             $query->whereExists(function ($q) use ($request) {
                 $q->select(DB::raw(1))
                     ->from('career_sector')
-                    ->whereRaw('career_sector.career_id = careers.id')
+                    ->whereColumn('career_sector.career_id', 'careers.id')
                     ->where('sector_code', $request->sector);
             });
         }

@@ -218,7 +218,7 @@ class MentorProfile extends Model
         }
 
         if (empty($matchingSpecializations)) {
-            return $query->whereRaw('1 = 0'); // Retourne rien
+            return $query->whereNull('id'); // Retourne rien
         }
 
         return $query->whereIn('specialization', $matchingSpecializations);
