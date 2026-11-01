@@ -1,7 +1,8 @@
 @extends('layouts.public')
 
-{{-- SEO Meta Tags --}}
-<x-seo-meta page="home" />
+@push('seo')
+    <x-seo-meta page="home" />
+@endpush
 
 
 @section('content')

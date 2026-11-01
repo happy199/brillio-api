@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="fr" class="overflow-x-hidden">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @stack('seo')
+
+    @if (empty($__env->yieldPushContent('seo')))
     <meta name="description"
         content="@yield('meta_description', 'Brillio - La plateforme d\'orientation professionnelle pour les jeunes africains. Découvrez votre personnalité, connectez avec des mentors et construisez votre avenir.')">
     <meta name="keywords"
         content="orientation, carrière, Afrique, jeunes, mentors, personnalité, MBTI, emploi, formation">
     <meta name="author" content="Brillio">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -26,14 +30,14 @@
     <meta property="twitter:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
 
-    @include('partials.analytics')
-
     <title>@yield('title', 'Brillio - Plateforme de Mentorat en Afrique')</title>
-
-    @include('partials.pwa-head')
 
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ url()->current() }}">
+    @endif
+
+    @include('partials.analytics')
+    @include('partials.pwa-head')
 
 
     <!-- Suppress Tailwind CDN warning -->
@@ -114,6 +118,10 @@
     <style>
         [x-cloak] {
             display: none !important;
+        }
+
+        html, body {
+            overflow-x: clip;
         }
 
         html {
@@ -278,7 +286,7 @@
 </head>
 
 
-<body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden" x-data="{ mobileMenu: false }">
+<body class="bg-gray-50 text-gray-900 antialiased" x-data="{ mobileMenu: false }">
     <!-- Skip to main content (a11y) -->
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-indigo-600 focus:text-white focus:rounded-xl focus:shadow-xl focus:outline-none">
         Aller au contenu principal

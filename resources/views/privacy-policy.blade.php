@@ -1,7 +1,8 @@
 @extends('layouts.public')
 
-{{-- SEO Meta Tags --}}
-<x-seo-meta page="privacy" />
+@push('seo')
+    <x-seo-meta page="privacy" />
+@endpush
 
 @section('title', 'Politique de Confidentialité')
 
