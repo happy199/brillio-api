@@ -168,8 +168,8 @@
                  x-transition:enter-start="opacity-0 translate-x-4"
                  x-transition:enter-end="opacity-100 translate-x-0"
                  class="flex-1 flex flex-col justify-center my-auto">
-                <div class="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
-                    <img src="{{ asset('images/onboarding/students.jpg') }}" alt="Bienvenue sur Brillio" class="w-full h-full object-cover">
+                <div class="w-full max-w-[300px] aspect-square mx-auto rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
+                    <img src="{{ asset('images/onboarding/students.png') }}" alt="Bienvenue sur Brillio" class="w-full h-full object-cover">
                 </div>
                 <div class="mt-6 text-center px-2">
                     <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Bienvenue sur Brillio</h2>
@@ -187,8 +187,8 @@
                  x-transition:enter-start="opacity-0 translate-x-4"
                  x-transition:enter-end="opacity-100 translate-x-0"
                  class="flex-1 flex flex-col justify-center my-auto">
-                <div class="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
-                    <img src="{{ asset('images/onboarding/mentor.jpg') }}" alt="Inspire-toi de modèles" class="w-full h-full object-cover">
+                <div class="w-full max-w-[300px] aspect-square mx-auto rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
+                    <img src="{{ asset('images/onboarding/mentor.png') }}" alt="Inspire-toi de modèles" class="w-full h-full object-cover">
                 </div>
                 <div class="mt-6 text-center px-2">
                     <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Inspire-toi de modèles</h2>
@@ -206,8 +206,8 @@
                  x-transition:enter-start="opacity-0 translate-x-4"
                  x-transition:enter-end="opacity-100 translate-x-0"
                  class="flex-1 flex flex-col justify-center my-auto">
-                <div class="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
-                    <img src="{{ asset('images/onboarding/start.jpg') }}" alt="Commence maintenant" class="w-full h-full object-cover">
+                <div class="w-full max-w-[300px] aspect-square mx-auto rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
+                    <img src="{{ asset('images/onboarding/start.png') }}" alt="Commence maintenant" class="w-full h-full object-cover">
                 </div>
                 <div class="mt-6 text-center px-2">
                     <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Commence maintenant</h2>
