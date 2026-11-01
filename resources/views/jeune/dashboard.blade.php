@@ -75,8 +75,8 @@
         <!-- 3. The 2x2 Services Grid (Figma Feature Core) -->
         <div>
             <div class="flex items-center justify-between mb-3 px-0.5">
-                <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Services Brillio</h2>
-                <span class="text-[11px] text-indigo-600 font-semibold">4 espaces</span>
+                <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Services & Outils Brillio</h2>
+                <span class="text-[11px] text-indigo-600 font-semibold">6 espaces</span>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <!-- Tuile 1: Orientation IA -->
@@ -143,6 +143,40 @@
                     </div>
                     <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-amber-600">
                         <span>Découvrir</span>
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <!-- Tuile 5: Analyseur de CV (Outils) -->
+                <a href="{{ route('jeune.outils') }}" class="pwa-tile-card pwa-tile-blue group" style="background-color: #f0fdf4; border-color: #dcfce7;">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition-colors">Analyseur de CV</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Audit & révision IA</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-teal-600">
+                        <span>Analyser</span>
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <!-- Tuile 6: Mes Documents -->
+                <a href="{{ route('jeune.documents') }}" class="pwa-tile-card pwa-tile-purple group" style="background-color: #fdf2f8; border-color: #fce7f3;">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-pink-700 transition-colors">Mes Documents</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Diplômes & fichiers</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-pink-600">
+                        <span>Consulter</span>
                         <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </a>

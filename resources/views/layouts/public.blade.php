@@ -100,7 +100,7 @@
             }
         }
     </script>
-    @vite(['resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Google Fonts - Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,6 +122,12 @@
 
         html, body {
             overflow-x: clip;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        a, button, [role="button"] {
+            touch-action: manipulation;
         }
 
         html {

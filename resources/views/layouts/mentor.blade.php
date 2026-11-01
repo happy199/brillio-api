@@ -59,11 +59,17 @@
             }
         }
     </script>
-    @vite(['resources/js/app.js'])
-
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         [x-cloak] { display: none !important; }
+        html, body {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        a, button, [role="button"] {
+            touch-action: manipulation;
+        }
         .nav-item {
             transition: all 0.2s ease;
         }

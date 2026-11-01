@@ -57,14 +57,18 @@
             display: none !important;
         }
 
-        button:not(:disabled),
-        [role="button"]:not(:disabled),
-        .cursor-pointer {
+        html, body {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        a, button, [role="button"], .cursor-pointer {
+            touch-action: manipulation;
             cursor: pointer !important;
         }
     </style>
 
-    @vite(['resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Tippy.js pour les tooltips -->
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>

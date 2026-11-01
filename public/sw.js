@@ -5,7 +5,7 @@
  * Background Sync, Web Push & Caching sécurisé.
  */
 
-const CACHE_NAME = 'brillio-pwa-v1.2.1';
+const CACHE_NAME = 'brillio-pwa-v1.3.0';
 const OFFLINE_URL = '/offline.html';
 
 // Ressources critiques pré-mises en cache à l'installation
@@ -64,12 +64,6 @@ self.addEventListener('activate', (event) => {
                     })
                 );
             }),
-            // Activation du Navigation Preload (si supporté par le navigateur)
-            (async () => {
-                if (self.registration && self.registration.navigationPreload) {
-                    await self.registration.navigationPreload.enable();
-                }
-            })(),
             // Prise de contrôle immédiate des clients
             self.clients.claim()
         ])
@@ -155,37 +149,21 @@ self.addEventListener('fetch', (event) => {
         }
     }
 
-    // 1. NAVIGATION REQUESTS (Pages HTML Laravel) : Network-First avec Navigation Preload & fallback Offline
+    // 1. NAVIGATION REQUESTS (Pages HTML Laravel) : Network direct ultra-rapide avec fallback Offline instantané
     if (request.mode === 'navigate' || (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
         event.respondWith(
-            (async () => {
-                try {
-                    // Utiliser en priorité la réponse préchargée si disponible
-                    const preloadResponse = await event.preloadResponse;
-                    if (preloadResponse) {
-                        return preloadResponse;
-                    }
-
-                    // Requête réseau en direct
-                    const networkResponse = await fetch(request);
-                    if (networkResponse && networkResponse.status === 200) {
-                        return networkResponse;
-                    }
-                    return networkResponse;
-                } catch {
-                    // Échec réseau : tentative de récupération en cache ou affichage de la page offline
-                    const cachedResponse = await caches.match(request);
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-                    const offlineFallback = await caches.match(OFFLINE_URL);
-                    return offlineFallback || new Response('Hors ligne', {
-                        status: 503,
-                        statusText: 'Service Unavailable',
-                        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-                    });
+            fetch(request).catch(async () => {
+                const cachedResponse = await caches.match(request);
+                if (cachedResponse) {
+                    return cachedResponse;
                 }
-            })()
+                const offlineFallback = await caches.match(OFFLINE_URL);
+                return offlineFallback || new Response('Hors ligne', {
+                    status: 503,
+                    statusText: 'Service Unavailable',
+                    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                });
+            })
         );
         return;
     }
