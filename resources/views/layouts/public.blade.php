@@ -108,9 +108,8 @@
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.7/dist/cdn.min.js" integrity="sha384-NArNwzWsUSF+kY2lgW4YriEkjLqi+J+za6HrENUn/3nZqkBnWbxV22kCJEK5Uu6n" crossorigin="anonymous"></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
-    <!-- AOS Animation -->
+    <!-- AOS Animation Stylesheet -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <style>
         [x-cloak] {
@@ -649,13 +648,49 @@
         </div>
     </footer>
 
-    <!-- Initialize AOS -->
+    <!-- AOS Animation Script & Robust Init -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-        AOS.init({
-            duration: 800,
-            easing: 'ease-out-cubic',
-            once: true,
-        });
+        (function() {
+            function initAOS() {
+                if (typeof AOS !== 'undefined') {
+                    AOS.init({
+                        duration: 800,
+                        easing: 'ease-out-cubic',
+                        once: true,
+                    });
+                } else {
+                    // Fallback de sécurité : assure la visibilité de tout le contenu
+                    document.querySelectorAll('[data-aos]').forEach(function(el) {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                    });
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initAOS);
+            } else {
+                initAOS();
+            }
+
+            // Filet de sécurité supplémentaire : garanti qu'aucun élément ne reste bloqué à opacity:0
+            setTimeout(function() {
+                document.querySelectorAll('[data-aos]').forEach(function(el) {
+                    if (window.getComputedStyle(el).opacity === '0') {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                    }
+                });
+            }, 1200);
+
+            // Gestionnaire d'erreurs d'images sans violation CSP
+            window.addEventListener('error', function(e) {
+                if (e.target && e.target.tagName === 'IMG' && e.target.classList.contains('mentor-avatar-img')) {
+                    e.target.style.display = 'none';
+                }
+            }, true);
+        })();
     </script>
 
     @stack('scripts')

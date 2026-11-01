@@ -1193,8 +1193,7 @@
                                                     <img src="{{ $mentorInfo->user->avatar_url }}"
                                                          alt="{{ $mentorInfo->user->name }}"
                                                          width="64" height="64" loading="lazy"
-                                                         class="absolute inset-0 w-full h-full object-cover z-10 bg-white"
-                                                         onerror="this.style.display='none'">
+                                                         class="mentor-avatar-img absolute inset-0 w-full h-full object-cover z-10 bg-white">
                                                     @endif
                                                 </div>
                                                 <div class="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white z-20" title="Vérifié"></div>
