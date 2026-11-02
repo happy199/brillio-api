@@ -23,24 +23,24 @@ class PageController extends Controller
     public function appWelcome()
     {
         if (auth()->check()) {
-            $user = auth()->user();
-            if ($user->isJeune()) {
-                return redirect()->route($user->onboarding_completed ? 'jeune.dashboard' : 'jeune.onboarding');
-            }
-            if ($user->isMentor()) {
-                return redirect()->route('mentor.dashboard');
-            }
-            if ($user->isAdmin() || $user->user_type === 'admin') {
-                return redirect()->route('admin.dashboard');
-            }
-            if ($user->user_type === 'coach') {
-                return redirect()->route('coach.dashboard');
-            }
-
-            return redirect()->route('auth.choice');
+            return redirect()->route($this->getAuthenticatedDashboardRoute(auth()->user()));
         }
 
         return view('public.app-welcome');
+    }
+
+    /**
+     * Résout la route de redirection selon le rôle de l'utilisateur connecté
+     */
+    private function getAuthenticatedDashboardRoute(User $user): string
+    {
+        return match (true) {
+            $user->isJeune() => $user->onboarding_completed ? 'jeune.dashboard' : 'jeune.onboarding',
+            $user->isMentor() => 'mentor.dashboard',
+            $user->isAdmin() || $user->user_type === 'admin' => 'admin.dashboard',
+            $user->user_type === 'coach' => 'coach.dashboard',
+            default => 'auth.choice',
+        };
     }
 
     /**

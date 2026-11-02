@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="color-scheme" content="light">
     <meta name="theme-color" content="#5844E3">
@@ -53,7 +53,7 @@
     </script>
 
     <!-- Alpine.js -->
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
     <style>
         body {
@@ -163,7 +163,7 @@
             <!-- ============================================================== -->
             <!-- STEP 1 : BIENVENUE SUR BRILLIO                                 -->
             <!-- ============================================================== -->
-            <div x-show="step === 1" 
+            <div x-show="step === 1"
                  x-transition:enter="transition ease-out duration-300 transform"
                  x-transition:enter-start="opacity-0 translate-x-4"
                  x-transition:enter-end="opacity-100 translate-x-0"
@@ -182,7 +182,7 @@
             <!-- ============================================================== -->
             <!-- STEP 2 : INSPIRE-TOI DE MODÈLES                                -->
             <!-- ============================================================== -->
-            <div x-show="step === 2" 
+            <div x-show="step === 2"
                  x-transition:enter="transition ease-out duration-300 transform"
                  x-transition:enter-start="opacity-0 translate-x-4"
                  x-transition:enter-end="opacity-100 translate-x-0"
@@ -201,7 +201,7 @@
             <!-- ============================================================== -->
             <!-- STEP 3 : COMMENCE MAINTENANT                                   -->
             <!-- ============================================================== -->
-            <div x-show="step === 3" 
+            <div x-show="step === 3"
                  x-transition:enter="transition ease-out duration-300 transform"
                  x-transition:enter-start="opacity-0 translate-x-4"
                  x-transition:enter-end="opacity-100 translate-x-0"

@@ -12,6 +12,8 @@ class PwaTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const VIEWPORT_FIT_COVER = 'viewport-fit=cover';
+
     #[Test]
     public function manifest_json_is_accessible_and_valid()
     {
@@ -105,7 +107,7 @@ class PwaTest extends TestCase
         $content = $response->getContent();
 
         $this->assertStringContainsString('manifest.json', $content);
-        $this->assertStringContainsString('viewport-fit=cover', $content);
+        $this->assertStringContainsString(self::VIEWPORT_FIT_COVER, $content);
         $this->assertStringContainsString('apple-mobile-web-app-capable', $content);
         $this->assertStringContainsString('pwa-install-banner', $content);
     }
@@ -120,7 +122,7 @@ class PwaTest extends TestCase
 
         $this->assertStringContainsString('manifest.json', $content);
         $this->assertStringContainsString('apple-mobile-web-app-capable', $content);
-        $this->assertStringContainsString('viewport-fit=cover', $content);
+        $this->assertStringContainsString(self::VIEWPORT_FIT_COVER, $content);
     }
 
     #[Test]
@@ -138,7 +140,7 @@ class PwaTest extends TestCase
 
         $this->assertStringContainsString('manifest.json', $content);
         $this->assertStringContainsString('apple-mobile-web-app-capable', $content);
-        $this->assertStringContainsString('viewport-fit=cover', $content);
+        $this->assertStringContainsString(self::VIEWPORT_FIT_COVER, $content);
         $this->assertStringContainsString('Navigation principale mobile', $content);
     }
 
@@ -157,7 +159,7 @@ class PwaTest extends TestCase
 
         $this->assertStringContainsString('manifest.json', $content);
         $this->assertStringContainsString('apple-mobile-web-app-capable', $content);
-        $this->assertStringContainsString('viewport-fit=cover', $content);
+        $this->assertStringContainsString(self::VIEWPORT_FIT_COVER, $content);
         $this->assertStringContainsString('Navigation principale mobile mentor', $content);
     }
 }

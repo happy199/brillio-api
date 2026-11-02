@@ -112,12 +112,12 @@ class BrillioPWA {
 
     initStorageAndCapabilities() {
         // 1. Demande de persistance du stockage (éviter l'éviction par le navigateur)
-        if (navigator.storage && navigator.storage.persist) {
+        if (navigator.storage?.persist) {
             navigator.storage.persist().catch(() => {});
         }
 
         // 2. Monitoring du quota de stockage
-        if (navigator.storage && navigator.storage.estimate) {
+        if (navigator.storage?.estimate) {
             navigator.storage.estimate().then(({ quota, usage }) => {
                 if (quota && usage) {
                     console.debug(`PWA Quota: ${(usage / 1024 / 1024).toFixed(1)}MB / ${(quota / 1024 / 1024).toFixed(1)}MB`);
@@ -173,7 +173,7 @@ class BrillioPWA {
                 try {
                     this.deferredPrompt.prompt();
                     const choice = await this.deferredPrompt.userChoice;
-                    if (choice && choice.outcome === 'accepted') {
+                    if (choice?.outcome === 'accepted') {
                         localStorage.setItem('brillio_pwa_installed', 'true');
                     }
                     this.deferredPrompt = null;
@@ -210,7 +210,7 @@ class BrillioPWA {
         if (this.isStandalone) return;
         const lastDismissed = localStorage.getItem('brillio_pwa_prompt_dismissed');
         const now = Date.now();
-        if (lastDismissed && (now - parseInt(lastDismissed, 10)) < 48 * 3600 * 1000) {
+        if (lastDismissed && (now - Number.parseInt(lastDismissed, 10)) < 48 * 3600 * 1000) {
             return;
         }
 
@@ -308,7 +308,6 @@ class BrillioPWA {
             if (closeDesktopBtn) {
                 e.preventDefault();
                 this.hideDesktopGuideModal();
-                return;
             }
         });
     }

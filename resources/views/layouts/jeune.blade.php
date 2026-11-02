@@ -155,7 +155,8 @@
                     @endphp
                     <a href="{{ route('jeune.messages.index') }}"
                        class="relative p-2 rounded-xl text-slate-600 hover:bg-slate-100 active:scale-95 transition"
-                       aria-label="Messages et notifications">
+                       title="Messages et notifications">
+                        <span class="sr-only">Messages et notifications</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
@@ -463,12 +464,11 @@
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
     <!-- Mobile Navigation Drawer (Slide-over) -->
-    <div x-show="mobileMenuOpen"
-         x-cloak
-         class="relative z-[90] md:hidden"
-         role="dialog"
-         aria-modal="true"
-         aria-label="Menu principal">
+    <dialog x-show="mobileMenuOpen"
+            x-cloak
+            class="relative z-[90] md:hidden p-0 m-0 border-0 bg-transparent w-full h-full max-w-full max-h-full"
+            aria-modal="true"
+            aria-label="Menu principal">
         <!-- Backdrop -->
         <div x-show="mobileMenuOpen"
              x-transition:enter="ease-in-out duration-300"
@@ -627,7 +627,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </dialog>
 
     @stack('scripts')
     @include('partials.toast')

@@ -109,3 +109,18 @@ button:not(:disabled),
         background-color: #4f46e5;
         margin: 2px auto 0;
     }
+
+    /* Accessibilité : Respect des préférences d'animation réduite */
+    @media (prefers-reduced-motion: reduce) {
+        .pwa-tile-card {
+            transition: none;
+        }
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms;
+            animation-iteration-count: 1;
+            transition-duration: 0.01ms;
+            scroll-behavior: auto;
+        }
+    }

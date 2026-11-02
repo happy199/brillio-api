@@ -78,7 +78,12 @@ self.addEventListener('activate', (event) => {
 
 // Réception de messages depuis l'application (ex: forcer skipWaiting)
 self.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'SKIP_WAITING') {
+    // Vérification de l'origine du message (Web:S2819)
+    if (event.origin && event.origin !== self.location.origin) {
+        return;
+    }
+
+    if (event.data?.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
 });
@@ -97,8 +102,9 @@ self.addEventListener('push', (event) => {
         if (event.data) {
             data = event.data.json();
         }
-    } catch {
-        data.body = event.data.text();
+    } catch (_ignored) {
+        // Fallback vers le texte brut si le payload n'est pas un JSON valide
+        data.body = event.data ? event.data.text() : data.body;
     }
 
     const options = {
@@ -117,7 +123,7 @@ self.addEventListener('push', (event) => {
 // Clic sur une notification Push
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    const rawUrl = (event.notification.data && event.notification.data.url) || '/';
+    const rawUrl = event.notification.data?.url || '/';
 
     // Sécurisation stricte contre les redirections ouvertes (Open Redirect Web:S5144)
     let safeUrl = '/';
@@ -126,23 +132,25 @@ self.addEventListener('notificationclick', (event) => {
         if (parsed.origin === self.location.origin) {
             safeUrl = parsed.pathname + parsed.search + parsed.hash;
         }
-    } catch {
+    } catch (_ignored) {
+        // Ignorer les erreurs de parsing d'URL mal formée et rediriger vers la racine
         safeUrl = '/';
     }
 
-    event.waitUntil(
-        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            const fullTarget = new URL(safeUrl, self.location.origin).href;
-            for (const client of windowClients) {
-                if (client.url === fullTarget && 'focus' in client) {
-                    return client.focus();
-                }
+    event.waitUntil((async () => {
+        const windowClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        const fullTarget = new URL(safeUrl, self.location.origin).href;
+
+        for (const client of windowClients) {
+            if (client.url === fullTarget && 'focus' in client) {
+                return client.focus();
             }
-            if (self.clients.openWindow) {
-                return self.clients.openWindow(safeUrl);
-            }
-        })
-    );
+        }
+
+        if (self.clients.openWindow) {
+            return self.clients.openWindow(safeUrl);
+        }
+    })());
 });
 
 // Stratégie de capture des requêtes réseau
@@ -168,7 +176,7 @@ self.addEventListener('fetch', (event) => {
     }
 
     // 1. NAVIGATION REQUESTS (Pages HTML Laravel) : Network direct ultra-rapide avec preload et fallback Offline
-    if (request.mode === 'navigate' || (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
+    if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
         event.respondWith((async () => {
             try {
                 // Utiliser la réponse préchargée en parallèle pour éliminer toute latence de réveil du worker
@@ -177,7 +185,8 @@ self.addEventListener('fetch', (event) => {
                     return preloadResponse;
                 }
                 return await fetch(request);
-            } catch (error) {
+            } catch (_ignored) {
+                // Fallback vers le cache ou la page offline si le réseau échoue
                 const cachedResponse = await caches.match(request);
                 if (cachedResponse) {
                     return cachedResponse;
@@ -193,7 +202,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 2. ASSETS STATIQUES IMMUTABLES (Vite /build/*, Fonts, Images, CSS, JS) : Stale-While-Revalidate
+    // 2. ASSETS STATIQUES IMMUTABLES (Vite /build/*, Fonts, Images, CSS, JS) : Stale-While-Revalidate sans promesses imbriquées
     const isStaticAsset = (
         url.pathname.startsWith('/build/') ||
         url.hostname.includes('fonts.googleapis.com') ||
@@ -203,24 +212,25 @@ self.addEventListener('fetch', (event) => {
     );
 
     if (isStaticAsset) {
-        event.respondWith(
-            caches.open(CACHE_NAME).then(async (cache) => {
-                const cachedResponse = await cache.match(request);
+        event.respondWith((async () => {
+            const cache = await caches.open(CACHE_NAME);
+            const cachedResponse = await cache.match(request);
 
-                const fetchPromise = fetch(request)
-                    .then((networkResponse) => {
-                        if (networkResponse && networkResponse.status === 200) {
-                            cache.put(request, networkResponse.clone());
-                        }
-                        return networkResponse;
-                    })
-                    .catch(() => {
-                        return null;
-                    });
+            const fetchPromise = (async () => {
+                try {
+                    const networkResponse = await fetch(request);
+                    if (networkResponse && networkResponse.status === 200) {
+                        cache.put(request, networkResponse.clone());
+                    }
+                    return networkResponse;
+                } catch (_ignored) {
+                    // Ignorer les échecs de revalidation en tâche de fond quand l'appareil est hors-ligne
+                    return null;
+                }
+            })();
 
-                // Si on a l'asset en cache, on le retourne immédiatement pendant que la mise à jour s'effectue en arrière-plan
-                return cachedResponse || fetchPromise;
-            })
-        );
+            // Si on a l'asset en cache, on le retourne immédiatement pendant que la mise à jour s'effectue en arrière-plan
+            return cachedResponse || await fetchPromise;
+        })());
     }
 });
