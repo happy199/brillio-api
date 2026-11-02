@@ -117,17 +117,29 @@ self.addEventListener('push', (event) => {
 // Clic sur une notification Push
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+    const rawUrl = (event.notification.data && event.notification.data.url) || '/';
+
+    // Sécurisation stricte contre les redirections ouvertes (Open Redirect Web:S5144)
+    let safeUrl = '/';
+    try {
+        const parsed = new URL(rawUrl, self.location.origin);
+        if (parsed.origin === self.location.origin) {
+            safeUrl = parsed.pathname + parsed.search + parsed.hash;
+        }
+    } catch {
+        safeUrl = '/';
+    }
 
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            const fullTarget = new URL(safeUrl, self.location.origin).href;
             for (const client of windowClients) {
-                if (client.url === targetUrl && 'focus' in client) {
+                if (client.url === fullTarget && 'focus' in client) {
                     return client.focus();
                 }
             }
             if (self.clients.openWindow) {
-                return self.clients.openWindow(targetUrl);
+                return self.clients.openWindow(safeUrl);
             }
         })
     );
@@ -144,7 +156,7 @@ self.addEventListener('fetch', (event) => {
     }
 
     // Ignorer les extensions de navigateur ou protocoles non HTTP/HTTPS
-    if (!url.protocol.startsWith('http')) {
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
         return;
     }
 

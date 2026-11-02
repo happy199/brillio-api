@@ -156,7 +156,7 @@
                     <a href="{{ route('jeune.messages.index') }}"
                        class="relative p-2 rounded-xl text-slate-600 hover:bg-slate-100 active:scale-95 transition"
                        aria-label="Messages et notifications">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
                         @if($mobileUnread > 0)
@@ -172,7 +172,7 @@
                             @click="mobileMenuOpen = true"
                             class="p-2 rounded-xl text-slate-700 hover:bg-slate-100 active:scale-95 transition focus:outline-none"
                             aria-label="Menu principal">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
                     </button>
@@ -295,7 +295,7 @@
                         <button @click="open = !open"
                             class="nav-item px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1 {{ request()->routeIs('jeune.mentors', 'jeune.mentorship.*', 'jeune.sessions.*') ? 'active' : 'text-gray-600 hover:bg-gray-100' }}">
                             Mentorat
-                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
@@ -348,7 +348,7 @@
                                 @endif
                             </div>
                             <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
@@ -407,7 +407,7 @@
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-start gap-3 flex-1">
                 <svg class="w-6 h-6 text-primary-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
+                    viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -511,7 +511,7 @@
                                     @click="mobileMenuOpen = false"
                                     class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition active:scale-95"
                                     aria-label="Fermer le menu">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
 
@@ -603,7 +603,7 @@
                                     <a href="{{ route('jeune.wallet.index') }}"
                                        class="flex items-center justify-between px-3 py-2 rounded-xl transition {{ request()->routeIs('jeune.wallet.*') ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-700 hover:bg-slate-50' }}">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-base">💎</span>
+                                             <span class="text-base">💎</span>
                                             <span>Portefeuille</span>
                                         </div>
                                         <span class="text-xs font-bold text-indigo-600 px-2 py-0.5 rounded-full bg-indigo-50">{{ auth()->user()->credits_balance ?? 0 }} crédits</span>
@@ -618,7 +618,7 @@
                                 @csrf
                                 <button type="submit"
                                         class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition active:scale-95">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                     <span>Déconnexion</span>
                                 </button>
                             </form>

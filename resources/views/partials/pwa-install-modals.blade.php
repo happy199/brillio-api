@@ -18,27 +18,27 @@
                 Installer
             </button>
             <button type="button" data-pwa-dismiss class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-xl transition" aria-label="Fermer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
     </div>
 </div>
 
 <!-- Modal Guide d'installation iOS Safari -->
-<div id="pwa-ios-modal" class="hidden fixed inset-0 z-[10000] overflow-y-auto" role="dialog" aria-modal="true">
+<dialog id="pwa-ios-modal" class="hidden fixed inset-0 z-[10000] overflow-y-auto bg-transparent border-0 p-0 m-0 w-full h-full max-w-none max-h-none" aria-modal="true" aria-labelledby="pwa-ios-title">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" data-pwa-close-ios></div>
 
     <div class="flex min-h-full items-end sm:items-center justify-center p-4 text-center sm:p-0">
         <div class="relative transform overflow-hidden rounded-3xl bg-white dark:bg-gray-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md w-full border border-gray-100 dark:border-gray-800">
             <!-- Header avec dégradé -->
             <div class="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-6 text-white text-center relative">
-                <button type="button" data-pwa-close-ios class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button type="button" data-pwa-close-ios class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition" aria-label="Fermer la fenêtre">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
                 <div class="w-16 h-16 mx-auto bg-white rounded-2xl p-1.5 shadow-xl mb-3 flex items-center justify-center">
                     <img src="{{ asset('apple-touch-icon.png') }}" alt="Brillio" width="48" height="48" loading="lazy" class="w-12 h-12 rounded-xl object-contain">
                 </div>
-                <h3 class="text-xl font-extrabold">Installer Brillio sur iPhone</h3>
+                <h3 id="pwa-ios-title" class="text-xl font-extrabold">Installer Brillio sur iPhone</h3>
                 <p class="text-xs text-white/90 mt-1">Suivez ces 3 étapes simples pour ajouter l'app à votre écran d'accueil.</p>
             </div>
 
@@ -80,23 +80,23 @@
             </div>
         </div>
     </div>
-</div>
+</dialog>
 
 <!-- Modal Guide d'installation Ordinateur (Chrome / Edge / Brave / Safari Desktop) -->
-<div id="pwa-desktop-modal" class="hidden fixed inset-0 z-[10000] overflow-y-auto" role="dialog" aria-modal="true">
+<dialog id="pwa-desktop-modal" class="hidden fixed inset-0 z-[10000] overflow-y-auto bg-transparent border-0 p-0 m-0 w-full h-full max-w-none max-h-none" aria-modal="true" aria-labelledby="pwa-desktop-title">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" data-pwa-close-desktop></div>
 
     <div class="flex min-h-full items-center justify-center p-4 text-center">
         <div class="relative transform overflow-hidden rounded-3xl bg-white dark:bg-gray-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md w-full border border-gray-100 dark:border-gray-800">
             <!-- Header avec dégradé -->
             <div class="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-6 text-white text-center relative">
-                <button type="button" data-pwa-close-desktop class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button type="button" data-pwa-close-desktop class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition" aria-label="Fermer la fenêtre">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
                 <div class="w-16 h-16 mx-auto bg-white rounded-2xl p-1.5 shadow-xl mb-3 flex items-center justify-center">
                     <img src="{{ asset('android-chrome-192x192.png') }}" alt="Brillio" width="48" height="48" loading="lazy" class="w-12 h-12 rounded-xl object-contain">
                 </div>
-                <h3 class="text-xl font-extrabold">Installer Brillio sur Ordinateur</h3>
+                <h3 id="pwa-desktop-title" class="text-xl font-extrabold">Installer Brillio sur Ordinateur</h3>
                 <p class="text-xs text-white/90 mt-1">Application de bureau ultra-rapide et autonome.</p>
             </div>
 
@@ -104,7 +104,7 @@
             <div class="p-6 space-y-4">
                 <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/50 flex items-start gap-3">
                     <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     </div>
                     <div class="text-sm">
                         <p class="font-bold text-gray-900 dark:text-white">Icône dans la barre d'adresse</p>
@@ -115,7 +115,7 @@
                 </div>
 
                 <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                    <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     <span>Fonctionne sur Chrome, Edge, Brave et Safari (macOS Sonoma+)</span>
                 </div>
 
@@ -125,4 +125,4 @@
             </div>
         </div>
     </div>
-</div>
+</dialog>

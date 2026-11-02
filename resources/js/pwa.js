@@ -234,6 +234,11 @@ class BrillioPWA {
         const modal = document.getElementById('pwa-ios-modal');
         if (modal) {
             modal.classList.remove('hidden');
+            if (typeof modal.showModal === 'function' && !modal.open) {
+                try { modal.showModal(); } catch (e) { modal.setAttribute('open', ''); }
+            } else {
+                modal.setAttribute('open', '');
+            }
         }
     }
 
@@ -241,6 +246,11 @@ class BrillioPWA {
         const modal = document.getElementById('pwa-ios-modal');
         if (modal) {
             modal.classList.add('hidden');
+            if (typeof modal.close === 'function' && modal.open) {
+                try { modal.close(); } catch (e) { modal.removeAttribute('open'); }
+            } else {
+                modal.removeAttribute('open');
+            }
         }
     }
 
@@ -248,6 +258,11 @@ class BrillioPWA {
         const modal = document.getElementById('pwa-desktop-modal');
         if (modal) {
             modal.classList.remove('hidden');
+            if (typeof modal.showModal === 'function' && !modal.open) {
+                try { modal.showModal(); } catch (e) { modal.setAttribute('open', ''); }
+            } else {
+                modal.setAttribute('open', '');
+            }
         } else {
             alert("Pour installer Brillio sur votre ordinateur, cliquez sur l'icône d'installation située à droite dans la barre d'adresse de votre navigateur (icône ⊕ ou écran).");
         }
@@ -257,6 +272,11 @@ class BrillioPWA {
         const modal = document.getElementById('pwa-desktop-modal');
         if (modal) {
             modal.classList.add('hidden');
+            if (typeof modal.close === 'function' && modal.open) {
+                try { modal.close(); } catch (e) { modal.removeAttribute('open'); }
+            } else {
+                modal.removeAttribute('open');
+            }
         }
     }
 

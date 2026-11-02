@@ -46,8 +46,22 @@ class PageController extends Controller
     /**
      * Page d'accueil
      */
-    public function home()
+    public function home(Request $request)
     {
+        if (app()->bound('current_organization')) {
+            return redirect()->route('auth.choice');
+        }
+
+        $validated = $request->validate([
+            'source' => ['nullable', 'string', 'max:50', 'alpha_dash'],
+            'mode' => ['nullable', 'string', 'max:50', 'alpha_dash'],
+            'web' => ['nullable', 'string', 'max:10', 'alpha_dash'],
+        ]);
+
+        if (($validated['source'] ?? null) === 'pwa' || ($validated['mode'] ?? null) === 'app') {
+            return redirect()->route('app.welcome');
+        }
+
         // Statistiques dynamiques avec résilience
         try {
             $jeunesCount = User::where('user_type', 'jeune')->count();
