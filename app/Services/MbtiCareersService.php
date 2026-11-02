@@ -1086,12 +1086,9 @@ class MbtiCareersService
 
             // Si on a déjà au moins 6 métiers en base, les renvoyer immédiatement (zéro latence)
             if ($careersFromDb->count() >= 6) {
-                $finalCareers = [];
-                foreach ($careersFromDb->take(10) as $career) {
-                    $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
-                }
-
-                return $finalCareers;
+                return $careersFromDb->take(10)
+                    ->map(fn ($career) => self::formatCareerRow($career, $career->pivot_match_reason))
+                    ->all();
             }
 
             // Si des métiers sont définis statiquement dans le service, les utiliser en priorité
@@ -1099,71 +1096,78 @@ class MbtiCareersService
                 return self::CAREERS_BY_TYPE[$type];
             }
 
-            // Sinon appeler l'IA avec fallback sécurisé
-            try {
-                $selectedFromDb = $careersFromDb->take(6);
-                $selectedTitles = $selectedFromDb->pluck('title')->toArray();
-                $allGlobalTitles = DB::table('careers')->pluck('title')->toArray();
-                $brillioAI = app(BrillioIAService::class);
-                $aiResult = $brillioAI->generateCareers($type, $allGlobalTitles, $selectedTitles);
+            return self::generateCareersWithAi($type, $careersFromDb);
+        });
+    }
 
-                $finalCareers = [];
-                foreach ($selectedFromDb as $career) {
+    /**
+     * Génère des métiers via IA avec gestion de fallback sécurisé
+     */
+    private static function generateCareersWithAi(string $type, $careersFromDb): array
+    {
+        try {
+            $selectedFromDb = $careersFromDb->take(6);
+            $selectedTitles = $selectedFromDb->pluck('title')->toArray();
+            $allGlobalTitles = DB::table('careers')->pluck('title')->toArray();
+            $brillioAI = app(BrillioIAService::class);
+            $aiResult = $brillioAI->generateCareers($type, $allGlobalTitles, $selectedTitles);
+
+            $finalCareers = [];
+            foreach ($selectedFromDb as $career) {
+                $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
+            }
+
+            if (! empty($aiResult['has_new_proposals']) && count($aiResult['careers'] ?? []) >= 4) {
+                foreach (array_slice($aiResult['careers'], 0, 4) as $aiCareer) {
+                    $newCareer = Career::firstOrCreate(
+                        ['title' => $aiCareer['title']],
+                        [
+                            'description' => $aiCareer['description'],
+                            'african_context' => $aiCareer['african_context'],
+                            'future_prospects' => $aiCareer['future_prospects'],
+                            'ai_impact_level' => $aiCareer['ai_impact_level'],
+                            'demand_level' => 'Moyenne (Suggéré par IA)',
+                        ]
+                    );
+
+                    DB::table('career_mbti')->updateOrInsert(
+                        ['career_id' => $newCareer->id, 'mbti_type' => $type],
+                        ['match_reason' => $aiCareer['match_reason'] ?? "Ce métier correspond aux forces de ton profil {$type}."]
+                    );
+
+                    if (isset($aiCareer['sectors']) && is_array($aiCareer['sectors'])) {
+                        foreach ($aiCareer['sectors'] as $sectorCode) {
+                            DB::table('career_sector')->updateOrInsert(
+                                ['career_id' => $newCareer->id, 'sector_code' => $sectorCode]
+                            );
+                        }
+                    }
+
+                    $finalCareers[] = [
+                        'id' => $newCareer->id,
+                        'title' => $newCareer->title,
+                        'description' => $newCareer->description,
+                        'match_reason' => $aiCareer['match_reason'] ?? "Correspondance IA avec {$type}.",
+                        'sectors' => $aiCareer['sectors'] ?? [],
+                        'future_prospects' => $newCareer->future_prospects,
+                        'african_context' => $newCareer->african_context,
+                        'ai_impact_level' => $newCareer->ai_impact_level,
+                        'demand_level' => $newCareer->demand_level,
+                    ];
+                }
+            } else {
+                $fallbackCareers = $careersFromDb->slice(6, 4);
+                foreach ($fallbackCareers as $career) {
                     $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
                 }
-
-                if (! empty($aiResult['has_new_proposals']) && count($aiResult['careers'] ?? []) >= 4) {
-                    foreach (array_slice($aiResult['careers'], 0, 4) as $aiCareer) {
-                        $newCareer = Career::firstOrCreate(
-                            ['title' => $aiCareer['title']],
-                            [
-                                'description' => $aiCareer['description'],
-                                'african_context' => $aiCareer['african_context'],
-                                'future_prospects' => $aiCareer['future_prospects'],
-                                'ai_impact_level' => $aiCareer['ai_impact_level'],
-                                'demand_level' => 'Moyenne (Suggéré par IA)',
-                            ]
-                        );
-
-                        DB::table('career_mbti')->updateOrInsert(
-                            ['career_id' => $newCareer->id, 'mbti_type' => $type],
-                            ['match_reason' => $aiCareer['match_reason'] ?? "Ce métier correspond aux forces de ton profil {$type}."]
-                        );
-
-                        if (isset($aiCareer['sectors']) && is_array($aiCareer['sectors'])) {
-                            foreach ($aiCareer['sectors'] as $sectorCode) {
-                                DB::table('career_sector')->updateOrInsert(
-                                    ['career_id' => $newCareer->id, 'sector_code' => $sectorCode]
-                                );
-                            }
-                        }
-
-                        $finalCareers[] = [
-                            'id' => $newCareer->id,
-                            'title' => $newCareer->title,
-                            'description' => $newCareer->description,
-                            'match_reason' => $aiCareer['match_reason'] ?? "Correspondance IA avec {$type}.",
-                            'sectors' => $aiCareer['sectors'] ?? [],
-                            'future_prospects' => $newCareer->future_prospects,
-                            'african_context' => $newCareer->african_context,
-                            'ai_impact_level' => $newCareer->ai_impact_level,
-                            'demand_level' => $newCareer->demand_level,
-                        ];
-                    }
-                } else {
-                    $fallbackCareers = $careersFromDb->slice(6, 4);
-                    foreach ($fallbackCareers as $career) {
-                        $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
-                    }
-                }
-
-                return ! empty($finalCareers) ? $finalCareers : (self::CAREERS_BY_TYPE[$type] ?? []);
-            } catch (\Throwable $e) {
-                Log::warning('MbtiCareersService AI generation bypassed: '.$e->getMessage());
-
-                return self::CAREERS_BY_TYPE[$type] ?? [];
             }
-        });
+
+            return ! empty($finalCareers) ? $finalCareers : (self::CAREERS_BY_TYPE[$type] ?? []);
+        } catch (\Throwable $e) {
+            Log::warning('MbtiCareersService AI generation bypassed: '.$e->getMessage());
+
+            return self::CAREERS_BY_TYPE[$type] ?? [];
+        }
     }
 
     /**

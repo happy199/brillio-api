@@ -470,15 +470,17 @@
             aria-modal="true"
             aria-label="Menu principal">
         <!-- Backdrop -->
-        <div x-show="mobileMenuOpen"
-             x-transition:enter="ease-in-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="ease-in-out duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
-             @click="mobileMenuOpen = false"></div>
+        <button type="button"
+                x-show="mobileMenuOpen"
+                x-transition:enter="ease-in-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in-out duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 w-full h-full border-0 p-0 m-0 bg-slate-900/50 backdrop-blur-xs transition-opacity cursor-default focus:outline-none"
+                @click="mobileMenuOpen = false"
+                aria-label="Fermer le menu"></button>
 
         <div class="fixed inset-0 overflow-hidden">
             <div class="absolute inset-0 overflow-hidden">

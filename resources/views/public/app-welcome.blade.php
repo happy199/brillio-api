@@ -94,6 +94,12 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @click="nextStep()"
+             @keydown.enter="nextStep()"
+             @keydown.space.prevent="nextStep()"
+             onkeydown="if(event.key==='Enter'||event.key===' ')nextStep()"
+             role="button"
+             tabindex="0"
+             aria-label="Commencer la visite"
              class="absolute inset-0 z-30 bg-gradient-to-b from-[#5844E3] via-[#513FDF] to-[#4332CE] flex flex-col justify-between items-center text-white p-8 cursor-pointer safe-top safe-bottom">
 
             <!-- Status Bar Mockup -->

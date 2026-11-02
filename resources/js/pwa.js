@@ -6,9 +6,11 @@
  */
 
 class BrillioPWA {
+    deferredPrompt = null;
+    isStandalone = false;
+    _isPrompting = false;
+
     constructor() {
-        this.deferredPrompt = null;
-        this.isStandalone = false;
         this.init();
     }
 
@@ -134,10 +136,12 @@ class BrillioPWA {
 
         // 4. Badging API (Progressive Enhancement)
         if ('setAppBadge' in navigator) {
-            window.setAppBadge = (count) => {
+            window.setAppBadge = async (count) => {
                 try {
-                    return count > 0 ? navigator.setAppBadge(count) : navigator.clearAppBadge();
-                } catch {}
+                    return count > 0 ? await navigator.setAppBadge(count) : await navigator.clearAppBadge();
+                } catch (error) {
+                    console.debug('Badging API error:', error);
+                }
             };
         }
     }
@@ -286,7 +290,7 @@ class BrillioPWA {
             const installBtn = e.target.closest('[data-pwa-install], [data-pwa-install-btn], .pwa-install-trigger');
             if (installBtn) {
                 e.preventDefault();
-                this.promptInstall();
+                void this.promptInstall();
                 return;
             }
 

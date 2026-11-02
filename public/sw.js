@@ -102,8 +102,8 @@ self.addEventListener('push', (event) => {
         if (event.data) {
             data = event.data.json();
         }
-    } catch (_ignored) {
-        // Fallback vers le texte brut si le payload n'est pas un JSON valide
+    } catch (error) {
+        console.debug('Push notification payload parse fallback:', error);
         data.body = event.data ? event.data.text() : data.body;
     }
 
@@ -132,8 +132,8 @@ self.addEventListener('notificationclick', (event) => {
         if (parsed.origin === self.location.origin) {
             safeUrl = parsed.pathname + parsed.search + parsed.hash;
         }
-    } catch (_ignored) {
-        // Ignorer les erreurs de parsing d'URL mal formée et rediriger vers la racine
+    } catch (error) {
+        console.debug('Invalid notification target URL:', error);
         safeUrl = '/';
     }
 
@@ -185,8 +185,8 @@ self.addEventListener('fetch', (event) => {
                     return preloadResponse;
                 }
                 return await fetch(request);
-            } catch (_ignored) {
-                // Fallback vers le cache ou la page offline si le réseau échoue
+            } catch (error) {
+                console.debug('Network navigation fetch failed, using fallback:', error);
                 const cachedResponse = await caches.match(request);
                 if (cachedResponse) {
                     return cachedResponse;
@@ -219,12 +219,12 @@ self.addEventListener('fetch', (event) => {
             const fetchPromise = (async () => {
                 try {
                     const networkResponse = await fetch(request);
-                    if (networkResponse && networkResponse.status === 200) {
-                        cache.put(request, networkResponse.clone());
+                    if (networkResponse?.status === 200) {
+                        await cache.put(request, networkResponse.clone());
                     }
                     return networkResponse;
-                } catch (_ignored) {
-                    // Ignorer les échecs de revalidation en tâche de fond quand l'appareil est hors-ligne
+                } catch (error) {
+                    console.debug('Background asset cache update failed:', error);
                     return null;
                 }
             })();
