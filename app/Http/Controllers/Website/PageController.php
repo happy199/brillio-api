@@ -76,7 +76,11 @@ class PageController extends Controller
         }
 
         $verifiedMentors = MentorProfile::with(['user', 'specializationModel', 'roadmapSteps'])
-            ->where('is_validated', true)
+            ->where(function ($query) {
+                $query->where('is_published', true)
+                    ->orWhere('is_validated', true);
+            })
+            ->whereNotNull('public_slug')
             ->inRandomOrder()
             ->limit(10)
             ->get();
@@ -187,8 +191,8 @@ class PageController extends Controller
      */
     public function mentorProfile(MentorProfile $mentor)
     {
-        // Vérifier que le profil est publié
-        if (! $mentor->is_published) {
+        // Vérifier que le profil est publié ou validé
+        if (! $mentor->is_published && ! $mentor->is_validated) {
             abort(404);
         }
 

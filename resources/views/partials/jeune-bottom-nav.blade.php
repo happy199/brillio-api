@@ -11,20 +11,20 @@
     <div class="grid grid-cols-5 h-16 max-w-md mx-auto items-stretch px-1">
         <!-- Accueil -->
         <a href="{{ route('jeune.dashboard') }}"
-           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.dashboard') ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-900' }}"
+           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.dashboard') ? 'text-[#5844E3] font-bold' : 'text-slate-500 hover:text-slate-900' }}"
            style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
             <svg class="pointer-events-none w-5 h-5 {{ request()->routeIs('jeune.dashboard') ? 'stroke-[2.5]' : 'stroke-2' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
             </svg>
             <span class="pointer-events-none text-[10px] mt-0.5 tracking-tight font-medium">Accueil</span>
             @if(request()->routeIs('jeune.dashboard'))
-                <span class="pointer-events-none w-1 h-1 rounded-full bg-indigo-600 mt-0.5"></span>
+                <span class="pointer-events-none w-1 h-1 rounded-full bg-[#5844E3] mt-0.5"></span>
             @endif
         </a>
 
         <!-- Orientation IA -->
         <a href="{{ route('jeune.chat') }}"
-           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.chat', 'jeune.personality') ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-900' }}"
+           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.chat', 'jeune.personality') ? 'text-[#5844E3] font-bold' : 'text-slate-500 hover:text-slate-900' }}"
            style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
             <div class="pointer-events-none relative">
                 <svg class="w-5 h-5 {{ request()->routeIs('jeune.chat', 'jeune.personality') ? 'stroke-[2.5]' : 'stroke-2' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -37,26 +37,26 @@
             </div>
             <span class="pointer-events-none text-[10px] mt-0.5 tracking-tight font-medium">Orientation</span>
             @if(request()->routeIs('jeune.chat', 'jeune.personality'))
-                <span class="pointer-events-none w-1 h-1 rounded-full bg-indigo-600 mt-0.5"></span>
+                <span class="pointer-events-none w-1 h-1 rounded-full bg-[#5844E3] mt-0.5"></span>
             @endif
         </a>
 
         <!-- Mentors -->
         <a href="{{ route('jeune.mentors') }}"
-           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.mentors', 'jeune.mentorship.*') ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-900' }}"
+           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.mentors', 'jeune.mentorship.*') ? 'text-[#5844E3] font-bold' : 'text-slate-500 hover:text-slate-900' }}"
            style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
             <svg class="pointer-events-none w-5 h-5 {{ request()->routeIs('jeune.mentors', 'jeune.mentorship.*') ? 'stroke-[2.5]' : 'stroke-2' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
             </svg>
             <span class="pointer-events-none text-[10px] mt-0.5 tracking-tight font-medium">Mentors</span>
             @if(request()->routeIs('jeune.mentors', 'jeune.mentorship.*'))
-                <span class="pointer-events-none w-1 h-1 rounded-full bg-indigo-600 mt-0.5"></span>
+                <span class="pointer-events-none w-1 h-1 rounded-full bg-[#5844E3] mt-0.5"></span>
             @endif
         </a>
 
         <!-- Messages -->
         <a href="{{ route('jeune.messages.index') }}"
-           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.messages.*') ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-900' }}"
+           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.messages.*') ? 'text-[#5844E3] font-bold' : 'text-slate-500 hover:text-slate-900' }}"
            style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
             <div class="pointer-events-none relative">
                 <svg class="w-5 h-5 {{ request()->routeIs('jeune.messages.*') ? 'stroke-[2.5]' : 'stroke-2' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -70,13 +70,13 @@
             </div>
             <span class="pointer-events-none text-[10px] mt-0.5 tracking-tight font-medium">Messages</span>
             @if(request()->routeIs('jeune.messages.*'))
-                <span class="pointer-events-none w-1 h-1 rounded-full bg-indigo-600 mt-0.5"></span>
+                <span class="pointer-events-none w-1 h-1 rounded-full bg-[#5844E3] mt-0.5"></span>
             @endif
         </a>
 
         <!-- Profil -->
         <a href="{{ route('jeune.profile') }}"
-           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.profile', 'jeune.wallet.*') ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-900' }}"
+           class="w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors active:bg-slate-100/80 rounded-xl relative z-20 text-center {{ request()->routeIs('jeune.profile', 'jeune.wallet.*') ? 'text-[#5844E3] font-bold' : 'text-slate-500 hover:text-slate-900' }}"
            style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
             <div class="pointer-events-none w-5 h-5 rounded-full overflow-hidden flex items-center justify-center ring-1.5 {{ request()->routeIs('jeune.profile', 'jeune.wallet.*') ? 'ring-indigo-600' : 'ring-slate-300' }}">
                 @if(auth()->user()->avatar_url)
@@ -87,7 +87,7 @@
             </div>
             <span class="pointer-events-none text-[10px] mt-0.5 tracking-tight font-medium">Profil</span>
             @if(request()->routeIs('jeune.profile', 'jeune.wallet.*'))
-                <span class="pointer-events-none w-1 h-1 rounded-full bg-indigo-600 mt-0.5"></span>
+                <span class="pointer-events-none w-1 h-1 rounded-full bg-[#5844E3] mt-0.5"></span>
             @endif
         </a>
     </div>

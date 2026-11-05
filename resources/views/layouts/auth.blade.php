@@ -105,13 +105,16 @@
 
     <style>
         [x-cloak] { display: none !important; }
-        .gradient-bg {
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        .auth-bg {
+            background-color: #F8FAFC;
+            background-image: radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+            background-size: 24px 24px;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+        .auth-card {
+            background: #ffffff;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
         }
 
         .btn-oauth {
@@ -122,78 +125,10 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
-
-        .floating-shapes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 0;
-        }
-
-        .floating-shapes .shape {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.1;
-            animation: float 20s infinite ease-in-out;
-        }
-
-        .floating-shapes .shape:nth-child(1) {
-            width: 400px;
-            height: 400px;
-            background: #fff;
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-
-        .floating-shapes .shape:nth-child(2) {
-            width: 300px;
-            height: 300px;
-            background: #fff;
-            bottom: -50px;
-            right: -50px;
-            animation-delay: -5s;
-        }
-
-        .floating-shapes .shape:nth-child(3) {
-            width: 200px;
-            height: 200px;
-            background: #fff;
-            top: 50%;
-            left: 50%;
-            animation-delay: -10s;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-
-            25% {
-                transform: translate(20px, -20px) rotate(5deg);
-            }
-
-            50% {
-                transform: translate(-10px, 20px) rotate(-5deg);
-            }
-
-            75% {
-                transform: translate(-20px, -10px) rotate(3deg);
-            }
-        }
     </style>
 </head>
 
-<body class="font-sans antialiased min-h-screen gradient-bg">
-    <!-- Floating shapes -->
-    <div class="floating-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
+<body class="font-sans antialiased min-h-screen auth-bg text-slate-900">
 
     <div class="relative z-10 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <!-- Logo -->
@@ -201,27 +136,25 @@
             @php
                 $siteName = $org ? $org->name : 'Brillio';
             @endphp
-            <a href="{{ route('home') }}" class="inline-flex items-center gap-2">
+            <a href="{{ route('home') }}" class="inline-flex items-center gap-2 group">
                 @if($org && $org->logo_url)
-                    <img src="{{ $org->logo_url }}" alt="{{ $siteName }}" class="h-12 w-auto object-contain rounded-xl shadow-lg bg-white p-1">
+                    <img src="{{ $org->logo_url }}" alt="{{ $siteName }}" class="h-11 w-auto object-contain rounded-xl shadow-xs bg-white p-1 ring-1 ring-slate-200">
+                    <span class="text-2xl font-extrabold tracking-tight text-slate-900">{{ $siteName }}</span>
                 @else
-                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                        <span class="text-2xl font-bold text-primary-600">{{ substr($siteName, 0, 1) }}</span>
-                    </div>
-                    <span class="text-3xl font-bold text-white">{{ $siteName }}</span>
+                    <img src="{{ asset('images/logo/brillio-logo.png') }}" alt="Brillio" width="154" height="60" class="h-12 w-auto object-contain group-hover:scale-105 transition-transform">
                 @endif
             </a>
-            <h2 class="mt-6 text-2xl font-bold text-white">
+            <h2 class="mt-5 text-2xl font-extrabold tracking-tight text-slate-900">
                 @yield('heading')
             </h2>
-            <p class="mt-2 text-white/80">
+            <p class="mt-1.5 text-sm text-slate-500 font-normal">
                 @yield('subheading')
             </p>
         </div>
 
         <!-- Card -->
         <div class="mt-8 sm:mx-auto sm:w-full @yield('card_width', 'sm:max-w-md')">
-            <div class="glass-card py-8 px-6 shadow-2xl rounded-2xl sm:px-10">
+            <div class="auth-card py-8 px-6 rounded-3xl sm:px-10">
                 @if(session('error'))
                 <div class="mb-4 p-4 rounded-xl bg-branding-error-bg border border-branding-error-border">
                     <p class="text-sm font-medium text-branding-error-text">{{ session('error') }}</p>
@@ -246,12 +179,12 @@
 
         <!-- Back to home -->
         <div class="mt-8 text-center">
-            <a href="{{ route('home') }}" class="text-white/80 hover:text-white text-sm inline-flex items-center gap-2">
+            <a href="{{ route('home') }}" class="text-slate-500 hover:text-slate-900 text-sm font-medium inline-flex items-center gap-2 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Retour a l'accueil
+                Retour à l'accueil
             </a>
         </div>
     </div>

@@ -21,6 +21,63 @@ class BrillioPWA {
         this.listenConnectivity();
         this.setupEventListeners();
         this.initStorageAndCapabilities();
+
+        // Envoi du signal de lancement si l'utilisateur est en mode PWA autonome
+        if (this.isStandalone) {
+            this.sendTracking('launch');
+        }
+
+        // Afficher la bannière après un court délai sur toutes les pages si l'application n'est pas installée
+        if (!this.isInstalled()) {
+            setTimeout(() => {
+                this.showInstallPrompts();
+            }, 1000);
+        }
+    }
+
+    getClientUuid() {
+        let uuid = localStorage.getItem('brillio_pwa_client_uuid');
+        if (!uuid) {
+            uuid = 'pwa_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+            localStorage.setItem('brillio_pwa_client_uuid', uuid);
+        }
+        return uuid;
+    }
+
+    getPlatform() {
+        if (this.isIos()) return 'ios';
+        const ua = navigator.userAgent.toLowerCase();
+        if (/android/.test(ua)) return 'android';
+        return 'desktop';
+    }
+
+    sendTracking(action) {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const payload = JSON.stringify({
+                client_uuid: this.getClientUuid(),
+                action: action,
+                platform: this.getPlatform(),
+                browser: navigator.userAgent.substring(0, 60),
+            });
+
+            if (navigator.sendBeacon) {
+                const blob = new Blob([payload], { type: 'application/json' });
+                // Note: sendBeacon n'inclut pas le header X-CSRF-TOKEN par défaut, on peut utiliser fetch
+            }
+
+            fetch('/pwa/tracking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || '',
+                },
+                body: payload,
+            }).catch(() => {});
+        } catch (e) {
+            console.debug('PWA tracking error:', e);
+        }
     }
 
     checkStandalone() {
@@ -163,6 +220,7 @@ class BrillioPWA {
             this.deferredPrompt = null;
             localStorage.setItem('brillio_pwa_installed', 'true');
             window.dispatchEvent(new CustomEvent('brillio:pwa-installed'));
+            this.sendTracking('install');
             this.hideAllInstallPrompts();
         });
     }
@@ -179,6 +237,7 @@ class BrillioPWA {
                     const choice = await this.deferredPrompt.userChoice;
                     if (choice?.outcome === 'accepted') {
                         localStorage.setItem('brillio_pwa_installed', 'true');
+                        this.sendTracking('install');
                     }
                     this.deferredPrompt = null;
                     this.hideAllInstallPrompts();
@@ -238,8 +297,13 @@ class BrillioPWA {
         const modal = document.getElementById('pwa-ios-modal');
         if (modal) {
             modal.classList.remove('hidden');
+            modal.style.display = 'block';
             if (typeof modal.showModal === 'function' && !modal.open) {
-                try { modal.showModal(); } catch (e) { modal.setAttribute('open', ''); }
+                try {
+                    modal.showModal();
+                } catch {
+                    modal.setAttribute('open', '');
+                }
             } else {
                 modal.setAttribute('open', '');
             }
@@ -250,8 +314,13 @@ class BrillioPWA {
         const modal = document.getElementById('pwa-ios-modal');
         if (modal) {
             modal.classList.add('hidden');
+            modal.style.display = 'none';
             if (typeof modal.close === 'function' && modal.open) {
-                try { modal.close(); } catch (e) { modal.removeAttribute('open'); }
+                try {
+                    modal.close();
+                } catch {
+                    modal.removeAttribute('open');
+                }
             } else {
                 modal.removeAttribute('open');
             }
@@ -262,8 +331,13 @@ class BrillioPWA {
         const modal = document.getElementById('pwa-desktop-modal');
         if (modal) {
             modal.classList.remove('hidden');
+            modal.style.display = 'block';
             if (typeof modal.showModal === 'function' && !modal.open) {
-                try { modal.showModal(); } catch (e) { modal.setAttribute('open', ''); }
+                try {
+                    modal.showModal();
+                } catch {
+                    modal.setAttribute('open', '');
+                }
             } else {
                 modal.setAttribute('open', '');
             }
@@ -276,8 +350,13 @@ class BrillioPWA {
         const modal = document.getElementById('pwa-desktop-modal');
         if (modal) {
             modal.classList.add('hidden');
+            modal.style.display = 'none';
             if (typeof modal.close === 'function' && modal.open) {
-                try { modal.close(); } catch (e) { modal.removeAttribute('open'); }
+                try {
+                    modal.close();
+                } catch {
+                    modal.removeAttribute('open');
+                }
             } else {
                 modal.removeAttribute('open');
             }

@@ -55,6 +55,7 @@ use App\Http\Controllers\Mentor\WalletController;
 use App\Http\Controllers\MonerooWebhookController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\Public\CareerController as PublicCareerController;
+use App\Http\Controllers\PwaTrackingController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Webhook\JitsiWebhookController;
 use App\Http\Controllers\Website\ContactController as WebsiteContactController;
@@ -66,6 +67,9 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\CookieConsent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// Tracking PWA (Installation et Lancement)
+Route::post('/pwa/tracking', [PwaTrackingController::class, 'track'])->name('pwa.tracking');
 
 // Portabilité des données (RGPD)
 Route::middleware(['auth'])->post('/export-data', [DataExportController::class, 'export'])->name('user.export-data');

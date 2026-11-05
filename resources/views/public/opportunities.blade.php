@@ -5,16 +5,16 @@
 @section('title', isset($isScoreView) && $isScoreView ? 'Diagnostic & Score ATS de votre CV - Brillio' : 'Évaluez votre CV & Score ATS - Brillio')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-b from-primary-50/40 via-white to-gray-50/60 pt-28 pb-20" x-data="cvUploaderApp">
+<div class="min-h-screen bg-[#F8FAFC] pt-28 pb-20" x-data="cvUploaderApp">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Fil d'Ariane -->
-        <nav class="flex items-center text-xs sm:text-sm font-medium text-gray-500 mb-8 space-x-2">
-            <a href="{{ route('home') }}" class="hover:text-primary-600 transition">Accueil</a>
+        <nav class="flex items-center text-xs sm:text-sm font-medium text-slate-500 mb-8 space-x-2">
+            <a href="{{ route('home') }}" class="hover:text-brand-600 transition">Accueil</a>
             <span>/</span>
-            <a href="{{ route('public.opportunities') }}" class="hover:text-primary-600 transition">Analyse mon CV</a>
+            <a href="{{ route('public.opportunities') }}" class="hover:text-brand-600 transition">Analyse mon CV</a>
             <span>/</span>
-            <span class="text-gray-900 font-semibold">{{ isset($isScoreView) && $isScoreView ? 'Diagnostic ATS' : 'Vérificateur de CV' }}</span>
+            <span class="text-slate-900 font-semibold">{{ isset($isScoreView) && $isScoreView ? 'Diagnostic ATS' : 'Vérificateur de CV' }}</span>
         </nav>
 
         @if(isset($isScoreView) && $isScoreView)
@@ -26,13 +26,13 @@
                 <!-- En-tête -->
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-primary-100 text-primary-800 mb-2">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200/60 mb-2">
                             <span>Diagnostic ATS & Recruteur</span>
                         </div>
-                        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-                            Score de compatibilité : <span class="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">{{ $cvAnalysis->global_score ?? 75 }}/100</span>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                            Score de compatibilité : <span class="text-brand-500 font-black">{{ $cvAnalysis->global_score ?? 75 }}/100</span>
                         </h1>
-                        <p class="text-sm sm:text-base text-gray-600 mt-1">
+                        <p class="text-sm sm:text-base text-slate-600 mt-1">
                             Analyse de la lisibilité par les algorithmes de recrutement et comparaison avec le modèle optimisé Brillio.
                         </p>
                     </div>
@@ -83,7 +83,7 @@
                             <!-- Bouton CTA principal de déblocage -->
                             <div class="mt-6">
                                 <a href="{{ route('auth.jeune.register') }}"
-                                   class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                   class="w-full py-3.5 px-4 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
                                     <span>Débloquer le rapport complet</span>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                 </a>
@@ -169,7 +169,7 @@
                         </div>
 
                         <!-- Boîte d'information ATS -->
-                        <div class="p-5 rounded-2xl bg-gradient-to-br from-primary-50 to-secondary-50 border border-primary-100 text-xs text-gray-700 space-y-2">
+                        <div class="p-5 rounded-2xl bg-brand-50 border border-primary-100 text-xs text-gray-700 space-y-2">
                             <h3 class="font-bold text-gray-900 flex items-center gap-1.5">
                                 <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span>Qu'est-ce qu'un parseur ATS ?</span>
@@ -203,7 +203,7 @@
                                     </button>
                                     <button type="button"
                                             @click="currentVersionTab = 'enhanced'"
-                                            :class="currentVersionTab === 'enhanced' ? 'bg-gradient-to-r from-primary-600 to-secondary-600 text-white shadow-xs font-bold' : 'text-gray-500 hover:text-gray-900 font-medium'"
+                                            :class="currentVersionTab === 'enhanced' ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-xs font-bold' : 'text-gray-500 hover:text-gray-900 font-medium'"
                                             class="px-4 py-1.5 text-xs rounded-lg transition flex items-center gap-1">
                                         <span>Modèle Brillio Pro ATS</span>
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -259,7 +259,7 @@
                                                 $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
                                             }
                                         @endphp
-                                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-600 to-secondary-600 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
+                                        <div class="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
                                             {{ $initials }}
                                         </div>
                                     </div>
@@ -324,7 +324,7 @@
                                     <!-- Overlay de Déblocage (Conforme Image 4 & 5) -->
                                     <div class="absolute inset-0 z-10 flex items-center justify-center p-4 bg-white/40 backdrop-blur-[2px]">
                                         <div class="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-white shadow-2xl border border-gray-100 text-center space-y-4">
-                                            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white flex items-center justify-center shadow-md">
+                                            <div class="w-14 h-14 mx-auto rounded-2xl bg-brand-500 text-white flex items-center justify-center shadow-md">
                                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                             </div>
                                             
@@ -337,7 +337,7 @@
 
                                             <div class="pt-2">
                                                 <a href="{{ route('auth.jeune.register') }}"
-                                                   class="inline-flex w-full items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white font-black text-sm shadow-md hover:shadow-lg transition">
+                                                   class="inline-flex w-full items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-black text-sm shadow-md hover:shadow-lg transition">
                                                     <span>Créer mon compte & Débloquer mon CV Pro</span>
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                                 </a>
@@ -375,7 +375,7 @@
                                 </p>
                             </div>
                             <a href="{{ route('auth.jeune.register') }}"
-                               class="flex-shrink-0 px-4 py-2.5 rounded-xl text-white text-xs font-bold shadow-sm hover:shadow-md transition {{ $isCertified ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700' }}">
+                               class="flex-shrink-0 px-4 py-2.5 rounded-xl text-white text-xs font-bold shadow-sm hover:shadow-md transition {{ $isCertified ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-brand-500 hover:bg-brand-600' }}">
                                 {{ $isCertified ? 'Télécharger mon CV Pro' : 'Optimiser maintenant' }}
                             </a>
                         </div>
@@ -472,7 +472,7 @@
                                     <div class="absolute inset-0 flex items-center justify-center p-4 bg-white/70 backdrop-blur-[1px]">
                                         <div class="text-center space-y-2">
                                             <p class="text-xs font-bold text-gray-900">Réécrire automatiquement mes points avec Brillio Pro</p>
-                                            <a href="{{ route('auth.jeune.register') }}" class="inline-flex px-4 py-2 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition">
+                                            <a href="{{ route('auth.jeune.register') }}" class="inline-flex px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition">
                                                 Corriger les points maintenant
                                             </a>
                                         </div>
@@ -536,11 +536,11 @@
                         <span>Compatible ATS</span>
                     </div>
                     
-                    <h1 class="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight">
-                        Votre CV est-il assez percutant pour <span class="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">les recruteurs ?</span>
+                    <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                        Votre CV est-il assez percutant pour <span class="text-brand-500">les recruteurs ?</span>
                     </h1>
                     
-                    <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
                         Testez gratuitement votre CV avec notre scanner : vérification de compatibilité ATS, score sur 100 et détection des opportunités adaptées.
                     </p>
                 </div>
@@ -556,21 +556,21 @@
                     <div @dragover.prevent="isDragging = true"
                          @dragleave.prevent="isDragging = false"
                          @drop.prevent="handleDrop($event)"
-                         :class="isDragging ? 'border-primary-500 bg-primary-50/40 scale-[1.01]' : 'border-gray-200 hover:border-primary-400 bg-white'"
-                         class="rounded-3xl border-2 border-dashed p-8 sm:p-14 text-center shadow-lg shadow-primary-500/5 transition-all cursor-pointer group"
+                         :class="isDragging ? 'border-brand-500 bg-brand-50/40 scale-[1.01]' : 'border-slate-200 hover:border-brand-400 bg-white'"
+                         class="rounded-3xl border-2 border-dashed p-8 sm:p-14 text-center shadow-xs transition-all cursor-pointer group"
                          @click="$refs.fileInput.click()">
                         
-                        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary-50 to-secondary-50 text-primary-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        <div class="w-16 h-16 mx-auto mb-5 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
                         </div>
 
-                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Glissez-déposez votre CV ici</h2>
-                        <p class="text-sm text-gray-500 mt-2">ou cliquez pour choisir un fichier depuis votre appareil</p>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Glissez-déposez votre CV ici</h2>
+                        <p class="text-sm text-slate-500 mt-2">ou cliquez pour choisir un fichier depuis votre appareil</p>
 
                         <div class="mt-6">
-                            <span class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-bold text-sm shadow-md group-hover:shadow-lg transition">
+                            <span class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-xs transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                 <span>Parcourir mes fichiers</span>
                             </span>
@@ -591,7 +591,7 @@
                 <div x-show="isAnalyzing" style="display: none;" class="max-w-2xl mx-auto">
                     <div class="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-gray-100 space-y-6">
                         <div class="text-center space-y-2">
-                            <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-primary-100 to-secondary-100 flex items-center justify-center text-primary-600 mb-2">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-brand-50 flex items-center justify-center text-primary-600 mb-2">
                                 <svg class="animate-spin w-8 h-8 text-primary-600" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -631,7 +631,7 @@
                     <!-- Carte Fichier & Actions Rapides -->
                     <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <div class="w-14 h-14 rounded-2xl bg-brand-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -654,7 +654,7 @@
 
                             <button type="button"
                                     @click="submitCv()"
-                                    class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                    class="px-8 py-3.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <span>Lancer l'audit de mon CV</span>
                             </button>

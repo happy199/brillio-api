@@ -62,23 +62,20 @@
                             200: '#c7d2fe',
                             300: '#a5b4fc',
                             400: '#818cf8',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            800: '#3730a3',
-                            900: '#312e81',
+                            500: '#5844E3',
+                            600: '#4835D4',
+                            700: '#3D2BBF',
+                            800: '#3323A0',
+                            900: '#1E1B4B',
                         },
-                        secondary: {
-                            50: '#fdf4ff',
-                            100: '#fae8ff',
-                            200: '#f5d0fe',
-                            300: '#f0abfc',
-                            400: '#e879f9',
-                            500: '#d946ef',
-                            600: '#c026d3',
-                            700: '#a21caf',
-                            800: '#86198f',
-                            900: '#701a75',
+                        brand: {
+                            50: '#F5F3FF',
+                            100: '#EDE9FE',
+                            500: '#5844E3',
+                            600: '#4835D4',
+                            700: '#3727A6',
+                            800: '#281B82',
+                            900: '#1A1259',
                         },
                         accent: {
                             50: '#fff7ed',
@@ -86,15 +83,15 @@
                             200: '#fed7aa',
                             300: '#fdba74',
                             400: '#fb923c',
-                            500: '#f97316',
-                            600: '#ea580c',
-                            700: '#c2410c',
-                            800: '#9a3412',
-                            900: '#7c2d12',
+                            500: '#ea580c',
+                            600: '#c2410c',
+                            700: '#9a3412',
+                            800: '#7c2d12',
+                            900: '#431407',
                         }
                     },
                     fontFamily: {
-                        sans: ['Poppins', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
                     }
                 }
             }
@@ -102,10 +99,10 @@
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Google Fonts - Poppins -->
+    <!-- Google Fonts - Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Alpine.js -->
@@ -135,7 +132,7 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
 
         /* Forcer un fond blanc normal sur les champs de saisie */
@@ -146,53 +143,93 @@
             color: #111827;
         }
 
-        /* Gradient backgrounds */
+        /* Hero pour pages secondaires : fond sombre texturé, contrasté à 100% avec le texte blanc */
         .gradient-hero {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #c026d3 100%);
+            background-color: #0F172A;
+            background-image: radial-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+            background-size: 24px 24px;
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, #4f46e5, #c026d3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #5844E3;
         }
 
-        .gradient-card {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(192, 38, 211, 0.1));
+        /* Animations fluides & ludiques (ui-ux-pro-max + taste-skill) */
+        @keyframes float-subtle {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-8px) rotate(0.5deg);
+            }
         }
 
-        /* Animations */
-        @keyframes float {
-
-            0%,
-            100% {
+        @keyframes float-badge {
+            0%, 100% {
                 transform: translateY(0px);
             }
-
             50% {
-                transform: translateY(-20px);
+                transform: translateY(-6px);
             }
         }
 
-        .float-animation {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes pulse-glow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        @keyframes pulse-subtle {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
             }
-
             50% {
-                box-shadow: 0 0 40px rgba(99, 102, 241, 0.8);
+                opacity: 0.85;
+                transform: scale(1.03);
             }
         }
 
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
+        .animate-float-subtle {
+            animation: float-subtle 5s ease-in-out infinite;
+        }
+
+        .animate-float-badge {
+            animation: float-badge 3.8s ease-in-out infinite;
+        }
+
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2.5s ease-in-out infinite;
+        }
+
+        /* Spring hover physics pour les cartes et boutons */
+        .card-interactive {
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+            will-change: transform;
+        }
+
+        .card-interactive:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .btn-spring {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+            will-change: transform;
+        }
+
+        .btn-spring:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-spring:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Respect du choix utilisateur: pas d'animations si prefers-reduced-motion */
+        @media (prefers-reduced-motion: reduce) {
+            .animate-float-subtle,
+            .animate-float-badge,
+            .animate-pulse-subtle,
+            .card-interactive,
+            .btn-spring {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+            }
         }
     </style>
 
@@ -309,45 +346,35 @@
     <!-- Header / Navigation -->
     <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         x-data="{ scrolled: {{ isset($forceScrolled) && $forceScrolled ? 'true' : 'false' }} }"
-        x-init="window.addEventListener('scroll', () => { scrolled = {{ isset($forceScrolled) && $forceScrolled ? 'true' : 'window.scrollY > 50' }} })"
-        :class="scrolled ? 'bg-white shadow-lg' : 'bg-transparent'">
+        x-init="window.addEventListener('scroll', () => { scrolled = {{ isset($forceScrolled) && $forceScrolled ? 'true' : 'window.scrollY > 20' }} })"
+        :class="scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/80' : 'bg-white/80 backdrop-blur-sm border-b border-slate-100'">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 @php
                     $orgForLogo = $current_organization ?? ($displayOrg ?? null);
                 @endphp
                 <!-- Logo -->
-                <a href="{{ route('home') }}" class="flex items-center space-x-3">
+                <a href="{{ route('home') }}" class="flex items-center space-x-3 group">
                     @if($orgForLogo)
                         @if($orgForLogo->logo_url)
-                            <img src="{{ $orgForLogo->logo_url }}" alt="{{ $orgForLogo->name }}" width="40" height="40" fetchpriority="high" class="w-10 h-10 rounded-xl object-cover bg-white">
+                            <img src="{{ $orgForLogo->logo_url }}" alt="{{ $orgForLogo->name }}" width="40" height="40" fetchpriority="high" class="w-10 h-10 rounded-xl object-cover bg-white ring-1 ring-slate-200">
                         @else
-                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center">
-                                <span class="text-xl font-bold text-white">{{ substr($orgForLogo->name, 0, 1) }}</span>
+                            <div class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-xl shadow-xs">
+                                <span>{{ substr($orgForLogo->name, 0, 1) }}</span>
                             </div>
                         @endif
-                        <span class="text-2xl font-bold" :class="scrolled ? 'text-gray-900' : 'text-white'">{{ $orgForLogo->name }}</span>
+                        <span class="text-xl font-bold tracking-tight text-slate-900">{{ $orgForLogo->name }}</span>
                     @else
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                </path>
-                            </svg>
-                        </div>
-                        <span class="text-2xl font-bold" :class="scrolled ? 'text-gray-900' : 'text-white'">Brillio</span>
+                        <img src="{{ asset('images/logo/brillio-logo.png') }}" alt="Brillio" width="138" height="54" class="h-10 w-auto object-contain transition-transform group-hover:scale-105">
                     @endif
                 </a>
 
-                <!-- Desktop Navigation (Adapté tablette et grands écrans 700px - 1280px) -->
-                <div class="hidden lg:flex items-center space-x-3 xl:space-x-6 text-xs xl:text-sm">
-                    <a href="{{ route('home') }}" class="font-medium transition-colors"
-                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Accueil</a>
-                    <a href="{{ route('about') }}" class="font-medium transition-colors whitespace-nowrap"
-                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">À
-                        propos</a>
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-1 xl:space-x-4 text-xs xl:text-sm">
+                    <a href="{{ route('home') }}" class="font-semibold px-3 py-2 rounded-lg transition-colors text-slate-900 bg-slate-100/70">Accueil</a>
+                    <a href="{{ route('about') }}" class="font-medium px-3 py-2 rounded-lg transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-50 whitespace-nowrap">À propos</a>
 
-                    <!-- Dropdown Outils (avec tag animé New et pont invisible pour faciliter le survol) -->
+                    <!-- Dropdown Outils -->
                     <div class="relative"
                          x-data="{
                              outilsDropdown: false,
@@ -359,21 +386,20 @@
                              close() {
                                  this.closeTimer = setTimeout(() => {
                                      this.outilsDropdown = false;
-                                 }, 300);
+                                 }, 250);
                              }
                          }"
                          @mouseenter="open()"
                          @mouseleave="close()">
                         <button @click="outilsDropdown = !outilsDropdown"
-                            class="font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap py-2"
-                            :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">
+                            class="font-medium px-3 py-2 rounded-lg transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-50 flex items-center gap-1.5 whitespace-nowrap">
                             <span>Outils</span>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] xl:text-[10px] font-bold bg-primary-600 text-white animate-pulse shadow-xs">New</span>
-                            <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': outilsDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-brand-50 text-brand-700 border border-brand-200">Nouveau</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': outilsDropdown }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
-                        <!-- Pont invisible de survol (pt-2) pour ne jamais perdre le focus curseur -->
+                        <!-- Pont invisible de survol (pt-2) -->
                         <div x-show="outilsDropdown" x-cloak
                             x-transition:enter="transition ease-out duration-150"
                             x-transition:enter-start="opacity-0 translate-y-1"
@@ -383,58 +409,57 @@
                             x-transition:leave-end="opacity-0 translate-y-1"
                             @mouseenter="open()"
                             @mouseleave="close()"
-                            class="absolute left-0 top-full pt-1.5 w-60 z-50">
-                            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 ring-1 ring-black/5">
+                            class="absolute left-0 top-full pt-1 w-64 z-50">
+                            <div class="bg-white rounded-2xl shadow-xl border border-slate-200/80 p-2 ring-1 ring-slate-900/5">
                                 <a href="{{ route('public.opportunities') }}"
-                                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs xl:text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition group">
-                                    <div class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-colors flex-shrink-0">
+                                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs xl:text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition group">
+                                    <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="font-semibold text-gray-900 group-hover:text-primary-700">Analyse CV</p>
-                                        <p class="text-[10px] text-gray-400 font-normal">Score & CV ATS gratuit</p>
+                                        <p class="font-semibold text-slate-900 group-hover:text-brand-600">Analyse CV</p>
+                                        <p class="text-[10px] text-slate-500 font-normal">Score & CV ATS gratuit</p>
                                     </div>
                                 </a>
                                 <a href="{{ route('public.resources') }}"
-                                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs xl:text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition group">
-                                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors flex-shrink-0">
+                                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs xl:text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition group">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="font-semibold text-gray-900 group-hover:text-primary-700">Ressources</p>
-                                        <p class="text-[10px] text-gray-400 font-normal">Guides & outils carrière</p>
+                                        <p class="font-semibold text-slate-900 group-hover:text-brand-600">Ressources</p>
+                                        <p class="text-[10px] text-slate-500 font-normal">Guides & outils carrière</p>
                                     </div>
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <a href="{{ route('public.advertisements') }}" class="font-medium transition-colors"
-                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Publicités</a>
-                    <a href="{{ route('contact') }}" class="font-medium transition-colors"
-                        :class="scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-white/90 hover:text-white'">Contact</a>
+                    <a href="{{ route('public.advertisements') }}" class="font-medium px-3 py-2 rounded-lg transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-50">Publicités</a>
+                    <a href="{{ route('contact') }}" class="font-medium px-3 py-2 rounded-lg transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-50">Contact</a>
                 </div>
 
-                <!-- CTA Buttons -->
+                <!-- CTA Buttons : Se connecter & Télécharger l'app -->
                 <div class="hidden lg:flex items-center space-x-2 xl:space-x-3">
-                    <a href="{{ route('auth.login') }}"
-                        class="hidden xl:inline-flex px-4 py-2 xl:px-5 xl:py-2.5 text-xs xl:text-sm font-semibold rounded-full transition-all duration-300 whitespace-nowrap"
-                        :class="scrolled ? 'text-primary-600 hover:bg-primary-50' : 'text-white hover:bg-white/10'">
-                        Explorer ta carrière
+                    <a href="{{ route('auth.choice') }}"
+                        class="px-4 py-2 xl:px-5 xl:py-2.5 text-xs xl:text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all duration-200 whitespace-nowrap">
+                        Se connecter
                     </a>
-                    <a href="#telecharger"
-                        class="px-4 py-2 xl:px-6 xl:py-2.5 text-xs xl:text-sm bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 whitespace-nowrap">
-                        Télécharger l'app
-                    </a>
+                    <button type="button" data-pwa-install
+                        class="btn-spring inline-flex items-center gap-2 px-4 py-2 xl:px-5 xl:py-2.5 text-xs xl:text-sm bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-xs hover:shadow transition-all duration-200 whitespace-nowrap cursor-pointer">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span>Télécharger l'app</span>
+                    </button>
                 </div>
 
-                <!-- Mobile & Tablet menu button (affiché jusqu'à 1024px) -->
-                <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 rounded-lg"
-                    :class="scrolled ? 'text-gray-700' : 'text-white'" aria-label="Menu principal">
+                <!-- Mobile & Tablet menu button -->
+                <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 text-slate-700 hover:bg-slate-100 rounded-lg" aria-label="Menu principal">
                     <svg x-show="!mobileMenu" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16"></path>
@@ -452,49 +477,52 @@
                 x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-4"
-                class="md:hidden bg-white rounded-2xl shadow-xl mt-2 p-4">
+                class="md:hidden bg-white rounded-2xl shadow-xl mt-2 p-4 border border-slate-200">
                 <a href="{{ route('home') }}"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Accueil</a>
+                    class="block py-3 px-4 text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg font-medium">Accueil</a>
                 <a href="{{ route('about') }}"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">À propos</a>
+                    class="block py-3 px-4 text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg font-medium">À propos</a>
 
                 <!-- Outils (Mobile avec sous-menu) -->
                 <div x-data="{ mobileOutilsOpen: true }" class="rounded-lg">
                     <button @click="mobileOutilsOpen = !mobileOutilsOpen"
-                        class="w-full flex items-center justify-between py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
+                        class="w-full flex items-center justify-between py-3 px-4 text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg">
                         <div class="flex items-center gap-2">
                             <span class="font-medium">Outils</span>
-                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-600 text-white animate-pulse">New</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-500 text-white animate-pulse">New</span>
                         </div>
                         <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-180': mobileOutilsOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
-                    <div x-show="mobileOutilsOpen" class="pl-4 pr-2 py-1 space-y-1 bg-gray-50/80 rounded-xl mt-1">
+                    <div x-show="mobileOutilsOpen" class="pl-4 pr-2 py-1 space-y-1 bg-slate-50/80 rounded-xl mt-1">
                         <a href="{{ route('public.opportunities') }}"
-                            class="block py-2.5 px-3 text-sm text-gray-700 hover:text-primary-600 hover:bg-white rounded-lg font-medium">
+                            class="block py-2.5 px-3 text-sm text-slate-700 hover:text-brand-600 hover:bg-white rounded-lg font-medium">
                             • Analyse CV
                         </a>
                         <a href="{{ route('public.resources') }}"
-                            class="block py-2.5 px-3 text-sm text-gray-700 hover:text-primary-600 hover:bg-white rounded-lg font-medium">
+                            class="block py-2.5 px-3 text-sm text-slate-700 hover:text-brand-600 hover:bg-white rounded-lg font-medium">
                             • Ressources
                         </a>
                     </div>
                 </div>
                 <a href="{{ route('public.advertisements') }}"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Publicités</a>
+                    class="block py-3 px-4 text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg font-medium">Publicités</a>
                 <a href="{{ route('contact') }}"
-                    class="block py-3 px-4 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">Contact</a>
+                    class="block py-3 px-4 text-slate-700 hover:text-brand-600 hover:bg-brand-50 rounded-lg font-medium">Contact</a>
 
-                <div class="mt-4 space-y-2">
-                    <a href="{{ route('auth.login') }}"
-                        class="block py-3 px-4 border border-primary-600 text-primary-600 text-center font-semibold rounded-lg hover:bg-primary-50">
-                        Explorer ta carrière
+                <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                    <a href="{{ route('auth.choice') }}"
+                        class="block py-3 px-4 border border-slate-200 text-slate-800 text-center font-semibold rounded-xl hover:bg-slate-50">
+                        Se connecter
                     </a>
-                    <a href="#telecharger"
-                        class="block py-3 px-4 bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-center font-semibold rounded-lg">
-                        Télécharger l'app
-                    </a>
+                    <button type="button" data-pwa-install @click="mobileMenu = false"
+                        class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white text-center font-bold rounded-xl transition shadow-xs">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span>Télécharger l'app</span>
+                    </button>
                 </div>
             </div>
         </nav>
@@ -511,16 +539,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                 <!-- Brand -->
                 <div class="lg:col-span-1">
-                    <div class="flex items-center space-x-3 mb-6">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                </path>
-                            </svg>
-                        </div>
-                        <span class="text-2xl font-bold">Brillio</span>
+                    <div class="mb-6">
+                        <img src="{{ asset('images/logo/brillio-logo-white-cropped.png') }}" alt="Brillio" width="138" height="54" class="h-10 w-auto object-contain">
                     </div>
                     <p class="text-gray-400 mb-6">
                         La plateforme d'orientation professionnelle pour les jeunes africains. Ton avenir, ton choix.
@@ -617,11 +637,11 @@
                 <div>
                     <h4 class="text-lg font-semibold mb-6">Application Mobile</h4>
                     <div class="space-y-3">
-                        <!-- PWA Quick Install -->
+                        <!-- Direct Install -->
                         <button type="button" data-pwa-install
-                            class="w-full flex items-center space-x-3 bg-gradient-to-r from-indigo-600 to-pink-600 rounded-xl p-3 hover:from-indigo-700 hover:to-pink-700 transition-all shadow-lg text-left group">
-                            <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            class="w-full flex items-center space-x-3 bg-brand-500 hover:bg-brand-600 rounded-xl p-3 transition-all shadow-sm text-left group">
+                            <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             </div>
                             <div>
                                 <p class="text-[11px] text-white/80 font-medium">Installation directe & rapide</p>

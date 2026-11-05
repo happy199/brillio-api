@@ -138,6 +138,16 @@ class MentorProfile extends Model
     }
 
     /**
+     * Résoudre la liaison de modèle de route par public_slug ou par id (fallback)
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where($field ?? 'public_slug', $value)
+            ->orWhere('id', $value)
+            ->first();
+    }
+
+    /**
      * Relation vers l'utilisateur
      */
     public function user(): BelongsTo

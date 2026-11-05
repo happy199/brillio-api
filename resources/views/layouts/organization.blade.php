@@ -5,23 +5,24 @@
     @php
     $org = $current_organization ?? (auth()->check() ? auth()->user()->organization : null);
     $isBranded = $org && $org->isPro(); // covers Pro and Enterprise
-    $primary = $org?->primary_color ?? '#f43f5e';
+    $primary = $org?->primary_color ?? '#5844E3';
 
     // Fallback logic for secondary and accent
-    $secondary = $org?->secondary_color ?? '#e11d48';
-    $accent = $org?->accent_color ?? '#fb7185';
+    $secondary = $org?->secondary_color ?? '#4835D4';
+    $accent = $org?->accent_color ?? '#3D2BBF';
     @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
-    <title>@yield('title', 'Espace Organisation') - Brillio</title>
+    <title>@yield('title', 'Espace Organisation') - {{ $org ? $org->name : 'Brillio' }}</title>
 
     @include('partials.pwa-head', ['primaryColor' => $primary])
 
+    <!-- Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -32,20 +33,20 @@
                 extend: {
                     colors: {
                         organization: {
-                            50: '{{ $isBranded ? $primary . "10" : "#fff1f2" }}',
-                            100: '{{ $isBranded ? $primary . "20" : "#ffe4e6" }}',
-                            200: '{{ $isBranded ? $primary . "30" : "#fecdd3" }}',
+                            50: '{{ $isBranded ? $primary . "10" : "#F5F3FF" }}',
+                            100: '{{ $isBranded ? $primary . "20" : "#EDE9FE" }}',
+                            200: '{{ $isBranded ? $primary . "30" : "#DDD6FE" }}',
                             300: '{{ $accent }}',
                             400: '{{ $accent }}',
                             500: '{{ $primary }}',
                             600: '{{ $secondary }}',
                             700: '{{ $secondary }}',
-                            800: '{{ $isBranded ? $primary : "#9f1239" }}',
-                            900: '{{ $isBranded ? $primary : "#881337" }}',
+                            800: '{{ $isBranded ? $primary : "#281B82" }}',
+                            900: '{{ $isBranded ? $primary : "#1A1259" }}',
                         }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
                     },
                 }
             }
@@ -60,11 +61,44 @@
         html, body {
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
 
         a, button, [role="button"], .cursor-pointer {
             touch-action: manipulation;
             cursor: pointer !important;
+        }
+
+        /* Spring hover micro-interactions (ui-ux-pro-max + taste-skill) */
+        .card-interactive {
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+            will-change: transform;
+        }
+
+        .card-interactive:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .btn-spring {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+            will-change: transform;
+        }
+
+        .btn-spring:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-spring:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card-interactive,
+            .btn-spring {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+            }
         }
     </style>
 
@@ -92,18 +126,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="{{ route('organization.dashboard') }}" class="flex items-center">
+                    <a href="{{ route('organization.dashboard') }}" class="flex items-center gap-2.5">
                         @if($org && $org->logo_url)
                         <img src="{{ $org->logo_url }}" alt="{{ $org->name }}"
-                            class="h-10 w-auto max-w-[150px] object-contain">
+                            class="h-9 w-auto max-w-[150px] object-contain">
                         @else
-                        <div class="flex items-center space-x-3">
-                            <div
-                                class="w-8 h-8 bg-gradient-to-br from-organization-400 to-organization-600 rounded-lg flex items-center justify-center">
-                                <span class="text-white font-bold text-sm">{{ substr($org ? $org->name : 'Brillio', 0, 1) }}</span>
-                            </div>
-                            <span class="text-xl font-bold text-gray-900">{{ $org ? $org->name : 'BrillioPartner' }}</span>
-                        </div>
+                        <img src="{{ asset('images/logo/brillio-logo.png') }}" alt="Brillio" class="h-9 w-auto object-contain">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#F5F3FF] text-[#5844E3] border border-[#DDD6FE]">Organisation</span>
                         @endif
                     </a>
 

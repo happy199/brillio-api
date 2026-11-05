@@ -2,9 +2,9 @@
 <html lang="fr">
 @php
     $displayOrg = $current_organization ?? (auth()->check() ? (auth()->user()->sponsoringOrganization ?? auth()->user()->organizations->first()) : null);
-    $primaryColor = $displayOrg?->primary_color ?? '#6366f1';
-    $secondaryColor = $displayOrg?->secondary_color ?? '#8b5cf6';
-    $accentColor = $displayOrg?->accent_color ?? '#d946ef';
+    $primaryColor = $displayOrg?->primary_color ?? '#5844E3';
+    $secondaryColor = $displayOrg?->secondary_color ?? '#4835D4';
+    $accentColor = $displayOrg?->accent_color ?? '#3D2BBF';
 @endphp
 <head>
     <meta charset="UTF-8">
@@ -17,10 +17,10 @@
     @include('partials.pwa-head')
 
 
-    <!-- Fonts -->
+    <!-- Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <!-- FontAwesome -->
@@ -42,20 +42,29 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
                     },
                     colors: {
                         primary: {
-                            50: '#f0f4ff',
-                            100: '#e0e9ff',
-                            200: '#c7d6fe',
-                            300: '#a4b8fc',
-                            400: '#8093f8',
+                            50: '#F5F3FF',
+                            100: '#EDE9FE',
+                            200: '#DDD6FE',
+                            300: '#C4B5FD',
+                            400: '#A78BFA',
                             500: '{{ $primaryColor }}',
-                            600: '{{ $primaryColor }}',
-                            700: '#4536ca',
-                            800: '#3a2fa3',
-                            900: '#332c81',
+                            600: '{{ $secondaryColor }}',
+                            700: '{{ $accentColor }}',
+                            800: '#281B82',
+                            900: '#1A1259',
+                        },
+                        brand: {
+                            50: '#F5F3FF',
+                            100: '#EDE9FE',
+                            500: '#5844E3',
+                            600: '#4835D4',
+                            700: '#3D2BBF',
+                            800: '#281B82',
+                            900: '#1A1259',
                         }
                     }
                 }
@@ -69,12 +78,13 @@
         html, body {
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
         a, button, [role="button"] {
             touch-action: manipulation;
         }
         .nav-item {
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .nav-item:hover {
@@ -86,28 +96,55 @@
             color: white !important;
         }
 
+        /* Spring hover micro-interactions (ui-ux-pro-max + taste-skill) */
+        .card-interactive {
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+            will-change: transform;
+        }
+
+        .card-interactive:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .btn-spring {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+            will-change: transform;
+        }
+
+        .btn-spring:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-spring:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
         .card-hover {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .card-hover:hover {
             transform: translateY(-4px);
-            box-shadow: 0 20px 40px -12px rgba(99, 102, 241, 0.25);
+            box-shadow: 0 20px 40px -12px rgba(88, 68, 227, 0.2);
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 50%, {{ $accentColor }} 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: {{ $primaryColor }};
         }
 
         .org-gradient-banner {
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 50%, {{ $accentColor }} 100%) !important;
+            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%) !important;
         }
 
-        [x-cloak] {
-            display: none !important;
+        @media (prefers-reduced-motion: reduce) {
+            .card-interactive,
+            .btn-spring,
+            .nav-item,
+            .card-hover {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+            }
         }
     </style>
 
@@ -221,14 +258,11 @@
             <div class="hidden md:flex justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="{{ route('jeune.dashboard') }}" class="flex items-center gap-2">
+                    <a href="{{ route('jeune.dashboard') }}" class="flex items-center gap-2.5">
                         @if($displayOrg && $displayOrg->logo_url)
-                            <img src="{{ $displayOrg->logo_url }}" alt="{{ $displayOrg->name }}" class="h-10 rounded-xl object-contain">
+                            <img src="{{ $displayOrg->logo_url }}" alt="{{ $displayOrg->name }}" class="h-9 rounded-xl object-contain">
                         @else
-                            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-600 rounded-xl flex items-center justify-center">
-                                <span class="text-xl font-bold text-white">{{ substr($displayOrg ? $displayOrg->name : 'Brillio', 0, 1) }}</span>
-                            </div>
-                            <span class="text-xl font-bold gradient-text hidden sm:block">{{ $displayOrg ? $displayOrg->name : 'Brillio' }}</span>
+                            <img src="{{ asset('images/logo/brillio-logo.png') }}" alt="Brillio" class="h-9 w-auto object-contain">
                         @endif
                     </a>
                 </div>
