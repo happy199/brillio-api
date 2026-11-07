@@ -50,7 +50,7 @@
 
                         <button @click="showAppModal = true"
                             class="btn-spring inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 font-semibold rounded-2xl transition-all shadow-2xs text-base text-center group">
-                            <svg class="w-5 h-5 text-slate-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-slate-600 group-hover:scale-110 transition-transform" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                             <span>Installer l'application mobile</span>
@@ -92,7 +92,10 @@
                         
                         <!-- Badge flottant 1 (Haut-Droit) : Match & Jeunes connectés -->
                         <div class="hidden sm:flex items-center gap-2.5 absolute -top-5 -right-4 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl px-3.5 py-2.5 shadow-lg shadow-brand-500/10 z-30 animate-float-badge cursor-pointer card-interactive"
-                             @click="nextTrait()">
+                             role="button" tabindex="0"
+                             @click="nextTrait()"
+                             @keydown.enter="nextTrait()"
+                             @keydown.space.prevent="nextTrait()">
                             <span class="flex h-2.5 w-2.5 relative">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500"></span>
@@ -197,7 +200,7 @@
                             <!-- Footer rapide du widget -->
                             <div class="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
                                 <span class="flex items-center gap-1.5 font-medium text-emerald-700">
-                                    <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg aria-hidden="true" class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                     </svg>
                                     Sessions certifiées gratuites
@@ -361,7 +364,7 @@
                 <div class="mt-4 md:mt-0">
                     <a href="{{ route('auth.choice') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 hover:bg-slate-50 shadow-2xs">
                         <span>Voir tout l'annuaire</span>
-                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="w-4 h-4 text-slate-500" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
             </div>
@@ -413,7 +416,7 @@
                         <a href="{{ route('public.mentor.profile', $mentor->public_slug) }}"
                             class="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-50 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 text-slate-800 text-xs font-semibold border border-slate-200/80 transition-all group-hover:shadow-2xs">
                             <span>Consulter la feuille de route</span>
-                            <svg class="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-1 group-hover:text-brand-600 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-1 group-hover:text-brand-600 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     </div>
                 </div>
@@ -531,8 +534,8 @@
                     </div>
                     <h3 class="font-bold text-slate-900 text-base">Application Mobile Brillio</h3>
                 </div>
-                <button @click="showAppModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button @click="showAppModal = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors" aria-label="Fermer la boîte de dialogue">
+                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
@@ -554,7 +557,7 @@
                 <div class="space-y-2 pt-2">
                     <button type="button" data-pwa-install @click="showAppModal = false"
                         class="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-xs transition-all text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         <span>Installer sur mon appareil</span>
                     </button>
                     <button type="button" @click="showAppModal = false" class="w-full py-2.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors">

@@ -43,7 +43,7 @@
                     <!-- Email -->
                     <div class="flex items-start space-x-4 p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl card-interactive group">
                         <div class="w-12 h-12 bg-brand-50 border border-brand-100 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-white transition-all">
-                            <svg class="w-6 h-6 text-brand-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg aria-hidden="true" class="w-6 h-6 text-brand-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                 </path>
@@ -82,7 +82,7 @@
                     <!-- Address -->
                     <div class="flex items-start space-x-4 p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl card-interactive group">
                         <div class="w-12 h-12 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                            <svg class="w-6 h-6 text-amber-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-6 h-6 text-amber-600 group-hover:text-white transition-colors" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
                                 </path>
