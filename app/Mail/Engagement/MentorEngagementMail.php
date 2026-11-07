@@ -27,7 +27,7 @@ class MentorEngagementMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Félicitations pour votre profil publié, '.$this->user->name.' ! 🚀',
+            subject: 'Développez votre impact et monétisez votre savoir sur Brillio, '.$this->user->name.' 💡',
         );
     }
 

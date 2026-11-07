@@ -76,6 +76,7 @@ class MentorProfile extends Model
         'profile_views',
         'has_unlocked_session_history',
         'accepts_mentorship_requests',
+        'published_email_sent_at',
     ];
 
     protected function casts(): array
@@ -90,6 +91,7 @@ class MentorProfile extends Model
             'linkedin_import_count' => 'integer',
             'linkedin_imported_at' => 'datetime',
             'validated_at' => 'datetime',
+            'published_email_sent_at' => 'datetime',
             'has_unlocked_session_history' => 'boolean',
             'accepts_mentorship_requests' => 'boolean',
         ];

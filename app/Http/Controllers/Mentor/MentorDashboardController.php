@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
+use App\Mail\MentorProfilePublished;
 use App\Mail\OrganizationUnlinkedNotificationMail;
 use App\Mail\UserUnlinkedConfirmationMail;
 use App\Models\MentorProfile;
@@ -220,7 +221,19 @@ class MentorDashboardController extends Controller
             return back()->withErrors(['phone' => 'Veuillez renseigner votre numéro de téléphone avant de publier votre profil.'])->with('error', 'Votre numéro de téléphone est obligatoire pour rendre votre profil visible.');
         }
 
+        $wasAlreadyPublished = $profile->is_published;
         $profile->update(['is_published' => true]);
+
+        // Envoyer le mail de félicitations une seule fois lors de la toute première publication
+        if (! $wasAlreadyPublished && is_null($profile->published_email_sent_at)) {
+            try {
+                Mail::to($user->email)->send(new MentorProfilePublished($user));
+                $profile->update(['published_email_sent_at' => now()]);
+                $user->update(['onboarding_completed' => true]);
+            } catch (\Exception $e) {
+                Log::error("Erreur envoi email publication profil pour mentor #{$user->id}: ".$e->getMessage());
+            }
+        }
 
         return back()->with('success', 'Votre profil est maintenant visible par les jeunes !');
     }

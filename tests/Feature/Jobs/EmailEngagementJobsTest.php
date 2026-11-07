@@ -8,6 +8,7 @@ use App\Jobs\SendProfileCompletionReminders;
 use App\Mail\CampaignNewsletterMail;
 use App\Mail\Engagement\MentorEngagementMail;
 use App\Mail\Engagement\ProfileCompletionReminder;
+use App\Mail\MentorProfilePublished;
 use App\Models\EmailCampaign;
 use App\Models\MentorProfile;
 use App\Models\User;
@@ -46,6 +47,7 @@ class EmailEngagementJobsTest extends TestCase
         MentorProfile::create([
             'user_id' => $mentorNoResources->id,
             'is_published' => true,
+            'published_email_sent_at' => now()->subMonths(2),
         ]);
 
         // 3. A young user with incomplete onboarding (should be ignored)
@@ -75,6 +77,38 @@ class EmailEngagementJobsTest extends TestCase
         Mail::assertNotSent(MentorEngagementMail::class, function ($mail) use ($jeuneIncomplete) {
             return $mail->hasTo($jeuneIncomplete->email);
         });
+    }
+
+    public function test_send_profile_completion_sends_published_email_only_once_for_newly_published_mentor()
+    {
+        Mail::fake();
+
+        $newlyPublished = User::factory()->create([
+            'user_type' => 'mentor',
+            'email' => 'newly-published@example.com',
+        ]);
+        $profile = MentorProfile::create([
+            'user_id' => $newlyPublished->id,
+            'is_published' => true,
+            'published_email_sent_at' => null,
+        ]);
+
+        (new SendProfileCompletionReminders)->handle(app(EmailDeliveryService::class));
+
+        Mail::assertSent(MentorProfilePublished::class, function ($mail) use ($newlyPublished) {
+            return $mail->hasTo($newlyPublished->email);
+        });
+        Mail::assertNotSent(MentorEngagementMail::class, function ($mail) use ($newlyPublished) {
+            return $mail->hasTo($newlyPublished->email);
+        });
+
+        $profile->refresh();
+        $this->assertNotNull($profile->published_email_sent_at);
+
+        // Run second time: should not send MentorProfilePublished again
+        Mail::fake();
+        (new SendProfileCompletionReminders)->handle(app(EmailDeliveryService::class));
+        Mail::assertNotSent(MentorProfilePublished::class);
     }
 
     public function test_send_newsletter_job_dispatches_staggered_campaign_emails()
