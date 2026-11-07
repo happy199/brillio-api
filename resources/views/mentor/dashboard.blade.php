@@ -41,6 +41,88 @@
             </div>
         </div>
 
+        <!-- Missing Phone Alert Cadran (Interactive inline input & CTA) -->
+        <div x-data="{
+            hasPhone: {{ !empty($user->phone) ? 'true' : 'false' }},
+            showInput: false,
+            phone: '{{ addslashes($user->phone ?? '') }}',
+            submitting: false,
+            error: '',
+            async savePhone() {
+                if (!this.phone.trim()) {
+                    this.error = 'Veuillez saisir votre numéro de téléphone.';
+                    return;
+                }
+                this.submitting = true;
+                this.error = '';
+                try {
+                    const response = await fetch('{{ route('mentor.profile.phone') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ phone: this.phone })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        this.hasPhone = true;
+                        window.location.reload();
+                    } else {
+                        this.error = data.message || 'Une erreur est survenue.';
+                    }
+                } catch (e) {
+                    this.error = 'Erreur de connexion.';
+                } finally {
+                    this.submitting = false;
+                }
+            }
+        }">
+            <!-- Yellow cadran: phone number is missing -->
+            <div x-show="!hasPhone" class="bg-amber-50 border border-amber-200 rounded-2xl p-6 shadow-sm" style="{{ empty($user->phone) ? '' : 'display: none;' }}">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start gap-4 flex-1">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-amber-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-amber-800">Il manque votre numéro de téléphone</h3>
+                            <p class="text-amber-700 text-sm mt-1">
+                                Il nous permet de vous contacter directement (Appel / WhatsApp) pour les séances de mentorat et de vous partager nos opportunités exclusives d'événements.
+                            </p>
+                            <p x-show="error" class="text-red-600 text-xs mt-1 font-semibold" x-text="error" style="display: none;"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <div x-show="showInput" class="flex items-center gap-2" style="display: none;">
+                            <label for="mentor_phone_input" class="sr-only">Numéro de téléphone</label>
+                            <input type="tel" id="mentor_phone_input" x-model="phone" placeholder="Ex: +22997000000"
+                                class="px-3 py-2 border border-amber-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none text-gray-900 bg-white h-10 w-48"
+                                @keydown.enter="savePhone()" :disabled="submitting">
+                            <button @click="savePhone()" :disabled="submitting"
+                                class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-xl shadow-sm transition disabled:opacity-50 h-10 flex items-center justify-center min-w-[100px]">
+                                <span x-show="!submitting">Enregistrer</span>
+                                <span x-show="submitting" style="display: none;">...</span>
+                            </button>
+                            <button @click="showInput = false" :disabled="submitting" class="text-amber-700 hover:text-amber-900 text-xs px-2 font-medium">
+                                Annuler
+                            </button>
+                        </div>
+
+                        <button x-show="!showInput" @click="showInput = true; $nextTick(() => $el.previousElementSibling.querySelector('input')?.focus())"
+                            class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-all h-10">
+                            Je renseigne mon numéro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Profile Status -->
         @if(!$stats['is_published'])
             <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6">
@@ -54,10 +136,12 @@
                     <div>
                         <h3 class="font-bold text-amber-800">Votre profil n'est pas encore visible</h3>
                         <p class="text-amber-700 text-sm mt-1">
-                            Pour etre visible par les jeunes, completez votre profil (bio, poste, specialisation) et ajoutez au
-                            moins une etape a votre parcours.
+                            Pour être visible par les jeunes, complétez votre profil (numéro de téléphone, bio, poste, spécialisation) et ajoutez au moins une étape à votre parcours.
                         </p>
                         <div class="mt-4 flex flex-wrap gap-2">
+                            @if(empty($user->phone))
+                                <span class="px-3 py-1 bg-amber-100 text-amber-800 font-semibold text-xs rounded-full">⚠️ Téléphone manquant</span>
+                            @endif
                             @if(!$profile || !$profile->bio)
                                 <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Bio manquante</span>
                             @endif
@@ -65,8 +149,7 @@
                                 <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Poste manquant</span>
                             @endif
                             @if(!$profile || (!$profile->specialization && !$profile->specialization_id))
-                                <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Specialisation
-                                    manquante</span>
+                                <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Spécialisation manquante</span>
                             @endif
                             @if($stats['roadmap_steps'] === 0)
                                 <span class="px-3 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Parcours vide</span>

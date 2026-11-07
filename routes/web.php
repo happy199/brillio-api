@@ -430,6 +430,7 @@ Route::prefix('espace-mentor')->name('mentor.')->middleware(['auth', 'user_type:
     Route::get('/', [MentorDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profil', [MentorDashboardController::class, 'profile'])->name('profile');
     Route::put('/profil', [MentorDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profil/telephone', [MentorDashboardController::class, 'updatePhone'])->name('profile.phone');
     Route::post('/profil/unlink-organization', [MentorDashboardController::class, 'unlinkOrganization'])->name('profile.unlink');
     Route::post('/profil/publier', [MentorDashboardController::class, 'publishProfile'])->name('profile.publish');
     Route::get('/parcours', [MentorDashboardController::class, 'roadmap'])->name('roadmap');

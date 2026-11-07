@@ -21,6 +21,8 @@ class MissingPhoneReminder extends Mailable implements ShouldQueue
 
     public $whatsappGroupUrl;
 
+    public $mentorWhatsappGroupUrl;
+
     /**
      * Create a new message instance.
      */
@@ -29,6 +31,7 @@ class MissingPhoneReminder extends Mailable implements ShouldQueue
         $this->user = $user;
         $this->whatsappChannelUrl = 'https://whatsapp.com/channel/0029VbCwysMKmCPOHlfDBB0g';
         $this->whatsappGroupUrl = config('services.whatsapp.group_url', 'https://chat.whatsapp.com/LhQzbQlUG3QBeeSRlGlZnH');
+        $this->mentorWhatsappGroupUrl = config('services.whatsapp.mentor_group_url', 'https://chat.whatsapp.com/LDjPaMz5vy0AGllDILraKd?s=cl&p=i&mlu=4&ilr=4&iam=2');
     }
 
     /**
@@ -36,6 +39,12 @@ class MissingPhoneReminder extends Mailable implements ShouldQueue
      */
     public function envelope(): Envelope
     {
+        if ($this->user->isMentor()) {
+            return new Envelope(
+                subject: '🤝 Rejoignez le réseau des mentors Brillio & activez vos alertes WhatsApp',
+            );
+        }
+
         return new Envelope(
             subject: '🔥 Ne rate plus rien : tes opportunités (Bourses, Emplois, Formations) sur WhatsApp !',
         );

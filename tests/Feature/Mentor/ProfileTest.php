@@ -37,6 +37,7 @@ class ProfileTest extends TestCase
             'current_position' => 'Expert Laravel',
             'years_of_experience' => 10,
             'specialization_id' => (string) $spec->id,
+            'phone' => '+22997000000',
         ]);
 
         $response->assertRedirect();

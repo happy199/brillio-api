@@ -108,7 +108,7 @@ class SendMissingPhoneRemindersTest extends TestCase
             return $mail->hasTo($jeuneRecentlyMessaged->email);
         });
 
-        Mail::assertNotQueued(MissingPhoneReminder::class, function ($mail) use ($mentorMissingPhone) {
+        Mail::assertQueued(MissingPhoneReminder::class, function ($mail) use ($mentorMissingPhone) {
             return $mail->hasTo($mentorMissingPhone->email);
         });
 

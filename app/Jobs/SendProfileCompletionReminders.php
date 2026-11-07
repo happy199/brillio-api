@@ -94,6 +94,10 @@ class SendProfileCompletionReminders implements ShouldQueue
             $missing[] = 'Ajouter une photo de profil';
         }
 
+        if (empty($user->phone)) {
+            $missing[] = 'Renseigner votre numéro de téléphone (Appel / WhatsApp)';
+        }
+
         if ($user->isJeune()) {
             if (! $user->personalityTest) {
                 $missing[] = 'Passer le test de personnalité (MBTI)';

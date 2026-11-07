@@ -10,12 +10,12 @@ use Illuminate\Mail\Mailable;
 class SendMissingPhoneReminders extends EngagementReminderJob
 {
     /**
-     * Select jeunes who have no phone number
+     * Select users (jeunes and mentors) who have no phone number
      * and have not received an engagement email in the last 6 days.
      */
     protected function eligibleUsers(): Builder
     {
-        return User::where('user_type', User::TYPE_JEUNE)
+        return User::whereIn('user_type', [User::TYPE_JEUNE, User::TYPE_MENTOR])
             ->where('is_archived', false)
             ->where('is_blocked', false)
             ->whereNotNull('email_verified_at')

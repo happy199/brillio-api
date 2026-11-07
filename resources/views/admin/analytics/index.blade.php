@@ -458,7 +458,7 @@
     </div>
 
     <!-- Main Demographic Charts -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-6">
         <!-- Chart Âge des Jeunes -->
         <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col border border-transparent hover:border-gray-100 transition-colors">
             <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Âge des Jeunes</h3>
@@ -495,12 +495,24 @@
             </div>
         </div>
 
-        <!-- Chart Phone Stats -->
+        <!-- Chart Phone Stats (Global) -->
         <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col hover:shadow-sm transition-shadow">
-            <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Téléphones</h3>
+            <h3 class="font-bold text-gray-900 mb-1 text-sm uppercase tracking-wider">Téléphones (Tous)</h3>
             <p class="text-xs text-gray-500 mb-4">Utilisateurs avec/sans numéro</p>
             <div class="h-64 mt-auto">
                 <canvas id="phoneChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart Mentor Phone Stats -->
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col border-2 border-orange-100 hover:shadow-sm transition-shadow">
+            <div class="flex items-center gap-1.5 mb-1">
+                <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+                <h3 class="font-bold text-orange-600 text-sm uppercase tracking-wider">Tél. Mentors</h3>
+            </div>
+            <p class="text-xs text-gray-500 mb-4">Mentors avec/sans numéro</p>
+            <div class="h-64 mt-auto">
+                <canvas id="mentorPhoneChart"></canvas>
             </div>
         </div>
     </div>
@@ -1220,6 +1232,30 @@
             datasets: [{
                 data: [phoneStats.with_phone, phoneStats.without_phone],
                 backgroundColor: ['#10B981', '#EF4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+            }
+        }
+    });
+
+    // Chart Mentor Phone
+    const mentorPhoneCtx = document.getElementById('mentorPhoneChart').getContext('2d');
+    const mentorPhoneStats = @json($stats['mentor_phone_stats']);
+    new Chart(mentorPhoneCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Avec numéro', 'Sans numéro'],
+            datasets: [{
+                data: [mentorPhoneStats.with_phone, mentorPhoneStats.without_phone],
+                backgroundColor: ['#F97316', '#CBD5E1'],
                 borderWidth: 2,
                 borderColor: '#ffffff'
             }]
