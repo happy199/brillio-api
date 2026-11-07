@@ -113,3 +113,12 @@ yarn-error.log*
 
 # Local dev scripts
 start-queue-worker.sh
+
+# AI Agents & Skills
+.agents/
+.agent/
+agent/
+agents/
+skills/
+.skills/
+

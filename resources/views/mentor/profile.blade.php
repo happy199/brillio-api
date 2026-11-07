@@ -31,9 +31,26 @@
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
         </div>
-        <div>
+        <div class="flex-1">
             <h3 class="font-semibold text-yellow-800">Profil incomplet</h3>
-            <p class="text-yellow-700 text-sm mt-1">Completez votre profil pour qu'il soit visible par les jeunes.</p>
+            <p class="text-yellow-700 text-sm mt-1">Complétez votre profil pour qu'il soit visible par les jeunes.</p>
+            <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                @if(empty($user->phone))
+                    <span class="px-2.5 py-1 bg-yellow-200/80 text-yellow-900 rounded-lg font-medium">⚠️ Numéro de téléphone manquant</span>
+                @endif
+                @if(!$profile || empty($profile->bio))
+                    <span class="px-2.5 py-1 bg-yellow-200/80 text-yellow-900 rounded-lg font-medium">Bio manquante</span>
+                @endif
+                @if(!$profile || empty($profile->current_position))
+                    <span class="px-2.5 py-1 bg-yellow-200/80 text-yellow-900 rounded-lg font-medium">Poste manquant</span>
+                @endif
+                @if(!$profile || (empty($profile->specialization) && empty($profile->specialization_id)))
+                    <span class="px-2.5 py-1 bg-yellow-200/80 text-yellow-900 rounded-lg font-medium">Spécialisation manquante</span>
+                @endif
+                @if(!$profile || $profile->roadmapSteps()->count() === 0)
+                    <span class="px-2.5 py-1 bg-yellow-200/80 text-yellow-900 rounded-lg font-medium">Parcours vide (au moins 1 étape)</span>
+                @endif
+            </div>
         </div>
     </div>
     @endif
@@ -122,6 +139,26 @@
                         value="{{ old('current_position', $profile->current_position ?? '') }}"
                         class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
                         placeholder="Ex: Directeur Marketing">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Numéro de téléphone (Appel / WhatsApp) *</label>
+                    <div class="relative">
+                        <input type="tel" name="phone" required
+                            value="{{ old('phone', $user->phone ?? '') }}"
+                            class="w-full px-4 py-3 pl-11 border @error('phone') border-red-500 ring-2 ring-red-200 @else border-gray-300 @enderror rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            placeholder="Ex: +229 97 00 00 00">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                        </div>
+                    </div>
+                    @error('phone')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @else
+                        <p class="text-xs text-gray-500 mt-1">Utilisé par l'équipe pour vous joindre et vous inviter aux opportunités exclusives.</p>
+                    @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Entreprise</label>

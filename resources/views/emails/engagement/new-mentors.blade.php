@@ -14,23 +14,48 @@
         🌟 Les nouveaux visages</h3>
 
     @foreach($mentors as $mentor)
+    @php
+        $mentorProfile = $mentor->mentorProfile ?? null;
+        $profileRoute = $mentorProfile ? route('jeune.mentors.show', ['mentor' => $mentorProfile]) : route('jeune.mentors');
+        $position = $mentorProfile->current_position ?? null;
+        $company = $mentorProfile->current_company ?? null;
+        $specializationName = $mentorProfile->specializationModel->name ?? $mentorProfile->specialization ?? null;
+        $avatarUrl = $mentor->avatar_url ?? ('https://ui-avatars.com/api/?name='.urlencode($mentor->name).'&color=5844E3&background=EEF2FF');
+    @endphp
     <table width="100%" cellpadding="0" cellspacing="0"
         style="margin-bottom: 25px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px;">
         <tr>
-            <td style="vertical-align: middle;">
-                <p style="margin: 0 0 5px; font-weight: 700; color: #334155; font-size: 17px;">{{ $mentor->name }}</p>
-                <p style="margin: 0 0 5px; color: #64748b; font-size: 14px;">
-                    <strong>{{ $mentor->mentorProfile->current_position }}</strong> @ {{
-                    $mentor->mentorProfile->current_company }}
-                </p>
-                <p style="margin: 0; color: #6366f1; font-size: 13px; font-weight: 600;">
-                    🎯 Expert en {{ $mentor->mentorProfile->specializationModel->name ??
-                    $mentor->mentorProfile->specialization }}
-                </p>
+            <td style="vertical-align: middle; width: 68px; padding-right: 16px;">
+                <a href="{{ $profileRoute }}" style="text-decoration: none; display: block;">
+                    <img src="{{ $avatarUrl }}"
+                         alt="{{ $mentor->name }}"
+                         width="56"
+                         height="56"
+                         style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; display: block; border: 2px solid #e0e7ff; background-color: #eef2ff;">
+                </a>
             </td>
-            <td style="vertical-align: middle; text-align: right; width: 120px;">
-                <a href="{{ route('jeune.mentors.show', ['mentor' => $mentor->mentorProfile]) }}"
-                    style="display: inline-block; background-color: #ffffff; color: #6366f1; border: 1px solid #6366f1; padding: 10px 16px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; white-space: nowrap;">
+            <td style="vertical-align: middle;">
+                <p style="margin: 0 0 4px; font-weight: 700; color: #1e293b; font-size: 16px; line-height: 1.3;">
+                    <a href="{{ $profileRoute }}" style="color: #1e293b; text-decoration: none;">
+                        {{ $mentor->name }}
+                    </a>
+                </p>
+                @if($position || $company)
+                <p style="margin: 0 0 4px; color: #64748b; font-size: 13px; line-height: 1.4;">
+                    @if($position)<strong>{{ $position }}</strong>@endif
+                    @if($position && $company) @ @endif
+                    @if($company){{ $company }}@endif
+                </p>
+                @endif
+                @if($specializationName)
+                <p style="margin: 0; color: #5844E3; font-size: 12px; font-weight: 600; line-height: 1.4;">
+                    🎯 Expert en {{ $specializationName }}
+                </p>
+                @endif
+            </td>
+            <td style="vertical-align: middle; text-align: right; width: 110px; padding-left: 10px;">
+                <a href="{{ $profileRoute }}"
+                    style="display: inline-block; background-color: #ffffff; color: #5844E3; border: 1px solid #5844E3; padding: 9px 14px; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: nowrap;">
                     Voir profil
                 </a>
             </td>
