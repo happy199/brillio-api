@@ -350,7 +350,7 @@
     </div>
 
     <!-- Stats principales -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-6">
         <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -424,6 +424,27 @@
             <div class="mt-4 flex items-center text-sm">
                 <span class="text-orange-600 font-medium">{{ $stats['youth_engagement']['mentorship_intent_rate'] }}%</span>
                 <span class="text-gray-500 ml-1">veulent un mentor</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm mb-6 border border-indigo-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <p class="text-sm font-bold text-gray-900">App Brillio (PWA)</p>
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#5844E3]/10 text-[#5844E3]">App</span>
+                    </div>
+                    <p class="text-3xl font-bold text-[#5844E3] mt-1">{{ number_format($stats['pwa']['total_installs']) }}</p>
+                </div>
+                <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-[#5844E3]">
+                    <svg class="w-6 h-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center text-sm">
+                <span class="text-emerald-600 font-medium">+{{ $stats['pwa']['period_installs'] }} sur période</span>
+                <span class="text-gray-500 ml-1">({{ $stats['pwa']['active_users_7d'] }} actifs 7j)</span>
             </div>
         </div>
     </div>
@@ -688,6 +709,81 @@
                 @empty
                 <p class="text-gray-500 text-center py-4">Aucune inscription sur cette période</p>
                 @endforelse
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA Analytics : Installations & Utilisateurs de l'App Brillio -->
+    <div id="pwa-analytics" class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-indigo-100">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-[#5844E3] flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 text-lg">App Brillio (PWA) - Installations & Usage</h3>
+                    <p class="text-xs text-gray-500">Statistiques de téléchargement et d'utilisation de l'application mobile et bureau</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                    {{ $stats['pwa']['active_users_7d'] }} actifs cette semaine
+                </span>
+            </div>
+        </div>
+
+        <!-- 4 Cartes de métriques PWA -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-indigo-50/50 border border-indigo-100 text-center">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Installations Totales</p>
+                <p class="text-3xl font-extrabold text-[#5844E3] mt-1">{{ number_format($stats['pwa']['total_installs']) }}</p>
+                <p class="text-[11px] text-gray-400 mt-1">+{{ $stats['pwa']['period_installs'] }} sur la période</p>
+            </div>
+            <div class="p-4 rounded-xl bg-emerald-50/50 border border-emerald-100 text-center">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Utilisateurs Actifs (30j)</p>
+                <p class="text-3xl font-extrabold text-emerald-600 mt-1">{{ number_format($stats['pwa']['active_users_30d']) }}</p>
+                <p class="text-[11px] text-gray-400 mt-1">{{ $stats['pwa']['active_users_7d'] }} sur les 7 derniers jours</p>
+            </div>
+            <div class="p-4 rounded-xl bg-purple-50/50 border border-purple-100 text-center">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Ouvertures de l'App</p>
+                <p class="text-3xl font-extrabold text-purple-600 mt-1">{{ number_format($stats['pwa']['total_launches']) }}</p>
+                <p class="text-[11px] text-gray-400 mt-1">Lancements depuis l'écran d'accueil</p>
+            </div>
+            <div class="p-4 rounded-xl bg-amber-50/50 border border-amber-100 text-center">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Taux d'adoption PWA</p>
+                @php
+                    $adoptionRate = $stats['total_users'] > 0 ? round(($stats['pwa']['total_installs'] / $stats['total_users']) * 100, 1) : 0;
+                @endphp
+                <p class="text-3xl font-extrabold text-amber-600 mt-1">{{ $adoptionRate }}%</p>
+                <p class="text-[11px] text-gray-400 mt-1">des utilisateurs inscrits</p>
+            </div>
+        </div>
+
+        <!-- Répartition par plateforme -->
+        <div class="p-4 rounded-xl bg-gray-50 border border-gray-100">
+            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Répartition par plateforme</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 shadow-2xs">
+                    <div class="flex items-center gap-2">
+                        <span class="text-emerald-600 font-bold text-sm">🤖 Android</span>
+                    </div>
+                    <span class="font-extrabold text-gray-900 text-sm">{{ $stats['pwa']['platforms']['android'] }}</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 shadow-2xs">
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-900 font-bold text-sm">🍏 iOS (iPhone/iPad)</span>
+                    </div>
+                    <span class="font-extrabold text-gray-900 text-sm">{{ $stats['pwa']['platforms']['ios'] }}</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 shadow-2xs">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[#5844E3] font-bold text-sm">💻 Ordinateur (Desktop)</span>
+                    </div>
+                    <span class="font-extrabold text-gray-900 text-sm">{{ $stats['pwa']['platforms']['desktop'] }}</span>
+                </div>
             </div>
         </div>
     </div>

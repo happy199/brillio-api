@@ -8,6 +8,7 @@ use App\Models\ChatConversation;
 use App\Models\ChatMessage;
 use App\Models\MentorProfile;
 use App\Models\PersonalityTest;
+use App\Models\PwaInstallation;
 use App\Models\RoadmapStep;
 use App\Models\User;
 use App\Models\UserFeedback;
@@ -231,6 +232,30 @@ class AnalyticsController extends Controller
                 ->latest()
                 ->limit(20)
                 ->get(),
+        ];
+
+        // --- PWA Analytics (Installations & Utilisateurs Actifs) ---
+        $stats['pwa'] = [
+            'total_installs' => PwaInstallation::whereNotNull('installed_at')->count(),
+            'period_installs' => PwaInstallation::whereNotNull('installed_at')
+                ->whereBetween('installed_at', [$start, $end])
+                ->count(),
+            'active_users_7d' => PwaInstallation::where('last_active_at', '>=', now()->subDays(7))->count(),
+            'active_users_30d' => PwaInstallation::where('last_active_at', '>=', now()->subDays(30))->count(),
+            'active_users_period' => PwaInstallation::whereBetween('last_active_at', [$start, $end])->count(),
+            'total_launches' => PwaInstallation::sum('launches_count') ?? 0,
+            'platforms' => [
+                'android' => PwaInstallation::where('platform', 'android')->count(),
+                'ios' => PwaInstallation::where('platform', 'ios')->count(),
+                'desktop' => PwaInstallation::where('platform', 'desktop')->count(),
+                'unknown' => PwaInstallation::where('platform', 'unknown')->count(),
+            ],
+            'daily_installs' => $this->getDailyData(
+                PwaInstallation::whereNotNull('installed_at'),
+                $start,
+                $end,
+                'installed_at'
+            ),
         ];
 
         return $stats;
@@ -550,9 +575,20 @@ class AnalyticsController extends Controller
      */
     private function getDailyData($query, Carbon $start, Carbon $end, string $dateColumn = 'created_at'): array
     {
+        $selectExpr = match ($dateColumn) {
+            'updated_at' => 'DATE(updated_at) as date, COUNT(*) as count',
+            'completed_at' => 'DATE(completed_at) as date, COUNT(*) as count',
+            'scheduled_at' => 'DATE(scheduled_at) as date, COUNT(*) as count',
+            default => 'DATE(created_at) as date, COUNT(*) as count',
+        };
+        $safeColumn = match ($dateColumn) {
+            'updated_at', 'completed_at', 'scheduled_at' => $dateColumn,
+            default => 'created_at',
+        };
+
         $data = $query->clone()
-            ->selectRaw("DATE($dateColumn) as date, COUNT(*) as count")
-            ->whereBetween($dateColumn, [$start, $end])
+            ->selectRaw($selectExpr)
+            ->whereBetween($safeColumn, [$start, $end])
             ->groupBy('date')
             ->orderBy('date')
             ->pluck('count', 'date')

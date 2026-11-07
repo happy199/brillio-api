@@ -9,6 +9,7 @@ use App\Models\ChatMessage;
 use App\Models\CvAnalysis;
 use App\Models\MentorProfile;
 use App\Models\PersonalityTest;
+use App\Models\PwaInstallation;
 use App\Models\User;
 
 /**
@@ -35,6 +36,9 @@ class DashboardController extends Controller
             'total_cv_analyses' => CvAnalysis::count(),
             'cv_analyses_this_week' => CvAnalysis::where('created_at', '>=', now()->subDays(7))->count(),
             'avg_cv_score' => (int) round(CvAnalysis::avg('global_score') ?? 0),
+            'total_pwa_installs' => PwaInstallation::whereNotNull('installed_at')->count(),
+            'active_pwa_users_30d' => PwaInstallation::where('last_active_at', '>=', now()->subDays(30))->count(),
+            'active_pwa_users_7d' => PwaInstallation::where('last_active_at', '>=', now()->subDays(7))->count(),
         ];
 
         // Utilisateurs récents (7 derniers jours)

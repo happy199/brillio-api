@@ -6,25 +6,22 @@
 
 
 @section('content')
-<div class="relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white py-24 sm:py-32"
+<div class="relative overflow-hidden bg-slate-50 py-24 sm:py-32"
      x-data="advertisementGallery"
      @keydown.escape.window="close()"
      @keydown.left.window="prev()"
      @keydown.right.window="next()">
 
-    <!-- Background elements -->
-    <div class="absolute inset-y-0 right-0 -z-10 w-full overflow-hidden ring-1 ring-gray-100 lg:row-span-4 lg:row-start-1 lg:bg-gray-100/10">
-        <div class="absolute -right-40 -top-40 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-primary-200 to-secondary-200 opacity-20 blur-3xl"></div>
-        <div class="absolute -left-40 top-80 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-indigo-200 to-primary-200 opacity-20 blur-3xl"></div>
-    </div>
-
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <!-- Header Section -->
         <div class="mx-auto max-w-3xl text-center mb-16">
-            <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+            <span class="inline-block px-3.5 py-1.5 bg-brand-50 border border-brand-100 rounded-full text-xs font-semibold text-brand-700 mb-4">
+                Opportunités & Partenariats
+            </span>
+            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
                 Vitrine & Opportunités
             </h1>
-            <p class="mt-4 text-lg leading-8 text-gray-600">
+            <p class="mt-4 text-lg leading-8 text-slate-600">
                 Découvrez les offres exclusives, bourses, formations et événements de notre communauté de partenaires.
             </p>
         </div>
@@ -121,7 +118,7 @@
 
                 <template x-if="activeAd && activeAd.url">
                     <a :href="activeAd.url" target="_blank"
-                       class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-bold rounded-full shadow-lg hover:shadow-primary-500/20 hover:scale-105 transition-all duration-300">
+                       class="inline-flex items-center justify-center px-6 py-3.5 bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-bold rounded-xl shadow-xs hover:shadow transition-all text-sm">
                         <span>En savoir plus</span>
                         <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>

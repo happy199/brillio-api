@@ -1,4 +1,5 @@
 import './bootstrap';
+import './pwa.js';
 import { parseLinkedInFile, sendToBackend } from './linkedin-parser.js';
 
 // Rendre disponible globalement

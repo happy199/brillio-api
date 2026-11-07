@@ -11,7 +11,7 @@
     <div class="bg-red-50 border border-red-200 rounded-xl p-4">
         <div class="flex items-start">
             <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -30,91 +30,67 @@
     @endif
     <!-- Jeune Card -->
     <a href="{{ route('auth.jeune.register') }}"
-        class="block p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-transparent hover:border-primary-500 transition-all duration-300 group">
+        class="block p-5 bg-white hover:bg-slate-50/80 rounded-2xl border border-slate-200 hover:border-brand-500 hover:shadow-md transition-all duration-200 group">
         <div class="flex items-center gap-4">
             <div
-                class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0 border border-brand-100">
+                <svg aria-hidden="true" class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
             </div>
             <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900">Je suis un Jeune</h3>
-                <p class="text-gray-600 text-sm mt-1">
+                <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-600 transition-colors">Je suis un Jeune</h3>
+                <p class="text-slate-500 text-xs mt-0.5 leading-relaxed">
                     Découvrez votre personnalité, explorez des carrières et trouvez votre voie grâce à nos mentors.
                 </p>
             </div>
-            <svg class="w-6 h-6 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all"
+            <svg aria-hidden="true" class="w-5 h-5 text-slate-400 group-hover:text-brand-600 group-hover:translate-x-0.5 transition-all flex-shrink-0"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </div>
     </a>
-
-    <!-- Divider -->
-    <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-200"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-            <span class="px-4 bg-white text-gray-500">ou</span>
-        </div>
-    </div>
 
     <!-- Mentor Card -->
     <a href="{{ route('auth.mentor.login') }}"
-        class="block p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border-2 border-transparent hover:border-orange-500 transition-all duration-300 group">
+        class="block p-5 bg-white hover:bg-slate-50/80 rounded-2xl border border-slate-200 hover:border-brand-500 hover:shadow-md transition-all duration-200 group">
         <div class="flex items-center gap-4">
             <div
-                class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0 border border-brand-100">
+                <svg aria-hidden="true" class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
             </div>
             <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900">Je suis un Mentor</h3>
-                <p class="text-gray-600 text-sm mt-1">
+                <h3 class="text-base font-bold text-slate-900 group-hover:text-brand-600 transition-colors">Je suis un Mentor</h3>
+                <p class="text-slate-500 text-xs mt-0.5 leading-relaxed">
                     Partagez votre parcours professionnel et inspirez la prochaine génération de talents africains.
                 </p>
             </div>
-            <svg class="w-6 h-6 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all"
+            <svg aria-hidden="true" class="w-5 h-5 text-slate-400 group-hover:text-brand-600 group-hover:translate-x-0.5 transition-all flex-shrink-0"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </div>
     </a>
 
-    <!-- Divider -->
-    <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-200"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-            <span class="px-4 bg-white text-gray-500">ou</span>
-        </div>
-    </div>
-
     <!-- Organization Card -->
     <a href="{{ route('organization.register') }}"
-        class="block p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-transparent hover:border-purple-500 transition-all duration-300 group">
+        class="block p-5 bg-white hover:bg-slate-50/80 rounded-2xl border border-slate-200 hover:border-slate-800 hover:shadow-md transition-all duration-200 group">
         <div class="flex items-center gap-4">
             <div
-                class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0 border border-slate-200">
+                <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
             </div>
             <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900">Je suis une Organisation</h3>
-                <p class="text-gray-600 text-sm mt-1">
-                    Sponsorisez des talents, soutenez la communauté et suivez l'impact de vos jeunes talents dans leur
-                    carrière.
+                <h3 class="text-base font-bold text-slate-900 transition-colors">Je suis une Organisation</h3>
+                <p class="text-slate-500 text-xs mt-0.5 leading-relaxed">
+                    Soutenez des cohortes, suivez l'insertion des jeunes et accédez à des talents qualifiés.
                 </p>
             </div>
-            <svg class="w-6 h-6 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all"
+            <svg aria-hidden="true" class="w-5 h-5 text-slate-400 group-hover:text-slate-800 group-hover:translate-x-0.5 transition-all flex-shrink-0"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -122,21 +98,21 @@
     </a>
 
     <!-- LinkedIn Badge for Mentors -->
-    <div class="text-center">
-        <p class="text-xs text-gray-500">
-            <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24">
+    <div class="text-center pt-2">
+        <p class="text-xs text-slate-500 flex items-center justify-center gap-1.5">
+            <svg aria-hidden="true" class="w-3.5 h-3.5 text-[#0A66C2] flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path
                     d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
             </svg>
-            Mentors : Connexion exclusive via LinkedIn pour vérifier votre profil professionnel
+            <span>Mentors : Authentification sécurisée via LinkedIn</span>
         </p>
     </div>
 </div>
 @endsection
 
 @section('footer')
-<p class="text-white/80 text-sm">
+<p class="text-slate-500 text-sm">
     Déjà inscrit ?
-    <a href="{{ route('auth.login') }}" class="text-white font-semibold hover:underline">Se connecter</a>
+    <a href="{{ route('auth.login') }}" class="text-brand-600 font-semibold hover:underline">Se connecter</a>
 </p>
 @endsection

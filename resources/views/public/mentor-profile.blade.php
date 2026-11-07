@@ -46,17 +46,27 @@
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="{{ route('auth.login') }}" class="flex items-center gap-2 hover:opacity-80 transition">
-                <span class="text-2xl font-bold text-orange-600">{{ $displayOrg ? $displayOrg->name : 'Brillio' }}</span>
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <a href="{{ route('home') }}" class="flex items-center gap-2.5 hover:opacity-90 transition">
+                @if($displayOrg && $displayOrg->logo_url)
+                    <img src="{{ $displayOrg->logo_url }}" alt="{{ $displayOrg->name }}" class="h-9 w-auto object-contain">
+                    <span class="text-xl font-bold tracking-tight text-slate-900">{{ $displayOrg->name }}</span>
+                @else
+                    <img src="{{ asset('images/logo/brillio-logo.png') }}" alt="Brillio" width="138" height="54" class="h-9 w-auto object-contain">
+                @endif
             </a>
-            <a href="{{ route('home') }}"
-                class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
-                Rejoindre la communauté
-            </a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('auth.login') }}" class="hidden sm:inline-flex px-4 py-2 text-xs font-semibold text-slate-700 hover:text-brand-600 transition">
+                    Se connecter
+                </a>
+                <a href="{{ route('auth.choice') }}"
+                    class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition shadow-xs">
+                    Rejoindre la communauté
+                </a>
+            </div>
         </div>
     </header>
 
@@ -74,7 +84,7 @@
                     $colors = ['from-blue-400 to-blue-600', 'from-orange-400 to-red-500', 'from-purple-400 to-purple-600', 'from-green-400 to-green-600'];
                     $color = $colors[crc32($mentor->user->id) % count($colors)];
                 @endphp
-                <div class="relative w-24 h-24 rounded-full bg-gradient-to-br {{ $color }} flex items-center justify-center text-white text-3xl font-bold flex-shrink-0 border-4 border-orange-100 overflow-hidden">
+                <div class="relative w-24 h-24 rounded-2xl bg-brand-50 border-2 border-brand-100 flex items-center justify-center text-brand-600 text-2xl font-black flex-shrink-0 overflow-hidden shadow-xs">
                     <span>{{ $initials }}</span>
                     @if($mentor->user->avatar_url)
                     <img src="{{ $mentor->user->avatar_url }}" alt="{{ $publicData['name'] }}" class="absolute inset-0 w-full h-full object-cover bg-white" onerror="this.style.display='none'">
@@ -187,9 +197,11 @@
         <!-- Advice -->
         @if($publicData['advice'])
         <div
-            class="bg-gradient-to-r from-orange-50 to-pink-50 rounded-2xl shadow-lg p-8 mb-6 border-l-4 border-orange-500">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">💡 Conseil de carrière</h2>
-            <p class="text-gray-700 leading-relaxed italic">{{ $publicData['advice'] }}</p>
+            class="bg-white rounded-2xl shadow-xs p-8 mb-6 border border-slate-200 border-l-4 border-l-brand-500">
+            <h2 class="text-xl font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <span class="text-brand-500 font-bold">💡</span> Conseil de carrière
+            </h2>
+            <p class="text-slate-700 leading-relaxed italic text-sm">{{ $publicData['advice'] }}</p>
         </div>
         @endif
 
@@ -349,12 +361,13 @@
         @endif
 
         <!-- CTA -->
-        <div class="bg-gradient-to-r from-orange-600 to-pink-600 rounded-2xl shadow-lg p-8 text-center text-white">
-            <h2 class="text-3xl font-bold mb-4">Inspiré par ce parcours ?</h2>
-            <p class="text-lg mb-6 opacity-90">Rejoignez {{ $displayOrg ? $displayOrg->name : 'Brillio' }} pour découvrir des centaines de mentors et construire
-                votre propre parcours professionnel</p>
-            <a href="{{ route('home') }}"
-                class="inline-block px-8 py-4 bg-white text-orange-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
+        <div class="bg-slate-900 rounded-3xl shadow-xl p-8 sm:p-12 text-center text-white border border-slate-800">
+            <h2 class="text-2xl sm:text-3xl font-extrabold mb-3 text-white">Inspiré par ce parcours ?</h2>
+            <p class="text-sm sm:text-base mb-8 text-slate-300 max-w-xl mx-auto leading-relaxed">
+                Rejoignez {{ $displayOrg ? $displayOrg->name : 'Brillio' }} pour découvrir des dizaines de mentors certifiés et accélérer votre orientation professionnelle.
+            </p>
+            <a href="{{ route('auth.choice') }}"
+                class="inline-block px-8 py-3.5 bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white rounded-xl font-bold text-sm transition shadow-xs">
                 Rejoindre la communauté gratuitement
             </a>
         </div>

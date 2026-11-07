@@ -18,10 +18,50 @@ use Illuminate\Support\Facades\Log;
 class PageController extends Controller
 {
     /**
+     * Écran d'accueil mobile & Onboarding (Figma)
+     */
+    public function appWelcome()
+    {
+        if (auth()->check()) {
+            return redirect()->route($this->getAuthenticatedDashboardRoute(auth()->user()));
+        }
+
+        return view('public.app-welcome');
+    }
+
+    /**
+     * Résout la route de redirection selon le rôle de l'utilisateur connecté
+     */
+    private function getAuthenticatedDashboardRoute(User $user): string
+    {
+        return match (true) {
+            $user->isJeune() => $user->onboarding_completed ? 'jeune.dashboard' : 'jeune.onboarding',
+            $user->isMentor() => 'mentor.dashboard',
+            $user->isAdmin() || $user->user_type === 'admin' => 'admin.dashboard',
+            $user->user_type === 'coach' => 'coach.dashboard',
+            default => 'auth.choice',
+        };
+    }
+
+    /**
      * Page d'accueil
      */
-    public function home()
+    public function home(Request $request)
     {
+        if (app()->bound('current_organization')) {
+            return redirect()->route('auth.choice');
+        }
+
+        $validated = $request->validate([
+            'source' => ['nullable', 'string', 'max:50', 'alpha_dash'],
+            'mode' => ['nullable', 'string', 'max:50', 'alpha_dash'],
+            'web' => ['nullable', 'string', 'max:10', 'alpha_dash'],
+        ]);
+
+        if (($validated['source'] ?? null) === 'pwa' || ($validated['mode'] ?? null) === 'app') {
+            return redirect()->route('app.welcome');
+        }
+
         // Statistiques dynamiques avec résilience
         try {
             $jeunesCount = User::where('user_type', 'jeune')->count();
@@ -36,7 +76,11 @@ class PageController extends Controller
         }
 
         $verifiedMentors = MentorProfile::with(['user', 'specializationModel', 'roadmapSteps'])
-            ->where('is_validated', true)
+            ->where(function ($query) {
+                $query->where('is_published', true)
+                    ->orWhere('is_validated', true);
+            })
+            ->whereNotNull('public_slug')
             ->inRandomOrder()
             ->limit(10)
             ->get();
@@ -147,8 +191,8 @@ class PageController extends Controller
      */
     public function mentorProfile(MentorProfile $mentor)
     {
-        // Vérifier que le profil est publié
-        if (! $mentor->is_published) {
+        // Vérifier que le profil est publié ou validé
+        if (! $mentor->is_published && ! $mentor->is_validated) {
             abort(404);
         }
 

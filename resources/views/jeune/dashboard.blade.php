@@ -3,43 +3,254 @@
 @section('title', 'Mon espace')
 
 @section('content')
-<div class="space-y-8">
-    <!-- Welcome Header -->
-    <div class="org-gradient-banner rounded-3xl p-8 text-white">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-                <h1 class="text-3xl font-bold">Bonjour, {{ explode(' ', $user->name)[0] }} !</h1>
-                <p class="text-white/80 mt-2">Prêt à explorer de nouvelles opportunités aujourd'hui ?</p>
+<div class="space-y-6">
+    <!-- =====================================================================
+         PWA MOBILE INTERFACE (Figma "Brillio Africa Mobile App" Harmonized)
+         ===================================================================== -->
+    <div class="block md:hidden space-y-5">
+        <!-- 1. Hero Card (Figma Purple Gradient Card) -->
+        <div class="pwa-hero-card p-5 rounded-3xl relative overflow-hidden shadow-lg shadow-indigo-500/25">
+            <div class="pwa-hero-pattern"></div>
+            <div class="relative z-10 space-y-3">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-semibold text-white tracking-wide">
+                    <span>✨</span>
+                    <span>Nouvelle Génération Brillio</span>
+                </div>
+                <h1 class="text-xl font-black text-white leading-tight tracking-tight">
+                    Explore ton avenir professionnel
+                </h1>
+                <p class="text-xs text-white/85 leading-relaxed">
+                    Découvre tes forces avec l'IA, connecte-toi à des mentors experts et débloque tes opportunités.
+                </p>
+                <div class="flex items-center gap-2 pt-1">
+                    @if(!$stats['personality_completed'])
+                        <a href="{{ route('jeune.personality') }}"
+                           class="flex-1 text-center py-2.5 px-3 bg-white text-indigo-700 font-bold text-xs rounded-xl shadow-md hover:bg-slate-50 active:scale-95 transition">
+                            Faire le test MBTI
+                        </a>
+                    @else
+                        <a href="{{ route('jeune.mentors') }}"
+                           class="flex-1 text-center py-2.5 px-3 bg-white text-indigo-700 font-bold text-xs rounded-xl shadow-md hover:bg-slate-50 active:scale-95 transition">
+                            Trouver un mentor
+                        </a>
+                    @endif
+                    <a href="{{ route('jeune.chat') }}"
+                       class="flex-1 text-center py-2.5 px-3 bg-white/15 border border-white/25 text-white font-semibold text-xs rounded-xl hover:bg-white/25 active:scale-95 transition backdrop-blur-xs">
+                        Orientation IA
+                    </a>
+                </div>
             </div>
-            <div class="flex gap-3">
-                @if(!$stats['personality_completed'])
-                <a href="{{ route('jeune.personality') }}"
-                    class="px-5 py-3 bg-white text-primary-600 font-semibold rounded-xl hover:bg-gray-50 transition shadow-lg flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                    <span class="hidden sm:inline">Passer le test MBTI</span>
-                    <span class="sm:hidden">Test MBTI</span>
-                </a>
+        </div>
+
+        <!-- 2. Balance & Status Card (Figma Pastel Lavender Card) -->
+        <div class="pwa-balance-card p-4 rounded-2xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Solde Brillio & Statut</p>
+                    <div class="flex items-baseline gap-2 mt-0.5">
+                        <span class="text-xl font-extrabold text-slate-900">{{ auth()->user()->credits_balance ?? 0 }}</span>
+                        <span class="text-xs font-semibold text-indigo-600">crédits disponibles</span>
+                    </div>
+                </div>
+                @if($stats['personality_completed'])
+                    <span class="px-2.5 py-1 bg-purple-100 border border-purple-200 text-purple-700 font-bold text-[11px] rounded-full">
+                        {{ $user->personalityTest->personality_type }}
+                    </span>
+                @else
+                    <a href="{{ route('jeune.personality') }}" class="px-2.5 py-1 bg-amber-100 border border-amber-200 text-amber-800 font-semibold text-[11px] rounded-full flex items-center gap-1">
+                        <span>⏳</span>
+                        <span>MBTI à passer</span>
+                    </a>
                 @endif
-                <a href="{{ route('jeune.mentors') }}"
-                    class="px-5 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <span class="hidden sm:inline">Trouver mon mentor</span>
-                    <span class="sm:hidden">Mon mentor</span>
+            </div>
+            <div class="mt-3 pt-3 border-t border-indigo-100/70 flex items-center justify-between">
+                <span class="text-[11px] text-slate-500">1 session = 1 crédit</span>
+                <a href="{{ route('jeune.wallet.index') }}" class="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 active:scale-95 transition">
+                    <span>Recharger mon solde</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
-                <a href="{{ route('jeune.chat') }}"
-                    class="px-5 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    Discuter avec l'IA
+            </div>
+        </div>
+
+        <!-- 3. The 2x2 Services Grid (Figma Feature Core) -->
+        <div>
+            <div class="flex items-center justify-between mb-3 px-0.5">
+                <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Services & Outils Brillio</h2>
+                <span class="text-[11px] text-indigo-600 font-semibold">6 espaces</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Tuile 1: Orientation IA -->
+                <a href="{{ route('jeune.chat') }}" class="pwa-tile-card pwa-tile-purple group">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-purple-700 transition-colors">Orientation IA</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Conseiller IA & bilan</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-purple-600">
+                        <span>Explorer</span>
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
                 </a>
+
+                <!-- Tuile 2: Mentors Certifiés -->
+                <a href="{{ route('jeune.mentors') }}" class="pwa-tile-card pwa-tile-blue group">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors">Mentors</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Séances 1:1 en visio</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-blue-600">
+                        <span>Prendre RDV</span>
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <!-- Tuile 3: Mon Profil & CV -->
+                <a href="{{ route('jeune.profile') }}" class="pwa-tile-card pwa-tile-emerald group">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">Mon Profil</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">CV & compétences</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-emerald-600">
+                        <span>Compléter</span>
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <!-- Tuile 4: Opportunités -->
+                <a href="{{ route('jeune.opportunities') }}" class="pwa-tile-card pwa-tile-amber group">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-amber-700 transition-colors">Opportunités</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Stages & offres</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-amber-600">
+                        <span>Découvrir</span>
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <!-- Tuile 5: Analyseur de CV (Outils) -->
+                <a href="{{ route('jeune.outils') }}" class="pwa-tile-card pwa-tile-blue group" style="background-color: #f0fdf4; border-color: #dcfce7;">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition-colors">Analyseur de CV</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Audit & révision IA</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-teal-600">
+                        <span>Analyser</span>
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+
+                <!-- Tuile 6: Mes Documents -->
+                <a href="{{ route('jeune.documents') }}" class="pwa-tile-card pwa-tile-purple group" style="background-color: #fdf2f8; border-color: #fce7f3;">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-pink-700 transition-colors">Mes Documents</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Diplômes & fichiers</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-[11px] font-semibold text-pink-600">
+                        <span>Consulter</span>
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. Profile Alerts (if missing phone or profile not public) -->
+        @if(!($user->jeuneProfile?->is_public))
+            <div class="bg-purple-50/90 border border-purple-200/80 rounded-2xl p-4 shadow-xs">
+                <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-purple-900">Profil non visible par les mentors</h4>
+                        <p class="text-[11px] text-purple-700 mt-0.5">Ajoute ta bio et ton CV pour être contacté.</p>
+                        <form action="{{ route('jeune.profile.publish') }}" method="POST" class="mt-2.5">
+                            @csrf
+                            <button type="submit" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] rounded-lg shadow-xs active:scale-95 transition">
+                                Rendre mon profil visible
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    <!-- =====================================================================
+         DESKTOP INTERFACE (Widescreen Widgets & Analytics)
+         ===================================================================== -->
+    <div class="hidden md:block space-y-8">
+        <!-- Welcome Header (Clean Studio Palette) -->
+        <div class="relative overflow-hidden rounded-3xl bg-[#1A1259] text-white p-8 shadow-xl border border-white/10">
+            <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[#5844E3]/30 blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-white/90 mb-3">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Espace Membre Brillio</span>
+                    </div>
+                    <h1 class="text-3xl font-extrabold tracking-tight">Bonjour, {{ explode(' ', $user->name)[0] }} 👋</h1>
+                    <p class="text-white/80 mt-1.5 text-sm max-w-xl leading-relaxed">
+                        Prêt à explorer de nouvelles opportunités aujourd'hui ? Découvre ton potentiel et avance dans ton orientation.
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    @if(!$stats['personality_completed'])
+                    <a href="{{ route('jeune.personality') }}"
+                        class="btn-spring px-5 py-3 bg-[#5844E3] hover:bg-[#4835D4] text-white font-bold rounded-xl transition shadow-lg shadow-[#5844E3]/30 flex items-center gap-2 text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        <span>Passer le test MBTI</span>
+                    </a>
+                    @endif
+                    <a href="{{ route('jeune.mentors') }}"
+                        class="btn-spring px-5 py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition shadow-sm flex items-center gap-2 text-sm">
+                        <svg class="w-5 h-5 text-[#5844E3]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>Trouver un mentor</span>
+                    </a>
+                    <a href="{{ route('jeune.chat') }}"
+                        class="btn-spring px-5 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/15 transition flex items-center gap-2 text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span>Conseiller IA</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -50,7 +261,7 @@
     <div class="bg-purple-50 border border-purple-200 rounded-2xl p-6">
         <div class="flex items-start gap-4">
             <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -74,7 +285,7 @@
                     @csrf
                     <button type="submit"
                         class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-800 focus:outline-none focus:border-purple-800 focus:ring ring-purple-300 disabled:opacity-25 transition ease-in-out duration-150">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg aria-hidden="true" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -127,7 +338,7 @@
         <div x-show="hasPhone" class="bg-green-50 border border-green-200 rounded-2xl p-6">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -144,7 +355,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-start gap-4 flex-1">
                     <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
@@ -186,61 +397,61 @@
 
     <!-- Quick Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl p-5 shadow-sm card-hover">
-            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-3">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/90 card-interactive">
+            <div class="w-12 h-12 bg-purple-50 text-[#5844E3] rounded-xl flex items-center justify-center mb-3">
+                <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
             </div>
-            <p class="text-sm text-gray-500">Test de personnalité</p>
-            <p class="text-lg font-bold text-gray-900">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Test MBTI</p>
+            <p class="text-xl font-extrabold text-slate-900 mt-0.5">
                 @if($stats['personality_completed'])
                 {{ $user->personalityTest->personality_type }}
                 @else
-                Non passe
+                Non passé
                 @endif
             </p>
         </div>
 
-        <div class="bg-white rounded-2xl p-5 shadow-sm card-hover">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/90 card-interactive">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-3">
+                <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
             </div>
-            <p class="text-sm text-gray-500">Conversations</p>
-            <p class="text-lg font-bold text-gray-900">{{ $stats['conversations_count'] }}</p>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Conversations</p>
+            <p class="text-xl font-extrabold text-slate-900 mt-0.5">{{ $stats['conversations_count'] }}</p>
         </div>
 
-        <div class="bg-white rounded-2xl p-5 shadow-sm card-hover">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-3">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/90 card-interactive">
+            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-3">
+                <svg class="w-6 h-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
             </div>
-            <p class="text-sm text-gray-500">Documents</p>
-            <p class="text-lg font-bold text-gray-900">{{ $stats['documents_count'] }}</p>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Documents</p>
+            <p class="text-xl font-extrabold text-slate-900 mt-0.5">{{ $stats['documents_count'] }}</p>
         </div>
 
-        <div class="bg-white rounded-2xl p-5 shadow-sm card-hover">
-            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-3">
-                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/90 card-interactive">
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-3">
+                <svg class="w-6 h-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                 </svg>
             </div>
-            <p class="text-sm text-gray-500">Messages IA</p>
-            <p class="text-lg font-bold text-gray-900">{{ $stats['messages_count'] }}</p>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Messages IA</p>
+            <p class="text-xl font-extrabold text-slate-900 mt-0.5">{{ $stats['messages_count'] }}</p>
         </div>
     </div>
 
     <!-- Visibilité Profil -->
     <div class="space-y-4">
         <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -268,7 +479,7 @@
                 </div>
                 <div
                     class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center group-hover:bg-white/20 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </div>
@@ -282,7 +493,7 @@
         <a href="{{ route('jeune.personality') }}" class="bg-white rounded-2xl p-6 shadow-sm card-hover group">
             <div
                 class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
@@ -295,7 +506,7 @@
                 @else
                 Passer le test
                 @endif
-                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                <svg aria-hidden="true" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -306,7 +517,7 @@
         <a href="{{ route('jeune.chat') }}" class="bg-white rounded-2xl p-6 shadow-sm card-hover group">
             <div
                 class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -316,7 +527,7 @@
                 personnalisés</p>
             <div class="mt-4 flex items-center text-primary-600 font-medium text-sm">
                 Demarrer une discussion
-                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                <svg aria-hidden="true" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -327,7 +538,7 @@
         <a href="{{ route('jeune.mentors') }}" class="bg-white rounded-2xl p-6 shadow-sm card-hover group">
             <div
                 class="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
@@ -336,7 +547,7 @@
             <p class="text-gray-500 text-sm mt-1">Découvrez les parcours inspirants de professionnels africains</p>
             <div class="mt-4 flex items-center text-primary-600 font-medium text-sm">
                 Voir les mentors
-                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                <svg aria-hidden="true" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -347,7 +558,7 @@
         <div x-data @click="$dispatch('open-profiling-modal')" class="bg-white rounded-2xl p-6 shadow-sm card-hover group text-left cursor-pointer">
             <div
                 class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
@@ -356,7 +567,7 @@
             <p class="text-gray-500 text-sm mt-1">Ta vie change ? Tes infos aussi ! Ça nous aide à mieux t'orienter</p>
             <div class="mt-4 flex items-center text-primary-600 font-medium text-sm">
                 Mettre à jour
-                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                <svg aria-hidden="true" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -424,10 +635,10 @@
                 <a href="{{ route('jeune.resources.index') }}" class="text-primary-600 font-medium text-sm hover:underline mr-2 hidden sm:block">Tout explorer</a>
                 <div class="flex gap-2">
                     <button @click="scrollResourceCarousel(-1)" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition shadow-sm group">
-                        <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        <svg aria-hidden="true" class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     </button>
                     <button @click="scrollResourceCarousel(1)" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:border-indigo-200 transition shadow-sm group">
-                        <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </button>
                 </div>
             </div>
@@ -447,7 +658,7 @@
                         <img src="{{ Storage::url($resource->preview_image_path) }}" alt="{{ $resource->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         @else
                         <div class="w-full h-full flex items-center justify-center bg-indigo-50">
-                            <svg class="w-10 h-10 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            <svg aria-hidden="true" class="w-10 h-10 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         </div>
                         @endif
                         @if($resource->is_premium)
@@ -476,7 +687,7 @@
                         </div>
                         @if($resource->quizzes_count > 0)
                         <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <svg aria-hidden="true" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             Quiz
                         </span>
                         @endif
@@ -493,6 +704,7 @@
         @include('shared.partials.formations-carousel', ['mbtiType' => $user->personalityTest->personality_type])
         @include('shared.partials.formations-drawer')
     @endif
+    </div>
 </div>
 @push('scripts')
     @if($stats['personality_completed'] && !$user->hasAntiCompetitionRestriction())

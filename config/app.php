@@ -84,7 +84,7 @@ return [
     */
 
     'admin_email' => env('ADMIN_EMAIL', 'contact@brillio.africa'),
-    'admin_password' => env('ADMIN_PASSWORD', 'BrillioAdmin2024!'),
+    'admin_password' => env('ADMIN_PASSWORD'),
 
     /*
     | Adresses jamais contactées par les campagnes / e-mails de prospection.

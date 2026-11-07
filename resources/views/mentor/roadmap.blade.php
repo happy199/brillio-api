@@ -68,7 +68,7 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm">
         <div class="relative pl-20">
             <!-- Timeline Line -->
-            <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-500 via-red-500 to-pink-500">
+            <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-indigo-300">
             </div>
 
             <div class="space-y-8" id="roadmapSortable">

@@ -1,72 +1,128 @@
-@import "tailwindcss";
+/* ==========================================================================
+   Brillio Custom Mobile & Application Styles
+   ========================================================================== */
 
-@theme {
-    /* Primary / Jeune Palette */
-    --color-primary-50: #f0f4ff;
-    --color-primary-100: #e0e9ff;
-    --color-primary-200: #c7d6fe;
-    --color-primary-300: #a4b8fc;
-    --color-primary-400: #8093f8;
-    --color-primary-500: #6366f1;
-    --color-primary-600: #5145e5;
-    --color-primary-700: #4536ca;
-    --color-primary-800: #3a2fa3;
-    --color-primary-900: #332c81;
-
-    /* Secondary Palette */
-    --color-secondary-50: #fdf4ff;
-    --color-secondary-100: #fae8ff;
-    --color-secondary-200: #f5d0fe;
-    --color-secondary-300: #f0abfc;
-    --color-secondary-400: #e879f9;
-    --color-secondary-500: #d946ef;
-    --color-secondary-600: #c026d3;
-    --color-secondary-700: #a21caf;
-    --color-secondary-800: #86198f;
-    --color-secondary-900: #701a75;
-
-    /* Accent Palette */
-    --color-accent-50: #fff7ed;
-    --color-accent-100: #ffedd5;
-    --color-accent-200: #fed7aa;
-    --color-accent-300: #fdba74;
-    --color-accent-400: #fb923c;
-    --color-accent-500: #f97316;
-    --color-accent-600: #ea580c;
-    --color-accent-700: #c2410c;
-    --color-accent-800: #9a3412;
-    --color-accent-900: #7c2d12;
-
-    /* Mentor Palette */
-    --color-mentor-50: #fff7ed;
-    --color-mentor-100: #ffedd5;
-    --color-mentor-200: #fed7aa;
-    --color-mentor-300: #fdba74;
-    --color-mentor-400: #fb923c;
-    --color-mentor-500: #f97316;
-    --color-mentor-600: #ea580c;
-    --color-mentor-700: #c2410c;
-    --color-mentor-800: #9a3412;
-    --color-mentor-900: #7c2d12;
-
-    /* Organization Palette */
-    --color-organization-50: #fff1f2;
-    --color-organization-100: #ffe4e6;
-    --color-organization-200: #fecdd3;
-    --color-organization-300: #fda4af;
-    --color-organization-400: #fb7185;
-    --color-organization-500: #f43f5e;
-    --color-organization-600: #e11d48;
-    --color-organization-700: #be123c;
-    --color-organization-800: #9f1239;
-    --color-organization-900: #881337;
-
-    --font-sans: "Poppins", "Inter", "sans-serif";
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+    cursor: pointer;
 }
 
-@layer base {
-    button:not(:disabled),
-    [role="button"]:not(:disabled) {
-        cursor: pointer;
+
+/* ==========================================================================
+   Brillio Mobile & PWA Design System (Figma-Harmonized)
+   ========================================================================== */
+
+    /* Hero Banner with Brand Violet & Studio Aesthetics */
+    .pwa-hero-card {
+        background-color: #5844E3;
+        background-image: radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.16) 0%, transparent 50%),
+                          radial-gradient(circle at 10% 90%, #3D2BBF 0%, transparent 60%);
+        border-radius: 1.5rem;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 14px 30px -10px rgba(88, 68, 227, 0.35);
     }
-}
+
+    .pwa-hero-pattern {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 16px 16px;
+        pointer-events: none;
+    }
+
+    /* Pastel Balance & Metrics Card */
+    .pwa-balance-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 16px -2px rgba(88, 68, 227, 0.05);
+    }
+
+    /* 2x2 Services Grid Tiles */
+    .pwa-tile-card {
+        border-radius: 1.25rem;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 120px;
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+        border-width: 1px;
+    }
+
+    .pwa-tile-card:active {
+        transform: scale(0.97);
+    }
+
+    .pwa-tile-purple {
+        background-color: #faf5ff;
+        border-color: #f3e8ff;
+    }
+    .pwa-tile-purple:hover {
+        border-color: #d8b4fe;
+        box-shadow: 0 8px 20px -6px rgba(168, 85, 247, 0.2);
+    }
+
+    .pwa-tile-blue {
+        background-color: #eff6ff;
+        border-color: #dbeafe;
+    }
+    .pwa-tile-blue:hover {
+        border-color: #93c5fd;
+        box-shadow: 0 8px 20px -6px rgba(59, 130, 246, 0.2);
+    }
+
+    .pwa-tile-emerald {
+        background-color: #ecfdf5;
+        border-color: #d1fae5;
+    }
+    .pwa-tile-emerald:hover {
+        border-color: #6ee7b7;
+        box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.2);
+    }
+
+    .pwa-tile-amber {
+        background-color: #fffbeb;
+        border-color: #fef3c7;
+    }
+    .pwa-tile-amber:hover {
+        border-color: #fcd34d;
+        box-shadow: 0 8px 20px -6px rgba(245, 158, 11, 0.2);
+    }
+
+    /* Floating Frosted Bottom Navigation Dock */
+    .pwa-bottom-dock {
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.07);
+        border-top-left-radius: 1.25rem;
+        border-top-right-radius: 1.25rem;
+    }
+
+    /* Active Dot Indicator */
+    .pwa-nav-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 9999px;
+        background-color: #4f46e5;
+        margin: 2px auto 0;
+    }
+
+    /* Accessibilité : Respect des préférences d'animation réduite */
+    @media (prefers-reduced-motion: reduce) {
+        .pwa-tile-card {
+            transition: none;
+        }
+        *,
+        ::before,
+        ::after {
+            animation-duration: 0.01ms;
+            animation-iteration-count: 1;
+            transition-duration: 0.01ms;
+            scroll-behavior: auto;
+        }
+    }

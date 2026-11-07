@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Career;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Service pour les metiers et secteurs lies aux types MBTI
@@ -1068,87 +1070,117 @@ class MbtiCareersService
 
     /**
      * Recupere les metiers pour un type MBTI depuis la base de donnees
-     * Avec enrichissement dynamique via l'IA (Phase 3)
+     * Avec enrichissement dynamique via l'IA en cache (évite les blocages réseau)
      */
     public static function getCareersForType(string $type): array
     {
-        $type = strtoupper($type);
+        $type = strtoupper(trim($type));
 
-        // 1. Récupérer les métiers existants en base pour ce type MBTI
-        $careersFromDb = DB::table('career_mbti')
-            ->where('mbti_type', $type)
-            ->join('careers', 'careers.id', '=', 'career_mbti.career_id')
-            ->select('careers.*', 'career_mbti.match_reason as pivot_match_reason')
-            ->get();
+        return Cache::remember("mbti_careers_full_{$type}", 86400, function () use ($type) {
+            // 1. Récupérer les métiers existants en base pour ce type MBTI
+            $careersFromDb = DB::table('career_mbti')
+                ->where('mbti_type', $type)
+                ->join('careers', 'careers.id', '=', 'career_mbti.career_id')
+                ->select('careers.*', 'career_mbti.match_reason as pivot_match_reason')
+                ->get();
 
-        // 2. Sélectionner les 6 premiers (ou aléatoires)
-        $selectedFromDb = $careersFromDb->take(6);
-        $selectedTitles = $selectedFromDb->pluck('title')->toArray();
-
-        // 3. Appeler l'IA pour compléter à 10 (on veut 4 nouveaux)
-        $allGlobalTitles = DB::table('careers')->pluck('title')->toArray();
-        $brillioAI = app(BrillioIAService::class);
-
-        $aiResult = $brillioAI->generateCareers($type, $allGlobalTitles, $selectedTitles);
-
-        $finalCareers = [];
-
-        // Ajouter les 6 de la DB
-        foreach ($selectedFromDb as $career) {
-            $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
-        }
-
-        // 4. Traiter les 4 métiers de l'IA ou Fallback
-        if ($aiResult['has_new_proposals'] && count($aiResult['careers'] ?? []) >= 4) {
-            foreach (array_slice($aiResult['careers'], 0, 4) as $aiCareer) {
-                // Sauvegarde automatique en base pour enrichissement
-                $newCareer = Career::firstOrCreate(
-                    ['title' => $aiCareer['title']],
-                    [
-                        'description' => $aiCareer['description'],
-                        'african_context' => $aiCareer['african_context'],
-                        'future_prospects' => $aiCareer['future_prospects'],
-                        'ai_impact_level' => $aiCareer['ai_impact_level'],
-                        'demand_level' => 'Moyenne (Suggéré par IA)',
-                    ]
-                );
-
-                // Lier au MBTI si ce n'est pas déjà fait
-                DB::table('career_mbti')->updateOrInsert(
-                    ['career_id' => $newCareer->id, 'mbti_type' => $type],
-                    ['match_reason' => $aiCareer['match_reason'] ?? "Ce métier correspond aux forces de ton profil {$type}."]
-                );
-
-                // Lier aux secteurs suggérés
-                if (isset($aiCareer['sectors']) && is_array($aiCareer['sectors'])) {
-                    foreach ($aiCareer['sectors'] as $sectorCode) {
-                        DB::table('career_sector')->updateOrInsert(
-                            ['career_id' => $newCareer->id, 'sector_code' => $sectorCode]
-                        );
-                    }
-                }
-
-                $finalCareers[] = [
-                    'id' => $newCareer->id,
-                    'title' => $newCareer->title,
-                    'description' => $newCareer->description,
-                    'match_reason' => $aiCareer['match_reason'] ?? "Correspondance IA avec {$type}.",
-                    'sectors' => $aiCareer['sectors'] ?? [],
-                    'future_prospects' => $newCareer->future_prospects,
-                    'african_context' => $newCareer->african_context,
-                    'ai_impact_level' => $newCareer->ai_impact_level,
-                    'demand_level' => $newCareer->demand_level,
-                ];
+            // Si on a déjà au moins 6 métiers en base, les renvoyer immédiatement (zéro latence)
+            if ($careersFromDb->count() >= 6) {
+                return $careersFromDb->take(10)
+                    ->map(fn ($career) => self::formatCareerRow($career, $career->pivot_match_reason))
+                    ->all();
             }
-        } else {
-            // Mode Fallback : On prend 4 autres métiers de la DB qui ne sont pas dans les 6 premiers
-            $fallbackCareers = $careersFromDb->slice(6, 4);
-            foreach ($fallbackCareers as $career) {
+
+            // Si des métiers sont définis statiquement dans le service, les utiliser en priorité
+            if (isset(self::CAREERS_BY_TYPE[$type]) && count(self::CAREERS_BY_TYPE[$type]) >= 6) {
+                return self::CAREERS_BY_TYPE[$type];
+            }
+
+            return self::generateCareersWithAi($type, $careersFromDb);
+        });
+    }
+
+    /**
+     * Génère des métiers via IA avec gestion de fallback sécurisé
+     */
+    private static function generateCareersWithAi(string $type, $careersFromDb): array
+    {
+        try {
+            $selectedFromDb = $careersFromDb->take(6);
+            $selectedTitles = $selectedFromDb->pluck('title')->toArray();
+            $allGlobalTitles = DB::table('careers')->pluck('title')->toArray();
+            $brillioAI = app(BrillioIAService::class);
+            $aiResult = $brillioAI->generateCareers($type, $allGlobalTitles, $selectedTitles);
+
+            $finalCareers = [];
+            foreach ($selectedFromDb as $career) {
                 $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
             }
+
+            if (! empty($aiResult['has_new_proposals']) && count($aiResult['careers'] ?? []) >= 4) {
+                $newCareers = self::processAiCareers($type, array_slice($aiResult['careers'], 0, 4));
+                $finalCareers = array_merge($finalCareers, $newCareers);
+            } else {
+                $fallbackCareers = $careersFromDb->slice(6, 4);
+                foreach ($fallbackCareers as $career) {
+                    $finalCareers[] = self::formatCareerRow($career, $career->pivot_match_reason);
+                }
+            }
+
+            return ! empty($finalCareers) ? $finalCareers : (self::CAREERS_BY_TYPE[$type] ?? []);
+        } catch (\Throwable $e) {
+            Log::warning('MbtiCareersService AI generation bypassed: '.$e->getMessage());
+
+            return self::CAREERS_BY_TYPE[$type] ?? [];
+        }
+    }
+
+    /**
+     * Enregistre et formate les métiers proposés par l'IA
+     */
+    private static function processAiCareers(string $type, array $aiCareers): array
+    {
+        $processed = [];
+
+        foreach ($aiCareers as $aiCareer) {
+            $newCareer = Career::firstOrCreate(
+                ['title' => $aiCareer['title']],
+                [
+                    'description' => $aiCareer['description'],
+                    'african_context' => $aiCareer['african_context'],
+                    'future_prospects' => $aiCareer['future_prospects'],
+                    'ai_impact_level' => $aiCareer['ai_impact_level'],
+                    'demand_level' => 'Moyenne (Suggéré par IA)',
+                ]
+            );
+
+            DB::table('career_mbti')->updateOrInsert(
+                ['career_id' => $newCareer->id, 'mbti_type' => $type],
+                ['match_reason' => $aiCareer['match_reason'] ?? "Ce métier correspond aux forces de ton profil {$type}."]
+            );
+
+            if (isset($aiCareer['sectors']) && is_array($aiCareer['sectors'])) {
+                foreach ($aiCareer['sectors'] as $sectorCode) {
+                    DB::table('career_sector')->updateOrInsert(
+                        ['career_id' => $newCareer->id, 'sector_code' => $sectorCode]
+                    );
+                }
+            }
+
+            $processed[] = [
+                'id' => $newCareer->id,
+                'title' => $newCareer->title,
+                'description' => $newCareer->description,
+                'match_reason' => $aiCareer['match_reason'] ?? "Correspondance IA avec {$type}.",
+                'sectors' => $aiCareer['sectors'] ?? [],
+                'future_prospects' => $newCareer->future_prospects,
+                'african_context' => $newCareer->african_context,
+                'ai_impact_level' => $newCareer->ai_impact_level,
+                'demand_level' => $newCareer->demand_level,
+            ];
         }
 
-        return $finalCareers;
+        return $processed;
     }
 
     /**
@@ -1175,22 +1207,42 @@ class MbtiCareersService
     }
 
     /**
-     * Recupere les secteurs pour un type MBTI
+     * Recupere les secteurs pour un type MBTI (instantané, sans blocage IA)
      */
     public static function getSectorsForType(string $type): array
     {
-        $careers = self::getCareersForType($type);
-        $sectors = [];
+        $type = strtoupper(trim($type));
 
-        foreach ($careers as $career) {
-            foreach ($career['sectors'] ?? [] as $sectorCode) {
-                if (! isset($sectors[$sectorCode])) {
-                    $sectors[$sectorCode] = self::SECTORS[$sectorCode] ?? ['name' => $sectorCode];
+        return Cache::remember("mbti_sectors_{$type}", 86400, function () use ($type) {
+            $sectorCodes = [];
+
+            // 1. Depuis les constantes statiques (instantané, 0ms)
+            if (isset(self::CAREERS_BY_TYPE[$type])) {
+                foreach (self::CAREERS_BY_TYPE[$type] as $career) {
+                    foreach ($career['sectors'] ?? [] as $code) {
+                        $sectorCodes[$code] = true;
+                    }
                 }
             }
-        }
 
-        return $sectors;
+            // 2. Depuis les carrières enregistrées en base (requête SQL directe sans IA)
+            $dbSectorCodes = DB::table('career_mbti')
+                ->where('mbti_type', $type)
+                ->join('career_sector', 'career_sector.career_id', '=', 'career_mbti.career_id')
+                ->pluck('career_sector.sector_code')
+                ->toArray();
+
+            foreach ($dbSectorCodes as $code) {
+                $sectorCodes[$code] = true;
+            }
+
+            $sectors = [];
+            foreach (array_keys($sectorCodes) as $code) {
+                $sectors[$code] = self::SECTORS[$code] ?? ['name' => ucfirst($code)];
+            }
+
+            return $sectors;
+        });
     }
 
     /**

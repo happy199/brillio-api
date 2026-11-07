@@ -5,7 +5,7 @@
 
 @section('content')
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 mb-8">
     <!-- Total utilisateurs -->
     <div class="bg-white rounded-xl shadow-sm p-5">
         <div class="flex items-center">
@@ -86,6 +86,27 @@
                 <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ number_format($stats['total_cv_analyses']) }}</p>
                 <p class="text-[11px] text-gray-500 truncate" title="{{ $stats['total_cv_analyses'] }} au total • {{ $stats['cv_analyses_this_week'] }} cette semaine">
                     Total des CV analysés • {{ $stats['avg_cv_score'] }}/100 moy.
+                </p>
+            </div>
+        </div>
+    </a>
+
+    <!-- Installations & Utilisateurs PWA -->
+    <a href="{{ route('admin.analytics.index') }}#pwa-analytics" class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group border border-transparent hover:border-indigo-200">
+        <div class="flex items-center">
+            <div class="p-3 bg-indigo-50 rounded-lg shrink-0 group-hover:bg-indigo-100 transition-colors">
+                <svg class="w-6 h-6 text-[#5844E3]" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <div class="ml-3 min-w-0">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500">App Brillio (PWA)</h3>
+                    <span class="text-[10px] text-[#5844E3] font-bold bg-[#5844E3]/10 px-1.5 py-0.5 rounded">Mobile</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ number_format($stats['total_pwa_installs']) }} <span class="text-xs font-normal text-gray-500">installées</span></p>
+                <p class="text-[11px] text-gray-500 truncate" title="{{ $stats['active_pwa_users_30d'] }} actifs sur 30 jours">
+                    <span class="text-emerald-600 font-semibold">{{ $stats['active_pwa_users_7d'] }}</span> actifs cette semaine
                 </p>
             </div>
         </div>

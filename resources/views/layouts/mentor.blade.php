@@ -2,30 +2,25 @@
 <html lang="fr">
 @php
     $displayOrg = $current_organization ?? (auth()->check() ? (auth()->user()->organization ?? auth()->user()->organizations->first()) : null);
-    $primaryColor = $displayOrg?->primary_color ?? '#f97316';
-    $secondaryColor = $displayOrg?->secondary_color ?? '#ea580c';
-    $accentColor = $displayOrg?->accent_color ?? '#dc2626';
+    $primaryColor = $displayOrg?->primary_color ?? '#5844E3';
+    $secondaryColor = $displayOrg?->secondary_color ?? '#4835D4';
+    $accentColor = $displayOrg?->accent_color ?? '#3D2BBF';
 @endphp
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="api-token" content="{{ auth()->user()->createToken('mentor-wallet')->plainTextToken }}">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title', 'Espace Mentor') - {{ $displayOrg ? $displayOrg->name : 'Brillio' }}</title>
 
     @include('partials.analytics')
+    @include('partials.pwa-head')
 
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="{{ $primaryColor }}">
-
+    <!-- Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -45,33 +40,52 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
                     },
                     colors: {
-                        mentor: {
-                            50: '#fff7ed',
-                            100: '#ffedd5',
-                            200: '#fed7aa',
-                            300: '#fdba74',
-                            400: '#fb923c',
+                        primary: {
+                            50: '#F5F3FF',
+                            100: '#EDE9FE',
+                            200: '#DDD6FE',
+                            300: '#C4B5FD',
+                            400: '#A78BFA',
                             500: '{{ $primaryColor }}',
                             600: '{{ $secondaryColor }}',
-                            700: '#c2410c',
-                            800: '#9a3412',
-                            900: '#7c2d12',
+                            700: '{{ $accentColor }}',
+                            800: '#281B82',
+                            900: '#1A1259',
+                        },
+                        mentor: {
+                            50: '#F5F3FF',
+                            100: '#EDE9FE',
+                            200: '#DDD6FE',
+                            300: '#C4B5FD',
+                            400: '#A78BFA',
+                            500: '{{ $primaryColor }}',
+                            600: '{{ $secondaryColor }}',
+                            700: '{{ $accentColor }}',
+                            800: '#281B82',
+                            900: '#1A1259',
                         }
                     }
                 }
             }
         }
     </script>
-    @vite(['resources/js/app.js'])
-
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         [x-cloak] { display: none !important; }
+        html, body {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        }
+        a, button, [role="button"] {
+            touch-action: manipulation;
+        }
         .nav-item {
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .nav-item:hover {
@@ -83,24 +97,55 @@
             color: white !important;
         }
 
+        /* Spring hover micro-interactions (ui-ux-pro-max + taste-skill) */
+        .card-interactive {
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+            will-change: transform;
+        }
+
+        .card-interactive:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .btn-spring {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+            will-change: transform;
+        }
+
+        .btn-spring:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-spring:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
         .card-hover {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .card-hover:hover {
             transform: translateY(-4px);
-            box-shadow: 0 20px 40px -12px rgba(249, 115, 22, 0.25);
+            box-shadow: 0 20px 40px -12px rgba(88, 68, 227, 0.2);
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 50%, {{ $accentColor }} 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: {{ $primaryColor }};
         }
 
         .org-gradient-banner {
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 50%, {{ $accentColor }} 100%) !important;
+            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%) !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card-interactive,
+            .btn-spring,
+            .nav-item,
+            .card-hover {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+            }
         }
     </style>
 
@@ -114,14 +159,12 @@
             <div class="flex justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="{{ route('mentor.dashboard') }}" class="flex items-center gap-2">
+                    <a href="{{ route('mentor.dashboard') }}" class="flex items-center gap-2.5">
                         @if($displayOrg && $displayOrg->logo_url)
-                            <img src="{{ $displayOrg->logo_url }}" alt="{{ $displayOrg->name }}" class="h-10 rounded-xl object-contain">
+                            <img src="{{ $displayOrg->logo_url }}" alt="{{ $displayOrg->name }}" class="h-9 rounded-xl object-contain">
                         @else
-                            <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                                <span class="text-xl font-bold text-white">{{ substr($displayOrg ? $displayOrg->name : 'Brillio', 0, 1) }}</span>
-                            </div>
-                            <span class="text-xl font-bold gradient-text hidden sm:block">{{ $displayOrg ? $displayOrg->name : 'Brillio' }} Mentor</span>
+                            <img src="{{ asset('images/logo/brillio-logo.png') }}" alt="Brillio" class="h-9 w-auto object-contain">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#F5F3FF] text-[#5844E3] border border-[#DDD6FE]">Mentor</span>
                         @endif
                     </a>
                 </div>
@@ -286,12 +329,12 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 md:pb-8">
         @yield('content')
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-100 mt-12">
+    <!-- Footer (masqué sur mobile & app pour ne pas chevaucher la barre de navigation) -->
+    <footer class="hidden md:block bg-white border-t border-gray-100 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <p class="text-sm text-gray-500">&copy; {{ date('Y') }} {{ $displayOrg ? $displayOrg->name : 'Brillio' }}. Merci de partager votre expérience.</p>
@@ -308,6 +351,8 @@
 
     @stack('scripts')
     @include('partials.toast')
+    @include('partials.mentor-bottom-nav')
+    @include('partials.pwa-install-modals')
 </body>
 
 </html>
