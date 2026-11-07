@@ -105,6 +105,7 @@ return [
 
     'whatsapp' => [
         'group_url' => env('WHATSAPP_GROUP_URL', 'https://chat.whatsapp.com/LhQzbQlUG3QBeeSRlGlZnH'),
+        'mentor_group_url' => env('WHATSAPP_MENTOR_GROUP_URL', 'https://chat.whatsapp.com/LDjPaMz5vy0AGllDILraKd?s=cl&p=i&mlu=4&ilr=4&iam=2'),
     ],
 
 ];

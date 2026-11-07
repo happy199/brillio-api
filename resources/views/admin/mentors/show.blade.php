@@ -102,6 +102,10 @@
                     <span class="text-gray-900">{{ $mentor->user->city ?? '-' }}</span>
                 </div>
                 <div class="flex justify-between">
+                    <span class="text-gray-500">Téléphone</span>
+                    <span class="text-gray-900">{{ $mentor->user->phone ?: 'Néant' }}</span>
+                </div>
+                <div class="flex justify-between">
                     <span class="text-gray-500">Expérience</span>
                     <span class="text-gray-900">{{ $mentor->years_of_experience ? $mentor->years_of_experience . '
                         ans' : '-' }}</span>

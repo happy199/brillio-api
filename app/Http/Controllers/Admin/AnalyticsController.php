@@ -201,6 +201,21 @@ class AnalyticsController extends Controller
                 ->count(),
         ];
 
+        // Statistiques de numéros de téléphone spécifiquement pour les Mentors (période sélectionnée)
+        $stats['mentor_phone_stats'] = [
+            'with_phone' => User::where('user_type', User::TYPE_MENTOR)
+                ->whereBetween('created_at', [$start, $end])
+                ->whereNotNull('phone')
+                ->where('phone', '!=', '')
+                ->count(),
+            'without_phone' => User::where('user_type', User::TYPE_MENTOR)
+                ->whereBetween('created_at', [$start, $end])
+                ->where(function ($q) {
+                    $q->whereNull('phone')->orWhere('phone', '');
+                })
+                ->count(),
+        ];
+
         // Avis Utilisateurs (Popups)
         $stats['feedbacks'] = [
             'total' => UserFeedback::count(),

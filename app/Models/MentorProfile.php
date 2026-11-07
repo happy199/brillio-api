@@ -185,6 +185,7 @@ class MentorProfile extends Model
         return ! empty($this->bio)
             && ! empty($this->current_position)
             && (! empty($this->specialization) || ! empty($this->specialization_id))
+            && ! empty($this->user?->phone)
             && $this->roadmapSteps()->count() >= 1;
     }
 
