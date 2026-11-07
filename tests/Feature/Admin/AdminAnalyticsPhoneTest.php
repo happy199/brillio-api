@@ -21,6 +21,8 @@ class AdminAnalyticsPhoneTest extends TestCase
 
     private const TEST_PHONE = '+22997000000';
 
+    private const TEXT_NEANT = 'Néant';
+
     private const USER_WITH_PHONE_NAME = 'User With Phone';
 
     private const USER_WITHOUT_PHONE_NAME = 'User Without Phone';
@@ -45,7 +47,7 @@ class AdminAnalyticsPhoneTest extends TestCase
 
         $response = $this->actingAs($this->admin)->get(route('admin.users.show', $userWithoutPhone));
         $response->assertStatus(200);
-        $response->assertSee('Néant');
+        $response->assertSee(self::TEXT_NEANT);
     }
 
     public function test_mentor_details_and_index_displays_phone_number_or_neant()
@@ -71,13 +73,13 @@ class AdminAnalyticsPhoneTest extends TestCase
 
         $responseShowWithout = $this->actingAs($this->admin)->get(route('admin.mentors.show', $mentorWithoutPhone));
         $responseShowWithout->assertStatus(200);
-        $responseShowWithout->assertSee('Néant');
+        $responseShowWithout->assertSee(self::TEXT_NEANT);
 
         // Test Mentor Directory/Index Page
         $responseIndex = $this->actingAs($this->admin)->get(route('admin.mentors.index'));
         $responseIndex->assertStatus(200);
         $responseIndex->assertSee(self::TEST_PHONE);
-        $responseIndex->assertSee('Néant');
+        $responseIndex->assertSee(self::TEXT_NEANT);
     }
 
     public function test_analytics_dashboard_contains_phone_stats()
