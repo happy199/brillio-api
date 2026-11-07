@@ -1,109 +1,118 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenue chez les mentors Brillio</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', Arial, sans-serif; background-color: #f8fafc;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 0;">
-        <tr>
-            <td align="center">
-                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
-                    <!-- Header -->
-                    <tr>
-                        <td style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 48px 40px; text-align: center;">
-                            <img src="{{ asset('android-chrome-512x512.png') }}" alt="Brillio" style="width: 80px; height: 80px; margin-bottom: 24px; border-radius: 20px; background: white; padding: 10px;">
-                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.025em;">Félicitations, {{ $user->name }} ! 🚀</h1>
-                            <p style="color: #e0e7ff; margin: 12px 0 0; font-size: 18px; font-weight: 500;">Votre profil est désormais publié sur Brillio.</p>
-                        </td>
-                    </tr>
+@extends('emails.layouts.base')
 
-                    <!-- Body -->
-                    <tr>
-                        <td style="padding: 40px; color: #1e293b;">
-                            <p style="font-size: 17px; line-height: 1.6; margin-bottom: 24px;">
-                                Merci d'avoir pris le temps de compléter votre profil. Vous faites désormais partie de notre communauté de mentors engagés pour la réussite des jeunes talents.
-                            </p>
+@section('content')
+<div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; color: #1e293b; max-width: 600px; margin: 0 auto;">
+    <!-- En-tête -->
+    <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 20px; padding: 40px 32px; text-align: center; margin-bottom: 28px; color: #ffffff;">
+        <div style="width: 64px; height: 64px; margin: 0 auto 16px; background: rgba(255, 255, 255, 0.2); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; line-height: 64px;">
+            🌍
+        </div>
+        <h1 style="color: #ffffff; margin: 0 0 10px; font-size: 26px; font-weight: 800; letter-spacing: -0.02em;">
+            Transmettez, guidez et monétisez votre expertise
+        </h1>
+        <p style="color: #e0e7ff; margin: 0; font-size: 16px; font-weight: 500;">
+            Bonjour {{ $user->name }}, découvrez tout ce que Brillio vous permet d'accomplir.
+        </p>
+    </div>
 
-                            <p style="font-size: 17px; line-height: 1.6; margin-bottom: 32px; font-weight: 600; color: #4338ca;">
-                                En attendant de recevoir vos premières demandes de mentorat, voici ce que vous pouvez faire :
-                            </p>
+    <!-- Intro -->
+    <p style="font-size: 16px; line-height: 1.6; color: #334155; margin-bottom: 24px;">
+        Votre présence sur <strong>Brillio</strong> va bien au-delà d'un simple annuaire. Brillio est une plateforme complète conçue pour permettre aux mentors et professionnels de structurer leur accompagnement, d'élargir leur audience panafricaine et de valoriser leur savoir-faire.
+    </p>
 
-                            <!-- Actions -->
-                            <div style="margin-bottom: 32px;">
-                                <!-- Action 1 -->
-                                <div style="background-color: #f1f5f9; border-radius: 16px; padding: 20px; margin-bottom: 16px;">
-                                    <table role="presentation" width="100%">
-                                        <tr>
-                                            <td style="width: 40px; vertical-align: top;">
-                                                <span style="font-size: 24px;">📚</span>
-                                            </td>
-                                            <td>
-                                                <h3 style="margin: 0 0 8px; font-size: 16px; font-weight: 700;">Explorez les ressources</h3>
-                                                <p style="margin: 0; font-size: 14px; color: #64748b;">Découvrez les partages et conseils de vos confrères mentors pour vous inspirer.</p>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
+    <!-- Piliers de valeur -->
+    <div style="margin-bottom: 32px;">
 
-                                <!-- Action 2 -->
-                                <div style="background-color: #f1f5f9; border-radius: 16px; padding: 20px; margin-bottom: 16px;">
-                                    <table role="presentation" width="100%">
-                                        <tr>
-                                            <td style="width: 40px; vertical-align: top;">
-                                                <span style="font-size: 24px;">✍️</span>
-                                            </td>
-                                            <td>
-                                                <h3 style="margin: 0 0 8px; font-size: 16px; font-weight: 700;">Partagez votre expertise</h3>
-                                                <p style="margin: 0; font-size: 14px; color: #64748b;">Créez et publiez vos propres ressources (articles, vidéos, guides) pour aider la communauté.</p>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
+        <!-- 1. Séances & Mentorat payant -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; margin-bottom: 16px;">
+            <table role="presentation" width="100%">
+                <tr>
+                    <td style="width: 44px; vertical-align: top;">
+                        <span style="font-size: 28px;">🎯</span>
+                    </td>
+                    <td>
+                        <h3 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #1e293b;">
+                            Monétisez votre savoir à l'unité
+                        </h3>
+                        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #475569;">
+                            Proposez des séances d'accompagnement individuel ou de mentorat payant à l'heure. Vous fixez vos disponibilités et vous êtes directement rémunéré(e) pour votre temps et vos conseils stratégiques.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-                                <!-- Action 3 -->
-                                <div style="background-color: #f1f5f9; border-radius: 16px; padding: 20px;">
-                                    <table role="presentation" width="100%">
-                                        <tr>
-                                            <td style="width: 40px; vertical-align: top;">
-                                                <span style="font-size: 24px;">🔍</span>
-                                            </td>
-                                            <td>
-                                                <h3 style="margin: 0 0 8px; font-size: 16px; font-weight: 700;">Découvrez les talents</h3>
-                                                <p style="margin: 0; font-size: 14px; color: #64748b;">Explorez la liste des jeunes talents en cas de besoins futurs en recrutement.</p>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+        <!-- 2. Vente de contenus documentaires -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; margin-bottom: 16px;">
+            <table role="presentation" width="100%">
+                <tr>
+                    <td style="width: 44px; vertical-align: top;">
+                        <span style="font-size: 28px;">📚</span>
+                    </td>
+                    <td>
+                        <h3 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #1e293b;">
+                            Partagez et vendez vos contenus documentaires
+                        </h3>
+                        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #475569;">
+                            E-books, modèles de CV, guides métiers, fiches pratiques ou brochures sectorielles : publiez vos ressources sur Brillio et générez des revenus complémentaires tout en éduquant votre communauté.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-                            <!-- Buttons -->
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                                <tr>
-                                    <td align="center" style="padding-top: 20px;">
-                                        <a href="{{ route('mentor.resources.index') }}" style="background: #4f46e5; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: 700; margin: 8px; display: inline-block;">📚 Voir les ressources</a>
-                                        <a href="{{ route('mentor.explore') }}" style="background: #ffffff; color: #4f46e5; border: 2px solid #4f46e5; padding: 12px 28px; text-decoration: none; border-radius: 12px; font-weight: 700; margin: 8px; display: inline-block;">🔍 Explorer les talents</a>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
+        <!-- 3. Communauté privée et suivi structuré -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; margin-bottom: 16px;">
+            <table role="presentation" width="100%">
+                <tr>
+                    <td style="width: 44px; vertical-align: top;">
+                        <span style="font-size: 28px;">👥</span>
+                    </td>
+                    <td>
+                        <h3 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #1e293b;">
+                            Bâtissez votre communauté privée
+                        </h3>
+                        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #475569;">
+                            Rassemblez les talents qui vous suivent dans un espace dédié. Échangez, suivez leur progression et fédérez votre propre cohorte de mentorés directement depuis la plateforme.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-                    <!-- Footer -->
-                    <tr>
-                        <td style="padding: 32px 40px; background-color: #f8fafc; text-align: center; border-top: 1px solid #e2e8f0;">
-                            <p style="margin: 0; font-size: 14px; color: #94a3b8;">
-                                Vous recevez cet email car vous êtes un mentor certifié sur Brillio.
-                            </p>
-                            <p style="margin: 12px 0 0; font-size: 14px; color: #94a3b8;">
-                                &copy; {{ date('Y') }} Brillio. Tous droits réservés.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>
+        <!-- 4. Impact panafricain -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px;">
+            <table role="presentation" width="100%">
+                <tr>
+                    <td style="width: 44px; vertical-align: top;">
+                        <span style="font-size: 28px;">🚀</span>
+                    </td>
+                    <td>
+                        <h3 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #1e293b;">
+                            Un impact direct sur les talents africains
+                        </h3>
+                        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #475569;">
+                            Accompagnez des jeunes étudiants et diplômés partout en Afrique. Aidez-les à éviter les erreurs de début de carrière, à trouver les bonnes filières et à construire un parcours professionnel solide.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align: center; margin: 36px 0;">
+        <a href="{{ route('mentor.dashboard') }}"
+           style="display: inline-block; background: #4f46e5; color: #ffffff !important; padding: 15px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);">
+           🚀 Accéder à mon espace mentor
+        </a>
+    </div>
+
+    <!-- Signature -->
+    <p style="margin: 28px 0 0; font-size: 14px; line-height: 1.6; color: #64748b;">
+        Merci d'inspirer la nouvelle génération,<br>
+        <strong>L'équipe Brillio</strong>
+    </p>
+</div>
+@endsection

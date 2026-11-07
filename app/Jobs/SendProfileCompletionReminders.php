@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Mail\Engagement\MentorEngagementMail;
 use App\Mail\Engagement\ProfileCompletionReminder;
+use App\Mail\MentorProfilePublished;
 use App\Models\User;
 use App\Services\EmailDeliveryService;
 use Illuminate\Bus\Queueable;
@@ -25,19 +26,12 @@ class SendProfileCompletionReminders implements ShouldQueue
     {
         // On récupère uniquement les mentors :
         // 1. Les mentors avec onboarding non complété
-        // 2. Les mentors avec profil publié mais SANS ressources publiées (pour réengagement mensuel)
+        // 2. Les mentors avec profil publié (pour confirmation unique de publication ou réengagement mensuel)
         $users = User::where('user_type', User::TYPE_MENTOR)
             ->where(function ($query) {
                 $query->where('onboarding_completed', false)
                     ->orWhere(function ($q) {
-                        $q->where('onboarding_completed', true)
-                            ->whereHas('mentorProfile', fn ($p) => $p->where('is_published', true))
-                            ->whereDoesntHave('resources', fn ($r) => $r->where('is_published', true))
-                            // On limite à un envoi par mois pour le réengagement
-                            ->where(function ($dateQuery) {
-                                $dateQuery->where('last_engagement_email_sent_at', '<=', now()->subDays(30))
-                                    ->orWhereNull('last_engagement_email_sent_at');
-                            });
+                        $q->whereHas('mentorProfile', fn ($p) => $p->where('is_published', true));
                     });
             })
             ->where('is_archived', false)
@@ -52,8 +46,32 @@ class SendProfileCompletionReminders implements ShouldQueue
             }
 
             // Logique spécifique pour les mentors
-            if ($user->isMentor()) {
-                if ($user->mentorProfile && $user->mentorProfile->is_published) {
+            if ($user->isMentor() && $user->mentorProfile && $user->mentorProfile->is_published) {
+                // 1. Si le mail de félicitations pour profil publié n'a JAMAIS été envoyé, on l'envoie une seule fois
+                if (is_null($user->mentorProfile->published_email_sent_at)) {
+                    try {
+                        Mail::to($user->email)->send(new MentorProfilePublished($user));
+                        $user->mentorProfile->update([
+                            'published_email_sent_at' => now(),
+                        ]);
+                        $user->update([
+                            'onboarding_completed' => true,
+                            'last_engagement_email_sent_at' => now(),
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error("Email publication profil mentor échoué pour #{$user->id}: ".$e->getMessage());
+                        $deliveryService->handleDeliveryFailure($user->email, $e);
+                    }
+
+                    continue;
+                }
+
+                // 2. Pour les mentors dont le profil est déjà publié depuis, on envoie le mail de réengagement
+                // (monétisation, séances, documents, communauté, impact) max une fois tous les 30 jours
+                $canSendMonthlyEngagement = is_null($user->last_engagement_email_sent_at)
+                    || $user->last_engagement_email_sent_at <= now()->subDays(30);
+
+                if ($canSendMonthlyEngagement) {
                     try {
                         Mail::to($user->email)->send(new MentorEngagementMail($user));
                         $user->update([
@@ -64,20 +82,25 @@ class SendProfileCompletionReminders implements ShouldQueue
                         Log::error("Email d'engagement mentor échoué pour #{$user->id}: ".$e->getMessage());
                         $deliveryService->handleDeliveryFailure($user->email, $e);
                     }
-
-                    continue;
                 }
+
+                continue;
             }
 
             $missingSections = $this->getMissingSections($user);
 
             if (! empty($missingSections)) {
-                try {
-                    Mail::to($user->email)->send(new ProfileCompletionReminder($user, $missingSections));
-                    $user->update(['last_engagement_email_sent_at' => now()]);
-                } catch (\Exception $e) {
-                    Log::error("Email complétion profil échoué pour #{$user->id}: ".$e->getMessage());
-                    $deliveryService->handleDeliveryFailure($user->email, $e);
+                $canSendProfileCompletion = is_null($user->last_engagement_email_sent_at)
+                    || $user->last_engagement_email_sent_at <= now()->subDays(7);
+
+                if ($canSendProfileCompletion) {
+                    try {
+                        Mail::to($user->email)->send(new ProfileCompletionReminder($user, $missingSections));
+                        $user->update(['last_engagement_email_sent_at' => now()]);
+                    } catch (\Exception $e) {
+                        Log::error("Email complétion profil échoué pour #{$user->id}: ".$e->getMessage());
+                        $deliveryService->handleDeliveryFailure($user->email, $e);
+                    }
                 }
             }
         }
