@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\MentorProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -47,11 +48,47 @@ class AdminAnalyticsPhoneTest extends TestCase
         $response->assertSee('Néant');
     }
 
+    public function test_mentor_details_and_index_displays_phone_number_or_neant()
+    {
+        // 1. Mentor with phone
+        $mentorUserWithPhone = User::factory()->create([
+            'phone' => self::TEST_PHONE,
+            'user_type' => User::TYPE_MENTOR,
+        ]);
+        $mentorWithPhone = MentorProfile::factory()->create(['user_id' => $mentorUserWithPhone->id]);
+
+        // 2. Mentor without phone
+        $mentorUserWithoutPhone = User::factory()->create([
+            'phone' => null,
+            'user_type' => User::TYPE_MENTOR,
+        ]);
+        $mentorWithoutPhone = MentorProfile::factory()->create(['user_id' => $mentorUserWithoutPhone->id]);
+
+        // Test Mentor Show Page
+        $responseShowWith = $this->actingAs($this->admin)->get(route('admin.mentors.show', $mentorWithPhone));
+        $responseShowWith->assertStatus(200);
+        $responseShowWith->assertSee(self::TEST_PHONE);
+
+        $responseShowWithout = $this->actingAs($this->admin)->get(route('admin.mentors.show', $mentorWithoutPhone));
+        $responseShowWithout->assertStatus(200);
+        $responseShowWithout->assertSee('Néant');
+
+        // Test Mentor Directory/Index Page
+        $responseIndex = $this->actingAs($this->admin)->get(route('admin.mentors.index'));
+        $responseIndex->assertStatus(200);
+        $responseIndex->assertSee(self::TEST_PHONE);
+        $responseIndex->assertSee('Néant');
+    }
+
     public function test_analytics_dashboard_contains_phone_stats()
     {
         // Create users
         User::factory()->create(['phone' => self::TEST_PHONE, 'user_type' => 'jeune', 'is_admin' => false]);
         User::factory()->create(['phone' => null, 'user_type' => 'jeune', 'is_admin' => false]);
+
+        // Create mentors
+        User::factory()->create(['phone' => self::TEST_PHONE, 'user_type' => User::TYPE_MENTOR, 'is_admin' => false]);
+        User::factory()->create(['phone' => null, 'user_type' => User::TYPE_MENTOR, 'is_admin' => false]);
 
         $response = $this->actingAs($this->admin)->get(route('admin.analytics.index'));
         $response->assertStatus(200);
@@ -59,8 +96,12 @@ class AdminAnalyticsPhoneTest extends TestCase
 
         $stats = $response->viewData('stats');
         $this->assertArrayHasKey('phone_stats', $stats);
-        $this->assertEquals(1, $stats['phone_stats']['with_phone']);
-        $this->assertEquals(1, $stats['phone_stats']['without_phone']);
+        $this->assertEquals(2, $stats['phone_stats']['with_phone']);
+        $this->assertEquals(2, $stats['phone_stats']['without_phone']);
+
+        $this->assertArrayHasKey('mentor_phone_stats', $stats);
+        $this->assertEquals(1, $stats['mentor_phone_stats']['with_phone']);
+        $this->assertEquals(1, $stats['mentor_phone_stats']['without_phone']);
     }
 
     public function test_csv_export_filters_by_phone_number_presence()
