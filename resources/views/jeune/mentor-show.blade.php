@@ -24,7 +24,7 @@
     @endif
 
     <!-- Profile Header -->
-    <div class="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl overflow-hidden">
+    <div class="bg-indigo-600 rounded-3xl overflow-hidden shadow-sm">
         <div class="p-8 text-white">
             <div class="flex flex-col md:flex-row md:items-start gap-6">
                 <div
@@ -119,7 +119,7 @@
                 <div class="relative pl-20">
                     <!-- Timeline Line -->
                     <div
-                        class="absolute left-8 top-0 bottom-0 w-0.5 -ml-px bg-gradient-to-b from-orange-500 via-red-500 to-pink-500">
+                        class="absolute left-8 top-0 bottom-0 w-0.5 -ml-px bg-indigo-300">
                     </div>
 
                     <div class="space-y-8">
@@ -127,10 +127,10 @@
                         <div class="relative">
                             <!-- Timeline Dot -->
                             <div
-                                class="absolute -left-12 w-6 h-6 bg-white border-4 border-orange-500 rounded-full transform -translate-x-1/2 top-6 z-10">
+                                class="absolute -left-12 w-6 h-6 bg-white border-4 border-indigo-600 rounded-full transform -translate-x-1/2 top-6 z-10">
                             </div>
 
-                            <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-5">
+                            <div class="bg-indigo-50/60 rounded-xl p-5 border border-indigo-100/60">
                                 <div class="flex items-start justify-between mb-2">
                                     <h3 class="font-bold text-gray-900">{{ $step->title }}</h3>
                                     @if($step->year_start || $step->year_end)

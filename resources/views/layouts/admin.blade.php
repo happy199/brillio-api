@@ -3,19 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title', 'Dashboard') - Brillio Admin</title>
 
     @include('partials.analytics')
-
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#6366f1">
+    @include('partials.pwa-head')
 
     <!-- Suppress Tailwind CDN warning -->
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
@@ -559,6 +553,7 @@
 
     @stack('scripts')
     <!--/email_off-->
+    @include('partials.pwa-install-modals')
 </body>
 
 </html>

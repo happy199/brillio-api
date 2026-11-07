@@ -5,7 +5,7 @@
 @section('content')
     <div class="space-y-8" x-data="{}">
         <!-- Welcome Header -->
-        <div class="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl p-8 text-white">
+        <div class="bg-indigo-600 rounded-3xl p-8 text-white shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div>
                     <h1 class="text-3xl font-bold">Bienvenue, {{ explode(' ', $user->name)[0] }} !</h1>
@@ -14,7 +14,7 @@
                 <div class="flex gap-3">
                     @if(!$stats['profile_complete'])
                         <a href="{{ route('mentor.profile') }}"
-                            class="px-5 py-3 bg-white text-orange-600 font-semibold rounded-xl hover:bg-gray-50 transition shadow-lg flex items-center gap-2">
+                            class="px-5 py-3 bg-white text-indigo-600 font-semibold rounded-xl hover:bg-gray-50 transition shadow-lg flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

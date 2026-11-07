@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html lang="fr" class="overflow-x-hidden">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @stack('seo')
+
+    @if (empty($__env->yieldPushContent('seo')))
     <meta name="description"
         content="@yield('meta_description', 'Brillio - La plateforme d\'orientation professionnelle pour les jeunes africains. Découvrez votre personnalité, connectez avec des mentors et construisez votre avenir.')">
     <meta name="keywords"
         content="orientation, carrière, Afrique, jeunes, mentors, personnalité, MBTI, emploi, formation">
     <meta name="author" content="Brillio">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -26,22 +30,14 @@
     <meta property="twitter:description"
         content="@yield('og_description', 'La plateforme d\'orientation professionnelle pour les jeunes africains')">
 
-    @include('partials.analytics')
-
     <title>@yield('title', 'Brillio - Plateforme de Mentorat en Afrique')</title>
-
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=2">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=2">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=2">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('android-chrome-192x192.png') }}?v=2">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('android-chrome-512x512.png') }}?v=2">
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#6366f1">
-
 
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ url()->current() }}">
+    @endif
+
+    @include('partials.analytics')
+    @include('partials.pwa-head')
 
 
     <!-- Suppress Tailwind CDN warning -->
@@ -104,7 +100,7 @@
             }
         }
     </script>
-    @vite(['resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Google Fonts - Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -116,13 +112,22 @@
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.7/dist/cdn.min.js" integrity="sha384-NArNwzWsUSF+kY2lgW4YriEkjLqi+J+za6HrENUn/3nZqkBnWbxV22kCJEK5Uu6n" crossorigin="anonymous"></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}" defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js" integrity="sha384-cixRWCxxaN2ZlgSKys0xeW++971nkjz01WMhvEVsYDm6hlVuq/vm14WM+CLfIkBB" crossorigin="anonymous"></script>
 
-    <!-- AOS Animation -->
+    <!-- AOS Animation Stylesheet -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <style>
         [x-cloak] {
             display: none !important;
+        }
+
+        html, body {
+            overflow-x: clip;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        a, button, [role="button"] {
+            touch-action: manipulation;
         }
 
         html {
@@ -131,6 +136,14 @@
 
         body {
             font-family: 'Poppins', sans-serif;
+        }
+
+        /* Forcer un fond blanc normal sur les champs de saisie */
+        input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="color"]):not([type="range"]),
+        select,
+        textarea {
+            background-color: #ffffff;
+            color: #111827;
         }
 
         /* Gradient backgrounds */
@@ -287,7 +300,12 @@
 </head>
 
 
-<body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden" x-data="{ mobileMenu: false }">
+<body class="bg-gray-50 text-gray-900 antialiased" x-data="{ mobileMenu: false }">
+    <!-- Skip to main content (a11y) -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-indigo-600 focus:text-white focus:rounded-xl focus:shadow-xl focus:outline-none">
+        Aller au contenu principal
+    </a>
+
     <!-- Header / Navigation -->
     <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         x-data="{ scrolled: {{ isset($forceScrolled) && $forceScrolled ? 'true' : 'false' }} }"
@@ -302,7 +320,7 @@
                 <a href="{{ route('home') }}" class="flex items-center space-x-3">
                     @if($orgForLogo)
                         @if($orgForLogo->logo_url)
-                            <img src="{{ $orgForLogo->logo_url }}" alt="{{ $orgForLogo->name }}" class="w-10 h-10 rounded-xl object-cover bg-white">
+                            <img src="{{ $orgForLogo->logo_url }}" alt="{{ $orgForLogo->name }}" width="40" height="40" fetchpriority="high" class="w-10 h-10 rounded-xl object-cover bg-white">
                         @else
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center">
                                 <span class="text-xl font-bold text-white">{{ substr($orgForLogo->name, 0, 1) }}</span>
@@ -483,7 +501,7 @@
     </header>
 
     <!-- Main Content -->
-    <main>
+    <main id="main-content">
         @yield('content')
     </main>
 
@@ -597,32 +615,45 @@
 
                 <!-- Download -->
                 <div>
-                    <h4 class="text-lg font-semibold mb-6">Télécharger</h4>
-                    <div class="space-y-4">
+                    <h4 class="text-lg font-semibold mb-6">Application Mobile</h4>
+                    <div class="space-y-3">
+                        <!-- PWA Quick Install -->
+                        <button type="button" data-pwa-install
+                            class="w-full flex items-center space-x-3 bg-gradient-to-r from-indigo-600 to-pink-600 rounded-xl p-3 hover:from-indigo-700 hover:to-pink-700 transition-all shadow-lg text-left group">
+                            <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-white/80 font-medium">Installation directe & rapide</p>
+                                <p class="font-bold text-white text-sm">Installer l'application</p>
+                            </div>
+                        </button>
+
                         <!-- App Store -->
-                        <a href="#"
-                            class="flex items-center space-x-3 bg-gray-800 rounded-xl p-3 hover:bg-gray-700 transition-colors">
-                            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                        <button type="button" data-pwa-install
+                            class="w-full flex items-center space-x-3 bg-gray-800 rounded-xl p-3 hover:bg-gray-700 transition-colors text-left">
+                            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
                                 <path
                                     d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
                             </svg>
                             <div>
-                                <p class="text-xs text-gray-400">Télécharger sur</p>
-                                <p class="font-semibold">App Store</p>
+                                <p class="text-xs text-gray-400">Version iOS</p>
+                                <p class="font-semibold text-white">Apple Safari / iOS</p>
                             </div>
-                        </a>
+                        </button>
+
                         <!-- Google Play -->
-                        <a href="#"
-                            class="flex items-center space-x-3 bg-gray-800 rounded-xl p-3 hover:bg-gray-700 transition-colors">
-                            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                        <button type="button" data-pwa-install
+                            class="w-full flex items-center space-x-3 bg-gray-800 rounded-xl p-3 hover:bg-gray-700 transition-colors text-left">
+                            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
                                 <path
                                     d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
                             </svg>
                             <div>
-                                <p class="text-xs text-gray-400">Disponible sur</p>
-                                <p class="font-semibold">Google Play</p>
+                                <p class="text-xs text-gray-400">Version Android</p>
+                                <p class="font-semibold text-white">Google Chrome / Android</p>
                             </div>
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -639,17 +670,54 @@
         </div>
     </footer>
 
-    <!-- Initialize AOS -->
+    <!-- AOS Animation Script & Robust Init -->
+    <script nonce="{{ request()->attributes->get('csp_nonce') }}" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script nonce="{{ request()->attributes->get('csp_nonce') }}">
-        AOS.init({
-            duration: 800,
-            easing: 'ease-out-cubic',
-            once: true,
-        });
+        (function() {
+            function initAOS() {
+                if (typeof AOS !== 'undefined') {
+                    AOS.init({
+                        duration: 800,
+                        easing: 'ease-out-cubic',
+                        once: true,
+                    });
+                } else {
+                    // Fallback de sécurité : assure la visibilité de tout le contenu
+                    document.querySelectorAll('[data-aos]').forEach(function(el) {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                    });
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initAOS);
+            } else {
+                initAOS();
+            }
+
+            // Filet de sécurité supplémentaire : garanti qu'aucun élément ne reste bloqué à opacity:0
+            setTimeout(function() {
+                document.querySelectorAll('[data-aos]').forEach(function(el) {
+                    if (window.getComputedStyle(el).opacity === '0') {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                    }
+                });
+            }, 1200);
+
+            // Gestionnaire d'erreurs d'images sans violation CSP
+            window.addEventListener('error', function(e) {
+                if (e.target && e.target.tagName === 'IMG' && e.target.classList.contains('mentor-avatar-img')) {
+                    e.target.style.display = 'none';
+                }
+            }, true);
+        })();
     </script>
 
     @stack('scripts')
     @include('partials.toast')
+    @include('partials.pwa-install-modals')
 </body>
 
 </html>

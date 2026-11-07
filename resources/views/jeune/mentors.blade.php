@@ -5,15 +5,15 @@
 @section('content')
 <div class="space-y-8">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl p-8 text-white">
-        <h1 class="text-3xl font-bold mb-2">Decouvre des parcours inspirants</h1>
-        <p class="text-white/90 max-w-lg">
-            Explore les roadmaps de professionnels africains qui ont reussi et inspire-toi de leurs parcours.
+    <div class="bg-indigo-600 rounded-3xl p-6 sm:p-8 text-white shadow-sm relative overflow-hidden">
+        <h1 class="text-2xl sm:text-3xl font-extrabold mb-2 text-white">Découvre des parcours inspirants</h1>
+        <p class="text-indigo-100 max-w-lg text-sm sm:text-base">
+            Explore les roadmaps de professionnels africains qui ont réussi et inspire-toi de leurs parcours.
         </p>
     </div>
 
     <!-- Search & Filters -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm" x-data="{ showFilters: false }">
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100" x-data="{ showFilters: false }">
         <div class="flex flex-col md:flex-row gap-4">
             <div class="flex-1 relative">
                 <svg class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none"
@@ -21,11 +21,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <input type="text" id="searchInput" placeholder="Rechercher un mentor, un metier, une entreprise..."
-                    class="w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                <input type="text" id="searchInput" placeholder="Rechercher un mentor, un métier, une entreprise..."
+                    class="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
             <button @click="showFilters = !showFilters"
-                class="px-5 py-3 border rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition flex items-center gap-2">
+                class="px-5 py-3 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-50 transition flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -35,12 +35,12 @@
         </div>
 
         <!-- Expandable Filters -->
-        <div x-show="showFilters" x-collapse class="mt-4 pt-4 border-t">
+        <div x-show="showFilters" x-collapse class="mt-4 pt-4 border-t border-slate-100">
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Specialisation</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Spécialisation</label>
                     <select id="filterSpecialization"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Toutes</option>
                         @foreach($specializations ?? [] as $key => $label)
                         <option value="{{ $key }}">{{ $label }}</option>
@@ -48,9 +48,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Pays</label>
                     <select id="filterCountry"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Tous les pays</option>
                         @foreach($countries ?? [] as $country)
                         <option value="{{ $country }}">{{ $country }}</option>
@@ -58,10 +58,10 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Experience</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Expérience</label>
                     <select id="filterExperience"
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="">Toute experience</option>
+                        class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Toute expérience</option>
                         <option value="0-5">0-5 ans</option>
                         <option value="5-10">5-10 ans</option>
                         <option value="10+">10+ ans</option>
@@ -69,7 +69,7 @@
                 </div>
                 <div class="flex items-end">
                     <button onclick="applyFilters()"
-                        class="w-full px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition">
+                        class="w-full px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
                         Appliquer
                     </button>
                 </div>
@@ -79,21 +79,21 @@
 
     <!-- Recommandation MBTI -->
     @if(isset($userMbtiType) && $userMbtiType)
-    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-100">
+    <div class="bg-indigo-50/70 rounded-2xl p-5 border border-indigo-100">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-3">
                 <div
-                    class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <span class="text-white font-bold">{{ $userMbtiType }}</span>
+                    class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs">
+                    <span class="text-white font-extrabold text-sm">{{ $userMbtiType }}</span>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-600">Ton profil : <span class="font-semibold text-gray-900">{{
+                    <p class="text-sm text-slate-700">Ton profil : <span class="font-bold text-slate-900">{{
                             $userMbtiLabel ?? $userMbtiType }}</span></p>
-                    <p class="text-xs text-gray-500">Decouvre les mentors dans tes secteurs recommandes</p>
+                    <p class="text-xs text-slate-500">Découvre les mentors dans tes secteurs recommandés</p>
                 </div>
             </div>
             <a href="{{ route('jeune.mentors', ['for_profile' => 'true']) }}"
-                class="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg transition flex items-center gap-2 {{ request('for_profile') === 'true' ? 'ring-2 ring-purple-300' : '' }}">
+                class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-xs transition flex items-center justify-center gap-2 {{ request('for_profile') === 'true' ? 'ring-2 ring-indigo-400' : '' }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -109,26 +109,26 @@
         <!-- Secteurs MBTI -->
         @if(isset($sectors) && count($sectors) > 0)
         <div class="flex flex-wrap gap-2">
-            <span class="text-sm text-gray-500 py-2">Secteurs :</span>
+            <span class="text-sm text-slate-500 py-2">Secteurs :</span>
             <a href="{{ route('jeune.mentors') }}"
-                class="px-4 py-2 rounded-full text-sm font-medium transition {{ !request('sector') && !request('specialization') && !request('for_profile') ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border' }}">
+                class="px-4 py-2 rounded-full text-sm font-medium transition {{ !request('sector') && !request('specialization') && !request('for_profile') ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200' }}">
                 Tous
             </a>
             @foreach($sectors as $code => $sector)
             <a href="{{ route('jeune.mentors', ['sector' => $code]) }}"
-                class="px-4 py-2 rounded-full text-sm font-medium transition {{ request('sector') === $code ? 'bg-primary-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border' }}">
+                class="px-4 py-2 rounded-full text-sm font-medium transition {{ request('sector') === $code ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200' }}">
                 {{ $sector['name'] ?? $code }}
             </a>
             @endforeach
         </div>
         @endif
 
-        <!-- Specialisations -->
+        <!-- Spécialisations -->
         <div class="flex flex-wrap gap-2">
-            <span class="text-sm text-gray-500 py-2">Specialisation :</span>
+            <span class="text-sm text-slate-500 py-2">Spécialisation :</span>
             @foreach($specializations ?? [] as $key => $label)
             <a href="{{ route('jeune.mentors', ['specialization' => $key]) }}"
-                class="px-3 py-1.5 rounded-full text-xs font-medium transition {{ request('specialization') === $key ? 'bg-orange-500 text-white' : 'bg-orange-50 text-orange-700 hover:bg-orange-100' }}">
+                class="px-3 py-1.5 rounded-full text-xs font-medium transition {{ request('specialization') === $key ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/60' }}">
                 {{ $label }}
             </a>
             @endforeach
@@ -142,9 +142,7 @@
         <a href="{{ route('jeune.mentors.show', $mentor) }}"
             class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group relative">
             <!-- Barre laterale decorative -->
-            <div
-                class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-orange-400 via-red-400 to-pink-400 rounded-l-2xl">
-            </div>
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500 rounded-l-2xl"></div>
 
             <div class="p-5 pl-6">
                 <!-- Header avec photo/initiales et badge -->
@@ -155,10 +153,10 @@
                         @if($mentor->user && $mentor->user->avatar_url)
                         <img src="{{ $mentor->user->avatar_url }}" alt="{{ $mentor->user->name }}"
                             class="w-full h-full object-cover"
-                            onerror="this.onerror=null; this.parentElement.classList.add('bg-gradient-to-br', 'from-orange-400', 'via-red-400', 'to-pink-400'); this.parentElement.innerHTML='<span class=\'text-xl font-bold text-white\'>{{ strtoupper(substr($mentor->user->name ?? '?', 0, 2)) }}</span>';">
+                            onerror="this.onerror=null; this.parentElement.classList.add('bg-indigo-600'); this.parentElement.innerHTML='<span class=\'text-xl font-bold text-white\'>{{ strtoupper(substr($mentor->user->name ?? '?', 0, 2)) }}</span>';">
                         @else
                         <div
-                            class="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-400 via-red-400 to-pink-400">
+                            class="w-full h-full flex items-center justify-center bg-indigo-600">
                             <span class="text-xl font-bold text-white">{{ strtoupper(substr($mentor->user->name ?? '?',
                                 0, 2)) }}</span>
                         </div>

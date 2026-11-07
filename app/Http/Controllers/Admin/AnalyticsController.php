@@ -550,9 +550,20 @@ class AnalyticsController extends Controller
      */
     private function getDailyData($query, Carbon $start, Carbon $end, string $dateColumn = 'created_at'): array
     {
+        $selectExpr = match ($dateColumn) {
+            'updated_at' => 'DATE(updated_at) as date, COUNT(*) as count',
+            'completed_at' => 'DATE(completed_at) as date, COUNT(*) as count',
+            'scheduled_at' => 'DATE(scheduled_at) as date, COUNT(*) as count',
+            default => 'DATE(created_at) as date, COUNT(*) as count',
+        };
+        $safeColumn = match ($dateColumn) {
+            'updated_at', 'completed_at', 'scheduled_at' => $dateColumn,
+            default => 'created_at',
+        };
+
         $data = $query->clone()
-            ->selectRaw("DATE($dateColumn) as date, COUNT(*) as count")
-            ->whereBetween($dateColumn, [$start, $end])
+            ->selectRaw($selectExpr)
+            ->whereBetween($safeColumn, [$start, $end])
             ->groupBy('date')
             ->orderBy('date')
             ->pluck('count', 'date')

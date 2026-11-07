@@ -1,7 +1,8 @@
 @extends('layouts.public')
 
-{{-- SEO Meta Tags --}}
-<x-seo-meta page="contact" />
+@push('seo')
+    <x-seo-meta page="contact" />
+@endpush
 
 
 @section('content')
@@ -186,7 +187,7 @@
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
                             <input type="text" id="name" name="name" required value="{{ old('name') }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('name') border-red-500 @enderror"
+                                class="w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-400 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('name') border-red-500 @enderror"
                                 placeholder="Votre nom">
                             @error('name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -197,7 +198,7 @@
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                             <input type="email" id="email" name="email" required value="{{ old('email') }}"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('email') border-red-500 @enderror"
+                                class="w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-400 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('email') border-red-500 @enderror"
                                 placeholder="votre@email.com">
                             @error('email')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -208,7 +209,7 @@
                         <div>
                             <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Sujet *</label>
                             <select id="subject" name="subject" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('subject') border-red-500 @enderror">
+                                class="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('subject') border-red-500 @enderror">
                                 <option value="">Sélectionnez un sujet</option>
                                 <option value="Question générale" {{ old('subject')=='Question générale' ? 'selected'
                                     : '' }}>Question générale</option>
@@ -231,7 +232,7 @@
                         <div>
                             <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message *</label>
                             <textarea id="message" name="message" rows="5" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none @error('message') border-red-500 @enderror"
+                                class="w-full px-4 py-3 bg-white text-gray-900 placeholder-gray-400 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none @error('message') border-red-500 @enderror"
                                 placeholder="Votre message...">{{ old('message') }}</textarea>
                             @error('message')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

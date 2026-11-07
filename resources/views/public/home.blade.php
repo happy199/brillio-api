@@ -1,7 +1,8 @@
 @extends('layouts.public')
 
-{{-- SEO Meta Tags --}}
-<x-seo-meta page="home" />
+@push('seo')
+    <x-seo-meta page="home" />
+@endpush
 
 
 @section('content')
@@ -39,15 +40,16 @@
                     <div class="flex flex-col sm:flex-row gap-4 mb-12">
                         <a href="{{ route('auth.choice') }}"
                             class="px-8 py-4 bg-white text-primary-600 font-bold rounded-full hover:bg-gray-100 hover:shadow-xl transition-all duration-300 text-center flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                             Explorer ta carrière
                         </a>
                         <button @click="showAppModal = true"
-                            class="px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/10 transition-all duration-300 text-center">
-                            Télécharger l'app mobile
+                            class="px-8 py-4 border-2 border-white/60 text-white font-bold rounded-full hover:bg-white/15 transition-all duration-300 text-center flex items-center justify-center gap-2.5 backdrop-blur-xs shadow-md active:scale-95">
+                            <svg class="w-5 h-5 text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Installer l'app mobile
                         </button>
                     </div>
 
@@ -68,34 +70,142 @@
                     </div>
                 </div>
 
-                <!-- Hero Image / Phone mockup -->
+                <!-- Hero Image / Phone mockup (Live Brillio Mobile PWA) -->
                 <div class="relative" data-aos="fade-left" data-aos-delay="200">
                     <div class="relative mx-auto w-72 sm:w-80">
                         <!-- Phone frame -->
-                        <div class="relative bg-gray-900 rounded-[3rem] p-3 shadow-2xl float-animation">
-                            <div class="bg-gray-800 rounded-[2.5rem] overflow-hidden">
-                                <!-- TODO: Remplacer par vraie capture d'écran de l'app -->
-                                <div
-                                    class="aspect-[9/19] bg-gradient-to-b from-primary-100 to-secondary-100 flex items-center justify-center">
-                                    <div class="text-center p-6">
-                                        <div
-                                            class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center">
-                                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                                                </path>
-                                            </svg>
+                        <div class="relative bg-slate-900 rounded-[3rem] p-3 shadow-2xl float-animation ring-1 ring-white/20">
+                            <!-- Notch / Dynamic Island -->
+                            <div class="absolute top-4 left-1/2 transform -translate-x-1/2 w-28 h-5 bg-slate-900 rounded-full z-30 flex items-center justify-end px-2.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-slate-800 ring-1 ring-slate-700/50"></span>
+                            </div>
+
+                            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-inner">
+                                <!-- Mobile App UI (Figma Live Simulation) -->
+                                <div class="aspect-[9/19.5] bg-slate-50 flex flex-col justify-between text-left select-none overflow-hidden relative font-sans">
+                                    <!-- Screen Top Bar -->
+                                    <div class="pt-8 px-4 pb-2.5 bg-white border-b border-slate-100">
+                                        <div class="flex items-center justify-between text-[10px] text-slate-800 font-bold mb-2">
+                                            <span>9:41</span>
+                                            <div class="flex items-center gap-1.5 text-slate-700">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+                                                <div class="w-4 h-2 rounded-xs border border-slate-700 p-0.5 flex items-center"><div class="h-full w-full bg-slate-700 rounded-2xs"></div></div>
+                                            </div>
                                         </div>
-                                        <h3 class="text-xl font-bold text-gray-800">Brillio</h3>
-                                        <p class="text-gray-600 text-sm mt-2">L'application mobile bientôt disponible
-                                        </p>
+                                        <!-- User Header -->
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-extrabold ring-1.5 ring-indigo-300">
+                                                    A
+                                                </div>
+                                                <div>
+                                                    <p class="text-[9px] text-slate-400 font-medium leading-none">Bonjour 👋</p>
+                                                    <p class="text-xs font-bold text-slate-800 leading-tight">Alexandre</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-[10px] font-bold text-indigo-700">
+                                                    <span>💎</span>
+                                                    <span>120</span>
+                                                </span>
+                                                <div class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 text-[11px] relative">
+                                                    🔔
+                                                    <span class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Screen Body -->
+                                    <div class="p-3 space-y-2.5 overflow-hidden flex-1">
+                                        <!-- Live App Badge -->
+                                        <div class="flex items-center justify-between px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200/80 text-[9px] font-bold text-emerald-800">
+                                            <span class="flex items-center gap-1">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                Application mobile active
+                                            </span>
+                                            <span class="text-emerald-700 font-extrabold text-[8px] bg-emerald-100/70 px-1.5 py-0.5 rounded">En ligne</span>
+                                        </div>
+
+                                        <!-- Hero Purple Card -->
+                                        <div class="p-3 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 text-white shadow-md shadow-indigo-500/20 space-y-1.5">
+                                            <p class="text-[8px] font-bold text-indigo-200 uppercase tracking-wider">Orientation & Avenir</p>
+                                            <h4 class="text-xs font-black leading-snug">Explore ton potentiel avec l'IA 🚀</h4>
+                                            <div class="flex gap-1.5 pt-0.5">
+                                                <span class="px-2 py-0.5 bg-white text-indigo-700 text-[9px] font-bold rounded-lg shadow-xs">Test MBTI</span>
+                                                <span class="px-2 py-0.5 bg-white/20 text-white text-[9px] font-medium rounded-lg">Mentors</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- 2x2 Services Grid (Figma) -->
+                                        <div class="space-y-1">
+                                            <div class="flex items-center justify-between px-0.5">
+                                                <p class="text-[9px] font-bold text-slate-700 uppercase tracking-wider">Services Brillio</p>
+                                                <span class="text-[8px] font-semibold text-indigo-600">4 espaces</span>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-1.5">
+                                                <!-- Tuile 1: Orientation IA -->
+                                                <div class="p-2 rounded-xl bg-purple-50/90 border border-purple-100 flex flex-col justify-between">
+                                                    <div class="w-6 h-6 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] mb-1">
+                                                        🧭
+                                                    </div>
+                                                    <p class="text-[10px] font-bold text-slate-800 leading-tight">Orientation IA</p>
+                                                    <p class="text-[8px] text-slate-500">Test & Bilan</p>
+                                                </div>
+                                                <!-- Tuile 2: Mentors -->
+                                                <div class="p-2 rounded-xl bg-blue-50/90 border border-blue-100 flex flex-col justify-between">
+                                                    <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] mb-1">
+                                                        🎓
+                                                    </div>
+                                                    <p class="text-[10px] font-bold text-slate-800 leading-tight">Mentors</p>
+                                                    <p class="text-[8px] text-slate-500">Visio 1:1</p>
+                                                </div>
+                                                <!-- Tuile 3: Mon Profil -->
+                                                <div class="p-2 rounded-xl bg-emerald-50/90 border border-emerald-100 flex flex-col justify-between">
+                                                    <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] mb-1">
+                                                        📄
+                                                    </div>
+                                                    <p class="text-[10px] font-bold text-slate-800 leading-tight">Mon Profil</p>
+                                                    <p class="text-[8px] text-slate-500">CV & dossier</p>
+                                                </div>
+                                                <!-- Tuile 4: Opportunités -->
+                                                <div class="p-2 rounded-xl bg-amber-50/90 border border-amber-100 flex flex-col justify-between">
+                                                    <div class="w-6 h-6 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-[10px] mb-1">
+                                                        💼
+                                                    </div>
+                                                    <p class="text-[10px] font-bold text-slate-800 leading-tight">Opportunités</p>
+                                                    <p class="text-[8px] text-slate-500">Offres & bourses</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bottom Dock (Figma) -->
+                                    <div class="bg-white/95 border-t border-slate-100 px-3 py-1.5 flex items-center justify-between text-[8px] font-semibold text-slate-400">
+                                        <div class="flex flex-col items-center text-indigo-600 font-bold">
+                                            <span class="text-[11px]">🏠</span>
+                                            <span>Accueil</span>
+                                            <span class="w-1 h-1 rounded-full bg-indigo-600 mt-0.5"></span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-[11px]">🧭</span>
+                                            <span>Tests</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-[11px]">🎓</span>
+                                            <span>Mentors</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-[11px]">💬</span>
+                                            <span>Chat</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-[11px]">👤</span>
+                                            <span>Profil</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Notch -->
-                            <div
-                                class="absolute top-3 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-gray-900 rounded-full">
                             </div>
                         </div>
                         <!-- Decorative elements -->
@@ -1192,8 +1302,8 @@
                                                     @if($mentorInfo->user->profile_photo_path || $mentorInfo->user->profile_photo_url)
                                                     <img src="{{ $mentorInfo->user->avatar_url }}"
                                                          alt="{{ $mentorInfo->user->name }}"
-                                                         class="absolute inset-0 w-full h-full object-cover z-10 bg-white"
-                                                         onerror="this.style.display='none'">
+                                                         width="64" height="64" loading="lazy"
+                                                         class="mentor-avatar-img absolute inset-0 w-full h-full object-cover z-10 bg-white">
                                                     @endif
                                                 </div>
                                                 <div class="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white z-20" title="Vérifié"></div>
@@ -1380,7 +1490,7 @@
                     class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                     @csrf
                     <input type="email" name="email" placeholder="Ton adresse email" required
-                        class="flex-1 px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        class="flex-1 px-6 py-3 bg-white text-gray-900 placeholder-gray-400 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                     <button type="submit"
                         class="px-8 py-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold rounded-full hover:shadow-lg transition-all duration-300">
                         S'inscrire
@@ -1453,22 +1563,33 @@
                 <!-- Emoji/Icon -->
                 <div class="relative text-center mb-4">
                     <div class="inline-block animate-bounce">
-                        <div class="text-7xl mb-2">🚀</div>
+                        <div class="text-7xl mb-2">📱</div>
                     </div>
                 </div>
 
                 <!-- Title -->
-                <h3 class="relative text-3xl font-bold text-center mb-3">
-                    L'app arrive bientôt !
+                <h3 class="relative text-3xl font-bold text-center mb-2">
+                    L'app mobile est là !
                 </h3>
 
-                <p class="relative text-center text-white/90 text-lg font-medium">
-                    Aidons-nous à atteindre <span class="font-bold">5000 utilisateurs</span>
+                <p class="relative text-center text-white/95 text-base font-medium">
+                    Installe <span class="font-bold underline decoration-pink-300">Brillio</span> en 1 clic sur ton écran d'accueil sans passer par les stores !
                 </p>
             </div>
 
             <!-- Content -->
             <div class="p-8 overflow-y-auto">
+                <!-- Direct Install CTA Button -->
+                <div class="mb-8">
+                    <button type="button" data-pwa-install
+                        @click="showAppModal = false"
+                        class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-extrabold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all duration-200 text-base">
+                        <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Installer l'application mobile
+                    </button>
+                    <p class="text-center text-xs text-gray-500 mt-2">Compatible iPhone (iOS Safari) et Android (Chrome / Samsung Internet)</p>
+                </div>
+
                 <!-- Progress Section -->
                 @php
                 $totalUsers = $jeunesCount + $mentorsCount;
@@ -1476,13 +1597,13 @@
                 $progressPercentage = min(($totalUsers / $targetUsers) * 100, 100);
                 @endphp
 
-                <div class="mb-8">
+                <div class="mb-6 pt-6 border-t border-gray-100">
                     <div class="flex justify-between items-baseline mb-3">
                         <span
                             class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                             {{ $totalUsers }} utilisateurs
                         </span>
-                        <span class="text-gray-500 font-medium">Objectif : {{ $targetUsers }}</span>
+                        <span class="text-gray-500 font-medium">Objectif communauté : {{ $targetUsers }}</span>
                     </div>
 
                     <!-- Progress Bar -->
@@ -1497,15 +1618,15 @@
 
                     <p class="text-center text-sm text-gray-600 mt-3">
                         Plus que <span class="font-bold text-purple-600">{{ max($targetUsers - $totalUsers, 0) }}
-                            utilisateurs</span> pour débloquer l'application mobile ! 🎉
+                            utilisateurs</span> pour célébrer le cap des 5 000 talents ! 🎉
                     </p>
                 </div>
 
                 <!-- Call to Action Text -->
-                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 mb-6 border border-purple-100">
-                    <p class="text-gray-700 text-center leading-relaxed">
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-5 mb-6 border border-purple-100">
+                    <p class="text-gray-700 text-center leading-relaxed text-sm">
                         <span class="font-semibold text-purple-700">Partage Brillio</span> avec tes proches et tes amis
-                        pour accélérer le lancement de l'application mobile !
+                        pour faire grandir la communauté !
                         <span class="inline-block animate-pulse">✨</span>
                     </p>
                 </div>
@@ -1513,7 +1634,7 @@
                 <!-- Share Buttons -->
                 <div class="space-y-3">
                     <!-- Native Share -->
-                    <button onclick="shareViaWebAPI()"
+                    <button type="button" @click="shareViaWebAPI()"
                         class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1523,7 +1644,7 @@
                     </button>
 
                     <!-- Copy Link Button -->
-                    <button onclick="copyShareLink()"
+                    <button type="button" @click="copyShareLink()"
                         class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-purple-200 text-purple-700 font-semibold rounded-xl hover:bg-purple-50 hover:border-purple-300 transition-all duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

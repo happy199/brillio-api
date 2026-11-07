@@ -125,12 +125,18 @@ class DashboardController extends Controller
 
         // Registration Trend (Teaser/Global)
         $isMysql = DB::connection()->getDriverName() === 'mysql';
-        $dateFormat = $isMysql ? 'DATE_FORMAT(users.created_at, "%Y-%m")' : 'strftime("%Y-%m", users.created_at)';
 
-        $registrationData = DB::table('users')
+        $registrationQuery = DB::table('users')
             ->join('organization_user', 'users.id', '=', 'organization_user.user_id')
-            ->where('organization_user.organization_id', $organization->id)
-            ->selectRaw($dateFormat.' as month, count(*) as count')
+            ->where('organization_user.organization_id', $organization->id);
+
+        if ($isMysql) {
+            $registrationQuery->selectRaw('DATE_FORMAT(users.created_at, "%Y-%m") as month, count(*) as count');
+        } else {
+            $registrationQuery->selectRaw('strftime("%Y-%m", users.created_at) as month, count(*) as count');
+        }
+
+        $registrationData = $registrationQuery
             ->where('users.created_at', '>=', now()->subMonths(6))
             ->groupBy('month')
             ->orderBy('month')

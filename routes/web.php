@@ -87,13 +87,10 @@ Route::middleware(['auth'])->post('/export-data', [DataExportController::class, 
  */
 
 // Page d'accueil
-Route::get('/', function () {
-    if (app()->bound('current_organization')) {
-        return redirect()->route('auth.choice');
-    }
+Route::get('/', [PageController::class, 'home'])->name('home');
 
-    return app(PageController::class)->home();
-})->name('home');
+// Application Mobile / Écran d'accueil & Onboarding (Figma)
+Route::get('/app', [PageController::class, 'appWelcome'])->name('app.welcome');
 
 // Pages informatives
 Route::get('/a-propos', [PageController::class, 'about'])->name('about');
@@ -793,3 +790,35 @@ Route::prefix('brillioSecretTeamAdmin')->name('admin.')->group(function () {
         Route::get('resources/{resource}', [App\Http\Controllers\Admin\ResourceController::class, 'show'])->name('resources.show');
     });
 });
+
+// === Routes PWA (Progressive Web App) ===
+Route::get('/sw.js', function () {
+    $path = public_path('sw.js');
+    abort_unless(file_exists($path), 404);
+
+    return response(file_get_contents($path), 200, [
+        'Content-Type' => 'application/javascript; charset=utf-8',
+        'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        'Service-Worker-Allowed' => '/',
+    ]);
+})->name('pwa.sw');
+
+Route::get('/manifest.json', function () {
+    $path = public_path('manifest.json');
+    abort_unless(file_exists($path), 404);
+
+    return response(file_get_contents($path), 200, [
+        'Content-Type' => 'application/manifest+json; charset=utf-8',
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+})->name('pwa.manifest');
+
+Route::get('/offline.html', function () {
+    $path = public_path('offline.html');
+    abort_unless(file_exists($path), 404);
+
+    return response(file_get_contents($path), 200, [
+        'Content-Type' => 'text/html; charset=utf-8',
+        'Cache-Control' => 'public, max-age=3600',
+    ]);
+})->name('pwa.offline');

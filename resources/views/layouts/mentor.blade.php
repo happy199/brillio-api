@@ -8,20 +8,14 @@
 @endphp
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="api-token" content="{{ auth()->user()->createToken('mentor-wallet')->plainTextToken }}">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title', 'Espace Mentor') - {{ $displayOrg ? $displayOrg->name : 'Brillio' }}</title>
 
     @include('partials.analytics')
-
-    <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="{{ $primaryColor }}">
+    @include('partials.pwa-head')
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,11 +59,17 @@
             }
         }
     </script>
-    @vite(['resources/js/app.js'])
-
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         [x-cloak] { display: none !important; }
+        html, body {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        a, button, [role="button"] {
+            touch-action: manipulation;
+        }
         .nav-item {
             transition: all 0.2s ease;
         }
@@ -286,12 +286,12 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 md:pb-8">
         @yield('content')
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-100 mt-12">
+    <!-- Footer (masqué sur mobile & app pour ne pas chevaucher la barre de navigation) -->
+    <footer class="hidden md:block bg-white border-t border-gray-100 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <p class="text-sm text-gray-500">&copy; {{ date('Y') }} {{ $displayOrg ? $displayOrg->name : 'Brillio' }}. Merci de partager votre expérience.</p>
@@ -308,6 +308,8 @@
 
     @stack('scripts')
     @include('partials.toast')
+    @include('partials.mentor-bottom-nav')
+    @include('partials.pwa-install-modals')
 </body>
 
 </html>
