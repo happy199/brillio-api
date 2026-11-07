@@ -77,6 +77,7 @@ class MentorDashboardController extends Controller
             'bio' => 'required|string|max:2000',
             'current_position' => 'required|string|max:255',
             'current_company' => 'nullable|string|max:255',
+            'phone' => 'required|string|max:20',
             'years_of_experience' => 'required|integer|min:0|max:50',
             'specialization_id' => 'required|string', // Peut être un ID ou 'new'
             'new_specialization_name' => 'nullable|required_if:specialization_id,new|string|max:255',
@@ -85,6 +86,8 @@ class MentorDashboardController extends Controller
             'advice' => 'nullable|string|max:1000',
             'is_published' => 'nullable|boolean',
             'profile_photo' => 'nullable|image|max:5120', // 5MB max
+        ], [
+            'phone.required' => 'Votre numéro de téléphone est obligatoire pour pouvoir vous joindre facilement par appel ou WhatsApp.',
         ]);
 
         // Mettre à jour les données validées avec les URLs formatées
@@ -162,9 +165,16 @@ class MentorDashboardController extends Controller
             $message = 'Votre profil a été mis à jour.';
         }
 
-        // Supprimer les champs non nécessaires
+        // Supprimer les champs non nécessaires pour MentorProfile
         unset($validated['new_specialization_name']);
         unset($validated['profile_photo']);
+
+        // Mettre à jour le numéro de téléphone de l'utilisateur
+        if (isset($validated['phone'])) {
+            $user->phone = $validated['phone'];
+            $user->save();
+            unset($validated['phone']);
+        }
 
         if ($profile) {
             $profile->update($validated);
@@ -206,9 +216,39 @@ class MentorDashboardController extends Controller
             $profile = MentorProfile::create(['user_id' => $user->id]);
         }
 
+        if (empty($user->phone)) {
+            return back()->withErrors(['phone' => 'Veuillez renseigner votre numéro de téléphone avant de publier votre profil.'])->with('error', 'Votre numéro de téléphone est obligatoire pour rendre votre profil visible.');
+        }
+
         $profile->update(['is_published' => true]);
 
         return back()->with('success', 'Votre profil est maintenant visible par les jeunes !');
+    }
+
+    /**
+     * Mise à jour rapide du téléphone depuis le dashboard
+     */
+    public function updatePhone(Request $request)
+    {
+        $validated = $request->validate([
+            'phone' => 'required|string|max:20',
+        ], [
+            'phone.required' => 'Veuillez saisir un numéro de téléphone.',
+        ]);
+
+        $user = auth()->user();
+        $user->phone = $validated['phone'];
+        $user->save();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Numéro de téléphone enregistré avec succès.',
+                'phone' => $user->phone,
+            ]);
+        }
+
+        return back()->with('success', 'Votre numéro de téléphone a été enregistré.');
     }
 
     /**
