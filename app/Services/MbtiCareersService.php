@@ -1118,43 +1118,8 @@ class MbtiCareersService
             }
 
             if (! empty($aiResult['has_new_proposals']) && count($aiResult['careers'] ?? []) >= 4) {
-                foreach (array_slice($aiResult['careers'], 0, 4) as $aiCareer) {
-                    $newCareer = Career::firstOrCreate(
-                        ['title' => $aiCareer['title']],
-                        [
-                            'description' => $aiCareer['description'],
-                            'african_context' => $aiCareer['african_context'],
-                            'future_prospects' => $aiCareer['future_prospects'],
-                            'ai_impact_level' => $aiCareer['ai_impact_level'],
-                            'demand_level' => 'Moyenne (Suggéré par IA)',
-                        ]
-                    );
-
-                    DB::table('career_mbti')->updateOrInsert(
-                        ['career_id' => $newCareer->id, 'mbti_type' => $type],
-                        ['match_reason' => $aiCareer['match_reason'] ?? "Ce métier correspond aux forces de ton profil {$type}."]
-                    );
-
-                    if (isset($aiCareer['sectors']) && is_array($aiCareer['sectors'])) {
-                        foreach ($aiCareer['sectors'] as $sectorCode) {
-                            DB::table('career_sector')->updateOrInsert(
-                                ['career_id' => $newCareer->id, 'sector_code' => $sectorCode]
-                            );
-                        }
-                    }
-
-                    $finalCareers[] = [
-                        'id' => $newCareer->id,
-                        'title' => $newCareer->title,
-                        'description' => $newCareer->description,
-                        'match_reason' => $aiCareer['match_reason'] ?? "Correspondance IA avec {$type}.",
-                        'sectors' => $aiCareer['sectors'] ?? [],
-                        'future_prospects' => $newCareer->future_prospects,
-                        'african_context' => $newCareer->african_context,
-                        'ai_impact_level' => $newCareer->ai_impact_level,
-                        'demand_level' => $newCareer->demand_level,
-                    ];
-                }
+                $newCareers = self::processAiCareers($type, array_slice($aiResult['careers'], 0, 4));
+                $finalCareers = array_merge($finalCareers, $newCareers);
             } else {
                 $fallbackCareers = $careersFromDb->slice(6, 4);
                 foreach ($fallbackCareers as $career) {
@@ -1168,6 +1133,54 @@ class MbtiCareersService
 
             return self::CAREERS_BY_TYPE[$type] ?? [];
         }
+    }
+
+    /**
+     * Enregistre et formate les métiers proposés par l'IA
+     */
+    private static function processAiCareers(string $type, array $aiCareers): array
+    {
+        $processed = [];
+
+        foreach ($aiCareers as $aiCareer) {
+            $newCareer = Career::firstOrCreate(
+                ['title' => $aiCareer['title']],
+                [
+                    'description' => $aiCareer['description'],
+                    'african_context' => $aiCareer['african_context'],
+                    'future_prospects' => $aiCareer['future_prospects'],
+                    'ai_impact_level' => $aiCareer['ai_impact_level'],
+                    'demand_level' => 'Moyenne (Suggéré par IA)',
+                ]
+            );
+
+            DB::table('career_mbti')->updateOrInsert(
+                ['career_id' => $newCareer->id, 'mbti_type' => $type],
+                ['match_reason' => $aiCareer['match_reason'] ?? "Ce métier correspond aux forces de ton profil {$type}."]
+            );
+
+            if (isset($aiCareer['sectors']) && is_array($aiCareer['sectors'])) {
+                foreach ($aiCareer['sectors'] as $sectorCode) {
+                    DB::table('career_sector')->updateOrInsert(
+                        ['career_id' => $newCareer->id, 'sector_code' => $sectorCode]
+                    );
+                }
+            }
+
+            $processed[] = [
+                'id' => $newCareer->id,
+                'title' => $newCareer->title,
+                'description' => $newCareer->description,
+                'match_reason' => $aiCareer['match_reason'] ?? "Correspondance IA avec {$type}.",
+                'sectors' => $aiCareer['sectors'] ?? [],
+                'future_prospects' => $newCareer->future_prospects,
+                'african_context' => $newCareer->african_context,
+                'ai_impact_level' => $newCareer->ai_impact_level,
+                'demand_level' => $newCareer->demand_level,
+            ];
+        }
+
+        return $processed;
     }
 
     /**

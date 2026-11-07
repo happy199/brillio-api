@@ -30,7 +30,7 @@ class PwaTrackingController extends Controller
         $installation = PwaInstallation::where('client_uuid', $clientUuid)->first();
 
         if (! $installation) {
-            $installation = new PwaInstallation();
+            $installation = new PwaInstallation;
             $installation->client_uuid = $clientUuid;
             $installation->platform = $platform;
             $installation->browser = $browser;

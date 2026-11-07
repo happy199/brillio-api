@@ -95,7 +95,7 @@
     <a href="{{ route('admin.analytics.index') }}#pwa-analytics" class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow group border border-transparent hover:border-indigo-200">
         <div class="flex items-center">
             <div class="p-3 bg-indigo-50 rounded-lg shrink-0 group-hover:bg-indigo-100 transition-colors">
-                <svg class="w-6 h-6 text-[#5844E3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-[#5844E3]" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                 </svg>
             </div>

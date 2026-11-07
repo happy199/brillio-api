@@ -11,7 +11,7 @@
             </div>
             <p class="text-xs text-slate-500 truncate">Accès instantané et fluide depuis votre écran d'accueil.</p>
         </div>
-        <div class="flex items-center gap-1.5 flex-shrink-0" onclick="event.stopPropagation();">
+        <div class="flex items-center gap-1.5 flex-shrink-0">
             <button type="button" data-pwa-install class="px-4 py-2 bg-[#5844E3] hover:bg-[#4835D4] text-white text-xs font-bold rounded-xl shadow-xs transition active:scale-95 cursor-pointer">
                 Installer
             </button>

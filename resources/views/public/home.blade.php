@@ -43,7 +43,7 @@
                         <a href="{{ route('auth.choice') }}"
                             class="btn-spring inline-flex items-center justify-center gap-2.5 px-7 py-4 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-sm hover:shadow-md transition-all text-base text-center group">
                             <span>Commencer gratuitement</span>
-                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
                         </a>
@@ -125,7 +125,11 @@
 
                             <!-- Bloc Orientation & Test Interactif (Cycle au clic) -->
                             <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3 cursor-pointer group hover:bg-brand-50/40 hover:border-brand-200 transition-all"
+                                 role="button"
+                                 tabindex="0"
                                  @click="nextTrait()"
+                                 @keydown.enter="nextTrait()"
+                                 @keydown.space.prevent="nextTrait()"
                                  title="Clique pour découvrir un autre profil">
                                 <div class="flex items-center justify-between text-xs">
                                     <div class="flex items-center gap-1.5">

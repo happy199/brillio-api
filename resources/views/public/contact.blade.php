@@ -63,7 +63,7 @@
                     <div class="flex items-start space-x-4 p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl card-interactive group">
                         <div
                             class="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                            <svg class="w-6 h-6 text-emerald-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor"
+                            <svg class="w-6 h-6 text-emerald-600 group-hover:text-white transition-colors" aria-hidden="true" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
@@ -392,7 +392,7 @@
 
             <!-- Conteneur iframe de la carte OpenStreetMap réelle -->
             <div class="rounded-3xl overflow-hidden border border-slate-200 shadow-sm relative h-[420px] bg-slate-100" data-aos="fade-up">
-                <iframe 
+                <iframe
                     title="Carte de localisation Brillio à Cotonou"
                     class="w-full h-full border-0"
                     loading="lazy"

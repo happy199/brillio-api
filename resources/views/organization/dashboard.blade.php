@@ -42,15 +42,15 @@ $isBranded = $organization && $organization->isPro();
         <div class="bg-white overflow-hidden rounded-2xl shadow-sm border border-slate-200/90 card-interactive p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0 bg-slate-100 rounded-xl p-3">
-                    <svg class="h-6 w-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-6 w-6 text-slate-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <div class="ml-4">
+                <dl class="ml-4">
                     <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Invitations envoyées</dt>
                     <dd class="text-2xl font-extrabold text-slate-900 mt-0.5">{{ $stats['total_invited'] }}</dd>
-                </div>
+                </dl>
             </div>
         </div>
 
@@ -58,15 +58,15 @@ $isBranded = $organization && $organization->isPro();
         <div class="bg-white overflow-hidden rounded-2xl shadow-sm border border-slate-200/90 card-interactive p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0 bg-purple-50 rounded-xl p-3">
-                    <svg class="h-6 w-6 text-[#5844E3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-6 w-6 text-[#5844E3]" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                 </div>
-                <div class="ml-4">
+                <dl class="ml-4">
                     <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Jeunes inscrits</dt>
                     <dd class="text-2xl font-extrabold text-slate-900 mt-0.5">{{ $stats['total_registered'] }}</dd>
-                </div>
+                </dl>
             </div>
         </div>
 
@@ -74,15 +74,15 @@ $isBranded = $organization && $organization->isPro();
         <div class="bg-white overflow-hidden rounded-2xl shadow-sm border border-slate-200/90 card-interactive p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0 bg-blue-50 rounded-xl p-3">
-                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-6 w-6 text-blue-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <div class="ml-4">
+                <dl class="ml-4">
                     <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mentors liés</dt>
                     <dd class="text-2xl font-extrabold text-slate-900 mt-0.5">{{ $stats['total_mentors'] }}</dd>
-                </div>
+                </dl>
             </div>
         </div>
 
@@ -92,15 +92,15 @@ $isBranded = $organization && $organization->isPro();
         <div class="bg-white overflow-hidden rounded-2xl shadow-sm border border-slate-200/90 card-interactive p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0 bg-purple-50 rounded-xl p-3">
-                    <svg class="h-6 w-6 text-[#5844E3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-6 w-6 text-[#5844E3]" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
-                <div class="ml-4">
+                <dl class="ml-4">
                     <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Jeunes actifs (30j)</dt>
                     <dd class="text-2xl font-extrabold text-slate-900 mt-0.5">{{ $stats['active_users'] }}</dd>
-                </div>
+                </dl>
             </div>
         </div>
 
@@ -108,15 +108,15 @@ $isBranded = $organization && $organization->isPro();
         <div class="bg-white overflow-hidden rounded-2xl shadow-sm border border-slate-200/90 card-interactive p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0 bg-blue-50 rounded-xl p-3">
-                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-6 w-6 text-blue-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
                     </svg>
                 </div>
-                <div class="ml-4">
+                <dl class="ml-4">
                     <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mentors actifs (30j)</dt>
                     <dd class="text-2xl font-extrabold text-slate-900 mt-0.5">{{ $stats['active_mentors'] }}</dd>
-                </div>
+                </dl>
             </div>
         </div>
 
@@ -124,15 +124,15 @@ $isBranded = $organization && $organization->isPro();
         <div class="bg-white overflow-hidden rounded-2xl shadow-sm border border-slate-200/90 card-interactive p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0 bg-emerald-50 rounded-xl p-3">
-                    <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-6 w-6 text-emerald-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <div class="ml-4">
+                <dl class="ml-4">
                     <dt class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Séances réalisées</dt>
                     <dd class="text-2xl font-extrabold text-slate-900 mt-0.5">{{ $stats['mentor_sessions_count'] }}</dd>
-                </div>
+                </dl>
             </div>
         </div>
 
